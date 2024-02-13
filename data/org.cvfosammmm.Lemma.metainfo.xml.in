@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>org.cvfosammmm.Lemma</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-3.0-or-later</project_license>
+    <content_rating type="oars-1.1" />
+    <name translatable="no">Lemma</name>
+    <summary>Make pages and connect them.</summary>
+    <developer_name translatable="no">Cvfosammmm</developer_name>
+
+    <description>
+        <p>Make pages and connect them.</p>
+    </description>
+
+    <launchable type="desktop-id">org.cvfosammmm.Lemma.desktop</launchable>
+    <translation type="gettext">lemma</translation>
+
+    <screenshots>
+        <screenshot type="default">
+            <caption>Editing a page in Lemma</caption>
+            <image>https://www.cvfosammmm.org/lemma/images/screenshot-appdata.png</image>
+        </screenshot>
+    </screenshots>
+
+    <url type="homepage">https://www.cvfosammmm.org/lemma/</url>
+    <url type="bugtracker">https://github.com/cvfosammmm/Lemma/issues</url>
+    <url type="donation">https://www.patreon.com/cvfosammmm</url>
+
+    <provides>
+        <id>org.cvfosammmm.Lemma.desktop</id>
+    </provides>
+
+    <supports>
+      <control>pointing</control>
+      <control>keyboard</control>
+      <control>touch</control>
+    </supports>
+
+    <requires>
+      <display_length compare="ge">768</display_length>
+    </requires>
+
+    <releases>
+        ​<release version="1" date="2024-2-13">
+            <description translatable="no">
+                <p>Initial release</p>
+            </description>
+        </release>
+    </releases>
+</component>

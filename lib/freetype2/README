@@ -1,0 +1,168 @@
+python_freetype is a high-level Python 3 binding for the
+[FreeType](http://www.freetype.org) font-rendering library. It is
+implemented entirely in Python, using ctypes. FreeType objects are
+wrapped in Python objects, with public structure fields accessible as
+read-only attributes of those objects, and object-specific routine
+calls done via methods of those objects.
+
+In usual Python fashion, you never have to explicitly dispose of
+anything: the lifetimes of the FreeType objects are automatically
+managed in sync with the lifetimes of their Python wrappers. You don’t
+have to check for errors; all calls that return FT_Error are
+automatically checked, and an instance of FTException will be raised
+when appropriate.
+
+Method names drop “FT_” prefixes and object-type-specific parts of
+names: thus, the FreeType call “FT_Outline_Transform” is wrapped by a
+method simply called “transform”, defined on Outline objects.
+
+FreeType API constants are currently defined within a class
+called freetype2.FT. This also contains lower-level ctypes-based
+definitions for encoding and decoding FreeType API structures.
+You will need to use the constants, but you can ignore the lower-level
+ctypes structures. The constants are defined with the “FT_” prefix omitted,
+since they are already inside a namespace called “FT”.
+
+This library also provides convenience routines for interoperating
+with [Pycairo](http://cairographics.org/documentation/pycairo/3/): you
+can create a cairo.ImageSurface from a freetype2.Bitmap, and you can
+construct a cairo.Path from a freetype2.Outline.
+
+If Fontconfig is available, you can also load a font by matching
+a Fontconfig pattern.
+
+WARNING: This Python binding is still to be considered in a state of
+flux for now, subject to whatever reorganization looks to be necessary
+as experience is gained with using it.
+
+Installation
+============
+
+To install python_freetype on your system, type
+
+    python3 setup.py install
+
+Basic Usage
+===========
+
+To initialize FreeType, import the module and obtain an instance of the
+Library object. Rather than instantiating the Library class yourself,
+it is preferable to use the global Library instance that the freetype2
+module will automatically create on demand:
+
+    import freetype2
+    FT = freetype2.FT # easier access to constants
+    lib = freetype2.get_default_lib()
+
+You can ask the library for the version of FreeType on your system:
+
+    print(lib.version)
+
+which might print something like “(2, 6, 3)”.
+
+To load a Face from a specific font file, use the library’s new_face
+method, e.g.:
+
+    face = lib.new_face("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf")
+
+Alternatively, you can find a font by matching against a Fontconfig
+pattern string, e.g.:
+
+    face = lib.find_face("times")
+    face = lib.find_face("palatino:style=italic:weight=1000")
+    face = lib.find_face("sans-serif:slant=500")
+
+(See the [Fontconfig user doc](http://www.freedesktop.org/software/fontconfig/fontconfig-user.html)
+for a detailed description of the pattern syntax.)
+
+You can find out which font file was actually loaded, along with the
+font family name and style name, by looking at attributes of the Face:
+
+    print((face.filename, face.family_name, face.style_name))
+
+Set the character size for rendering:
+
+    face.set_char_size(size = 72, resolution = 90)
+
+Load the glyph for a character code:
+
+    face.load_char(ord("€"), FT.LOAD_DEFAULT)
+
+Render the glyph to a bitmap:
+
+    face.glyph.render_glyph(FT.RENDER_MODE_NORMAL)
+
+Obtain a Pycairo ImageSurface object from the bitmap:
+
+    surf = face.glyph.bitmap.make_image_surface()
+
+And save the bitmap to a PNG file:
+
+    surf.write_to_png("test.png")
+
+This will show the glyph as white against a black background; to get
+other colour schemes, you can of course use more elaborate Cairo calls
+like Context.mask_surface, or Context.set_source_surface with
+different operators.
+
+Alternatively, after the load_char call, instead of getting a bitmap
+from FreeType, you can obtain the scalable outline:
+
+    outl = face.glyph_outline
+
+Determine its bounding box:
+
+    bbox = outl.get_bbox()
+
+The default FreeType coordinate system puts the origin at lower-left
+(y-coordinates increasing upwards), whereas Cairo by default puts the
+origin at the upper-left (y-coordinates increasing downwards). So the
+Cairo context needs to have a vertical-flip transformation applied
+to make the glyph render the right way up:
+
+    g = cairo.Context(...)
+    ... further initialization of g ...
+    m = cairo.Matrix()
+    m.translate(0, + (bbox.yMax - bbox.yMin) / 2)
+    m.scale(1, -1)
+    m.translate(0, - (bbox.yMax - bbox.yMin) / 2)
+    g.transform(m)
+
+Draw the outline as a Cairo path into the context:
+
+    g.new_path()
+    outl.draw(g)
+
+Fill or stroke it with some suitable colour or pattern, e.g.
+
+    g.set_source_rgba(0, 0, 0, 1)
+    g.fill()
+
+And so on.
+
+For some example scripts, see my python_freetype_examples repository
+([GitLab](https://gitlab.com/ldo/python_freetype_examples),
+[GitHub](https://github.com/ldo/python_freetype_examples)).
+
+Vectors And Matrices
+====================
+
+This module provides Vector and Matrix types which aim to be more
+convenient to use than the original FreeType types. For example, to
+multiply two matrices m1 and m2, you can just use the simple Python
+expression “m1 * m2”; to multiply m1 by the inverse of m2, you can
+write “m1 * m2.inv()”, or even more simply, express it as a division:
+“m1 / m2”. To transform a vector v by a matrix m, premultiply it by
+the matrix: “m * v”. All Vector and Matrix operations are *functional*,
+not *procedural*: they construct and return new objects, leaving the
+originals unchanged.
+
+As a further convenience, the components of these vectors and matrices
+are regular Python floating-point numbers, so you don’t have to worry
+about the right fixed-point scaling to apply.
+
+These objects are automatically converted to the underlying FreeType
+types, with the right scaling, where appropriate.
+
+Lawrence D’Oliveiro <ldo@geek-central.gen.nz>
+2017 April 9

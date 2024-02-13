@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+# coding: utf-8
+
+# Copyright (C) 2017-present Robert Griesel
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>
+
+import os, os.path, shutil, pickle
+
+from lemma.document.document import Document
+from lemma.app.service_locator import ServiceLocator
+
+
+class Storage(object):
+
+    def __init__(self, workspace):
+        self.workspace = workspace
+        self.pathname = ServiceLocator.get_data_folder()
+
+        try: os.mkdir(self.pathname)
+        except FileExistsError: pass
+
+    def populate_documents(self):
+        for direntry in os.scandir(self.pathname):
+            if direntry.is_file() and direntry.name.isdigit():
+                filename = direntry.name
+
+                with open(direntry, 'rb') as file:
+                    try: document_data = pickle.loads(file.read())
+                    except Exception: document_data = None
+
+                if document_data != None:
+                    document = Document(self.workspace, int(filename))
+
+                    document.title = document_data['title']
+                    document.lines = document_data['lines']
+                    document.insert.set_position(document_data['insert_position'])
+                    document.teaser_scanner.teaser = document_data['teaser']
+                    document.layouter.root = document_data['layout_root']
+                    document.last_modified = document_data['last_modified']
+
+                    self.workspace.documents.add(document)
+
+    def populate_workspace(self):
+        pathname = os.path.join(self.pathname, 'workspace')
+        if not os.path.isfile(pathname): return
+
+        with open(pathname, 'rb') as file:
+            data = pickle.loads(file.read())
+
+            self.workspace.active_document = self.workspace.documents.get_by_id(data['active_document_id'])
+
+            for document_id in data['history']:
+                document = self.workspace.documents.get_by_id(document_id)
+                self.workspace.history.add(document, remove_tail_after_last_active=False)
+                if document == self.workspace.active_document:
+                    self.workspace.history.activate_document(document)
+            self.workspace.history.add_change_code('active_document_changed')
+        self.workspace.documents.update()
+
+    def init_writer(self):
+        for document in self.workspace.documents.documents:
+            document.connect('changed', self.on_document_change)
+        self.workspace.documents.connect('new_document', self.on_new_document)
+        self.workspace.documents.connect('document_removed', self.on_document_removed)
+
+    def on_new_document(self, workspace, document):
+        self.save_document(document)
+        document.connect('changed', self.on_document_change)
+
+    def on_document_removed(self, workspace, document):
+        document.disconnect('changed', self.on_document_change)
+        self.delete_document(document)
+
+    def on_document_change(self, document):
+        self.save_document(document)
+
+    def save_document(self, document):
+        pathname = os.path.join(self.pathname, str(document.id))
+
+        try: filehandle = open(pathname, 'wb')
+        except IOError: pass
+        else:
+            document_data = {'title': document.title,
+                             'lines': document.lines,
+                             'insert_position': document.insert.get_position(),
+                             'teaser': document.teaser_scanner.teaser,
+                             'layout_root': document.layouter.root,
+                             'last_modified': document.last_modified}
+            filehandle.write(pickle.dumps(document_data))
+
+    def delete_document(self, document):
+        pathname = os.path.join(self.pathname, str(document.id))
+        os.remove(pathname)
+
+    def save_workspace(self):
+        pathname = os.path.join(self.pathname, 'workspace')
+
+        try: filehandle = open(pathname, 'wb')
+        except IOError: pass
+        else:
+            if self.workspace.active_document != None:
+                active_document_id = self.workspace.active_document.id
+            else:
+                active_document_id = None
+
+            data = {'active_document_id': active_document_id,
+                    'history': self.get_history_list()}
+            filehandle.write(pickle.dumps(data))
+
+    def get_history_list(self):
+        history_list = []
+        for i, document in enumerate(self.workspace.history.documents):
+            history_list.append(document.id)
+        return history_list
+
+

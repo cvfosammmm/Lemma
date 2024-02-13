@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+# coding: utf-8
+
+# Copyright (C) 2017-present Robert Griesel
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>
+
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gio
+
+from lemma.app.service_locator import ServiceLocator
+from lemma.dialogs.dialog_locator import DialogLocator
+from lemma.popovers.popover_manager import PopoverManager
+
+
+class Actions(object):
+
+    def __init__(self, workspace):
+        self.workspace = workspace
+        self.main_window = ServiceLocator.get_main_window()
+        self.settings = ServiceLocator.get_settings()
+
+        self.actions = dict()
+        self.add_action('add-document', self.add_document)
+        self.add_action('delete-document', self.delete_document)
+        self.add_action('rename-document', self.rename_document)
+
+        self.add_action('go-back', self.go_back)
+        self.add_action('go-forward', self.go_forward)
+
+        self.add_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
+        self.add_action('show-about-dialog', self.show_about_dialog)
+        self.add_action('show-document-menu', self.show_document_menu)
+        self.add_action('show-hamburger-menu', self.show_hamburger_menu)
+
+        self.actions['quit'] = Gio.SimpleAction.new('quit', None)
+        self.main_window.add_action(self.actions['quit'])
+
+        self.workspace.history.connect('changed', self.on_history_change)
+        self.workspace.connect('new_active_document', self.on_new_active_document)
+
+        self.update_actions()
+
+    def add_action(self, name, callback, parameter=None):
+        self.actions[name] = Gio.SimpleAction.new(name, parameter)
+        self.main_window.add_action(self.actions[name])
+        self.actions[name].connect('activate', callback)
+
+    def on_history_change(self, history):
+        self.update_actions()
+
+    def on_new_active_document(self, workspace, document=None):
+        self.update_actions()
+
+    def update_actions(self):
+        has_active_doc = (self.workspace.active_document != None)
+        prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
+        next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
+
+        self.actions['go-back'].set_enabled(prev_doc != None)
+        self.actions['go-forward'].set_enabled(next_doc != None)
+        self.actions['delete-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['rename-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+
+    def add_document(self, action=None, paramenter=''):
+        self.workspace.enter_draft_mode()
+
+    def delete_document(self, action=None, parameter=''):
+        self.workspace.delete_document(self.workspace.active_document)
+
+    def rename_document(self, action=None, parameter=''):
+        self.workspace.document_view.init_renaming()
+
+    def go_back(self, action=None, parameter=''):
+        if self.workspace.mode == 'draft':
+            self.workspace.document_draft_view.cancel()
+        else:
+            prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
+            if prev_doc != None:
+                self.workspace.set_active_document(prev_doc, update_history=False)
+
+    def go_forward(self, action=None, parameter=''):
+        next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
+        if next_doc != None:
+            self.workspace.set_active_document(next_doc, update_history=False)
+
+    def show_shortcuts_dialog(self, action=None, parameter=''):
+        DialogLocator.get_dialog('keyboard_shortcuts').run()
+
+    def show_about_dialog(self, action=None, parameter=''):
+        DialogLocator.get_dialog('about').run()
+
+    def show_document_menu(self, action=None, parameter=''):
+        PopoverManager.popup_at_button('document_menu')
+
+    def show_hamburger_menu(self, action=None, parameter=''):
+        PopoverManager.popup_at_button('hamburger_menu')
+        return True
+
+

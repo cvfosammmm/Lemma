@@ -1,0 +1,196 @@
+/* scrollbars */
+
+scrollbar {
+    background-color: transparent;
+    box-shadow: none;
+}
+scrollbar trough {
+    margin: 1px;
+}
+scrollbar slider {
+    padding: 0px;
+    min-width: 3px;
+}
+scrollbar:hover slider {
+    min-width: 8px;
+}
+scrollbar.hidden slider {
+    opacity: 0;
+}
+
+/* headerbar */
+
+headerbar.left {
+    background-color: @headerbar_bg_1;
+}
+windowhandle.right {
+    background-color: @headerbar_bg_2;
+    border-bottom: 1px solid @header_border_bottom;
+}
+windowhandle.right headerbar {
+    background-color: @headerbar_bg_2;
+    border-bottom-width: 0px;
+    box-shadow: none;
+}
+windowhandle.right headerbar box > box.start {
+    margin-right: 2px;
+}
+windowhandle.right headerbar box > box.end {
+    margin-left: 0px;
+}
+windowhandle.right > box {
+    padding: 0px;
+}
+windowhandle.right > box > box.linked {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+overlay.history scrollbar {
+    opacity: 0;
+}
+
+/* title-widget */
+
+.document-title {
+    background: none;
+}
+.document-title > box > box {
+    margin-top: 49px;
+    margin-right: 48px;
+    margin-left: 48px;
+    background: @window_bg_color;
+}
+.document-title entry {
+    font-size: 24pt;
+    font-weight: bold;
+    background: none;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    border-radius: 0px;
+    border-bottom: 1px solid @border_1;
+    padding: 0px;
+    padding-bottom: 10px;
+    color: @title_color;
+}
+.document-title entry.error {
+    border-bottom: 1px solid @error_color;
+}
+.document-title button {
+    padding: 3px 9px;
+    margin-bottom: 25px;
+}
+.document-title > box > box > label {
+    margin-top: 7px;
+    margin-bottom: 10px;
+    margin-left: 1px;
+}
+.document-title > box > box > label:not(.error) {
+    color: @description;
+}
+
+/* paneds */
+
+paned.header separator.wide {
+    padding: 0px;
+    margin: 0px;
+    border-width: 0px;
+    min-width: 3px;
+    box-shadow: none;
+    background-color: @header_border;
+}
+paned.content separator.wide {
+    padding: 0px;
+    margin: 0px;
+    border-width: 0px;
+    min-width: 3px;
+    box-shadow: none;
+    background-color: @header_border;
+}
+
+/* popover */
+
+@keyframes popover-animation {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(3px);
+    }
+}
+box.popover {
+    animation-name: popover-animation;
+    animation-duration: 0.2s;
+    animation-timing-function: ease;
+    transform: translateY(3px);
+}
+box.popover .content {
+    background: @popover_bg_color;
+    padding: 6px;
+    padding-top: 5px;
+    border-radius: 10px;
+    border: 1px solid @borders;
+    box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
+}
+box.popover .arrow {
+    min-width: 10px;
+    min-height: 10px;
+    background: @popover_bg_color;
+    border: 1px solid mix(@borders, transparent, 0.1);
+    transform: translateY(10px) scale(2, 2) rotate(-45deg);
+    box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
+}
+box.popover .arrow-border {
+    min-width: 1px;
+    min-height: 1px;
+    background: black;
+    background: @popover_bg_color;
+    transform: translateY(-4px) translateX(12px) scale(18, 18) rotate(-45deg);
+}
+box.popover button.action, box.popover button.menu, box.popover button.header {
+    background: none;
+    font-weight: normal;
+}
+box.popover button.action:hover, box.popover button.menu:hover, box.popover button.header:hover {
+    background: @view_hover_color;
+    transition: none;
+}
+box.popover button.action:active, box.popover button.menu:active, box.popover button.header:active {
+    background: @borders;
+}
+box.popover button.header {
+    font-weight: bold;
+}
+box.popover button.highlight:not(:disabled) {
+    background: @view_hover_color;
+}
+box.popover button.highlight:active {
+    background: @borders;
+}
+box.popover button label.shortcut {
+    color: @menu_shortcut_color;
+    margin-left: 18px;
+}
+box.popover button image.icon {
+    padding-top: 2px;
+    padding-right: 8px;
+}
+box.popover separator {
+    margin: 6px 0px;
+}
+box.popover label.explaination {
+    margin: 0px 10px;
+    color: @description_color;
+    font-size: 13px;
+}
+box.popover label.explaination-header {
+    margin: 0px 10px;
+    font-weight: bold;
+}
+button.popover.active {
+    background: @headerbar_button_active_color;
+}
