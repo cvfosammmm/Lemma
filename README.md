@@ -4,6 +4,8 @@ Note-taking app for the GNU/Linux desktop, written in Python with Gtk.
 
 **Warning: this app is currently in alpha stage, data loss possible. Please be careful and make regular backups.**
 
+![Screenshot](https://github.com/cvfosammmm/Lemma/raw/master/data/screenshot.png)
+
 ## Running Lemma with Gnome Builder
 
 To run Lemma with Gnome Builder just click the "Clone.." button on the start screen, paste in the url (https://github.com/cvfosammmm/Lemma.git), click on "Clone" again, wait for it to download and hit the play button. It will build Lemma and its dependencies and then launch it.
