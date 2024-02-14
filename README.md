@@ -32,3 +32,7 @@ Lemma development / discussion takes place on GitHub at [https://github.com/cvfo
 Lemma is licensed under GPL version 3 or later. See the COPYING file for details.
 
 NewComputerModern fonts are licensed under GustFLv1 or later (see [https://ctan.org/tex-archive/fonts/newcomputermodern](https://ctan.org/tex-archive/fonts/newcomputermodern)).
+
+python_freetype (in the `lib` folder) is dual-licensed under the FreeType licence ([http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT](http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT)) and GPL version 2 or later ([http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/GPLv2.TXT](http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/GPLv2.TXT)), to be compatible with FreeType itself.
+
+Python_fontconfig and HarfPy (in the `lib` folder) are licensed under LGPL version 2.1 or later (see the COPYING files in their respective folders, under `lib`).

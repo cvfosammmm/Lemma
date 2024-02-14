@@ -5,6 +5,10 @@ See https://ctan.org/tex-archive/fonts/newcomputermodern for details.
 A copy of the license can be found in this file (below the GPL) or
 under beforementioned link.
 
+python_freetype (in the "lib" folder) is dual-licensed under the FreeType licence (http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT) and GPLv2 (http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/GPLv2.TXT) or later, to be compatible with FreeType itself.
+
+Python_fontconfig and HarfPy (in the "lib" folder) are licensed under LGPL version 2.1 or later (see the COPYING files in their respective folders, under "lib").
+
 -------------------------------------------------------------------------
 
 This program is free software: you can redistribute it and/or modify
