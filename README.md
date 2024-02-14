@@ -6,15 +6,9 @@ Note-taking app for the GNU/Linux desktop, written in Python with Gtk.
 
 ![Screenshot](https://github.com/cvfosammmm/Lemma/raw/master/data/screenshot.png)
 
-## Running Lemma with Gnome Builder
-
-To run Lemma with Gnome Builder just click the "Clone.." button on the start screen, paste in the url (https://github.com/cvfosammmm/Lemma.git), click on "Clone" again, wait for it to download and hit the play button. It will build Lemma and its dependencies and then launch it.
-
-Warning: Building Lemma this way may take some time.
-
 ## Running Lemma on Debian (probably Ubuntu, other Distributions too?)
 
-This way is probably a bit faster and may save you some disk space. I develop Lemma on Debian and that's what I tested it with. On Debian derivatives (like Ubuntu) it should probably work the same. On distributions other than Debian and Debian derivatives it should work more or less the same. If you want to run Lemma from source on another distribution and don't know how please open an issue here on GitHub. I will then try to provide instructions for your system.
+I develop Lemma on Debian and that's what I tested it with. On Debian derivatives (like Ubuntu) it should probably work the same. On distributions other than Debian and Debian derivatives it should work more or less the same. If you want to run Lemma from source on another distribution and don't know how please open an issue here on GitHub. I will then try to provide instructions for your system.
 
 1. Run the following command to install prerequisite Debian packages:<br />
 `apt-get install meson python3-gi gir1.2-gtk-4.0 gir1.2-pango-1.0 gettext python3-cairo python3-gi-cairo gir1.2-adw-1 python3-xdg`
