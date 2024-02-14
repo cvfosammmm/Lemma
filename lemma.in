@@ -19,7 +19,6 @@ import gi
 gi.require_version('Adw', '1')
 from gi.repository import Adw
 import sys, os.path, gettext
-import lib.fontconfig.fontconfig as fontconfig
 
 from lemma.app.font_manager import FontManager
 from lemma.workspace.workspace import Workspace
@@ -55,11 +54,10 @@ class Application(Adw.Application):
         ServiceLocator.init_app_icons_path('@app_icons_path@')
 
         # setup fonts
-        filename = os.path.join(ServiceLocator.get_resources_path(), 'fonts', 'newcomputermodern/otf/NewCM10-Book.otf')
-        fontconfig.Config.get_current().app_font_add_file(filename)
-        FontManager.init_face(filename, size=19.407)
-        filename = os.path.join(ServiceLocator.get_resources_path(), 'fonts', 'newcomputermodern/otf/NewCM08-Book.otf')
-        fontconfig.Config.get_current().app_font_add_file(filename)
+        font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')
+        FontManager.add_font('cmr10', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'))
+        FontManager.add_font('cmr08', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'))
+        FontManager.set_text_font('cmr10', size=19.407)
 
         self.main_window = MainWindow(self)
         ServiceLocator.set_main_window(self.main_window)

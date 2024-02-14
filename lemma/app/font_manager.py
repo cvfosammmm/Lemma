@@ -17,18 +17,23 @@
 
 import lib.freetype2.freetype2 as freetype2
 import lib.harfpy.harfbuzz as harfbuzz
+import lib.fontconfig.fontconfig as fontconfig
 
 
 class FontManager(object):
 
-    filename = None
+    fonts = dict()
     face = None
     char_extents = dict()
     surface_cache = dict()
     line_height = 0
 
-    def init_face(filename, size):
-        FontManager.filename = filename
+    def add_font(name, filename):
+        FontManager.fonts[name] = filename
+        fontconfig.Config.get_current().app_font_add_file(filename)
+
+    def set_text_font(name, size):
+        filename = FontManager.fonts[name]
         FontManager.face = freetype2.get_default_lib().new_face(filename)
         FontManager.face.set_char_size(size=size, resolution=72)
         FontManager.line_height = FontManager.face.height // 72 + 8
