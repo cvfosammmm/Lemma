@@ -82,7 +82,7 @@ class Layouter(Observable):
             box = BoxGlyph(width, height, left, top, char.content, node=char)
             char_boxes.append(box)
 
-        if self.current_line_box.width + total_width > 720:
+        if self.current_line_box.width + total_width > 670:
             self.start_new_display_line()
 
         for i, box in enumerate(char_boxes):

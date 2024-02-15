@@ -5,11 +5,12 @@
     <project_license>GPL-3.0-or-later</project_license>
     <content_rating type="oars-1.1" />
     <name translatable="no">Lemma</name>
-    <summary>Make pages and connect them.</summary>
+    <summary>Note-Taking App</summary>
     <developer_name translatable="no">Cvfosammmm</developer_name>
 
     <description>
-        <p>Make pages and connect them.</p>
+        <p>Take notes with beautiful typography.</p>
+        <p>Warning: it is currently in alpha stage, data loss possible. Please be careful and make regular backups.</p>
     </description>
 
     <launchable type="desktop-id">org.cvfosammmm.Lemma.desktop</launchable>
@@ -35,10 +36,6 @@
       <control>keyboard</control>
       <control>touch</control>
     </supports>
-
-    <requires>
-      <display_length compare="ge">768</display_length>
-    </requires>
 
     <releases>
         ​<release version="1" date="2024-2-13">
