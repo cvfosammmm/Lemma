@@ -10,7 +10,7 @@ Website: <a href="https://www.cvfosammmm.org/lemma/">https://www.cvfosammmm.org/
 
 ![Screenshot](https://github.com/cvfosammmm/Lemma/raw/master/data/screenshot.png)
 
-## Running Lemma on Debian (probably Ubuntu, other Distributions too?)
+## Running Lemma (Debian, probably Ubuntu and other Distributions)
 
 I develop Lemma on Debian and that's what I tested it with. On Debian derivatives (like Ubuntu) it should probably work the same. On distributions other than Debian and Debian derivatives it should work more or less the same. If you want to run Lemma from source on another distribution and don't know how please open an issue here on GitHub. I will then try to provide instructions for your system.
 
