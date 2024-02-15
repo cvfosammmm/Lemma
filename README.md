@@ -4,6 +4,10 @@ Note-taking app for the GNU/Linux desktop, written in Python with Gtk.
 
 **Warning: this app is currently in alpha stage, data loss possible. Please be careful and make regular backups.**
 
+Website: <a href="https://www.cvfosammmm.org/lemma/">https://www.cvfosammmm.org/lemma/</a>
+
+<a href="https://flathub.org/apps/org.cvfosammmm.Lemma"><img src="https://dl.flathub.org/assets/badges/flathub-badge-en.png" width="150" height="50" alt="Download on Flathub"></a>
+
 ![Screenshot](https://github.com/cvfosammmm/Lemma/raw/master/data/screenshot.png)
 
 ## Running Lemma on Debian (probably Ubuntu, other Distributions too?)
