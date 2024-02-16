@@ -119,3 +119,4 @@
 @define-color welcome_fg #eee;
 @define-color welcome_bg @window_bg_color;
 @define-color welcome_logo #444;
+@define-color welcome_logo_node #d2b9d8;

@@ -51,19 +51,6 @@
          values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0 "
          in="fbSourceGraphic" />
     </filter>
-    <clipPath
-       clipPathUnits="userSpaceOnUse"
-       id="clipPath4473">
-      <rect
-         style="fill:none;stroke:#000000;stroke-width:0;stroke-linejoin:bevel"
-         id="rect4475"
-         width="78.902885"
-         height="78.902885"
-         x="-35.282288"
-         y="-37.535786"
-         ry="22.191437"
-         transform="scale(1,-1)" />
-    </clipPath>
   </defs>
   <sodipodi:namedview
      id="namedview4"
@@ -75,9 +62,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
-     inkscape:zoom="0.45693809"
-     inkscape:cx="-318.42388"
-     inkscape:cy="159.75906"
+     inkscape:zoom="2.3140764"
+     inkscape:cx="103.06488"
+     inkscape:cy="156.4339"
      inkscape:window-width="1440"
      inkscape:window-height="831"
      inkscape:window-x="0"
@@ -108,11 +95,12 @@
              id="g10871"
              style="display:inline" />
           <g
-             id="g10873">
+             id="g10873"
+             clip-path="none">
             <g
                id="g10875"
                transform="matrix(1.0529162,0,0,1.0529162,-1.864715,-3.132763)"
-               clip-path="url(#clipPath4473)">
+               clip-path="none">
               <g
                  id="g10877">
                 <g
@@ -866,6 +854,30 @@
               </g>
             </g>
           </g>
+          <rect class="error"
+             style="display:inline;fill:#d2b9d8;fill-opacity:1;stroke:none;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;enable-background:new"
+             id="rect31548"
+             width="6.993351"
+             height="6.993351"
+             x="-31.496717"
+             y="-20.714069"
+             transform="scale(1,-1)" />
+          <rect class="error"
+             style="display:inline;fill:#d2b9d8;fill-opacity:1;stroke:none;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;enable-background:new"
+             id="rect31548-9"
+             width="6.993351"
+             height="6.993351"
+             x="12.569994"
+             y="-12.274548"
+             transform="scale(1,-1)" />
+          <rect class="error"
+             style="display:inline;fill:#d2b9d8;fill-opacity:1;stroke:none;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;enable-background:new"
+             id="rect31548-9-1"
+             width="6.993351"
+             height="6.993351"
+             x="-17.808002"
+             y="18.303619"
+             transform="scale(1,-1)" />
         </g>
       </g>
     </g>

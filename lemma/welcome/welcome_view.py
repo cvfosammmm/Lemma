@@ -28,9 +28,13 @@ class WelcomeView(Gtk.CenterBox):
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.get_style_context().add_class('welcome')
 
-        self.header = Gtk.Label.new('Welcome to Lemma')
+        self.icon = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.icon.set_halign(Gtk.Align.CENTER)
+        self.icon.get_style_context().add_class('icon')
+
+        self.header = Gtk.Label.new('Welcome to Lemma!')
         self.header.get_style_context().add_class('header')
-        self.header.get_style_context().add_class('large-title')
+        self.header.get_style_context().add_class('title-3')
 
         self.explainer = Gtk.Label.new('Your workspace is currently empty. To start taking notes, click the button below.')
         self.explainer.get_style_context().add_class('explainer')
@@ -44,6 +48,7 @@ class WelcomeView(Gtk.CenterBox):
         self.button.grab_focus()
 
         self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.box.append(self.icon)
         self.box.append(self.header)
         self.box.append(self.explainer)
         self.box.append(self.button)

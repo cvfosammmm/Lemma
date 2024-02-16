@@ -201,9 +201,15 @@ box.welcome {
     background: @welcome_bg;
 }
 box.welcome > box {
-    padding-top: 305px;
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @welcome_logo) no-repeat center 27px;
-    margin-bottom: 120px;
+    margin-top: 54px;
+    margin-bottom: 150px;
+}
+box.welcome box.icon {
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @welcome_logo, error @welcome_logo_node) no-repeat center top;
+    min-width: 256px;
+    min-height: 256px;
+    margin-bottom: 32px;
+    border-radius: 128px;
 }
 box.welcome label.header {
     margin-bottom: 32px;
