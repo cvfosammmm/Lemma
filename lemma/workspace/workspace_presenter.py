@@ -48,15 +48,15 @@ class WorkspacePresenter():
         elif self.workspace.mode == 'draft':
             self.init_draft_mode()
         else:
-            self.init_homepage_mode()
+            self.init_welcome_mode()
 
     def init_document_mode(self):
         self.workspace.document_view.set_document(self.workspace.active_document)
         self.main_window.content_stack.set_visible_child_name('document_view')
 
-    def init_homepage_mode(self):
-        self.main_window.content_stack.set_visible_child_name('homepage')
-        self.main_window.homepage.button.grab_focus()
+    def init_welcome_mode(self):
+        self.main_window.content_stack.set_visible_child_name('welcome')
+        self.main_window.welcome.button.grab_focus()
 
     def init_draft_mode(self):
         self.main_window.content_stack.set_visible_child_name('draft_view')

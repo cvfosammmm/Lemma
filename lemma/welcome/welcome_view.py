@@ -21,7 +21,7 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 
 
-class HomepageView(Gtk.CenterBox):
+class WelcomeView(Gtk.CenterBox):
         
     def __init__(self):
         Gtk.CenterBox.__init__(self)

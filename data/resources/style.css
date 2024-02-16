@@ -202,7 +202,7 @@ box.welcome {
 }
 box.welcome > box {
     padding-top: 305px;
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @window_fg_color) no-repeat center 27px;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @welcome_logo) no-repeat center 27px;
     margin-bottom: 120px;
 }
 box.welcome label.header {

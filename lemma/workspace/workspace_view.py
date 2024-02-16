@@ -22,7 +22,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, GObject, Adw
 
-from lemma.homepage.homepage_view import HomepageView
+from lemma.welcome.welcome_view import WelcomeView
 from lemma.app.service_locator import ServiceLocator
 
 
@@ -46,11 +46,11 @@ class MainWindow(Adw.ApplicationWindow):
         self.content_paned.set_wide_handle(True)
         self.headerbar.bind_property('position', self.content_paned, 'position', GObject.BindingFlags.BIDIRECTIONAL)
 
-        self.homepage = HomepageView()
+        self.welcome = WelcomeView()
 
         self.content_stack = Gtk.Stack()
         self.content_stack.get_style_context().add_class('content')
-        self.content_stack.add_named(self.homepage, 'homepage')
+        self.content_stack.add_named(self.welcome, 'welcome')
         self.content_stack.add_named(self.workspace.document_draft_view, 'draft_view')
         self.content_stack.add_named(self.workspace.document_view.view, 'document_view')
 
