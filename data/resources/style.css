@@ -198,24 +198,24 @@ button.popover.active {
 /* welcome page */
 
 box.welcome {
-    background: @welcome_bg;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-bg-symbolic.svg'), success @welcome_fg, error @welcome_bg) left top;
 }
 box.welcome > box {
-    margin-top: 54px;
-    margin-bottom: 150px;
+    margin-top: 52px;
+    margin-bottom: 200px;
 }
 box.welcome box.icon {
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @welcome_logo, error @welcome_logo_node) no-repeat center top;
-    min-width: 256px;
-    min-height: 256px;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @welcome_logo, error @welcome_logo_node) no-repeat left top;
+    min-width: 240px;
+    min-height: 240px;
     margin-bottom: 32px;
-    border-radius: 128px;
+    border-radius: 120px;
 }
 box.welcome label.header {
-    margin-bottom: 32px;
+    margin-bottom: 25px;
 }
 box.welcome label.explainer {
-    margin-bottom: 23px;
+    margin-bottom: 42px;
 }
 
 

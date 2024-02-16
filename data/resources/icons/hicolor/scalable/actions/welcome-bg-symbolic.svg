@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
-   height="16px"
-   viewBox="0 0 16 16"
-   width="16px"
    version="1.1"
-   id="svg6"
+   id="svg2"
+   width="645"
+   height="373"
+   viewBox="0 0 645 373"
    sodipodi:docname="welcome-bg-symbolic.svg"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -12,9 +14,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs10" />
+     id="defs6" />
   <sodipodi:namedview
-     id="namedview8"
+     id="namedview4"
      pagecolor="#ffffff"
      bordercolor="#000000"
      borderopacity="0.25"
@@ -23,27 +25,66 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
-     inkscape:zoom="14.75"
-     inkscape:cx="8.1016949"
-     inkscape:cy="8"
+     inkscape:zoom="0.87591258"
+     inkscape:cx="348.7791"
+     inkscape:cy="262.58328"
      inkscape:window-width="1440"
      inkscape:window-height="831"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg6" />
-  <rect
-     class="error"
-     style="fill:#ffffff;stroke-width:0;stroke-linejoin:bevel"
-     id="rect339"
-     width="16"
-     height="16"
-     x="0"
-     y="0" />
-  <path
-     class="success"
-     d="M 8.0000002,0 C 3.5781242,0 0,3.5781242 0,8.0000002 0,12.421876 3.5781242,16 8.0000002,16 12.421876,16 16,12.421876 16,8.0000002 16,3.5781242 12.421876,0 8.0000002,0 Z M 4.0000001,6.0000002 h 7.9999989 c 1.109377,0 2.000001,0.890624 2.000001,2 0,1.109376 -0.890624,2.0000008 -2.000001,2.0000008 H 4.0000001 c -1.1093759,0 -2,-0.8906248 -2,-2.0000008 0,-1.109376 0.8906241,-2 2,-2 z m 0,0"
-     fill="#e01b24"
-     id="path4"
-     style="stroke-width:2" />
+     inkscape:current-layer="g8" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g8">
+    <rect
+       class="error"
+       style="fill:#000000;stroke:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none;fill-opacity:1"
+       id="rect1991"
+       width="645"
+       height="373"
+       x="5e-07"
+       y="5e-07" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="M 704.52008,35.84375 118.94,373.92969 l 0.5,0.86523 585.58008,-338.083983 z"
+       id="path1050" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="M 764.95698,116.07236 179.3769,454.1583 l 0.5,0.86523 585.58008,-338.08398 z"
+       id="path1050-5" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="m 506.47905,-107.06324 -585.580073,338.08594 0.5,0.86523 585.580073,-338.08398 z"
+       id="path1050-3" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="m -78.70184,139.40862 585.58008,338.08594 -0.5,0.86523 -585.58008,-338.08398 z"
+       id="path1050-56" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="m -52.747332,39.440439 585.580082,338.085941 -0.5,0.86523 L -53.247332,40.307629 Z"
+       id="path1050-9" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="m 195.47938,-74.745592 585.58008,338.085942 -0.5,0.86523 -585.58008,-338.083985 z"
+       id="path1050-1" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="m 288.30305,-136.21566 585.58008,338.08594 -0.5,0.86523 -585.58008,-338.08398 z"
+       id="path1050-1-2" />
+    <path
+       class="success"
+       style="color:#000000;fill:#000000;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none"
+       d="m 351.62859,-132.89799 -585.58008,338.08594 0.5,0.86523 585.58008,-338.08398 z"
+       id="path1050-2" />
+  </g>
 </svg>

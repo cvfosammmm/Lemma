@@ -116,7 +116,7 @@
 @define-color fg #000000ff;
 @define-color title_color green;
 @define-color cursor #000000ff;
-@define-color welcome_fg #eee;
+@define-color welcome_fg #ddd;
 @define-color welcome_bg @window_bg_color;
 @define-color welcome_logo #444;
 @define-color welcome_logo_node #d2b9d8;

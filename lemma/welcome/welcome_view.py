@@ -32,7 +32,7 @@ class WelcomeView(Gtk.CenterBox):
         self.icon.set_halign(Gtk.Align.CENTER)
         self.icon.get_style_context().add_class('icon')
 
-        self.header = Gtk.Label.new('Welcome to Lemma!')
+        self.header = Gtk.Label.new('Welcome to Lemma')
         self.header.get_style_context().add_class('header')
         self.header.get_style_context().add_class('title-3')
 
