@@ -68,7 +68,7 @@ class Actions(object):
         prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
         next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
 
-        self.actions['go-back'].set_enabled(prev_doc != None)
+        self.actions['go-back'].set_enabled(self.workspace.mode == 'draft' or prev_doc != None)
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['delete-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['rename-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
