@@ -25,22 +25,33 @@ class HomepageView(Gtk.CenterBox):
         
     def __init__(self):
         Gtk.CenterBox.__init__(self)
-        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.set_orientation(Gtk.Orientation.VERTICAL)
+        self.get_style_context().add_class('welcome')
 
-        self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.header = Gtk.Label.new('Welcome to Lemma')
+        self.header.get_style_context().add_class('header')
+        self.header.get_style_context().add_class('large-title')
 
-        self.label = Gtk.Label.new('Welcome.')
-        self.label.set_size_request(250, -1)
+        self.explainer = Gtk.Label.new('Your workspace is currently empty. To start taking notes, click the button below.')
+        self.explainer.get_style_context().add_class('explainer')
 
-        self.button = Gtk.Button.new_with_label('+ New Document')
+        self.button = Gtk.Button.new_with_label('New Document')
         self.button.set_can_focus(False)
+        self.button.set_halign(Gtk.Align.CENTER)
         self.button.set_action_name('win.add-document')
         self.button.set_tooltip_text('Add new document (Ctrl+N)')
+        self.button.get_style_context().add_class('suggested-action')
         self.button.grab_focus()
 
-        self.box.append(self.label)
+        self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.box.append(self.header)
+        self.box.append(self.explainer)
         self.box.append(self.button)
 
-        self.set_center_widget(self.box)
+        self.center_box = Gtk.CenterBox()
+        self.center_box.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.center_box.set_center_widget(self.box)
+
+        self.set_center_widget(self.center_box)
 
 

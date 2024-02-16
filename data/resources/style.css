@@ -194,3 +194,22 @@ box.popover label.explaination-header {
 button.popover.active {
     background: @headerbar_button_active_color;
 }
+
+/* welcome page */
+
+box.welcome {
+    background: @welcome_bg;
+}
+box.welcome > box {
+    padding-top: 305px;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @window_fg_color) no-repeat center 27px;
+    margin-bottom: 120px;
+}
+box.welcome label.header {
+    margin-bottom: 32px;
+}
+box.welcome label.explainer {
+    margin-bottom: 23px;
+}
+
+

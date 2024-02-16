@@ -116,3 +116,5 @@
 @define-color fg #000000ff;
 @define-color title_color green;
 @define-color cursor #000000ff;
+@define-color welcome_fg #eee;
+@define-color welcome_bg @window_bg_color;
