@@ -62,9 +62,6 @@ class ServiceLocator():
     def get_config_folder():
         return os.path.join(xdg_config_home, 'lemma')
 
-    def get_data_folder():
-        return ServiceLocator.get_settings().get_value('preferences', 'data_folder')
-
     def init_lemma_version(lemma_version):
         ServiceLocator.lemma_version = lemma_version
 

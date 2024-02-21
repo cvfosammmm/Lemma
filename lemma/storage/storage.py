@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os, os.path, shutil, pickle
+import os, os.path, pickle
 
 from lemma.document.document import Document
 from lemma.app.service_locator import ServiceLocator
@@ -25,10 +25,10 @@ class Storage(object):
 
     def __init__(self, workspace):
         self.workspace = workspace
-        self.pathname = ServiceLocator.get_data_folder()
 
-        try: os.mkdir(self.pathname)
-        except FileExistsError: pass
+        self.pathname = os.path.expanduser(ServiceLocator.get_config_folder() + '/notes')
+        if not os.path.exists(self.pathname):
+            os.mkdir(self.pathname)
 
     def populate_documents(self):
         for direntry in os.scandir(self.pathname):

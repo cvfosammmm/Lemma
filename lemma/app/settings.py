@@ -54,7 +54,6 @@ class Settings(Observable):
         self.defaults['window_state']['sidebar_position'] = 250
 
         self.defaults['preferences'] = dict()
-        self.defaults['preferences']['data_folder'] = os.path.expanduser(self.pathname + '/Notes')
         self.defaults['preferences']['color_scheme'] = 'default'
 
     def get_value(self, section, item):
