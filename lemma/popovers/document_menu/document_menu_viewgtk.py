@@ -40,7 +40,7 @@ class DocumentMenuView(Popover):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.export_document_button = MenuBuilder.create_button(_('Export As...'), shortcut=_('Ctrl') + '+E')
+        self.export_document_button = MenuBuilder.create_button(_('Export Markdown...'), shortcut=_('Ctrl') + '+E')
         self.export_document_button.set_action_name('win.export-as')
         self.add_closing_button(self.export_document_button)
 
