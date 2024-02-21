@@ -20,7 +20,7 @@ import lib.harfpy.harfbuzz as harfbuzz
 import lib.fontconfig.fontconfig as fontconfig
 
 
-class FontManager(object):
+class FontManager():
 
     fonts = dict()
     face = None

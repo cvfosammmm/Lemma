@@ -35,6 +35,7 @@ class Actions(object):
         self.add_action('add-document', self.add_document)
         self.add_action('delete-document', self.delete_document)
         self.add_action('rename-document', self.rename_document)
+        self.add_action('export-as', self.export_as)
 
         self.add_action('go-back', self.go_back)
         self.add_action('go-forward', self.go_forward)
@@ -72,6 +73,7 @@ class Actions(object):
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['delete-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['rename-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['export-as'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
 
     def add_document(self, action=None, paramenter=''):
@@ -82,6 +84,9 @@ class Actions(object):
 
     def rename_document(self, action=None, parameter=''):
         self.workspace.document_view.init_renaming()
+
+    def export_as(self, action=None, parameter=''):
+        DialogLocator.get_dialog('export_as').run(self.workspace.active_document)
 
     def go_back(self, action=None, parameter=''):
         if self.workspace.mode == 'draft':

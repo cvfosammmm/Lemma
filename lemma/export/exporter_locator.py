@@ -15,23 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.dialogs.about.about import AboutDialog
-from lemma.dialogs.keyboard_shortcuts.keyboard_shortcuts import KeyboardShortcutsDialog
-from lemma.dialogs.export_document.export_document import ExportDocumentDialog
+from lemma.export.exporter_markdown import ExporterMarkdown
 
 
-class DialogLocator(object):
+class ExporterLocator(object):
 
-    dialogs = dict()
+    exporters = dict()
 
-    def init_dialogs(main_window):
-        dialogs = dict()
-        dialogs['about'] = AboutDialog(main_window)
-        dialogs['keyboard_shortcuts'] = KeyboardShortcutsDialog(main_window)
-        dialogs['export_as'] = ExportDocumentDialog(main_window)
-        DialogLocator.dialogs = dialogs
-    
-    def get_dialog(dialog_type):
-        return DialogLocator.dialogs[dialog_type]
+    def init_exporters():
+        ExporterLocator.exporters['markdown'] = ExporterMarkdown()
+
+    def get_exporter(document_format):
+        return ExporterLocator.exporters[document_format]
 
 
