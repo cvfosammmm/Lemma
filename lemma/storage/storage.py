@@ -19,6 +19,7 @@ import os, os.path, pickle
 
 from lemma.document.document import Document
 from lemma.app.service_locator import ServiceLocator
+from lemma.ast.node import *
 
 
 class Storage(object):
@@ -33,23 +34,34 @@ class Storage(object):
     def populate_documents(self):
         for direntry in os.scandir(self.pathname):
             if direntry.is_file() and direntry.name.isdigit():
-                filename = direntry.name
+                self.import_document(direntry)
 
-                with open(direntry, 'rb') as file:
-                    try: document_data = pickle.loads(file.read())
-                    except Exception: document_data = None
+    def import_document(self, direntry):
+        document = Document(self.workspace, int(direntry.name))
+        document.last_modified = direntry.stat(follow_symlinks=False).st_mtime
+        lines = None
 
-                if document_data != None:
-                    document = Document(self.workspace, int(filename))
+        with open(direntry, 'r') as file:
+            for line in file:
+                if document.title == '':
+                    if not line.startswith('# '): return
+                    document.title = line[2:].strip()
+                else:
+                    if lines == None:
+                        lines = Lines()
 
-                    document.title = document_data['title']
-                    document.lines = document_data['lines']
-                    document.insert.set_position(document_data['insert_position'])
-                    document.teaser_scanner.teaser = document_data['teaser']
-                    document.layouter.root = document_data['layout_root']
-                    document.last_modified = document_data['last_modified']
+                    document_line = Line()
+                    for char in line[:-1]:
+                        document_line.append(UnicodeCharacter(char))
+                    lines.append(document_line)
 
-                    self.workspace.documents.add(document)
+        if lines == None: return
+
+        document.lines = lines
+        document.insert.set_position([0, 0])
+        document.update_visitors()
+
+        self.workspace.documents.add(document)
 
     def populate_workspace(self):
         pathname = os.path.join(self.pathname, 'workspace')
@@ -88,16 +100,10 @@ class Storage(object):
     def save_document(self, document):
         pathname = os.path.join(self.pathname, str(document.id))
 
-        try: filehandle = open(pathname, 'wb')
+        try: filehandle = open(pathname, 'w')
         except IOError: pass
         else:
-            document_data = {'title': document.title,
-                             'lines': document.lines,
-                             'insert_position': document.insert.get_position(),
-                             'teaser': document.teaser_scanner.teaser,
-                             'layout_root': document.layouter.root,
-                             'last_modified': document.last_modified}
-            filehandle.write(pickle.dumps(document_data))
+            filehandle.write(document.markdown_scanner.markdown)
 
     def delete_document(self, document):
         pathname = os.path.join(self.pathname, str(document.id))

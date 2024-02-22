@@ -51,7 +51,6 @@ class Lines(Node):
         Node.__init__(self)
 
         self.children = []
-        self.insert(0, Line())
 
         self.iter_index = None
 

@@ -20,6 +20,7 @@ import time
 from lemma.ast.node import *
 from lemma.cursor.cursor import Cursor
 from lemma.layouter.layouter import Layouter
+from lemma.markdown_scanner.markdown_scanner import MarkdownScanner
 from lemma.teaser_scanner.teaser_scanner import TeaserScanner
 from lemma.helpers.observable import Observable
 
@@ -33,6 +34,7 @@ class Document(Observable):
         self.id = id
         self.title = ''
         self.lines = Lines()
+        self.lines.insert(0, Line())
         self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
 
         self.commands = list()
@@ -40,6 +42,7 @@ class Document(Observable):
         self.last_modified = time.time()
 
         self.layouter = Layouter(self)
+        self.markdown_scanner = MarkdownScanner(self)
         self.teaser_scanner = TeaserScanner(self)
 
     def set_last_modified(self):
@@ -84,6 +87,7 @@ class Document(Observable):
 
     def update_visitors(self):
         self.layouter.update()
+        self.markdown_scanner.update()
         self.teaser_scanner.update()
 
 

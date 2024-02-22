@@ -26,10 +26,6 @@ class TeaserScanner(Observable):
 
         self.teaser = ''
 
-        self.document.connect('changed', self.on_document_change)
-        self.update()
-
-    def on_document_change(self, document):
         self.update()
 
     def update(self):

@@ -30,6 +30,7 @@ class KeyboardShortcutsDialog():
         section = {'title': 'Documents', 'items': list()}
         section['items'].append({'title': 'Create new document', 'shortcut': '&lt;ctrl&gt;N'})
         section['items'].append({'title': 'Rename document', 'shortcut': 'F2'})
+        section['items'].append({'title': 'Export Markdown', 'shortcut': '&lt;ctrl&gt;E'})
         data.append(section)
 
         section = {'title': 'Navigation', 'items': list()}

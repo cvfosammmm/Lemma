@@ -15,20 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.helpers.observable import Observable
 
-class ExporterMarkdown(object):
 
-    def __init__(self):
-        self.text_buffer = ''
+class MarkdownScanner(Observable):
 
-    def export(self, document):
-        self.text_buffer = ''
-        document.lines.accept(self)
+    def __init__(self, document):
+        Observable.__init__(self)
+        self.document = document
+
+        self.markdown = ''
+
+        self.update()
+
+    def update(self):
+        self.markdown = '# ' + self.document.title + '\n'
+        self.document.lines.accept(self)
 
         # remove last EOL
-        self.text_buffer = self.text_buffer[:-1]
-
-        return self.text_buffer
+        self.markdown = self.markdown[:-1]
 
     def visit_lines(self, lines):
         for line in lines:
@@ -40,13 +45,13 @@ class ExporterMarkdown(object):
 
     def visit_char(self, char):
         if char.is_whitespace:
-            if self.text_buffer == '' or self.text_buffer[-1] != ' ':
-                self.text_buffer += ' '
+            if self.markdown == '' or self.markdown[-1] != ' ':
+                self.markdown += ' '
         else:
-            self.text_buffer += char.content
+            self.markdown += char.content
 
     def visit_eol(self, node):
-        self.text_buffer += '\n'
+        self.markdown += '\n'
 
     def visit_node(self, node):
         pass

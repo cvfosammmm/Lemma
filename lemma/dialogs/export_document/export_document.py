@@ -21,7 +21,6 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio
 
 import os.path
-from lemma.export.exporter_locator import ExporterLocator
 
 
 class ExportDocumentDialog(object):
@@ -57,9 +56,8 @@ class ExportDocumentDialog(object):
 
                 if not filename.endswith('.md'):
                     filename += '.md'
-                markdown = ExporterLocator.get_exporter('markdown').export(self.document)
 
                 with open(filename, 'w') as f:
-                    f.write(markdown)
+                    f.write(self.document.markdown_scanner.markdown)
 
 
