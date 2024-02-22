@@ -18,9 +18,11 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk, Gio, GLib
 
 import os.path
+
+from lemma.app.service_locator import ServiceLocator
 
 
 class ExportDocumentDialog(object):
@@ -44,6 +46,11 @@ class ExportDocumentDialog(object):
         file_filter.set_name(_('Markdown Files'))
         self.view.set_default_filter(file_filter)
 
+        export_folder = ServiceLocator.get_settings().get_value('app_state', 'last_export_folder')
+        if export_folder == None or not os.path.exists(export_folder) or not os.path.isdir(export_folder):
+            export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
+        self.view.set_initial_folder(Gio.File.new_for_path(export_folder))
+
         self.view.set_initial_name(self.document.title + '.md')
 
     def dialog_process_response(self, dialog, result):
@@ -53,6 +60,7 @@ class ExportDocumentDialog(object):
         else:
             if file != None:
                 filename = file.get_path()
+                ServiceLocator.get_settings().set_value('app_state', 'last_export_folder', os.path.dirname(filename))
 
                 if not filename.endswith('.md'):
                     filename += '.md'

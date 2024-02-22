@@ -53,6 +53,9 @@ class Settings(Observable):
         self.defaults['window_state']['is_maximized'] = False
         self.defaults['window_state']['sidebar_position'] = 250
 
+        self.defaults['app_state'] = dict()
+        self.defaults['app_state']['last_export_folder'] = None
+
         self.defaults['preferences'] = dict()
         self.defaults['preferences']['color_scheme'] = 'default'
 
