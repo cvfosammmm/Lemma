@@ -17,8 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, GLib
-from gi.repository import Gdk, GdkPixbuf
+from gi.repository import Gtk, GLib, Gdk, GObject
 
 import os
 
@@ -57,7 +56,26 @@ class ImportDocumentsView(DialogView):
 
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_child(self.list)
-        self.scrolled_window.set_size_request(520, 254)
+
+        self.drop_message_inner_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        image = Gtk.Image.new_from_icon_name('arrow1-down-symbolic')
+        image.set_pixel_size(64)
+        arrow_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        arrow_box.append(image)
+        self.drop_message_inner_box.append(arrow_box)
+        self.drop_message_inner_box.append(Gtk.Label.new('Drag and Drop .md-Files here'))
+
+        self.drop_message_outer_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.drop_message_outer_box.get_style_context().add_class('drop-message')
+        self.drop_message_outer_box.append(self.drop_message_inner_box)
+
+        self.drop_stack = Gtk.Stack()
+        self.drop_stack.add_named(self.drop_message_outer_box, 'message')
+        self.drop_stack.add_named(self.scrolled_window, 'files')
+
+        self.drop_controller = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
+        self.drop_controller.set_gtypes([Gdk.FileList])
+        self.drop_stack.add_controller(self.drop_controller)
 
         button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
         button_box.append(Gtk.Image.new_from_icon_name('list-add-symbolic'))
@@ -70,7 +88,7 @@ class ImportDocumentsView(DialogView):
         self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.content.set_vexpand(True)
         self.content.append(self.explainer)
-        self.content.append(self.scrolled_window)
+        self.content.append(self.drop_stack)
         self.content.append(self.add_file_button)
 
         self.topbox.append(self.content)

@@ -41,20 +41,19 @@ class ImportDocuments(object):
         self.init_current_values()
         self.view = view.ImportDocumentsView(self.main_window)
         self.setup()
-
-        self.view.import_button.set_sensitive(False)
-
-        self.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
-        self.view.import_button.connect('clicked', self.on_import_button_clicked)
-        self.view.add_file_button.connect('clicked', self.on_add_file_button_clicked)
-
         self.view.present()
 
     def init_current_values(self):
         self.current_values['files'] = set()
 
     def setup(self):
-        pass
+        self.view.import_button.set_sensitive(False)
+        self.view.drop_stack.set_visible_child_name('message')
+
+        self.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
+        self.view.import_button.connect('clicked', self.on_import_button_clicked)
+        self.view.add_file_button.connect('clicked', self.on_add_file_button_clicked)
+        self.view.drop_controller.connect('drop', self.on_drop)
 
     def on_cancel_button_clicked(self, button):
         self.view.close()
@@ -85,6 +84,13 @@ class ImportDocuments(object):
                     self.add_file_to_list(file.get_path())
                 self.view.list.invalidate_sort()
 
+    def on_drop(self, controller, files, x, y):
+        for file in files:
+            path = file.get_path()
+            if not os.path.isdir(path) and path.endswith('.md'):
+                self.add_file_to_list(path)
+        self.view.list.invalidate_sort()
+
     def add_file_to_list(self, path):
         if path not in self.current_values['files']:
             self.current_values['files'].add(path)
@@ -93,6 +99,7 @@ class ImportDocuments(object):
             self.view.list.append(row)
 
         self.view.import_button.set_sensitive(True)
+        self.view.drop_stack.set_visible_child_name('files')
 
     def remove_file_from_list(self, button):
         row = button.get_parent().get_parent()
@@ -100,6 +107,7 @@ class ImportDocuments(object):
         self.current_values['files'].remove(row.path)
 
         self.view.import_button.set_sensitive(len(self.current_values['files']) > 0)
+        self.view.drop_stack.set_visible_child_name(('files' if len(self.current_values['files']) > 0 else 'message'))
 
     def import_files(self):
         for path in self.current_values['files']:

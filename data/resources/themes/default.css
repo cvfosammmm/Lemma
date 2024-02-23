@@ -120,3 +120,6 @@
 @define-color welcome_bg @window_bg_color;
 @define-color welcome_logo #444;
 @define-color welcome_logo_node #d2b9d8;
+@define-color list_border #ddd;
+@define-color list_row_border #eee;
+@define-color list_row_hover #f9f9f9;

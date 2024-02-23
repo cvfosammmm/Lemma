@@ -223,16 +223,46 @@ box.welcome label.explainer {
 window.import-markdown-files-dialog label.explainer {
     margin: 18px;
 }
-window.import-markdown-files-dialog scrolledwindow {
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+window.import-markdown-files-dialog stack {
+    background: @view_bg_color;
+    border-top: 1px solid @list_border;
+    border-bottom: 1px solid @list_border;
+}
+window.import-markdown-files-dialog box.drop-message {
+    padding: 16px;
+}
+window.import-markdown-files-dialog box.drop-message > box {
+    border: 2px dashed @borders;
+    border-radius: 6px;
+    min-width: 484px;
+    min-height: 216px;
+}
+window.import-markdown-files-dialog box.drop-message > box > box {
+    min-height: 112px;
+    margin-top: 18px;
+}
+@keyframes arrow-animation {
+    0% { margin-top: 36px; }
+    50% { margin-top: 48px; }
+    100% { margin-top: 36px; }
+}
+window.import-markdown-files-dialog box.drop-message > box image {
+    margin-top: 48px;
+    padding: 0px;
+    animation: arrow-animation 2s ease infinite;
+}
+window.import-markdown-files-dialog box.drop-message > box label {
+    margin-top: 12px;
+}
+window.import-markdown-files-dialog list {
+    background: none;
 }
 window.import-markdown-files-dialog list row {
     padding: 0px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid @list_row_border;
 }
 window.import-markdown-files-dialog list row:hover {
-    background: #f9f9f9;
+    background: @list_row_hover;
 }
 window.import-markdown-files-dialog list row label {
     padding-top: 1px;
