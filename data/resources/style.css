@@ -246,6 +246,9 @@ window.import-markdown-files-dialog box.drop-message > box > box {
     50% { margin-top: 48px; }
     100% { margin-top: 36px; }
 }
+window.import-markdown-files-dialog headerbar button {
+    padding: 6px 12px;
+}
 window.import-markdown-files-dialog box.drop-message > box image {
     margin-top: 48px;
     padding: 0px;
