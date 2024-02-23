@@ -16,8 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import gi
+gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-from gi.repository import Adw
+from gi.repository import Gtk, Adw
 import sys, os.path, gettext
 
 from lemma.app.font_manager import FontManager
@@ -62,6 +63,9 @@ class Application(Adw.Application):
         self.main_window = MainWindow(self)
         ServiceLocator.set_main_window(self.main_window)
         ColorManager.init(self.main_window)
+        resources_path = ServiceLocator.get_resources_path()
+        icon_theme = Gtk.IconTheme.get_for_display(self.main_window.get_display())
+        icon_theme.add_search_path(os.path.join(resources_path, 'icons'))
 
         self.workspace = Workspace()
 

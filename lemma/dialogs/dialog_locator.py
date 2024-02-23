@@ -18,6 +18,7 @@
 from lemma.dialogs.about.about import AboutDialog
 from lemma.dialogs.keyboard_shortcuts.keyboard_shortcuts import KeyboardShortcutsDialog
 from lemma.dialogs.export_document.export_document import ExportDocumentDialog
+from lemma.dialogs.import_documents.import_documents import ImportDocuments
 
 
 class DialogLocator(object):
@@ -29,6 +30,7 @@ class DialogLocator(object):
         dialogs['about'] = AboutDialog(main_window)
         dialogs['keyboard_shortcuts'] = KeyboardShortcutsDialog(main_window)
         dialogs['export_as'] = ExportDocumentDialog(main_window)
+        dialogs['import_documents'] = ImportDocuments(main_window)
         DialogLocator.dialogs = dialogs
     
     def get_dialog(dialog_type):

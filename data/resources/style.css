@@ -218,4 +218,32 @@ box.welcome label.explainer {
     margin-bottom: 42px;
 }
 
+/* import markdown dialog */
 
+window.import-markdown-files-dialog label.explainer {
+    margin: 18px;
+}
+window.import-markdown-files-dialog scrolledwindow {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+window.import-markdown-files-dialog list row {
+    padding: 0px;
+    border-bottom: 1px solid #eee;
+}
+window.import-markdown-files-dialog list row:hover {
+    background: #f9f9f9;
+}
+window.import-markdown-files-dialog list row label {
+    padding-top: 1px;
+    padding-left: 18px;
+}
+window.import-markdown-files-dialog list row button {
+    padding: 7px;
+    padding-right: 12px;
+    padding-left: 12px;
+    border-radius: 1px;
+}
+window.import-markdown-files-dialog button.filechooser-button {
+    margin: 6px;
+}

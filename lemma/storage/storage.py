@@ -45,7 +45,7 @@ class Storage(object):
             for line in file:
                 if document.title == '':
                     if not line.startswith('# '): return
-                    document.title = line[2:].strip()
+                    document.title = line[1:].strip()
                 else:
                     if lines == None:
                         lines = Lines()

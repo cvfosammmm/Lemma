@@ -33,6 +33,7 @@ class Actions(object):
 
         self.actions = dict()
         self.add_action('add-document', self.add_document)
+        self.add_action('import-markdown-files', self.import_markdown_files)
         self.add_action('delete-document', self.delete_document)
         self.add_action('rename-document', self.rename_document)
         self.add_action('export-as', self.export_as)
@@ -69,15 +70,23 @@ class Actions(object):
         prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
         next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
 
-        self.actions['go-back'].set_enabled(self.workspace.mode == 'draft' or prev_doc != None)
-        self.actions['go-forward'].set_enabled(next_doc != None)
+        self.actions['add-document'].set_enabled(True)
+        self.actions['import-markdown-files'].set_enabled(True)
         self.actions['delete-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['rename-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['export-as'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['go-back'].set_enabled(self.workspace.mode == 'draft' or prev_doc != None)
+        self.actions['go-forward'].set_enabled(next_doc != None)
+        self.actions['show-shortcuts-dialog'].set_enabled(True)
+        self.actions['show-about-dialog'].set_enabled(True)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['show-hamburger-menu'].set_enabled(True)
 
     def add_document(self, action=None, paramenter=''):
         self.workspace.enter_draft_mode()
+
+    def import_markdown_files(self, action=None, paramenter=''):
+        DialogLocator.get_dialog('import_documents').run(self.workspace)
 
     def delete_document(self, action=None, parameter=''):
         self.workspace.delete_document(self.workspace.active_document)

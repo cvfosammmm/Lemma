@@ -10,7 +10,7 @@
 
     <description>
         <p>Take notes with beautiful typography.</p>
-        <p>Warning: Lemma is currently in alpha stage, data loss possible. Please be careful and make regular backups.</p>
+        <p>Warning: Lemma is currently in alpha stage, data loss is likely. Please be careful and make regular backups.</p>
     </description>
 
     <launchable type="desktop-id">org.cvfosammmm.Lemma.desktop</launchable>
