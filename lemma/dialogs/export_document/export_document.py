@@ -49,7 +49,8 @@ class ExportDocumentDialog(object):
         export_folder = ServiceLocator.get_settings().get_value('app_state', 'last_export_folder')
         if export_folder == None or not os.path.exists(export_folder) or not os.path.isdir(export_folder):
             export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
-        self.view.set_initial_folder(Gio.File.new_for_path(export_folder))
+        if export_folder != None:
+            self.view.set_initial_folder(Gio.File.new_for_path(export_folder))
 
         self.view.set_initial_name(self.document.title + '.md')
 

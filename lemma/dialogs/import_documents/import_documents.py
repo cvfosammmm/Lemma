@@ -75,7 +75,8 @@ class ImportDocuments(object):
         import_folder = ServiceLocator.get_settings().get_value('app_state', 'last_import_folder')
         if import_folder == None or not os.path.exists(import_folder) or not os.path.isdir(import_folder):
             import_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
-        dialog.set_initial_folder(Gio.File.new_for_path(import_folder))
+        if import_folder != None:
+            dialog.set_initial_folder(Gio.File.new_for_path(import_folder))
 
         dialog.open_multiple(self.main_window, None, self.add_file_dialog_process_response)
 
