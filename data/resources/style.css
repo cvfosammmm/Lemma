@@ -278,5 +278,7 @@ window.import-markdown-files-dialog list row button {
     border-radius: 1px;
 }
 window.import-markdown-files-dialog button.filechooser-button {
-    margin: 6px;
+    margin: 0px;
+    padding: 12px 18px;
+    border-radius: 0px;
 }
