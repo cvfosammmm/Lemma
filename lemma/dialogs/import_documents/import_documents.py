@@ -143,8 +143,9 @@ class ImportDocuments(object):
                 document_lines = Lines()
                 for line in lines:
                     document_line = Line()
-                    for char in line[:-1]:
-                        document_line.append(UnicodeCharacter(char))
+                    for char in line:
+                        if char != '\n':
+                            document_line.append(UnicodeCharacter(char))
                     document_lines.append(document_line)
 
             document.lines = document_lines

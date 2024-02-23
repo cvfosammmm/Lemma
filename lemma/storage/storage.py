@@ -51,8 +51,9 @@ class Storage(object):
                         lines = Lines()
 
                     document_line = Line()
-                    for char in line[:-1]:
-                        document_line.append(UnicodeCharacter(char))
+                    for char in line:
+                        if char != '\n':
+                            document_line.append(UnicodeCharacter(char))
                     lines.append(document_line)
 
         if lines == None: return
