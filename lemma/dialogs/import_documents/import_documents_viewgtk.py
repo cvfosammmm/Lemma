@@ -57,7 +57,7 @@ class ImportDocumentsView(DialogView):
 
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_child(self.list)
-        self.scrolled_window.set_size_request(520, 240)
+        self.scrolled_window.set_size_request(520, 254)
 
         button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
         button_box.append(Gtk.Image.new_from_icon_name('list-add-symbolic'))
