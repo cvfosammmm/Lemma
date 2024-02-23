@@ -53,6 +53,7 @@ class ImportDocumentsView(DialogView):
 
         self.list = Gtk.ListBox()
         self.list.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.list.set_sort_func(self.sort_function)
 
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_child(self.list)
@@ -92,6 +93,17 @@ class ImportDocumentsView(DialogView):
         self.content.append(self.add_file_button)
 
         self.topbox.append(self.content)
+
+    def sort_function(self, row1, row2, user_data=None):
+        val1 = row1.path.lower()
+        val2 = row2.path.lower()
+
+        if val1 > val2:
+            return 1
+        elif  val1 == val2:
+            return 0
+        elif val1 < val2:
+            return -1
 
 
 class Row(Gtk.ListBoxRow):
