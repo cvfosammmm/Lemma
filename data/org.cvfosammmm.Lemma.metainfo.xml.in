@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="3" date="2024-2-23">
+            <description translatable="no">
+                <p>Markdown import and export, changed internal file format to markdown, ...</p>
+            </description>
+        </release>
         ​<release version="2" date="2024-2-16">
             <description translatable="no">
                 <p>New welcome page, ...</p>
