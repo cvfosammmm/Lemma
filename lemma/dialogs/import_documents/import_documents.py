@@ -18,7 +18,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib, Gio
 
 import os.path, pickle, re
 
@@ -72,6 +72,11 @@ class ImportDocuments(object):
         file_filter.set_name(_('Markdown Files'))
         dialog.set_default_filter(file_filter)
 
+        import_folder = ServiceLocator.get_settings().get_value('app_state', 'last_import_folder')
+        if import_folder == None or not os.path.exists(import_folder) or not os.path.isdir(import_folder):
+            import_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
+        dialog.set_initial_folder(Gio.File.new_for_path(import_folder))
+
         dialog.open_multiple(self.main_window, None, self.add_file_dialog_process_response)
 
     def add_file_dialog_process_response(self, dialog, result):
@@ -79,20 +84,20 @@ class ImportDocuments(object):
             files = dialog.open_multiple_finish(result)
         except Exception: pass
         else:
-            if files != None:
+            if files != None and len(files) > 0:
+                import_folder = os.path.dirname(files[0].get_path())
+                ServiceLocator.get_settings().set_value('app_state', 'last_import_folder', import_folder)
                 for file in files:
                     self.add_file_to_list(file.get_path())
                 self.view.list.invalidate_sort()
 
     def on_drop(self, controller, files, x, y):
         for file in files:
-            path = file.get_path()
-            if not os.path.isdir(path) and path.endswith('.md'):
-                self.add_file_to_list(path)
+            self.add_file_to_list(file.get_path())
         self.view.list.invalidate_sort()
 
     def add_file_to_list(self, path):
-        if path not in self.current_values['files']:
+        if not os.path.isdir(path) and path.endswith('.md') and path not in self.current_values['files']:
             self.current_values['files'].add(path)
             row = view.Row(path)
             row.button.connect('clicked', self.remove_file_from_list)

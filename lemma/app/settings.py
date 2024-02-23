@@ -55,6 +55,7 @@ class Settings(Observable):
 
         self.defaults['app_state'] = dict()
         self.defaults['app_state']['last_export_folder'] = None
+        self.defaults['app_state']['last_import_folder'] = None
 
         self.defaults['preferences'] = dict()
         self.defaults['preferences']['color_scheme'] = 'default'
