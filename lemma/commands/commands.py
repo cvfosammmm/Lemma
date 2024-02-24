@@ -168,7 +168,7 @@ class Delete():
 
     def undo(self, document):
         if self.state['deleted_char'] != None:
-            document.insert_text_at_cursor(self.text)
+            document.insert_text_at_cursor(self.state['deleted_char'])
             document.move_cursor_by_offset(-1)
 
 
