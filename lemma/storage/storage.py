@@ -59,7 +59,8 @@ class Storage(object):
 
         if document_lines == None: return
 
-        document.add_command(commands.ReplaceAST(document_lines))
+        document.command_processor.add_command(commands.ReplaceAST(document_lines))
+        document.command_processor.reset_undo_stack()
         self.workspace.documents.add(document)
 
     def populate_workspace(self):

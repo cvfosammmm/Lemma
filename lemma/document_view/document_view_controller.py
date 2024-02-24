@@ -88,18 +88,18 @@ class DocumentViewController():
             case ('backspace', _): command = commands.Backspace()
             case ('delete', _): command = commands.Delete()
 
-            case ('z', 4): self.document_view.document.undo()
-            case ('z', 5): self.document_view.document.redo()
+            case ('z', 4): self.document_view.document.command_processor.undo()
+            case ('z', 5): self.document_view.document.command_processor.redo()
 
             case _: return False
         if command != None:
-            self.document_view.document.add_command(command)
+            self.document_view.document.command_processor.add_command(command)
         return True
 
     def on_im_commit(self, im_context, text):
         if self.document_view.document == None: return False
 
-        self.document_view.document.add_command(commands.IMCommit(text))
+        self.document_view.document.command_processor.add_command(commands.IMCommit(text))
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()

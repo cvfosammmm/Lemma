@@ -23,23 +23,23 @@ from lemma.layouter.layouter import Layouter
 from lemma.markdown_scanner.markdown_scanner import MarkdownScanner
 from lemma.teaser_scanner.teaser_scanner import TeaserScanner
 from lemma.helpers.observable import Observable
+from lemma.command_processor.command_processor import CommandProcessor
 
 
 class Document(Observable):
 
-    def __init__(self, workspace, id=None):
+    def __init__(self, workspace, id):
         Observable.__init__(self)
         self.workspace = workspace
+
+        self.last_modified = time.time()
+        self.command_processor = CommandProcessor(self)
 
         self.id = id
         self.title = ''
         self.lines = Lines()
         self.lines.insert(0, Line())
         self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
-
-        self.commands = list()
-        self.last_command = -1
-        self.last_modified = time.time()
 
         self.layouter = Layouter(self)
         self.markdown_scanner = MarkdownScanner(self)
@@ -48,42 +48,5 @@ class Document(Observable):
     def set_last_modified(self):
         self.last_modified = time.time()
         self.add_change_code('changed')
-
-    def add_command(self, command):
-        self.commands = self.commands[:self.last_command + 1] + [command]
-        self.last_command += 1
-        command.run(self)
-
-        self.set_last_modified()
-
-    def undo(self):
-        if self.last_command >= 0:
-            command = self.commands[self.last_command]
-            command.undo(self)
-            self.last_command -= 1
-
-            if not command.is_undo_checkpoint:
-                self.undo()
-            else:
-                self.set_last_modified()
-        else:
-            self.set_last_modified()
-
-    def redo(self):
-        if self.last_command < len(self.commands) - 1:
-            command = self.commands[self.last_command + 1]
-            command.run(self)
-            self.last_command += 1
-
-            if not command.is_undo_checkpoint:
-                self.redo()
-            else:
-                self.set_last_modified()
-        else:
-            self.set_last_modified()
-
-    def reset_undo_stack(self):
-        self.commands = list()
-        self.last_command = -1
 
 

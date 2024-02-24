@@ -149,7 +149,8 @@ class ImportDocuments(object):
                             document_line.append(UnicodeCharacter(char))
                     document_lines.append(document_line)
 
-            document.add_command(commands.ReplaceAST(document_lines))
+            document.command_processor.add_command(commands.ReplaceAST(document_lines))
+            document.command_processor.reset_undo_stack()
             self.workspace.documents.add(document)
 
 
