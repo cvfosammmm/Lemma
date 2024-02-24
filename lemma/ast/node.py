@@ -26,23 +26,11 @@ class Node(object):
     def __init__(self):
         self.parent = None
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        raise StopIteration
-
     def set_parent(self, parent):
         self.parent = parent
 
     def accept(self, visitor):
         visitor.visit_node(self)
-
-    def get_iterator(self):
-        return Iterator(self)
-
-    def is_line(self):
-        return False
 
 
 class Lines(Node):
@@ -51,19 +39,6 @@ class Lines(Node):
         Node.__init__(self)
 
         self.children = []
-
-        self.iter_index = None
-
-    def __iter__(self):
-        self.iter_index = 0
-        return self
-
-    def __next__(self):
-        if self.iter_index < self.length():
-            self.iter_index += 1
-            return self.get_child(self.iter_index - 1)
-        else:
-            raise StopIteration
 
     def insert(self, index, node):
         self.children.insert(index, node)
@@ -98,19 +73,6 @@ class Line(Node):
         self.children = []
         self.insert(0, EndOfLine())
 
-        self.iter_index = None
-
-    def __iter__(self):
-        self.iter_index = 0
-        return self
-
-    def __next__(self):
-        if self.iter_index < self.length():
-            self.iter_index += 1
-            return self.get_child(self.iter_index - 1)
-        else:
-            raise StopIteration
-
     def insert(self, index, node):
         self.children.insert(index, node)
         node.set_parent(self)
@@ -134,8 +96,23 @@ class Line(Node):
     def accept(self, visitor):
         visitor.visit_line(self)
 
-    def is_line(self):
-        return True
+    def split(self, separating_child):
+        part_1 = Line()
+        part_2 = Line()
+
+        current_part = part_1
+        for child in self.children:
+            if child == separating_child:
+                current_part = part_2
+            if child != self.get_child(-1):
+                current_part.append(child)
+
+        return (part_1, part_2)
+
+    def add(self, line):
+        for child in line.children:
+            if child != line.get_child(-1):
+                self.append(child)
 
 
 class UnicodeCharacter(Node):
@@ -146,6 +123,9 @@ class UnicodeCharacter(Node):
         self.content = string
         self.is_whitespace = (whitespace_regex.match(string) != None)
 
+    def get_iterator(self):
+        return Iterator(self)
+
     def accept(self, visitor):
         visitor.visit_char(self)
 
@@ -154,6 +134,9 @@ class EndOfLine(Node):
 
     def __init__(self):
         Node.__init__(self)
+
+    def get_iterator(self):
+        return Iterator(self)
 
     def accept(self, visitor):
         visitor.visit_eol(self)

@@ -41,13 +41,13 @@ class Layouter(Observable):
         self.document.lines.accept(self)
 
     def visit_lines(self, lines):
-        for line in lines:
+        for line in lines.children:
             line.accept(self)
 
     def visit_line(self, line):
         self.start_new_display_line()
 
-        for char in line:
+        for char in line.children:
             char.accept(self)
 
     def visit_char(self, char):

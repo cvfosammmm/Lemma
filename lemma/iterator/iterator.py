@@ -25,12 +25,26 @@ class Iterator():
         index = parent.get_index(self.current_node)
         if index > 0:
             self.current_node = parent.get_child(index - 1)
+        else:
+            if parent.parent.get_child(0) == parent:
+                return False
+            else:
+                index = parent.parent.get_index(parent)
+                self.current_node = parent.parent.get_child(index - 1).get_child(-1)
+        return True
 
     def next(self):
         parent = self.current_node.parent
         index = parent.get_index(self.current_node)
         if index < parent.length() - 1:
             self.current_node = parent.get_child(index + 1)
+        else:
+            if parent.parent.get_child(-1) == parent:
+                return False
+            else:
+                index = parent.parent.get_index(parent)
+                self.current_node = parent.parent.get_child(index + 1).get_child(0)
+        return True
 
     def get_node(self):
         return self.current_node
@@ -43,14 +57,10 @@ class Iterator():
         line = self.get_line()
         return (line.length() > 0 and line.get_child(-1) == self.current_node)
 
-    def get_line(self, node=None):
-        if node == None: node = self.current_node
-
-        if node.is_line():
-            return node
-        elif node.parent != None:
-            return self.get_line(node.parent)
-        else:
-            return None
+    def get_line(self):
+        node = self.current_node
+        while node.parent.parent != None:
+            node = node.parent
+        return node
 
 

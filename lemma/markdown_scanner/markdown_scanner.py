@@ -39,11 +39,11 @@ class MarkdownScanner(Observable):
         self.markdown = self.markdown[:-1]
 
     def visit_lines(self, lines):
-        for line in lines:
+        for line in lines.children:
             line.accept(self)
 
     def visit_line(self, line):
-        for char in line:
+        for char in line.children:
             char.accept(self)
 
     def visit_char(self, char):

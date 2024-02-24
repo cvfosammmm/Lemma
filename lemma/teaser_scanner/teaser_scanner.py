@@ -36,13 +36,13 @@ class TeaserScanner(Observable):
         self.document.lines.accept(self)
 
     def visit_lines(self, lines):
-        for line in lines:
+        for line in lines.children:
             line.accept(self)
 
             if len(self.teaser) > 100: break
 
     def visit_line(self, line):
-        for char in line:
+        for char in line.children:
             char.accept(self)
 
             if len(self.teaser) > 100: break

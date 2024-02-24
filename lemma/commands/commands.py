@@ -158,8 +158,7 @@ class Delete():
         self.state = dict()
 
     def run(self, document):
-        iterator = document.insert.get_node().get_iterator()
-        line = iterator.get_line()
+        line = document.insert.get_node().get_iterator().get_line()
         if document.insert.get_node() != line.get_child(-1) or line.parent.get_child(-1) != line:
             self.state['deleted_char'] = document.delete_char_at_cursor()
             self.is_undo_checkpoint = True
