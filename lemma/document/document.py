@@ -49,4 +49,122 @@ class Document(Observable):
         self.last_modified = time.time()
         self.add_change_code('changed')
 
+    def move_cursor_by_offset(self, offset):
+        if offset < 0:
+            offset_moved = -self.move_left(-offset)
+        else:
+            offset_moved = self.move_right(offset)
+        return offset_moved
+
+    def move_left(self, offset):
+        offset_moved = 0
+
+        while offset > offset_moved:
+            iterator = self.insert.get_node().get_iterator()
+            line = iterator.get_line()
+            if not iterator.starts_line():
+                iterator.prev()
+                self.insert.set_node(iterator.get_node())
+                offset_moved += 1
+            else:
+                if line.parent.get_child(0) == line:
+                    break
+                else:
+                    index = line.parent.get_index(line)
+                    self.insert.set_node(line.parent.get_child(index - 1).get_child(-1))
+                    offset_moved += 1
+
+        return offset_moved
+
+    def move_right(self, offset):
+        offset_moved = 0
+
+        while offset > offset_moved:
+            iterator = self.insert.get_node().get_iterator()
+            line = iterator.get_line()
+            if not iterator.ends_line():
+                iterator.next()
+                self.insert.set_node(iterator.get_node())
+                offset_moved += 1
+            else:
+                if line.parent.get_child(-1) == line:
+                    break
+                else:
+                    index = line.parent.get_index(line)
+                    self.insert.set_node(line.parent.get_child(index + 1).get_child(0))
+                    offset_moved += 1
+
+        return offset_moved
+
+    def insert_text_at_cursor(self, text):
+        for char in text:
+            if char == '\n':
+    	        self.insert_linebreak()
+            else:
+    	        self.insert_character(char)
+
+    def insert_character(self, char):
+        character = UnicodeCharacter(char)
+        iterator = self.insert.get_node().get_iterator()
+        line = iterator.get_line()
+        index = line.get_index(self.insert.get_node())
+        line.insert(index, character)
+
+    def insert_linebreak(self):
+        iterator = self.insert.get_node().get_iterator()
+        orig_line = iterator.get_line()
+        line_1 = Line()
+        line_2 = Line()
+        separating_child = self.insert.get_node()
+
+        current_line = line_1
+        for child in orig_line:
+            if child == separating_child:
+                current_line = line_2
+            if child != orig_line.get_child(-1):
+                current_line.append(child)
+
+        index = self.lines.get_index(orig_line)
+        self.lines.remove(orig_line)
+        self.lines.insert(index, line_2)
+        self.lines.insert(index, line_1)
+        self.insert.set_node(line_2.get_child(0))
+
+    def delete_char_at_cursor(self):
+        deleted_char = None
+
+        iterator = self.insert.get_node().get_iterator()
+        line = iterator.get_line()
+        if self.insert.get_node() == line.get_child(-1):
+            if line.parent.get_child(-1) != line:
+                deleted_char = '\n'
+
+                iterator = self.insert.get_node().get_iterator()
+                line_1 = iterator.get_line()
+                iterator = line_1.get_iterator()
+                iterator.next()
+                line_2 = iterator.get_node()
+                new_line = Line()
+                for child in line_1:
+                    if child != line_1.get_child(-1):
+                        new_line.append(child)
+                for child in line_2:
+                    if child != line_2.get_child(-1):
+                        new_line.append(child)
+                index = self.lines.get_index(line_1)
+                self.lines.insert(index, new_line)
+                self.lines.remove(line_1)
+                self.lines.remove(line_2)
+                self.insert.set_node(new_line.get_child(line_1.length() - 1))
+        else:
+            deleted_char = self.insert.get_node().content
+
+            iterator = self.insert.get_node().get_iterator()
+            line = iterator.get_line()
+            index = line.get_index(self.insert.get_node())
+            line.remove(self.insert.get_node())
+            self.insert.set_node(line.get_child(index))
+
+        return deleted_char
+
 

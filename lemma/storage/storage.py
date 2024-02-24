@@ -35,33 +35,10 @@ class Storage(object):
     def populate_documents(self):
         for direntry in os.scandir(self.pathname):
             if direntry.is_file() and direntry.name.isdigit():
-                self.import_document(direntry)
-
-    def import_document(self, direntry):
-        document = Document(self.workspace, int(direntry.name))
-        document.last_modified = direntry.stat(follow_symlinks=False).st_mtime
-        document_lines = None
-
-        with open(direntry, 'r') as file:
-            for line in file:
-                if document.title == '':
-                    if not line.startswith('# '): return
-                    document.title = line[1:].strip()
-                else:
-                    if document_lines == None:
-                        document_lines = Lines()
-
-                    document_line = Line()
-                    for char in line:
-                        if char != '\n':
-                            document_line.append(UnicodeCharacter(char))
-                    document_lines.append(document_line)
-
-        if document_lines == None: return
-
-        document.command_processor.add_command(commands.ReplaceAST(document_lines))
-        document.command_processor.reset_undo_stack()
-        self.workspace.documents.add(document)
+                document = Document(self.workspace, int(direntry.name))
+                document.command_processor.add_command(commands.PopulateFromPath(direntry.path))
+                document.command_processor.reset_undo_stack()
+                self.workspace.documents.add(document)
 
     def populate_workspace(self):
         pathname = os.path.join(self.pathname, 'workspace')

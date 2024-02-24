@@ -15,21 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.commands.primitives import *
-
-
-class Command():
-
-    def __init__(self):
-        pass
-
-    def add_child_and_run(self, child, document):
-        self.children.append(child)
-        child.run(document)
-
-    def undo(self, document):
-        for command in reversed(self.children):
-            command.undo(document)
+import os.path
+from lemma.ast.node import *
 
 
 class SetTitle():
@@ -47,130 +34,164 @@ class SetTitle():
         document.title = self.state['prev_title']
 
 
-class ReplaceAST():
+class PopulateFromPath():
 
-    def __init__(self, ast):
-        self.ast = ast
+    def __init__(self, path):
+        self.path = path
         self.is_undo_checkpoint = False
 
     def run(self, document):
-        document.lines = self.ast
+        document.last_modified = os.path.getmtime(self.path)
+        document_lines = Lines()
+
+        with open(self.path, 'r') as file:
+            for line in file:
+                if document.title == '' and line.startswith('# '):
+                    document.title = line[1:].strip()
+                else:
+                    document_line = Line()
+                    for char in line:
+                        if char != '\n':
+                            document_line.append(UnicodeCharacter(char))
+                    document_lines.append(document_line)
+
+        if document_lines.length() == 0: document_lines.append(Line())
+
+        document.lines = document_lines
         document.insert.set_position([0, 0])
-        del(self.ast)
 
     def undo(self, document):
         pass
 
 
-class Left(Command):
+class Left():
 
     def __init__(self, offset):
-        Command.__init__(self)
+        self.offset = -offset
+        self.is_undo_checkpoint = False
+        self.state = dict()
+
+    def run(self, document):
+        self.state['offset_moved'] = document.move_cursor_by_offset(self.offset)
+
+    def undo(self, document):
+        document.move_cursor_by_offset(-self.state['offset_moved'])
+
+
+class Right():
+
+    def __init__(self, offset):
         self.offset = offset
         self.is_undo_checkpoint = False
+        self.state = dict()
 
     def run(self, document):
-        self.children = list()
-        self.add_child_and_run(MoveCursorByOffset(-self.offset), document)
+        self.state['offset_moved'] = document.move_cursor_by_offset(self.offset)
+
+    def undo(self, document):
+        document.move_cursor_by_offset(-self.state['offset_moved'])
 
 
-class LineStart(Command):
+class LineStart():
 
     def __init__(self):
-        Command.__init__(self)
         self.is_undo_checkpoint = False
+        self.state = dict()
 
     def run(self, document):
-        self.children = list()
         line = document.insert.get_node().get_iterator().get_line()
         offset = line.get_index(document.insert.get_node())
-        self.add_child_and_run(MoveCursorByOffset(-offset), document)
+        self.state['offset_moved'] = document.move_cursor_by_offset(-offset)
+
+    def undo(self, document):
+        document.move_cursor_by_offset(-self.state['offset_moved'])
 
 
-class Right(Command):
-
-    def __init__(self, offset):
-        Command.__init__(self)
-        self.offset = offset
-        self.is_undo_checkpoint = False
-
-    def run(self, document):
-        self.children = list()
-        self.add_child_and_run(MoveCursorByOffset(self.offset), document)
-
-
-class LineEnd(Command):
+class LineEnd():
 
     def __init__(self):
-        Command.__init__(self)
         self.is_undo_checkpoint = False
+        self.state = dict()
 
     def run(self, document):
-        self.children = list()
         line = document.insert.get_node().get_iterator().get_line()
         index = line.get_index(document.insert.get_node())
         target_pos = line.length() - 1
-        self.add_child_and_run(MoveCursorByOffset(target_pos - index), document)
+        self.state['offset_moved'] = document.move_cursor_by_offset(target_pos - index)
+
+    def undo(self, document):
+        document.move_cursor_by_offset(-self.state['offset_moved'])
 
 
-class Return(Command):
+class Return():
 
     def __init__(self):
-        Command.__init__(self)
         self.is_undo_checkpoint = True
 
     def run(self, document):
-        self.children = list()
-        self.add_child_and_run(InsertTextAtCursor('\n'), document)
+        document.insert_text_at_cursor('\n')
+
+    def undo(self, document):
+        document.move_cursor_by_offset(-1)
+        document.delete_char_at_cursor()
 
 
-class IMCommit(Command):
+class IMCommit():
 
     def __init__(self, text):
-        Command.__init__(self)
         self.is_undo_checkpoint = True
         self.text = text
 
     def run(self, document):
-        self.children = list()
+        document.insert_text_at_cursor(self.text)
 
-        self.add_child_and_run(InsertTextAtCursor(self.text), document)
+    def undo(self, document):
+        for char in reversed(self.text):
+            document.move_cursor_by_offset(-1)
+            document.delete_char_at_cursor()
 
 
-class Delete(Command):
+class Delete():
 
     def __init__(self):
-        Command.__init__(self)
         self.is_undo_checkpoint = True
+        self.state = dict()
 
     def run(self, document):
-        self.children = list()
-
         iterator = document.insert.get_node().get_iterator()
         line = iterator.get_line()
         if document.insert.get_node() != line.get_child(-1) or line.parent.get_child(-1) != line:
-            self.add_child_and_run(DeleteTextAtCursor(), document)
+            self.state['deleted_char'] = document.delete_char_at_cursor()
             self.is_undo_checkpoint = True
         else:
+            self.state['deleted_char'] = None
             self.is_undo_checkpoint = False
 
+    def undo(self, document):
+        if self.state['deleted_char'] != None:
+            document.insert_text_at_cursor(self.text)
+            document.move_cursor_by_offset(-1)
 
-class Backspace(Command):
+
+class Backspace():
 
     def __init__(self):
-        Command.__init__(self)
         self.is_undo_checkpoint = True
+        self.state = dict()
 
     def run(self, document):
-        self.children = list()
-
         line = document.insert.get_node().get_iterator().get_line()
         index = line.get_index(document.insert.get_node())
         if document.lines.get_index(line) != 0 or index != 0:
-            self.add_child_and_run(MoveCursorByOffset(-1), document)
-            self.add_child_and_run(DeleteTextAtCursor(), document)
+            document.move_cursor_by_offset(-1)
+            self.state['deleted_char'] = document.delete_char_at_cursor()
             self.is_undo_checkpoint = True
         else:
+            self.state['deleted_char'] = None
             self.is_undo_checkpoint = False
+
+    def undo(self, document):
+        if self.state['deleted_char'] != None:
+            document.insert_text_at_cursor(self.state['deleted_char'])
 
 

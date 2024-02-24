@@ -119,37 +119,7 @@ class ImportDocuments(object):
     def import_files(self):
         for path in self.current_values['files']:
             document = Document(self.workspace, self.workspace.documents.get_new_document_id())
-            document.last_modified = os.path.getmtime(path)
-
-            document.title = os.path.basename(path[:-3])
-            if self.workspace.documents.get_by_title(document.title):
-                match = re.match(r'.*\(([1-9]+)\)', document.title)
-                if match != None:
-                    document.title = document.title[:-(len(match.group(1)) + 2)]
-
-                number = 1
-                new_title = document.title + '(' + str(number) + ')'
-                while self.workspace.documents.get_by_title(new_title):
-                    number += 1
-                    new_title = document.title + '(' + str(number) + ')'
-                document.title = new_title
-
-            with open(path, 'r') as file:
-                lines = file.readlines()
-                if len(lines) == 0: return
-                if lines[0].startswith('# '):
-                    del(lines[0])
-                if len(lines) == 0: return
-
-                document_lines = Lines()
-                for line in lines:
-                    document_line = Line()
-                    for char in line:
-                        if char != '\n':
-                            document_line.append(UnicodeCharacter(char))
-                    document_lines.append(document_line)
-
-            document.command_processor.add_command(commands.ReplaceAST(document_lines))
+            document.command_processor.add_command(commands.PopulateFromPath(path))
             document.command_processor.reset_undo_stack()
             self.workspace.documents.add(document)
 
