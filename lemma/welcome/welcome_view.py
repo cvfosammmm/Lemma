@@ -36,7 +36,7 @@ class WelcomeView(Gtk.CenterBox):
         self.header.get_style_context().add_class('header')
         self.header.get_style_context().add_class('title-3')
 
-        self.explainer = Gtk.Label.new('Your workspace is currently empty. To start taking notes, click the button below.')
+        self.explainer = Gtk.Label.new('To create a new document, click the button below.')
         self.explainer.get_style_context().add_class('explainer')
 
         self.button = Gtk.Button.new_with_label('New Document')

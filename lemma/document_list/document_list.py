@@ -75,8 +75,9 @@ class DocumentList(Observable):
                 return document
 
     def get_by_id(self, id):
-        if id not in self.documents_by_id: return None
-        return self.documents_by_id[id]
+        if id in self.documents_by_id:
+            return self.documents_by_id[id]
+        return None
 
     def count(self):
         return len(self.documents)
