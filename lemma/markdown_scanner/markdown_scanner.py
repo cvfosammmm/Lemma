@@ -26,6 +26,9 @@ class MarkdownScanner(Observable):
 
         self.markdown = ''
 
+        self.document.connect('changed', self.on_document_changed)
+
+    def on_document_changed(self, document):
         self.update()
 
     def update(self):

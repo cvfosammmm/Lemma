@@ -20,6 +20,7 @@ import os, os.path, pickle
 from lemma.document.document import Document
 from lemma.app.service_locator import ServiceLocator
 from lemma.ast.node import *
+import lemma.commands.commands as commands
 
 
 class Storage(object):
@@ -39,7 +40,7 @@ class Storage(object):
     def import_document(self, direntry):
         document = Document(self.workspace, int(direntry.name))
         document.last_modified = direntry.stat(follow_symlinks=False).st_mtime
-        lines = None
+        document_lines = None
 
         with open(direntry, 'r') as file:
             for line in file:
@@ -47,21 +48,18 @@ class Storage(object):
                     if not line.startswith('# '): return
                     document.title = line[1:].strip()
                 else:
-                    if lines == None:
-                        lines = Lines()
+                    if document_lines == None:
+                        document_lines = Lines()
 
                     document_line = Line()
                     for char in line:
                         if char != '\n':
                             document_line.append(UnicodeCharacter(char))
-                    lines.append(document_line)
+                    document_lines.append(document_line)
 
-        if lines == None: return
+        if document_lines == None: return
 
-        document.lines = lines
-        document.insert.set_position([0, 0])
-        document.update_visitors()
-
+        document.add_command(commands.ReplaceAST(document_lines))
         self.workspace.documents.add(document)
 
     def populate_workspace(self):

@@ -47,6 +47,21 @@ class SetTitle():
         document.title = self.state['prev_title']
 
 
+class ReplaceAST():
+
+    def __init__(self, ast):
+        self.ast = ast
+        self.is_undo_checkpoint = False
+
+    def run(self, document):
+        document.lines = self.ast
+        document.insert.set_position([0, 0])
+        del(self.ast)
+
+    def undo(self, document):
+        pass
+
+
 class Left(Command):
 
     def __init__(self, offset):

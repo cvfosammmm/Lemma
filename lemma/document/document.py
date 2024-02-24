@@ -54,7 +54,6 @@ class Document(Observable):
         self.last_command += 1
         command.run(self)
 
-        self.update_visitors()
         self.set_last_modified()
 
     def undo(self):
@@ -63,7 +62,6 @@ class Document(Observable):
             command.undo(self)
             self.last_command -= 1
 
-            self.update_visitors()
             if not command.is_undo_checkpoint:
                 self.undo()
             else:
@@ -77,7 +75,6 @@ class Document(Observable):
             command.run(self)
             self.last_command += 1
 
-            self.update_visitors()
             if not command.is_undo_checkpoint:
                 self.redo()
             else:
@@ -85,9 +82,8 @@ class Document(Observable):
         else:
             self.set_last_modified()
 
-    def update_visitors(self):
-        self.layouter.update()
-        self.markdown_scanner.update()
-        self.teaser_scanner.update()
+    def reset_undo_stack(self):
+        self.commands = list()
+        self.last_command = -1
 
 

@@ -26,6 +26,7 @@ import lemma.dialogs.import_documents.import_documents_viewgtk as view
 from lemma.ast.node import *
 from lemma.document.document import Document
 from lemma.app.service_locator import ServiceLocator
+import lemma.commands.commands as commands
 
 
 class ImportDocuments(object):
@@ -148,10 +149,7 @@ class ImportDocuments(object):
                             document_line.append(UnicodeCharacter(char))
                     document_lines.append(document_line)
 
-            document.lines = document_lines
-            document.insert.set_position([0, 0])
-            document.update_visitors()
-
+            document.add_command(commands.ReplaceAST(document_lines))
             self.workspace.documents.add(document)
 
 
