@@ -34,6 +34,7 @@ class TeaserScanner(Observable):
     def update(self):
         self.teaser = ''
         self.document.lines.accept(self)
+        self.teaser = self.teaser.strip()
 
     def visit_lines(self, lines):
         for line in lines.children:
