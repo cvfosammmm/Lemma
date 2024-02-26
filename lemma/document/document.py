@@ -49,6 +49,15 @@ class Document(Observable):
         self.last_modified = time.time()
         self.add_change_code('changed')
 
+    def get_node_at_xy(self, x, y):
+        box = self.layouter.root
+        x = max(0, min(box.width, x))
+        y = max(0, min(box.height, y))
+
+        while not box.is_leaf():
+            box = box.get_child_at_xy(x, y)
+        return box.get_node()
+
     def move_cursor_by_offset(self, offset):
         offset_moved = 0
         iterator = self.insert.get_node().get_iterator()

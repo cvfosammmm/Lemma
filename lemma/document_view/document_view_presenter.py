@@ -53,9 +53,9 @@ class DocumentViewPresenter():
         self.cursor_coords = None
         scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
 
-        self.draw_title(ctx, 48, self.view.padding_top - scrolling_offset)
+        self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset)
 
-        self.draw_box(ctx, self.model.document.layouter.root, 48, self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset)
+        self.draw_box(ctx, self.model.document.layouter.root, self.view.padding_left, self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset)
 
         self.draw_cursor(ctx)
 

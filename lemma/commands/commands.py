@@ -64,6 +64,23 @@ class PopulateFromPath():
         pass
 
 
+class Click():
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.is_undo_checkpoint = False
+        self.state = dict()
+
+    def run(self, document):
+        self.state['previous_cursor_position'] = document.insert.get_position()
+
+        document.insert.set_node(document.get_node_at_xy(self.x, self.y))
+
+    def undo(self, document):
+        document.insert.set_position(self.state['previous_cursor_position'])
+
+
 class Left():
 
     def __init__(self, offset):

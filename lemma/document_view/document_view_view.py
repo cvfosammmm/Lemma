@@ -29,6 +29,7 @@ class DocumentViewView(Gtk.Overlay):
 
         self.set_size_request(770, -1)
 
+        self.padding_left = 48
         self.padding_bottom = 120
         self.padding_top = 49
         self.title_height = 49

@@ -45,8 +45,6 @@ class Layouter(Observable):
             line.accept(self)
 
     def visit_line(self, line):
-        self.start_new_display_line()
-
         for char in line.children:
             char.accept(self)
 
@@ -62,7 +60,9 @@ class Layouter(Observable):
 
     def visit_eol(self, node):
         self.process_current_word()
-        self.add_box_to_current_line(BoxOther(0, 0, 0, 0, node=node))
+        self.add_box_to_current_line(BoxEOL(node=node))
+        self.root.add(self.current_line_box)
+        self.current_line_box = BoxHContainer()
 
     def visit_node(self, node):
         pass
@@ -82,16 +82,13 @@ class Layouter(Observable):
             char_boxes.append(box)
 
         if self.current_line_box.width + total_width > 670:
-            self.start_new_display_line()
+            self.root.add(self.current_line_box)
+            self.current_line_box = BoxHContainer()
 
         for i, box in enumerate(char_boxes):
             self.add_box_to_current_line(box)
 
         self.current_word = []
-
-    def start_new_display_line(self):
-        self.current_line_box = BoxHContainer()
-        self.root.add(self.current_line_box)
 
     def add_box_to_current_line(self, box):
         if self.document.insert.get_node() == box.get_node():

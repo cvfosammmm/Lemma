@@ -36,6 +36,18 @@ class BoxVContainer(object):
         self.height = max(child.height, self.height)
         self.width += child.width
 
+    def get_child_at_xy(self, x, y):
+        current_child, current_height = (None, 0)
+
+        for child in self.children:
+            current_child = child
+            current_height += child.height
+            if current_height >= y:
+                break
+
+        return current_child
+
+    def is_leaf(self): return False
     def get_node(self): return None
 
 
@@ -57,6 +69,18 @@ class BoxHContainer(object):
         self.height = max(child.height, self.height)
         self.width += child.width
 
+    def get_child_at_xy(self, x, y):
+        current_child, current_width = (None, 0)
+
+        for child in self.children:
+            current_child = child
+            current_width += child.width
+            if current_width >= x:
+                break
+
+        return current_child
+
+    def is_leaf(self): return False
     def get_node(self): return None
 
 
@@ -72,6 +96,7 @@ class BoxGlyph(object):
         self.node = node
         self.is_selected = False
 
+    def is_leaf(self): return True
     def get_node(self): return self.node
 
 
@@ -83,7 +108,22 @@ class BoxInsert(object):
         self.left = 0
         self.top = top
 
+    def is_leaf(self): return True
     def get_node(self): return None
+
+
+class BoxEOL(object):
+
+    def __init__(self, node=None):
+        self.width = 0
+        self.height = 0
+        self.left = 0
+        self.top = 0
+
+        self.node = node
+
+    def is_leaf(self): return True
+    def get_node(self): return self.node
 
 
 class BoxOther(object):
@@ -96,6 +136,8 @@ class BoxOther(object):
 
         self.node = node
 
+    def is_leaf(self): return True
     def get_node(self): return self.node
+
 
 

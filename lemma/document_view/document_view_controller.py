@@ -29,10 +29,7 @@ class DocumentViewController():
         self.view = self.document_view.view
         self.content = self.view.content
 
-        event_controller = Gtk.GestureClick()
-        event_controller.connect('pressed', self.on_button_press)
-        event_controller.set_button(1)
-        self.content.add_controller(event_controller)
+        self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
 
         self.key_controller_content = Gtk.EventControllerKey()
         self.key_controller_content.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
@@ -54,30 +51,26 @@ class DocumentViewController():
         self.view.scrolling_widget.connect('hover_state_changed', self.on_hover_state_changed)
         self.update_cursor()
 
-    def on_button_press(self, event_controller, n_press, x, y):
-        widget = self.view.scrolling_widget
-        x = widget.scrolling_offset_x + (widget.cursor_x if widget.cursor_x != None else 0)
-        y = widget.scrolling_offset_y + (widget.cursor_y if widget.cursor_y != None else 0)
+    def on_primary_button_press(self, content, data):
+        x, y, state = data
 
-        if y < self.view.padding_top + self.view.title_height:
-            self.document_view.init_renaming()
-        elif y > self.view.padding_top + self.view.title_height + self.view.subtitle_height:
-            self.content.grab_focus()
+        if state == 0:
+            x -= self.view.padding_left
+            y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+
+            if y < -self.view.subtitle_height:
+                self.document_view.init_renaming()
+            elif y > 0:
+                self.document_view.document.command_processor.add_command(commands.Click(x, y))
+                self.content.grab_focus()
 
     def on_keypress_content(self, controller, keyval, keycode, state):
         if self.document_view.document == None: return False
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
-        '''
-        8 == int(Gdk.ModifierType.ALT_MASK)
-        4 = int(Gdk.ModifierType.CONTROL_MASK)
-        2 = int(Gdk.ModifierType.SHIFT_MASK)
-        5 = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
-        '''
-
         command = None
-        match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
+        match (Gdk.keyval_name(keyval).lower(), state & modifiers):
             case ('left', 0): command = commands.Left(1)
             case ('right', 0): command = commands.Right(1)
 
@@ -88,8 +81,8 @@ class DocumentViewController():
             case ('backspace', _): command = commands.Backspace()
             case ('delete', _): command = commands.Delete()
 
-            case ('z', 4): self.document_view.document.command_processor.undo()
-            case ('z', 5): self.document_view.document.command_processor.redo()
+            case ('z', Gdk.ModifierType.CONTROL_MASK): self.document_view.document.command_processor.undo()
+            case ('z', Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK): self.document_view.document.command_processor.redo()
 
             case _: return False
         if command != None:
