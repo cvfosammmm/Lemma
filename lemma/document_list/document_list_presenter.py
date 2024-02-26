@@ -101,7 +101,7 @@ class DocumentListPresenter(object):
 
             Gdk.cairo_set_source_rgba(ctx, fg_color_2)
             ctx.move_to(15, self.view.line_height * i + 35 - scrolling_offset)
-            self.view.layout_teaser.set_text(document.teaser_scanner.teaser)
+            self.view.layout_teaser.set_text(' '.join(document.plaintext.splitlines())[:100])
             PangoCairo.show_layout(ctx, self.view.layout_teaser)
 
     def get_last_modified_string(self, document):

@@ -23,7 +23,7 @@ import datetime
 
 from lemma.app.font_manager import FontManager
 from lemma.app.color_manager import ColorManager
-from lemma.layouter.box import *
+from lemma.layout.layout import *
 
 
 class DocumentViewPresenter():
@@ -41,7 +41,7 @@ class DocumentViewPresenter():
     def on_change(self, model):
         if self.model.document == None: return
 
-        height = self.model.document.layouter.root.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
+        height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
 
         self.view.scrolling_widget.adjustment_x.set_upper(1)
         self.view.scrolling_widget.adjustment_y.set_upper(height)
@@ -55,7 +55,7 @@ class DocumentViewPresenter():
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset)
 
-        self.draw_box(ctx, self.model.document.layouter.root, self.view.padding_left, self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset)
+        self.draw_box(ctx, self.model.document.layout, self.view.padding_left, self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset)
 
         self.draw_cursor(ctx)
 

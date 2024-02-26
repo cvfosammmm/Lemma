@@ -28,7 +28,7 @@ class CommandProcessor(object):
         self.last_command += 1
         command.run(self.document)
 
-        self.document.set_last_modified()
+        self.document.update()
 
     def undo(self):
         if self.last_command >= 0:
@@ -39,9 +39,9 @@ class CommandProcessor(object):
             if not command.is_undo_checkpoint:
                 self.undo()
             else:
-                self.document.set_last_modified()
+                self.document.update()
         else:
-            self.document.set_last_modified()
+            self.document.update()
 
     def redo(self):
         if self.last_command < len(self.commands) - 1:
@@ -52,9 +52,9 @@ class CommandProcessor(object):
             if not command.is_undo_checkpoint:
                 self.redo()
             else:
-                self.document.set_last_modified()
+                self.document.update()
         else:
-            self.document.set_last_modified()
+            self.document.update()
 
     def reset_undo_stack(self):
         self.commands = list()

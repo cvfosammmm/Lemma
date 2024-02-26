@@ -19,9 +19,9 @@ import time
 
 from lemma.ast.node import *
 from lemma.cursor.cursor import Cursor
-from lemma.layouter.layouter import Layouter
-from lemma.markdown_scanner.markdown_scanner import MarkdownScanner
-from lemma.teaser_scanner.teaser_scanner import TeaserScanner
+from lemma.document.layouter.layouter import Layouter
+from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
+from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
 from lemma.helpers.observable import Observable
 from lemma.command_processor.command_processor import CommandProcessor
 
@@ -40,17 +40,26 @@ class Document(Observable):
         self.lines = Lines()
         self.lines.insert(0, Line())
         self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
+        self.layout = None
+        self.markdown = None
+        self.plaintext = None
 
         self.layouter = Layouter(self)
         self.markdown_scanner = MarkdownScanner(self)
-        self.teaser_scanner = TeaserScanner(self)
+        self.plaintext_scanner = PlaintextScanner(self)
 
-    def set_last_modified(self):
+        self.update()
+
+    def update(self):
+        self.layouter.update()
+        self.markdown_scanner.update()
+        self.plaintext_scanner.update()
+
         self.last_modified = time.time()
         self.add_change_code('changed')
 
     def get_node_at_xy(self, x, y):
-        box = self.layouter.root
+        box = self.layout
         x = max(0, min(box.width, x))
         y = max(0, min(box.height, y))
 

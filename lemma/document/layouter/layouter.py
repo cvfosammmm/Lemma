@@ -17,7 +17,7 @@
 
 from lemma.helpers.observable import Observable
 from lemma.app.font_manager import FontManager
-from lemma.layouter.box import *
+from lemma.layout.layout import *
 import lemma.helpers.helpers as helpers
 
 
@@ -31,14 +31,10 @@ class Layouter(Observable):
         self.current_line_box = BoxHContainer()
         self.current_word = []
 
-        self.document.connect('changed', self.on_document_changed)
-
-    def on_document_changed(self, document):
-        self.update()
-
     def update(self):
         self.root = BoxVContainer()
         self.document.lines.accept(self)
+        self.document.layout = self.root
 
     def visit_lines(self, lines):
         for line in lines.children:

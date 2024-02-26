@@ -80,7 +80,7 @@ class Storage(object):
         try: filehandle = open(pathname, 'w')
         except IOError: pass
         else:
-            filehandle.write(document.markdown_scanner.markdown)
+            filehandle.write(document.markdown)
 
     def delete_document(self, document):
         pathname = os.path.join(self.pathname, str(document.id))

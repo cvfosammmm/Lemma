@@ -58,7 +58,7 @@ class DocumentView(Observable):
 
     def set_document(self, document):
         if self.document != None:
-            self.document.disconnect(self.signal_id, self.on_change)
+            self.document.disconnect('changed', self.on_change)
 
         self.document = document
         self.view.content.queue_draw()
@@ -67,7 +67,7 @@ class DocumentView(Observable):
         self.view.content.grab_focus()
 
         if document != None:
-            self.signal_id = self.document.connect('changed', self.on_change)
+            self.document.connect('changed', self.on_change)
 
     def on_change(self, document):
         self.add_change_code('changed')

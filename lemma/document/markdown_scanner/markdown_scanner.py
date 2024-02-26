@@ -18,46 +18,37 @@
 from lemma.helpers.observable import Observable
 
 
-class TeaserScanner(Observable):
+class MarkdownScanner(Observable):
 
     def __init__(self, document):
         Observable.__init__(self)
         self.document = document
 
-        self.teaser = ''
-
-        self.document.connect('changed', self.on_document_changed)
-
-    def on_document_changed(self, document):
-        self.update()
+        self.markdown = ''
 
     def update(self):
-        self.teaser = ''
+        self.markdown = '# ' + self.document.title + '\n'
         self.document.lines.accept(self)
-        self.teaser = self.teaser.strip()
+        self.markdown = self.markdown[:-1] # remove last EOL
+        self.document.markdown = self.markdown
 
     def visit_lines(self, lines):
         for line in lines.children:
             line.accept(self)
 
-            if len(self.teaser) > 100: break
-
     def visit_line(self, line):
         for char in line.children:
             char.accept(self)
 
-            if len(self.teaser) > 100: break
-
     def visit_char(self, char):
         if char.is_whitespace:
-            if self.teaser == '' or self.teaser[-1] != ' ':
-                self.teaser += ' '
+            if self.markdown == '' or self.markdown[-1] != ' ':
+                self.markdown += ' '
         else:
-            self.teaser += char.content
+            self.markdown += char.content
 
     def visit_eol(self, node):
-        if self.teaser == '' or self.teaser[-1] != ' ':
-            self.teaser += ' '
+        self.markdown += '\n'
 
     def visit_node(self, node):
         pass

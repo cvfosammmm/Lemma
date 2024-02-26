@@ -70,7 +70,7 @@ class DocumentViewController():
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
         command = None
-        match (Gdk.keyval_name(keyval).lower(), state & modifiers):
+        match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
             case ('left', 0): command = commands.Left(1)
             case ('right', 0): command = commands.Right(1)
 
@@ -80,9 +80,6 @@ class DocumentViewController():
             case ('return', _): command = commands.Return()
             case ('backspace', _): command = commands.Backspace()
             case ('delete', _): command = commands.Delete()
-
-            case ('z', Gdk.ModifierType.CONTROL_MASK): self.document_view.document.command_processor.undo()
-            case ('z', Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK): self.document_view.document.command_processor.redo()
 
             case _: return False
         if command != None:

@@ -18,25 +18,21 @@
 from lemma.helpers.observable import Observable
 
 
-class MarkdownScanner(Observable):
+class PlaintextScanner(Observable):
 
     def __init__(self, document):
         Observable.__init__(self)
         self.document = document
 
-        self.markdown = ''
-
-        self.document.connect('changed', self.on_document_changed)
-
-    def on_document_changed(self, document):
-        self.update()
+        self.text = ''
+        self.current_line = ''
 
     def update(self):
-        self.markdown = '# ' + self.document.title + '\n'
+        self.text = ''
+        self.current_line = ''
         self.document.lines.accept(self)
-
-        # remove last EOL
-        self.markdown = self.markdown[:-1]
+        self.text = self.text[:-1] # remove last EOL
+        self.document.plaintext = self.text
 
     def visit_lines(self, lines):
         for line in lines.children:
@@ -48,13 +44,16 @@ class MarkdownScanner(Observable):
 
     def visit_char(self, char):
         if char.is_whitespace:
-            if self.markdown == '' or self.markdown[-1] != ' ':
-                self.markdown += ' '
+            if self.current_line == '' or self.current_line[-1] != ' ':
+                self.current_line += ' '
         else:
-            self.markdown += char.content
+            self.current_line += char.content
 
     def visit_eol(self, node):
-        self.markdown += '\n'
+        self.current_line = self.current_line.strip()
+        if self.current_line != '':
+            self.text += self.current_line + '\n'
+            self.current_line = ''
 
     def visit_node(self, node):
         pass

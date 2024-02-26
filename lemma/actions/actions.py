@@ -41,6 +41,9 @@ class Actions(object):
         self.add_action('go-back', self.go_back)
         self.add_action('go-forward', self.go_forward)
 
+        self.add_action('undo', self.undo)
+        self.add_action('redo', self.redo)
+
         self.add_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
         self.add_action('show-about-dialog', self.show_about_dialog)
         self.add_action('show-document-menu', self.show_document_menu)
@@ -77,6 +80,8 @@ class Actions(object):
         self.actions['export-as'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['go-back'].set_enabled(self.workspace.mode == 'draft' or prev_doc != None)
         self.actions['go-forward'].set_enabled(next_doc != None)
+        self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
         self.actions['show-about-dialog'].set_enabled(True)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
@@ -109,6 +114,12 @@ class Actions(object):
         next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
         if next_doc != None:
             self.workspace.set_active_document(next_doc, update_history=False)
+
+    def undo(self, action=None, parameter=''):
+        self.workspace.active_document.command_processor.undo()
+
+    def redo(self, action=None, parameter=''):
+        self.workspace.active_document.command_processor.redo()
 
     def show_shortcuts_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('keyboard_shortcuts').run()

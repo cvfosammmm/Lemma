@@ -42,7 +42,7 @@ class BoxVContainer(object):
         for child in self.children:
             current_child = child
             current_height += child.height
-            if current_height >= y:
+            if current_height > y:
                 break
 
         return current_child
@@ -75,7 +75,7 @@ class BoxHContainer(object):
         for child in self.children:
             current_child = child
             current_width += child.width
-            if current_width >= x:
+            if current_width > x:
                 break
 
         return current_child

@@ -67,6 +67,6 @@ class ExportDocumentDialog(object):
                     filename += '.md'
 
                 with open(filename, 'w') as f:
-                    f.write(self.document.markdown_scanner.markdown)
+                    f.write(self.document.markdown)
 
 
