@@ -58,6 +58,21 @@ class Document(Observable):
         self.last_modified = time.time()
         self.add_change_code('changed')
 
+    def get_xy_at_node(self, node):
+        child = node.box
+        parent = child.parent
+        x, y = (0, 0)
+
+        while not parent == None:
+            new_x, new_y = parent.get_xy_at_child(child)
+            x += new_x
+            y += new_y
+
+            child = child.parent
+            parent = parent.parent
+
+        return x, y
+
     def get_node_at_xy(self, x, y):
         box = self.layout
         x = max(0, min(box.width, x))

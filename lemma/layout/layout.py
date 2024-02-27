@@ -24,17 +24,29 @@ class BoxVContainer(object):
         self.width = 0
         self.height = 0
 
+        self.parent = None
         self.children = list()
 
     def add(self, child):
         self.children.append(child)
         self.height += child.height
         self.width = max(child.width, self.width)
+        child.set_parent(self)
 
     def insert(self, position, child):
         self.children.insert(position, child)
         self.height = max(child.height, self.height)
         self.width += child.width
+        child.set_parent(self)
+
+    def get_xy_at_child(self, box):
+        x = 0
+        y = 0
+        for child in self.children:
+            if child == box:
+                break
+            y += child.height
+        return (x, y)
 
     def get_child_at_xy(self, x, y):
         current_child, current_height = (None, 0)
@@ -47,6 +59,7 @@ class BoxVContainer(object):
 
         return current_child
 
+    def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return False
     def get_node(self): return None
 
@@ -57,17 +70,29 @@ class BoxHContainer(object):
         self.width = 0
         self.height = FontManager.line_height
 
+        self.parent = None
         self.children = list()
 
     def add(self, child):
         self.children.append(child)
         self.height = max(child.height, self.height)
         self.width += child.width
+        child.set_parent(self)
 
     def insert(self, position, child):
         self.children.insert(position, child)
         self.height = max(child.height, self.height)
         self.width += child.width
+        child.set_parent(self)
+
+    def get_xy_at_child(self, box):
+        x = 0
+        y = 0
+        for child in self.children:
+            if child == box:
+                break
+            x += child.width
+        return (x, y)
 
     def get_child_at_xy(self, x, y):
         current_child, current_width = (None, 0)
@@ -80,6 +105,7 @@ class BoxHContainer(object):
 
         return current_child
 
+    def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return False
     def get_node(self): return None
 
@@ -92,10 +118,12 @@ class BoxGlyph(object):
         self.left = left
         self.top = top
 
+        self.parent = None
         self.char = char
         self.node = node
         self.is_selected = False
 
+    def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return True
     def get_node(self): return self.node
 
@@ -108,8 +136,10 @@ class BoxEOL(object):
         self.left = 0
         self.top = 0
 
+        self.parent = None
         self.node = node
 
+    def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return True
     def get_node(self): return self.node
 

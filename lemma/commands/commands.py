@@ -116,12 +116,13 @@ class LineStart():
         self.state = dict()
 
     def run(self, document):
-        line = document.insert.get_node().get_iterator().get_line()
-        offset = line.get_index(document.insert.get_node())
-        self.state['offset_moved'] = document.move_cursor_by_offset(-offset)
+        self.state['previous_cursor_position'] = document.insert.get_position()
+        
+        x, y = document.get_xy_at_node(document.insert.get_node())
+        document.insert.set_node(document.get_node_at_xy(0, y))
 
     def undo(self, document):
-        document.move_cursor_by_offset(-self.state['offset_moved'])
+        document.insert.set_position(self.state['previous_cursor_position'])
 
 
 class LineEnd():
@@ -131,13 +132,13 @@ class LineEnd():
         self.state = dict()
 
     def run(self, document):
-        line = document.insert.get_node().get_iterator().get_line()
-        index = line.get_index(document.insert.get_node())
-        target_pos = line.length() - 1
-        self.state['offset_moved'] = document.move_cursor_by_offset(target_pos - index)
+        self.state['previous_cursor_position'] = document.insert.get_position()
+        
+        x, y = document.get_xy_at_node(document.insert.get_node())
+        document.insert.set_node(document.get_node_at_xy(document.layout.width, y))
 
     def undo(self, document):
-        document.move_cursor_by_offset(-self.state['offset_moved'])
+        document.insert.set_position(self.state['previous_cursor_position'])
 
 
 class Return():
