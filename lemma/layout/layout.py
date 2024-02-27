@@ -126,18 +126,3 @@ class BoxEOL(object):
     def get_node(self): return self.node
 
 
-class BoxOther(object):
-
-    def __init__(self, width, height, left, top, node=None):
-        self.width = width
-        self.height = height
-        self.left = left
-        self.top = top
-
-        self.node = node
-
-    def is_leaf(self): return True
-    def get_node(self): return self.node
-
-
-
