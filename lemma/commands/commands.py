@@ -109,6 +109,41 @@ class Right():
         document.move_cursor_by_offset(-self.state['offset_moved'])
 
 
+class Up():
+
+    def __init__(self):
+        self.is_undo_checkpoint = False
+        self.state = dict()
+
+    def run(self, document):
+        self.state['previous_cursor_position'] = document.insert.get_position()
+
+        x, y = document.get_xy_at_node(document.insert.get_node())
+        if y == 0:
+            document.insert.set_node(document.get_node_at_xy(0, 0))
+        else:
+            document.insert.set_node(document.get_node_at_xy(x, y - 1))
+
+    def undo(self, document):
+        document.insert.set_position(self.state['previous_cursor_position'])
+
+
+class Down():
+
+    def __init__(self):
+        self.is_undo_checkpoint = False
+        self.state = dict()
+
+    def run(self, document):
+        self.state['previous_cursor_position'] = document.insert.get_position()
+
+        x, y = document.get_xy_at_node(document.insert.get_node())
+        document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height))
+
+    def undo(self, document):
+        document.insert.set_position(self.state['previous_cursor_position'])
+
+
 class LineStart():
 
     def __init__(self):
@@ -117,7 +152,7 @@ class LineStart():
 
     def run(self, document):
         self.state['previous_cursor_position'] = document.insert.get_position()
-        
+
         x, y = document.get_xy_at_node(document.insert.get_node())
         document.insert.set_node(document.get_node_at_xy(0, y))
 
@@ -133,7 +168,7 @@ class LineEnd():
 
     def run(self, document):
         self.state['previous_cursor_position'] = document.insert.get_position()
-        
+
         x, y = document.get_xy_at_node(document.insert.get_node())
         document.insert.set_node(document.get_node_at_xy(document.layout.width, y))
 

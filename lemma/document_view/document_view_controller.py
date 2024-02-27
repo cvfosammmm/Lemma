@@ -73,6 +73,8 @@ class DocumentViewController():
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
             case ('left', 0): command = commands.Left(1)
             case ('right', 0): command = commands.Right(1)
+            case ('up', 0): command = commands.Up()
+            case ('down', 0): command = commands.Down()
 
             case ('home', 0): command = commands.LineStart()
             case ('end', 0): command = commands.LineEnd()

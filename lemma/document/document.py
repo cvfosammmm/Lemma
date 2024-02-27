@@ -76,7 +76,8 @@ class Document(Observable):
     def get_node_at_xy(self, x, y):
         box = self.layout
         x = max(0, min(box.width, x))
-        y = max(0, min(box.height, y))
+        y = max(0, y)
+        if y > box.height: x, y = (box.width, box.height)
 
         while not box.is_leaf():
             box = box.get_child_at_xy(x, y)
