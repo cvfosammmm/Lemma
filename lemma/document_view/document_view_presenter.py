@@ -102,8 +102,8 @@ class DocumentViewPresenter():
                 ctx.mask(pattern)
                 ctx.fill()
 
-        elif isinstance(box, BoxInsert):
-            self.cursor_coords = (offset_x + box.left, offset_y + box.top, 1, box.height)
+        if box == self.model.document.insert.get_node().box:
+            self.cursor_coords = (offset_x, offset_y + 7, 1, 26)
 
     def draw_cursor(self, ctx):
         if self.cursor_coords == None: return

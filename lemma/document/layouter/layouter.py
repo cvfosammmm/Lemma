@@ -50,13 +50,17 @@ class Layouter(Observable):
                 self.process_current_word()
 
             width, height, left, top = FontManager.get_char_extents_single(char.content)
-            self.add_box_to_current_line(BoxGlyph(width, height, left, top, char.content, node=char))
+            box = BoxGlyph(width, height, left, top, char.content, node=char)
+            self.current_line_box.add(box)
+            char.set_box(box)
         else:
             self.current_word.append(char)
 
     def visit_eol(self, node):
         self.process_current_word()
-        self.add_box_to_current_line(BoxEOL(node=node))
+        box = BoxEOL(node=node)
+        self.current_line_box.add(box)
+        node.set_box(box)
         self.root.add(self.current_line_box)
         self.current_line_box = BoxHContainer()
 
@@ -75,6 +79,7 @@ class Layouter(Observable):
             total_width += width
 
             box = BoxGlyph(width, height, left, top, char.content, node=char)
+            char.set_box(box)
             char_boxes.append(box)
 
         if self.current_line_box.width + total_width > 670:
@@ -82,14 +87,8 @@ class Layouter(Observable):
             self.current_line_box = BoxHContainer()
 
         for i, box in enumerate(char_boxes):
-            self.add_box_to_current_line(box)
+            self.current_line_box.add(box)
 
         self.current_word = []
-
-    def add_box_to_current_line(self, box):
-        if self.document.insert.get_node() == box.get_node():
-            self.current_line_box.add(BoxInsert(height=26, top=7))
-
-        self.current_line_box.add(box)
 
 

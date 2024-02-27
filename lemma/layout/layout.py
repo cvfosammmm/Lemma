@@ -100,18 +100,6 @@ class BoxGlyph(object):
     def get_node(self): return self.node
 
 
-class BoxInsert(object):
-
-    def __init__(self, height, top):
-        self.width = 0
-        self.height = height
-        self.left = 0
-        self.top = top
-
-    def is_leaf(self): return True
-    def get_node(self): return None
-
-
 class BoxEOL(object):
 
     def __init__(self, node=None):

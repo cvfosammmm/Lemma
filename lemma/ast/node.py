@@ -122,6 +122,10 @@ class UnicodeCharacter(Node):
 
         self.content = string
         self.is_whitespace = (whitespace_regex.match(string) != None)
+        self.box = None
+
+    def set_box(self, box):
+        self.box = box
 
     def get_iterator(self):
         return Iterator(self)
@@ -134,6 +138,11 @@ class EndOfLine(Node):
 
     def __init__(self):
         Node.__init__(self)
+
+        self.box = None
+
+    def set_box(self, box):
+        self.box = box
 
     def get_iterator(self):
         return Iterator(self)
