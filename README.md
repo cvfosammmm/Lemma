@@ -2,7 +2,7 @@
 
 Note-taking app for the GNU/Linux desktop, written in Python with Gtk.
 
-**Warning: this app is currently in alpha stage, data loss is likely. Please be careful and make regular backups.**
+**Warning: this app is currently in alpha stage, data loss is likely at this point. Please be careful and make regular backups.**
 
 Website: <a href="https://www.cvfosammmm.org/lemma/">https://www.cvfosammmm.org/lemma/</a>
 

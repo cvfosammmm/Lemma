@@ -47,8 +47,7 @@ class Document(Observable):
         self.layouter = Layouter(self)
         self.markdown_scanner = MarkdownScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
-
-        self.update()
+        self.update() # this will create an empty layout, markdown string, ...
 
     def update(self):
         self.layouter.update()

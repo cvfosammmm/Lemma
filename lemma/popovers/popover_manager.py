@@ -20,6 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 from lemma.popovers.hamburger_menu.hamburger_menu import HamburgerMenu
+from lemma.popovers.add_menu.add_menu import AddMenu
 from lemma.popovers.document_menu.document_menu import DocumentMenu
 from lemma.popovers.helpers.popover_button import PopoverButton
 
@@ -52,6 +53,7 @@ class PopoverManager():
     def create_popover(name):
         popover = None
         if name == 'hamburger_menu': popover = HamburgerMenu(PopoverManager)
+        if name == 'add_menu': popover = AddMenu(PopoverManager)
         if name == 'document_menu': popover = DocumentMenu(PopoverManager)
 
         PopoverManager.popovers[name] = popover

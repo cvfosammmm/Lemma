@@ -68,16 +68,21 @@ class HeaderBarLeft(Gtk.HeaderBar):
 
         # workspace menu
         self.hamburger_popover = PopoverManager.create_popover('hamburger_menu')
-        self.menu_button = PopoverManager.create_popover_button('hamburger_menu')
-        self.menu_button.set_child(Gtk.Image.new_from_icon_name('open-menu-symbolic'))
-        self.menu_button.set_can_focus(False)
-        self.menu_button.set_tooltip_text(_('Main Menu') + ' (F10)')
-        self.menu_button.get_style_context().add_class('flat')
-        self.pack_end(self.menu_button)
+        self.hamburger_menu_button = PopoverManager.create_popover_button('hamburger_menu')
+        self.hamburger_menu_button.set_child(Gtk.Image.new_from_icon_name('open-menu-symbolic'))
+        self.hamburger_menu_button.set_can_focus(False)
+        self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (F10)')
+        self.hamburger_menu_button.get_style_context().add_class('flat')
+        self.pack_end(self.hamburger_menu_button)
 
-        self.search_button = Gtk.Button.new_from_icon_name('edit-find-symbolic')
-        self.search_button.set_can_focus(False)
-        self.pack_start(self.search_button)
+        # add menu
+        self.add_popover = PopoverManager.create_popover('add_menu')
+        self.add_menu_button = PopoverManager.create_popover_button('add_menu')
+        self.add_menu_button.set_child(Gtk.Image.new_from_icon_name('list-add-symbolic'))
+        self.add_menu_button.set_can_focus(False)
+        self.add_menu_button.set_tooltip_text(_('Add Documents'))
+        self.add_menu_button.get_style_context().add_class('flat')
+        self.pack_start(self.add_menu_button)
 
         self.set_title_widget(Gtk.Label())
 
