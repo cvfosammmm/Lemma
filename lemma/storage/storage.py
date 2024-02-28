@@ -64,6 +64,7 @@ class Storage(object):
         self.workspace.documents.connect('document_removed', self.on_document_removed)
 
     def on_new_document(self, workspace, document):
+        document.update()
         self.save_document(document)
         document.connect('changed', self.on_document_change)
 
