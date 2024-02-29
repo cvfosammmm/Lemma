@@ -28,8 +28,6 @@ class Popover(Gtk.Box):
         Gtk.Box.__init__(self)
         self.set_focusable(True)
         self.set_orientation(Gtk.Orientation.VERTICAL)
-        self.set_halign(Gtk.Align.START)
-        self.set_valign(Gtk.Align.START)
         self.get_style_context().add_class('popover')
 
         self.popover_manager = popover_manager
@@ -58,11 +56,6 @@ class Popover(Gtk.Box):
 
         self.content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.content_box.get_style_context().add_class('content')
-        self.content_box.append(self.arrow_border_box)
-        self.content_box.append(self.stack)
-
-        self.append(self.arrow_box)
-        self.append(self.content_box)
 
         self.add_page('main')
 
@@ -238,5 +231,35 @@ class Popover(Gtk.Box):
         self.selected_button_id[pagename] = button_id
         if button_id != None:
             self.buttons_by_id[pagename][button_id].get_style_context().add_class('highlight')
+
+
+class PopoverTop(Popover):
+
+    def __init__(self, popover_manager):
+        Popover.__init__(self, popover_manager)
+
+        self.set_halign(Gtk.Align.START)
+        self.set_valign(Gtk.Align.END)
+
+        self.get_style_context().add_class('popover-top')
+
+        self.content_box.append(self.stack)
+        self.append(self.content_box)
+
+
+class PopoverBottom(Popover):
+
+    def __init__(self, popover_manager):
+        Popover.__init__(self, popover_manager)
+
+        self.set_halign(Gtk.Align.START)
+        self.set_valign(Gtk.Align.START)
+
+        self.get_style_context().add_class('popover-bottom')
+
+        self.content_box.append(self.arrow_border_box)
+        self.content_box.append(self.stack)
+        self.append(self.arrow_box)
+        self.append(self.content_box)
 
 

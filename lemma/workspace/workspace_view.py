@@ -24,6 +24,8 @@ from gi.repository import Gtk, GObject, Adw
 
 from lemma.welcome.welcome_view import WelcomeView
 from lemma.app.service_locator import ServiceLocator
+from lemma.headerbar.headerbar import HeaderBar
+from lemma.toolbar.toolbar import ToolBar
 
 
 class MainWindow(Adw.ApplicationWindow):
@@ -37,9 +39,11 @@ class MainWindow(Adw.ApplicationWindow):
         self.popoverlay = Gtk.Overlay()
         self.set_content(self.popoverlay)
 
-    def add_widgets(self, workspace, headerbar):
+    def add_widgets(self, workspace):
         self.workspace = workspace
-        self.headerbar = headerbar.view
+        self.headerbar = HeaderBar()
+        self.headerbar.hb_right.history_overlay.set_child(self.workspace.history.view)
+        self.toolbar = ToolBar()
 
         self.content_paned = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
         self.content_paned.get_style_context().add_class('content')
@@ -54,11 +58,15 @@ class MainWindow(Adw.ApplicationWindow):
         self.content_stack.add_named(self.workspace.document_draft_view, 'draft_view')
         self.content_stack.add_named(self.workspace.document_view.view, 'document_view')
 
+        self.content_with_toolbar = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.content_with_toolbar.append(self.content_stack)
+        self.content_with_toolbar.append(self.toolbar)
+
         self.content_paned.set_start_child(self.workspace.documents.view)
         self.content_paned.set_resize_start_child(False)
         self.content_paned.set_shrink_start_child(False)
 
-        self.content_paned.set_end_child(self.content_stack)
+        self.content_paned.set_end_child(self.content_with_toolbar)
         self.content_paned.set_resize_end_child(True)
         self.content_paned.set_shrink_end_child(False)
 

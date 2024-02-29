@@ -51,6 +51,12 @@ overlay.history scrollbar {
     opacity: 0;
 }
 
+/* actionbar */
+
+actionbar box {
+    background: @headerbar_bg_2;
+}
+
 /* title-widget */
 
 .document-title {
@@ -122,11 +128,27 @@ paned.content separator.wide {
         transform: translateY(3px);
     }
 }
-box.popover {
+box.popover-bottom {
     animation-name: popover-animation;
     animation-duration: 0.2s;
     animation-timing-function: ease;
     transform: translateY(3px);
+}
+@keyframes popover-animation-top {
+    from {
+        opacity: 0;
+        transform: translateY(-42px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-55px);
+    }
+}
+box.popover-top {
+    animation-name: popover-animation-top;
+    animation-duration: 0.2s;
+    animation-timing-function: ease;
+    transform: translateY(-55px);
 }
 box.popover .content {
     background: @popover_bg_color;
@@ -136,7 +158,7 @@ box.popover .content {
     border: 1px solid @borders;
     box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
 }
-box.popover .arrow {
+box.popover-bottom .arrow {
     min-width: 10px;
     min-height: 10px;
     background: @popover_bg_color;
@@ -144,10 +166,9 @@ box.popover .arrow {
     transform: translateY(10px) scale(2, 2) rotate(-45deg);
     box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
 }
-box.popover .arrow-border {
+box.popover-bottom .arrow-border {
     min-width: 1px;
     min-height: 1px;
-    background: black;
     background: @popover_bg_color;
     transform: translateY(-4px) translateX(12px) scale(18, 18) rotate(-45deg);
 }

@@ -30,6 +30,12 @@ class CommandProcessor(object):
 
         self.document.update()
 
+    def can_undo(self):
+        return self.last_command >= 0
+
+    def can_redo(self):
+        return self.last_command < len(self.commands) - 1
+
     def undo(self):
         if self.last_command >= 0:
             command = self.commands[self.last_command]

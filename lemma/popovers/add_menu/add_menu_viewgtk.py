@@ -20,13 +20,13 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 from lemma.popovers.helpers.popover_menu_builder import MenuBuilder
-from lemma.popovers.helpers.popover import Popover
+from lemma.popovers.helpers.popover import PopoverBottom
 
 
-class AddMenuView(Popover):
+class AddMenuView(PopoverBottom):
 
     def __init__(self, popover_manager):
-        Popover.__init__(self, popover_manager)
+        PopoverBottom.__init__(self, popover_manager)
 
         self.set_width(306)
 

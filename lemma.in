@@ -32,7 +32,6 @@ from lemma.dialogs.dialog_locator import DialogLocator
 from lemma.app.color_manager import ColorManager
 from lemma.popovers.popover_manager import PopoverManager
 import lemma.keyboard_shortcuts.shortcuts as shortcuts
-from lemma.headerbar.headerbar import HeaderBar
 
 
 class Application(Adw.Application):
@@ -75,9 +74,7 @@ class Application(Adw.Application):
 
         PopoverManager.init(self.main_window, self.workspace)
 
-        self.headerbar = HeaderBar(self.workspace)
-        self.headerbar.view.hb_right.history_overlay.set_child(self.workspace.history.view)
-        self.main_window.add_widgets(self.workspace, self.headerbar)
+        self.main_window.add_widgets(self.workspace)
 
         if settings.get_value('window_state', 'is_maximized'): self.main_window.maximize()
         else: self.main_window.unmaximize()
