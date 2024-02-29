@@ -216,6 +216,35 @@ button.popover.active {
     background: @headerbar_button_active_color;
 }
 
+/*
+** context menus
+*/
+
+popover.context-menu contents {
+    background: @popover_bg_color;
+}
+popover.context-menu button {
+    background: none;
+    font-weight: normal;
+}
+popover.context-menu button:hover {
+    background: @view_hover_color;
+}
+popover.context-menu button:active, popover button:focus {
+    background: @borders;
+}
+popover.context-menu button label.shortcut {
+    color: @menu_shortcut_color;
+    margin-left: 18px;
+}
+popover.context-menu button image.icon {
+    padding-top: 2px;
+    padding-right: 8px;
+}
+popover.context-menu separator {
+    margin: 6px 0px;
+}
+
 /* welcome page */
 
 box.welcome {

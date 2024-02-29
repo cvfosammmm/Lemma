@@ -21,7 +21,7 @@ from lemma.helpers.observable import Observable
 from lemma.document_list.document_list_view import DocumentListView
 from lemma.document_list.document_list_presenter import DocumentListPresenter
 from lemma.document_list.document_list_controller import DocumentListController
-from lemma.document_list.context_menu.context_menu import ContextMenu
+from lemma.context_menus.document_list import ContextMenuDocumentList
 
 
 class DocumentList(Observable):
@@ -42,7 +42,7 @@ class DocumentList(Observable):
         self.view = DocumentListView()
         self.presenter = DocumentListPresenter(self, self.view)
         self.controller = DocumentListController(self, self.view)
-        self.context_menu = ContextMenu(self)
+        self.context_menu = ContextMenuDocumentList(self)
 
     def add(self, document):
         self.max_document_id = max(self.max_document_id, document.id)

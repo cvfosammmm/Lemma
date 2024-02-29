@@ -24,6 +24,7 @@ from lemma.document_view.document_view_view import DocumentViewView
 from lemma.document_view.document_view_controller import DocumentViewController
 from lemma.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.title_widget.title_widget import TitleWidget
+from lemma.context_menus.document_view import ContextMenuDocumentView
 from lemma.helpers.observable import Observable
 
 
@@ -45,6 +46,8 @@ class DocumentView(Observable):
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
         self.title_widget.view.title_entry.add_controller(self.key_controller_window)
         self.view.add_overlay(self.title_widget.view)
+
+        self.context_menu = ContextMenuDocumentView(self)
 
         self.workspace = workspace
         self.document = None

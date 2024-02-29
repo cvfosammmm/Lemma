@@ -17,19 +17,20 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 
-class MenuBuilder():
+class ContextMenu():
 
-    def create_menu():
-        menu = Gtk.Popover()
-        box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        menu.set_child(box)
+    def __init__(self):
+        self.popover = Gtk.Popover()
+        self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.popover.set_child(self.box)
+        self.popover.set_has_arrow(False)
+        self.popover.set_can_focus(False)
+        self.popover.get_style_context().add_class('context-menu')
 
-        return menu
-
-    def create_button(label, shortcut=None):
+    def create_button(self, label, shortcut=None):
         button = Gtk.Button()
         button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         button.set_child(button_box)
@@ -39,16 +40,19 @@ class MenuBuilder():
         if shortcut != None:
             shortcut_label = Gtk.Label.new(shortcut)
             shortcut_label.get_style_context().add_class('shortcut')
+            shortcut_label.set_xalign(Gtk.Align.END)
+            shortcut_label.set_hexpand(True)
             button_box.append(shortcut_label)
 
         return button
 
-    def add_button(menu, button):
-        box = menu.get_child()
-        box.append(button)
-
-    def add_separator(menu):
-        box = menu.get_child()
-        box.append(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
+    def popup_at_cursor(self, x, y):
+        rect = Gdk.Rectangle()
+        rect.x = x
+        rect.y = y
+        rect.width = 1
+        rect.height = 1
+        self.popover.set_pointing_to(rect)
+        self.popover.popup()
 
 
