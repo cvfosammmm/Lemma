@@ -51,8 +51,8 @@ class DocumentListPresenter(object):
         title_color = ColorManager.get_ui_color('sidebar_fg_1')
         teaser_color = ColorManager.get_ui_color('sidebar_fg_1')
         bg_color = ColorManager.get_ui_color('sidebar_bg_1')
-        hover_color = ColorManager.get_ui_color('hover')
-        selected_color = ColorManager.get_ui_color('selection')
+        hover_color = ColorManager.get_ui_color('sidebar_hover')
+        selected_color = ColorManager.get_ui_color('sidebar_selection')
         active_bg_color = ColorManager.get_ui_color('sidebar_active_bg')
         active_fg_color = ColorManager.get_ui_color('sidebar_active_fg')
 

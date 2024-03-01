@@ -22,10 +22,15 @@ scrollbar.hidden slider {
 
 headerbar.left {
     background-color: @headerbar_bg_1;
+    border-bottom: 1px solid @header_border_bottom_1;
+    box-shadow: none;
+}
+headerbar.left box {
+    border: none;
 }
 windowhandle.right {
     background-color: @headerbar_bg_2;
-    border-bottom: 1px solid @header_border_bottom;
+    border-bottom: 1px solid @header_border_bottom_2;
 }
 windowhandle.right headerbar {
     background-color: @headerbar_bg_2;
@@ -54,7 +59,7 @@ overlay.history scrollbar {
 /* actionbar */
 
 actionbar box {
-    background: @headerbar_bg_2;
+    background: @window_bg_color;
 }
 
 /* title-widget */
@@ -105,7 +110,7 @@ paned.header separator.wide {
     border-width: 0px;
     min-width: 3px;
     box-shadow: none;
-    background-color: @header_border;
+    background-color: @headerpaned_border;
 }
 paned.content separator.wide {
     padding: 0px;
@@ -113,7 +118,7 @@ paned.content separator.wide {
     border-width: 0px;
     min-width: 3px;
     box-shadow: none;
-    background-color: @header_border;
+    background-color: @bodypaned_border;
 }
 
 /* popover */

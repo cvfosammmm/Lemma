@@ -40,17 +40,6 @@
 @define-color headerbar_darker_shade_color rgba(0, 0, 0, 0.12);
 @define-color headerbar_button_active_color rgba(0, 0, 0, 0.24);
 
-/* Split pane views */
-@define-color sidebar_bg_color #ebebeb;
-@define-color sidebar_fg_color rgba(0, 0, 0, 0.8);
-@define-color sidebar_backdrop_color #f2f2f2;
-@define-color sidebar_shade_color rgba(0, 0, 0, 0.07);
-
-@define-color secondary_sidebar_bg_color #f3f3f3;
-@define-color secondary_sidebar_fg_color rgba(0, 0, 0, 0.8);
-@define-color secondary_sidebar_backdrop_color #f6f6f6;
-@define-color secondary_sidebar_shade_color rgba(0, 0, 0, 0.07);
-
 /* Cards, boxed lists */
 @define-color card_bg_color #ffffff;
 @define-color card_fg_color rgba(0, 0, 0, 0.8);
@@ -91,24 +80,36 @@
 @define-color borders #0003;
 @define-color text #222f;
 
+@define-color sidebar_bg_color #ebebeb;
+@define-color sidebar_fg_color rgba(0, 0, 0, 0.8);
+@define-color sidebar_backdrop_color #f2f2f2;
+@define-color sidebar_shade_color rgba(0, 0, 0, 0.07);
+@define-color secondary_sidebar_bg_color #f3f3f3;
+@define-color secondary_sidebar_fg_color rgba(0, 0, 0, 0.8);
+@define-color secondary_sidebar_backdrop_color #f6f6f6;
+@define-color secondary_sidebar_shade_color rgba(0, 0, 0, 0.07);
 @define-color sidebar_bg_1 #00000011;
 @define-color sidebar_fg_1 #000d;
 @define-color sidebar_fg_2 #0007;
 @define-color sidebar_active_fg #000c;
 @define-color sidebar_active_bg #00000017;
+@define-color sidebar_hover #00000009;
+@define-color sidebar_selection #00000022;
 
 @define-color history_active_fg #323232;
 @define-color history_active_bg #00000017;
 
-@define-color headerbar_bg_1 #00000044;
-@define-color headerbar_bg_2 #00000022;
-@define-color headerbar_bg_1 #00000011;
-@define-color headerbar_bg_2 #00000000;
+@define-color headerbar_bg_1 #bbb;
+@define-color headerpaned_border #aaa;
+@define-color headerbar_bg_2 #e9e9e9;
+@define-color header_border_bottom_1 #999;
+@define-color header_border_bottom_2 #ccc;
+
+@define-color actionbar_bg #ffffff;
 
 @define-color content_border #c01c28;
 @define-color content_border #0003;
-@define-color header_border #ccc;
-@define-color header_border_bottom #ddd;
+@define-color bodypaned_border #ccc;
 @define-color description #0005;
 @define-color border_1 #00000022;
 @define-color selection #00000022;
