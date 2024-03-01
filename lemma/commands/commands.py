@@ -24,6 +24,7 @@ class SetTitle():
     def __init__(self, new_title):
         self.new_title = new_title
         self.is_undo_checkpoint = True
+        self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):
@@ -39,6 +40,7 @@ class PopulateFromPath():
     def __init__(self, path):
         self.path = path
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = True
 
     def run(self, document):
         document.last_modified = os.path.getmtime(self.path)
@@ -70,6 +72,7 @@ class Click():
         self.x = x
         self.y = y
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
@@ -86,6 +89,7 @@ class Left():
     def __init__(self, offset):
         self.offset = -offset
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
@@ -100,6 +104,7 @@ class Right():
     def __init__(self, offset):
         self.offset = offset
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
@@ -113,12 +118,15 @@ class Up():
 
     def __init__(self):
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):
         self.state['previous_cursor_position'] = document.insert.get_position()
 
         x, y = document.get_xy_at_node(document.insert.get_node())
+        if document.implicit_x_position != None:
+            x = document.implicit_x_position
         if y == 0:
             document.insert.set_node(document.get_node_at_xy(0, 0))
         else:
@@ -132,12 +140,15 @@ class Down():
 
     def __init__(self):
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):
         self.state['previous_cursor_position'] = document.insert.get_position()
 
         x, y = document.get_xy_at_node(document.insert.get_node())
+        if document.implicit_x_position != None:
+            x = document.implicit_x_position
         document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height))
 
     def undo(self, document):
@@ -148,6 +159,7 @@ class LineStart():
 
     def __init__(self):
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
@@ -164,6 +176,7 @@ class LineEnd():
 
     def __init__(self):
         self.is_undo_checkpoint = False
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
@@ -180,6 +193,7 @@ class Return():
 
     def __init__(self):
         self.is_undo_checkpoint = True
+        self.update_implicit_x_position = True
 
     def run(self, document):
         document.insert_text_at_cursor('\n')
@@ -193,6 +207,7 @@ class IMCommit():
 
     def __init__(self, text):
         self.is_undo_checkpoint = True
+        self.update_implicit_x_position = True
         self.text = text
 
     def run(self, document):
@@ -208,6 +223,7 @@ class Delete():
 
     def __init__(self):
         self.is_undo_checkpoint = True
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
@@ -229,6 +245,7 @@ class Backspace():
 
     def __init__(self):
         self.is_undo_checkpoint = True
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):

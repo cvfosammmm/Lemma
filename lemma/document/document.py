@@ -40,6 +40,7 @@ class Document(Observable):
         self.lines = Lines()
         self.lines.insert(0, Line())
         self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
+        self.implicit_x_position = None
         self.layout = None
         self.markdown = None
         self.plaintext = None
@@ -53,9 +54,16 @@ class Document(Observable):
         self.layouter.update()
         self.markdown_scanner.update()
         self.plaintext_scanner.update()
+        self.update_implicit_x_position()
 
         self.last_modified = time.time()
         self.add_change_code('changed')
+
+    def update_implicit_x_position(self):
+        last_command = self.command_processor.get_last_command()
+        if last_command != None and last_command.update_implicit_x_position:
+            x, y = self.get_xy_at_node(self.insert.get_node())
+            self.implicit_x_position = x
 
     def get_xy_at_node(self, node):
         child = node.box

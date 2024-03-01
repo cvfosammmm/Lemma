@@ -36,6 +36,12 @@ class CommandProcessor(object):
     def can_redo(self):
         return self.last_command < len(self.commands) - 1
 
+    def get_last_command(self):
+        if self.last_command >= 0:
+            return self.commands[self.last_command]
+        else:
+            return None
+
     def undo(self):
         if self.last_command >= 0:
             command = self.commands[self.last_command]
