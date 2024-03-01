@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="4" date="2024-3-1">
+            <description translatable="no">
+                <p>Move cursor on click, more cursor movement commands, some changes to the app layout, ...</p>
+            </description>
+        </release>
         ​<release version="3" date="2024-2-23">
             <description translatable="no">
                 <p>Markdown import and export, changed internal file format to markdown, ...</p>
