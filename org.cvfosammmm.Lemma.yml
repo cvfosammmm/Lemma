@@ -8,12 +8,7 @@ finish-args:
   - --socket=fallback-x11
   - --socket=wayland
   - --device=dri
-  - --socket=pulseaudio
-  - --filesystem=host
-  - --env=PATH=/app/bin:/usr/bin:/app/bin/x86_64-linux
-  - --env=LC_ALL=C
-  - --talk-name=ca.desrt.dconf
-  - --env=DCONF_USER_CONFIG_DIR=.config/dconf
+  - --filesystem=xdg-documents
 modules:
   - name: python3-pyxdg
     buildsystem: simple
