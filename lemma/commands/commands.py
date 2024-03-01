@@ -149,7 +149,7 @@ class Down():
         x, y = document.get_xy_at_node(document.insert.get_node())
         if document.implicit_x_position != None:
             x = document.implicit_x_position
-        document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height))
+        document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height + 1))
 
     def undo(self, document):
         document.insert.set_position(self.state['previous_cursor_position'])
