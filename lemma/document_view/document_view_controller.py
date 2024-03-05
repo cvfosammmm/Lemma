@@ -75,9 +75,10 @@ class DocumentViewController():
             case ('right', 0): command = commands.Right(1)
             case ('up', 0): command = commands.Up()
             case ('down', 0): command = commands.Down()
-
             case ('home', 0): command = commands.LineStart()
             case ('end', 0): command = commands.LineEnd()
+            case ('page_up', 0): command = commands.PageUp(self.view.scrolling_widget.height)
+            case ('page_down', 0): command = commands.PageDown(self.view.scrolling_widget.height)
 
             case ('return', _): command = commands.Return()
             case ('backspace', _): command = commands.Backspace()

@@ -161,6 +161,51 @@ class Down():
         document.insert.set_position(self.state['previous_cursor_position'])
 
 
+class PageUp():
+
+    def __init__(self, height):
+        self.is_undo_checkpoint = False
+        self.height = height
+        self.update_implicit_x_position = False
+        self.state = dict()
+
+    def run(self, document):
+        self.state['previous_cursor_position'] = document.insert.get_position()
+
+        x, y = document.get_xy_at_node(document.insert.get_node())
+        if document.implicit_x_position != None:
+            x = document.implicit_x_position
+        if y == 0:
+            document.insert.set_node(document.get_node_at_xy(0, 0))
+        else:
+            document.insert.set_node(document.get_node_at_xy(x, max(0, y - self.height)))
+        document.set_scroll_insert_on_screen_after_layout_update()
+
+    def undo(self, document):
+        document.insert.set_position(self.state['previous_cursor_position'])
+
+
+class PageDown():
+
+    def __init__(self, height):
+        self.is_undo_checkpoint = False
+        self.height = height
+        self.update_implicit_x_position = False
+        self.state = dict()
+
+    def run(self, document):
+        self.state['previous_cursor_position'] = document.insert.get_position()
+
+        x, y = document.get_xy_at_node(document.insert.get_node())
+        if document.implicit_x_position != None:
+            x = document.implicit_x_position
+        document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height + self.height))
+        document.set_scroll_insert_on_screen_after_layout_update()
+
+    def undo(self, document):
+        document.insert.set_position(self.state['previous_cursor_position'])
+
+
 class LineStart():
 
     def __init__(self):
