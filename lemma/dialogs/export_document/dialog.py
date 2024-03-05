@@ -25,7 +25,7 @@ import os.path
 from lemma.app.service_locator import ServiceLocator
 
 
-class ExportDocumentDialog(object):
+class Dialog(object):
 
     def __init__(self, main_window):
         self.main_window = main_window

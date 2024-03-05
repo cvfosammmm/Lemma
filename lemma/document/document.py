@@ -23,7 +23,7 @@ from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
 from lemma.helpers.observable import Observable
-from lemma.command_processor.command_processor import CommandProcessor
+from lemma.commands.command_processor import CommandProcessor
 
 
 class Document(Observable):

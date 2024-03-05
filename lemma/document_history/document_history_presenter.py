@@ -56,8 +56,7 @@ class DocumentHistoryPresenter(object):
             width += self.get_item_extents('New Document').width / Pango.SCALE
             width += 37
         width += 72
-        self.view.scrolling_widget.adjustment_x.set_upper(width)
-        self.view.scrolling_widget.adjustment_y.set_upper(1)
+        self.view.scrolling_widget.set_size(width, 1)
 
     def scroll_active_document_on_screen(self):
         if self.view.scrolling_widget.adjustment_x.get_upper() < self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width or self.model.active_document_index == len(self.items) - 1:

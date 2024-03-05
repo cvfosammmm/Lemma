@@ -34,6 +34,7 @@ class ScrollingWidget(Observable):
         self.cursor_x, self.cursor_y = None, None
         self.scrolling_multiplier = 2.5
         self.last_cursor_scrolling_change = time.time()
+        self.scrolling_job = None
 
         self.view = Gtk.Overlay()
         self.content = Gtk.DrawingArea()
@@ -85,15 +86,39 @@ class ScrollingWidget(Observable):
     def queue_draw(self):
         self.content.queue_draw()
 
-    def scroll_to_position(self, position):
+    def scroll_to_position(self, position, animate=False):
         window_width = self.width
         yoffset = max(position[1], 0)
         xoffset = max(position[0], 0)
-        self.scroll_now([xoffset, yoffset])
 
-    def scroll_now(self, position):
-        self.adjustment_x.set_value(position[0])
-        self.adjustment_y.set_value(position[1])
+        self.scrolling_job = {'from': (self.scrolling_offset_x, self.scrolling_offset_y), 'to': (xoffset, yoffset), 'starting_time': time.time(), 'duration': 0.2 if animate else 0}
+        self.scroll_now()
+
+    def scroll_now(self):
+        if self.scrolling_job == None: return False
+
+        if self.scrolling_job['duration'] == 0:
+            fraction_done = 1
+        else:
+            time_percent = (time.time() - self.scrolling_job['starting_time']) / self.scrolling_job['duration']
+            fraction_done = (time_percent - 1)**3 + 1 # easing
+
+        if fraction_done >= 1:
+            new_x = self.scrolling_job['to'][0]
+            new_y = self.scrolling_job['to'][1]
+        else:
+            new_x = self.scrolling_job['from'][0] * (1 - fraction_done) + self.scrolling_job['to'][0] * fraction_done
+            new_y = self.scrolling_job['from'][1] * (1 - fraction_done) + self.scrolling_job['to'][1] * fraction_done
+
+        self.adjustment_x.set_value(new_x)
+        self.adjustment_y.set_value(new_y)
+
+        if (new_x, new_y) == self.scrolling_job['to']:
+            self.scrolling_job = None
+        else:
+            GObject.timeout_add(15, self.scroll_now)
+
+        return False
 
     def on_scroll(self, controller, dx, dy):
         if abs(dx) > 0 and abs(dy / dx) >= 1: dx = 0
@@ -141,7 +166,9 @@ class ScrollingWidget(Observable):
 
         if abs(data['velocity'][0] * exponential_factor) < 0.1 and abs(data['velocity'][1] * exponential_factor) < 0.1: return False
 
-        self.scroll_now([position_x, position_y])
+        self.scrolling_job = {'from': (self.scrolling_offset_x, self.scrolling_offset_y), 'to': (position_x, position_y), 'starting_time': time.time(), 'duration': 0}
+        self.scroll_now()
+
         data['position'] = (position_x, position_y)
         GObject.timeout_add(15, self.deceleration, data)
 
@@ -203,6 +230,14 @@ class ScrollingWidget(Observable):
 
     def on_leave(self, controller):
         self.set_cursor_position(None, None)
+
+    def set_size(self, x, y):
+        self.adjustment_x.set_upper(x)
+        self.adjustment_y.set_upper(y)
+        self.update_scrollbars()
+        if self.scrolling_offset_y > max(0, y - self.height):
+            self.scrolling_job = {'from': (self.scrolling_offset_x, self.scrolling_offset_y), 'to': (self.scrolling_offset_x, max(0, y - self.height)), 'starting_time': time.time(), 'duration': 0}
+            self.scroll_now()
 
     def set_cursor_position(self, x, y):
         if x != self.cursor_x or y != self.cursor_y:

@@ -22,7 +22,7 @@ from gi.repository import Gtk
 from lemma.app.service_locator import ServiceLocator
 
 
-class AboutDialog(object):
+class Dialog(object):
 
     def __init__(self, main_window):
         self.main_window = main_window

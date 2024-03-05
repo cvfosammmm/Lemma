@@ -39,8 +39,7 @@ class DocumentListPresenter(object):
         self.model.connect('selected_item_changed', self.on_selected_item_change)
 
     def on_change(self, model):
-        self.view.scrolling_widget.adjustment_x.set_upper(1)
-        self.view.scrolling_widget.adjustment_y.set_upper(max(self.model.count() * self.view.line_height, 1))
+        self.view.scrolling_widget.set_size(1, max(self.model.count() * self.view.line_height, 1))
         self.view.scrolling_widget.queue_draw()
 
     def on_selected_item_change(self, model):

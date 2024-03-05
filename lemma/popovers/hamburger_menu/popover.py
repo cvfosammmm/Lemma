@@ -17,13 +17,34 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
-from lemma.popovers.helpers.popover_menu_builder import MenuBuilder
-from lemma.popovers.helpers.popover import PopoverBottom
+from lemma.popovers.popover_menu_builder import MenuBuilder
+from lemma.popovers.popover_templates import PopoverBottom
 
 
-class HamburgerMenuView(PopoverBottom):
+class Popover(object):
+
+    def __init__(self, popover_manager):
+        self.popover_manager = popover_manager
+        self.view = View(popover_manager)
+
+        self.key_controller = Gtk.EventControllerKey()
+        self.key_controller.connect('key-pressed', self.on_keypress)
+        self.view.add_controller(self.key_controller)
+
+    def on_keypress(self, controller, keyval, keycode, state):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+
+        if keyval == Gdk.keyval_from_name('F10'):
+            if state & modifiers == 0:
+                self.popover_manager.popdown()
+                return True
+
+        return False
+
+
+class View(PopoverBottom):
 
     def __init__(self, popover_manager):
         PopoverBottom.__init__(self, popover_manager)

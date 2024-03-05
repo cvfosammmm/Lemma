@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.dialogs.about.about import AboutDialog
-from lemma.dialogs.keyboard_shortcuts.keyboard_shortcuts import KeyboardShortcutsDialog
-from lemma.dialogs.export_document.export_document import ExportDocumentDialog
-from lemma.dialogs.import_documents.import_documents import ImportDocuments
+import os.path
 
 
 class DialogLocator(object):
@@ -26,13 +23,12 @@ class DialogLocator(object):
     dialogs = dict()
 
     def init_dialogs(main_window):
-        dialogs = dict()
-        dialogs['about'] = AboutDialog(main_window)
-        dialogs['keyboard_shortcuts'] = KeyboardShortcutsDialog(main_window)
-        dialogs['export_as'] = ExportDocumentDialog(main_window)
-        dialogs['import_documents'] = ImportDocuments(main_window)
-        DialogLocator.dialogs = dialogs
-    
+        for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
+            if 'dialog.py' in files:
+                name = os.path.basename(path)
+                exec('import lemma.dialogs.' + name + '.dialog as ' + name)
+                exec('DialogLocator.dialogs["' + name + '"] = ' + name + '.Dialog(main_window)')
+
     def get_dialog(dialog_type):
         return DialogLocator.dialogs[dialog_type]
 

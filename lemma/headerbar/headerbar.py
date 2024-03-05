@@ -55,7 +55,6 @@ class HeaderBarLeft(Gtk.HeaderBar):
         self.set_show_title_buttons(show_title_buttons)
 
         # workspace menu
-        self.hamburger_popover = PopoverManager.create_popover('hamburger_menu')
         self.hamburger_menu_button = PopoverManager.create_popover_button('hamburger_menu')
         self.hamburger_menu_button.set_child(Gtk.Image.new_from_icon_name('open-menu-symbolic'))
         self.hamburger_menu_button.set_can_focus(False)
@@ -64,7 +63,6 @@ class HeaderBarLeft(Gtk.HeaderBar):
         self.pack_end(self.hamburger_menu_button)
 
         # add menu
-        self.add_popover = PopoverManager.create_popover('add_menu')
         self.add_menu_button = PopoverManager.create_popover_button('add_menu')
         self.add_menu_button.set_child(Gtk.Image.new_from_icon_name('list-add-symbolic'))
         self.add_menu_button.set_can_focus(False)

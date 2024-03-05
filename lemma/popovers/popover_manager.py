@@ -19,10 +19,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.popovers.hamburger_menu.hamburger_menu import HamburgerMenu
-from lemma.popovers.add_menu.add_menu import AddMenu
-from lemma.popovers.document_menu.document_menu import DocumentMenu
-from lemma.popovers.helpers.popover_button import PopoverButton
+import os.path
+
+from lemma.popovers.popover_button import PopoverButton
+from lemma.app.service_locator import ServiceLocator
 
 
 class PopoverManager():
@@ -50,21 +50,25 @@ class PopoverManager():
 
         PopoverManager.inbetween.set_can_target(False)
 
-    def create_popover(name):
-        popover = None
-        if name == 'hamburger_menu': popover = HamburgerMenu(PopoverManager)
-        if name == 'add_menu': popover = AddMenu(PopoverManager)
-        if name == 'document_menu': popover = DocumentMenu(PopoverManager)
-
-        PopoverManager.popovers[name] = popover
-        return popover
+        for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
+            if 'popover.py' in files:
+                name = os.path.basename(path)
+                exec('import lemma.popovers.' + name + '.popover as ' + name)
+                exec('PopoverManager.popovers["' + name + '"] = ' + name + '.Popover(PopoverManager)')
 
     def create_popover_button(name):
         popover_button = PopoverButton(name, PopoverManager)
         PopoverManager.popover_buttons[name] = popover_button
         return popover_button
 
+    def get_popover(name):
+        if name in PopoverManager.popovers: return PopoverManager.popovers[name]
+        else: return None
+
     def popup_at_button(name):
+        popover = PopoverManager.get_popover(name)
+
+        if popover == None: return
         if PopoverManager.current_popover_name == name: return
         if PopoverManager.current_popover_name != None: PopoverManager.popdown()
 
@@ -74,7 +78,6 @@ class PopoverManager():
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y + allocation.size.height
 
-        popover = PopoverManager.popovers[name]
         window_width = PopoverManager.main_window.get_width()
         arrow_width = 10
         arrow_border_width = 36

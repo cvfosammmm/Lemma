@@ -28,7 +28,6 @@ class ToolBar(Gtk.ActionBar):
         Gtk.ActionBar.__init__(self)
 
         # document menu
-        self.document_menu = PopoverManager.create_popover('document_menu')
         self.document_menu_button = PopoverManager.create_popover_button('document_menu')
         self.document_menu_button.set_child(Gtk.Image.new_from_icon_name('view-more-symbolic'))
         self.document_menu_button.set_can_focus(False)
