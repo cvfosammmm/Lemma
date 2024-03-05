@@ -26,10 +26,11 @@ from lemma.keyboard_shortcuts.shortcut_controller_app import ShortcutControllerA
 
 class Shortcuts(object):
 
-    def __init__(self):
+    def __init__(self, actions):
+        self.actions = actions
         self.main_window = ServiceLocator.get_main_window()
 
-        self.shortcut_controller_app = ShortcutControllerApp()
+        self.shortcut_controller_app = ShortcutControllerApp(self.actions)
         self.main_window.add_controller(self.shortcut_controller_app)
 
         PopoverManager.connect('popup', self.on_popover_popup)

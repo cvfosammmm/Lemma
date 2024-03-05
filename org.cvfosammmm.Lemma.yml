@@ -8,7 +8,6 @@ finish-args:
   - --socket=fallback-x11
   - --socket=wayland
   - --device=dri
-  - --filesystem=xdg-documents
 modules:
   - name: python3-pyxdg
     buildsystem: simple

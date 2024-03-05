@@ -24,7 +24,7 @@ from lemma.scrolling_widget.scrolling_widget import ScrollingWidget
 
 class DocumentViewView(Gtk.Overlay):
 
-    def __init__(self, document_view):
+    def __init__(self):
         Gtk.Overlay.__init__(self)
 
         self.set_size_request(770, -1)
@@ -36,6 +36,8 @@ class DocumentViewView(Gtk.Overlay):
         self.subtitle_height = 50
         self.title_buttons_height = 0
         self.title_width = 500
+        self.insert_height = 26
+        self.insert_drawing_offset = 7
 
         self.layout_title = Pango.Layout(self.get_pango_context())
         self.layout_title.set_ellipsize(Pango.EllipsizeMode.END)

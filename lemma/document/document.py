@@ -40,7 +40,8 @@ class Document(Observable):
         self.lines = Lines()
         self.lines.insert(0, Line())
         self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
-        self.implicit_x_position = None
+        self.implicit_x_position = 0
+        self.scroll_insert_on_screen_after_layout_update = False
         self.layout = None
         self.markdown = None
         self.plaintext = None
@@ -64,6 +65,9 @@ class Document(Observable):
         if last_command != None and last_command.update_implicit_x_position:
             x, y = self.get_xy_at_node(self.insert.get_node())
             self.implicit_x_position = x
+
+    def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
+        self.scroll_insert_on_screen_after_layout_update = True
 
     def get_xy_at_node(self, node):
         child = node.box

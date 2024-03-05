@@ -30,6 +30,7 @@ class SetTitle():
     def run(self, document):
         self.state['prev_title'] = document.title
         document.title = self.new_title
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.title = self.state['prev_title']
@@ -61,6 +62,7 @@ class PopulateFromPath():
 
         document.lines = document_lines
         document.insert.set_position([0, 0])
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         pass
@@ -94,6 +96,7 @@ class Left():
 
     def run(self, document):
         self.state['offset_moved'] = document.move_cursor_by_offset(self.offset)
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.move_cursor_by_offset(-self.state['offset_moved'])
@@ -109,6 +112,7 @@ class Right():
 
     def run(self, document):
         self.state['offset_moved'] = document.move_cursor_by_offset(self.offset)
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.move_cursor_by_offset(-self.state['offset_moved'])
@@ -131,6 +135,7 @@ class Up():
             document.insert.set_node(document.get_node_at_xy(0, 0))
         else:
             document.insert.set_node(document.get_node_at_xy(x, y - 1))
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.insert.set_position(self.state['previous_cursor_position'])
@@ -150,6 +155,7 @@ class Down():
         if document.implicit_x_position != None:
             x = document.implicit_x_position
         document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height + 1))
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.insert.set_position(self.state['previous_cursor_position'])
@@ -167,6 +173,7 @@ class LineStart():
 
         x, y = document.get_xy_at_node(document.insert.get_node())
         document.insert.set_node(document.get_node_at_xy(0, y))
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.insert.set_position(self.state['previous_cursor_position'])
@@ -184,6 +191,7 @@ class LineEnd():
 
         x, y = document.get_xy_at_node(document.insert.get_node())
         document.insert.set_node(document.get_node_at_xy(document.layout.width, y))
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.insert.set_position(self.state['previous_cursor_position'])
@@ -197,10 +205,12 @@ class Return():
 
     def run(self, document):
         document.insert_text_at_cursor('\n')
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.move_cursor_by_offset(-1)
         document.delete_char_at_cursor()
+        document.set_scroll_insert_on_screen_after_layout_update()
 
 
 class IMCommit():
@@ -212,11 +222,13 @@ class IMCommit():
 
     def run(self, document):
         document.insert_text_at_cursor(self.text)
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         for char in reversed(self.text):
             document.move_cursor_by_offset(-1)
             document.delete_char_at_cursor()
+        document.set_scroll_insert_on_screen_after_layout_update()
 
 
 class Delete():
@@ -234,11 +246,13 @@ class Delete():
         else:
             self.state['deleted_char'] = None
             self.is_undo_checkpoint = False
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         if self.state['deleted_char'] != None:
             document.insert_text_at_cursor(self.state['deleted_char'])
             document.move_cursor_by_offset(-1)
+        document.set_scroll_insert_on_screen_after_layout_update()
 
 
 class Backspace():
@@ -258,9 +272,11 @@ class Backspace():
         else:
             self.state['deleted_char'] = None
             self.is_undo_checkpoint = False
+        document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         if self.state['deleted_char'] != None:
             document.insert_text_at_cursor(self.state['deleted_char'])
+        document.set_scroll_insert_on_screen_after_layout_update()
 
 

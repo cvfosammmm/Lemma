@@ -20,7 +20,6 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 import lemma.commands.commands as commands
-from lemma.document_view.document_view_view import DocumentViewView
 from lemma.document_view.document_view_controller import DocumentViewController
 from lemma.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.title_widget.title_widget import TitleWidget
@@ -30,10 +29,10 @@ from lemma.helpers.observable import Observable
 
 class DocumentView(Observable):
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, main_window):
         Observable.__init__(self)
 
-        self.view = DocumentViewView(self)
+        self.view = main_window.document_view
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
@@ -52,6 +51,7 @@ class DocumentView(Observable):
         self.workspace = workspace
         self.document = None
         self.set_document(workspace.get_active_document())
+        self.add_change_code('changed')
 
         self.workspace.connect('new_active_document', self.on_new_active_document)
 

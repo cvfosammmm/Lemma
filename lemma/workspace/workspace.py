@@ -22,9 +22,6 @@ import pickle
 from lemma.helpers.observable import Observable
 from lemma.document_list.document_list import DocumentList
 from lemma.document_history.document_history import DocumentHistory
-from lemma.document_view.document_view import DocumentView
-from lemma.document_draft.document_draft import DocumentDraftView
-from lemma.actions.actions import Actions
 from lemma.app.service_locator import ServiceLocator
 
 
@@ -38,10 +35,6 @@ class Workspace(Observable):
 
         self.documents = DocumentList(self)
         self.history = DocumentHistory(self)
-
-        self.document_view = DocumentView(self)
-        self.document_draft_view = DocumentDraftView(self)
-        self.actions = Actions(self)
 
         self.settings = ServiceLocator.get_settings()
         self.settings.connect('settings_changed', self.on_settings_changed)

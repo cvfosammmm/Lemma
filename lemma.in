@@ -31,6 +31,9 @@ from lemma.app.service_locator import ServiceLocator
 from lemma.dialogs.dialog_locator import DialogLocator
 from lemma.app.color_manager import ColorManager
 from lemma.popovers.popover_manager import PopoverManager
+from lemma.document_view.document_view import DocumentView
+from lemma.document_draft.document_draft import DocumentDraft
+from lemma.actions.actions import Actions
 import lemma.keyboard_shortcuts.shortcuts as shortcuts
 
 
@@ -90,10 +93,13 @@ class Application(Adw.Application):
 
         self.workspace_controller = WorkspaceController(self.workspace, self.main_window)
         self.workspace_presenter = WorkspacePresenter(self.workspace, self.main_window)
+        self.document_view = DocumentView(self.workspace, self.main_window)
+        self.document_draft = DocumentDraft(self.workspace, self.main_window)
+        self.actions = Actions(self.workspace, self.document_view)
 
         self.storage.init_writer()
-        self.shortcuts = shortcuts.Shortcuts()
-        self.workspace.actions.actions['quit'].connect('activate', self.on_quit_action)
+        self.shortcuts = shortcuts.Shortcuts(self.actions)
+        self.actions.actions['quit'].connect('activate', self.on_quit_action)
 
     def on_window_close(self, window=None, parameter=None):
         self.save_quit()

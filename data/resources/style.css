@@ -257,7 +257,7 @@ box.welcome {
 }
 box.welcome > box {
     margin-top: 52px;
-    margin-bottom: 200px;
+    margin-bottom: 152px;
 }
 box.welcome box.icon {
     background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @welcome_logo, error @welcome_logo_node) no-repeat left top;

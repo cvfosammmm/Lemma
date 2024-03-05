@@ -17,26 +17,17 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
-from gi.repository import Gtk, Gdk, Adw
+from gi.repository import Gtk, Gdk
 
 from lemma.document.document import Document
-from lemma.title_widget.title_widget import TitleWidget
 
 
-class DocumentDraftView(Gtk.Box):
+class DocumentDraft():
 
-    def __init__(self, workspace):
-        Gtk.Box.__init__(self)
-        self.set_orientation(Gtk.Orientation.VERTICAL)
-
-        self.title_widget = TitleWidget(self)
-        self.title_widget.view.submit_button.set_label('Create Document')
-
+    def __init__(self, workspace, main_window):
         self.workspace = workspace
+        self.title_widget = main_window.draft_title_widget
         self.document = None
-
-        self.append(self.title_widget.view)
 
         self.title_widget.view.title_entry.connect('activate', self.on_entry_activate)
         self.title_widget.view.submit_button.connect('clicked', self.on_submit_button_clicked)
@@ -46,6 +37,14 @@ class DocumentDraftView(Gtk.Box):
         self.key_controller_window.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
         self.title_widget.view.title_entry.add_controller(self.key_controller_window)
+
+        self.workspace.connect('mode_set', self.on_mode_set)
+
+    def on_mode_set(self, workspace):
+        if self.workspace.mode == 'draft':
+            self.init()
+        else:
+            self.cancel()
 
     def on_entry_activate(self, entry=None):
         if self.title_widget.validation_state:
@@ -75,7 +74,6 @@ class DocumentDraftView(Gtk.Box):
     def cancel(self):
         self.reset_title()
         self.title_widget.deactivate()
-        self.workspace.leave_draft_mode()
 
     def init(self):
         id = self.workspace.documents.get_new_document_id()

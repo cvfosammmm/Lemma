@@ -23,9 +23,11 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, GObject, Adw
 
 from lemma.welcome.welcome_view import WelcomeView
+from lemma.title_widget.title_widget import TitleWidget
 from lemma.app.service_locator import ServiceLocator
 from lemma.headerbar.headerbar import HeaderBar
 from lemma.toolbar.toolbar import ToolBar
+from lemma.document_view.document_view_view import DocumentViewView
 
 
 class MainWindow(Adw.ApplicationWindow):
@@ -51,12 +53,18 @@ class MainWindow(Adw.ApplicationWindow):
         self.headerbar.bind_property('position', self.content_paned, 'position', GObject.BindingFlags.BIDIRECTIONAL)
 
         self.welcome = WelcomeView()
+        self.document_view = DocumentViewView()
+
+        self.draft_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.draft_title_widget = TitleWidget(self)
+        self.draft_title_widget.view.submit_button.set_label('Create Document')
+        self.draft_box.append(self.draft_title_widget.view)
 
         self.content_stack = Gtk.Stack()
         self.content_stack.get_style_context().add_class('content')
         self.content_stack.add_named(self.welcome, 'welcome')
-        self.content_stack.add_named(self.workspace.document_draft_view, 'draft_view')
-        self.content_stack.add_named(self.workspace.document_view.view, 'document_view')
+        self.content_stack.add_named(self.draft_box, 'draft_view')
+        self.content_stack.add_named(self.document_view, 'document_view')
 
         self.content_with_toolbar = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.content_with_toolbar.append(self.content_stack)

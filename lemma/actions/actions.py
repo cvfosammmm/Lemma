@@ -26,8 +26,9 @@ from lemma.popovers.popover_manager import PopoverManager
 
 class Actions(object):
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, document_view):
         self.workspace = workspace
+        self.document_view = document_view
         self.main_window = ServiceLocator.get_main_window()
         self.settings = ServiceLocator.get_settings()
 
@@ -106,7 +107,7 @@ class Actions(object):
 
     def go_back(self, action=None, parameter=''):
         if self.workspace.mode == 'draft':
-            self.workspace.document_draft_view.cancel()
+            self.workspace.leave_draft_mode()
         else:
             prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
             if prev_doc != None:

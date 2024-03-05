@@ -19,18 +19,14 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.app.service_locator import ServiceLocator
 from lemma.keyboard_shortcuts.shortcut_controller import ShortcutController
 
 
 class ShortcutControllerApp(ShortcutController):
 
-    def __init__(self):
+    def __init__(self, actions):
         ShortcutController.__init__(self)
-
-        self.main_window = ServiceLocator.get_main_window()
-        self.workspace = ServiceLocator.get_workspace()
-        self.actions = self.workspace.actions
+        self.actions = actions
 
         self.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
 

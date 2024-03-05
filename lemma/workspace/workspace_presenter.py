@@ -31,36 +31,24 @@ class WorkspacePresenter():
         self.workspace.connect('theme_change', self.on_theme_change)
 
         self.update_colors()
-        self.init()
+        self.update_mode_stack()
 
     def on_new_active_document(self, workspace, document=None):
-        self.init()
+        self.update_mode_stack()
 
     def on_mode_set(self, workspace):
-        self.init()
+        self.update_mode_stack()
 
     def on_theme_change(self, workspace):
         self.update_colors()
 
-    def init(self):
+    def update_mode_stack(self):
         if self.workspace.mode == 'documents' and self.workspace.active_document != None:
-            self.init_document_mode()
+            self.main_window.content_stack.set_visible_child_name('document_view')
         elif self.workspace.mode == 'draft':
-            self.init_draft_mode()
+            self.main_window.content_stack.set_visible_child_name('draft_view')
         else:
-            self.init_welcome_mode()
-
-    def init_document_mode(self):
-        self.workspace.document_view.set_document(self.workspace.active_document)
-        self.main_window.content_stack.set_visible_child_name('document_view')
-
-    def init_welcome_mode(self):
-        self.main_window.content_stack.set_visible_child_name('welcome')
-        self.main_window.welcome.button.grab_focus()
-
-    def init_draft_mode(self):
-        self.main_window.content_stack.set_visible_child_name('draft_view')
-        self.workspace.document_draft_view.init()
+            self.main_window.content_stack.set_visible_child_name('welcome')
 
     def update_colors(self):
         path = os.path.join(ServiceLocator.get_resources_path(), 'themes', self.workspace.theme + '.css')
