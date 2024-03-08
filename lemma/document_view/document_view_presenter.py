@@ -58,21 +58,21 @@ class DocumentViewPresenter():
         document = self.model.document
         insert_position = document.get_xy_at_node(document.insert.get_node())
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
-        insert_y = insert_position[1] + content_offset
+        insert_y = insert_position[1] + content_offset + self.view.insert_drawing_offset
         insert_height = self.view.insert_height
         window_height = self.view.scrolling_widget.height
         scrolling_offset_y = self.view.scrolling_widget.scrolling_offset_y
 
         if window_height <= 0: return
 
-        if insert_y == content_offset:
+        if insert_y == content_offset + self.view.insert_drawing_offset:
             self.view.scrolling_widget.scroll_to_position((0, 0), animate)
         elif insert_y < scrolling_offset_y:
-            self.view.scrolling_widget.scroll_to_position((0, insert_y + self.view.insert_drawing_offset), animate)
+            self.view.scrolling_widget.scroll_to_position((0, insert_y), animate)
         elif insert_position[1] == self.model.document.layout.height - self.model.document.layout.children[-1].height:
             self.view.scrolling_widget.scroll_to_position((0, self.model.document.layout.height + content_offset + self.view.padding_bottom - window_height), animate)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
-            self.view.scrolling_widget.scroll_to_position((0, insert_y - window_height + insert_height + self.view.insert_drawing_offset), animate)
+            self.view.scrolling_widget.scroll_to_position((0, insert_y - window_height + insert_height), animate)
 
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return
