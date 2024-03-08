@@ -41,11 +41,10 @@ class MarkdownScanner(Observable):
             char.accept(self)
 
     def visit_char(self, char):
-        if char.is_whitespace:
-            if self.markdown == '' or self.markdown[-1] != ' ':
-                self.markdown += ' '
-        else:
-            self.markdown += char.content
+        self.markdown += char.content
+
+    def visit_math_symbol(self, symbol):
+        self.markdown += '$`\\' + symbol.name + '`$'
 
     def visit_eol(self, node):
         self.markdown += '\n'

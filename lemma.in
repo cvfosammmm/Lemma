@@ -68,6 +68,7 @@ class Application(Adw.Application):
         resources_path = ServiceLocator.get_resources_path()
         icon_theme = Gtk.IconTheme.get_for_display(self.main_window.get_display())
         icon_theme.add_search_path(os.path.join(resources_path, 'icons'))
+        icon_theme.add_search_path(os.path.join(resources_path, 'symbols'))
 
         self.workspace = Workspace()
 

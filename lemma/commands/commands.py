@@ -17,6 +17,7 @@
 
 import os.path
 from lemma.ast.node import *
+import lemma.markdown.markdown as markdown
 
 
 class SetTitle():
@@ -45,22 +46,17 @@ class PopulateFromPath():
 
     def run(self, document):
         document.last_modified = os.path.getmtime(self.path)
-        document_lines = Lines()
 
         with open(self.path, 'r') as file:
-            for line in file:
-                if document.title == '' and line.startswith('# '):
-                    document.title = line[1:].strip()
-                else:
-                    document_line = Line()
-                    for char in line:
-                        if char != '\n':
-                            document_line.append(UnicodeCharacter(char))
-                    document_lines.append(document_line)
+            content = file.read()
 
-        if document_lines.length() == 0: document_lines.append(Line())
+        if content.startswith('# '):
+            line, newline, rest = content.partition('\n')
+            document.title = line[1:].strip()
 
-        document.lines = document_lines
+        if rest != '':
+            document.lines = markdown.build_ast(rest)
+
         document.insert.set_position([0, 0])
         document.set_scroll_insert_on_screen_after_layout_update()
 
@@ -276,6 +272,23 @@ class IMCommit():
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
+class AddMathSymbol():
+
+    def __init__(self, name):
+        self.is_undo_checkpoint = True
+        self.update_implicit_x_position = True
+        self.name = name
+
+    def run(self, document):
+        document.insert_math_symbol(self.name)
+        document.set_scroll_insert_on_screen_after_layout_update()
+
+    def undo(self, document):
+        document.move_cursor_by_offset(-1)
+        document.delete_char_at_cursor()
+        document.set_scroll_insert_on_screen_after_layout_update()
+
+
 class Delete():
 
     def __init__(self):
@@ -286,16 +299,16 @@ class Delete():
     def run(self, document):
         line = document.insert.get_node().get_iterator().get_line()
         if document.insert.get_node() != line.get_child(-1) or line.parent.get_child(-1) != line:
-            self.state['deleted_char'] = document.delete_char_at_cursor()
+            self.state['deleted_node'] = document.delete_char_at_cursor()
             self.is_undo_checkpoint = True
         else:
-            self.state['deleted_char'] = None
+            self.state['deleted_node'] = None
             self.is_undo_checkpoint = False
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        if self.state['deleted_char'] != None:
-            document.insert_text_at_cursor(self.state['deleted_char'])
+        if self.state['deleted_node'] != None:
+            document.insert_node_at_cursor(self.state['deleted_node'])
             document.move_cursor_by_offset(-1)
         document.set_scroll_insert_on_screen_after_layout_update()
 
@@ -312,16 +325,16 @@ class Backspace():
         index = line.get_index(document.insert.get_node())
         if document.lines.get_index(line) != 0 or index != 0:
             document.move_cursor_by_offset(-1)
-            self.state['deleted_char'] = document.delete_char_at_cursor()
+            self.state['deleted_node'] = document.delete_char_at_cursor()
             self.is_undo_checkpoint = True
         else:
-            self.state['deleted_char'] = None
+            self.state['deleted_node'] = None
             self.is_undo_checkpoint = False
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        if self.state['deleted_char'] != None:
-            document.insert_text_at_cursor(self.state['deleted_char'])
+        if self.state['deleted_node'] != None:
+            document.insert_node_at_cursor(self.state['deleted_node'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

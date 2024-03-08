@@ -61,6 +61,29 @@ overlay.history scrollbar {
 actionbar box {
     background: @window_bg_color;
 }
+box.popover.insert-symbols .content {
+    padding: 0px;
+}
+box.popover.insert-symbols .header {
+    padding: 6px;
+    border-bottom: 1px solid @borders;
+}
+box.popover.insert-symbols .header label {
+    margin-left: 9px;
+}
+box.popover.insert-symbols .header button {
+}
+box.popover.insert-symbols flowbox {
+    background: @borders;
+}
+box.popover.insert-symbols flowboxchild {
+    background: @window_bg_color;
+    padding: 0px;
+    border-radius: 0px;
+}
+box.popover.insert-symbols flowboxchild button {
+    border-radius: 0px;
+}
 
 /* title-widget */
 

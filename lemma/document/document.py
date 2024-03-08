@@ -112,6 +112,14 @@ class Document(Observable):
 
         return offset_moved
 
+    def insert_node_at_cursor(self, node):
+        if isinstance(node, EndOfLine):
+	        self.insert_linebreak()
+        elif isinstance(node, UnicodeCharacter):
+	        self.insert_character(node.content)
+        elif isinstance(node, MathSymbol):
+	        self.insert_math_symbol(node.name)
+
     def insert_text_at_cursor(self, text):
         for char in text:
             if char == '\n':
@@ -134,13 +142,19 @@ class Document(Observable):
         self.lines.insert(index, line_1)
         self.insert.set_node(line_2.get_child(0))
 
+    def insert_math_symbol(self, name):
+        symbol = MathSymbol(name)
+        line = self.insert.get_node().get_iterator().get_line()
+        index = line.get_index(self.insert.get_node())
+        line.insert(index, symbol)
+
     def delete_char_at_cursor(self):
-        deleted_char = None
+        deleted_node = None
 
         line = self.insert.get_node().get_iterator().get_line()
         if self.insert.get_node() == line.get_child(-1):
             if self.lines.get_child(-1) != line:
-                deleted_char = '\n'
+                deleted_node = self.insert.get_node()
 
                 line_1 = self.insert.get_node().get_iterator().get_line()
                 line_2 = self.lines.get_child(self.lines.get_index(line_1) + 1)
@@ -153,13 +167,13 @@ class Document(Observable):
                 self.lines.remove(line_2)
                 self.insert.set_node(new_line.get_child(line_1.length() - 1))
         else:
-            deleted_char = self.insert.get_node().content
+            deleted_node = self.insert.get_node()
 
             line = self.insert.get_node().get_iterator().get_line()
             index = line.get_index(self.insert.get_node())
             line.remove(self.insert.get_node())
             self.insert.set_node(line.get_child(index))
 
-        return deleted_char
+        return deleted_node
 
 

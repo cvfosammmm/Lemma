@@ -49,6 +49,10 @@ class PlaintextScanner(Observable):
         else:
             self.current_line += char.content
 
+    def visit_math_symbol(self, symbol):
+        if self.current_line == '' or self.current_line[-1] != ' ':
+            self.current_line += ' '
+
     def visit_eol(self, node):
         self.current_line = self.current_line.strip()
         if self.current_line != '':

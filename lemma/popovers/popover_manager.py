@@ -119,6 +119,7 @@ class PopoverManager():
             PopoverManager.popover_buttons[name].set_active(False)
 
         PopoverManager.add_change_code('popdown', name)
+        PopoverManager.main_window.document_view.scrolling_widget.content.grab_focus()
 
     def on_click_inbetween(controller, n_press, x, y):
         PopoverManager.popdown()

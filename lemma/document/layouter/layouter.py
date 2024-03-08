@@ -17,6 +17,7 @@
 
 from lemma.helpers.observable import Observable
 from lemma.app.font_manager import FontManager
+from lemma.app.latex_db import LaTeXDB
 from lemma.layout.layout import *
 import lemma.helpers.helpers as helpers
 
@@ -46,8 +47,7 @@ class Layouter(Observable):
 
     def visit_char(self, char):
         if char.is_whitespace:
-            if len(self.current_word) > 0:
-                self.process_current_word()
+            self.process_current_word()
 
             width, height, left, top = FontManager.get_char_extents_single(char.content)
             box = BoxGlyph(width, height, left, top, char.content, node=char)
@@ -55,6 +55,16 @@ class Layouter(Observable):
             char.set_box(box)
         else:
             self.current_word.append(char)
+
+    def visit_math_symbol(self, symbol):
+        self.process_current_word()
+
+        unicode = LaTeXDB.get_unicode_from_latex_name(symbol.name)
+        width, height, left, top = FontManager.get_char_extents_single(unicode)
+        box = BoxGlyph(width, height, left, top, unicode, node=symbol)
+        symbol.set_box(box)
+
+        self.add_char_boxes_and_break_lines_in_case([box], width)
 
     def visit_eol(self, node):
         self.process_current_word()
@@ -68,6 +78,8 @@ class Layouter(Observable):
         pass
 
     def process_current_word(self):
+        if len(self.current_word) == 0: return
+
         text = ''
         for char in self.current_word:
             text += char.content
@@ -81,14 +93,16 @@ class Layouter(Observable):
             box = BoxGlyph(width, height, left, top, char.content, node=char)
             char.set_box(box)
             char_boxes.append(box)
+        self.current_word = []
 
-        if self.current_line_box.width + total_width > 670:
+        self.add_char_boxes_and_break_lines_in_case(char_boxes, total_width)
+
+    def add_char_boxes_and_break_lines_in_case(self, char_boxes, width):
+        if self.current_line_box.width + width > 670:
             self.root.add(self.current_line_box)
             self.current_line_box = BoxHContainer()
 
         for i, box in enumerate(char_boxes):
             self.current_line_box.add(box)
-
-        self.current_word = []
 
 

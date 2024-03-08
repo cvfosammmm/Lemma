@@ -134,6 +134,24 @@ class UnicodeCharacter(Node):
         visitor.visit_char(self)
 
 
+class MathSymbol(Node):
+
+    def __init__(self, name):
+        Node.__init__(self)
+
+        self.name = name
+        self.box = None
+
+    def set_box(self, box):
+        self.box = box
+
+    def get_iterator(self):
+        return Iterator(self)
+
+    def accept(self, visitor):
+        visitor.visit_math_symbol(self)
+
+
 class EndOfLine(Node):
 
     def __init__(self):

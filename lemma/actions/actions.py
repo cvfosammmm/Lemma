@@ -17,11 +17,12 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gio
+from gi.repository import Gio, GLib
 
 from lemma.app.service_locator import ServiceLocator
 from lemma.dialogs.dialog_locator import DialogLocator
 from lemma.popovers.popover_manager import PopoverManager
+import lemma.commands.commands as commands
 
 
 class Actions(object):
@@ -45,10 +46,14 @@ class Actions(object):
         self.add_action('undo', self.undo)
         self.add_action('redo', self.redo)
 
+        self.add_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
+
+        self.add_action('show-insert-symbols-menu', self.show_insert_symbols_menu)
+        self.add_action('show-document-menu', self.show_document_menu)
+
+        self.add_action('show-hamburger-menu', self.show_hamburger_menu)
         self.add_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
         self.add_action('show-about-dialog', self.show_about_dialog)
-        self.add_action('show-document-menu', self.show_document_menu)
-        self.add_action('show-hamburger-menu', self.show_hamburger_menu)
 
         self.actions['quit'] = Gio.SimpleAction.new('quit', None)
         self.main_window.add_action(self.actions['quit'])
@@ -85,10 +90,12 @@ class Actions(object):
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
-        self.actions['show-shortcuts-dialog'].set_enabled(True)
-        self.actions['show-about-dialog'].set_enabled(True)
+        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['show-insert-symbols-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
+        self.actions['show-shortcuts-dialog'].set_enabled(True)
+        self.actions['show-about-dialog'].set_enabled(True)
 
     def add_document(self, action=None, paramenter=''):
         self.workspace.enter_draft_mode()
@@ -124,11 +131,16 @@ class Actions(object):
     def redo(self, action=None, parameter=''):
         self.workspace.active_document.command_processor.redo()
 
-    def show_shortcuts_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('keyboard_shortcuts').run()
+    def insert_symbol(self, action=None, parameter=None):
+        if parameter == None: return
 
-    def show_about_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('about').run()
+        name = parameter[0]
+
+        command = commands.AddMathSymbol(name)
+        self.workspace.active_document.command_processor.add_command(command)
+
+    def show_insert_symbols_menu(self, action=None, parameter=''):
+        PopoverManager.popup_at_button('insert_symbols')
 
     def show_document_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('document_menu')
@@ -136,5 +148,11 @@ class Actions(object):
     def show_hamburger_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('hamburger_menu')
         return True
+
+    def show_shortcuts_dialog(self, action=None, parameter=''):
+        DialogLocator.get_dialog('keyboard_shortcuts').run()
+
+    def show_about_dialog(self, action=None, parameter=''):
+        DialogLocator.get_dialog('about').run()
 
 
