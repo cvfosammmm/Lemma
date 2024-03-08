@@ -24,7 +24,7 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      inkscape:zoom="14.75"
-     inkscape:cx="8.0338983"
+     inkscape:cx="8.1016949"
      inkscape:cy="8"
      inkscape:window-width="1440"
      inkscape:window-height="831"
@@ -34,11 +34,12 @@
      inkscape:current-layer="svg49" />
   <path
      class="error"
-     d="M 1,9 10,-1 19,9 Z"
+     d="M 0,9 10,-1 20,9 Z"
      id="path47-3"
-     style="stroke-width:1.11803" />
+     style="display:inline;stroke-width:1.17851" />
   <path
      class="success"
-     d="m 2,11 v -1 l 8,-9 8,9 v 1 z"
-     id="path47" />
+     d="m 1,11 v -1 l 9,-9 9,9 v 1 z"
+     id="path47"
+     style="display:inline;stroke-width:1.06066" />
 </svg>
