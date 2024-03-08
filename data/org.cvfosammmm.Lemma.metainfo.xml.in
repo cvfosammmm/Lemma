@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="5" date="2024-3-8">
+            <description translatable="no">
+                <p>Autoscroll cursor on screen, support for paging keys, ...</p>
+            </description>
+        </release>
         ​<release version="4" date="2024-3-1">
             <description translatable="no">
                 <p>Move cursor on click, more cursor movement commands, some changes to the app layout, ...</p>
