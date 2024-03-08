@@ -22,12 +22,11 @@ from gi.repository import Gtk, Gdk, GLib
 from lemma.popovers.popover_menu_builder import MenuBuilder
 
 
-class Popover(Gtk.Box):
+class Popover(Gtk.Overlay):
 
     def __init__(self, popover_manager):
-        Gtk.Box.__init__(self)
+        Gtk.Overlay.__init__(self)
         self.set_focusable(True)
-        self.set_orientation(Gtk.Orientation.VERTICAL)
         self.get_style_context().add_class('popover')
 
         self.popover_manager = popover_manager
@@ -46,16 +45,14 @@ class Popover(Gtk.Box):
         self.arrow_box = Gtk.CenterBox()
         self.arrow_box.set_start_widget(self.arrow)
 
-        self.arrow_border = Gtk.DrawingArea()
-        self.arrow_border.get_style_context().add_class('arrow-border')
-        self.arrow_border_box = Gtk.CenterBox()
-        self.arrow_border_box.set_start_widget(self.arrow_border)
-
         self.stack = Gtk.Stack()
         self.stack.set_vhomogeneous(False)
 
         self.content_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.content_box.get_style_context().add_class('content')
+        self.content_box.append(self.stack)
+
+        self.set_child(self.content_box)
 
         self.add_page('main')
 
@@ -243,8 +240,9 @@ class PopoverTop(Popover):
 
         self.get_style_context().add_class('popover-top')
 
-        self.content_box.append(self.stack)
-        self.append(self.content_box)
+        self.arrow_box.set_valign(Gtk.Align.END)
+        self.arrow_box.set_halign(Gtk.Align.START)
+        self.add_overlay(self.arrow_box)
 
 
 class PopoverBottom(Popover):
@@ -257,9 +255,8 @@ class PopoverBottom(Popover):
 
         self.get_style_context().add_class('popover-bottom')
 
-        self.content_box.append(self.arrow_border_box)
-        self.content_box.append(self.stack)
-        self.append(self.arrow_box)
-        self.append(self.content_box)
+        self.arrow_box.set_valign(Gtk.Align.START)
+        self.arrow_box.set_halign(Gtk.Align.START)
+        self.add_overlay(self.arrow_box)
 
 

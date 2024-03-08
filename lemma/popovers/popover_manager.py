@@ -79,20 +79,16 @@ class PopoverManager():
         y = allocation.origin.y + allocation.size.height
 
         window_width = PopoverManager.main_window.get_width()
-        arrow_width = 10
-        arrow_border_width = 36
+        arrow_width = 20
         if x - popover.view.width / 2 < 0:
             popover.view.set_margin_start(0)
             popover.view.arrow.set_margin_start(x - arrow_width / 2)
-            popover.view.arrow_border.set_margin_start(x - arrow_border_width / 2)
         elif x - popover.view.width / 2 > window_width - popover.view.width:
             popover.view.set_margin_start(window_width - popover.view.width)
             popover.view.arrow.set_margin_start(x - window_width + popover.view.width - arrow_width / 2)
-            popover.view.arrow_border.set_margin_start(x - window_width + popover.view.width - arrow_border_width / 2)
         else:
             popover.view.set_margin_start(x - popover.view.width / 2)
             popover.view.arrow.set_margin_start(popover.view.width / 2 - arrow_width / 2)
-            popover.view.arrow_border.set_margin_start(popover.view.width / 2 - arrow_border_width / 2)
         popover.view.set_margin_top(max(0, y))
 
         PopoverManager.current_popover_name = name

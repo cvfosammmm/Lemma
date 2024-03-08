@@ -61,27 +61,27 @@ overlay.history scrollbar {
 actionbar box {
     background: @window_bg_color;
 }
-box.popover.insert-symbols .content {
+overlay.popover.insert-symbols .content {
     padding: 0px;
 }
-box.popover.insert-symbols .header {
+overlay.popover.insert-symbols .header {
     padding: 6px;
     border-bottom: 1px solid @borders;
 }
-box.popover.insert-symbols .header label {
+overlay.popover.insert-symbols .header label {
     margin-left: 9px;
 }
-box.popover.insert-symbols .header button {
+overlay.popover.insert-symbols .header button {
 }
-box.popover.insert-symbols flowbox {
+overlay.popover.insert-symbols flowbox {
     background: @borders;
 }
-box.popover.insert-symbols flowboxchild {
+overlay.popover.insert-symbols flowboxchild {
     background: @window_bg_color;
     padding: 0px;
     border-radius: 0px;
 }
-box.popover.insert-symbols flowboxchild button {
+overlay.popover.insert-symbols flowboxchild button {
     border-radius: 0px;
 }
 
@@ -156,7 +156,7 @@ paned.content separator.wide {
         transform: translateY(3px);
     }
 }
-box.popover-bottom {
+overlay.popover-bottom {
     animation-name: popover-animation;
     animation-duration: 0.2s;
     animation-timing-function: ease;
@@ -165,20 +165,20 @@ box.popover-bottom {
 @keyframes popover-animation-top {
     from {
         opacity: 0;
-        transform: translateY(-42px);
+        transform: translateY(-30px);
     }
     to {
         opacity: 1;
-        transform: translateY(-55px);
+        transform: translateY(-43px);
     }
 }
-box.popover-top {
+overlay.popover-top {
     animation-name: popover-animation-top;
     animation-duration: 0.2s;
     animation-timing-function: ease;
-    transform: translateY(-55px);
+    transform: translateY(-43px);
 }
-box.popover .content {
+overlay.popover .content {
     background: @popover_bg_color;
     padding: 6px;
     padding-top: 5px;
@@ -186,57 +186,61 @@ box.popover .content {
     border: 1px solid @borders;
     box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
 }
-box.popover-bottom .arrow {
-    min-width: 10px;
-    min-height: 10px;
-    background: @popover_bg_color;
-    border: 1px solid mix(@borders, transparent, 0.1);
-    transform: translateY(10px) scale(2, 2) rotate(-45deg);
-    box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
+overlay.popover .arrow {
+    min-width: 20px;
+    min-height: 16px;
 }
-box.popover-bottom .arrow-border {
-    min-width: 1px;
-    min-height: 1px;
-    background: @popover_bg_color;
-    transform: translateY(-4px) translateX(12px) scale(18, 18) rotate(-45deg);
+overlay.popover-bottom .arrow {
+    color: #000;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
 }
-box.popover button.action, box.popover button.menu, box.popover button.header {
+overlay.popover-top .arrow {
+    color: #000;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
+}
+overlay.popover-bottom .content {
+    margin-top: 10px;
+}
+overlay.popover-top .content {
+    margin-bottom: 10px;
+}
+overlay.popover button.action, overlay.popover button.menu, overlay.popover button.header {
     background: none;
     font-weight: normal;
 }
-box.popover button.action:hover, box.popover button.menu:hover, box.popover button.header:hover {
+overlay.popover button.action:hover, overlay.popover button.menu:hover, overlay.popover button.header:hover {
     background: @view_hover_color;
     transition: none;
 }
-box.popover button.action:active, box.popover button.menu:active, box.popover button.header:active {
+overlay.popover button.action:active, overlay.popover button.menu:active, overlay.popover button.header:active {
     background: @borders;
 }
-box.popover button.header {
+overlay.popover button.header {
     font-weight: bold;
 }
-box.popover button.highlight:not(:disabled) {
+overlay.popover button.highlight:not(:disabled) {
     background: @view_hover_color;
 }
-box.popover button.highlight:active {
+overlay.popover button.highlight:active {
     background: @borders;
 }
-box.popover button label.shortcut {
+overlay.popover button label.shortcut {
     color: @menu_shortcut_color;
     margin-left: 18px;
 }
-box.popover button image.icon {
+overlay.popover button image.icon {
     padding-top: 2px;
     padding-right: 8px;
 }
-box.popover separator {
+overlay.popover separator {
     margin: 6px 0px;
 }
-box.popover label.explaination {
+overlay.popover label.explaination {
     margin: 0px 10px;
     color: @description_color;
     font-size: 13px;
 }
-box.popover label.explaination-header {
+overlay.popover label.explaination-header {
     margin: 0px 10px;
     font-weight: bold;
 }
