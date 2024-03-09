@@ -22,29 +22,33 @@ class Iterator():
         self.current_node = node
 
     def prev(self):
-        parent = self.current_node.parent
-        index = parent.get_index(self.current_node)
-        if index > 0:
-            self.current_node = parent.get_child(index - 1)
-        else:
-            if parent.parent.get_child(0) == parent:
-                return False
-            else:
-                index = parent.parent.get_index(parent)
-                self.current_node = parent.parent.get_child(index - 1).get_child(-1)
+        node = self.current_node
+        while not node.is_root() and node.parent.get_index(node) == 0:
+            node = node.parent
+
+        if node.is_root(): return False
+
+        node = node.parent.get_child(node.parent.get_index(node) - 1)
+
+        while not node.is_leaf():
+            node = node.get_child(-1)
+
+        self.current_node = node
         return True
 
     def next(self):
-        parent = self.current_node.parent
-        index = parent.get_index(self.current_node)
-        if index < parent.length() - 1:
-            self.current_node = parent.get_child(index + 1)
-        else:
-            if parent.parent.get_child(-1) == parent:
-                return False
-            else:
-                index = parent.parent.get_index(parent)
-                self.current_node = parent.parent.get_child(index + 1).get_child(0)
+        node = self.current_node
+        while not node.is_root() and node.parent.get_index(node) == node.parent.length() - 1:
+            node = node.parent
+
+        if node.is_root(): return False
+
+        node = node.parent.get_child(node.parent.get_index(node) + 1)
+
+        while not node.is_leaf():
+            node = node.get_child(0)
+
+        self.current_node = node
         return True
 
     def get_node(self):
@@ -60,7 +64,7 @@ class Iterator():
 
     def get_line(self):
         node = self.current_node
-        while node.parent.parent != None:
+        while not node.parent.is_root():
             node = node.parent
         return node
 

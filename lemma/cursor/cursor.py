@@ -38,7 +38,7 @@ class Cursor():
     def get_position(self):
         position = list()
         node = self.node
-        while node.parent != None:
+        while not node.parent.is_root():
             position.insert(0, node.parent.get_index(node))
             node = node.parent
 

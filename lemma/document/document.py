@@ -37,7 +37,7 @@ class Document(Observable):
 
         self.id = id
         self.title = ''
-        self.lines = ast.Lines()
+        self.lines = ast.Root()
         self.lines.insert(0, ast.Line())
         self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
         self.implicit_x_position = 0
@@ -70,17 +70,14 @@ class Document(Observable):
         self.scroll_insert_on_screen_after_layout_update = True
 
     def get_xy_at_node(self, node):
-        child = node.box
-        parent = child.parent
+        box = node.box
         x, y = (0, 0)
 
-        while not parent == None:
-            new_x, new_y = parent.get_xy_at_child(child)
+        while not box == self.layout:
+            new_x, new_y = box.parent.get_xy_at_child(box)
             x += new_x
             y += new_y
-
-            child = child.parent
-            parent = parent.parent
+            box = box.parent
 
         return x, y
 

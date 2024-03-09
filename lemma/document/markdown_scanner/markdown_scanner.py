@@ -32,24 +32,30 @@ class MarkdownScanner(Observable):
         self.markdown = self.markdown[:-1] # remove last EOL
         self.document.markdown = self.markdown
 
-    def visit_lines(self, lines):
-        for line in lines.children:
+    def visit_root(self, root):
+        for line in root.children:
             line.accept(self)
 
     def visit_line(self, line):
         for char in line.children:
             char.accept(self)
 
+    def visit_mathlist(self, mathlist):
+        self.markdown += '$`'
+        for symbol in mathlist.children:
+            symbol.accept(self)
+        self.markdown += '`$'
+
     def visit_char(self, char):
         self.markdown += char.content
 
     def visit_math_symbol(self, symbol):
-        self.markdown += '$`\\' + symbol.name + '`$'
+        self.markdown += '\\' + symbol.name
 
     def visit_eol(self, node):
         self.markdown += '\n'
 
-    def visit_node(self, node):
+    def visit_eoml(self, node):
         pass
 
 

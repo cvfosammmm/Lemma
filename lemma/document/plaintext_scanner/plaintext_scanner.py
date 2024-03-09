@@ -34,13 +34,17 @@ class PlaintextScanner(Observable):
         self.text = self.text[:-1] # remove last EOL
         self.document.plaintext = self.text
 
-    def visit_lines(self, lines):
-        for line in lines.children:
+    def visit_root(self, root):
+        for line in root.children:
             line.accept(self)
 
     def visit_line(self, line):
         for char in line.children:
             char.accept(self)
+
+    def visit_mathlist(self, mathlist):
+        if self.current_line == '' or self.current_line[-1] != ' ':
+            self.current_line += ' '
 
     def visit_char(self, char):
         if char.is_whitespace:
@@ -50,8 +54,7 @@ class PlaintextScanner(Observable):
             self.current_line += char.content
 
     def visit_math_symbol(self, symbol):
-        if self.current_line == '' or self.current_line[-1] != ' ':
-            self.current_line += ' '
+        pass
 
     def visit_eol(self, node):
         self.current_line = self.current_line.strip()
@@ -59,7 +62,7 @@ class PlaintextScanner(Observable):
             self.text += self.current_line + '\n'
             self.current_line = ''
 
-    def visit_node(self, node):
+    def visit_eoml(self, node):
         pass
 
 

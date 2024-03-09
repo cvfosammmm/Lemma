@@ -128,7 +128,7 @@ class BoxGlyph(object):
     def get_node(self): return self.node
 
 
-class BoxEOL(object):
+class BoxEmpty(object):
 
     def __init__(self, node=None):
         self.width = 0

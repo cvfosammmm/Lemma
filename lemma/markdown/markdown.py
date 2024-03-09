@@ -21,7 +21,7 @@ import lemma.ast.node as ast
 
 
 def build_ast(markdown):
-    document_lines = ast.Lines()
+    document_lines = ast.Root()
 
     lines = markdown.splitlines()
     for line in lines:

@@ -21,23 +21,9 @@ whitespace_regex = re.compile('\s')
 from lemma.iterator.iterator import Iterator
 
 
-class Node(object):
+class Root():
 
     def __init__(self):
-        self.parent = None
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def accept(self, visitor):
-        visitor.visit_node(self)
-
-
-class Lines(Node):
-
-    def __init__(self):
-        Node.__init__(self)
-
         self.children = []
 
     def insert(self, index, node):
@@ -61,17 +47,20 @@ class Lines(Node):
     def length(self):
         return len(self.children)
 
-    def accept(self, visitor):
-        visitor.visit_lines(self)
+    def accept(self, visitor): visitor.visit_root(self)
+    def is_leaf(self): return False
+    def is_root(self): return True
 
 
-class Line(Node):
+class Line():
 
     def __init__(self):
-        Node.__init__(self)
-
+        self.parent = None
         self.children = []
         self.insert(0, EndOfLine())
+
+    def set_parent(self, parent):
+        self.parent = parent
 
     def insert(self, index, node):
         self.children.insert(index, node)
@@ -93,8 +82,58 @@ class Line(Node):
     def length(self):
         return len(self.children)
 
-    def accept(self, visitor):
-        visitor.visit_line(self)
+    def split(self, separating_child):
+        part_1 = Line()
+        part_2 = Line()
+
+        current_part = part_1
+        for child in self.children:
+            if child == separating_child:
+                current_part = part_2
+            if child != self.get_child(-1):
+                current_part.append(child)
+
+        return (part_1, part_2)
+
+    def add(self, line):
+        for child in line.children:
+            if child != line.get_child(-1):
+                self.append(child)
+
+    def accept(self, visitor): visitor.visit_line(self)
+    def is_leaf(self): return False
+    def is_root(self): return False
+
+
+class MathList():
+
+    def __init__(self):
+        self.parent = None
+        self.children = []
+        self.insert(0, EndOfMathList())
+
+    def set_parent(self, parent):
+        self.parent = parent
+
+    def insert(self, index, node):
+        self.children.insert(index, node)
+        node.set_parent(self)
+
+    def append(self, node):
+        self.insert(-1, node)
+
+    def remove(self, node):
+        self.children.remove(node)
+        node.set_parent(self)
+
+    def get_child(self, index):
+        return self.children[index]
+
+    def get_index(self, node):
+        return self.children.index(node)
+
+    def length(self):
+        return len(self.children)
 
     def split(self, separating_child):
         part_1 = Line()
@@ -114,50 +153,62 @@ class Line(Node):
             if child != line.get_child(-1):
                 self.append(child)
 
+    def accept(self, visitor): visitor.visit_mathlist(self)
+    def is_leaf(self): return False
+    def is_root(self): return False
 
-class UnicodeCharacter(Node):
+
+class UnicodeCharacter():
 
     def __init__(self, string):
-        Node.__init__(self)
-
+        self.parent = None
         self.content = string
         self.is_whitespace = (whitespace_regex.match(string) != None)
         self.box = None
 
+    def set_parent(self, parent):
+        self.parent = parent
+
     def set_box(self, box):
         self.box = box
 
     def get_iterator(self):
         return Iterator(self)
 
-    def accept(self, visitor):
-        visitor.visit_char(self)
+    def accept(self, visitor): visitor.visit_char(self)
+    def is_leaf(self): return True
+    def is_root(self): return False
 
 
-class MathSymbol(Node):
+class MathSymbol():
 
     def __init__(self, name):
-        Node.__init__(self)
-
+        self.parent = None
         self.name = name
         self.box = None
 
+    def set_parent(self, parent):
+        self.parent = parent
+
     def set_box(self, box):
         self.box = box
 
     def get_iterator(self):
         return Iterator(self)
 
-    def accept(self, visitor):
-        visitor.visit_math_symbol(self)
+    def accept(self, visitor): visitor.visit_math_symbol(self)
+    def is_leaf(self): return True
+    def is_root(self): return False
 
 
-class EndOfLine(Node):
+class EndOfLine():
 
     def __init__(self):
-        Node.__init__(self)
-
+        self.parent = None
         self.box = None
+
+    def set_parent(self, parent):
+        self.parent = parent
 
     def set_box(self, box):
         self.box = box
@@ -165,7 +216,28 @@ class EndOfLine(Node):
     def get_iterator(self):
         return Iterator(self)
 
-    def accept(self, visitor):
-        visitor.visit_eol(self)
+    def accept(self, visitor): visitor.visit_eol(self)
+    def is_leaf(self): return True
+    def is_root(self): return False
+
+
+class EndOfMathList():
+
+    def __init__(self):
+        self.parent = None
+        self.box = None
+
+    def set_parent(self, parent):
+        self.parent = parent
+
+    def set_box(self, box):
+        self.box = box
+
+    def get_iterator(self):
+        return Iterator(self)
+
+    def accept(self, visitor): visitor.visit_eoml(self)
+    def is_leaf(self): return True
+    def is_root(self): return False
 
 

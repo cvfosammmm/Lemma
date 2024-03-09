@@ -37,13 +37,17 @@ class Layouter(Observable):
         self.document.lines.accept(self)
         self.document.layout = self.root
 
-    def visit_lines(self, lines):
-        for line in lines.children:
+    def visit_root(self, root):
+        for line in root.children:
             line.accept(self)
 
     def visit_line(self, line):
         for char in line.children:
             char.accept(self)
+
+    def visit_mathlist(self, mathlist):
+        for symbol in mathlist.children:
+            symbol.accept(self)
 
     def visit_char(self, char):
         if char.is_whitespace:
@@ -68,14 +72,17 @@ class Layouter(Observable):
 
     def visit_eol(self, node):
         self.process_current_word()
-        box = boxes.BoxEOL(node=node)
+        box = boxes.BoxEmpty(node=node)
         self.current_line_box.add(box)
         node.set_box(box)
         self.root.add(self.current_line_box)
         self.current_line_box = boxes.BoxHContainer()
 
-    def visit_node(self, node):
-        pass
+    def visit_eoml(self, node):
+        self.process_current_word()
+        box = boxes.BoxEmpty(node=node)
+        node.set_box(box)
+        self.current_line_box.add(box)
 
     def process_current_word(self):
         if len(self.current_word) == 0: return
