@@ -19,7 +19,6 @@ import os, os.path, pickle
 
 from lemma.document.document import Document
 from lemma.app.service_locator import ServiceLocator
-from lemma.ast.node import *
 import lemma.commands.commands as commands
 
 

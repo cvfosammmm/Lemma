@@ -18,7 +18,7 @@
 from lemma.helpers.observable import Observable
 from lemma.app.font_manager import FontManager
 from lemma.app.latex_db import LaTeXDB
-from lemma.layout.layout import *
+import lemma.layout.layout as boxes
 import lemma.helpers.helpers as helpers
 
 
@@ -28,12 +28,12 @@ class Layouter(Observable):
         Observable.__init__(self)
         self.document = document
 
-        self.root = BoxVContainer()
-        self.current_line_box = BoxHContainer()
+        self.root = boxes.BoxVContainer()
+        self.current_line_box = boxes.BoxHContainer()
         self.current_word = []
 
     def update(self):
-        self.root = BoxVContainer()
+        self.root = boxes.BoxVContainer()
         self.document.lines.accept(self)
         self.document.layout = self.root
 
@@ -50,7 +50,7 @@ class Layouter(Observable):
             self.process_current_word()
 
             width, height, left, top = FontManager.get_char_extents_single(char.content)
-            box = BoxGlyph(width, height, left, top, char.content, node=char)
+            box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
             self.current_line_box.add(box)
             char.set_box(box)
         else:
@@ -61,18 +61,18 @@ class Layouter(Observable):
 
         unicode = LaTeXDB.get_unicode_from_latex_name(symbol.name)
         width, height, left, top = FontManager.get_char_extents_single(unicode)
-        box = BoxGlyph(width, height, left, top, unicode, node=symbol)
+        box = boxes.BoxGlyph(width, height, left, top, unicode, node=symbol)
         symbol.set_box(box)
 
         self.add_char_boxes_and_break_lines_in_case([box], width)
 
     def visit_eol(self, node):
         self.process_current_word()
-        box = BoxEOL(node=node)
+        box = boxes.BoxEOL(node=node)
         self.current_line_box.add(box)
         node.set_box(box)
         self.root.add(self.current_line_box)
-        self.current_line_box = BoxHContainer()
+        self.current_line_box = boxes.BoxHContainer()
 
     def visit_node(self, node):
         pass
@@ -90,7 +90,7 @@ class Layouter(Observable):
             width, height, left, top = extents
             total_width += width
 
-            box = BoxGlyph(width, height, left, top, char.content, node=char)
+            box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
             char.set_box(box)
             char_boxes.append(box)
         self.current_word = []
@@ -100,7 +100,7 @@ class Layouter(Observable):
     def add_char_boxes_and_break_lines_in_case(self, char_boxes, width):
         if self.current_line_box.width + width > 670:
             self.root.add(self.current_line_box)
-            self.current_line_box = BoxHContainer()
+            self.current_line_box = boxes.BoxHContainer()
 
         for i, box in enumerate(char_boxes):
             self.current_line_box.add(box)

@@ -22,18 +22,19 @@ from gi.repository import Gtk, Adw
 import sys, os.path, gettext
 
 from lemma.app.font_manager import FontManager
-from lemma.workspace.workspace import Workspace
-from lemma.workspace.workspace_controller import WorkspaceController
-from lemma.workspace.workspace_presenter import WorkspacePresenter
-from lemma.workspace.workspace_view import MainWindow
-from lemma.storage.storage import Storage
 from lemma.app.service_locator import ServiceLocator
-from lemma.dialogs.dialog_locator import DialogLocator
 from lemma.app.color_manager import ColorManager
+from lemma.dialogs.dialog_locator import DialogLocator
 from lemma.popovers.popover_manager import PopoverManager
-from lemma.document_view.document_view import DocumentView
-from lemma.document_draft.document_draft import DocumentDraft
-from lemma.actions.actions import Actions
+
+import lemma.workspace.workspace as workspace
+import lemma.workspace.workspace_controller as workspace_controller
+import lemma.workspace.workspace_presenter as workspace_presenter
+import lemma.workspace.workspace_view as workspace_view
+import lemma.storage.storage as storage
+import lemma.document_view.document_view as document_view
+import lemma.document_draft.document_draft as document_draft
+import lemma.actions.actions as actions
 import lemma.keyboard_shortcuts.shortcuts as shortcuts
 
 
@@ -62,7 +63,7 @@ class Application(Adw.Application):
         FontManager.add_font('cmr08', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'))
         FontManager.set_text_font('cmr10', size=19.407)
 
-        self.main_window = MainWindow(self)
+        self.main_window = workspace_view.MainWindow(self)
         ServiceLocator.set_main_window(self.main_window)
         ColorManager.init(self.main_window)
         resources_path = ServiceLocator.get_resources_path()
@@ -70,9 +71,9 @@ class Application(Adw.Application):
         icon_theme.add_search_path(os.path.join(resources_path, 'icons'))
         icon_theme.add_search_path(os.path.join(resources_path, 'symbols'))
 
-        self.workspace = Workspace()
+        self.workspace = workspace.Workspace()
 
-        self.storage = Storage(self.workspace)
+        self.storage = storage.Storage(self.workspace)
         self.storage.populate_documents()
         self.storage.populate_workspace()
 
@@ -92,11 +93,11 @@ class Application(Adw.Application):
         ServiceLocator.set_workspace(self.workspace)
         DialogLocator.init_dialogs(self.main_window)
 
-        self.workspace_controller = WorkspaceController(self.workspace, self.main_window)
-        self.workspace_presenter = WorkspacePresenter(self.workspace, self.main_window)
-        self.document_view = DocumentView(self.workspace, self.main_window)
-        self.document_draft = DocumentDraft(self.workspace, self.main_window)
-        self.actions = Actions(self.workspace, self.document_view)
+        self.workspace_controller = workspace_controller.WorkspaceController(self.workspace, self.main_window)
+        self.workspace_presenter = workspace_presenter.WorkspacePresenter(self.workspace, self.main_window)
+        self.document_view = document_view.DocumentView(self.workspace, self.main_window)
+        self.document_draft = document_draft.DocumentDraft(self.workspace, self.main_window)
+        self.actions = actions.Actions(self.workspace, self.document_view)
 
         self.storage.init_writer()
         self.shortcuts = shortcuts.Shortcuts(self.actions)

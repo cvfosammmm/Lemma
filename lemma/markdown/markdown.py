@@ -17,15 +17,15 @@
 
 import re
 
-from lemma.ast.node import *
+import lemma.ast.node as ast
 
 
 def build_ast(markdown):
-    document_lines = Lines()
+    document_lines = ast.Lines()
 
     lines = markdown.splitlines()
     for line in lines:
-        document_line = Line()
+        document_line = ast.Line()
         for segment in re.split(r'(\$`.*?`\$)', line):
             if segment.startswith('$`') and segment.endswith('`$'):
                 add_math_to_line(document_line, segment[2:-2])
@@ -33,7 +33,7 @@ def build_ast(markdown):
                 add_non_math_to_line(document_line, segment)
         document_lines.append(document_line)
 
-    if document_lines.length() == 0: document_lines.append(Line())
+    if document_lines.length() == 0: document_lines.append(ast.Line())
 
     return document_lines
 
@@ -41,12 +41,12 @@ def build_ast(markdown):
 def add_non_math_to_line(document_line, text):
     for char in text:
         if char != '\n':
-            document_line.append(UnicodeCharacter(char))
+            document_line.append(ast.UnicodeCharacter(char))
 
 
 def add_math_to_line(document_line, text):
     for name in re.split(r'(\\[^\\]*)', text):
         if name.startswith('\\'):
-            document_line.append(MathSymbol(name[1:]))
+            document_line.append(ast.MathSymbol(name[1:]))
 
 

@@ -17,7 +17,7 @@
 
 import time
 
-from lemma.ast.node import *
+import lemma.ast.node as ast
 from lemma.cursor.cursor import Cursor
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
@@ -37,8 +37,8 @@ class Document(Observable):
 
         self.id = id
         self.title = ''
-        self.lines = Lines()
-        self.lines.insert(0, Line())
+        self.lines = ast.Lines()
+        self.lines.insert(0, ast.Line())
         self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
         self.implicit_x_position = 0
         self.scroll_insert_on_screen_after_layout_update = False
@@ -113,11 +113,11 @@ class Document(Observable):
         return offset_moved
 
     def insert_node_at_cursor(self, node):
-        if isinstance(node, EndOfLine):
+        if isinstance(node, ast.EndOfLine):
 	        self.insert_linebreak()
-        elif isinstance(node, UnicodeCharacter):
+        elif isinstance(node, ast.UnicodeCharacter):
 	        self.insert_character(node.content)
-        elif isinstance(node, MathSymbol):
+        elif isinstance(node, ast.MathSymbol):
 	        self.insert_math_symbol(node.name)
 
     def insert_text_at_cursor(self, text):
@@ -128,7 +128,7 @@ class Document(Observable):
     	        self.insert_character(char)
 
     def insert_character(self, char):
-        character = UnicodeCharacter(char)
+        character = ast.UnicodeCharacter(char)
         line = self.insert.get_node().get_iterator().get_line()
         index = line.get_index(self.insert.get_node())
         line.insert(index, character)
@@ -143,7 +143,7 @@ class Document(Observable):
         self.insert.set_node(line_2.get_child(0))
 
     def insert_math_symbol(self, name):
-        symbol = MathSymbol(name)
+        symbol = ast.MathSymbol(name)
         line = self.insert.get_node().get_iterator().get_line()
         index = line.get_index(self.insert.get_node())
         line.insert(index, symbol)
@@ -158,7 +158,7 @@ class Document(Observable):
 
                 line_1 = self.insert.get_node().get_iterator().get_line()
                 line_2 = self.lines.get_child(self.lines.get_index(line_1) + 1)
-                new_line = Line()
+                new_line = ast.Line()
                 new_line.add(line_1)
                 new_line.add(line_2)
                 index = self.lines.get_index(line_1)

@@ -20,7 +20,6 @@ import os.path
 import time
 import datetime
 from xdg.BaseDirectory import xdg_config_home
-from xdg.BaseDirectory import *
 
 import lemma.app.settings as settingscontroller
 

@@ -23,7 +23,6 @@ from gi.repository import Gtk, GLib, Gio
 import os.path, pickle, re
 
 import lemma.dialogs.import_documents.import_documents_viewgtk as view
-from lemma.ast.node import *
 from lemma.document.document import Document
 from lemma.app.service_locator import ServiceLocator
 import lemma.commands.commands as commands

@@ -23,7 +23,7 @@ import datetime
 
 from lemma.app.font_manager import FontManager
 from lemma.app.color_manager import ColorManager
-from lemma.layout.layout import *
+import lemma.layout.layout as boxes
 
 
 class DocumentViewPresenter():
@@ -104,17 +104,17 @@ class DocumentViewPresenter():
         ctx.fill()
 
     def draw_box(self, ctx, box, offset_x, offset_y):
-        if isinstance(box, BoxVContainer):
+        if isinstance(box, boxes.BoxVContainer):
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_y += child.height
 
-        elif isinstance(box, BoxHContainer):
+        elif isinstance(box, boxes.BoxHContainer):
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_x += child.width
 
-        elif isinstance(box, BoxGlyph):
+        elif isinstance(box, boxes.BoxGlyph):
             if box.is_selected:
                 ctx.set_source_rgb(0, 0, 1)
                 ctx.rectangle(offset_x, offset_y, box.width, box.height)
