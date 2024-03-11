@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class IMCommit():
+class Command():
 
     def __init__(self, text):
         self.is_undo_checkpoint = True
@@ -31,30 +31,6 @@ class IMCommit():
         for char in reversed(self.text):
             document.ast.move_cursor_by_offset(-1)
             document.ast.delete_char_at_cursor()
-        document.set_scroll_insert_on_screen_after_layout_update()
-
-
-class Delete():
-
-    def __init__(self):
-        self.is_undo_checkpoint = True
-        self.update_implicit_x_position = True
-        self.state = dict()
-
-    def run(self, document):
-        line = document.ast.insert.get_node().get_iterator().get_line()
-        if document.ast.insert.get_node() != line.get_child(-1) or line.parent.get_child(-1) != line:
-            self.state['deleted_node'] = document.ast.delete_char_at_cursor()
-            self.is_undo_checkpoint = True
-        else:
-            self.state['deleted_node'] = None
-            self.is_undo_checkpoint = False
-        document.set_scroll_insert_on_screen_after_layout_update()
-
-    def undo(self, document):
-        if self.state['deleted_node'] != None:
-            document.ast.insert_node_at_cursor(self.state['deleted_node'])
-            document.ast.move_cursor_by_offset(-1)
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

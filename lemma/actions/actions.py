@@ -22,7 +22,6 @@ from gi.repository import Gio, GLib
 from lemma.app.service_locator import ServiceLocator
 from lemma.dialogs.dialog_locator import DialogLocator
 from lemma.popovers.popover_manager import PopoverManager
-import lemma.document.commands.commands as commands
 
 
 class Actions(object):
@@ -135,9 +134,7 @@ class Actions(object):
         if parameter == None: return
 
         name = parameter[0]
-
-        command = commands.AddMathSymbol(name)
-        self.workspace.active_document.add_command(command)
+        self.workspace.active_document.add_command('add_symbol', name)
 
     def show_insert_symbols_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('insert_symbols')

@@ -16,25 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class IMCommit():
-
-    def __init__(self, text):
-        self.is_undo_checkpoint = True
-        self.update_implicit_x_position = True
-        self.text = text
-
-    def run(self, document):
-        document.ast.insert_text_at_cursor(self.text)
-        document.set_scroll_insert_on_screen_after_layout_update()
-
-    def undo(self, document):
-        for char in reversed(self.text):
-            document.ast.move_cursor_by_offset(-1)
-            document.ast.delete_char_at_cursor()
-        document.set_scroll_insert_on_screen_after_layout_update()
-
-
-class Delete():
+class Command():
 
     def __init__(self):
         self.is_undo_checkpoint = True

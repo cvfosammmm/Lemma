@@ -19,8 +19,6 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-import lemma.document.commands.commands as commands
-
 
 class DocumentViewController():
 
@@ -61,7 +59,7 @@ class DocumentViewController():
             if y < -self.view.subtitle_height:
                 self.document_view.init_renaming()
             elif y > 0:
-                self.document_view.document.add_command(commands.Click(x, y))
+                self.document_view.document.add_command('click', x, y)
                 self.content.grab_focus()
 
     def on_keypress_content(self, controller, keyval, keycode, state):
@@ -69,30 +67,27 @@ class DocumentViewController():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
-        command = None
+        document = self.document_view.document
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
-            case ('left', 0): command = commands.Left(1)
-            case ('right', 0): command = commands.Right(1)
-            case ('up', 0): command = commands.Up()
-            case ('down', 0): command = commands.Down()
-            case ('home', 0): command = commands.LineStart()
-            case ('end', 0): command = commands.LineEnd()
-            case ('page_up', 0): command = commands.PageUp(self.view.scrolling_widget.height)
-            case ('page_down', 0): command = commands.PageDown(self.view.scrolling_widget.height)
-
-            case ('return', _): command = commands.Return()
-            case ('backspace', _): command = commands.Backspace()
-            case ('delete', _): command = commands.Delete()
+            case ('left', 0): document.add_command('left', 1)
+            case ('right', 0): document.add_command('right', 1)
+            case ('up', 0): document.add_command('up')
+            case ('down', 0): document.add_command('down')
+            case ('home', 0): document.add_command('line_start')
+            case ('end', 0): document.add_command('line_end')
+            case ('page_up', 0): document.add_command('page_up', self.view.scrolling_widget.height)
+            case ('page_down', 0): document.add_command('page_down', self.view.scrolling_widget.height)
+            case ('return', _): document.add_command('newline')
+            case ('backspace', _): document.add_command('backspace')
+            case ('delete', _): document.add_command('delete')
 
             case _: return False
-        if command != None:
-            self.document_view.document.add_command(command)
         return True
 
     def on_im_commit(self, im_context, text):
         if self.document_view.document == None: return False
 
-        self.document_view.document.add_command(commands.IMCommit(text))
+        self.document_view.document.add_command('im_commit', text)
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()

@@ -19,7 +19,6 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-import lemma.document.commands.commands as commands
 from lemma.document_view.document_view_controller import DocumentViewController
 from lemma.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.title_widget.title_widget import TitleWidget
@@ -99,7 +98,7 @@ class DocumentView(Observable):
             self.submit()
 
     def submit(self):
-        self.document.add_command(commands.SetTitle(self.title_widget.title))
+        self.document.add_command('set_title', self.title_widget.title)
         self.stop_renaming()
 
     def on_entry_keypress(self, controller, keyval, keycode, state):

@@ -15,15 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import time
+import time, os.path
 
 from lemma.document.ast.ast import AST
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
 from lemma.document.command_processor.command_processor import CommandProcessor
-import lemma.document.commands.populate_from_path as populate_from_path
 from lemma.helpers.observable import Observable
+import lemma.document.commands.populate_from_path as populate_from_path
+for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
+    for file in files:
+        name = os.path.basename(file[:-3])
+        exec('import lemma.document.commands.' + name + ' as ' + name)
 
 
 class Document(Observable):
@@ -49,10 +53,10 @@ class Document(Observable):
         self.update() # this will create an empty layout, markdown string, ...
 
         if path != None:
-            self.add_command(populate_from_path.Command(path))
+            self.add_command('populate_from_path', path)
             self.command_processor.reset_undo_stack()
 
-    def add_command(self, command): self.command_processor.add_command(command)
+    def add_command(self, name, *parameters): self.command_processor.add_command(eval(name + '.Command')(*parameters))
     def can_undo(self): return self.command_processor.can_undo()
     def can_redo(self): return self.command_processor.can_redo()
     def undo(self): self.command_processor.undo()
