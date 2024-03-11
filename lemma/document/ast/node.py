@@ -18,7 +18,7 @@
 import re
 whitespace_regex = re.compile('\s')
 
-from lemma.document.iterator.iterator import Iterator
+from lemma.document.ast.iterator import Iterator
 
 
 class Root():

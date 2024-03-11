@@ -18,7 +18,7 @@
 import time
 
 import lemma.document.ast.node as ast
-from lemma.document.cursor.cursor import Cursor
+from lemma.document.ast.cursor import Cursor
 
 
 class AST(object):
