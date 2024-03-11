@@ -99,7 +99,7 @@ class DocumentView(Observable):
             self.submit()
 
     def submit(self):
-        self.document.command_processor.add_command(commands.SetTitle(self.title_widget.title))
+        self.document.add_command(commands.SetTitle(self.title_widget.title))
         self.stop_renaming()
 
     def on_entry_keypress(self, controller, keyval, keycode, state):

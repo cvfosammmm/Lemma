@@ -117,9 +117,7 @@ class Dialog(object):
 
     def import_files(self):
         for path in self.current_values['files']:
-            document = Document(self.workspace, self.workspace.documents.get_new_document_id())
-            document.command_processor.add_command(commands.PopulateFromPath(path))
-            document.command_processor.reset_undo_stack()
+            document = Document(self.workspace.documents.get_new_document_id(), path=path)
             self.workspace.documents.add(document)
 
 

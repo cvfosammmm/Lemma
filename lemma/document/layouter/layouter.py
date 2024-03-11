@@ -34,7 +34,7 @@ class Layouter(Observable):
 
     def update(self):
         self.root = boxes.BoxVContainer()
-        self.document.lines.accept(self)
+        self.document.ast.root.accept(self)
         self.document.layout = self.root
 
     def visit_root(self, root):

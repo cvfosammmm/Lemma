@@ -34,9 +34,7 @@ class Storage(object):
     def populate_documents(self):
         for direntry in os.scandir(self.pathname):
             if direntry.is_file() and direntry.name.isdigit():
-                document = Document(self.workspace, int(direntry.name))
-                document.command_processor.add_command(commands.PopulateFromPath(direntry.path))
-                document.command_processor.reset_undo_stack()
+                document = Document(int(direntry.name), path=direntry.path)
                 self.workspace.documents.add(document)
 
     def populate_workspace(self):

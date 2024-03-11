@@ -15,9 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os.path
-import lemma.document.markdown.markdown as markdown
-
 
 class SetTitle():
 
@@ -36,33 +33,6 @@ class SetTitle():
         document.title = self.state['prev_title']
 
 
-class PopulateFromPath():
-
-    def __init__(self, path):
-        self.path = path
-        self.is_undo_checkpoint = False
-        self.update_implicit_x_position = True
-
-    def run(self, document):
-        document.last_modified = os.path.getmtime(self.path)
-
-        with open(self.path, 'r') as file:
-            content = file.read()
-
-        if content.startswith('# '):
-            line, newline, rest = content.partition('\n')
-            document.title = line[1:].strip()
-
-        if rest != '':
-            document.lines = markdown.build_ast(rest)
-
-        document.insert.set_position([0, 0])
-        document.set_scroll_insert_on_screen_after_layout_update()
-
-    def undo(self, document):
-        pass
-
-
 class Click():
 
     def __init__(self, x, y):
@@ -73,12 +43,12 @@ class Click():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.insert.get_position()
+        self.state['previous_cursor_position'] = document.ast.insert.get_position()
 
-        document.insert.set_node(document.get_node_at_xy(self.x, self.y))
+        document.ast.insert.set_node(document.get_node_at_xy(self.x, self.y))
 
     def undo(self, document):
-        document.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.insert.set_position(self.state['previous_cursor_position'])
 
 
 class Left():
@@ -90,11 +60,11 @@ class Left():
         self.state = dict()
 
     def run(self, document):
-        self.state['offset_moved'] = document.move_cursor_by_offset(self.offset)
+        self.state['offset_moved'] = document.ast.move_cursor_by_offset(self.offset)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.move_cursor_by_offset(-self.state['offset_moved'])
+        document.ast.move_cursor_by_offset(-self.state['offset_moved'])
 
 
 class Right():
@@ -106,11 +76,11 @@ class Right():
         self.state = dict()
 
     def run(self, document):
-        self.state['offset_moved'] = document.move_cursor_by_offset(self.offset)
+        self.state['offset_moved'] = document.ast.move_cursor_by_offset(self.offset)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.move_cursor_by_offset(-self.state['offset_moved'])
+        document.ast.move_cursor_by_offset(-self.state['offset_moved'])
 
 
 class Up():
@@ -121,19 +91,19 @@ class Up():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.insert.get_position()
+        self.state['previous_cursor_position'] = document.ast.insert.get_position()
 
-        x, y = document.get_xy_at_node(document.insert.get_node())
+        x, y = document.get_xy_at_node(document.ast.insert.get_node())
         if document.implicit_x_position != None:
             x = document.implicit_x_position
         if y == 0:
-            document.insert.set_node(document.get_node_at_xy(0, 0))
+            document.ast.insert.set_node(document.get_node_at_xy(0, 0))
         else:
-            document.insert.set_node(document.get_node_at_xy(x, y - 1))
+            document.ast.insert.set_node(document.get_node_at_xy(x, y - 1))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.insert.set_position(self.state['previous_cursor_position'])
 
 
 class Down():
@@ -144,16 +114,16 @@ class Down():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.insert.get_position()
+        self.state['previous_cursor_position'] = document.ast.insert.get_position()
 
-        x, y = document.get_xy_at_node(document.insert.get_node())
+        x, y = document.get_xy_at_node(document.ast.insert.get_node())
         if document.implicit_x_position != None:
             x = document.implicit_x_position
-        document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height + 1))
+        document.ast.insert.set_node(document.get_node_at_xy(x, y + document.ast.insert.get_node().box.parent.height + 1))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.insert.set_position(self.state['previous_cursor_position'])
 
 
 class PageUp():
@@ -165,19 +135,19 @@ class PageUp():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.insert.get_position()
+        self.state['previous_cursor_position'] = document.ast.insert.get_position()
 
-        x, y = document.get_xy_at_node(document.insert.get_node())
+        x, y = document.get_xy_at_node(document.ast.insert.get_node())
         if document.implicit_x_position != None:
             x = document.implicit_x_position
         if y == 0:
-            document.insert.set_node(document.get_node_at_xy(0, 0))
+            document.ast.insert.set_node(document.get_node_at_xy(0, 0))
         else:
-            document.insert.set_node(document.get_node_at_xy(x, max(0, y - self.height)))
+            document.ast.insert.set_node(document.get_node_at_xy(x, max(0, y - self.height)))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.insert.set_position(self.state['previous_cursor_position'])
 
 
 class PageDown():
@@ -189,16 +159,16 @@ class PageDown():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.insert.get_position()
+        self.state['previous_cursor_position'] = document.ast.insert.get_position()
 
-        x, y = document.get_xy_at_node(document.insert.get_node())
+        x, y = document.get_xy_at_node(document.ast.insert.get_node())
         if document.implicit_x_position != None:
             x = document.implicit_x_position
-        document.insert.set_node(document.get_node_at_xy(x, y + document.insert.get_node().box.parent.height + self.height))
+        document.ast.insert.set_node(document.get_node_at_xy(x, y + document.ast.insert.get_node().box.parent.height + self.height))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.insert.set_position(self.state['previous_cursor_position'])
 
 
 class LineStart():
@@ -209,14 +179,14 @@ class LineStart():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.insert.get_position()
+        self.state['previous_cursor_position'] = document.ast.insert.get_position()
 
-        x, y = document.get_xy_at_node(document.insert.get_node())
-        document.insert.set_node(document.get_node_at_xy(0, y))
+        x, y = document.get_xy_at_node(document.ast.insert.get_node())
+        document.ast.insert.set_node(document.get_node_at_xy(0, y))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.insert.set_position(self.state['previous_cursor_position'])
 
 
 class LineEnd():
@@ -227,14 +197,14 @@ class LineEnd():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.insert.get_position()
+        self.state['previous_cursor_position'] = document.ast.insert.get_position()
 
-        x, y = document.get_xy_at_node(document.insert.get_node())
-        document.insert.set_node(document.get_node_at_xy(document.layout.width, y))
+        x, y = document.get_xy_at_node(document.ast.insert.get_node())
+        document.ast.insert.set_node(document.get_node_at_xy(document.layout.width, y))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.insert.set_position(self.state['previous_cursor_position'])
 
 
 class Return():
@@ -244,12 +214,12 @@ class Return():
         self.update_implicit_x_position = True
 
     def run(self, document):
-        document.insert_text_at_cursor('\n')
+        document.ast.insert_text_at_cursor('\n')
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.move_cursor_by_offset(-1)
-        document.delete_char_at_cursor()
+        document.ast.move_cursor_by_offset(-1)
+        document.ast.delete_char_at_cursor()
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
@@ -261,13 +231,13 @@ class IMCommit():
         self.text = text
 
     def run(self, document):
-        document.insert_text_at_cursor(self.text)
+        document.ast.insert_text_at_cursor(self.text)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         for char in reversed(self.text):
-            document.move_cursor_by_offset(-1)
-            document.delete_char_at_cursor()
+            document.ast.move_cursor_by_offset(-1)
+            document.ast.delete_char_at_cursor()
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
@@ -279,12 +249,12 @@ class AddMathSymbol():
         self.name = name
 
     def run(self, document):
-        document.insert_math_symbol(self.name)
+        document.ast.insert_math_symbol(self.name)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.move_cursor_by_offset(-1)
-        document.delete_char_at_cursor()
+        document.ast.move_cursor_by_offset(-1)
+        document.ast.delete_char_at_cursor()
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
@@ -296,9 +266,9 @@ class Delete():
         self.state = dict()
 
     def run(self, document):
-        line = document.insert.get_node().get_iterator().get_line()
-        if document.insert.get_node() != line.get_child(-1) or line.parent.get_child(-1) != line:
-            self.state['deleted_node'] = document.delete_char_at_cursor()
+        line = document.ast.insert.get_node().get_iterator().get_line()
+        if document.ast.insert.get_node() != line.get_child(-1) or line.parent.get_child(-1) != line:
+            self.state['deleted_node'] = document.ast.delete_char_at_cursor()
             self.is_undo_checkpoint = True
         else:
             self.state['deleted_node'] = None
@@ -307,8 +277,8 @@ class Delete():
 
     def undo(self, document):
         if self.state['deleted_node'] != None:
-            document.insert_node_at_cursor(self.state['deleted_node'])
-            document.move_cursor_by_offset(-1)
+            document.ast.insert_node_at_cursor(self.state['deleted_node'])
+            document.ast.move_cursor_by_offset(-1)
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
@@ -320,11 +290,11 @@ class Backspace():
         self.state = dict()
 
     def run(self, document):
-        line = document.insert.get_node().get_iterator().get_line()
-        index = line.get_index(document.insert.get_node())
-        if document.lines.get_index(line) != 0 or index != 0:
-            document.move_cursor_by_offset(-1)
-            self.state['deleted_node'] = document.delete_char_at_cursor()
+        line = document.ast.insert.get_node().get_iterator().get_line()
+        index = line.get_index(document.ast.insert.get_node())
+        if document.ast.root.get_index(line) != 0 or index != 0:
+            document.ast.move_cursor_by_offset(-1)
+            self.state['deleted_node'] = document.ast.delete_char_at_cursor()
             self.is_undo_checkpoint = True
         else:
             self.state['deleted_node'] = None
@@ -333,7 +303,7 @@ class Backspace():
 
     def undo(self, document):
         if self.state['deleted_node'] != None:
-            document.insert_node_at_cursor(self.state['deleted_node'])
+            document.ast.insert_node_at_cursor(self.state['deleted_node'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

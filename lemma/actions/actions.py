@@ -78,8 +78,8 @@ class Actions(object):
         has_active_doc = (self.workspace.active_document != None)
         prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
         next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
-        can_undo = has_active_doc and self.workspace.active_document.command_processor.can_undo()
-        can_redo = has_active_doc and self.workspace.active_document.command_processor.can_redo()
+        can_undo = has_active_doc and self.workspace.active_document.can_undo()
+        can_redo = has_active_doc and self.workspace.active_document.can_redo()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -126,10 +126,10 @@ class Actions(object):
             self.workspace.set_active_document(next_doc, update_history=False)
 
     def undo(self, action=None, parameter=''):
-        self.workspace.active_document.command_processor.undo()
+        self.workspace.active_document.undo()
 
     def redo(self, action=None, parameter=''):
-        self.workspace.active_document.command_processor.redo()
+        self.workspace.active_document.redo()
 
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return
@@ -137,7 +137,7 @@ class Actions(object):
         name = parameter[0]
 
         command = commands.AddMathSymbol(name)
-        self.workspace.active_document.command_processor.add_command(command)
+        self.workspace.active_document.add_command(command)
 
     def show_insert_symbols_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('insert_symbols')

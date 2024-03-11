@@ -28,7 +28,7 @@ class MarkdownScanner(Observable):
 
     def update(self):
         self.markdown = '# ' + self.document.title + '\n'
-        self.document.lines.accept(self)
+        self.document.ast.root.accept(self)
         self.markdown = self.markdown[:-1] # remove last EOL
         self.document.markdown = self.markdown
 

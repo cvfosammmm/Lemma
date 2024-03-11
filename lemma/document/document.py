@@ -17,29 +17,26 @@
 
 import time
 
-import lemma.document.ast.node as ast
-from lemma.document.cursor.cursor import Cursor
+from lemma.document.ast.ast import AST
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
-from lemma.document.commands.command_processor import CommandProcessor
+from lemma.document.command_processor.command_processor import CommandProcessor
+import lemma.document.commands.populate_from_path as populate_from_path
 from lemma.helpers.observable import Observable
 
 
 class Document(Observable):
 
-    def __init__(self, workspace, id):
+    def __init__(self, id, path=None):
         Observable.__init__(self)
-        self.workspace = workspace
 
         self.last_modified = time.time()
         self.command_processor = CommandProcessor(self)
 
         self.id = id
         self.title = ''
-        self.lines = ast.Root()
-        self.lines.insert(0, ast.Line())
-        self.insert = Cursor(self, self.lines.get_child(0).get_child(0))
+        self.ast = AST()
         self.implicit_x_position = 0
         self.scroll_insert_on_screen_after_layout_update = False
         self.layout = None
@@ -50,6 +47,16 @@ class Document(Observable):
         self.markdown_scanner = MarkdownScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
         self.update() # this will create an empty layout, markdown string, ...
+
+        if path != None:
+            self.add_command(populate_from_path.Command(path))
+            self.command_processor.reset_undo_stack()
+
+    def add_command(self, command): self.command_processor.add_command(command)
+    def can_undo(self): return self.command_processor.can_undo()
+    def can_redo(self): return self.command_processor.can_redo()
+    def undo(self): self.command_processor.undo()
+    def redo(self): self.command_processor.redo()
 
     def update(self):
         self.layouter.update()
@@ -63,7 +70,7 @@ class Document(Observable):
     def update_implicit_x_position(self):
         last_command = self.command_processor.get_last_command()
         if last_command != None and last_command.update_implicit_x_position:
-            x, y = self.get_xy_at_node(self.insert.get_node())
+            x, y = self.get_xy_at_node(self.ast.insert.get_node())
             self.implicit_x_position = x
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
@@ -90,87 +97,5 @@ class Document(Observable):
         while not box.is_leaf():
             box = box.get_child_at_xy(x, y)
         return box.get_node()
-
-    def move_cursor_by_offset(self, offset):
-        offset_moved = 0
-        iterator = self.insert.get_node().get_iterator()
-
-        if offset < 0:
-            while offset < offset_moved:
-                if iterator.prev() == False:
-                    break
-                offset_moved -= 1
-        else:
-            while offset > offset_moved:
-                if iterator.next() == False:
-                    break
-                offset_moved += 1
-        self.insert.set_node(iterator.get_node())
-
-        return offset_moved
-
-    def insert_node_at_cursor(self, node):
-        if isinstance(node, ast.EndOfLine):
-	        self.insert_linebreak()
-        elif isinstance(node, ast.UnicodeCharacter):
-	        self.insert_character(node.content)
-        elif isinstance(node, ast.MathSymbol):
-	        self.insert_math_symbol(node.name)
-
-    def insert_text_at_cursor(self, text):
-        for char in text:
-            if char == '\n':
-    	        self.insert_linebreak()
-            else:
-    	        self.insert_character(char)
-
-    def insert_character(self, char):
-        character = ast.UnicodeCharacter(char)
-        line = self.insert.get_node().get_iterator().get_line()
-        index = line.get_index(self.insert.get_node())
-        line.insert(index, character)
-
-    def insert_linebreak(self):
-        orig_line = self.insert.get_node().get_iterator().get_line()
-        line_1, line_2 = orig_line.split(self.insert.get_node())
-        index = self.lines.get_index(orig_line)
-        self.lines.remove(orig_line)
-        self.lines.insert(index, line_2)
-        self.lines.insert(index, line_1)
-        self.insert.set_node(line_2.get_child(0))
-
-    def insert_math_symbol(self, name):
-        symbol = ast.MathSymbol(name)
-        line = self.insert.get_node().get_iterator().get_line()
-        index = line.get_index(self.insert.get_node())
-        line.insert(index, symbol)
-
-    def delete_char_at_cursor(self):
-        deleted_node = None
-
-        line = self.insert.get_node().get_iterator().get_line()
-        if self.insert.get_node() == line.get_child(-1):
-            if self.lines.get_child(-1) != line:
-                deleted_node = self.insert.get_node()
-
-                line_1 = self.insert.get_node().get_iterator().get_line()
-                line_2 = self.lines.get_child(self.lines.get_index(line_1) + 1)
-                new_line = ast.Line()
-                new_line.add(line_1)
-                new_line.add(line_2)
-                index = self.lines.get_index(line_1)
-                self.lines.insert(index, new_line)
-                self.lines.remove(line_1)
-                self.lines.remove(line_2)
-                self.insert.set_node(new_line.get_child(line_1.length() - 1))
-        else:
-            deleted_node = self.insert.get_node()
-
-            line = self.insert.get_node().get_iterator().get_line()
-            index = line.get_index(self.insert.get_node())
-            line.remove(self.insert.get_node())
-            self.insert.set_node(line.get_child(index))
-
-        return deleted_node
 
 

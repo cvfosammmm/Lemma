@@ -30,7 +30,7 @@ class PlaintextScanner(Observable):
     def update(self):
         self.text = ''
         self.current_line = ''
-        self.document.lines.accept(self)
+        self.document.ast.root.accept(self)
         self.text = self.text[:-1] # remove last EOL
         self.document.plaintext = self.text
 

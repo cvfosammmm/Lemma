@@ -18,8 +18,8 @@
 
 class Cursor():
 
-    def __init__(self, document, node=None):
-        self.document = document
+    def __init__(self, ast, node=None):
+        self.ast = ast
         self.node = node
 
     def set_node(self, node):
@@ -29,7 +29,7 @@ class Cursor():
         return self.node
 
     def set_position(self, position):
-        node = self.document.lines
+        node = self.ast.root
 
         for index in position:
             node = node.get_child(index)

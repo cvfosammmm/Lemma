@@ -56,7 +56,7 @@ class DocumentViewPresenter():
 
     def scroll_insert_on_screen(self, animate=False):
         document = self.model.document
-        insert_position = document.get_xy_at_node(document.insert.get_node())
+        insert_position = document.get_xy_at_node(document.ast.insert.get_node())
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
         insert_y = insert_position[1] + content_offset + self.view.insert_drawing_offset
         insert_height = self.view.insert_height
@@ -129,7 +129,7 @@ class DocumentViewPresenter():
                 ctx.mask(pattern)
                 ctx.fill()
 
-        if box == self.model.document.insert.get_node().box:
+        if box == self.model.document.ast.insert.get_node().box:
             self.cursor_coords = (offset_x, offset_y + self.view.insert_drawing_offset, 1, self.view.insert_height)
 
     def draw_cursor(self, ctx):

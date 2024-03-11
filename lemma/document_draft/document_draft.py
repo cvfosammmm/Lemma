@@ -77,7 +77,7 @@ class DocumentDraft():
 
     def init(self):
         id = self.workspace.documents.get_new_document_id()
-        self.document = Document(self, id)
+        self.document = Document(id)
         self.title_widget.document = self.document
         self.reset_title()
         self.title_widget.grab_focus()
