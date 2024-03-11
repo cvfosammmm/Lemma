@@ -22,7 +22,7 @@ from gi.repository import Gio, GLib
 from lemma.app.service_locator import ServiceLocator
 from lemma.dialogs.dialog_locator import DialogLocator
 from lemma.popovers.popover_manager import PopoverManager
-import lemma.commands.commands as commands
+import lemma.document.commands.commands as commands
 
 
 class Actions(object):

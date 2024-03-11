@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import os.path
-import lemma.markdown.markdown as markdown
+import lemma.document.markdown.markdown as markdown
 
 
 class SetTitle():

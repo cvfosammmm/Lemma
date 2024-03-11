@@ -23,7 +23,7 @@ import datetime
 
 from lemma.app.font_manager import FontManager
 from lemma.app.color_manager import ColorManager
-import lemma.layout.layout as boxes
+import lemma.document.layout.layout as boxes
 
 
 class DocumentViewPresenter():

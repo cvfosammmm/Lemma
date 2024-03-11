@@ -17,7 +17,7 @@
 
 import re
 
-import lemma.ast.node as ast
+import lemma.document.ast.node as ast
 
 
 def build_ast(markdown):

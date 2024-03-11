@@ -23,7 +23,6 @@ import datetime
 
 from lemma.app.service_locator import ServiceLocator
 from lemma.app.color_manager import ColorManager
-from lemma.ast.node import UnicodeCharacter
 import lemma.helpers.helpers as helpers
 
 

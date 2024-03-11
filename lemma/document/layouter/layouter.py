@@ -18,7 +18,7 @@
 from lemma.helpers.observable import Observable
 from lemma.app.font_manager import FontManager
 from lemma.app.latex_db import LaTeXDB
-import lemma.layout.layout as boxes
+import lemma.document.layout.layout as boxes
 import lemma.helpers.helpers as helpers
 
 

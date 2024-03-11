@@ -17,13 +17,13 @@
 
 import time
 
-import lemma.ast.node as ast
-from lemma.cursor.cursor import Cursor
+import lemma.document.ast.node as ast
+from lemma.document.cursor.cursor import Cursor
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
+from lemma.document.commands.command_processor import CommandProcessor
 from lemma.helpers.observable import Observable
-from lemma.commands.command_processor import CommandProcessor
 
 
 class Document(Observable):
