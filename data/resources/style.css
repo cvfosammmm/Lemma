@@ -181,7 +181,6 @@ overlay.popover-top {
 overlay.popover .content {
     background: @popover_bg_color;
     padding: 6px;
-    padding-top: 5px;
     border-radius: 10px;
     border: 1px solid @borders;
     box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
