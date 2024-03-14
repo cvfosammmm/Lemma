@@ -104,6 +104,14 @@ class DocumentViewPresenter():
         ctx.fill()
 
     def draw_box(self, ctx, box, offset_x, offset_y):
+        if box == self.model.document.ast.insert.get_node().box:
+            if isinstance(box, boxes.BoxPlaceholder):
+                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
+                ctx.rectangle(offset_x, offset_y + self.view.insert_drawing_offset, box.width, box.parent.height)
+                ctx.fill()
+            else:
+                self.cursor_coords = (offset_x, offset_y + self.view.insert_drawing_offset, 1, self.view.insert_height)
+
         if isinstance(box, boxes.BoxVContainer):
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
@@ -114,23 +122,18 @@ class DocumentViewPresenter():
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_x += child.width
 
-        elif isinstance(box, boxes.BoxGlyph):
-            if box.is_selected:
-                ctx.set_source_rgb(0, 0, 1)
-                ctx.rectangle(offset_x, offset_y, box.width, box.height)
-                ctx.fill()
+        elif isinstance(box, boxes.BoxGlyph) or isinstance(box, boxes.BoxPlaceholder):
+            surface_color = ColorManager.get_ui_color('math') if 'math' in box.classes else ColorManager.get_ui_color('text')
+            fontname = 'math' if 'math' in box.classes and not box.char.isdecimal() else 'book'
+            surface = FontManager.get_surface(box.char, fontname=fontname)
 
-            surface = FontManager.get_surface(box.char)
             if surface != None:
                 ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.height + box.top)
                 pattern = ctx.get_source()
                 pattern.set_filter(cairo.Filter.BEST)
-                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('text'))
+                Gdk.cairo_set_source_rgba(ctx, surface_color)
                 ctx.mask(pattern)
                 ctx.fill()
-
-        if box == self.model.document.ast.insert.get_node().box:
-            self.cursor_coords = (offset_x, offset_y + self.view.insert_drawing_offset, 1, self.view.insert_height)
 
     def draw_cursor(self, ctx):
         if self.cursor_coords == None: return

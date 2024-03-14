@@ -24,19 +24,15 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        line = document.ast.insert.get_node().get_iterator().get_line()
-        if document.ast.insert.get_node() != line.get_child(-1) or line.parent.get_child(-1) != line:
-            self.state['deleted_node'] = document.ast.delete_char_at_cursor()
-            self.is_undo_checkpoint = True
-        else:
-            self.state['deleted_node'] = None
-            self.is_undo_checkpoint = False
+        self.state['insert_position_before'] = document.ast.insert.get_position()
+        self.state['deleted_nodes'] = document.ast.delete_char_at_cursor()
+        self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        if self.state['deleted_node'] != None:
-            document.ast.insert_node_at_cursor(self.state['deleted_node'])
-            document.ast.move_cursor_by_offset(-1)
+        for node in self.state['deleted_nodes']:
+            document.ast.insert_node(node)
+        document.ast.insert.set_position(self.state['insert_position_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

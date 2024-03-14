@@ -50,6 +50,8 @@ class Root():
     def accept(self, visitor): visitor.visit_root(self)
     def is_leaf(self): return False
     def is_root(self): return True
+    def is_line(self): return False
+    def is_math_area(self): return False
 
 
 class Line():
@@ -103,14 +105,38 @@ class Line():
     def accept(self, visitor): visitor.visit_line(self)
     def is_leaf(self): return False
     def is_root(self): return False
+    def is_line(self): return True
+    def is_math_area(self): return False
 
 
-class MathList():
+class BeforeMathArea():
+
+    def __init__(self):
+        self.parent = None
+        self.box = None
+
+    def set_parent(self, parent):
+        self.parent = parent
+
+    def set_box(self, box):
+        self.box = box
+
+    def get_iterator(self):
+        return Iterator(self)
+
+    def accept(self, visitor): visitor.visit_beforemath(self)
+    def is_leaf(self): return True
+    def is_root(self): return False
+    def is_line(self): return False
+    def is_math_area(self): return False
+
+
+class MathArea():
 
     def __init__(self):
         self.parent = None
         self.children = []
-        self.insert(0, EndOfMathList())
+        self.insert(0, EndOfMathArea())
 
     def set_parent(self, parent):
         self.parent = parent
@@ -153,9 +179,33 @@ class MathList():
             if child != line.get_child(-1):
                 self.append(child)
 
-    def accept(self, visitor): visitor.visit_mathlist(self)
+    def accept(self, visitor): visitor.visit_matharea(self)
     def is_leaf(self): return False
     def is_root(self): return False
+    def is_line(self): return False
+    def is_math_area(self): return True
+
+
+class EndOfMathArea():
+
+    def __init__(self):
+        self.parent = None
+        self.box = None
+
+    def set_parent(self, parent):
+        self.parent = parent
+
+    def set_box(self, box):
+        self.box = box
+
+    def get_iterator(self):
+        return Iterator(self)
+
+    def accept(self, visitor): visitor.visit_aftermath(self)
+    def is_leaf(self): return True
+    def is_root(self): return False
+    def is_line(self): return False
+    def is_math_area(self): return False
 
 
 class UnicodeCharacter():
@@ -178,27 +228,8 @@ class UnicodeCharacter():
     def accept(self, visitor): visitor.visit_char(self)
     def is_leaf(self): return True
     def is_root(self): return False
-
-
-class MathSymbol():
-
-    def __init__(self, name):
-        self.parent = None
-        self.name = name
-        self.box = None
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def set_box(self, box):
-        self.box = box
-
-    def get_iterator(self):
-        return Iterator(self)
-
-    def accept(self, visitor): visitor.visit_math_symbol(self)
-    def is_leaf(self): return True
-    def is_root(self): return False
+    def is_line(self): return False
+    def is_math_area(self): return False
 
 
 class EndOfLine():
@@ -219,25 +250,7 @@ class EndOfLine():
     def accept(self, visitor): visitor.visit_eol(self)
     def is_leaf(self): return True
     def is_root(self): return False
-
-
-class EndOfMathList():
-
-    def __init__(self):
-        self.parent = None
-        self.box = None
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def set_box(self, box):
-        self.box = box
-
-    def get_iterator(self):
-        return Iterator(self)
-
-    def accept(self, visitor): visitor.visit_eoml(self)
-    def is_leaf(self): return True
-    def is_root(self): return False
+    def is_line(self): return False
+    def is_math_area(self): return False
 
 

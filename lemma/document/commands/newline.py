@@ -21,14 +21,19 @@ class Command():
     def __init__(self):
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
+        self.state = dict()
 
     def run(self, document):
-        document.ast.insert_text_at_cursor('\n')
-        document.set_scroll_insert_on_screen_after_layout_update()
+        self.state['newline_added'] = False
+        if document.ast.insert.get_node().parent.is_line():
+            document.ast.insert_linebreak()
+            document.set_scroll_insert_on_screen_after_layout_update()
+            self.state['newline_added'] = True
 
     def undo(self, document):
-        document.ast.move_cursor_by_offset(-1)
-        document.ast.delete_char_at_cursor()
-        document.set_scroll_insert_on_screen_after_layout_update()
+        if self.state['newline_added']:
+            document.ast.move_cursor_by_offset(-1)
+            document.ast.delete_char_at_cursor()
+            document.set_scroll_insert_on_screen_after_layout_update()
 
 

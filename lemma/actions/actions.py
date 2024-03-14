@@ -45,6 +45,7 @@ class Actions(object):
         self.add_action('undo', self.undo)
         self.add_action('redo', self.redo)
 
+        self.add_action('insert-math', self.insert_math)
         self.add_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
         self.add_action('show-insert-symbols-menu', self.show_insert_symbols_menu)
@@ -74,11 +75,13 @@ class Actions(object):
         self.update_actions()
 
     def update_actions(self):
-        has_active_doc = (self.workspace.active_document != None)
-        prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
-        next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
-        can_undo = has_active_doc and self.workspace.active_document.can_undo()
-        can_redo = has_active_doc and self.workspace.active_document.can_redo()
+        active_document = self.workspace.active_document
+        has_active_doc = (active_document != None)
+        prev_doc = self.workspace.history.get_previous_if_any(active_document)
+        next_doc = self.workspace.history.get_next_if_any(active_document)
+        can_undo = has_active_doc and active_document.can_undo()
+        can_redo = has_active_doc and active_document.can_redo()
+        insert_in_line = has_active_doc and active_document.ast.insert.get_node().parent.is_line()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -89,6 +92,7 @@ class Actions(object):
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
+        self.actions['insert-math'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-insert-symbols-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
@@ -130,11 +134,14 @@ class Actions(object):
     def redo(self, action=None, parameter=''):
         self.workspace.active_document.redo()
 
+    def insert_math(self, action=None, parameter=''):
+        self.workspace.active_document.add_command('insert_math')
+
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return
 
         name = parameter[0]
-        self.workspace.active_document.add_command('add_symbol', name)
+        self.workspace.active_document.add_command('insert_symbol', name)
 
     def show_insert_symbols_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('insert_symbols')

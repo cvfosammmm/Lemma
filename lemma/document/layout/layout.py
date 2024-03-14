@@ -23,6 +23,7 @@ class BoxVContainer(object):
     def __init__(self):
         self.width = 0
         self.height = 0
+        self.classes = set()
 
         self.parent = None
         self.children = list()
@@ -68,7 +69,8 @@ class BoxHContainer(object):
 
     def __init__(self):
         self.width = 0
-        self.height = FontManager.line_height
+        self.height = FontManager.get_line_height()
+        self.classes = set()
 
         self.parent = None
         self.children = list()
@@ -117,11 +119,11 @@ class BoxGlyph(object):
         self.height = height
         self.left = left
         self.top = top
+        self.classes = set()
 
         self.parent = None
         self.char = char
         self.node = node
-        self.is_selected = False
 
     def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return True
@@ -135,8 +137,27 @@ class BoxEmpty(object):
         self.height = 0
         self.left = 0
         self.top = 0
+        self.classes = set()
 
         self.parent = None
+        self.node = node
+
+    def set_parent(self, parent): self.parent = parent
+    def is_leaf(self): return True
+    def get_node(self): return self.node
+
+
+class BoxPlaceholder(object):
+
+    def __init__(self, width, height, left, top, node=None):
+        self.width = width
+        self.height = height
+        self.left = left
+        self.top = top
+        self.classes = set()
+
+        self.parent = None
+        self.char = '•'
         self.node = node
 
     def set_parent(self, parent): self.parent = parent

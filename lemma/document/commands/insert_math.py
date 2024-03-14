@@ -16,32 +16,24 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class Cursor():
+class Command():
 
-    def __init__(self, ast, node=None):
-        self.ast = ast
-        self.node = node
+    def __init__(self):
+        self.is_undo_checkpoint = True
+        self.update_implicit_x_position = True
+        self.state = dict()
 
-    def set_node(self, node):
-        self.node = node
+    def run(self, document):
+        self.state['math_inserted'] = False
+        if document.ast.insert.get_node().parent.is_line():
+            document.ast.insert_math_area()
+            document.set_scroll_insert_on_screen_after_layout_update()
+            self.state['math_inserted'] = True
 
-    def get_node(self):
-        return self.node
-
-    def set_position(self, position):
-        node = self.ast.root
-
-        for index in position:
-            node = node.get_child(index)
-        self.node = node
-
-    def get_position(self):
-        position = list()
-        node = self.node
-        while not node.is_root():
-            position.insert(0, node.parent.get_index(node))
-            node = node.parent
-
-        return position
+    def undo(self, document):
+        if self.state['math_inserted']:
+            document.ast.move_cursor_by_offset(-1)
+            document.ast.delete_char_at_cursor()
+            document.set_scroll_insert_on_screen_after_layout_update()
 
 

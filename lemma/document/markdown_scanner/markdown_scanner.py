@@ -40,22 +40,22 @@ class MarkdownScanner(Observable):
         for char in line.children:
             char.accept(self)
 
-    def visit_mathlist(self, mathlist):
+    def visit_beforemath(self, beforemath):
+        pass
+
+    def visit_matharea(self, mathlist):
         self.markdown += '$`'
         for symbol in mathlist.children:
             symbol.accept(self)
         self.markdown += '`$'
 
+    def visit_aftermath(self, aftermath):
+        pass
+
     def visit_char(self, char):
         self.markdown += char.content
 
-    def visit_math_symbol(self, symbol):
-        self.markdown += '\\' + symbol.name
-
     def visit_eol(self, node):
         self.markdown += '\n'
-
-    def visit_eoml(self, node):
-        pass
 
 

@@ -53,23 +53,25 @@ class Command():
             document_line = ast.Line()
             for segment in re.split(r'(\$`.*?`\$)', line):
                 if segment.startswith('$`') and segment.endswith('`$'):
-                    self.add_math_to_line(document_line, segment[2:-2])
+                    document_line.append(ast.BeforeMathArea())
+                    math_area = ast.MathArea()
+                    self.add_math(math_area, segment[2:-2])
+                    document_line.append(math_area)
                 else:
-                    self.add_non_math_to_line(document_line, segment)
+                    self.add_non_math(document_line, segment)
             document_lines.append(document_line)
 
         if document_lines.length() == 0: document_lines.append(ast.Line())
 
         return document_lines
 
-    def add_non_math_to_line(self, document_line, text):
+    def add_non_math(self, composite, text):
         for char in text:
             if char != '\n':
-                document_line.append(ast.UnicodeCharacter(char))
+                composite.append(ast.UnicodeCharacter(char))
 
-    def add_math_to_line(self, document_line, text):
-        for name in re.split(r'(\\[^\\]*)', text):
-            if name.startswith('\\'):
-                document_line.append(ast.MathSymbol(name[1:]))
+    def add_math(self, composite, text):
+        for char in text:
+            composite.append(ast.UnicodeCharacter(char))
 
 

@@ -59,9 +59,12 @@ class Application(Adw.Application):
 
         # setup fonts
         font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')
-        FontManager.add_font('cmr10', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'))
-        FontManager.add_font('cmr08', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'))
-        FontManager.set_text_font('cmr10', size=19.407)
+        FontManager.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), size=19.407)
+        FontManager.add_font('italic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Italic.otf'), size=19.407)
+        FontManager.add_font('bookitalic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-BookItalic.otf'), size=19.407)
+        FontManager.add_font('bolditalic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-BoldItalic.otf'), size=19.407)
+        FontManager.add_font('math', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), size=19.407)
+        FontManager.add_font('teaser', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'), size=14)
 
         self.main_window = workspace_view.MainWindow(self)
         ServiceLocator.set_main_window(self.main_window)

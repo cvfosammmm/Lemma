@@ -24,20 +24,39 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        line = document.ast.insert.get_node().get_iterator().get_line()
-        index = line.get_index(document.ast.insert.get_node())
-        if document.ast.root.get_index(line) != 0 or index != 0:
-            document.ast.move_cursor_by_offset(-1)
-            self.state['deleted_node'] = document.ast.delete_char_at_cursor()
-            self.is_undo_checkpoint = True
-        else:
-            self.state['deleted_node'] = None
-            self.is_undo_checkpoint = False
+        self.state['insert_position_before'] = document.ast.insert.get_position()
+        self.state['deleted_nodes'] = []
+
+        if document.ast.insert.get_node().parent.is_line():
+            iterator = document.ast.insert.get_node().get_iterator()
+            if iterator.starts_line():
+                if iterator.prev():
+                    document.ast.insert.set_node(iterator.get_node())
+                    self.state['deleted_nodes'] = document.ast.delete_char_at_cursor()
+            else:
+                line = document.ast.insert.get_node().parent
+                index = line.get_index(document.ast.insert.get_node())
+                while not line.get_child(index - 1).is_leaf():
+                    index -= 1
+                document.ast.insert.set_node(line.get_child(index - 1))
+                self.state['deleted_nodes'] = document.ast.delete_char_at_cursor()
+        elif document.ast.insert.get_node().parent.is_math_area():
+            math_area = document.ast.insert.get_node().parent
+            if document.ast.insert.get_node() != math_area.get_child(0):
+                index = math_area.get_index(document.ast.insert.get_node())
+                document.ast.insert.set_node(math_area.get_child(index - 1))
+                self.state['deleted_nodes'] = document.ast.delete_char_at_cursor()
+            elif math_area.length() == 1:
+                document.ast.move_cursor_by_offset(-1)
+                self.state['deleted_nodes'] = document.ast.delete_char_at_cursor()
+
+        self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        if self.state['deleted_node'] != None:
-            document.ast.insert_node_at_cursor(self.state['deleted_node'])
+        for node in self.state['deleted_nodes']:
+            document.ast.insert_node(node)
+        document.ast.insert.set_position(self.state['insert_position_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
