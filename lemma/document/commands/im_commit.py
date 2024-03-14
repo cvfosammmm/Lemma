@@ -40,7 +40,9 @@ class Command():
                     self.state['chars_added'] += document.ast.insert_character(char)
                 elif char == '-':
                     self.state['chars_added'] += document.ast.insert_character('−')
-                elif char in ['+', '=']:
+                elif char == '|':
+                    self.state['chars_added'] += document.ast.insert_character('|')
+                elif char in ['+', '=', '<', '>']:
                     self.state['chars_added'] += document.ast.insert_character(char)
                 elif char == ' ' and node == node.parent.get_child(-1):
                     document.ast.move_cursor_by_offset(1)
