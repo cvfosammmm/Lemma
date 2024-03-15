@@ -26,8 +26,9 @@ from lemma.helpers.observable import Observable
 import lemma.document.commands.populate_from_path as populate_from_path
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:
-        name = os.path.basename(file[:-3])
-        exec('import lemma.document.commands.' + name + ' as ' + name)
+        if file.endswith('.py'):
+            name = os.path.basename(file[:-3])
+            exec('import lemma.document.commands.' + name + ' as ' + name)
 
 
 class Document(Observable):
