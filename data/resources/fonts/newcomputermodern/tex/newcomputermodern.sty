@@ -1,15 +1,21 @@
 %\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{newcomputermodern}[v4.5 NewCM fonts by Antonis Tsolomitis]
+\ProvidesPackage{newcomputermodern}[v5.1 NewCM fonts by Antonis Tsolomitis]
 \typeout{Loading NewCM fonts by Antonis Tsolomitis}
+\RequirePackage{fontspec}
+\RequirePackage{unicode-math}
 
 \newif\if@olddefault
 \DeclareOption{regular}{\@olddefaulttrue}
 \ProcessOptions\relax
 
+%Next command has been moved to fspolddefault.tex and
+% fspdefault.tex 
+%\let\prosgegrammeni=\undefined %Babel compatibility
+
 \if@olddefault
- \RequirePackage{fspolddefault}
+ \input{fspolddefault.tex}
  \else
- \RequirePackage{fspdefault}
+ \input{fspdefault.tex}
  \fi
 \endinput
 

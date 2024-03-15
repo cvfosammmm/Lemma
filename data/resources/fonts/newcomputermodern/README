@@ -1,10 +1,10 @@
 
 		New Computer Modern Fonts
 
-           (Package version 4.5, GustFLv1 or later)
+           (Package version 5.1, GustFLv1 or later)
 
 		Antonis Tsolomitis
-		Samos, Greece, 2019--2023
+		Samos, Greece, 2019--2024
 
 This is a release of a new assembly of ComputerModern 
 fonts that extents the family with more shapes and more mathematical glyphs
@@ -41,13 +41,119 @@ As of version 3.90 they are distributed in 10pt size in *all* families
 and series and in 8pt size in Roman (Regular Italic Book BookItalic)
 and Sans (Regular, Oblique, Book, BookOblique).
 
+As of version 5.0 the Devanagari script is supported for 
+Languages Hindi (default), Sanskrit, Marathi and Nepali in 
+Regular/Book 08/10pt and Bold 10t.
+
 The Math fonts (Regular and Book) support fully all Unicode blocks
 of Mathematics providing the widest possible Mathematical coverage.
 
 The fonts have their own protrusion settings through the microtype package
 which are distributed with microtype.
+======================================================================
+
+How to build the package from source
+------------------------------------
+
+(a) convert the sfd files to otf using the script
+with contents the next three lines:
+
+#!/usr/bin/fontforge
+Open($1)
+Generate($1:r + ".otf")
+
+Assume the above script is called sfd2otf
+After making it executable cd in the sfd folder
+and execute
+
+for i in *.sfd; do sfd2otf $i; done
+
+(b) copy/move the otf files either in
+
+$HOME/texmf/tex/fonts/opentype/newcomputermodern/
+
+or 
+
+in your TeX installation
+
+or 
+
+in the folder that contains newcm-doc.tex
+
+In any case, the command 
+
+kpsewhich NewCM10-Regular.otf
+
+must return the newly installed font.
+
+(c) cd in the folder  that contains newcm-doc.tex
+and run
+
+xelatex-unsafe newcm-doc.tex
+
+or (in newer installations) 
+
+xelatex newcm-doc.tex
+
+(the xelatex-unsafe if for using gs properly)
+====================================================
+
+
 
 Latest additions/improvements:
+------------------------------
+
+Version 5.1
+
+Added Aegean Numbers in the Sans font
+
+Added one.oldstyle.alt and one.taboldstyle.alt in cv06
+
+Added missing ligatures in dlig for ch, ck, and il
+
+Added right kerning for the sequence uni026D slash
+
+Replaced fspdefault.sty and fspolddefault.sty with
+fspdefault.tex and fspolddefault.tex in newcomputermodern.sty
+
+Version 5.01
+
+Brought back the AMS blackboard bold as the default and
+moved the newcm bb in ss03
+
+
+Version 5.0
+
+Support for Devanagari in Regular/Book 08/10pt and Bold 10t.
+
+Support of the Unicode Devanagari Block as variable letters and numbers
+in Math fonts with auto selection for the numbers in ss04.
+
+Addition in the Math fonts of a matching mathbb design keeping the
+AMS mathbb in ss03 if preferred.
+
+Two levels of scriptness in capitals. One as default with \mathcal and 
+anotther in ss01. Lowercase script are also avalable with \mscrX where
+X is any of the latin lowercase letters. Their design match the ss01 
+capitals. (Notice that this was already supported in version 4.7 but it 
+was forgotten to be included in the documentation.)
+
+Complete support in all fonts for the diacritics Unicode block
+U0300--U036F with stacking support.
+
+A lot of improvements in BoldSans design.
+
+Completion of the Greek+Coptic block in all fonts (it was complete only in
+Regular/Book 10pt).
+
+
+Version 4.7
+
+Many improvements in Bold Sans 10.
+
+Version 4.6
+
+Small fixes with some latin accented letters such as a grave, e grave etc.
 
 Version 4.5
 

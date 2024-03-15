@@ -1,13 +1,15 @@
 \documentclass{article}
 \synctex=1
 \def\xstacked{x̧̖̗̘̙̜̝̞̟̠̣̤̥̦̩̪̫̬̭̮̯̰̱̲̹̺̻̼͇͈͉͍̀́̂̃̄̅̆̇̈̉̊̋̌̍̎̏̑̓̔̽̾͆͝͠͡}
+%\def\ttxstackedup{\sffamily x̀́̂̃̄̅̆̇̈̉̊̋̌̍̎̏̑̓̔̽̾͆͝͠͡}
+%\def\ttxstackeddown{\ttfamily x̧̖̗̘̙̜̝̞̟̠̣̤̥̦̩̪̫̬̭̮̯̰̱̲̹̺̻̼͇͈͉͍}
 \usepackage{polyglossia}
 \setmainlanguage{english}
 \setotherlanguage[variant=polytonic]{greek}
 \usepackage[hidelinks,pdfa]{hyperref}
 %\usepackage{xgreek}
 \usepackage[default,varnothing]{fontsetup}
-\usepackage{unicodefonttable,graphicx,wrapfig,xcolor}
+\usepackage{unicodefonttable,graphicx,wrapfig,xcolor,calc}
 \newfontfamily\lmboldsans{lmsans10-bold.otf}
 \newfontfamily\newcmaltendings[CharacterVariant=2]{NewCM10-Book.otf}
 \newfontfamily\newcmaltk[CharacterVariant=1]{NewCM10-Book.otf}
@@ -19,11 +21,30 @@
 \newfontfamily\ipafont[%Renderer     = {Harfbuzz},
 StylisticSet = {05},ItalicFont=NewCM10-BookItalic]{NewCM10-Book.otf}
 %
-\newfontfamily\devanagaritext[%
-  Script=Devanagari,%
-  Scale=0.8,%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Devanagari text %%%%
+\newfontfamily\hinditext[%
+Script=Devanagari,%
+BoldFont=NewCM10Devanagari-Bold.otf,
   % Renderer=Harfbuzz% Optionally for LuaTeX
-]{Shobhika-Regular.otf}
+]{NewCM10Devanagari-Book.otf}
+\newfontfamily\marathitext[%
+Script=Devanagari,%
+Language=Marathi,
+  % Renderer=Harfbuzz% Optionally for LuaTeX
+]{NewCM10Devanagari-Book.otf}
+\newfontfamily\sanskrittext[%
+Script=Devanagari,%
+Language=Sanskrit,
+  % Renderer=Harfbuzz% Optionally for LuaTeX
+]{NewCM10Devanagari-Book.otf}
+\newfontfamily\nepalitext[%
+Script=Devanagari,%
+Language=Nepali,
+  % Renderer=Harfbuzz% Optionally for LuaTeX
+]{NewCM10Devanagari-Book.otf}
+\newcommand{\devanagaritext}{\marathitext}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \definecolor{mygray}{gray}{.9}
 \definecolor{mygrayone}{gray}{.9}
 \definecolor{mygraytwo}{gray}{.8}
@@ -52,16 +73,29 @@ StylisticSet = {05},ItalicFont=NewCM10-BookItalic]{NewCM10-Book.otf}
 \newfontfamily\graythreeb[Color=mygraythree,Opacity=0.7,Scale=12]{NewCM10-Book.otf}
 \newfontfamily\grayfourb[Color=mygrayfour,Opacity=0.7,Scale=10]{NewCM10-Book.otf}
 \newfontfamily\grayfiveb[Color=mygrayfive,Opacity=0.7,Scale=12]{NewCM10-Book.otf}
+\newfontfamily\devgray[Color=mygrayfive,Opacity=0.4,Scale=10,Script=Devanagari]{NewCM10Devanagari-Book.otf}
+\newfontfamily\devgraytwo[Color=mygrayone,Scale=10,Script=Devanagari,Language=Marathi]{NewCM10Devanagari-Book.otf}
 \newcommand\leftgrquotes{\char"201C} %{\char"2018}
 \newcommand\rightgrquotes{\char"201E} %{\char"2019}
 \newcommand{\acro}{\relax}
 %%% Start of metadata %%%
 
 \newtheorem{theorem}{Θεώρημα}[section]
+\newtheorem{devtheorem}[theorem]{प्रमेय}
+
+%\DeclareSymbolFont{devletters}{\encodingdefault}{NewCMMath-Regular.otf(0)}{}{}
+%\ExplSyntaxOn
+%\int_step_inline:nnn { "0900 } { "097F }
+%{
+%  \Umathcode #1 = "0 ~ \use:c{ symdevletters } ~ #1
+%}
+%\ExplSyntaxOff
+  
+
 \renewcommand{\arraystretch}{1.4}
 
 
-\title{The New Computer Modern FontFamily\\ version 4.5}
+\title{The New Computer Modern FontFamily\\ version 5.1}
 \author{Antonis Tsolomitis}
 %\address{Department of Mathematics\\ University of the Aegean\\ Karlovassi, 832\,00 Samos\\ Greece}
 %\netaddress{atsol (at) aegean dot gr}
@@ -71,6 +105,8 @@ StylisticSet = {05},ItalicFont=NewCM10-BookItalic]{NewCM10-Book.otf}
 \begin{document}
 
 %
+\rput(-2,-3){\devgray ल}%
+\rput(10.2,-4){\devgraytwo ल\char"093F\char"0902}%
 \rput(0,0){\grayone ζ}\rput(1,-0.5){\grayfour β}
 \rput(0,-5){\grayone ἆ}\rput(1,-5){\graythree ἃ}\rput(2.5,-5){\grayone ἶ}%
 \rput(3.5,-5){\graythree ῗ}\rput(5,-5){\grayone ᾦ}\rput(6,-5){\graythree ᾓ}
@@ -138,8 +174,17 @@ StylisticSet = {05},ItalicFont=NewCM10-BookItalic]{NewCM10-Book.otf}
 \null\thispagestyle{empty}
 
 
+%\vfill
+%
+%\ttxstackedup \qquad
+%{\ttxstackeddown}
+%
+%\vfill
+%
 
 \newpage
+
+%\end{document}
 
 \maketitle
 \tableofcontents
@@ -169,6 +214,7 @@ that Unicode has forgotten to encode).
 \textit{What follows is a sequence of commands and results so as to show how to access all features
 of the fonts. Character tables are also included}.
 
+
 \section{How to load the fonts}
 The simpler way to load the fonts is through the \verb|fontsetup| package. The command
 
@@ -191,7 +237,7 @@ The Serif font includes additional
 ligatures fb ffb ffh ffj ffk fft fh fj ft fk and the same with longs instead of f
 in the \textit{default} liga table (in addition to the default fi fl ffi ffl ff).
 It also includes an alternative k (in the cv01 table) and
-{\newcmdlig sp ch ck ct st}
+{\newcmdlig sp ch ck ct st il}
 in the dlig table. Finally it also inludes} ``end'' {\newcmaltk versions for the letters
 a, e, m, n and r in the cv02 table.
 }
@@ -210,16 +256,57 @@ and to load the font with endings variations use
 Of course the above can be mixed separating the optional arguments with comma,
 or one can define a custom font say by using
 
-\verb|\newfontfamily\myfont[<options to enable>]{NewCM10-Regular.otf}|
+\verb|\newfontfamily\myfont[<options to enable>]{NewCM10-Book.otf}|
 
 \begin{center}
   \begin{tabular}{c|c|c|c}
-    Regular &   k & a e m n r & sp ch ck ct st\\ \hline
+    Book &   k & a e m n r & sp ch ck ct st il\\ \hline
     cv01 & {\newcmaltk k} & & \\ \hline
     cv02 & & {\newcmaltendings a e m n r} &  \\ \hline
-    dlig & & & {\newcmdlig sp ch ck ct st}
+    dlig & & & {\newcmdlig sp ch ck ct st il}
   \end{tabular}
 \end{center}
+
+\subsection{Oldstyle numbers}
+
+Typically oldstyle numbers are available in \verb|onum| Lookup
+and with the \verb|\textsc| if \verb|fontsetup| is loaded.
+Also available they are with \verb|\oldstylenums|.
+There are two series, one is with variable widths and one with
+fixed width for use in tables. The code
+
+\begin{verbatim}
+\oldstylenums{0123456789}\addfontfeatures{Numbers=Tabular}
+\textsc{0123456789}
+\end{verbatim}
+gives
+
+\oldstylenums{0123456789}\addfontfeatures{Numbers=Tabular}
+
+\textsc{0123456789}\addfontfeatures{Numbers=Proportional}
+
+\medskip
+
+\noindent An alternative design is also provided for the number 1 in cv06.
+The code
+
+\begin{verbatim}
+\oldstylenums{0123456789}\addfontfeatures{CharacterVariant=6}
+\oldstylenums{0\textcolor{red}{1}23456789}
+      \addfontfeatures{CharacterVariant=6,Numbers=Tabular}
+\oldstylenums{0\textcolor{red}{1}23456789}
+\end{verbatim}
+gives
+
+
+\oldstylenums{0123456789}\addfontfeatures{CharacterVariant=6}
+
+\oldstylenums{0\textcolor{red}{1}23456789}\addfontfeatures{CharacterVariant=6,Numbers=Tabular}
+
+\oldstylenums{0\textcolor{red}{1}23456789}
+
+
+
 
 \subsection{Old Italic}
 
@@ -230,10 +317,12 @@ U10307, U10310, U10312, U10314, U1031F and U1032F are
 
 \subsection{Diacritics Stacking}
 \marginpar{\begin{center}
-{\color{red}$\rightarrow$}\ \xstacked\ {\color{red}$\leftarrow$}
+{\color{red}$\rightarrow$}\ \xstacked\quad{\sffamily\xstacked}\quad{\ttfamily\xstacked}\ {\color{red}$\leftarrow$}
 \end{center}}
-Diacritics stacking is supported at least for Regular, Book and Bold upright seriffed fonts.
-In the margin you can see an example of stacking on the letter ``x''. If you need to enter
+Diacritics---the full block U+0300 to U+036F---and diacritics stacking
+is supported.
+In the margin you can see an example of stacking on the letter ``x'' in Roman, Sans and Mono.
+If you need to enter
 these accents you can use the \verb|\char| command or just copy-paste from the following line
 (from this pdf file or the provided source \TeX\ file):
 \begin{center}
@@ -251,6 +340,48 @@ these accents you can use the \verb|\char| command or just copy-paste from the f
 
 Also notice that your text editor may not support stacking. The editor may show the
 accents one after the other, but the pdf produced by xetex or luatex will have the accents stacked.
+
+\subsubsection{Coloring diacritics}
+
+If one wants to use color for diacritics, different from the color of the base character
+this does not work with Xe\LaTeX\ (the commands of the \verb|color| package
+break the stacking mechanism). It works though with Lua\LaTeX\ using the \verb|luacolor|
+package. However, there is a problem when the base glyph and the first diacritic above
+exist in the font as a precomposed character. For example, this is the case
+with aacute (á) (U+00E1). Such characters are treated as one by Lua and they can not
+be colorized with different colors. A work around is to place the empty character U+034F
+between ``a'' and acute (U+0301). So the following minimal example
+produces the result below:
+
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage[olddefault]{fontsetup}
+\usepackage{luacolor}
+\pagestyle{empty}
+\newfontfamily{\ncmtest}[Renderer=Harfbuzz]{NewCM10-Regular.otf}
+\definecolor{orange}{RGB}{255,191,0}
+\definecolor{colorone}{RGB}{91,0,250}
+\definecolor{colortwo}{RGB}{250,0,121}
+\definecolor{colorthree}{RGB}{0,204,250}
+\definecolor{colorfour}{RGB}{14,250,0}
+\definecolor{colorfive}{RGB}{255,150,0}
+\definecolor{colorgray}{gray}{0.8}
+\newcommand{\emptydiacritic}{\char"034F}
+\begin{document}
+\Huge
+{\ncmtest \color{colorgray}a\color{colorfour}̖\color{colortwo}̗%
+\emptydiacritic\color{colorthree}́ \color{colorone}̀ \color{colorfive}̐ }
+\end{document}
+\end{verbatim}
+
+\vspace{-5.5cm}
+
+
+\null \hfill\includegraphics[scale=2]{colored-diacritics.pdf}
+
+
+\vspace{2cm}
 
 
 \section{Greek}
@@ -345,7 +476,8 @@ So when enabling cv04 one can define the commands
 
 \noindent for the rare case one needs quotes inside quotes. The \verb|fontsetup| package
 does this automatically for Greek if the \verb|xgreek| package has been loaded \textit{before}
-the \verb|fontsetup| package. Otherwise, for non-Greek documents with small passages of Greek,
+the \verb|fontsetup| package or when the language is set to Greek by, say, the Babel package.
+Otherwise, for non-Greek documents with small passages of Greek,
 the author may enable \verb|cv04| by creating a custom command such as
 
 \verb|\newcommand\propergreek[CharacterVariant=4]{NewCM10-Book.otf}|
@@ -418,6 +550,33 @@ So the Unicode slot U1014F named ``Greek Acrophonic Attic Five Staters'' can be 
 with the command \verb|\atticfivestaters| and it gives \atticfivestaters; and the
 slot u10182 named ``Greek Kyathos Base Sign'' can be accessed with the command
 \verb|\greekkyathosbasesign| and it gives \greekkyathosbasesign.
+
+
+\subsection{Aegean Numbers}
+Aegean numbers are supported in the Sans fonts and their slots are defined in \verb|fontsetup|
+package using commands of the form \verb|\aegeanXXXX| where \verb|XXXX| is the Unicode name
+of the character (without spaces).
+A few examples are:
+\begin{center}
+\aegeanseven\quad
+\aegeanfivehundred\quad
+\aegeanfourthousand\quad
+\aegeanfiftythousand\quad
+\aegeanweightbaseunit\quad
+\aegeanweightfirstsubunit\quad
+\aegeanweightsecondsubunit\quad
+\aegeanweightthirdsubunit\quad
+\aegeanweightfourthsubunit\quad
+\aegeandrymeasurefirstsubunit\quad
+\aegeanliquidmeasurefirstsubunit\quad
+\aegeansecondsubunit\quad
+\aegeanthirdsubunit
+\end{center}
+and the whole table of Aegean Numbers with the commands to access the glyphs
+is shown on page \pageref{AegeanNumbers}.
+
+
+
 
 \subsection{Support for Papyrology}
 Papyrology needs to declare that a glyph is missing from the papyrus or
@@ -511,9 +670,143 @@ A few letters from Coptic and Epact numbers follow:
 \section{Cherokee}
 Both Unicode blocks 
 U13A0--13FF and UAB70--UABBF for Cherokee are supported. A few letters are:
-\begin{center}
+%\begin{center}
   ᎣᎤᎹᏊᏐ  ꭳꭴꭷꮂꮔꮿ
+%\end{center}
+
+
+
+\section{Devanagari}
+
+Devanagari script is supported for the serifed font in Regular (10pt/8pt), Book (10pt/8pt),
+and Bold (10pt). The fonts support Hindi (as the default), Sanskrit, Marathi and Nepali Languages.
+The optional arguments for the \verb|fontspec| font-selection mechanism
+must include
+
+\noindent \verb|Script=Devanagari, Language=XXXX| where \verb|XXXX|
+must be replaced with one of \verb|Hindi|, \verb|Sanskrit|, \verb|Marathi|, \verb|Nepali|.
+If the \verb|Language| parameter is not set then the default is \verb|Hindi|.
+For Lua\LaTeX\ the parameter \verb|Renderer=Harfbuzz| must also be included.
+
+So if say Marathi is needed as the default font document then one can use the following:
+\begin{verbatim}
+\usepackage{fontspec}
+\setmainfont[Script=Devanagari, Language=Marathi,% 
+Renderer=Harfbuzz]{NewCM10Devanagari-Book.otf}
+\end{verbatim}
+
+
+The Devanagari fonts were developed with the help of {\devanagaritext निरंजन} (Niranjan)
+whose name appears in the copyright section of the fonts and I also thank him for
+providing the samples below.
+
+
+\noindent A Sanskrit sample from {\sanskrittext बृहदारण्यकोपनिषद्} (bṛhadāraṇyakopaniṣad) follows:
+
+
+\begin{center}
+\fbox{\begin{minipage}{9cm}
+{\hinditext
+ॐ पूर्णमदः पूर्णमिदं, पूर्णात्पूर्णमुदच्यते।\\
+पूर्णस्य पूर्णमादाय पूर्णमेवावशिष्यते॥
+}
+
+\medskip
+
+That\footnote{the outer world} is complete;\\
+this\footnote{the inner world} too is complete.\\
+From one complete comes the other. Taking out\\
+one complete from the other too results in a complete.
+\end{minipage}}
 \end{center}
+
+
+\noindent Next is a beautiful part of a poem in Marathi
+by {\marathitext तुकाराम} (Tukaram) and its translation:
+
+\medskip
+
+\hspace*{-3cm}\begin{tabular}{l|l}
+{\begin{minipage}{\widthof{\marathitext त्यांसि म्हणे जो आपुलें॥ १ ॥}}
+{\marathitext
+%\noindent\begin{verse} 
+जें कां रंजलें गांजलें।\\
+त्यांसि म्हणे जो आपुलें॥ १ ॥\\
+तो चि साधु ओळखावा।\\
+देव तेथें चि जाणावा॥
+%\end{verse}
+}
+\end{minipage}}
+           &
+\begin{minipage}{12cm}
+      %\begin{verse}
+  Only the one who treats the downtrodden people equally is a sage\footnote{\ ``The wise'' of course, not the plant.}.\\
+        One may sense the essence of god there.\\
+      %\end{verse}
+    \end{minipage}
+\end{tabular}
+         
+
+\bigskip
+         
+Devanagari Unicode letters (range U0900--U097F) are also available as variables (letters) and
+numbers in the Regular and Book Math fonts. They are available as usually in three weights
+in the Math fonts so that the color is balanced when in script size (eg in exponents or indices).
+For this to work a version of \verb|fontsetup| package greater or equal to 1.8 with options
+\verb|default| or \verb|olddefault| loaded is needed. This is because Devanagari letters are not
+Math variables in Unicode standard and hence not supported currently as such by the
+unicode-math package. To show this possibility next is a theorem in Hindi (mixing with Greek):
+
+\medskip
+
+%प्रमेय (Πυθαγόρας - पिथागोरास)‘’
+%\setmathfont[StylisticSet=4]{NewCMMath-Regular.otf}
+\setmathfont[StylisticSet=4]{NewCMMath-Book.otf}
+{\hinditext
+\textbf{प्रमेय}\,(\textrm{Πυθαγόρας} (पिथागोरास)) अगर समकोण त्रिभुज के कर्ण की लंबाई को ‘अ’ और
+अन्य दो भुजाओं की लंबाई को ‘क’ और ‘ख’ कहते हैं, तो भुजाओं की लम्बाई के वर्गों की
+जोड़, कर्ण के वर्ग जितनी होती है, अर्थात्
+ $अ^२=क^२+ख^२$।
+}
+%\setmathfont{NewCMMath-Regular.otf}
+\setmathfont{NewCMMath-Book.otf}
+
+
+\bigskip
+
+However, if only Devanagari numbers are needed with the source using arabic numerals
+then one can use the Stylistic Set 04 of the Math font. 
+So the command
+
+%\noindent\verb|\setmathfont[StylisticSet=4]{NewCMMath-Regular.otf}|
+\noindent\verb|\setmathfont[StylisticSet=4]{NewCMMath-Regular.otf}|
+with source:
+\begin{verbatim}
+$$\sum_{n=0}^\infty \frac1{n!}x^n=1+x+\frac{1}{2!}x^2
+   +\frac1{3!}x^3+\frac1{4!}x^4+\ldots=e^x.$$
+$$9!=1\cdot2\cdot3\cdot4\cdot5\cdot6\cdot7\cdot8\cdot9.$$
+$$2^{2^2}$$
+\end{verbatim}
+will have the following effect:
+
+
+%\setmathfont[StylisticSet=4]{NewCMMath-Regular.otf}
+\setmathfont[StylisticSet=4]{NewCMMath-Book.otf}
+
+$$\sum_{n=0}^\infty \frac1{n!}x^n=1+x+\frac{1}{2!}x^2+\frac1{3!}x^3+\frac1{4!}x^4+\ldots=e^x.$$
+$$9!=1\cdot2\cdot3\cdot4\cdot5\cdot6\cdot7\cdot8\cdot9.$$
+$$2^{2^2}$$
+
+\noindent which when the math font is reset to use Arabic numbers with
+
+%\noindent\verb|\setmathfont{NewCMMath-Regular.otf}| it gives:
+\noindent\verb|\setmathfont{NewCMMath-Book.otf}| it gives:
+
+%\setmathfont{NewCMMath-Regular.otf}
+\setmathfont{NewCMMath-Book.otf}
+$$\sum_{n=0}^\infty \frac1{n!}x^n=1+x+\frac{1}{2!}x^2+\frac1{3!}x^3+\frac1{4!}x^4+\ldots=e^x.$$
+$$9!=1\cdot2\cdot3\cdot4\cdot5\cdot6\cdot7\cdot8\cdot9.$$
+$$2^{2^2}$$
 
 
 \section{Medieval Latin and Uncial Greek}
@@ -721,7 +1014,75 @@ Zoom or print and compare with \texttt{lat\-in\-modern-math} font:
 \end{center}
 
 
+\subsection{Math Script}
 
+Calligraphic letters are accessed as usual with \verb|\mathcal| producing
+$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+
+However, mathematicians often need a second level of ``scriptness''. The fonts
+provide an alternative calligraphic, a script design at StylisticSet 1. For this to work
+one has to re-set the math font using
+
+\noindent\verb|\setmathfont[StylisticSet=1]{NewCMMath-Book.otf}|
+
+(or the Regular version). So the following code
+\begin{verbatim}
+$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+\setmathfont[StylisticSet=1]{NewCMMath-Book.otf}
+$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+$$
+\mscra\mscrb\mscrc\mscrd\mscre\mscrf\mscrg\mscrh\mscri\mscrj
+\mscrk\mscrl\mscrm\mscrn\mscro\mscrp\mscrq\mscrr\mscrs\mscrt
+\mscru\mscrv\mscrw\mscrx\mscry\mscrz
+$$
+\setmathfont{NewCMMath-Book.otf}
+$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+\end{verbatim}
+produces
+$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$\setmathfont[StylisticSet=1]{NewCMMath-Book.otf}$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+$$
+\mscra\mscrb\mscrc\mscrd\mscre\mscrf\mscrg\mscrh\mscri\mscrj\mscrk\mscrl\mscrm\mscrn\mscro\mscrp\mscrq\mscrr\mscrs\mscrt\mscru\mscrv\mscrw\mscrx\mscry\mscrz
+$$
+\setmathfont{NewCMMath-Book.otf}$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+
+
+\subsection{Blackboard Bold}
+In version 5.0 of the fonts a new NewCM blackboard bold was introduced
+in the place of the \textsc{ams} blackboard
+bold letters. There were many complains from Mathematicians for this choice.
+I have to make a statement here: it seems that although \textsc{ams} blackboard
+bold are not matching with the computer modern design the long time
+Mathematicians use them had its effect. People (including myself)
+got used to it and find it difficult to feel their non-matching design.
+Moreover, the new design can not be metrically equivalent with the past
+so there will be slight changes in the older documents if re-run.
+With this in mind and the fact that the new design should be considered
+``beta'', as there are characters that need improvement,
+I decided bring back to default the \textsc{ams} design and keep the
+new design for new documents for the StylisticSet 3. 
+
+
+
+The \textsc{ams} blackboard bold are:
+$$\mathbb{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+$$\mathbb{abcdefghijklmnopqrstuvwxyz}$$
+$$\mathbb{0123456789\ \pi\gamma\Gamma\Pi\Sigma\mitBbbD\mitBbbd\mitBbbe\mitBbbi\mitBbbj}$$
+
+To access the new ones needs to load the math font enabling the
+\verb|ss03| stylistic set using for example
+
+\noindent\verb|\setmathfont[StylisticSet=3]{NewCMMath-Book.otf}|
+Then the above blackboard bold design changes to
+\setmathfont[StylisticSet=3]{NewCMMath-Book.otf}
+$$\mathbb{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+$$\mathbb{abcdefghijklmnopqrstuvwxyz}$$
+$$\mathbb{0123456789\ \pi\gamma\Gamma\Pi\Sigma\mitBbbD\mitBbbd\mitBbbe\mitBbbi\mitBbbj}$$
+
+\setmathfont{NewCMMath-Book.otf}
+
+If using the latest \verb|fontsetup| (to be released soon)
+then you can choose the NewCM blackboard bold
+with the option \verb|newcmbb|.
 
 \subsection{Upright and extensible integrals}
 The Math fonts (both Regular and Book weights) include upright integrals
@@ -810,6 +1171,45 @@ Private Area of the fonts.
 
 
 \displayfonttable[hex-digits=head+foot, range-end=03CE]{NewCMUncial10-Book.otf}
+
+
+\section{The Aegean Numbers glyph complement}
+\label{AegeanNumbers}
+
+\begin{tabular}{|c|c||c|c|}\hline
+\verb|\aegeanseparator| &\aegeanseparator&             \verb|\aegeaneighthundred| &\aegeaneighthundred\\ \hline                          
+\verb|\aegeanseparatordot| &\aegeanseparatordot&       \verb|\aegeanninehundred| &\aegeanninehundred\\ \hline                            
+\verb|\aegeancheckmark| &\aegeancheckmark&             \verb|\aegeanonethousand| &\aegeanonethousand\\ \hline                            
+\verb|\aegeanone| &\aegeanone&                         \verb|\aegeantwothousand| &\aegeantwothousand\\ \hline                            
+\verb|\aegeantwo| &\aegeantwo&                         \verb|\aegeanthreethousand| &\aegeanthreethousand\\ \hline                        
+\verb|\aegeanthree| &\aegeanthree&                     \verb|\aegeanfourthousand| &\aegeanfourthousand\\ \hline                          
+\verb|\aegeanfour| &\aegeanfour&                       \verb|\aegeanfivethousand| &\aegeanfivethousand\\ \hline                          
+\verb|\aegeanfive| &\aegeanfive&                       \verb|\aegeansixthousand| &\aegeansixthousand\\ \hline                            
+\verb|\aegeansix| &\aegeansix&                         \verb|\aegeanseventhousand| &\aegeanseventhousand\\ \hline                        
+\verb|\aegeanseven| &\aegeanseven&                     \verb|\aegeaneightthousand| &\aegeaneightthousand\\ \hline                        
+\verb|\aegeaneight| &\aegeaneight&                     \verb|\aegeanninethousand| &\aegeanninethousand\\ \hline                          
+\verb|\aegeanine| &\aegeanine&                         \verb|\aegeantenthousand| &\aegeantenthousand\\ \hline                            
+\verb|\aegeanten| &\aegeanten&                         \verb|\aegeantwentythousand| &\aegeantwentythousand\\ \hline                      
+\verb|\aegeantwenty| &\aegeantwenty&                   \verb|\aegeanthirtythousand| &\aegeanthirtythousand\\ \hline                      
+\verb|\aegeanthirty| &\aegeanthirty&                   \verb|\aegeanfourtythousand| &\aegeanfourtythousand\\ \hline                      
+\verb|\aegeanfourty| &\aegeanfourty&                   \verb|\aegeanfiftythousand| &\aegeanfiftythousand\\ \hline                        
+\verb|\aegeanfifty| &\aegeanfifty&                     \verb|\aegeansixtythousand| &\aegeansixtythousand\\ \hline                        
+\verb|\aegeansixty| &\aegeansixty&                     \verb|\aegeanseventythousand| &\aegeanseventythousand\\ \hline                    
+\verb|\aegeanseventy| &\aegeanseventy&                 \verb|\aegeaneightythousand| &\aegeaneightythousand\\ \hline                      
+\verb|\aegeaneighty| &\aegeaneighty&                   \verb|\aegeanninetythousand| &\aegeanninetythousand\\ \hline                      
+\verb|\aegeanninety| &\aegeanninety&                   \verb|\aegeanweightbaseunit| &\aegeanweightbaseunit\\ \hline                      
+\verb|\aegeanonehundred| &\aegeanonehundred&           \verb|\aegeanweightfirstsubunit| &\aegeanweightfirstsubunit\\ \hline              
+\verb|\aegeantwohundred| &\aegeantwohundred&           \verb|\aegeanweightsecondsubunit| &\aegeanweightsecondsubunit\\ \hline            
+\verb|\aegeanthreehundred| &\aegeanthreehundred&       \verb|\aegeanweightthirdsubunit| &\aegeanweightthirdsubunit\\ \hline              
+\verb|\aegeanfourhundred| &\aegeanfourhundred&         \verb|\aegeanweightfourthsubunit| &\aegeanweightfourthsubunit\\ \hline            
+\verb|\aegeanfivehundred| &\aegeanfivehundred&         \verb|\aegeandrymeasurefirstsubunit| &\aegeandrymeasurefirstsubunit\\ \hline      
+\verb|\aegeansixhundred| &\aegeansixhundred&           \verb|\aegeanliquidmeasurefirstsubunit| &\aegeanliquidmeasurefirstsubunit\\ \hline
+\verb|\aegeansevenhundred| &\aegeansevenhundred&       \verb|\aegeansecondsubunit| &\aegeansecondsubunit\\ \hline                        
+            & &                                        \verb|\aegeanthirdsubunit| &\aegeanthirdsubunit\\ \hline                          
+\end{tabular}
+
+
+
 
 
 \begin{thebibliography}{9}
