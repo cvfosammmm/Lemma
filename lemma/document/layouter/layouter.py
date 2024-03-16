@@ -68,7 +68,7 @@ class Layouter(Observable):
 
         if aftermath.parent.length() == 1:
             width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
-            box = boxes.BoxPlaceholder(width, height, left, top + 3, node=aftermath)
+            box = boxes.BoxPlaceholder(width, height, left, top, node=aftermath)
         else:
             box = boxes.BoxEmpty(node=aftermath)
         box.classes.add('math')
@@ -91,7 +91,7 @@ class Layouter(Observable):
                     char_string = char.content
 
                 width, height, left, top = FontManager.get_char_extents_single(char_string, fontname='math')
-                box = boxes.BoxGlyph(width, height, left, top + 3, char_string, node=char)
+                box = boxes.BoxGlyph(width, height, left, top, char_string, node=char)
                 box.classes.add('math')
                 char.set_box(box)
                 self.current_math_box.add(box)
@@ -148,7 +148,7 @@ class Layouter(Observable):
             width, height, left, top = extents
             total_width += width
 
-            box = boxes.BoxGlyph(width, height, left, top + 3, char.content, node=char)
+            box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
             box.classes.add('math')
             char.set_box(box)
             self.current_math_box.add(box)

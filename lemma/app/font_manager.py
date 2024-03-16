@@ -24,7 +24,7 @@ class FontManager():
 
     fonts = dict()
 
-    def add_font(name, filename, size):
+    def add_font(name, filename, size, line_height):
         fontconfig.Config.get_current().app_font_add_file(filename)
 
         FontManager.fonts[name] = dict()
@@ -32,7 +32,7 @@ class FontManager():
         face = freetype2.get_default_lib().new_face(filename)
         face.set_char_size(size=size, resolution=72)
         FontManager.fonts[name]['face'] = face
-        FontManager.fonts[name]['line_height'] = face.height // 72 + 8
+        FontManager.fonts[name]['line_height'] = line_height
         FontManager.fonts[name]['harfbuzz_font'] = harfbuzz.Font.ft_create(face)
         FontManager.fonts[name]['char_extents'] = dict()
         FontManager.fonts[name]['surface_cache'] = dict()
