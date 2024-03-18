@@ -103,7 +103,9 @@ class Document(Observable):
         if y > box.height: x, y = (box.width, box.height)
 
         while not box.is_leaf():
-            box = box.get_child_at_xy(x, y)
+            box, x_offset, y_offset = box.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
         return box.get_node()
 
 

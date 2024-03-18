@@ -56,9 +56,10 @@ class BoxVContainer(object):
             current_child = child
             current_height += child.height
             if current_height > y:
+                current_height -= child.height
                 break
 
-        return current_child
+        return (current_child, 0, current_height)
 
     def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return False
@@ -103,9 +104,10 @@ class BoxHContainer(object):
             current_child = child
             current_width += child.width
             if current_width > x:
+                current_width -= child.width
                 break
 
-        return current_child
+        return (current_child, current_width, 0)
 
     def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return False

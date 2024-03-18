@@ -57,10 +57,15 @@ class AST(object):
     def insert_character(self, char):
         composite_node = self.insert.get_node().parent
         index = composite_node.get_index(self.insert.get_node())
-        if composite_node.is_math_area():
-            character = ast.MathSymbol(char)
-        else:
-            character = ast.UnicodeCharacter(char)
+        character = ast.UnicodeCharacter(char)
+        composite_node.insert(index, character)
+
+        return [character]
+
+    def insert_mathsymbol(self, char):
+        composite_node = self.insert.get_node().parent
+        index = composite_node.get_index(self.insert.get_node())
+        character = ast.MathSymbol(char)
         composite_node.insert(index, character)
 
         return [character]

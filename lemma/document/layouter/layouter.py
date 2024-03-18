@@ -64,15 +64,8 @@ class Layouter(object):
         else:
             self.process_current_number()
 
-            if symbol.content.isalpha() and symbol.content.islower():
-                char_string = chr(ord(symbol.content) + 119789)
-            elif symbol.content.isalpha() and symbol.content.isupper():
-                char_string = chr(ord(symbol.content) + 119795)
-            else:
-                char_string = symbol.content
-
-            width, height, left, top = FontManager.get_char_extents_single(char_string, fontname='math')
-            box = boxes.BoxGlyph(width, height, left, top, char_string, node=symbol)
+            width, height, left, top = FontManager.get_char_extents_single(symbol.content, fontname='math')
+            box = boxes.BoxGlyph(width, height, left, top, symbol.content, node=symbol)
             box.classes.add('math')
             symbol.set_box(box)
             self.current_math_box.add(box)

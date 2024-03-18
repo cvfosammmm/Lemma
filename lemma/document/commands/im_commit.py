@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.app.latex_db import LaTeXDB
+
 
 class Command():
 
@@ -28,24 +30,23 @@ class Command():
         self.state['insert_position_before'] = document.ast.insert.get_position()
         self.state['chars_added'] = []
 
-        for char in self.text:
-            if document.ast.insert.get_node().parent.is_line():
+        node = document.ast.insert.get_node()
+        if node.parent.is_line():
+            for char in self.text:
                 self.state['chars_added'] += document.ast.insert_character(char)
-                document.set_scroll_insert_on_screen_after_layout_update()
 
-            elif document.ast.insert.get_node().parent.is_math_area():
-                node = document.ast.insert.get_node()
+        elif node.parent.is_math_area():
+            if self.text == ' ' and node == node.parent.get_child(-1):
+                document.ast.move_cursor_by_offset(1)
+            else:
+                for char in self.text:
+                    if char.isalpha() and char.islower(): char = chr(ord(char) + 119789)
+                    elif char.isalpha() and char.isupper(): char = chr(ord(char) + 119795)
+                    elif char == '-': char = '−'
+                    elif char == '*': char = '∗'
 
-                if char.isalnum():
-                    self.state['chars_added'] += document.ast.insert_character(char)
-                elif char == '-':
-                    self.state['chars_added'] += document.ast.insert_character('−')
-                elif char == '|':
-                    self.state['chars_added'] += document.ast.insert_character('|')
-                elif char in ['+', '=', '/', '!', '?', '\'', '"', '@', '<', '>']:
-                    self.state['chars_added'] += document.ast.insert_character(char)
-                elif char == ' ' and node == node.parent.get_child(-1):
-                    document.ast.move_cursor_by_offset(1)
+                    if LaTeXDB.is_mathsymbol(char):
+                        self.state['chars_added'] += document.ast.insert_mathsymbol(char)
 
         self.is_undo_checkpoint = (len(self.state['chars_added']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
