@@ -15,13 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.helpers.observable import Observable
 
-
-class PlaintextScanner(Observable):
+class PlaintextScanner(object):
 
     def __init__(self, document):
-        Observable.__init__(self)
         self.document = document
 
         self.text = ''
@@ -48,6 +45,9 @@ class PlaintextScanner(Observable):
     def visit_matharea(self, mathlist):
         if self.current_line == '' or self.current_line[-1] != ' ':
             self.current_line += ' '
+
+    def visit_mathsymbol(self, symbol):
+        pass
 
     def visit_aftermath(self, aftermath):
         pass

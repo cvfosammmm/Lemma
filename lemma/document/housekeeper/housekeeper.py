@@ -15,19 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.helpers.observable import Observable
+from lemma.app.font_manager import FontManager
+from lemma.app.latex_db import LaTeXDB
+import lemma.document.layout.layout as boxes
+import lemma.helpers.helpers as helpers
 
-class MarkdownScanner(object):
+
+class Housekeeper():
 
     def __init__(self, document):
         self.document = document
 
-        self.markdown = ''
-
     def update(self):
-        self.markdown = '# ' + self.document.title + '\n'
         self.document.ast.root.accept(self)
-        self.markdown = self.markdown[:-1] # remove last EOL
-        self.document.markdown = self.markdown
 
     def visit_root(self, root):
         for line in root.children:
@@ -40,22 +41,20 @@ class MarkdownScanner(object):
     def visit_beforemath(self, beforemath):
         pass
 
-    def visit_matharea(self, mathlist):
-        self.markdown += '$`'
-        for symbol in mathlist.children:
-            symbol.accept(self)
-        self.markdown += '`$'
+    def visit_matharea(self, matharea):
+        for char in matharea.children:
+            char.accept(self)
 
     def visit_mathsymbol(self, symbol):
-        self.markdown += symbol.content
+        pass
 
     def visit_aftermath(self, aftermath):
         pass
 
     def visit_char(self, char):
-        self.markdown += char.content
+        pass
 
     def visit_eol(self, node):
-        self.markdown += '\n'
+        pass
 
 

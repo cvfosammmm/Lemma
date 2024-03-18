@@ -15,17 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.helpers.observable import Observable
 from lemma.app.font_manager import FontManager
 from lemma.app.latex_db import LaTeXDB
 import lemma.document.layout.layout as boxes
 import lemma.helpers.helpers as helpers
 
 
-class Layouter(Observable):
+class Layouter(object):
 
     def __init__(self, document):
-        Observable.__init__(self)
         self.document = document
 
         self.root = boxes.BoxVContainer()
@@ -33,7 +31,6 @@ class Layouter(Observable):
         self.current_math_box = boxes.BoxHContainer()
         self.current_word = []
         self.current_number = []
-        self.in_math_mode = False
 
     def update(self):
         self.root = boxes.BoxVContainer()
@@ -53,7 +50,6 @@ class Layouter(Observable):
         box = boxes.BoxEmpty(node=beforemath)
         beforemath.set_box(box)
         self.current_line_box.add(box)
-        self.in_math_mode = True
 
     def visit_matharea(self, matharea):
         self.current_math_box = boxes.BoxHContainer()
@@ -62,8 +58,26 @@ class Layouter(Observable):
 
         self.add_boxes_and_break_lines_in_case([self.current_math_box], self.current_math_box.width)
 
+    def visit_mathsymbol(self, symbol):
+        if symbol.content.isdigit():
+            self.current_number.append(symbol)
+        else:
+            self.process_current_number()
+
+            if symbol.content.isalpha() and symbol.content.islower():
+                char_string = chr(ord(symbol.content) + 119789)
+            elif symbol.content.isalpha() and symbol.content.isupper():
+                char_string = chr(ord(symbol.content) + 119795)
+            else:
+                char_string = symbol.content
+
+            width, height, left, top = FontManager.get_char_extents_single(char_string, fontname='math')
+            box = boxes.BoxGlyph(width, height, left, top, char_string, node=symbol)
+            box.classes.add('math')
+            symbol.set_box(box)
+            self.current_math_box.add(box)
+
     def visit_aftermath(self, aftermath):
-        self.in_math_mode = False
         self.process_current_number()
 
         if aftermath.parent.length() == 1:
@@ -77,36 +91,16 @@ class Layouter(Observable):
         self.current_math_box.add(box)
 
     def visit_char(self, char):
-        if self.in_math_mode:
-            if char.content.isdigit():
-                self.current_number.append(char)
-            else:
-                self.process_current_number()
+        if char.is_whitespace:
+            self.process_current_word()
 
-                if char.content.isalpha() and char.content.islower():
-                    char_string = chr(ord(char.content) + 119789)
-                elif char.content.isalpha() and char.content.isupper():
-                    char_string = chr(ord(char.content) + 119795)
-                else:
-                    char_string = char.content
-
-                width, height, left, top = FontManager.get_char_extents_single(char_string, fontname='math')
-                box = boxes.BoxGlyph(width, height, left, top, char_string, node=char)
-                box.classes.add('math')
-                char.set_box(box)
-                self.current_math_box.add(box)
+            width, height, left, top = FontManager.get_char_extents_single(char.content)
+            box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
+            self.current_line_box.add(box)
+            char.set_box(box)
 
         else:
-            if char.is_whitespace:
-                self.process_current_word()
-
-                width, height, left, top = FontManager.get_char_extents_single(char.content)
-                box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
-                self.current_line_box.add(box)
-                char.set_box(box)
-
-            else:
-                self.current_word.append(char)
+            self.current_word.append(char)
 
     def visit_eol(self, node):
         self.process_current_word()

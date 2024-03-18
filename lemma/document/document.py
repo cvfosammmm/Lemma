@@ -18,6 +18,7 @@
 import time, os.path
 
 from lemma.document.ast.ast import AST
+from lemma.document.housekeeper.housekeeper import Housekeeper
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
@@ -48,6 +49,7 @@ class Document(Observable):
         self.markdown = None
         self.plaintext = None
 
+        self.housekeeper = Housekeeper(self)
         self.layouter = Layouter(self)
         self.markdown_scanner = MarkdownScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
@@ -64,6 +66,7 @@ class Document(Observable):
     def redo(self): self.command_processor.redo()
 
     def update(self):
+        self.housekeeper.update()
         self.layouter.update()
         self.markdown_scanner.update()
         self.plaintext_scanner.update()

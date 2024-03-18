@@ -208,6 +208,29 @@ class EndOfMathArea():
     def is_math_area(self): return False
 
 
+class MathSymbol():
+
+    def __init__(self, string):
+        self.parent = None
+        self.content = string
+        self.box = None
+
+    def set_parent(self, parent):
+        self.parent = parent
+
+    def set_box(self, box):
+        self.box = box
+
+    def get_iterator(self):
+        return Iterator(self)
+
+    def accept(self, visitor): visitor.visit_mathsymbol(self)
+    def is_leaf(self): return True
+    def is_root(self): return False
+    def is_line(self): return False
+    def is_math_area(self): return False
+
+
 class UnicodeCharacter():
 
     def __init__(self, string):

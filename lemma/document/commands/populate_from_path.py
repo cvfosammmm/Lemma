@@ -72,6 +72,6 @@ class Command():
 
     def add_math(self, composite, text):
         for char in text:
-            composite.append(ast.UnicodeCharacter(char))
+            composite.append(ast.MathSymbol(char))
 
 
