@@ -21,6 +21,7 @@ class LaTeXDB(object):
     ordinary_symbols = {'𝑎', '𝑏', '𝑐', '𝑑', '𝑒', '𝑓', '𝑔', '\u210E', '𝑖', '𝑗', '𝑘', '𝑙', '𝑚', '𝑛', '𝑜', '𝑝', '𝑞', '𝑟', '𝑠', '𝑡', '𝑢', '𝑣', '𝑤', '𝑥', '𝑦', '𝑧', '𝐴', '𝐵', '𝐶', '𝐷', '𝐸', '𝐹', '𝐺', '𝐻', '𝐼', '𝐽', '𝐾', '𝐿', '𝑀', '𝑁', '𝑂', '𝑃', '𝑄', '𝑅', '𝑆', '𝑇', '𝑈', '𝑉', '𝑊', '𝑋', '𝑌', '𝑍', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '?', '.', '|', '/', '\'', '@', '"'}
     binary_operations = {'+', '−', '∗'}
     relations = {'=', '<', '>', ':'}
+    punctuation_marks = {',', ';'}
     latex_to_unicode = {
         'alpha': 'α',
         'beta': 'β',
@@ -67,7 +68,7 @@ class LaTeXDB(object):
         return LaTeXDB.latex_to_unicode[name]
 
     def is_mathsymbol(char):
-        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.binary_operations or char in LaTeXDB.relations
+        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.binary_operations or char in LaTeXDB.relations or char in LaTeXDB.punctuation_marks
 
     def is_ordinary_symbol(char):
         return char in LaTeXDB.ordinary_symbols
@@ -77,5 +78,8 @@ class LaTeXDB(object):
 
     def is_relation(char):
         return char in LaTeXDB.relations
+
+    def is_punctuation_mark(char):
+        return char in LaTeXDB.punctuation_marks
 
 

@@ -74,6 +74,9 @@ class Layouter(object):
                 width += FontManager.get_thickspace() * 2
                 left += FontManager.get_thickspace()
 
+            if symbol.layout_mode == 'punct':
+                width += FontManager.get_thinspace()
+
             box = boxes.BoxGlyph(width, height, left, top, symbol.content, node=symbol)
             box.classes.add('math')
             symbol.set_box(box)

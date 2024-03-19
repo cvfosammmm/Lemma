@@ -48,6 +48,8 @@ class Housekeeper():
             symbol.layout_mode = 'bin'
         elif LaTeXDB.is_relation(symbol.content):
             symbol.layout_mode = 'rel'
+        elif LaTeXDB.is_punctuation_mark(symbol.content):
+            symbol.layout_mode = 'punct'
 
     def visit_aftermath(self, aftermath):
         pass
