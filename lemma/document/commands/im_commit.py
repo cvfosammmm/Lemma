@@ -45,6 +45,7 @@ class Command():
                     elif char.isalpha() and char.isupper(): char = chr(ord(char) + 119795)
                     elif char == '-': char = '−'
                     elif char == '*': char = '∗'
+                    elif char == '\'': char = '′'
 
                     if LaTeXDB.is_mathsymbol(char):
                         self.state['chars_added'] += document.ast.insert_mathsymbol(char)
