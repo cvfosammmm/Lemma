@@ -110,7 +110,7 @@ class Actions(object):
         self.workspace.delete_document(self.workspace.active_document)
 
     def rename_document(self, action=None, parameter=''):
-        self.workspace.document_view.init_renaming()
+        self.document_view.init_renaming()
 
     def export_as(self, action=None, parameter=''):
         DialogLocator.get_dialog('export_as').run(self.workspace.active_document)
