@@ -22,6 +22,8 @@ class LaTeXDB(object):
     binary_operations = {'+', '−', '∗'}
     relations = {'=', '<', '>', ':'}
     punctuation_marks = {',', ';'}
+    opening_symbols = {'(', '[', '{'}
+    closing_symbols = {')', ']', '}'}
     latex_to_unicode = {
         'alpha': 'α',
         'beta': 'β',
@@ -68,7 +70,7 @@ class LaTeXDB(object):
         return LaTeXDB.latex_to_unicode[name]
 
     def is_mathsymbol(char):
-        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.binary_operations or char in LaTeXDB.relations or char in LaTeXDB.punctuation_marks
+        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.binary_operations or char in LaTeXDB.relations or char in LaTeXDB.punctuation_marks or char in LaTeXDB.opening_symbols or char in LaTeXDB.closing_symbols
 
     def is_ordinary_symbol(char):
         return char in LaTeXDB.ordinary_symbols
@@ -81,5 +83,11 @@ class LaTeXDB(object):
 
     def is_punctuation_mark(char):
         return char in LaTeXDB.punctuation_marks
+
+    def is_opening_symbol(char):
+        return char in LaTeXDB.opening_symbols
+
+    def is_closing_symbol(char):
+        return char in LaTeXDB.closing_symbols
 
 

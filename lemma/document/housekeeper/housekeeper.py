@@ -50,6 +50,10 @@ class Housekeeper():
             symbol.layout_mode = 'rel'
         elif LaTeXDB.is_punctuation_mark(symbol.content):
             symbol.layout_mode = 'punct'
+        elif LaTeXDB.is_opening_symbol(symbol.content):
+            symbol.layout_mode = 'open'
+        elif LaTeXDB.is_closing_symbol(symbol.content):
+            symbol.layout_mode = 'close'
 
     def visit_aftermath(self, aftermath):
         pass
