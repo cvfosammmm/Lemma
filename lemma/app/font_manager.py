@@ -32,6 +32,11 @@ class FontManager():
         face = freetype2.get_default_lib().new_face(filename)
         face.set_char_size(size=size, resolution=72)
         FontManager.fonts[name]['face'] = face
+        FontManager.fonts[name]['ppem'] = face.size['metrics']['x_ppem']
+        FontManager.fonts[name]['ppex'] = face.size['metrics']['y_ppem']
+        FontManager.fonts[name]['thinspace'] = int(face.size['metrics']['x_ppem'] / 6)
+        FontManager.fonts[name]['medspace'] = int(2 * face.size['metrics']['x_ppem'] / 9)
+        FontManager.fonts[name]['thickspace'] = int(5 * face.size['metrics']['x_ppem'] / 18)
         FontManager.fonts[name]['line_height'] = line_height
         FontManager.fonts[name]['harfbuzz_font'] = harfbuzz.Font.ft_create(face)
         FontManager.fonts[name]['char_extents'] = dict()
@@ -39,6 +44,21 @@ class FontManager():
 
     def get_line_height(fontname='book'):
         return FontManager.fonts[fontname]['line_height']
+
+    def get_ppem(fontname='book'):
+        return FontManager.fonts[fontname]['ppem']
+
+    def get_ppex(fontname='book'):
+        return FontManager.fonts[fontname]['ppex']
+
+    def get_thinspace(fontname='book'):
+        return FontManager.fonts[fontname]['thinspace']
+
+    def get_medspace(fontname='book'):
+        return FontManager.fonts[fontname]['medspace']
+
+    def get_thickspace(fontname='book'):
+        return FontManager.fonts[fontname]['thickspace']
 
     def get_char_extents_single(char, fontname='book'):
         if char not in FontManager.fonts[fontname]['char_extents']:
@@ -72,7 +92,6 @@ class FontManager():
 
     def load_glyph(char, fontname='book'):
         if char not in FontManager.fonts[fontname]['char_extents']:
-            #FontManager.fonts[fontname]['face'].load_char(ord(char), freetype2.FT.LOAD_FORCE_AUTOHINT)
             FontManager.fonts[fontname]['face'].load_char(ord(char), freetype2.FT.LOAD_DEFAULT)
             FontManager.fonts[fontname]['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
 

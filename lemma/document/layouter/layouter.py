@@ -65,6 +65,15 @@ class Layouter(object):
             self.process_current_number()
 
             width, height, left, top = FontManager.get_char_extents_single(symbol.content, fontname='math')
+
+            if symbol.layout_mode == 'bin':
+                width += FontManager.get_medspace() * 2
+                left += FontManager.get_medspace()
+
+            if symbol.layout_mode == 'rel':
+                width += FontManager.get_thickspace() * 2
+                left += FontManager.get_thickspace()
+
             box = boxes.BoxGlyph(width, height, left, top, symbol.content, node=symbol)
             box.classes.add('math')
             symbol.set_box(box)

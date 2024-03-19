@@ -40,7 +40,8 @@ class Command():
                 document.ast.move_cursor_by_offset(1)
             else:
                 for char in self.text:
-                    if char.isalpha() and char.islower(): char = chr(ord(char) + 119789)
+                    if char == 'h': char = '\u210E'
+                    elif char.isalpha() and char.islower(): char = chr(ord(char) + 119789)
                     elif char.isalpha() and char.isupper(): char = chr(ord(char) + 119795)
                     elif char == '-': char = '−'
                     elif char == '*': char = '∗'

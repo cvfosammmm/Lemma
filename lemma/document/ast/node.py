@@ -214,6 +214,7 @@ class MathSymbol():
         self.parent = None
         self.content = string
         self.box = None
+        self.layout_mode = None
 
     def set_parent(self, parent):
         self.parent = parent
