@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.app.latex_db import LaTeXDB
+
 
 class Command():
 
@@ -22,14 +24,25 @@ class Command():
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.name = name
+        self.state = dict()
 
     def run(self, document):
-        document.ast.insert_math_symbol(self.name)
+        self.state['insert_position_before'] = document.ast.insert.get_position()
+        self.state['chars_added'] = []
+
+        node = document.ast.insert.get_node()
+        if node.parent.is_math_area():
+            char = LaTeXDB.get_unicode_from_latex_name(self.name)
+            if LaTeXDB.is_mathsymbol(char):
+                self.state['chars_added'] += document.ast.insert_mathsymbol(char)
+
+        self.is_undo_checkpoint = (len(self.state['chars_added']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.ast.move_cursor_by_offset(-1)
-        document.ast.delete_char_at_cursor()
+        for node in self.state['chars_added']:
+            document.ast.delete_node(node)
+        document.ast.insert.set_position(self.state['insert_position_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

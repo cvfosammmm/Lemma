@@ -32,6 +32,7 @@ class WorkspacePresenter():
 
         self.update_colors()
         self.update_mode_stack()
+        self.setup_paneds()
 
     def on_new_active_document(self, workspace, document=None):
         self.update_mode_stack()
@@ -53,5 +54,15 @@ class WorkspacePresenter():
     def update_colors(self):
         path = os.path.join(ServiceLocator.get_resources_path(), 'themes', self.workspace.theme + '.css')
         self.main_window.css_provider_colors.load_from_path(path)
+
+    def setup_paneds(self):
+        show_tools_sidebar = self.workspace.settings.get_value('window_state', 'show_tools_sidebar')
+        tools_sidebar_position = self.workspace.settings.get_value('window_state', 'tools_sidebar_position')
+
+        if tools_sidebar_position in [None, -1]: self.main_window.document_view_paned.set_end_on_first_show()
+
+        self.main_window.document_view_paned.first_set_show_widget(show_tools_sidebar)
+        self.main_window.document_view_paned.set_target_position(tools_sidebar_position)
+        self.main_window.headerbar.hb_right.tools_sidebar_toggle.set_active(show_tools_sidebar)
 
 

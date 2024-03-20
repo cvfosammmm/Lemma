@@ -122,6 +122,8 @@ class Application(Adw.Application):
         settings.set_value('window_state', 'height', self.main_window.get_property('default-height'))
         settings.set_value('window_state', 'is_maximized', self.main_window.get_property('maximized'))
         settings.set_value('window_state', 'sidebar_position', self.main_window.headerbar.get_property('position'))
+        settings.set_value('window_state', 'show_tools_sidebar', self.main_window.document_view_paned.show_widget)
+        settings.set_value('window_state', 'tools_sidebar_position', self.main_window.document_view_paned.target_position)
         settings.pickle()
 
 

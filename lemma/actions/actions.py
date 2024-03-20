@@ -33,27 +33,25 @@ class Actions(object):
         self.settings = ServiceLocator.get_settings()
 
         self.actions = dict()
-        self.add_action('add-document', self.add_document)
-        self.add_action('import-markdown-files', self.import_markdown_files)
-        self.add_action('delete-document', self.delete_document)
-        self.add_action('rename-document', self.rename_document)
-        self.add_action('export-as', self.export_as)
+        self.add_simple_action('add-document', self.add_document)
+        self.add_simple_action('import-markdown-files', self.import_markdown_files)
+        self.add_simple_action('delete-document', self.delete_document)
+        self.add_simple_action('rename-document', self.rename_document)
+        self.add_simple_action('export-as', self.export_as)
 
-        self.add_action('go-back', self.go_back)
-        self.add_action('go-forward', self.go_forward)
+        self.add_simple_action('go-back', self.go_back)
+        self.add_simple_action('go-forward', self.go_forward)
 
-        self.add_action('undo', self.undo)
-        self.add_action('redo', self.redo)
+        self.add_simple_action('undo', self.undo)
+        self.add_simple_action('redo', self.redo)
 
-        self.add_action('insert-math', self.insert_math)
-        self.add_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
+        self.add_simple_action('insert-math', self.insert_math)
+        self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
-        self.add_action('show-insert-symbols-menu', self.show_insert_symbols_menu)
-        self.add_action('show-document-menu', self.show_document_menu)
-
-        self.add_action('show-hamburger-menu', self.show_hamburger_menu)
-        self.add_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
-        self.add_action('show-about-dialog', self.show_about_dialog)
+        self.add_simple_action('show-document-menu', self.show_document_menu)
+        self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
+        self.add_simple_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
+        self.add_simple_action('show-about-dialog', self.show_about_dialog)
 
         self.actions['quit'] = Gio.SimpleAction.new('quit', None)
         self.main_window.add_action(self.actions['quit'])
@@ -63,7 +61,7 @@ class Actions(object):
 
         self.update_actions()
 
-    def add_action(self, name, callback, parameter=None):
+    def add_simple_action(self, name, callback, parameter=None):
         self.actions[name] = Gio.SimpleAction.new(name, parameter)
         self.main_window.add_action(self.actions[name])
         self.actions[name].connect('activate', callback)
@@ -82,6 +80,7 @@ class Actions(object):
         can_undo = has_active_doc and active_document.can_undo()
         can_redo = has_active_doc and active_document.can_redo()
         insert_in_line = has_active_doc and active_document.ast.insert.get_node().parent.is_line()
+        insert_in_math_area = has_active_doc and active_document.ast.insert.get_node().parent.is_math_area()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -93,8 +92,7 @@ class Actions(object):
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
         self.actions['insert-math'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
-        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['show-insert-symbols-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_math_area)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
@@ -142,9 +140,6 @@ class Actions(object):
 
         name = parameter[0]
         self.workspace.active_document.add_command('insert_symbol', name)
-
-    def show_insert_symbols_menu(self, action=None, parameter=''):
-        PopoverManager.popup_at_button('insert_symbols')
 
     def show_document_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('document_menu')

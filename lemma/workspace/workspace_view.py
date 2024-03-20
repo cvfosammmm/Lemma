@@ -27,7 +27,9 @@ from lemma.title_widget.title_widget import TitleWidget
 from lemma.app.service_locator import ServiceLocator
 from lemma.headerbar.headerbar import HeaderBar
 from lemma.toolbar.toolbar import ToolBar
+from lemma.toolbar.sidebar import ToolsSidebar
 from lemma.document_view.document_view_view import DocumentViewView
+import lemma.animated_paned.animated_paned as animated_paned
 
 
 class MainWindow(Adw.ApplicationWindow):
@@ -54,6 +56,7 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.welcome = WelcomeView()
         self.document_view = DocumentViewView()
+        self.tools_sidebar = ToolsSidebar()
 
         self.draft_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.draft_title_widget = TitleWidget(self)
@@ -66,8 +69,12 @@ class MainWindow(Adw.ApplicationWindow):
         self.content_stack.add_named(self.draft_box, 'draft_view')
         self.content_stack.add_named(self.document_view, 'document_view')
 
+        self.document_view_paned = animated_paned.AnimatedHPaned(self.content_stack, self.tools_sidebar, False)
+        self.document_view_paned.get_style_context().add_class('document-view')
+        self.document_view_paned.set_wide_handle(True)
+
         self.content_with_toolbar = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.content_with_toolbar.append(self.content_stack)
+        self.content_with_toolbar.append(self.document_view_paned)
         self.content_with_toolbar.append(self.toolbar)
 
         self.content_paned.set_start_child(self.workspace.documents.view)

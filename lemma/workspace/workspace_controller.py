@@ -22,4 +22,10 @@ class WorkspaceController():
         self.workspace = workspace
         self.main_window = main_window
 
+        self.main_window.headerbar.hb_right.tools_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+
+    def on_tools_sidebar_toggle_toggled(self, toggle_button, parameter=None):
+        self.main_window.document_view_paned.set_show_widget(toggle_button.get_active())
+        self.main_window.document_view_paned.animate(True)
+
 

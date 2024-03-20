@@ -143,6 +143,14 @@ paned.content separator.wide {
     box-shadow: none;
     background-color: @bodypaned_border;
 }
+paned.document-view separator.wide {
+    padding: 0px;
+    margin: 0px;
+    border-right: 2px solid @window_bg_color;
+    min-width: 1px;
+    box-shadow: none;
+    background-color: @bodypaned_border;
+}
 
 /* popover */
 

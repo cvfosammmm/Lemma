@@ -18,62 +18,75 @@
 
 class LaTeXDB(object):
 
-    ordinary_symbols = {'𝑎', '𝑏', '𝑐', '𝑑', '𝑒', '𝑓', '𝑔', '\u210E', '𝑖', '𝑗', '𝑘', '𝑙', '𝑚', '𝑛', '𝑜', '𝑝', '𝑞', '𝑟', '𝑠', '𝑡', '𝑢', '𝑣', '𝑤', '𝑥', '𝑦', '𝑧', '𝐴', '𝐵', '𝐶', '𝐷', '𝐸', '𝐹', '𝐺', '𝐻', '𝐼', '𝐽', '𝐾', '𝐿', '𝑀', '𝑁', '𝑂', '𝑃', '𝑄', '𝑅', '𝑆', '𝑇', '𝑈', '𝑉', '𝑊', '𝑋', '𝑌', '𝑍', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '?', '.', '|', '/', '′', '@', '"'}
+    alphabetical_symbols = {'𝑎', '𝑏', '𝑐', '𝑑', '𝑒', '𝑓', '𝑔', '\u210E', '𝑖', '𝑗', '𝑘', '𝑙', '𝑚', '𝑛', '𝑜', '𝑝', '𝑞', '𝑟', '𝑠', '𝑡', '𝑢', '𝑣', '𝑤', '𝑥', '𝑦', '𝑧', '𝐴', '𝐵', '𝐶', '𝐷', '𝐸', '𝐹', '𝐺', '𝐻', '𝐼', '𝐽', '𝐾', '𝐿', '𝑀', '𝑁', '𝑂', '𝑃', '𝑄', '𝑅', '𝑆', '𝑇', '𝑈', '𝑉', '𝑊', '𝑋', '𝑌', '𝑍', '𝛼', '𝛽', '𝛾', '𝛿', '𝜀', '𝜁', '𝜂', '𝜃', '𝜄', '𝜅', '𝜆', '𝜇', '𝜈', '𝜉', '𝜊', '𝜋', '𝜌', '𝜍', '𝜎', '𝜏', '𝜐', '𝜑', '𝜒', '𝜓', '𝜔', '𝜕', '𝜖', '𝜗', '𝜘', '𝜙', '𝜚', '𝜛', '𝛢', '𝛣', '𝛤', '𝛥', '𝛦', '𝛧', '𝛨', '𝛩', '𝛪', '𝛫', '𝛬', '𝛭', '𝛮', '𝛯', '𝛰', '𝛱', '𝛲', '𝛳', '𝛴', '𝛵', '𝛶', '𝛷', '𝛸', '𝛹', '𝛺', 'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'ς', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω', 'ϊ', 'ϋ', 'ό', 'ύ', 'ώ', 'Ϗ', 'ϐ', 'ϑ', 'ϒ', 'ϓ', 'ϔ', 'ϕ', 'ϖ', 'ϗ', 'Ϙ', 'ϙ', 'Ϛ', 'ϛ', 'Ϝ', 'ϝ', 'Ϟ', 'ϟ', 'Ϡ', 'ϡ', 'Ϣ', 'ϣ', 'Ϥ', 'ϥ', 'Ϧ', 'ϧ', 'Ϩ', 'ϩ', 'Ϫ', 'ϫ', 'Ϭ', 'ϭ', 'Ϯ', 'ϯ', 'ϰ', 'ϱ', 'ϲ', 'ϳ', 'ϴ', 'ϵ', 'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'}
+    ordinary_symbols = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '?', '.', '|', '/', '′', '@', '"'}
     binary_operations = {'+', '−', '∗'}
     relations = {'=', '<', '>', ':'}
     punctuation_marks = {',', ';'}
     opening_symbols = {'(', '[', '{'}
     closing_symbols = {')', ']', '}'}
     latex_to_unicode = {
-        'alpha': 'α',
-        'beta': 'β',
-        'gamma': 'γ',
-        'delta': 'δ',
-        'epsilon': 'ε',
-        'zeta': 'ζ',
-        'eta': 'η',
-        'theta': 'θ',
-        'vartheta': 'ϑ',
-        'iota': 'ι',
-        'kappa': 'κ',
-        'lambda': 'λ',
-        'mu': 'μ',
-        'nu': 'ν',
-        'xi': 'ξ',
-        'pi': 'π',
-        'varpi': 'ϖ',
-        'rho': 'ρ',
-        'varrho': 'ϱ',
-        'sigma': 'σ',
-        'varsigma': 'ς',
-        'tau': 'τ',
-        'upsilon': 'υ',
-        'phi': 'ϕ',
-        'varphi': 'φ',
-        'chi': 'χ',
-        'psi': 'ψ',
-        'omega': 'ω',
+        'alpha': '𝛼',
+        'beta': '𝛽',
+        'gamma': '𝛾',
+        'delta': '𝛿',
+        'epsilon': '𝜖',
+        'varepsilon': '𝜀',
+        'zeta': '𝜁',
+        'eta': '𝜂',
+        'theta': '𝜃',
+        'vartheta': '𝜗',
+        'iota': '𝜄',
+        'kappa': '𝜅',
+        'lambda': '𝜆',
+        'mu': '𝜇',
+        'nu': '𝜈',
+        'xi': '𝜉',
+        'pi': '𝜋',
+        'varpi': '𝜛',
+        'rho': '𝜌',
+        'varrho': '𝜚',
+        'sigma': '𝜎',
+        'varsigma': '𝜍',
+        'tau': '𝜏',
+        'upsilon': '𝜐',
+        'phi': '𝜙',
+        'varphi': '𝜑',
+        'chi': '𝜒',
+        'psi': '𝜓',
+        'omega': '𝜔',
         'Gamma': 'Γ',
+        'varGamma': '𝛤',
         'Delta': 'Δ',
+        'varDelta': '𝛥',
         'Theta': 'Θ',
+        'varTheta': '𝛩',
         'Lambda': 'Λ',
+        'varLambda': '𝛬',
         'Xi': 'Ξ',
+        'varXi': '𝛯',
         'Pi': 'Π',
+        'varPi': '𝛱',
         'Sigma': 'Σ',
+        'varSigma': '𝛴',
         'Upsilon': 'Υ',
+        'varUpsilon': '𝛶',
         'Phi': 'Φ',
+        'varPhi': '𝛷',
         'Psi': 'Ψ',
-        'Omega': 'Ω'
+        'varPsi': '𝛹',
+        'Omega': 'Ω',
+        'varOmega': '𝛺'
     }
 
     def get_unicode_from_latex_name(name):
         return LaTeXDB.latex_to_unicode[name]
 
     def is_mathsymbol(char):
-        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.binary_operations or char in LaTeXDB.relations or char in LaTeXDB.punctuation_marks or char in LaTeXDB.opening_symbols or char in LaTeXDB.closing_symbols
+        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.binary_operations or char in LaTeXDB.relations or char in LaTeXDB.punctuation_marks or char in LaTeXDB.opening_symbols or char in LaTeXDB.closing_symbols or char in LaTeXDB.alphabetical_symbols
 
     def is_ordinary_symbol(char):
-        return char in LaTeXDB.ordinary_symbols
+        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.alphabetical_symbols
 
     def is_binary_operation(char):
         return char in LaTeXDB.binary_operations
