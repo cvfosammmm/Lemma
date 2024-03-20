@@ -112,6 +112,7 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.box.append(self.headerbar)
 
         self.tools_sidebar_toggle = Gtk.ToggleButton()
+        self.tools_sidebar_toggle.set_tooltip_text(_('Show Tools Sidebar') + ' (F9)')
         self.tools_sidebar_toggle.set_icon_name('sidebar-show-right-symbolic')
         self.tools_sidebar_toggle.set_can_focus(False)
         self.tools_sidebar_toggle.get_style_context().add_class('flat')

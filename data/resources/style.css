@@ -58,31 +58,12 @@ overlay.history scrollbar {
 
 /* actionbar */
 
+actionbar {
+    border-top: 1px solid @bodypaned_border;
+}
 actionbar box {
     background: @window_bg_color;
-}
-overlay.popover.insert-symbols .content {
-    padding: 0px;
-}
-overlay.popover.insert-symbols .header {
-    padding: 6px;
-    border-bottom: 1px solid @borders;
-}
-overlay.popover.insert-symbols .header label {
-    margin-left: 9px;
-}
-overlay.popover.insert-symbols .header button {
-}
-overlay.popover.insert-symbols flowbox {
-    background: @borders;
-}
-overlay.popover.insert-symbols flowboxchild {
-    background: @window_bg_color;
-    padding: 0px;
-    border-radius: 0px;
-}
-overlay.popover.insert-symbols flowboxchild button {
-    border-radius: 0px;
+    box-shadow: none;
 }
 
 /* title-widget */
@@ -150,6 +131,29 @@ paned.document-view separator.wide {
     min-width: 1px;
     box-shadow: none;
     background-color: @bodypaned_border;
+}
+
+/* tools sidebar */
+
+box.tools-sidebar {
+    padding-right: 2px;
+}
+box.tools-sidebar .header {
+    padding: 6px;
+    padding-top: 12px;
+}
+box.tools-sidebar .header label {
+    margin-left: 9px;
+}
+box.tools-sidebar flowbox {
+    margin: 4px;
+}
+box.tools-sidebar flowboxchild {
+    padding: 0px;
+    border-radius: 0px;
+}
+box.tools-sidebar button {
+    padding: 6px;
 }
 
 /* popover */

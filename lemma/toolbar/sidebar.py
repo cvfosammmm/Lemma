@@ -26,7 +26,10 @@ class ToolsSidebar(Gtk.ScrolledWindow):
 
     def __init__(self):
         Gtk.ScrolledWindow.__init__(self)
-        self.set_size_request(240, 280)
+        self.set_size_request(248, 280)
+
+        self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.box.get_style_context().add_class('tools-sidebar')
 
         self.header = Gtk.CenterBox()
         self.header.set_orientation(Gtk.Orientation.HORIZONTAL)
@@ -38,6 +41,7 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         self.flowbox.set_can_focus(False)
         self.flowbox.set_row_spacing(1)
         self.flowbox.set_column_spacing(1)
+        self.flowbox.set_max_children_per_line(20)
 
         self.symbols_list = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'vartheta', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'pi', 'varpi', 'rho', 'varrho', 'sigma', 'varsigma', 'tau', 'upsilon', 'phi', 'varphi', 'chi', 'psi', 'omega', 'Gamma', 'varGamma', 'Delta', 'varDelta', 'Theta', 'varTheta', 'Lambda', 'varLambda', 'Xi', 'varXi', 'Pi', 'varPi', 'Sigma', 'varSigma', 'Upsilon', 'varUpsilon', 'Phi', 'varPhi', 'Psi', 'varPsi', 'Omega', 'varOmega']
         for name in self.symbols_list:
@@ -48,7 +52,6 @@ class ToolsSidebar(Gtk.ScrolledWindow):
             button.get_style_context().add_class('flat')
             self.flowbox.append(button)
 
-        self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.box.append(self.header)
         self.box.append(self.flowbox)
 

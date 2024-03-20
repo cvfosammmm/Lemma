@@ -48,6 +48,7 @@ class Actions(object):
         self.add_simple_action('insert-math', self.insert_math)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
+        self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar)
         self.add_simple_action('show-document-menu', self.show_document_menu)
         self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
         self.add_simple_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
@@ -93,6 +94,7 @@ class Actions(object):
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
         self.actions['insert-math'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_math_area)
+        self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
@@ -140,6 +142,10 @@ class Actions(object):
 
         name = parameter[0]
         self.workspace.active_document.add_command('insert_symbol', name)
+
+    def toggle_tools_sidebar(self, action=None, parameter=''):
+        toggle = self.main_window.headerbar.hb_right.tools_sidebar_toggle
+        toggle.set_active(not toggle.get_active())
 
     def show_document_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('document_menu')

@@ -37,6 +37,7 @@ class ShortcutControllerApp(ShortcutController):
         self.create_and_add_shortcut('F2', self.actions.actions['rename-document'].activate)
         self.create_and_add_shortcut('<Control>e', self.actions.actions['export-as'].activate)
         self.create_and_add_shortcut('<Control>question', self.actions.actions['show-shortcuts-dialog'].activate)
+        self.create_and_add_shortcut('F9', self.actions.actions['toggle-tools-sidebar'].activate)
         self.create_and_add_shortcut('F10', self.actions.actions['show-hamburger-menu'].activate)
         self.create_and_add_shortcut('F12', self.actions.actions['show-document-menu'].activate)
 

@@ -30,6 +30,7 @@ class Dialog():
         section = {'title': 'Windows and Panels', 'items': list()}
         section['items'].append({'title': 'Show global menu', 'shortcut': 'F10'})
         section['items'].append({'title': 'Show document menu', 'shortcut': 'F12'})
+        section['items'].append({'title': 'Show tools sidebar', 'shortcut': 'F9'})
         section['items'].append({'title': 'Show keyboard shortcuts', 'shortcut': '&lt;ctrl&gt;question'})
         section['items'].append({'title': 'Quit the application', 'shortcut': '&lt;ctrl&gt;Q'})
         data.append(section)
