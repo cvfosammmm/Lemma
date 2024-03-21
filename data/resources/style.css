@@ -138,15 +138,14 @@ paned.document-view separator.wide {
 box.tools-sidebar {
     padding-right: 2px;
 }
-box.tools-sidebar .header {
+box.tools-sidebar label.header {
     padding: 6px;
     padding-top: 12px;
-}
-box.tools-sidebar .header label {
-    margin-left: 9px;
+    margin-left: 7px;
 }
 box.tools-sidebar flowbox {
     margin: 4px;
+    margin-bottom: 18px;
 }
 box.tools-sidebar flowboxchild {
     padding: 0px;

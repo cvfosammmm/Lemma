@@ -26,23 +26,20 @@ class ToolsSidebar(Gtk.ScrolledWindow):
 
     def __init__(self):
         Gtk.ScrolledWindow.__init__(self)
-        self.set_size_request(248, 280)
+        self.set_size_request(262, 280)
 
         self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.box.get_style_context().add_class('tools-sidebar')
 
-        self.header = Gtk.CenterBox()
-        self.header.set_orientation(Gtk.Orientation.HORIZONTAL)
-        self.header.get_style_context().add_class('header')
-        self.header.set_start_widget(Gtk.Label.new('Greek Letters'))
+        self.header_greek = Gtk.Label.new('Greek Letters')
+        self.header_greek.set_xalign(Gtk.Align.FILL)
+        self.header_greek.get_style_context().add_class('header')
+        self.box.append(self.header_greek)
 
-        self.flowbox = Gtk.FlowBox()
-        self.flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
-        self.flowbox.set_can_focus(False)
-        self.flowbox.set_row_spacing(1)
-        self.flowbox.set_column_spacing(1)
-        self.flowbox.set_max_children_per_line(20)
-
+        self.flowbox_greek = Gtk.FlowBox()
+        self.flowbox_greek.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.flowbox_greek.set_can_focus(False)
+        self.flowbox_greek.set_max_children_per_line(20)
         self.symbols_list = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'vartheta', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'pi', 'varpi', 'rho', 'varrho', 'sigma', 'varsigma', 'tau', 'upsilon', 'phi', 'varphi', 'chi', 'psi', 'omega', 'Gamma', 'varGamma', 'Delta', 'varDelta', 'Theta', 'varTheta', 'Lambda', 'varLambda', 'Xi', 'varXi', 'Pi', 'varPi', 'Sigma', 'varSigma', 'Upsilon', 'varUpsilon', 'Phi', 'varPhi', 'Psi', 'varPsi', 'Omega', 'varOmega']
         for name in self.symbols_list:
             button = Gtk.Button.new_from_icon_name('sidebar-' + name + '-symbolic')
@@ -50,10 +47,27 @@ class ToolsSidebar(Gtk.ScrolledWindow):
             button.set_can_focus(False)
             button.set_action_target_value(GLib.Variant('as', [name]))
             button.get_style_context().add_class('flat')
-            self.flowbox.append(button)
+            self.flowbox_greek.append(button)
+        self.box.append(self.flowbox_greek)
 
-        self.box.append(self.header)
-        self.box.append(self.flowbox)
+        self.header_arrows = Gtk.Label.new('Arrows')
+        self.header_arrows.set_xalign(Gtk.Align.FILL)
+        self.header_arrows.get_style_context().add_class('header')
+        self.box.append(self.header_arrows)
+
+        self.flowbox_arrows = Gtk.FlowBox()
+        self.flowbox_arrows.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.flowbox_arrows.set_can_focus(False)
+        self.flowbox_arrows.set_max_children_per_line(20)
+        self.symbols_list = ['leftarrow', 'leftrightarrow', 'rightarrow', 'mapsto', 'longleftarrow', 'longleftrightarrow', 'longrightarrow', 'longmapsto', 'downarrow', 'updownarrow', 'uparrow', 'nwarrow', 'searrow', 'nearrow', 'swarrow', 'nleftarrow', 'nleftrightarrow', 'nrightarrow', 'hookleftarrow', 'hookrightarrow', 'twoheadleftarrow', 'twoheadrightarrow', 'leftarrowtail', 'rightarrowtail', 'Leftarrow', 'Leftrightarrow', 'Rightarrow', 'Longleftarrow', 'Longleftrightarrow', 'Longrightarrow', 'Updownarrow', 'Uparrow', 'Downarrow', 'nLeftarrow', 'nLeftrightarrow', 'nRightarrow', 'leftleftarrows', 'leftrightarrows', 'rightleftarrows', 'rightrightarrows', 'downdownarrows', 'upuparrows', 'curvearrowleft', 'curvearrowright', 'Lsh', 'Rsh', 'looparrowleft', 'looparrowright', 'leftrightsquigarrow', 'rightsquigarrow', 'Lleftarrow', 'leftharpoondown', 'rightharpoondown', 'leftharpoonup', 'rightharpoonup', 'rightleftharpoons', 'leftrightharpoons', 'downharpoonleft', 'upharpoonleft', 'downharpoonright', 'upharpoonright']
+        for name in self.symbols_list:
+            button = Gtk.Button.new_from_icon_name('sidebar-' + name + '-symbolic')
+            button.set_action_name('win.insert-symbol')
+            button.set_can_focus(False)
+            button.set_action_target_value(GLib.Variant('as', [name]))
+            button.get_style_context().add_class('flat')
+            self.flowbox_arrows.append(button)
+        self.box.append(self.flowbox_arrows)
 
         self.set_child(self.box)
 
