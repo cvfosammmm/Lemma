@@ -44,7 +44,7 @@ class DocumentDraft():
         if self.workspace.mode == 'draft':
             self.init()
         else:
-            self.cancel()
+            self.title_widget.deactivate()
 
     def on_entry_activate(self, entry=None):
         if self.title_widget.validation_state:
@@ -64,16 +64,12 @@ class DocumentDraft():
     def on_entry_keypress(self, controller, keyval, keycode, state):
         if keyval == Gdk.keyval_from_name('Escape'):
             if state & Gtk.accelerator_get_default_mod_mask() == 0:
-                self.cancel()
+                self.workspace.leave_draft_mode()
                 return True
         return False
 
     def on_cancel_button_clicked(self, widget=None):
-        self.cancel()
-
-    def cancel(self):
-        self.reset_title()
-        self.title_widget.deactivate()
+        self.workspace.leave_draft_mode()
 
     def init(self):
         id = self.workspace.documents.get_new_document_id()
