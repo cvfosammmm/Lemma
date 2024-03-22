@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="7" date="2024-3-22">
+            <description translatable="no">
+                <p>Add symbols toolbar, ...</p>
+            </description>
+        </release>
         ​<release version="6" date="2024-3-15">
             <description translatable="no">
                 <p>Add math mode, ...</p>
