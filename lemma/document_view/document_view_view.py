@@ -36,8 +36,8 @@ class DocumentViewView(Gtk.Overlay):
         self.subtitle_height = 50
         self.title_buttons_height = 0
         self.title_width = 500
-        self.insert_height = 26
-        self.insert_drawing_offset = 7
+        self.insert_height = 25
+        self.insert_drawing_offset = 9
 
         self.layout_title = Pango.Layout(self.get_pango_context())
         self.layout_title.set_ellipsize(Pango.EllipsizeMode.END)

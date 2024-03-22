@@ -50,16 +50,12 @@ class BoxVContainer(object):
         return (x, y)
 
     def get_child_at_xy(self, x, y):
-        current_child, current_height = (None, 0)
-
+        current_height = 0
         for child in self.children:
-            current_child = child
-            current_height += child.height
-            if current_height >= y:
-                current_height -= child.height
-                break
-
-        return (current_child, 0, current_height)
+            if current_height + child.height + FontManager.get_descend() + FontManager.get_line_space() / 2 <= y:
+                current_height += child.height
+            else:
+                return (child, 0, current_height)
 
     def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return False

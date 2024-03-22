@@ -24,7 +24,7 @@ class FontManager():
 
     fonts = dict()
 
-    def add_font(name, filename, size, line_height):
+    def add_font(name, filename, size, line_height, ascend, descend):
         fontconfig.Config.get_current().app_font_add_file(filename)
 
         FontManager.fonts[name] = dict()
@@ -34,10 +34,15 @@ class FontManager():
         FontManager.fonts[name]['face'] = face
         FontManager.fonts[name]['ppem'] = face.size['metrics']['x_ppem']
         FontManager.fonts[name]['ppex'] = face.size['metrics']['y_ppem']
+        FontManager.fonts[name]['ascend'] = ascend
+        FontManager.fonts[name]['descend'] = descend
         FontManager.fonts[name]['thinspace'] = int(face.size['metrics']['x_ppem'] / 6)
         FontManager.fonts[name]['medspace'] = int(2 * face.size['metrics']['x_ppem'] / 9)
         FontManager.fonts[name]['thickspace'] = int(5 * face.size['metrics']['x_ppem'] / 18)
         FontManager.fonts[name]['line_height'] = line_height
+        FontManager.fonts[name]['cursor_offset'] = line_height - ascend
+        FontManager.fonts[name]['cursor_height'] = ascend + descend
+        FontManager.fonts[name]['line_space'] = (line_height - ascend - descend) / 2
         FontManager.fonts[name]['harfbuzz_font'] = harfbuzz.Font.ft_create(face)
         FontManager.fonts[name]['char_extents'] = dict()
         FontManager.fonts[name]['surface_cache'] = dict()
@@ -59,6 +64,18 @@ class FontManager():
 
     def get_thickspace(fontname='book'):
         return FontManager.fonts[fontname]['thickspace']
+
+    def get_cursor_offset(fontname='book'):
+        return FontManager.fonts[fontname]['cursor_offset']
+
+    def get_cursor_height(fontname='book'):
+        return FontManager.fonts[fontname]['cursor_height']
+
+    def get_descend(fontname='book'):
+        return FontManager.fonts[fontname]['descend']
+
+    def get_line_space(fontname='book'):
+        return FontManager.fonts[fontname]['line_space']
 
     def get_char_extents_single(char, fontname='book'):
         if char not in FontManager.fonts[fontname]['char_extents']:

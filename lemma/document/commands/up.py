@@ -32,7 +32,7 @@ class Command():
         if y == 0:
             document.ast.insert.set_node(document.get_node_at_xy(0, 0))
         else:
-            document.ast.insert.set_node(document.get_node_at_xy(x, y - 1))
+            document.ast.insert.set_node(document.get_node_at_xy(x, y - document.ast.insert.get_node().box.parent.height * 0.5))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):

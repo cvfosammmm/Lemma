@@ -58,14 +58,14 @@ class DocumentViewPresenter():
         document = self.model.document
         insert_position = document.get_xy_at_node(document.ast.insert.get_node())
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
-        insert_y = insert_position[1] + content_offset + self.view.insert_drawing_offset
-        insert_height = self.view.insert_height
+        insert_y = insert_position[1] + content_offset + FontManager.get_cursor_offset()
+        insert_height = FontManager.get_cursor_height()
         window_height = self.view.scrolling_widget.height
         scrolling_offset_y = self.view.scrolling_widget.scrolling_offset_y
 
         if window_height <= 0: return
 
-        if insert_y == content_offset + self.view.insert_drawing_offset:
+        if insert_y == content_offset + FontManager.get_cursor_offset():
             self.view.scrolling_widget.scroll_to_position((0, 0), animate)
         elif insert_y < scrolling_offset_y:
             self.view.scrolling_widget.scroll_to_position((0, insert_y), animate)
@@ -107,10 +107,10 @@ class DocumentViewPresenter():
         if box == self.model.document.ast.insert.get_node().box:
             if isinstance(box, boxes.BoxPlaceholder):
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-                ctx.rectangle(offset_x, offset_y + self.view.insert_drawing_offset, box.width, box.parent.height)
+                ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()
             else:
-                self.cursor_coords = (offset_x, offset_y + self.view.insert_drawing_offset, 1, self.view.insert_height)
+                self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(), 1, FontManager.get_cursor_height())
 
         if isinstance(box, boxes.BoxVContainer):
             for child in box.children:

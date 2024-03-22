@@ -106,6 +106,7 @@ class Document(Observable):
             box, x_offset, y_offset = box.get_child_at_xy(x, y)
             x -= x_offset
             y -= y_offset
+
         return box.get_node()
 
 

@@ -29,7 +29,7 @@ class Command():
         x, y = document.get_xy_at_node(document.ast.insert.get_node())
         if document.implicit_x_position != None:
             x = document.implicit_x_position
-        document.ast.insert.set_node(document.get_node_at_xy(x, y + document.ast.insert.get_node().box.parent.height + 1))
+        document.ast.insert.set_node(document.get_node_at_xy(x, y + document.ast.insert.get_node().box.parent.height * 1.5))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
