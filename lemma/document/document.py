@@ -102,11 +102,18 @@ class Document(Observable):
         y = max(0, y)
         if y > box.height: x, y = (box.width, box.height)
 
+        x_offset, y_offset = (0, 0)
         while not box.is_leaf():
             box, x_offset, y_offset = box.get_child_at_xy(x, y)
             x -= x_offset
             y -= y_offset
 
-        return box.get_node()
+        node = box.get_node()
+        if x > box.width / 2 and x < box.width:
+            iterator = node.get_iterator()
+            iterator.next()
+            node = iterator.get_node()
+
+        return node
 
 
