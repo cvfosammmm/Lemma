@@ -147,6 +147,10 @@ box.tools-sidebar flowbox {
     margin: 4px;
     margin-bottom: 18px;
 }
+box.tools-sidebar flowbox.mathcal {
+    margin: 4px;
+    margin-bottom: 6px;
+}
 box.tools-sidebar flowboxchild {
     padding: 0px;
     border-radius: 0px;
