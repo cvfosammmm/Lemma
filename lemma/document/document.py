@@ -100,8 +100,9 @@ class Document(Observable):
         box = self.layout
         x = max(0, min(box.width, x))
         y = max(0, y)
-        if y > box.height: y = box.height
-        if x > box.width: x = box.width
+        if y > box.height:
+            y = box.height
+            x = box.width
 
         x_offset, y_offset = (0, 0)
         while not box.is_leaf():
