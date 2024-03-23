@@ -25,18 +25,18 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.ast.insert.get_position()
+        self.state['insert_position_before'] = document.ast.get_insert_position()
 
-        x, y = document.get_xy_at_node(document.ast.insert.get_node())
+        x, y = document.get_xy_at_insert()
         if document.implicit_x_position != None:
             x = document.implicit_x_position
         if y == 0:
-            document.ast.insert.set_node(document.get_node_at_xy(0, 0))
+            document.ast.move_insert_to_node(document.get_node_at_xy(0, 0))
         else:
-            document.ast.insert.set_node(document.get_node_at_xy(x, max(0, y - self.height)))
+            document.ast.move_insert_to_node(document.get_node_at_xy(x, max(0, y - self.height)))
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.ast.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.move_insert_to_position(self.state['insert_position_before'])
 
 

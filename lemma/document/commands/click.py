@@ -26,11 +26,11 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['previous_cursor_position'] = document.ast.insert.get_position()
+        self.state['insert_position_before'] = document.ast.get_insert_position()
 
-        document.ast.insert.set_node(document.get_node_at_xy(self.x, self.y))
+        document.ast.move_insert_to_node(document.get_node_at_xy(self.x, self.y))
 
     def undo(self, document):
-        document.ast.insert.set_position(self.state['previous_cursor_position'])
+        document.ast.move_insert_to_position(self.state['insert_position_before'])
 
 

@@ -27,17 +27,17 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['insert_position_before'] = document.ast.insert.get_position()
+        self.state['insert_position_before'] = document.ast.get_insert_position()
         self.state['chars_added'] = []
 
-        node = document.ast.insert.get_node()
+        node = document.ast.get_insert_node()
         if node.parent.is_line():
             for char in self.text:
                 self.state['chars_added'] += document.ast.insert_character(char)
 
         elif node.parent.is_math_area():
             if self.text == ' ' and node == node.parent.get_child(-1):
-                document.ast.move_cursor_by_offset(1)
+                document.ast.move_insert_by_offset(1)
             else:
                 for char in self.text:
                     if char == 'h': char = '\u210E'
@@ -56,7 +56,7 @@ class Command():
     def undo(self, document):
         for node in self.state['chars_added']:
             document.ast.delete_node(node)
-        document.ast.insert.set_position(self.state['insert_position_before'])
+        document.ast.move_insert_to_position(self.state['insert_position_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

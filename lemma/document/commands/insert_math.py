@@ -25,15 +25,15 @@ class Command():
 
     def run(self, document):
         self.state['math_inserted'] = False
-        if document.ast.insert.get_node().parent.is_line():
+        if document.ast.get_insert_node().parent.is_line():
             document.ast.insert_math_area()
             document.set_scroll_insert_on_screen_after_layout_update()
             self.state['math_inserted'] = True
 
     def undo(self, document):
         if self.state['math_inserted']:
-            document.ast.move_cursor_by_offset(-1)
-            document.ast.delete_char_at_cursor()
+            document.ast.move_insert_by_offset(-1)
+            document.ast.delete_char_at_insert()
             document.set_scroll_insert_on_screen_after_layout_update()
 
 

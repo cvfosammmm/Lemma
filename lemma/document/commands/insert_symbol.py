@@ -27,10 +27,10 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['insert_position_before'] = document.ast.insert.get_position()
+        self.state['insert_position_before'] = document.ast.get_insert_position()
         self.state['chars_added'] = []
 
-        node = document.ast.insert.get_node()
+        node = document.ast.get_insert_node()
         if node.parent.is_math_area():
             char = LaTeXDB.get_unicode_from_latex_name(self.name)
             if LaTeXDB.is_mathsymbol(char):
@@ -42,7 +42,7 @@ class Command():
     def undo(self, document):
         for node in self.state['chars_added']:
             document.ast.delete_node(node)
-        document.ast.insert.set_position(self.state['insert_position_before'])
+        document.ast.move_insert_to_position(self.state['insert_position_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

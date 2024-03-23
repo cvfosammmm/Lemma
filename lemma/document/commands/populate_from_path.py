@@ -39,7 +39,7 @@ class Command():
         if rest != '':
             document.ast.root = self.build_ast(rest)
 
-        document.ast.insert.set_position([0, 0])
+        document.ast.move_insert_to_position([0, 0])
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):

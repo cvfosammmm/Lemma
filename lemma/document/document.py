@@ -78,11 +78,15 @@ class Document(Observable):
     def update_implicit_x_position(self):
         last_command = self.command_processor.get_last_command()
         if last_command != None and last_command.update_implicit_x_position:
-            x, y = self.get_xy_at_node(self.ast.insert.get_node())
+            x, y = self.get_xy_at_insert()
             self.implicit_x_position = x
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True
+
+    def get_xy_at_insert(self):
+        node = self.ast.get_insert_node()
+        return self.get_xy_at_node(node)
 
     def get_xy_at_node(self, node):
         box = node.box

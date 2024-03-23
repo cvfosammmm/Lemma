@@ -25,10 +25,10 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['offset_moved'] = document.ast.move_cursor_by_offset(self.offset)
+        self.state['offset_moved'] = document.ast.move_insert_by_offset(self.offset)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.ast.move_cursor_by_offset(-self.state['offset_moved'])
+        document.ast.move_insert_by_offset(-self.state['offset_moved'])
 
 

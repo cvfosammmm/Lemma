@@ -80,8 +80,8 @@ class Actions(object):
         next_doc = self.workspace.history.get_next_if_any(active_document)
         can_undo = has_active_doc and active_document.can_undo()
         can_redo = has_active_doc and active_document.can_redo()
-        insert_in_line = has_active_doc and active_document.ast.insert.get_node().parent.is_line()
-        insert_in_math_area = has_active_doc and active_document.ast.insert.get_node().parent.is_math_area()
+        insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_line()
+        insert_in_math_area = has_active_doc and active_document.ast.get_insert_node().parent.is_math_area()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)

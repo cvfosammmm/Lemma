@@ -24,15 +24,15 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['insert_position_before'] = document.ast.insert.get_position()
-        self.state['deleted_nodes'] = document.ast.delete_char_at_cursor()
+        self.state['insert_position_before'] = document.ast.get_insert_position()
+        self.state['deleted_nodes'] = document.ast.delete_char_at_insert()
         self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         for node in self.state['deleted_nodes']:
             document.ast.insert_node(node)
-        document.ast.insert.set_position(self.state['insert_position_before'])
+        document.ast.move_insert_to_position(self.state['insert_position_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
