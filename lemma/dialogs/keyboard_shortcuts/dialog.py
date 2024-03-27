@@ -51,6 +51,10 @@ class Dialog():
         section['items'].append({'title': 'Redo', 'shortcut': '&lt;ctrl&gt;&lt;shift&gt;Z'})
         data.append(section)
 
+        section = {'title': 'Selection', 'items': list()}
+        section['items'].append({'title': 'Select all', 'shortcut': '&lt;ctrl&gt;A'})
+        data.append(section)
+
         section = {'title': 'Math', 'items': list()}
         section['items'].append({'title': 'Insert math', 'shortcut': '&lt;ctrl&gt;M'})
         data.append(section)

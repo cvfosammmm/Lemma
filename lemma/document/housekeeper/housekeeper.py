@@ -27,14 +27,10 @@ class Housekeeper():
         self.document.ast.root.accept(self)
 
     def visit_root(self, root):
-        for line in root.children:
-            line.accept(self)
+        for child in root.children:
+            child.accept(self)
 
-    def visit_line(self, line):
-        for char in line.children:
-            char.accept(self)
-
-    def visit_beforemath(self, beforemath):
+    def visit_placeholder(self, placeholder):
         pass
 
     def visit_matharea(self, matharea):
@@ -55,13 +51,7 @@ class Housekeeper():
         elif LaTeXDB.is_closing_symbol(symbol.content):
             symbol.layout_mode = 'close'
 
-    def visit_aftermath(self, aftermath):
-        pass
-
     def visit_char(self, char):
-        pass
-
-    def visit_eol(self, node):
         pass
 
 

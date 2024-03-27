@@ -99,7 +99,9 @@ class BoxHContainer(object):
         current_child, current_width = (None, 0)
         for child in self.children:
             current_child = child
-            if current_width + child.width <= x:
+            if current_width == x:
+                break
+            elif current_width + child.width <= x:
                 current_width += child.width
             else:
                 break

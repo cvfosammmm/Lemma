@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import os.path, re
-import lemma.document.ast.node as ast
+from lemma.document.ast.node import Root, Placeholder, MathArea, UnicodeCharacter, MathSymbol
 
 
 class Command():
@@ -39,39 +39,36 @@ class Command():
         if rest != '':
             document.ast.root = self.build_ast(rest)
 
-        document.ast.move_insert_to_position([0, 0])
+        document.ast.set_cursor_state([[0], [0]])
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         pass
 
     def build_ast(self, markdown):
-        document_lines = ast.Root()
+        root = Root()
 
         lines = markdown.splitlines()
         for line in lines:
-            document_line = ast.Line()
             for segment in re.split(r'(\$`.*?`\$)', line):
                 if segment.startswith('$`') and segment.endswith('`$'):
-                    document_line.append(ast.BeforeMathArea())
-                    math_area = ast.MathArea()
+                    root.append(Placeholder(name='beforemath'))
+                    math_area = MathArea()
                     self.add_math(math_area, segment[2:-2])
-                    document_line.append(math_area)
+                    root.append(math_area)
                 else:
-                    self.add_non_math(document_line, segment)
-            document_lines.append(document_line)
+                    self.add_non_math(root, segment)
+            root.append(Placeholder(name='EOL'))
 
-        if document_lines.length() == 0: document_lines.append(ast.Line())
-
-        return document_lines
+        return root
 
     def add_non_math(self, composite, text):
         for char in text:
             if char != '\n':
-                composite.append(ast.UnicodeCharacter(char))
+                composite.append(UnicodeCharacter(char))
 
     def add_math(self, composite, text):
         for char in text:
-            composite.append(ast.MathSymbol(char))
+            composite.append(MathSymbol(char))
 
 

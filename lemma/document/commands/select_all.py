@@ -19,28 +19,16 @@
 class Command():
 
     def __init__(self):
-        self.is_undo_checkpoint = True
+        self.is_undo_checkpoint = False
         self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
-        self.state['deleted_nodes'] = []
-
-        node = document.ast.get_insert_node()
-        if document.ast.has_selection():
-            self.state['deleted_nodes'] = document.ast.delete_selection()
-        elif not node.get_iterator().is_last_in_parent() or node.parent.length() == 1:
-            document.ast.move_insert_right_with_selection()
-            self.state['deleted_nodes'] = document.ast.delete_selection()
-
-        self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
-        document.set_scroll_insert_on_screen_after_layout_update()
+        document.ast.move_insert_to_node(document.ast.root.get_child(0))
+        document.ast.move_selection_bound_to_node(document.ast.root.get_child(-1))
 
     def undo(self, document):
-        for node in self.state['deleted_nodes']:
-            document.ast.insert_node(node)
         document.ast.set_cursor_state(self.state['cursor_state_before'])
-        document.set_scroll_insert_on_screen_after_layout_update()
 
 

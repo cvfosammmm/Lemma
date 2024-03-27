@@ -44,5 +44,6 @@ class ShortcutControllerApp(ShortcutController):
         self.create_and_add_shortcut('<Control>m', self.actions.actions['insert-math'].activate)
         self.create_and_add_shortcut('<Control>z', self.actions.actions['undo'].activate)
         self.create_and_add_shortcut('<Control><Shift>z', self.actions.actions['redo'].activate)
+        self.create_and_add_shortcut('<Control>a', self.actions.actions['select-all'].activate)
 
 

@@ -44,6 +44,7 @@ class Actions(object):
 
         self.add_simple_action('undo', self.undo)
         self.add_simple_action('redo', self.redo)
+        self.add_simple_action('select-all', self.select_all)
 
         self.add_simple_action('insert-math', self.insert_math)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
@@ -80,7 +81,7 @@ class Actions(object):
         next_doc = self.workspace.history.get_next_if_any(active_document)
         can_undo = has_active_doc and active_document.can_undo()
         can_redo = has_active_doc and active_document.can_redo()
-        insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_line()
+        insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_root()
         insert_in_math_area = has_active_doc and active_document.ast.get_insert_node().parent.is_math_area()
 
         self.actions['add-document'].set_enabled(True)
@@ -92,6 +93,7 @@ class Actions(object):
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
+        self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-math'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_math_area)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
@@ -133,6 +135,9 @@ class Actions(object):
 
     def redo(self, action=None, parameter=''):
         self.workspace.active_document.redo()
+
+    def select_all(self, action=None, parameter=''):
+        self.workspace.active_document.add_command('select_all')
 
     def insert_math(self, action=None, parameter=''):
         self.workspace.active_document.add_command('insert_math')

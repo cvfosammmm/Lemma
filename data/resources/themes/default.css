@@ -80,6 +80,8 @@
 @define-color borders #ccc;
 @define-color text #222f;
 @define-color math #37e;
+@define-color selection_fg #fff;
+@define-color selection_bg #c6defa;
 @define-color selection_bg #c6defa;
 
 @define-color sidebar_bg_color #ebebeb;

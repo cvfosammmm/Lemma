@@ -24,7 +24,7 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['insert_position_before'] = document.ast.get_insert_position()
+        self.state['cursor_state_before'] = document.ast.get_cursor_state()
 
         x, y = document.get_xy_at_insert()
         if document.implicit_x_position != None:
@@ -34,6 +34,6 @@ class Command():
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.ast.move_insert_to_position(self.state['insert_position_before'])
+        document.ast.set_cursor_state(self.state['cursor_state_before'])
 
 

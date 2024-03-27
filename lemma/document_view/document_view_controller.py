@@ -69,14 +69,18 @@ class DocumentViewController():
 
         document = self.document_view.document
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
-            case ('left', 0): document.add_command('left', 1)
-            case ('right', 0): document.add_command('right', 1)
+            case ('left', 0): document.add_command('left')
+            case ('right', 0): document.add_command('right')
             case ('up', 0): document.add_command('up')
             case ('down', 0): document.add_command('down')
             case ('home', 0): document.add_command('line_start')
             case ('end', 0): document.add_command('line_end')
             case ('page_up', 0): document.add_command('page_up', self.view.scrolling_widget.height)
             case ('page_down', 0): document.add_command('page_down', self.view.scrolling_widget.height)
+
+            case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_left')
+            case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_right')
+
             case ('return', _): document.add_command('newline')
             case ('backspace', _): document.add_command('backspace')
             case ('delete', _): document.add_command('delete')

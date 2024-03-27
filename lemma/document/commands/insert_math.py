@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.document.ast.node import Placeholder, MathArea
+
 
 class Command():
 
@@ -24,16 +26,29 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['math_inserted'] = False
-        if document.ast.get_insert_node().parent.is_line():
-            document.ast.insert_math_area()
+        self.state['cursor_state_before_1'] = document.ast.get_cursor_state()
+        self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
+        self.state['deleted_nodes'] = []
+        self.state['nodes_added'] = []
+
+        if document.ast.get_insert_node().parent.is_root():
+            self.state['deleted_nodes'] = document.ast.delete_selection()
+            self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
+            self.state['nodes_added'] += document.ast.insert_node(Placeholder(name='beforemath'))
+            self.state['nodes_added'] += document.ast.insert_node(MathArea())
+            document.ast.move_insert_left()
             document.set_scroll_insert_on_screen_after_layout_update()
-            self.state['math_inserted'] = True
+
+        self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
 
     def undo(self, document):
-        if self.state['math_inserted']:
-            document.ast.move_insert_by_offset(-1)
-            document.ast.delete_char_at_insert()
-            document.set_scroll_insert_on_screen_after_layout_update()
+        for node in self.state['nodes_added']:
+            document.ast.delete_node(node)
+        document.ast.set_cursor_state(self.state['cursor_state_before_2'])
+        document.set_scroll_insert_on_screen_after_layout_update()
+
+        for node in self.state['deleted_nodes']:
+            document.ast.insert_node(node)
+        document.ast.set_cursor_state(self.state['cursor_state_before_1'])
 
 

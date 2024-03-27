@@ -34,7 +34,6 @@ class Iterator():
             node = node.get_child(-1)
 
         self.current_node = node
-        return True
 
     def next(self):
         node = self.current_node
@@ -49,23 +48,39 @@ class Iterator():
             node = node.get_child(0)
 
         self.current_node = node
-        return True
+
+    def prev_in_current_parent(self):
+        node = self.current_node
+        index = node.parent.get_index(node) - 1
+        while not node.parent.get_child(index).is_leaf():
+            index -= 1
+
+        self.current_node = node.parent.get_child(index)
+
+    def next_in_current_parent(self):
+        node = self.current_node
+        index = node.parent.get_index(node) + 1
+        while not node.parent.get_child(index).is_leaf():
+            index += 1
+
+        self.current_node = node.parent.get_child(index)
 
     def get_node(self):
         return self.current_node
 
-    def starts_line(self):
-        line = self.get_line()
-        return (line.length() > 0 and line.get_child(0) == self.current_node)
-
-    def ends_line(self):
-        line = self.get_line()
-        return (line.length() > 0 and line.get_child(-1) == self.current_node)
-
-    def get_line(self):
+    def get_position(self):
+        position = list()
         node = self.current_node
-        while not node.parent.is_root():
+        while not node.is_root():
+            position.insert(0, node.parent.get_index(node))
             node = node.parent
-        return node
+
+        return position
+
+    def is_first_in_parent(self):
+        return self.current_node == self.current_node.parent.get_child(0)
+
+    def is_last_in_parent(self):
+        return self.current_node == self.current_node.parent.get_child(-1)
 
 

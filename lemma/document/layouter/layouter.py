@@ -38,18 +38,29 @@ class Layouter(object):
         self.document.layout = self.root
 
     def visit_root(self, root):
-        for line in root.children:
-            line.accept(self)
+        for child in root.children:
+            child.accept(self)
 
-    def visit_line(self, line):
-        for char in line.children:
-            char.accept(self)
-
-    def visit_beforemath(self, beforemath):
+    def visit_placeholder(self, placeholder):
         self.process_current_word()
-        box = boxes.BoxEmpty(node=beforemath)
-        beforemath.set_box(box)
-        self.current_line_box.add(box)
+        self.process_current_number()
+
+        if placeholder.name == 'EOL':
+            box = boxes.BoxEmpty(node=placeholder)
+            self.current_line_box.add(box)
+            self.root.add(self.current_line_box)
+            self.current_line_box = boxes.BoxHContainer()
+        elif placeholder.parent.is_math_area():
+            if placeholder.parent.length() == 1:
+                width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
+                box = boxes.BoxPlaceholder(width, height, left, top, node=placeholder)
+            else:
+                box = boxes.BoxEmpty(node=placeholder)
+            self.current_math_box.add(box)
+        else:
+            box = boxes.BoxEmpty(node=placeholder)
+            self.current_line_box.add(box)
+        placeholder.set_box(box)
 
     def visit_matharea(self, matharea):
         self.current_math_box = boxes.BoxHContainer()
@@ -82,19 +93,6 @@ class Layouter(object):
             symbol.set_box(box)
             self.current_math_box.add(box)
 
-    def visit_aftermath(self, aftermath):
-        self.process_current_number()
-
-        if aftermath.parent.length() == 1:
-            width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
-            box = boxes.BoxPlaceholder(width, height, left, top, node=aftermath)
-        else:
-            box = boxes.BoxEmpty(node=aftermath)
-        box.classes.add('math')
-        aftermath.set_box(box)
-
-        self.current_math_box.add(box)
-
     def visit_char(self, char):
         if char.is_whitespace:
             self.process_current_word()
@@ -106,14 +104,6 @@ class Layouter(object):
 
         else:
             self.current_word.append(char)
-
-    def visit_eol(self, node):
-        self.process_current_word()
-        box = boxes.BoxEmpty(node=node)
-        self.current_line_box.add(box)
-        node.set_box(box)
-        self.root.add(self.current_line_box)
-        self.current_line_box = boxes.BoxHContainer()
 
     def process_current_word(self):
         if len(self.current_word) == 0: return

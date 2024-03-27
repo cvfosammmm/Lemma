@@ -36,12 +36,6 @@ class Cursor():
         self.node = node
 
     def get_position(self):
-        position = list()
-        node = self.node
-        while not node.is_root():
-            position.insert(0, node.parent.get_index(node))
-            node = node.parent
-
-        return position
+        return self.node.get_iterator().get_position()
 
 

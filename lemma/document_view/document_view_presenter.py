@@ -78,6 +78,8 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         self.cursor_coords = None
+        self.first_cursor_pos = min(self.model.document.ast.get_cursor_state())
+        self.last_cursor_pos = max(self.model.document.ast.get_cursor_state())
         scrolling_offset_y = self.view.scrolling_widget.scrolling_offset_y
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
@@ -104,7 +106,7 @@ class DocumentViewPresenter():
         ctx.fill()
 
     def draw_box(self, ctx, box, offset_x, offset_y):
-        if box == self.model.document.ast.get_insert_node().box:
+        if box == self.model.document.ast.get_insert_node().box and not self.model.document.ast.has_selection():
             if isinstance(box, boxes.BoxPlaceholder):
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
@@ -123,8 +125,15 @@ class DocumentViewPresenter():
                 offset_x += child.width
 
         elif isinstance(box, boxes.BoxGlyph) or isinstance(box, boxes.BoxPlaceholder):
-            surface_color = ColorManager.get_ui_color('math') if 'math' in box.classes else ColorManager.get_ui_color('text')
-            fontname = 'math' if 'math' in box.classes and not box.char.isdecimal() else 'book'
+            pos = box.node.get_iterator().get_position()
+
+            if pos >= self.first_cursor_pos and pos < self.last_cursor_pos:
+                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
+                ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
+                ctx.fill()
+            surface_color = ColorManager.get_ui_color('math') if box.node.parent.is_math_area() else ColorManager.get_ui_color('text')
+
+            fontname = 'math' if box.node.parent.is_math_area() and not box.char.isdecimal() else 'book'
             surface = FontManager.get_surface(box.char, fontname=fontname)
 
             if surface != None:

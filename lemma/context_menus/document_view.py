@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk
+
 from lemma.context_menus.context_menu import ContextMenu
 
 
@@ -39,6 +43,13 @@ class ContextMenuDocumentView(ContextMenu):
         self.redo_button.set_action_name('win.redo')
         self.redo_button.connect('clicked', self.on_button_click)
         self.box.append(self.redo_button)
+
+        self.box.append(Gtk.Separator())
+
+        self.select_all_button = self.create_button('Select All', _('Ctrl') + '+A')
+        self.select_all_button.set_action_name('win.select-all')
+        self.select_all_button.connect('clicked', self.on_button_click)
+        self.box.append(self.select_all_button)
 
         self.parent.connect('secondary_button_press', self.on_secondary_button_press)
 

@@ -32,15 +32,15 @@ class PlaintextScanner(object):
         self.document.plaintext = self.text
 
     def visit_root(self, root):
-        for line in root.children:
-            line.accept(self)
+        for child in root.children:
+            child.accept(self)
 
-    def visit_line(self, line):
-        for char in line.children:
-            char.accept(self)
-
-    def visit_beforemath(self, beforemath):
-        pass
+    def visit_placeholder(self, placeholder):
+        if placeholder.name == 'EOL':
+            self.current_line = self.current_line.strip()
+            if self.current_line != '':
+                self.text += self.current_line + '\n'
+                self.current_line = ''
 
     def visit_matharea(self, mathlist):
         if self.current_line == '' or self.current_line[-1] != ' ':
@@ -49,20 +49,11 @@ class PlaintextScanner(object):
     def visit_mathsymbol(self, symbol):
         pass
 
-    def visit_aftermath(self, aftermath):
-        pass
-
     def visit_char(self, char):
         if char.is_whitespace:
             if self.current_line == '' or self.current_line[-1] != ' ':
                 self.current_line += ' '
         else:
             self.current_line += char.content
-
-    def visit_eol(self, node):
-        self.current_line = self.current_line.strip()
-        if self.current_line != '':
-            self.text += self.current_line + '\n'
-            self.current_line = ''
 
 

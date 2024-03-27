@@ -30,15 +30,12 @@ class MarkdownScanner(object):
         self.document.markdown = self.markdown
 
     def visit_root(self, root):
-        for line in root.children:
-            line.accept(self)
+        for child in root.children:
+            child.accept(self)
 
-    def visit_line(self, line):
-        for char in line.children:
-            char.accept(self)
-
-    def visit_beforemath(self, beforemath):
-        pass
+    def visit_placeholder(self, placeholder):
+        if placeholder.name == 'EOL':
+            self.markdown += '\n'
 
     def visit_matharea(self, mathlist):
         self.markdown += '$`'
@@ -49,13 +46,7 @@ class MarkdownScanner(object):
     def visit_mathsymbol(self, symbol):
         self.markdown += symbol.content
 
-    def visit_aftermath(self, aftermath):
-        pass
-
     def visit_char(self, char):
         self.markdown += char.content
-
-    def visit_eol(self, node):
-        self.markdown += '\n'
 
 
