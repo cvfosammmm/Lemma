@@ -49,17 +49,37 @@ class Iterator():
 
         self.current_node = node
 
-    def prev_in_current_parent(self):
+    def prev_no_descent(self):
         node = self.current_node
-        index = node.parent.get_index(node) - 1
+        if node != node.parent.get_child(0):
+            index = node.parent.get_index(node) - 1
+            while not node.parent.get_child(index).is_leaf():
+                index -= 1
+            self.current_node = node.parent.get_child(index)
+        else:
+            self.prev()
+
+    def next_no_descent(self):
+        node = self.current_node
+        if node != node.parent.get_child(-1):
+            index = node.parent.get_index(node) + 1
+            while not node.parent.get_child(index).is_leaf():
+                index += 1
+            self.current_node = node.parent.get_child(index)
+        else:
+            self.next()
+
+    def prev_in_ancestor(self, ancestor):
+        node = [node for node in self.get_ancestors() if node.parent == ancestor][0]
+        index = node.parent.get_index(node)
         while not node.parent.get_child(index).is_leaf():
             index -= 1
 
         self.current_node = node.parent.get_child(index)
 
-    def next_in_current_parent(self):
-        node = self.current_node
-        index = node.parent.get_index(node) + 1
+    def next_in_ancestor(self, ancestor):
+        node = [node for node in self.get_ancestors() if node.parent == ancestor][0]
+        index = node.parent.get_index(node)
         while not node.parent.get_child(index).is_leaf():
             index += 1
 
@@ -76,6 +96,15 @@ class Iterator():
             node = node.parent
 
         return position
+
+    def get_ancestors(self):
+        node = self.current_node
+        ancestors = [node]
+        while not node.is_root():
+            ancestors.insert(0, node.parent)
+            node = node.parent
+
+        return ancestors
 
     def is_first_in_parent(self):
         return self.current_node == self.current_node.parent.get_child(0)

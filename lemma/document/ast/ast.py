@@ -48,30 +48,54 @@ class AST(object):
         self.selection_bound.set_node(node)
 
     def move_insert_left_with_selection(self):
-        node = self.insert.get_node()
-
-        if node != node.parent.get_child(0):
-            iterator = self.get_insert_node().get_iterator()
-            iterator.prev_in_current_parent()
-            self.insert.set_node(iterator.get_node())
-        elif not node.parent.is_root():
-            self.move_insert_left()
-            iterator = self.get_insert_node().get_iterator()
-            iterator.next_in_current_parent()
-            self.selection_bound.set_node(iterator.get_node())
+        iterator = self.get_insert_node().get_iterator()
+        iterator.prev_no_descent()
+        self.insert.set_node(iterator.get_node())
+        self.restore_selection_invariant()
 
     def move_insert_right_with_selection(self):
-        node = self.insert.get_node()
+        iterator = self.get_insert_node().get_iterator()
+        iterator.next_no_descent()
+        self.insert.set_node(iterator.get_node())
+        self.restore_selection_invariant()
 
-        if node != node.parent.get_child(-1):
-            iterator = self.get_insert_node().get_iterator()
-            iterator.next_in_current_parent()
-            self.insert.set_node(iterator.get_node())
-        elif not node.parent.is_root():
-            self.move_insert_right()
-            iterator = self.get_insert_node().get_iterator()
-            iterator.prev_in_current_parent()
+    def move_insert_to_node_with_selection(self, node):
+        self.insert.set_node(node)
+        self.restore_selection_invariant()
+
+    def restore_selection_invariant(self):
+        sca = self.smallest_common_ancestor(self.insert.get_node(), self.selection_bound.get_node())
+
+        if self.insert.get_node() == self.selection_bound.get_node(): return
+        if self.insert.get_node().parent == sca and self.selection_bound.get_node().parent == sca: return
+
+        if self.selection_bound.get_position() > self.insert.get_position():
+            iterator = self.get_selection_iter()
+            iterator.next_in_ancestor(sca)
             self.selection_bound.set_node(iterator.get_node())
+
+            iterator = self.get_insert_iter()
+            iterator.prev_in_ancestor(sca)
+            self.insert.set_node(iterator.get_node())
+        else:
+            iterator = self.get_selection_iter()
+            iterator.prev_in_ancestor(sca)
+            self.selection_bound.set_node(iterator.get_node())
+
+            iterator = self.get_insert_iter()
+            iterator.next_in_ancestor(sca)
+            self.insert.set_node(iterator.get_node())
+
+    def smallest_common_ancestor(self, node_1, node_2):
+        ancestors_1 = node_1.get_iterator().get_ancestors()
+        ancestors_2 = node_2.get_iterator().get_ancestors()
+        i = 0
+        for i in range(0, min(len(ancestors_1), len(ancestors_2))):
+            if ancestors_1[i] == ancestors_2[i]:
+                sca = ancestors_1[i]
+            else:
+                break
+        return sca
 
     def set_cursor_state(self, position):
         self.insert.set_position(position[0])
@@ -84,6 +108,12 @@ class AST(object):
 
     def get_insert_node(self):
         return self.insert.get_node()
+
+    def get_insert_iter(self):
+        return self.insert.get_node().get_iterator()
+
+    def get_selection_iter(self):
+        return self.selection_bound.get_node().get_iterator()
 
     def has_selection(self):
         return self.insert.get_node() != self.selection_bound.get_node()

@@ -80,6 +80,8 @@ class DocumentViewController():
 
             case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_left')
             case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_right')
+            case ('down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_down')
+            case ('up', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_up')
 
             case ('return', _): document.add_command('newline')
             case ('backspace', _): document.add_command('backspace')
