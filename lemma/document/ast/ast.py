@@ -19,6 +19,7 @@ import time
 
 from lemma.document.ast.node import Root
 from lemma.document.ast.cursor import Cursor
+from lemma.helpers.helpers import position_less_than
 
 
 class AST(object):
@@ -64,31 +65,29 @@ class AST(object):
         self.restore_selection_invariant()
 
     def restore_selection_invariant(self):
-        sca = self.smallest_common_ancestor(self.insert.get_node(), self.selection_bound.get_node())
+        sca = self.smallest_common_real_ancestor(self.insert.get_node(), self.selection_bound.get_node())
 
         if self.insert.get_node() == self.selection_bound.get_node(): return
         if self.insert.get_node().parent == sca and self.selection_bound.get_node().parent == sca: return
 
-        if self.selection_bound.get_position() > self.insert.get_position():
-            iterator = self.get_selection_iter()
-            iterator.next_in_ancestor(sca)
-            self.selection_bound.set_node(iterator.get_node())
+        node_1 = [node for node in self.get_insert_iter().get_ancestors() if node.parent == sca][0]
+        node_2 = [node for node in self.get_selection_iter().get_ancestors() if node.parent == sca][0]
 
-            iterator = self.get_insert_iter()
-            iterator.prev_in_ancestor(sca)
-            self.insert.set_node(iterator.get_node())
+        if position_less_than(self.selection_bound.get_position(), self.insert.get_position()):
+            selection_node = sca.get_child(sca.get_index(node_2))
+            insert_node = sca.get_child(sca.get_index(node_1) + 1)
         else:
-            iterator = self.get_selection_iter()
-            iterator.prev_in_ancestor(sca)
-            self.selection_bound.set_node(iterator.get_node())
+            insert_node = sca.get_child(sca.get_index(node_1))
+            selection_node = sca.get_child(sca.get_index(node_2) + 1)
 
-            iterator = self.get_insert_iter()
-            iterator.next_in_ancestor(sca)
-            self.insert.set_node(iterator.get_node())
+        if self.selection_bound.get_node().parent != sca:
+            self.selection_bound.set_node(selection_node)
+        if self.insert.get_node().parent != sca:
+            self.insert.set_node(insert_node)
 
-    def smallest_common_ancestor(self, node_1, node_2):
-        ancestors_1 = node_1.get_iterator().get_ancestors()
-        ancestors_2 = node_2.get_iterator().get_ancestors()
+    def smallest_common_real_ancestor(self, node_1, node_2):
+        ancestors_1 = node_1.get_iterator().get_ancestors()[:-1]
+        ancestors_2 = node_2.get_iterator().get_ancestors()[:-1]
         i = 0
         for i in range(0, min(len(ancestors_1), len(ancestors_2))):
             if ancestors_1[i] == ancestors_2[i]:
@@ -115,6 +114,18 @@ class AST(object):
     def get_selection_iter(self):
         return self.selection_bound.get_node().get_iterator()
 
+    def get_first_cursor_pos(self):
+        if position_less_than(self.insert.get_position(), self.selection_bound.get_position()):
+            return self.insert.get_position()
+        else:
+            return self.selection_bound.get_position()
+
+    def get_last_cursor_pos(self):
+        if position_less_than(self.insert.get_position(), self.selection_bound.get_position()):
+            return self.selection_bound.get_position()
+        else:
+            return self.insert.get_position()
+
     def has_selection(self):
         return self.insert.get_node() != self.selection_bound.get_node()
 
@@ -127,12 +138,12 @@ class AST(object):
         return [node]
 
     def delete_selection(self):
-        if self.insert.get_position() > self.selection_bound.get_position():
-            first_node = self.selection_bound.get_node()
-            last_node = self.insert.get_node()
-        else:
+        if position_less_than(self.insert.get_position(), self.selection_bound.get_position()):
             first_node = self.insert.get_node()
             last_node = self.selection_bound.get_node()
+        else:
+            first_node = self.selection_bound.get_node()
+            last_node = self.insert.get_node()
 
         deleted_nodes = []
         while first_node != last_node:

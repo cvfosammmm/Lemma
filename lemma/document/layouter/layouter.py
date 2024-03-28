@@ -50,20 +50,20 @@ class Layouter(object):
             self.current_line_box.add(box)
             self.root.add(self.current_line_box)
             self.current_line_box = boxes.BoxHContainer()
-        elif placeholder.parent.is_math_area():
+        else:
             if placeholder.parent.length() == 1:
                 width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
                 box = boxes.BoxPlaceholder(width, height, left, top, node=placeholder)
             else:
                 box = boxes.BoxEmpty(node=placeholder)
             self.current_math_box.add(box)
-        else:
-            box = boxes.BoxEmpty(node=placeholder)
-            self.current_line_box.add(box)
         placeholder.set_box(box)
 
     def visit_matharea(self, matharea):
         self.current_math_box = boxes.BoxHContainer()
+        box = boxes.BoxEmpty(node=matharea)
+        matharea.set_box(box)
+        self.current_math_box.add(box)
         for char in matharea.children:
             char.accept(self)
 

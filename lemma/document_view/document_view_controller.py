@@ -80,8 +80,12 @@ class DocumentViewController():
 
             case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_left')
             case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_right')
-            case ('down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_down')
             case ('up', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_up')
+            case ('down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_down')
+            case ('home', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_line_start')
+            case ('end', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_line_end')
+            case ('page_up', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_up', self.view.scrolling_widget.height)
+            case ('page_down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_down', self.view.scrolling_widget.height)
 
             case ('return', _): document.add_command('newline')
             case ('backspace', _): document.add_command('backspace')

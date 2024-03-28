@@ -29,3 +29,21 @@ def timer(original_function):
     return  new_function
 
 
+def position_less_than(position_1, position_2):
+    if len(position_1) < len(position_2):
+        for i in range(len(position_1)):
+            if position_1[i] < position_2[i]: return True
+            if position_1[i] > position_2[i]: return False
+        return True
+    if len(position_1) > len(position_2):
+        for i in range(len(position_2)):
+            if position_1[i] < position_2[i]: return True
+            if position_1[i] > position_2[i]: return False
+        return False
+    else:
+        for i in range(len(position_1)):
+            if position_1[i] < position_2[i]: return True
+            if position_1[i] > position_2[i]: return False
+        return False
+
+

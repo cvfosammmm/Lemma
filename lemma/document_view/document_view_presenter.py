@@ -78,8 +78,8 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         self.cursor_coords = None
-        self.first_cursor_pos = min(self.model.document.ast.get_cursor_state())
-        self.last_cursor_pos = max(self.model.document.ast.get_cursor_state())
+        self.first_cursor_pos = self.model.document.ast.get_first_cursor_pos()
+        self.last_cursor_pos = self.model.document.ast.get_last_cursor_pos()
         scrolling_offset_y = self.view.scrolling_widget.scrolling_offset_y
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)

@@ -34,7 +34,6 @@ class Command():
         if document.ast.get_insert_node().parent.is_root():
             self.state['deleted_nodes'] = document.ast.delete_selection()
             self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-            self.state['nodes_added'] += document.ast.insert_node(Placeholder(name='beforemath'))
             self.state['nodes_added'] += document.ast.insert_node(MathArea())
             document.ast.move_insert_left()
             document.set_scroll_insert_on_screen_after_layout_update()

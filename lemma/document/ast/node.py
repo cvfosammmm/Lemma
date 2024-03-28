@@ -32,6 +32,9 @@ class Root():
     def set_parent(self, parent):
         self.parent = parent
 
+    def set_box(self, box):
+        self.box = box
+
     def insert(self, index, node):
         self.children.insert(index, node)
         node.set_parent(self)
@@ -51,6 +54,9 @@ class Root():
 
     def length(self):
         return len(self.children)
+
+    def get_iterator(self):
+        return Iterator(self)
 
     def accept(self, visitor): visitor.visit_root(self)
     def is_leaf(self): return False
@@ -69,6 +75,9 @@ class MathArea():
     def set_parent(self, parent):
         self.parent = parent
 
+    def set_box(self, box):
+        self.box = box
+
     def insert(self, index, node):
         self.children.insert(index, node)
         node.set_parent(self)
@@ -88,6 +97,9 @@ class MathArea():
 
     def length(self):
         return len(self.children)
+
+    def get_iterator(self):
+        return Iterator(self)
 
     def accept(self, visitor): visitor.visit_matharea(self)
     def is_leaf(self): return False

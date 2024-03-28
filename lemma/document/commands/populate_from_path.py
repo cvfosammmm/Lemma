@@ -52,7 +52,6 @@ class Command():
         for line in lines:
             for segment in re.split(r'(\$`.*?`\$)', line):
                 if segment.startswith('$`') and segment.endswith('`$'):
-                    root.append(Placeholder(name='beforemath'))
                     math_area = MathArea()
                     self.add_math(math_area, segment[2:-2])
                     root.append(math_area)

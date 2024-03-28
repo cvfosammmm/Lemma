@@ -26,10 +26,9 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
 
-        if document.ast.has_selection():
-            document.ast.set_cursor_state([document.ast.get_last_cursor_pos(), document.ast.get_last_cursor_pos()])
-        else:
-            document.ast.move_insert_right()
+        x, y = document.get_xy_at_insert()
+        node = document.get_node_at_xy(document.layout.width, y + document.ast.get_insert_node().box.parent.height * 0.5)
+        document.ast.move_insert_to_node_with_selection(node)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
