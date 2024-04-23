@@ -46,7 +46,7 @@ class Actions(object):
         self.add_simple_action('redo', self.redo)
         self.add_simple_action('select-all', self.select_all)
 
-        self.add_simple_action('insert-math', self.insert_math)
+        self.add_simple_action('insert-matharea', self.insert_matharea)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
         self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar)
@@ -95,7 +95,7 @@ class Actions(object):
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['insert-math'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
+        self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_math_area)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-edit-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
@@ -141,8 +141,8 @@ class Actions(object):
     def select_all(self, action=None, parameter=''):
         self.workspace.active_document.add_command('select_all')
 
-    def insert_math(self, action=None, parameter=''):
-        self.workspace.active_document.add_command('insert_math')
+    def insert_matharea(self, action=None, parameter=''):
+        self.workspace.active_document.add_command('insert_matharea')
 
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return

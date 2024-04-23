@@ -28,7 +28,7 @@ class ToolBar(Gtk.ActionBar):
         Gtk.ActionBar.__init__(self)
 
         self.add_math_button = Gtk.Button.new_from_icon_name('insert-math-symbolic')
-        self.add_math_button.set_action_name('win.insert-math')
+        self.add_math_button.set_action_name('win.insert-matharea')
         self.add_math_button.set_can_focus(False)
         self.add_math_button.set_tooltip_text(_('Insert Math') + ' (Ctrl+M)')
         self.pack_start(self.add_math_button)
