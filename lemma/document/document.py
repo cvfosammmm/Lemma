@@ -18,6 +18,7 @@
 import time, os.path
 
 from lemma.document.ast.ast import AST
+from lemma.document.ast.iterator import ASTIterator
 from lemma.document.housekeeper.housekeeper import Housekeeper
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
@@ -116,9 +117,7 @@ class Document(Observable):
 
         node = box.get_node()
         if x > box.width / 2 and x < box.width:
-            iterator = node.get_iterator()
-            iterator.next()
-            node = iterator.get_node()
+            node = ASTIterator.next(node)
 
         return node
 

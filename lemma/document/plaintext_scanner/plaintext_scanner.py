@@ -30,7 +30,7 @@ class PlaintextScanner(object):
         self.text = ''
         self.current_line = ''
 
-        for child in self.document.ast.root.children:
+        for child in self.document.ast.root:
             self.process_node(child)
 
         self.text = self.text[:-1] # remove last EOL

@@ -26,7 +26,7 @@ class MarkdownScanner(object):
     def update(self):
         self.markdown = '# ' + self.document.title + '\n'
 
-        for child in self.document.ast.root.children:
+        for child in self.document.ast.root:
             self.process_node(child)
 
         self.markdown = self.markdown[:-1] # remove last EOL
@@ -35,7 +35,7 @@ class MarkdownScanner(object):
     def process_node(self, node):
         if node.is_matharea():
             self.markdown += '$`'
-            for child in node.children:
+            for child in node:
                 self.process_node(child)
             self.markdown += '`$'
 

@@ -16,93 +16,55 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class Iterator():
+class ASTIterator():
 
-    def __init__(self, node):
-        self.current_node = node
-
-    def prev(self):
-        node = self.current_node
-
-        if node != node.parent.get_child(0):
-            node = node.parent.get_child(node.parent.get_index(node) - 1)
+    def prev(node):
+        if node != node.parent[0]:
+            node = node.parent[node.parent.index(node) - 1]
             while not node.is_leaf():
-                node = node.get_child(-1)
+                node = node[-1]
 
         elif not node.parent.is_root():
             node = node.parent
 
-        self.current_node = node
+        return node
 
-    def next(self):
-        node = self.current_node
-
+    def next(node):
         if not node.is_leaf():
-            node = node.get_child(0)
+            node = node[0]
         else:
-            while not node.is_root() and node.parent.get_index(node) == node.parent.length() - 1:
+            while not node.is_root() and node.parent.index(node) == node.parent.length() - 1:
                 node = node.parent
             if node.is_root():
                 return
             else:
-                node = node.parent.get_child(node.parent.get_index(node) + 1)
+                node = node.parent[node.parent.index(node) + 1]
 
-        self.current_node = node
+        return node
 
-    def prev_no_descent(self):
-        node = self.current_node
-
-        if node != node.parent.get_child(0):
-            index = node.parent.get_index(node) - 1
-            node = node.parent.get_child(index)
+    def prev_no_descent(node):
+        if node != node.parent[0]:
+            index = node.parent.index(node) - 1
+            node = node.parent[index]
 
         elif not node.parent.is_root():
             node = node.parent
 
-        self.current_node = node
+        return node
 
-    def next_no_descent(self):
-        node = self.current_node
-
-        if node != node.parent.get_child(-1):
-            index = node.parent.get_index(node) + 1
-            node = node.parent.get_child(index)
+    def next_no_descent(node):
+        if node != node.parent[-1]:
+            index = node.parent.index(node) + 1
+            node = node.parent[index]
 
         else:
-            while not node.is_root() and node.parent.get_index(node) == node.parent.length() - 1:
+            while not node.is_root() and node.parent.index(node) == node.parent.length() - 1:
                 node = node.parent
             if node.is_root():
                 return
             else:
-                node = node.parent.get_child(node.parent.get_index(node) + 1)
+                node = node.parent[node.parent.index(node) + 1]
 
-        self.current_node = node
-
-    def get_node(self):
-        return self.current_node
-
-    def get_position(self):
-        position = list()
-        node = self.current_node
-        while not node.is_root():
-            position.insert(0, node.parent.get_index(node))
-            node = node.parent
-
-        return position
-
-    def get_ancestors(self):
-        node = self.current_node
-        ancestors = [node]
-        while not node.is_root():
-            ancestors.insert(0, node.parent)
-            node = node.parent
-
-        return ancestors
-
-    def is_first_in_parent(self):
-        return self.current_node == self.current_node.parent.get_child(0)
-
-    def is_last_in_parent(self):
-        return self.current_node == self.current_node.parent.get_child(-1)
+        return node
 
 

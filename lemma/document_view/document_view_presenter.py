@@ -125,7 +125,7 @@ class DocumentViewPresenter():
                 offset_x += child.width
 
         elif isinstance(box, boxes.BoxGlyph) or isinstance(box, boxes.BoxPlaceholder):
-            pos = box.node.get_iterator().get_position()
+            pos = box.node.get_position()
 
             if pos >= self.first_cursor_pos and pos < self.last_cursor_pos:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))

@@ -36,7 +36,7 @@ class Layouter(object):
     def update(self):
         self.root = boxes.BoxVContainer()
 
-        for child in self.document.ast.root.children:
+        for child in self.document.ast.root:
             self.process_node(child)
 
         self.document.layout = self.root
@@ -48,7 +48,7 @@ class Layouter(object):
             box = boxes.BoxEmpty(node=node)
             node.set_box(box)
             self.current_math_box.add(box)
-            for child in node.children:
+            for child in node:
                 self.process_node(child)
             self.add_boxes_and_break_lines_in_case([self.current_math_box], self.current_math_box.width)
             self.in_math_mode = False

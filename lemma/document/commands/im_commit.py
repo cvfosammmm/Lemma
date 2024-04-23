@@ -42,7 +42,7 @@ class Command():
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
         elif node.parent.is_matharea():
-            if not document.ast.has_selection() and self.text == ' ' and node == node.parent.get_child(-1):
+            if not document.ast.has_selection() and self.text == ' ' and node == node.parent[-1]:
                 document.ast.move_insert_right()
             else:
                 self.state['deleted_nodes'] = document.ast.delete_selection()

@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.iterator import Iterator
-
 
 class Node():
 
@@ -25,6 +23,7 @@ class Node():
         self.children = []
         self.head = head
         self.box = None
+        self.tags = []
 
     def set_parent(self, parent):
         self.parent = parent
@@ -41,21 +40,38 @@ class Node():
 
     def remove(self, node):
         self.children.remove(node)
-        node.set_parent(self)
+        node.set_parent(None)
 
-    def get_child(self, index):
-        return self.children[index]
-
-    def get_index(self, node):
+    def index(self, node):
         return self.children.index(node)
 
     def length(self):
         return len(self.children)
 
-    def get_iterator(self):
-        return Iterator(self)
+    def __iter__(self): return self.children.__iter__()
+    def __getitem__(self, key): return self.children.__getitem__(key)
+
+    def get_ancestors(self):
+        node = self
+        ancestors = [node]
+        while not node.is_root():
+            ancestors.insert(0, node.parent)
+            node = node.parent
+
+        return ancestors
+
+    def get_position(self):
+        position = list()
+        node = self
+        while not node.is_root():
+            position.insert(0, node.parent.index(node))
+            node = node.parent
+
+        return position
 
     def is_leaf(self): return len(self.children) == 0
+    def is_first_in_parent(self): return self == self.parent[0]
+    def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.head == 'root'
     def is_matharea(self): return self.head == 'matharea'
 
