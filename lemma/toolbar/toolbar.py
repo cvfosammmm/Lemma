@@ -41,6 +41,14 @@ class ToolBar(Gtk.ActionBar):
         self.document_menu_button.set_action_name('win.show-document-menu')
         self.pack_end(self.document_menu_button)
 
+        self.edit_menu_button = PopoverManager.create_popover_button('edit_menu')
+        self.edit_menu_button.set_child(Gtk.Image.new_from_icon_name('document-edit-symbolic'))
+        self.edit_menu_button.set_can_focus(False)
+        self.edit_menu_button.set_tooltip_text(_('Edit Menu'))
+        self.edit_menu_button.get_style_context().add_class('flat')
+        self.edit_menu_button.set_action_name('win.show-edit-menu')
+        self.pack_end(self.edit_menu_button)
+
         self.redo_button = Gtk.Button.new_from_icon_name('edit-redo-symbolic')
         self.redo_button.set_action_name('win.redo')
         self.redo_button.set_can_focus(False)
