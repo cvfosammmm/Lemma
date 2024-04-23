@@ -17,7 +17,7 @@
 
 import time
 
-from lemma.document.ast.node import Root
+from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
 from lemma.helpers.helpers import position_less_than
 
@@ -25,7 +25,8 @@ from lemma.helpers.helpers import position_less_than
 class AST(object):
 
     def __init__(self):
-        self.root = Root()
+        self.root = Node('root')
+        self.root.insert(0, Node('EOL'))
         self.insert = Cursor(self, self.root.get_child(0))
         self.selection_bound = Cursor(self, self.root.get_child(0))
 

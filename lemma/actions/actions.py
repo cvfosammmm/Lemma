@@ -83,7 +83,7 @@ class Actions(object):
         can_undo = has_active_doc and active_document.can_undo()
         can_redo = has_active_doc and active_document.can_redo()
         insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_root()
-        insert_in_math_area = has_active_doc and active_document.ast.get_insert_node().parent.is_math_area()
+        insert_in_matharea = has_active_doc and active_document.ast.get_insert_node().parent.is_matharea()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -96,7 +96,7 @@ class Actions(object):
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
-        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_math_area)
+        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_matharea)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-edit-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)

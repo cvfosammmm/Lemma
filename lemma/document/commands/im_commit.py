@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.app.latex_db import LaTeXDB
-from lemma.document.ast.node import UnicodeCharacter, MathSymbol
+from lemma.document.ast.node import Node
 
 
 class Command():
@@ -38,10 +38,10 @@ class Command():
             self.state['deleted_nodes'] = document.ast.delete_selection()
             self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
             for char in self.text:
-                character = UnicodeCharacter(char)
+                character = Node(char)
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
-        elif node.parent.is_math_area():
+        elif node.parent.is_matharea():
             if not document.ast.has_selection() and self.text == ' ' and node == node.parent.get_child(-1):
                 document.ast.move_insert_right()
             else:
@@ -56,7 +56,7 @@ class Command():
                     elif char == '\'': char = '′'
 
                     if LaTeXDB.is_mathsymbol(char):
-                        character = MathSymbol(char)
+                        character = Node(char)
                         self.state['nodes_added'] += document.ast.insert_node(character)
                 if len(self.state['nodes_added']) == 0:
                     for node in self.state['deleted_nodes']:

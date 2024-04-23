@@ -24,34 +24,6 @@ class Housekeeper():
         self.document = document
 
     def update(self):
-        self.document.ast.root.accept(self)
-
-    def visit_root(self, root):
-        for child in root.children:
-            child.accept(self)
-
-    def visit_placeholder(self, placeholder):
-        pass
-
-    def visit_matharea(self, matharea):
-        for char in matharea.children:
-            char.accept(self)
-
-    def visit_mathsymbol(self, symbol):
-        if LaTeXDB.is_ordinary_symbol(symbol.content):
-            symbol.layout_mode = 'ord'
-        elif LaTeXDB.is_binary_operation(symbol.content):
-            symbol.layout_mode = 'bin'
-        elif LaTeXDB.is_relation(symbol.content):
-            symbol.layout_mode = 'rel'
-        elif LaTeXDB.is_punctuation_mark(symbol.content):
-            symbol.layout_mode = 'punct'
-        elif LaTeXDB.is_opening_symbol(symbol.content):
-            symbol.layout_mode = 'open'
-        elif LaTeXDB.is_closing_symbol(symbol.content):
-            symbol.layout_mode = 'close'
-
-    def visit_char(self, char):
         pass
 
 

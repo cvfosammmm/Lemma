@@ -15,19 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import re
-whitespace_regex = re.compile('\s')
-
 from lemma.document.ast.iterator import Iterator
 
 
-class Root():
+class Node():
 
-    def __init__(self):
+    def __init__(self, head):
         self.parent = None
         self.children = []
-        self.insert(0, Placeholder(name='EOL'))
-        self.name = None
+        self.head = head
+        self.box = None
 
     def set_parent(self, parent):
         self.parent = parent
@@ -58,122 +55,8 @@ class Root():
     def get_iterator(self):
         return Iterator(self)
 
-    def accept(self, visitor): visitor.visit_root(self)
-    def is_leaf(self): return False
-    def is_root(self): return True
-    def is_math_area(self): return False
-
-
-class MathArea():
-
-    def __init__(self):
-        self.parent = None
-        self.children = []
-        self.insert(0, Placeholder())
-        self.name = None
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def set_box(self, box):
-        self.box = box
-
-    def insert(self, index, node):
-        self.children.insert(index, node)
-        node.set_parent(self)
-
-    def append(self, node):
-        self.insert(-1, node)
-
-    def remove(self, node):
-        self.children.remove(node)
-        node.set_parent(self)
-
-    def get_child(self, index):
-        return self.children[index]
-
-    def get_index(self, node):
-        return self.children.index(node)
-
-    def length(self):
-        return len(self.children)
-
-    def get_iterator(self):
-        return Iterator(self)
-
-    def accept(self, visitor): visitor.visit_matharea(self)
-    def is_leaf(self): return False
-    def is_root(self): return False
-    def is_math_area(self): return True
-
-
-class Placeholder():
-
-    def __init__(self, name=None):
-        self.parent = None
-        self.box = None
-        self.name = name
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def set_box(self, box):
-        self.box = box
-
-    def get_iterator(self):
-        return Iterator(self)
-
-    def accept(self, visitor): visitor.visit_placeholder(self)
-    def is_leaf(self): return True
-    def is_root(self): return False
-    def is_math_area(self): return False
-
-
-class MathSymbol():
-
-    def __init__(self, string):
-        self.parent = None
-        self.content = string
-        self.box = None
-        self.layout_mode = None
-        self.name = None
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def set_box(self, box):
-        self.box = box
-
-    def get_iterator(self):
-        return Iterator(self)
-
-    def accept(self, visitor): visitor.visit_mathsymbol(self)
-    def is_leaf(self): return True
-    def is_root(self): return False
-    def is_math_area(self): return False
-
-
-class UnicodeCharacter():
-
-    def __init__(self, string):
-        self.parent = None
-        self.content = string
-        self.is_whitespace = (whitespace_regex.match(string) != None)
-        self.box = None
-        self.name = None
-
-    def set_parent(self, parent):
-        self.parent = parent
-
-    def set_box(self, box):
-        self.box = box
-
-    def get_iterator(self):
-        return Iterator(self)
-
-    def accept(self, visitor): visitor.visit_char(self)
-    def is_leaf(self): return True
-    def is_root(self): return False
-    def is_math_area(self): return False
+    def is_leaf(self): return len(self.children) == 0
+    def is_root(self): return self.head == 'root'
+    def is_matharea(self): return self.head == 'matharea'
 
 

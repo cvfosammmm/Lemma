@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import re
+whitespace_regex = re.compile('\s')
+
 
 class LaTeXDB(object):
 
@@ -356,5 +359,8 @@ class LaTeXDB(object):
 
     def is_closing_symbol(char):
         return char in LaTeXDB.closing_symbols
+
+    def is_whitespace(char):
+        return (whitespace_regex.match(char) != None)
 
 

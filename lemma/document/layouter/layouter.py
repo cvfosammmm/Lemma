@@ -31,86 +31,88 @@ class Layouter(object):
         self.current_math_box = boxes.BoxHContainer()
         self.current_word = []
         self.current_number = []
+        self.in_math_mode = False
 
     def update(self):
         self.root = boxes.BoxVContainer()
-        self.document.ast.root.accept(self)
+
+        for child in self.document.ast.root.children:
+            self.process_node(child)
+
         self.document.layout = self.root
 
-    def visit_root(self, root):
-        for child in root.children:
-            child.accept(self)
+    def process_node(self, node):
+        if node.is_matharea():
+            self.in_math_mode = True
+            self.current_math_box = boxes.BoxHContainer()
+            box = boxes.BoxEmpty(node=node)
+            node.set_box(box)
+            self.current_math_box.add(box)
+            for child in node.children:
+                self.process_node(child)
+            self.add_boxes_and_break_lines_in_case([self.current_math_box], self.current_math_box.width)
+            self.in_math_mode = False
 
-    def visit_placeholder(self, placeholder):
-        self.process_current_word()
-        self.process_current_number()
-
-        if placeholder.name == 'EOL':
-            box = boxes.BoxEmpty(node=placeholder)
+        elif node.head == 'EOL':
+            self.process_current_word()
+            self.process_current_number()
+            box = boxes.BoxEmpty(node=node)
             self.current_line_box.add(box)
             self.root.add(self.current_line_box)
             self.current_line_box = boxes.BoxHContainer()
-        else:
-            if placeholder.parent.length() == 1:
-                width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
-                box = boxes.BoxPlaceholder(width, height, left, top, node=placeholder)
-            else:
-                box = boxes.BoxEmpty(node=placeholder)
-            self.current_math_box.add(box)
-        placeholder.set_box(box)
+            node.set_box(box)
 
-    def visit_matharea(self, matharea):
-        self.current_math_box = boxes.BoxHContainer()
-        box = boxes.BoxEmpty(node=matharea)
-        matharea.set_box(box)
-        self.current_math_box.add(box)
-        for char in matharea.children:
-            char.accept(self)
-
-        self.add_boxes_and_break_lines_in_case([self.current_math_box], self.current_math_box.width)
-
-    def visit_mathsymbol(self, symbol):
-        if symbol.content.isdigit():
-            self.current_number.append(symbol)
-        else:
-            self.process_current_number()
-
-            width, height, left, top = FontManager.get_char_extents_single(symbol.content, fontname='math')
-
-            if symbol.layout_mode == 'bin':
-                width += FontManager.get_medspace() * 2
-                left += FontManager.get_medspace()
-
-            if symbol.layout_mode == 'rel':
-                width += FontManager.get_thickspace() * 2
-                left += FontManager.get_thickspace()
-
-            if symbol.layout_mode == 'punct':
-                width += FontManager.get_thinspace()
-
-            box = boxes.BoxGlyph(width, height, left, top, symbol.content, node=symbol)
-            box.classes.add('math')
-            symbol.set_box(box)
-            self.current_math_box.add(box)
-
-    def visit_char(self, char):
-        if char.is_whitespace:
+        elif node.head == 'placeholder':
             self.process_current_word()
+            self.process_current_number()
+            if node.parent.length() == 1:
+                width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
+                box = boxes.BoxPlaceholder(width, height, left, top, node=node)
+            else:
+                box = boxes.BoxEmpty(node=node)
+            self.current_math_box.add(box)
+            node.set_box(box)
 
-            width, height, left, top = FontManager.get_char_extents_single(char.content)
-            box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
+        elif self.in_math_mode:
+            if node.head.isdigit():
+                self.current_number.append(node)
+            else:
+                self.process_current_number()
+
+                width, height, left, top = FontManager.get_char_extents_single(node.head, fontname='math')
+
+                if LaTeXDB.is_binary_operation(node.head):
+                    width += FontManager.get_medspace() * 2
+                    left += FontManager.get_medspace()
+
+                if LaTeXDB.is_relation(node.head):
+                    width += FontManager.get_thickspace() * 2
+                    left += FontManager.get_thickspace()
+
+                if LaTeXDB.is_punctuation_mark(node.head):
+                    width += FontManager.get_thinspace()
+
+                box = boxes.BoxGlyph(width, height, left, top, node.head, node=node)
+                box.classes.add('math')
+                node.set_box(box)
+                self.current_math_box.add(box)
+
+        elif LaTeXDB.is_whitespace(node.head):
+            self.process_current_word()
+            width, height, left, top = FontManager.get_char_extents_single(node.head)
+            box = boxes.BoxGlyph(width, height, left, top, node.head, node=node)
             self.current_line_box.add(box)
-            char.set_box(box)
+            node.set_box(box)
 
         else:
-            self.current_word.append(char)
+            self.current_word.append(node)
 
     def process_current_word(self):
         if len(self.current_word) == 0: return
 
         text = ''
         for char in self.current_word:
-            text += char.content
+            text += char.head
 
         total_width = 0
         char_boxes = []
@@ -118,7 +120,7 @@ class Layouter(object):
             width, height, left, top = extents
             total_width += width
 
-            box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
+            box = boxes.BoxGlyph(width, height, left, top, char.head, node=char)
             char.set_box(box)
             char_boxes.append(box)
         self.current_word = []
@@ -130,14 +132,14 @@ class Layouter(object):
 
         text = ''
         for char in self.current_number:
-            text += char.content
+            text += char.head
 
         total_width = 0
         for char, extents in zip(self.current_number, FontManager.get_char_extents_multi(text, fontname='math')):
             width, height, left, top = extents
             total_width += width
 
-            box = boxes.BoxGlyph(width, height, left, top, char.content, node=char)
+            box = boxes.BoxGlyph(width, height, left, top, char.head, node=char)
             box.classes.add('math')
             char.set_box(box)
             self.current_math_box.add(box)

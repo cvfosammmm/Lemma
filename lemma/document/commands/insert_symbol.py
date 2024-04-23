@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.app.latex_db import LaTeXDB
-from lemma.document.ast.node import MathSymbol
+from lemma.document.ast.node import Node
 
 
 class Command():
@@ -34,12 +34,12 @@ class Command():
         self.state['nodes_added'] = []
 
         node = document.ast.get_insert_node()
-        if node.parent.is_math_area():
+        if node.parent.is_matharea():
             char = LaTeXDB.get_unicode_from_latex_name(self.name)
             if LaTeXDB.is_mathsymbol(char):
                 self.state['deleted_nodes'] = document.ast.delete_selection()
                 self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-                character = MathSymbol(char)
+                character = Node(char)
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)

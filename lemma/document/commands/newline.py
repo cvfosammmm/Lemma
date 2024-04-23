@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.node import Placeholder
+from lemma.document.ast.node import Node
 
 
 class Command():
@@ -34,7 +34,7 @@ class Command():
         if document.ast.get_insert_node().parent.is_root():
             self.state['deleted_nodes'] = document.ast.delete_selection()
             self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-            self.state['nodes_added'] += document.ast.insert_node(Placeholder(name='EOL'))
+            self.state['nodes_added'] += document.ast.insert_node(Node('EOL'))
             document.set_scroll_insert_on_screen_after_layout_update()
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)

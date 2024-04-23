@@ -131,9 +131,9 @@ class DocumentViewPresenter():
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()
-            surface_color = ColorManager.get_ui_color('math') if box.node.parent.is_math_area() else ColorManager.get_ui_color('text')
+            surface_color = ColorManager.get_ui_color('math') if box.node.parent.is_matharea() else ColorManager.get_ui_color('text')
 
-            fontname = 'math' if box.node.parent.is_math_area() and not box.char.isdecimal() else 'book'
+            fontname = 'math' if box.node.parent.is_matharea() and not box.char.isdecimal() else 'book'
             surface = FontManager.get_surface(box.char, fontname=fontname)
 
             if surface != None:

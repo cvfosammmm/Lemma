@@ -25,28 +25,27 @@ class MarkdownScanner(object):
 
     def update(self):
         self.markdown = '# ' + self.document.title + '\n'
-        self.document.ast.root.accept(self)
+
+        for child in self.document.ast.root.children:
+            self.process_node(child)
+
         self.markdown = self.markdown[:-1] # remove last EOL
         self.document.markdown = self.markdown
 
-    def visit_root(self, root):
-        for child in root.children:
-            child.accept(self)
+    def process_node(self, node):
+        if node.is_matharea():
+            self.markdown += '$`'
+            for child in node.children:
+                self.process_node(child)
+            self.markdown += '`$'
 
-    def visit_placeholder(self, placeholder):
-        if placeholder.name == 'EOL':
+        elif node.head == 'EOL':
             self.markdown += '\n'
 
-    def visit_matharea(self, mathlist):
-        self.markdown += '$`'
-        for symbol in mathlist.children:
-            symbol.accept(self)
-        self.markdown += '`$'
+        elif node.head == 'placeholder':
+            pass
 
-    def visit_mathsymbol(self, symbol):
-        self.markdown += symbol.content
-
-    def visit_char(self, char):
-        self.markdown += char.content
+        else:
+            self.markdown += node.head
 
 

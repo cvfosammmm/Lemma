@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.app.latex_db import LaTeXDB
+
 
 class PlaintextScanner(object):
 
@@ -27,33 +29,32 @@ class PlaintextScanner(object):
     def update(self):
         self.text = ''
         self.current_line = ''
-        self.document.ast.root.accept(self)
+
+        for child in self.document.ast.root.children:
+            self.process_node(child)
+
         self.text = self.text[:-1] # remove last EOL
         self.document.plaintext = self.text
 
-    def visit_root(self, root):
-        for child in root.children:
-            child.accept(self)
+    def process_node(self, node):
+        if node.is_matharea():
+            if self.current_line == '' or self.current_line[-1] != ' ':
+                self.current_line += ' '
 
-    def visit_placeholder(self, placeholder):
-        if placeholder.name == 'EOL':
+        elif node.head == 'EOL':
             self.current_line = self.current_line.strip()
             if self.current_line != '':
                 self.text += self.current_line + '\n'
                 self.current_line = ''
 
-    def visit_matharea(self, mathlist):
-        if self.current_line == '' or self.current_line[-1] != ' ':
-            self.current_line += ' '
+        elif node.head == 'placeholder':
+            pass
 
-    def visit_mathsymbol(self, symbol):
-        pass
-
-    def visit_char(self, char):
-        if char.is_whitespace:
-            if self.current_line == '' or self.current_line[-1] != ' ':
-                self.current_line += ' '
         else:
-            self.current_line += char.content
+            if LaTeXDB.is_whitespace(node.head):
+                if self.current_line == '' or self.current_line[-1] != ' ':
+                    self.current_line += ' '
+            else:
+                self.current_line += node.head
 
 

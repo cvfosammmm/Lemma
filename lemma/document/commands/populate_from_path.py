@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import os.path, re
-from lemma.document.ast.node import Root, Placeholder, MathArea, UnicodeCharacter, MathSymbol
+from lemma.document.ast.node import Node
 
 
 class Command():
@@ -46,28 +46,30 @@ class Command():
         pass
 
     def build_ast(self, markdown):
-        root = Root()
+        root = Node('root')
+        root.insert(0, Node('EOL'))
 
         lines = markdown.splitlines()
         for line in lines:
             for segment in re.split(r'(\$`.*?`\$)', line):
                 if segment.startswith('$`') and segment.endswith('`$'):
-                    math_area = MathArea()
-                    self.add_math(math_area, segment[2:-2])
-                    root.append(math_area)
+                    matharea = Node('matharea')
+                    matharea.insert(0, Node('placeholder'))
+                    self.add_math(matharea, segment[2:-2])
+                    root.append(matharea)
                 else:
                     self.add_non_math(root, segment)
-            root.append(Placeholder(name='EOL'))
+            root.append(Node('EOL'))
 
         return root
 
     def add_non_math(self, composite, text):
         for char in text:
             if char != '\n':
-                composite.append(UnicodeCharacter(char))
+                composite.append(Node(char))
 
     def add_math(self, composite, text):
         for char in text:
-            composite.append(MathSymbol(char))
+            composite.append(Node(char))
 
 

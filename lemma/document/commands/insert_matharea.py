@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.node import Placeholder, MathArea
+from lemma.document.ast.node import Node
 
 
 class Command():
@@ -32,9 +32,13 @@ class Command():
         self.state['nodes_added'] = []
 
         if document.ast.get_insert_node().parent.is_root():
+            matharea = Node('matharea')
+            matharea.insert(0, Node('placeholder'))
+
             self.state['deleted_nodes'] = document.ast.delete_selection()
             self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-            self.state['nodes_added'] += document.ast.insert_node(MathArea())
+            self.state['nodes_added'] += document.ast.insert_node(matharea)
+
             document.ast.move_insert_left()
             document.set_scroll_insert_on_screen_after_layout_update()
 
