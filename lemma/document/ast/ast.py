@@ -45,12 +45,10 @@ class AST(object):
         self.cursor.set_node_selection(node)
 
     def move_insert_left_with_selection(self):
-        self.cursor.set_node_insert(ASTIterator.prev_no_descent(self.get_insert_node()))
-        self.cursor.restore_selection_invariant()
+        self.move_insert_to_node_with_selection(ASTIterator.prev_no_descent(self.get_insert_node()))
 
     def move_insert_right_with_selection(self):
-        self.cursor.set_node_insert(ASTIterator.next_no_descent(self.get_insert_node()))
-        self.cursor.restore_selection_invariant()
+        self.move_insert_to_node_with_selection(ASTIterator.next_no_descent(self.get_insert_node()))
 
     def move_insert_to_node_with_selection(self, node):
         self.cursor.set_node_insert(node)

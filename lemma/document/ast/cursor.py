@@ -64,39 +64,29 @@ class Cursor():
     def has_selection(self):
         return self.get_node_insert() != self.get_node_selection()
 
+    # restore the invariant that both the insert and the selection bound have the same parent.
     def restore_selection_invariant(self):
+
+        # special cases where the invariant already holds
         if not self.has_selection(): return
+        if self.node_insert.parent == self.node_selection.parent: return
 
-        sca = self.smallest_common_real_ancestor(self.node_insert, self.node_selection)
+        # compute the smallest common ancestor of both the insert and the selection node.
+        ancestors = zip(self.node_insert.ancestors()[:-1], self.node_selection.ancestors()[:-1])
+        sca = list(filter(lambda x: x[0] == x[1], ancestors))[-1][0]
 
-        if self.node_insert == self.node_selection: return
-        if self.node_insert.parent == sca and self.node_selection.parent == sca: return
-
-        node_1 = [node for node in self.node_insert.get_ancestors() if node.parent == sca][0]
-        node_2 = [node for node in self.node_selection.get_ancestors() if node.parent == sca][0]
-
+        # move both insert and selection bound to the sca.
+        node_1 = [node for node in self.node_insert.ancestors() if node.parent == sca][0]
+        node_2 = [node for node in self.node_selection.ancestors() if node.parent == sca][0]
         if position_less_than(self.get_position_selection(), self.get_position_insert()):
-            selection_node = sca[sca.index(node_2)]
             insert_node = sca[sca.index(node_1) + 1]
+            selection_node = sca[sca.index(node_2)]
         else:
             insert_node = sca[sca.index(node_1)]
             selection_node = sca[sca.index(node_2) + 1]
-
         if self.node_selection.parent != sca:
             self.set_node_selection(selection_node)
         if self.node_insert.parent != sca:
             self.set_node_insert(insert_node)
-
-    def smallest_common_real_ancestor(self, node_1, node_2):
-        ancestors_1 = node_1.get_ancestors()[:-1]
-        ancestors_2 = node_2.get_ancestors()[:-1]
-        i = 0
-        sca = self.ast.root
-        for i in range(0, min(len(ancestors_1), len(ancestors_2))):
-            if ancestors_1[i] == ancestors_2[i]:
-                sca = ancestors_1[i]
-            else:
-                break
-        return sca
 
 

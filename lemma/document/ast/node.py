@@ -51,7 +51,7 @@ class Node():
     def __iter__(self): return self.children.__iter__()
     def __getitem__(self, key): return self.children.__getitem__(key)
 
-    def get_ancestors(self):
+    def ancestors(self):
         node = self
         ancestors = [node]
         while not node.is_root():
