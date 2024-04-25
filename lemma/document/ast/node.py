@@ -60,19 +60,11 @@ class Node():
 
         return ancestors
 
-    def get_position(self):
-        position = list()
-        node = self
-        while not node.is_root():
-            position.insert(0, node.parent.index(node))
-            node = node.parent
-
-        return position
-
     def is_leaf(self): return len(self.children) == 0
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.head == 'root'
+    def is_math(self): return ('matharea' in self.ancestors())
     def is_matharea(self): return self.head == 'matharea'
 
 

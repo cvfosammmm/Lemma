@@ -18,7 +18,7 @@
 import time, os.path
 
 from lemma.document.ast.ast import AST
-from lemma.document.ast.iterator import ASTIterator
+from lemma.document.ast.services import ASTIterator
 from lemma.document.housekeeper.housekeeper import Housekeeper
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner

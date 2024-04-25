@@ -15,118 +15,39 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
-from gi.repository import Gtk, Adw
 import sys, os.path, gettext
 
 from lemma.app.font_manager import FontManager
 from lemma.app.service_locator import ServiceLocator
-from lemma.app.color_manager import ColorManager
-from lemma.dialogs.dialog_locator import DialogLocator
-from lemma.popovers.popover_manager import PopoverManager
-
 import lemma.workspace.workspace as workspace
-import lemma.workspace.workspace_controller as workspace_controller
-import lemma.workspace.workspace_presenter as workspace_presenter
-import lemma.workspace.workspace_view as workspace_view
+import lemma.view.application as application
 import lemma.storage.storage as storage
-import lemma.document_view.document_view as document_view
-import lemma.document_draft.document_draft as document_draft
-import lemma.actions.actions as actions
-import lemma.keyboard_shortcuts.shortcuts as shortcuts
 
+# setup gettext
+gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
 
-class Application(Adw.Application):
+# get settings
+settings = ServiceLocator.get_settings()
 
-    def __init__(self):
-        Adw.Application.__init__(self, application_id='org.cvfosammmm.Lemma')
+# init static variables
+ServiceLocator.init_lemma_version('@lemma_version@')
+ServiceLocator.init_resources_path('@resources_path@')
+ServiceLocator.init_app_icons_path('@app_icons_path@')
 
-    def do_activate(self):
-        Adw.Application.do_activate(self)
-        
-        # setup gettext
-        gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
+# setup fonts
+font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')
+FontManager.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
+FontManager.add_font('math', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
+FontManager.add_font('teaser', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'), size=14, line_height=28, ascend=19, descend=5)
 
-        # get settings
-        settings = ServiceLocator.get_settings()
+workspace = workspace.Workspace()
 
-        # init static variables
-        ServiceLocator.init_lemma_version('@lemma_version@')
-        ServiceLocator.init_resources_path('@resources_path@')
-        ServiceLocator.init_app_icons_path('@app_icons_path@')
+storage = storage.Storage(workspace)
+storage.populate_documents()
+storage.populate_workspace()
+storage.init_writer()
 
-        # setup fonts
-        font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')
-        FontManager.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
-        FontManager.add_font('math', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
-        FontManager.add_font('teaser', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'), size=14, line_height=28, ascend=19, descend=5)
+view = application.Application(workspace)
 
-        self.main_window = workspace_view.MainWindow(self)
-        ServiceLocator.set_main_window(self.main_window)
-        ColorManager.init(self.main_window)
-        resources_path = ServiceLocator.get_resources_path()
-        icon_theme = Gtk.IconTheme.get_for_display(self.main_window.get_display())
-        icon_theme.add_search_path(os.path.join(resources_path, 'icons'))
-        icon_theme.add_search_path(os.path.join(resources_path, 'symbols'))
-
-        self.workspace = workspace.Workspace()
-
-        self.storage = storage.Storage(self.workspace)
-        self.storage.populate_documents()
-        self.storage.populate_workspace()
-
-        PopoverManager.init(self.main_window, self.workspace)
-
-        self.main_window.add_widgets(self.workspace)
-
-        if settings.get_value('window_state', 'is_maximized'): self.main_window.maximize()
-        else: self.main_window.unmaximize()
-        window_width = settings.get_value('window_state', 'width')
-        window_height = settings.get_value('window_state', 'height')
-        self.main_window.set_default_size(window_width, window_height)
-        self.main_window.headerbar.set_position(settings.get_value('window_state', 'sidebar_position'))
-        self.main_window.present()
-        self.main_window.connect('close-request', self.on_window_close)
-
-        ServiceLocator.set_workspace(self.workspace)
-        DialogLocator.init_dialogs(self.main_window)
-
-        self.workspace_controller = workspace_controller.WorkspaceController(self.workspace, self.main_window)
-        self.workspace_presenter = workspace_presenter.WorkspacePresenter(self.workspace, self.main_window)
-        self.document_view = document_view.DocumentView(self.workspace, self.main_window)
-        self.document_draft = document_draft.DocumentDraft(self.workspace, self.main_window)
-        self.actions = actions.Actions(self.workspace, self.document_view)
-
-        self.storage.init_writer()
-        self.shortcuts = shortcuts.Shortcuts(self.actions)
-        self.actions.actions['quit'].connect('activate', self.on_quit_action)
-
-    def on_window_close(self, window=None, parameter=None):
-        self.save_quit()
-        return True
-
-    def on_quit_action(self, action=None, parameter=None):
-        self.save_quit()
-
-    def save_quit(self):
-        self.save_window_state()
-        self.storage.save_workspace()
-        self.quit()
-
-    def save_window_state(self):
-        settings = ServiceLocator.get_settings()
-
-        settings.set_value('window_state', 'width', self.main_window.get_property('default-width'))
-        settings.set_value('window_state', 'height', self.main_window.get_property('default-height'))
-        settings.set_value('window_state', 'is_maximized', self.main_window.get_property('maximized'))
-        settings.set_value('window_state', 'sidebar_position', self.main_window.headerbar.get_property('position'))
-        settings.set_value('window_state', 'show_tools_sidebar', self.main_window.document_view_paned.show_widget)
-        settings.set_value('window_state', 'tools_sidebar_position', self.main_window.document_view_paned.target_position)
-        settings.pickle()
-
-
-main_controller = Application()
-exit_status = main_controller.run(sys.argv)
+exit_status = view.run(sys.argv)
 sys.exit(exit_status)

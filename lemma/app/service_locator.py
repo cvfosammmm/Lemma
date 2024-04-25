@@ -39,12 +39,6 @@ class ServiceLocator():
     def get_main_window():
         return ServiceLocator.main_window
 
-    def set_workspace(workspace):
-        ServiceLocator.workspace = workspace
-
-    def get_workspace():
-        return ServiceLocator.workspace
-
     def get_settings():
         if ServiceLocator.settings == None:
             ServiceLocator.settings = settingscontroller.Settings(ServiceLocator.get_config_folder())

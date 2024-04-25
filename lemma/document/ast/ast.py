@@ -19,8 +19,7 @@ import time
 
 from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
-from lemma.document.ast.iterator import ASTIterator
-from lemma.helpers.helpers import position_less_than
+from lemma.document.ast.services import ASTIterator, sort_positions, position_to_node, position_less_than
 
 
 class AST(object):
@@ -110,5 +109,11 @@ class AST(object):
 
     def delete_node(self, node):
         node.parent.remove(node.parent[node.parent.index(node)])
+
+    def subtree(self, pos1, pos2):
+        pos1, pos2 = sort_positions(pos1, pos2)
+        parent = position_to_node(pos1[:-1], self.root)
+
+        return parent[pos1[-1]:pos2[-1]]
 
 

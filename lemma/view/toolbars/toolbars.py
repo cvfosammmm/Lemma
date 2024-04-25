@@ -15,17 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import time
 
+class Toolbars(object):
 
-def timer(original_function):
-    
-    def new_function(*args, **kwargs):
-        start_time = time.time()
-        return_value = original_function(*args, **kwargs)
-        print(original_function.__name__ + ': ' + str(time.time() - start_time) + ' seconds')
-        return return_value
-    
-    return  new_function
+    def __init__(self, workspace, main_window):
+        self.workspace = workspace
+        self.main_window = main_window
+
+        self.main_window.headerbar.hb_right.tools_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+
+        self.update()
+
+    def update(self):
+        pass
+
+    def on_tools_sidebar_toggle_toggled(self, toggle_button, parameter=None):
+        self.main_window.document_view_paned.set_show_widget(toggle_button.get_active())
+        self.main_window.document_view_paned.animate(True)
 
 

@@ -15,17 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import time
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk, Pango
+
+from lemma.view.main_window.scrolling_widget import ScrollingWidget
 
 
-def timer(original_function):
-    
-    def new_function(*args, **kwargs):
-        start_time = time.time()
-        return_value = original_function(*args, **kwargs)
-        print(original_function.__name__ + ': ' + str(time.time() - start_time) + ' seconds')
-        return return_value
-    
-    return  new_function
+class DocumentHistoryView(Gtk.Overlay):
+
+    def __init__(self):
+        Gtk.Overlay.__init__(self)
+        self.set_hexpand(True)
+        self.get_style_context().add_class('history')
+
+        self.scrolling_widget = ScrollingWidget()
+        self.content = self.scrolling_widget.content
+        self.set_child(self.scrolling_widget.view)
 
 

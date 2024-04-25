@@ -15,17 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import time
+import os.path
+
+from lemma.app.service_locator import ServiceLocator
 
 
-def timer(original_function):
-    
-    def new_function(*args, **kwargs):
-        start_time = time.time()
-        return_value = original_function(*args, **kwargs)
-        print(original_function.__name__ + ': ' + str(time.time() - start_time) + ' seconds')
-        return return_value
-    
-    return  new_function
+class Colors(object):
+
+    def __init__(self, workspace, main_window):
+        self.workspace = workspace
+        self.main_window = main_window
+
+        self.update()
+
+    def update(self):
+        path = os.path.join(ServiceLocator.get_resources_path(), 'themes', ServiceLocator.get_settings().get_value('preferences', 'color_scheme') + '.css')
+        self.main_window.css_provider_colors.load_from_path(path)
 
 

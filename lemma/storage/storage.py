@@ -34,7 +34,7 @@ class Storage(object):
         for direntry in os.scandir(self.pathname):
             if direntry.is_file() and direntry.name.isdigit():
                 document = Document(int(direntry.name), path=direntry.path)
-                self.workspace.documents.add(document)
+                self.workspace.add(document)
 
     def populate_workspace(self):
         pathname = os.path.join(self.pathname, 'workspace')
@@ -43,21 +43,29 @@ class Storage(object):
         with open(pathname, 'rb') as file:
             data = pickle.loads(file.read())
 
-            self.workspace.active_document = self.workspace.documents.get_by_id(data['active_document_id'])
+            self.workspace.active_document = self.workspace.get_by_id(data['active_document_id'])
 
             for document_id in data['history']:
-                document = self.workspace.documents.get_by_id(document_id)
-                self.workspace.history.add(document, remove_tail_after_last_active=False)
-                if document == self.workspace.active_document:
-                    self.workspace.history.activate_document(document)
+                document = self.workspace.get_by_id(document_id)
+                if document != None:
+                    self.workspace.history.add(document, remove_tail_after_last_active=False)
+                    if document == self.workspace.active_document:
+                        self.workspace.history.activate_document(document)
             self.workspace.history.add_change_code('active_document_changed')
-        self.workspace.documents.update()
 
     def init_writer(self):
-        for document in self.workspace.documents.documents:
+        for document in self.workspace.documents:
             document.connect('changed', self.on_document_change)
-        self.workspace.documents.connect('new_document', self.on_new_document)
-        self.workspace.documents.connect('document_removed', self.on_document_removed)
+        self.workspace.connect('new_document', self.on_new_document)
+        self.workspace.connect('document_removed', self.on_document_removed)
+        self.workspace.connect('changed', self.on_workspace_changed)
+        self.workspace.history.connect('changed', self.on_history_change)
+
+    def on_workspace_changed(self, workspace):
+        self.save_workspace()
+
+    def on_history_change(self, history):
+        self.save_workspace()
 
     def on_new_document(self, workspace, document):
         document.update()
@@ -101,7 +109,8 @@ class Storage(object):
     def get_history_list(self):
         history_list = []
         for i, document in enumerate(self.workspace.history.documents):
-            history_list.append(document.id)
+            if document != None:
+                history_list.append(document.id)
         return history_list
 
 

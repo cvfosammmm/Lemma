@@ -15,17 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import time
+import os.path
 
 
-def timer(original_function):
-    
-    def new_function(*args, **kwargs):
-        start_time = time.time()
-        return_value = original_function(*args, **kwargs)
-        print(original_function.__name__ + ': ' + str(time.time() - start_time) + ' seconds')
-        return return_value
-    
-    return  new_function
+class DialogLocator(object):
+
+    dialogs = dict()
+
+    def init_dialogs(main_window):
+        for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
+            if 'dialog.py' in files:
+                name = os.path.basename(path)
+                exec('import lemma.view.dialogs.' + name + '.dialog as ' + name)
+                exec('DialogLocator.dialogs["' + name + '"] = ' + name + '.Dialog(main_window)')
+
+    def get_dialog(dialog_type):
+        return DialogLocator.dialogs[dialog_type]
 
 
