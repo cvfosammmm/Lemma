@@ -27,6 +27,22 @@ class ToolBarView(Gtk.ActionBar):
     def __init__(self):
         Gtk.ActionBar.__init__(self)
 
+        self.bold_button = Gtk.ToggleButton()
+        self.bold_button.set_child(Gtk.Image.new_from_icon_name('format-text-bold-symbolic'))
+        self.bold_button.set_can_focus(False)
+        self.bold_button.get_style_context().add_class('flat')
+        self.bold_button.set_tooltip_text(_('Bold') + ' (Ctrl+B)')
+        self.pack_start(self.bold_button)
+
+        self.italic_button = Gtk.ToggleButton()
+        self.italic_button.set_child(Gtk.Image.new_from_icon_name('format-text-italic-symbolic'))
+        self.italic_button.set_can_focus(False)
+        self.italic_button.get_style_context().add_class('flat')
+        self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
+        self.pack_start(self.italic_button)
+
+        self.pack_start(Gtk.Separator())
+
         self.add_math_button = Gtk.Button.new_from_icon_name('insert-math-symbolic')
         self.add_math_button.set_action_name('win.insert-matharea')
         self.add_math_button.set_can_focus(False)

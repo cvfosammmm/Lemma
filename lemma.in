@@ -37,6 +37,9 @@ ServiceLocator.init_app_icons_path('@app_icons_path@')
 # setup fonts
 font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')
 FontManager.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
+FontManager.add_font('bold', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Bold.otf'), size=19.407, line_height=28, ascend=19, descend=5)
+FontManager.add_font('bolditalic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-BoldItalic.otf'), size=19.407, line_height=28, ascend=19, descend=5)
+FontManager.add_font('italic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Italic.otf'), size=19.407, line_height=28, ascend=19, descend=5)
 FontManager.add_font('math', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
 FontManager.add_font('teaser', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'), size=14, line_height=28, ascend=19, descend=5)
 

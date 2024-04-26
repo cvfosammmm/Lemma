@@ -22,17 +22,25 @@ class MarkdownScanner(object):
         self.document = document
 
         self.markdown = ''
+        self.current_tags = set()
 
     def update(self):
         self.markdown = '# ' + self.document.title + '\n'
 
+        self.current_tags = set()
         for child in self.document.ast.root:
             self.process_node(child)
+        self.current_tags_to_md()
 
         self.markdown = self.markdown[:-1] # remove last EOL
         self.document.markdown = self.markdown
 
     def process_node(self, node):
+        if node.tags != self.current_tags:
+            self.current_tags_to_md()
+            self.current_tags = node.tags
+            self.current_tags_to_md()
+
         if node.is_matharea():
             self.markdown += '$`'
             for child in node:
@@ -47,5 +55,10 @@ class MarkdownScanner(object):
 
         else:
             self.markdown += node.head
+
+    def current_tags_to_md(self):
+        if 'bold' in self.current_tags and 'italic' in self.current_tags: self.markdown += '***'
+        elif 'bold' in self.current_tags: self.markdown += '**'
+        elif 'italic' in self.current_tags: self.markdown += '*'
 
 

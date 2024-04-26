@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os.path, re
+import os.path, re, mistune
 from lemma.document.ast.node import Node
 
 
@@ -49,24 +49,42 @@ class Command():
         root = Node('root')
         root.insert(0, Node('EOL'))
 
-        lines = markdown.splitlines()
-        for line in lines:
-            for segment in re.split(r'(\$`.*?`\$)', line):
-                if segment.startswith('$`') and segment.endswith('`$'):
-                    matharea = Node('matharea')
-                    matharea.insert(0, Node('placeholder'))
-                    self.add_math(matharea, segment[2:-2])
-                    root.append(matharea)
-                else:
-                    self.add_non_math(root, segment)
-            root.append(Node('EOL'))
+        parser = mistune.create_markdown(renderer=None)
+        for line in parser(markdown):
+            if line['type'] == 'blank_line':
+                root.append(Node('EOL'))
+            elif line['type'] == 'paragraph':
+                for section in line['children']:
+                    self.parse_section(root, section)
+                root.append(Node('EOL'))
 
         return root
 
-    def add_non_math(self, composite, text):
+    def parse_section(self, root, section, tags=set()):
+        if section['type'] == 'codespan':
+            matharea = Node('matharea')
+            matharea.insert(0, Node('placeholder'))
+            self.add_math(matharea, section['raw'])
+            root.append(matharea)
+        elif section['type'] == 'emphasis':
+            tags.add('italic')
+            self.parse_section(root, section['children'][0], tags)
+            tags.remove('italic')
+        elif section['type'] == 'strong':
+            tags.add('bold')
+            self.parse_section(root, section['children'][0], tags)
+            tags.remove('bold')
+        elif section['type'] == 'text':
+            self.add_non_math(root, section['raw'].strip('$'), tags=tags)
+        elif section['type'] == 'softbreak':
+            root.append(Node('EOL'))
+
+    def add_non_math(self, composite, text, tags):
         for char in text:
             if char != '\n':
-                composite.append(Node(char))
+                node = Node(char)
+                node.tags = tags.copy()
+                composite.append(node)
 
     def add_math(self, composite, text):
         for char in text:

@@ -134,7 +134,12 @@ class DocumentViewPresenter():
                 ctx.fill()
             surface_color = ColorManager.get_ui_color('math') if box.node.parent.is_matharea() else ColorManager.get_ui_color('text')
 
-            fontname = 'math' if box.node.parent.is_matharea() and not box.char.isdecimal() else 'book'
+            if box.node.is_math(): fontname = 'math'
+            elif 'bold' in box.node.tags and 'italic' not in box.node.tags: fontname = 'bold'
+            elif 'bold' in box.node.tags and 'italic' in box.node.tags: fontname = 'bolditalic'
+            elif 'bold' not in box.node.tags and 'italic' in box.node.tags: fontname = 'italic'
+            else: fontname = 'book'
+
             surface = FontManager.get_surface(box.char, fontname=fontname)
 
             if surface != None:

@@ -21,13 +21,36 @@ class Toolbars(object):
     def __init__(self, workspace, main_window):
         self.workspace = workspace
         self.main_window = main_window
+        self.toolbar = main_window.toolbar
 
         self.main_window.headerbar.hb_right.tools_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+        self.toolbar.bold_button.connect('clicked', self.on_tag_button_clicked, 'bold')
+        self.toolbar.italic_button.connect('clicked', self.on_tag_button_clicked, 'italic')
 
         self.update()
 
     def update(self):
-        pass
+        document = self.workspace.active_document
+        if self.workspace.mode != 'documents' or document == None: return
+
+        char_nodes = [node for node in document.ast.subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        self.toolbar.bold_button.set_sensitive(len(char_nodes) > 0)
+        self.toolbar.italic_button.set_sensitive(len(char_nodes) > 0)
+
+        all_bold = True
+        all_italic = True
+        for node in char_nodes:
+            if 'bold' not in node.tags: all_bold = False
+            if 'italic' not in node.tags: all_italic = False
+        self.toolbar.bold_button.set_active(len(char_nodes) > 0 and all_bold)
+        self.toolbar.italic_button.set_active(len(char_nodes) > 0 and all_italic)
+
+    def on_tag_button_clicked(self, button, parameter):
+        document = self.workspace.active_document
+        if button.get_active():
+            document.add_command('add_tag', parameter)
+        else:
+            document.add_command('remove_tag', parameter)
 
     def on_tools_sidebar_toggle_toggled(self, toggle_button, parameter=None):
         self.main_window.document_view_paned.set_show_widget(toggle_button.get_active())

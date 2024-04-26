@@ -65,6 +65,8 @@ class Application(Adw.Application):
         self.panels = panels.Panels(self.workspace, self.main_window, self)
 
         self.document = self.workspace.get_active_document()
+        if self.document != None: self.document.connect('changed', self.on_document_change)
+
         self.workspace.connect('new_document', self.on_new_document)
         self.workspace.connect('document_removed', self.on_document_removed)
         self.workspace.connect('new_active_document', self.on_new_active_document)
@@ -99,10 +101,12 @@ class Application(Adw.Application):
         self.actions.update()
         self.document_history.update()
         self.document_list.update()
+        self.toolbars.update()
 
     def on_document_change(self, document):
         self.actions.update()
         self.document_list.update()
+        self.toolbars.update()
 
     def on_mode_set(self, workspace):
         self.panels.update()

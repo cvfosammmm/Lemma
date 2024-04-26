@@ -23,7 +23,7 @@ class Node():
         self.children = []
         self.head = head
         self.box = None
-        self.tags = []
+        self.tags = set()
 
     def set_parent(self, parent):
         self.parent = parent
@@ -64,7 +64,8 @@ class Node():
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.head == 'root'
-    def is_math(self): return ('matharea' in self.ancestors())
+    def is_math(self): return ('matharea' in [node.head for node in self.ancestors()])
     def is_matharea(self): return self.head == 'matharea'
+    def is_char(self): return self.is_leaf() and not self.is_math()
 
 

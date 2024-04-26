@@ -116,7 +116,14 @@ class Layouter(object):
 
         total_width = 0
         char_boxes = []
-        for char, extents in zip(self.current_word, FontManager.get_char_extents_multi(text)):
+
+        node = self.current_word[0]
+        if 'bold' in node.tags and 'italic' not in node.tags: fontname = 'bold'
+        elif 'bold' in node.tags and 'italic' in node.tags: fontname = 'bolditalic'
+        elif 'bold' not in node.tags and 'italic' in node.tags: fontname = 'italic'
+        else: fontname = 'book'
+
+        for char, extents in zip(self.current_word, FontManager.get_char_extents_multi(text, fontname=fontname)):
             width, height, left, top = extents
             total_width += width
 

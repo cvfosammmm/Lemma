@@ -110,3 +110,15 @@ def node_to_position(node):
         return position
 
 
+def flatten(list_of_nodes):
+    def append(flatlist, node):
+        flatlist.append(node)
+        for child in node:
+            append(flatlist, child)
+
+    flatlist = []
+    for node in list_of_nodes:
+        append(flatlist, node)
+    return flatlist
+
+
