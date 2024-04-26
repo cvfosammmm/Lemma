@@ -49,6 +49,9 @@ class Actions(object):
         self.add_simple_action('insert-matharea', self.insert_matharea)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
+        self.add_simple_action('trigger-bold-button', self.trigger_bold_button)
+        self.add_simple_action('trigger-italic-button', self.trigger_italic_button)
+
         self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
@@ -88,6 +91,8 @@ class Actions(object):
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_matharea)
+        self.actions['trigger-bold-button'].set_enabled(True)
+        self.actions['trigger-italic-button'].set_enabled(True)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-edit-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
@@ -140,6 +145,12 @@ class Actions(object):
 
         name = parameter[0]
         self.workspace.active_document.add_command('insert_symbol', name)
+
+    def trigger_bold_button(self, action=None, parameter=''):
+        self.main_window.toolbar.bold_button.emit('clicked')
+
+    def trigger_italic_button(self, action=None, parameter=''):
+        self.main_window.toolbar.italic_button.emit('clicked')
 
     def toggle_tools_sidebar(self, action=None, parameter=''):
         toggle = self.main_window.headerbar.hb_right.tools_sidebar_toggle
