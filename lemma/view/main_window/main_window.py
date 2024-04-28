@@ -30,6 +30,7 @@ from lemma.view.main_window.document_list_view import DocumentListView
 from lemma.view.main_window.toolbar import ToolBarView
 from lemma.view.main_window.sidebar import ToolsSidebar
 from lemma.view.main_window.document_view_view import DocumentViewView
+from lemma.view.main_window.document_draft import DocumentDraftView
 from lemma.view.title_widget.title_widget import TitleWidget
 from lemma.view.main_window.animated_paned import AnimatedHPaned
 
@@ -60,16 +61,12 @@ class MainWindow(Adw.ApplicationWindow):
         self.welcome = WelcomeView()
         self.document_view = DocumentViewView()
         self.tools_sidebar = ToolsSidebar()
-
-        self.draft_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.draft_title_widget = TitleWidget(self)
-        self.draft_title_widget.view.submit_button.set_label('Create Document')
-        self.draft_box.append(self.draft_title_widget.view)
+        self.draft_view = DocumentDraftView()
 
         self.content_stack = Gtk.Stack()
         self.content_stack.get_style_context().add_class('content')
         self.content_stack.add_named(self.welcome, 'welcome')
-        self.content_stack.add_named(self.draft_box, 'draft_view')
+        self.content_stack.add_named(self.draft_view, 'draft_view')
         self.content_stack.add_named(self.document_view, 'document_view')
 
         self.document_view_paned = AnimatedHPaned(self.content_stack, self.tools_sidebar, False)

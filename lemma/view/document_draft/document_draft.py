@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+import datetime
+
 from lemma.document.document import Document
 
 
@@ -26,35 +28,114 @@ class DocumentDraft():
 
     def __init__(self, workspace, main_window):
         self.workspace = workspace
-        self.title_widget = main_window.draft_title_widget
+        self.view = main_window.draft_view
         self.document = None
 
-        self.title_widget.view.title_entry.connect('activate', self.on_entry_activate)
-        self.title_widget.view.submit_button.connect('clicked', self.on_submit_button_clicked)
-        self.title_widget.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
+        self.title = ''
+        self.title_changed = False
+        self.validation_state = False
+        self.is_active = False
+
+        self.view.title_entry.connect('changed', self.on_entry_changed)
+        self.view.title_entry.connect('activate', self.on_entry_activate)
+        self.view.submit_button.connect('clicked', self.on_submit_button_clicked)
+        self.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
 
         self.key_controller_window = Gtk.EventControllerKey()
         self.key_controller_window.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
-        self.title_widget.view.title_entry.add_controller(self.key_controller_window)
+        self.view.title_entry.add_controller(self.key_controller_window)
 
     def update(self):
         if self.workspace.mode == 'draft':
             self.init()
         else:
-            self.title_widget.deactivate()
+            self.deactivate()
+
+    def on_entry_changed(self, entry):
+        if self.is_active:
+            self.set_title(entry.get_text())
+
+    def set_title(self, title):
+        if title != self.title:
+            self.title = title
+            self.title_changed = True
+            self.validate()
+
+    def validate(self):
+        if self.document == None: return
+
+        validation_state = True
+        if self.title == '':
+            validation_state = False
+        elif self.title != self.document.title and self.workspace.get_by_title(self.title):
+            validation_state = False
+
+        if self.title != self.document.title and self.title == '':
+            self.view.subtext.set_text('Name cannot be empty.')
+            self.view.subtext.get_style_context().add_class('error')
+            self.view.title_entry.get_style_context().add_class('error')
+        elif self.title != self.document.title and self.workspace.get_by_title(self.title):
+            self.view.subtext.set_text('A document with this name already exists.')
+            self.view.subtext.get_style_context().add_class('error')
+            self.view.title_entry.get_style_context().add_class('error')
+        else:
+            self.view.subtext.set_text('Please enter a name for this document.')
+            self.view.subtext.get_style_context().remove_class('error')
+            self.view.title_entry.get_style_context().remove_class('error')
+
+        if validation_state != self.validation_state:
+            self.validation_state = validation_state
+        self.view.submit_button.set_sensitive(validation_state)
+
+    def grab_focus(self):
+        self.view.title_entry.grab_focus()
+        self.view.title_entry.set_position(len(self.title))
+
+    def activate(self):
+        if not self.is_active:
+            self.is_active = True
+            self.reset_title()
+            self.validate()
+            self.view.button_revealer.set_reveal_child(True)
+
+    def deactivate(self):
+        self.is_active = False
+        self.view.title_entry.set_position(0)
+        self.view.button_revealer.set_reveal_child(False)
+        self.set_subtext_to_last_modified_date()
+
+    def reset_title(self):
+        if self.document == None:
+            self.view.title_entry.set_enable_undo(False)
+            self.view.title_entry.set_text('')
+            self.view.title_entry.set_enable_undo(True)
+            self.title_changed = False
+        else:
+            self.view.title_entry.set_enable_undo(False)
+            self.view.title_entry.set_text(self.document.title)
+            self.view.title_entry.set_enable_undo(True)
+            self.title_changed = False
+
+    def set_subtext_to_last_modified_date(self):
+        if self.document == None:
+            self.view.subtext.set_text('')
+        else:
+            datetime_last_modified = datetime.datetime.fromtimestamp(self.document.last_modified)
+            self.view.subtext.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
+        self.view.subtext.get_style_context().remove_class('error')
 
     def on_entry_activate(self, entry=None):
-        if self.title_widget.validation_state:
+        if self.validation_state:
             self.submit()
 
     def on_submit_button_clicked(self, widget=None):
-        if self.title_widget.validation_state:
+        if self.validation_state:
             self.submit()
 
     def submit(self):
-        self.document.title = self.title_widget.title
-        self.title_widget.deactivate()
+        self.document.title = self.title
+        self.deactivate()
         self.workspace.add(self.document)
         self.workspace.set_active_document(self.document)
         self.document = None
@@ -72,17 +153,16 @@ class DocumentDraft():
     def init(self):
         id = self.workspace.get_new_document_id()
         self.document = Document(id)
-        self.title_widget.document = self.document
         self.reset_title()
-        self.title_widget.grab_focus()
-        self.title_widget.activate()
-        self.title_widget.validate()
+        self.grab_focus()
+        self.activate()
+        self.validate()
 
     def reset_title(self):
-        self.title_widget.title = ''
-        self.title_widget.view.title_entry.set_enable_undo(False)
-        self.title_widget.view.title_entry.set_text('')
-        self.title_widget.view.title_entry.set_enable_undo(True)
-        self.title_widget.title_changed = False
+        self.title = ''
+        self.view.title_entry.set_enable_undo(False)
+        self.view.title_entry.set_text('')
+        self.view.title_entry.set_enable_undo(True)
+        self.title_changed = False
 
 
