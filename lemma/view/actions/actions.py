@@ -113,7 +113,7 @@ class Actions(object):
         self.document_view.init_renaming()
 
     def export_as(self, action=None, parameter=''):
-        DialogLocator.get_dialog('export_as').run(self.workspace.active_document)
+        DialogLocator.get_dialog('export_document').run(self.workspace.active_document)
 
     def go_back(self, action=None, parameter=''):
         if self.workspace.mode == 'draft':
