@@ -69,7 +69,6 @@ class Panels(object):
 
         self.main_window.document_view_paned.first_set_show_widget(show_tools_sidebar)
         self.main_window.document_view_paned.set_target_position(tools_sidebar_position)
-        self.main_window.headerbar.hb_right.tools_sidebar_toggle.set_active(show_tools_sidebar)
 
     def save_window_state(self):
         self.settings.set_value('window_state', 'width', self.main_window.get_property('default-width'))

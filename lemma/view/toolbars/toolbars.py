@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.app.service_locator import ServiceLocator
+
 
 class Toolbars(object):
 
@@ -23,7 +25,8 @@ class Toolbars(object):
         self.main_window = main_window
         self.toolbar = main_window.toolbar
 
-        self.main_window.headerbar.hb_right.tools_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+        self.toolbar.tools_sidebar_toggle.set_active(ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar'))
+        self.toolbar.tools_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
         self.toolbar.bold_button.connect('clicked', self.on_tag_button_clicked, 'bold')
         self.toolbar.italic_button.connect('clicked', self.on_tag_button_clicked, 'italic')
 

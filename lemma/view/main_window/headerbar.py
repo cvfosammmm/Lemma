@@ -111,11 +111,12 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.headerbar.set_title_widget(Gtk.Label.new(''))
         self.box.append(self.headerbar)
 
-        self.tools_sidebar_toggle = Gtk.ToggleButton()
-        self.tools_sidebar_toggle.set_tooltip_text(_('Show Tools Sidebar') + ' (F9)')
-        self.tools_sidebar_toggle.set_icon_name('sidebar-show-right-symbolic')
-        self.tools_sidebar_toggle.set_can_focus(False)
-        self.tools_sidebar_toggle.get_style_context().add_class('flat')
-        self.headerbar.pack_start(self.tools_sidebar_toggle)
+        self.document_menu_button = PopoverManager.create_popover_button('document_menu')
+        self.document_menu_button.set_child(Gtk.Image.new_from_icon_name('view-more-symbolic'))
+        self.document_menu_button.set_can_focus(False)
+        self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (F12)')
+        self.document_menu_button.get_style_context().add_class('flat')
+        self.document_menu_button.set_action_name('win.show-document-menu')
+        self.headerbar.pack_start(self.document_menu_button)
 
 
