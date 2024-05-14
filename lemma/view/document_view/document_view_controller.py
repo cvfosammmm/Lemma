@@ -19,6 +19,9 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+from urllib.parse import urlparse
+import webbrowser
+
 
 class DocumentViewController():
 
@@ -87,9 +90,12 @@ class DocumentViewController():
 
                 link_target = document.get_link_at_xy(x, y)
                 if link_target != None and link_target == self.document_view.selected_link_target:
-                    target_document = workspace.get_by_title(link_target)
-                    if target_document != None:
-                        workspace.set_active_document(target_document)
+                    if urlparse(link_target).scheme in ['http', 'https']:
+                        webbrowser.open(link_target)
+                    else:
+                        target_document = workspace.get_by_title(link_target)
+                        if target_document != None:
+                            workspace.set_active_document(target_document)
 
     def on_keypress_content(self, controller, keyval, keycode, state):
         if self.document_view.document == None: return False
