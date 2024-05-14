@@ -23,11 +23,14 @@ class MarkdownScanner(object):
 
         self.markdown = ''
         self.current_tags = set()
+        self.current_link_target = None
 
     def update(self):
         self.markdown = '# ' + self.document.title + '\n'
 
         self.current_tags = set()
+        self.current_link_target = None
+
         for child in self.document.ast.root:
             self.process_node(child)
         self.current_tags_to_md()
@@ -36,10 +39,17 @@ class MarkdownScanner(object):
         self.document.markdown = self.markdown
 
     def process_node(self, node):
+        if node.link_target != self.current_link_target and node.link_target != None:
+            self.open_current_link()
+
         if node.tags != self.current_tags:
             self.current_tags_to_md()
             self.current_tags = node.tags
             self.current_tags_to_md()
+
+        if node.link_target != self.current_link_target:
+            self.close_current_link()
+            self.current_link_target = node.link_target
 
         if node.is_matharea():
             self.markdown += '$`'
@@ -60,5 +70,13 @@ class MarkdownScanner(object):
         if 'bold' in self.current_tags and 'italic' in self.current_tags: self.markdown += '***'
         elif 'bold' in self.current_tags: self.markdown += '**'
         elif 'italic' in self.current_tags: self.markdown += '*'
+
+    def open_current_link(self):
+        self.markdown += '['
+
+    def close_current_link(self):
+        if self.current_link_target == None: return
+
+        self.markdown += '](' + self.current_link_target + ')'
 
 

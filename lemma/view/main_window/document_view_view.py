@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, Pango
+from gi.repository import Gtk, Pango
 
 from lemma.view.main_window.scrolling_widget import ScrollingWidget
 
@@ -60,10 +60,12 @@ class DocumentViewView(Gtk.Overlay):
         self.content.set_focusable(True)
         self.content.set_vexpand(True)
 
-        self.mouse_cursor_default = Gdk.Cursor.new_from_name('default')
-        self.mouse_cursor_text = Gdk.Cursor.new_from_name('text')
-        self.mouse_cursor_pointer = Gdk.Cursor.new_from_name('pointer')
-
         self.set_child(self.scrolling_widget.view)
+
+        self.link_overlay = Gtk.Label.new('http://url')
+        self.link_overlay.set_valign(Gtk.Align.END)
+        self.link_overlay.set_halign(Gtk.Align.END)
+        self.link_overlay.get_style_context().add_class('link-overlay')
+        self.add_overlay(self.link_overlay)
 
 

@@ -31,13 +31,15 @@ class PopoverManager():
     popover_buttons = dict()
     current_popover_name = None
     main_window = None
+    workspace = None
     popoverlay = None
     inbetween = Gtk.DrawingArea()
 
     connected_functions = dict() # observers' functions to be called when change codes are emitted
 
-    def init(main_window):
+    def init(main_window, workspace):
         PopoverManager.main_window = main_window
+        PopoverManager.workspace = workspace
         PopoverManager.popoverlay = main_window.popoverlay
         PopoverManager.popoverlay.add_overlay(PopoverManager.inbetween)
 

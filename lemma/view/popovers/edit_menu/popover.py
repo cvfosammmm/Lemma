@@ -28,7 +28,19 @@ class Popover(object):
     def __init__(self, popover_manager):
         self.popover_manager = popover_manager
         self.view = View(popover_manager)
+        self.workspace = popover_manager.workspace
 
+        self.popover_manager.connect('popup', self.on_popover_popup)
+
+    def on_popover_popup(self, name):
+        if name != 'edit_menu': return
+
+        document = self.workspace.get_active_document()
+        if document == None: return
+
+        char_nodes = [node for node in document.ast.subtree(*document.ast.get_cursor_state()) if node.link_target != None]
+        self.view.remove_link_button.set_visible(len(char_nodes) > 0)
+        self.view.link_buttons_separator.set_visible(len(char_nodes) > 0)
 
 class View(PopoverTop):
 
@@ -40,5 +52,12 @@ class View(PopoverTop):
         self.select_all_button = MenuBuilder.create_button(_('Select All'), shortcut=_('Ctrl') + '+A')
         self.select_all_button.set_action_name('win.select-all')
         self.add_closing_button(self.select_all_button)
+
+        self.link_buttons_separator = Gtk.Separator()
+        self.add_widget(self.link_buttons_separator)
+
+        self.remove_link_button = MenuBuilder.create_button(_('Remove Link'))
+        self.remove_link_button.set_action_name('win.remove-link')
+        self.add_closing_button(self.remove_link_button)
 
 

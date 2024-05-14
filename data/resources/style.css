@@ -66,6 +66,16 @@ actionbar box {
     box-shadow: none;
 }
 
+/* link-overlay */
+
+label.link-overlay {
+    background: @window_bg_color;
+    border-top: 1px solid @bodypaned_border;
+    border-left: 1px solid @bodypaned_border;
+    padding: 3px 6px;
+    border-top-left-radius: 3px;
+}
+
 /* title-widget */
 
 .document-title {
@@ -312,6 +322,16 @@ box.welcome label.header {
 }
 box.welcome label.explainer {
     margin-bottom: 42px;
+}
+
+/* insert link dialog */
+
+window.insert-link-dialog entry {
+    border: none;
+    outline: none;
+    border-radius: 0px;
+    padding-top: 7px;
+    padding-bottom: 7px;
 }
 
 /* import markdown dialog */

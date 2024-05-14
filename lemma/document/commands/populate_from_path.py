@@ -60,30 +60,34 @@ class Command():
 
         return root
 
-    def parse_section(self, root, section, tags=set()):
+    def parse_section(self, root, section, tags=set(), link_target=None):
         if section['type'] == 'codespan':
             matharea = Node('matharea')
             matharea.insert(0, Node('placeholder'))
             self.add_math(matharea, section['raw'])
             root.append(matharea)
+        elif section['type'] == 'link':
+            link_target = section['attrs']['url']
+            self.parse_section(root, section['children'][0], tags, link_target)
         elif section['type'] == 'emphasis':
             tags.add('italic')
-            self.parse_section(root, section['children'][0], tags)
+            self.parse_section(root, section['children'][0], tags, link_target)
             tags.remove('italic')
         elif section['type'] == 'strong':
             tags.add('bold')
-            self.parse_section(root, section['children'][0], tags)
+            self.parse_section(root, section['children'][0], tags, link_target)
             tags.remove('bold')
         elif section['type'] == 'text':
-            self.add_non_math(root, section['raw'].strip('$'), tags=tags)
+            self.add_non_math(root, section['raw'].strip('$'), tags, link_target)
         elif section['type'] == 'softbreak':
             root.append(Node('EOL'))
 
-    def add_non_math(self, composite, text, tags):
+    def add_non_math(self, composite, text, tags, link_target=None):
         for char in text:
             if char != '\n':
                 node = Node(char)
                 node.tags = tags.copy()
+                node.link_target = link_target
                 composite.append(node)
 
     def add_math(self, composite, text):

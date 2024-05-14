@@ -46,6 +46,8 @@ class Actions(object):
         self.add_simple_action('redo', self.redo)
         self.add_simple_action('select-all', self.select_all)
 
+        self.add_simple_action('insert-link', self.insert_link)
+        self.add_simple_action('remove-link', self.remove_link)
         self.add_simple_action('insert-matharea', self.insert_matharea)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
@@ -90,6 +92,8 @@ class Actions(object):
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
+        self.actions['insert-link'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
+        self.actions['remove-link'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_matharea)
         self.actions['trigger-bold-button'].set_enabled(True)
         self.actions['trigger-italic-button'].set_enabled(True)
@@ -145,6 +149,12 @@ class Actions(object):
 
         name = parameter[0]
         self.workspace.active_document.add_command('insert_symbol', name)
+
+    def insert_link(self, action=None, parameter=''):
+        DialogLocator.get_dialog('insert_link').run(self.workspace)
+
+    def remove_link(self, action=None, parameter=''):
+        self.workspace.active_document.add_command('remove_link')
 
     def trigger_bold_button(self, action=None, parameter=''):
         self.main_window.toolbar.bold_button.emit('clicked')

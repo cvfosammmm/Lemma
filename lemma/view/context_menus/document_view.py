@@ -27,6 +27,7 @@ class ContextMenuDocumentView(ContextMenu):
     def __init__(self, document_view):
         ContextMenu.__init__(self)
         self.parent = document_view.view.scrolling_widget
+        self.document_view = document_view
 
         self.popup_offset_x, self.popup_offset_y = 0, 0
 
@@ -51,13 +52,32 @@ class ContextMenuDocumentView(ContextMenu):
         self.select_all_button.connect('clicked', self.on_button_click)
         self.box.append(self.select_all_button)
 
+        self.link_buttons_separator = Gtk.Separator()
+        self.box.append(self.link_buttons_separator)
+
+        self.remove_link_button = self.create_button('Remove Link')
+        self.remove_link_button.set_action_name('win.remove-link')
+        self.remove_link_button.connect('clicked', self.on_button_click)
+        self.box.append(self.remove_link_button)
+
         self.parent.connect('secondary_button_press', self.on_secondary_button_press)
 
     def on_secondary_button_press(self, content, data):
+        self.update_button_visibility()
+
         x_offset, y_offset, state = data
         self.popup_offset_x, self.popup_offset_y = x_offset, y_offset
         self.popup_at_cursor(x_offset - content.scrolling_offset_x, y_offset - content.scrolling_offset_y)
         return True
+
+    def update_button_visibility(self):
+        document = self.document_view.document
+
+        if document == None: return
+
+        char_nodes = [node for node in document.ast.subtree(*document.ast.get_cursor_state()) if node.link_target != None]
+        self.remove_link_button.set_visible(len(char_nodes) > 0)
+        self.link_buttons_separator.set_visible(len(char_nodes) > 0)
 
     def on_button_click(self, button):
         self.popover.popdown()

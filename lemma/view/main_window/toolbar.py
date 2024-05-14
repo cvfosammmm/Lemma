@@ -54,7 +54,17 @@ class ToolBarView(Gtk.ActionBar):
         self.tools_sidebar_toggle.set_icon_name('sidebar-show-right-symbolic')
         self.tools_sidebar_toggle.set_can_focus(False)
         self.tools_sidebar_toggle.get_style_context().add_class('flat')
-        self.pack_end(self.tools_sidebar_toggle)
+        self.pack_start(self.tools_sidebar_toggle)
+
+        self.pack_start(Gtk.Separator())
+
+        self.insert_link_button = Gtk.ToggleButton()
+        self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('insert-link-symbolic'))
+        self.insert_link_button.set_can_focus(False)
+        self.insert_link_button.get_style_context().add_class('flat')
+        self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
+        self.insert_link_button.set_action_name('win.insert-link')
+        self.pack_start(self.insert_link_button)
 
         self.edit_menu_button = PopoverManager.create_popover_button('edit_menu')
         self.edit_menu_button.set_child(Gtk.Image.new_from_icon_name('document-edit-symbolic'))

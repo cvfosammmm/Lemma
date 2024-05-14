@@ -52,6 +52,8 @@ class DocumentView(Observable):
         self.set_document(workspace.get_active_document())
         self.add_change_code('changed')
 
+        self.selected_link_target = None
+
         self.workspace.connect('new_active_document', self.on_new_active_document)
 
     def on_new_active_document(self, workspace, document=None):

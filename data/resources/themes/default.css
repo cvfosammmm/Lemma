@@ -79,7 +79,8 @@
 @define-color theme_bg_color #0001;
 @define-color borders #ccc;
 @define-color text #222f;
-@define-color math #37e;
+@define-color math @text;
+@define-color links #37e;
 @define-color selection_fg #fff;
 @define-color selection_bg #c6defa;
 @define-color selection_bg #c6defa;

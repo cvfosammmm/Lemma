@@ -126,19 +126,31 @@ class DocumentViewPresenter():
                 offset_x += child.width
 
         elif isinstance(box, boxes.BoxGlyph) or isinstance(box, boxes.BoxPlaceholder):
-            pos = node_to_position(box.node)
+            node = box.node
+            pos = node_to_position(node)
 
             if pos >= self.first_cursor_pos and pos < self.last_cursor_pos:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()
-            surface_color = ColorManager.get_ui_color('math') if box.node.parent.is_matharea() else ColorManager.get_ui_color('text')
 
-            if box.node.is_math(): fontname = 'math'
-            elif 'bold' in box.node.tags and 'italic' not in box.node.tags: fontname = 'bold'
-            elif 'bold' in box.node.tags and 'italic' in box.node.tags: fontname = 'bolditalic'
-            elif 'bold' not in box.node.tags and 'italic' in box.node.tags: fontname = 'italic'
-            else: fontname = 'book'
+            if node.is_math():
+                fontname = 'math'
+                surface_color = ColorManager.get_ui_color('math')
+            else:
+                if node.link_target != None:
+                    surface_color = ColorManager.get_ui_color('links')
+                else:
+                    surface_color = ColorManager.get_ui_color('text')
+
+                if 'bold' in node.tags and 'italic' not in node.tags:
+                    fontname = 'bold'
+                elif 'bold' in node.tags and 'italic' in node.tags:
+                    fontname = 'bolditalic'
+                elif 'bold' not in node.tags and 'italic' in node.tags:
+                    fontname = 'italic'
+                else:
+                    fontname = 'book'
 
             surface = FontManager.get_surface(box.char, fontname=fontname)
 

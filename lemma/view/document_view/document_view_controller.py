@@ -27,7 +27,12 @@ class DocumentViewController():
         self.view = self.document_view.view
         self.content = self.view.content
 
+        self.mouse_cursor_default = Gdk.Cursor.new_from_name('default')
+        self.mouse_cursor_text = Gdk.Cursor.new_from_name('text')
+        self.mouse_cursor_pointer = Gdk.Cursor.new_from_name('pointer')
+
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
+        self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
 
         self.key_controller_content = Gtk.EventControllerKey()
         self.key_controller_content.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
@@ -52,6 +57,7 @@ class DocumentViewController():
     def on_primary_button_press(self, content, data):
         x, y, state = data
 
+        self.document_view.selected_link_target = None
         if state == 0:
             x -= self.view.padding_left
             y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
@@ -59,8 +65,31 @@ class DocumentViewController():
             if y < -self.view.subtitle_height:
                 self.document_view.init_renaming()
             elif y > 0:
-                self.document_view.document.add_command('click', x, y)
+                document = self.document_view.document
+
+                link_target = document.get_link_at_xy(x, y)
+                if link_target != None:
+                    self.document_view.selected_link_target = link_target
+                else:
+                    document.add_command('move_cursor_to_xy', x, y)
                 self.content.grab_focus()
+
+    def on_primary_button_release(self, content, data):
+        x, y, state = data
+
+        if state == 0:
+            x -= self.view.padding_left
+            y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+
+            if y >= -self.view.subtitle_height:
+                document = self.document_view.document
+                workspace = self.document_view.workspace
+
+                link_target = document.get_link_at_xy(x, y)
+                if link_target != None and link_target == self.document_view.selected_link_target:
+                    target_document = workspace.get_by_title(link_target)
+                    if target_document != None:
+                        workspace.set_active_document(target_document)
 
     def on_keypress_content(self, controller, keyval, keycode, state):
         if self.document_view.document == None: return False
@@ -122,12 +151,27 @@ class DocumentViewController():
         widget = self.view.scrolling_widget
         x = widget.scrolling_offset_x + (widget.cursor_x if widget.cursor_x != None else 0)
         y = widget.scrolling_offset_y + (widget.cursor_y if widget.cursor_y != None else 0)
+        x -= self.view.padding_left
+        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        link_target = None
 
-        if y < self.view.padding_top + self.view.title_height:
-            self.content.set_cursor(self.view.mouse_cursor_text)
-        elif y > self.view.padding_top + self.view.title_height + self.view.subtitle_height:
-            self.content.set_cursor(self.view.mouse_cursor_text)
+        if y < -self.view.subtitle_height:
+            self.content.set_cursor(self.mouse_cursor_text)
+        elif y > 0:
+            document = self.document_view.document
+            workspace = self.document_view.workspace
+            link_target = document.get_link_at_xy(x, y)
+            if link_target != None:
+                self.content.set_cursor(self.mouse_cursor_pointer)
+            else:
+                self.content.set_cursor(self.mouse_cursor_text)
         else:
-            self.content.set_cursor(self.view.mouse_cursor_default)
+            self.content.set_cursor(self.mouse_cursor_default)
+
+        if link_target != None:
+            self.view.link_overlay.set_text(link_target)
+            self.view.link_overlay.set_visible(True)
+        else:
+            self.view.link_overlay.set_visible(False)
 
 

@@ -121,4 +121,18 @@ class Document(Observable):
 
         return node
 
+    def get_link_at_xy(self, x, y):
+        box = self.layout
+        if y > box.height or y < 0 or x > box.width or x < 0: return
+
+        x_offset, y_offset = (0, 0)
+        while not box.is_leaf():
+            box, x_offset, y_offset = box.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+
+        node = box.get_node()
+
+        return node.link_target
+
 

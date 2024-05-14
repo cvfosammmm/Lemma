@@ -50,7 +50,7 @@ class Application(Adw.Application):
         self.main_window = main_window.MainWindow(self)
         ServiceLocator.set_main_window(self.main_window)
         ColorManager.init(self.main_window)
-        PopoverManager.init(self.main_window)
+        PopoverManager.init(self.main_window, self.workspace)
         self.main_window.add_widgets()
         DialogLocator.init_dialogs(self.main_window)
 
