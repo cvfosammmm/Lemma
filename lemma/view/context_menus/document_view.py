@@ -75,7 +75,7 @@ class ContextMenuDocumentView(ContextMenu):
 
         if document == None: return
 
-        char_nodes = [node for node in document.ast.subtree(*document.ast.get_cursor_state()) if node.link_target != None]
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.link_target != None]
         self.remove_link_button.set_visible(len(char_nodes) > 0)
         self.link_buttons_separator.set_visible(len(char_nodes) > 0)
 

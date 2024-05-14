@@ -151,7 +151,7 @@ class Actions(object):
         self.workspace.active_document.add_command('insert_symbol', name)
 
     def insert_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.workspace)
+        DialogLocator.get_dialog('insert_link').run(self.workspace.active_document)
 
     def remove_link(self, action=None, parameter=''):
         self.workspace.active_document.add_command('remove_link')

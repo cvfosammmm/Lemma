@@ -36,7 +36,7 @@ class Toolbars(object):
         document = self.workspace.active_document
         if self.workspace.mode != 'documents' or document == None: return
 
-        char_nodes = [node for node in document.ast.subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
         self.toolbar.bold_button.set_sensitive(len(char_nodes) > 0)
         self.toolbar.italic_button.set_sensitive(len(char_nodes) > 0)
 

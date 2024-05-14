@@ -28,7 +28,7 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
 
-        char_nodes = [node for node in document.ast.subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
         prev_targets = []
         for node in char_nodes:
             prev_targets.append(node.link_target)

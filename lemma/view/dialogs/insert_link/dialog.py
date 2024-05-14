@@ -15,25 +15,53 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk, Gdk, GObject
 
-import lemma.view.dialogs.insert_link.insert_link_viewgtk as view
+import os
+
+from lemma.view.dialogs.helpers.dialog_viewgtk import DialogView
 from lemma.document.document import Document
 from lemma.app.service_locator import ServiceLocator
+from lemma.document.ast.services import ASTIterator, node_to_position
 
 
 class Dialog(object):
 
     def __init__(self, main_window):
         self.main_window = main_window
-        self.workspace = None
+        self.document = None
+        self.subtree = None
         self.current_values = dict()
 
-    def run(self, workspace):
-        self.workspace = workspace
-
+    def run(self, document):
+        self.document = document
         self.init_current_values()
-        self.view = view.InsertLinkView(self.main_window)
+        self.view = InsertLinkView(self.main_window)
         self.setup()
+
+        node = self.document.ast.get_insert_node()
+        match_func = lambda x: (x != None and x.link_target != None and x.link_target == node.link_target)
+        if self.document.ast.has_selection():
+            nodes = document.ast.get_subtree(*document.ast.get_cursor_state())
+            if len([node for node in nodes if match_func(node) == False]) > 0:
+                self.subtree = None
+                self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
+            else:
+                self.subtree = nodes
+                self.view.entry_link_target.set_text(node.link_target)
+                self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
+        else:
+            nodes = self.document.ast.get_matching_subtree_around_node(node, match_func)
+            if len(nodes) > 0 and nodes[0] != node:
+                self.subtree = nodes
+                self.view.entry_link_target.set_text(node.link_target)
+                self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
+            else:
+                self.subtree = None
+                self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
+
         self.validate()
         self.view.present()
 
@@ -67,7 +95,42 @@ class Dialog(object):
 
     def submit(self):
         if self.is_valid():
-            self.workspace.get_active_document().add_command('add_link', self.current_values['link_target'])
+            if self.subtree != None: 
+                positions = (node_to_position(self.subtree[0]), node_to_position(ASTIterator.next_in_parent(self.subtree[-1])))
+            else:
+                positions = (None, None)
+
+            self.document.add_command('add_link', self.current_values['link_target'], *positions)
             self.view.close()
+
+
+class InsertLinkView(DialogView):
+
+    def __init__(self, main_window):
+        DialogView.__init__(self, main_window)
+
+        self.set_default_size(400, -1)
+        self.get_style_context().add_class('insert-link-dialog')
+        self.headerbar.set_show_title_buttons(False)
+        self.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
+        self.topbox.set_size_request(400, -1)
+
+        self.cancel_button = Gtk.Button.new_with_mnemonic(_('_Cancel'))
+        self.cancel_button.set_can_focus(False)
+        self.headerbar.pack_start(self.cancel_button)
+
+        self.add_button = Gtk.Button.new_with_mnemonic(_('Insert'))
+        self.add_button.set_can_focus(False)
+        self.add_button.get_style_context().add_class('suggested-action')
+        self.headerbar.pack_end(self.add_button)
+
+        self.entry_link_target = Gtk.Entry()
+        self.entry_link_target.set_placeholder_text(_('Link Target'))
+
+        self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.content.set_vexpand(True)
+        self.content.append(self.entry_link_target)
+
+        self.topbox.append(self.content)
 
 
