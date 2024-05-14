@@ -116,7 +116,7 @@ class AST(object):
 
         return parent[pos1[-1]:pos2[-1]]
 
-    def matching_subtree_around_node(self, node, match_function):
+    def get_matching_subtree_around_node(self, node, match_function):
         parent = node.parent
         node1 = node
         node2 = node

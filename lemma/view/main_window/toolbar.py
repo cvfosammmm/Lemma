@@ -59,7 +59,7 @@ class ToolBarView(Gtk.ActionBar):
         self.pack_start(Gtk.Separator())
 
         self.insert_link_button = Gtk.ToggleButton()
-        self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('insert-link-symbolic'))
+        self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
         self.insert_link_button.set_can_focus(False)
         self.insert_link_button.get_style_context().add_class('flat')
         self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
