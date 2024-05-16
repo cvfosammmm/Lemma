@@ -22,6 +22,8 @@ from gi.repository import Gtk, Gdk
 from urllib.parse import urlparse
 import webbrowser
 
+from lemma.document.ast.services import insert_inside_link_no_selection
+
 
 class DocumentViewController():
 
@@ -86,16 +88,10 @@ class DocumentViewController():
 
             if y >= -self.view.subtitle_height:
                 document = self.document_view.document
-                workspace = self.document_view.workspace
 
                 link_target = document.get_link_at_xy(x, y)
                 if link_target != None and link_target == self.document_view.selected_link_target:
-                    if urlparse(link_target).scheme in ['http', 'https']:
-                        webbrowser.open(link_target)
-                    else:
-                        target_document = workspace.get_by_title(link_target)
-                        if target_document != None:
-                            workspace.set_active_document(target_document)
+                    self.open_link(link_target)
 
     def on_keypress_content(self, controller, keyval, keycode, state):
         if self.document_view.document == None: return False
@@ -122,7 +118,11 @@ class DocumentViewController():
             case ('page_up', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_up', self.view.scrolling_widget.height)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_down', self.view.scrolling_widget.height)
 
-            case ('return', _): document.add_command('newline')
+            case ('return', _):
+                if insert_inside_link_no_selection(document):
+                    self.open_link(document.ast.get_insert_node().link_target)
+                else:
+                    document.add_command('newline')
             case ('backspace', _): document.add_command('backspace')
             case ('delete', _): document.add_command('delete')
 
@@ -165,7 +165,6 @@ class DocumentViewController():
             self.content.set_cursor(self.mouse_cursor_text)
         elif y > 0:
             document = self.document_view.document
-            workspace = self.document_view.workspace
             link_target = document.get_link_at_xy(x, y)
             if link_target != None:
                 self.content.set_cursor(self.mouse_cursor_pointer)
@@ -179,5 +178,15 @@ class DocumentViewController():
             self.view.link_overlay.set_visible(True)
         else:
             self.view.link_overlay.set_visible(False)
+
+    def open_link(self, link_target):
+        workspace = self.document_view.workspace
+
+        if urlparse(link_target).scheme in ['http', 'https']:
+            webbrowser.open(link_target)
+        else:
+            target_document = workspace.get_by_title(link_target)
+            if target_document != None:
+                workspace.set_active_document(target_document)
 
 

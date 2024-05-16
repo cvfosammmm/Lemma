@@ -134,3 +134,9 @@ def flatten(list_of_nodes):
     return flatlist
 
 
+def insert_inside_link_no_selection(document):
+    ins = document.ast.get_insert_node()
+    prev = ASTIterator.prev_in_parent(ins)
+    return prev != None and prev.link_target != None and ins.link_target == prev.link_target
+
+
