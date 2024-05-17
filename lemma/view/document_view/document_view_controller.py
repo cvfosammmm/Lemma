@@ -23,6 +23,7 @@ from urllib.parse import urlparse
 import webbrowser
 
 from lemma.document.ast.services import insert_inside_link_no_selection
+from lemma.document.document import Document
 
 
 class DocumentViewController():
@@ -187,5 +188,11 @@ class DocumentViewController():
             target_document = workspace.get_by_title(link_target)
             if target_document != None:
                 workspace.set_active_document(target_document)
+            else:
+                id = workspace.get_new_document_id()
+                document = Document(id)
+                document.title = link_target
+                workspace.add(document)
+                workspace.set_active_document(document)
 
 
