@@ -17,6 +17,7 @@
 
 import os.path, re, mistune
 from lemma.document.ast.node import Node
+from lemma.document.ast.link import Link
 
 
 class Command():
@@ -36,8 +37,8 @@ class Command():
             line, newline, rest = content.partition('\n')
             document.title = line[1:].strip()
 
-        if rest != '':
-            document.ast.root = self.build_ast(rest)
+            if rest != '':
+                document.ast.root = self.build_ast(document, rest)
 
         document.ast.set_cursor_state([[0], [0]])
         document.set_scroll_insert_on_screen_after_layout_update()
@@ -45,7 +46,7 @@ class Command():
     def undo(self, document):
         pass
 
-    def build_ast(self, markdown):
+    def build_ast(self, document, markdown):
         root = Node('root')
         root.insert(0, Node('EOL'))
 
@@ -55,42 +56,46 @@ class Command():
                 root.append(Node('EOL'))
             elif line['type'] == 'paragraph':
                 for section in line['children']:
-                    self.parse_section(root, section)
+                    self.parse_section(document, root, section)
                 root.append(Node('EOL'))
 
         return root
 
-    def parse_section(self, root, section, tags=set(), link_target=None):
+    def parse_section(self, document, root, section, tags=set(), link_target=None):
         if section['type'] == 'codespan':
             matharea = Node('matharea')
             matharea.insert(0, Node('placeholder'))
-            self.add_math(matharea, section['raw'])
+            self.add_math(document, matharea, section['raw'])
             root.append(matharea)
         elif section['type'] == 'link':
             link_target = section['attrs']['url']
-            self.parse_section(root, section['children'][0], tags, link_target)
+            for child in section['children']:
+                self.parse_section(document, root, child, tags, link_target)
         elif section['type'] == 'emphasis':
             tags.add('italic')
-            self.parse_section(root, section['children'][0], tags, link_target)
+            for child in section['children']:
+                self.parse_section(document, root, child, tags, link_target)
             tags.remove('italic')
         elif section['type'] == 'strong':
             tags.add('bold')
-            self.parse_section(root, section['children'][0], tags, link_target)
+            for child in section['children']:
+                self.parse_section(document, root, child, tags, link_target)
             tags.remove('bold')
         elif section['type'] == 'text':
-            self.add_non_math(root, section['raw'].strip('$'), tags, link_target)
+            self.add_non_math(document, root, section['raw'].strip('$'), tags, link_target)
         elif section['type'] == 'softbreak':
             root.append(Node('EOL'))
 
-    def add_non_math(self, composite, text, tags, link_target=None):
+    def add_non_math(self, document, composite, text, tags, link_target=None):
         for char in text:
             if char != '\n':
                 node = Node(char)
                 node.tags = tags.copy()
-                node.link_target = link_target
+                if link_target != None:
+                    node.link = Link(document.title, link_target)
                 composite.append(node)
 
-    def add_math(self, composite, text):
+    def add_math(self, document, composite, text):
         for char in text:
             composite.append(Node(char))
 

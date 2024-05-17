@@ -23,33 +23,35 @@ class MarkdownScanner(object):
 
         self.markdown = ''
         self.current_tags = set()
-        self.current_link_target = None
+        self.current_link = None
 
     def update(self):
         self.markdown = '# ' + self.document.title + '\n'
 
         self.current_tags = set()
-        self.current_link_target = None
+        self.current_link = None
 
         for child in self.document.ast.root:
             self.process_node(child)
-        self.current_tags_to_md()
+        self.close_current_tags()
 
         self.markdown = self.markdown[:-1] # remove last EOL
         self.document.markdown = self.markdown
 
     def process_node(self, node):
-        if node.link_target != self.current_link_target and node.link_target != None:
-            self.open_current_link()
+        if node.link != self.current_link:
+            if node.link != None:
+                self.open_current_link()
 
         if node.tags != self.current_tags:
-            self.current_tags_to_md()
+            self.close_current_tags()
             self.current_tags = node.tags
-            self.current_tags_to_md()
+            self.open_current_tags()
 
-        if node.link_target != self.current_link_target:
-            self.close_current_link()
-            self.current_link_target = node.link_target
+        if node.link != self.current_link:
+            if self.current_link != None:
+                self.close_current_link()
+            self.current_link = node.link
 
         if node.is_matharea():
             self.markdown += '$`'
@@ -66,17 +68,20 @@ class MarkdownScanner(object):
         else:
             self.markdown += node.head
 
-    def current_tags_to_md(self):
-        if 'bold' in self.current_tags and 'italic' in self.current_tags: self.markdown += '***'
-        elif 'bold' in self.current_tags: self.markdown += '**'
-        elif 'italic' in self.current_tags: self.markdown += '*'
+    def open_current_tags(self):
+        if 'bold' in self.current_tags: self.markdown += '**'
+        if 'italic' in self.current_tags: self.markdown += '*'
+
+    def close_current_tags(self):
+        if 'bold' in self.current_tags: self.markdown += '**'
+        if 'italic' in self.current_tags: self.markdown += '*'
 
     def open_current_link(self):
         self.markdown += '['
 
     def close_current_link(self):
-        if self.current_link_target == None: return
+        if self.current_link == None: return
 
-        self.markdown += '](' + self.current_link_target + ')'
+        self.markdown += '](' + self.current_link.target + ')'
 
 

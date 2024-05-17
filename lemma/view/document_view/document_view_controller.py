@@ -70,9 +70,9 @@ class DocumentViewController():
         elif y > 0:
             document = self.document_view.document
 
-            link_target = document.get_link_at_xy(x, y)
-            if state == 0 and link_target != None:
-                self.document_view.selected_link_target = link_target
+            link = document.get_link_at_xy(x, y)
+            if state == 0 and link != None:
+                self.document_view.selected_link_target = link.target
             else:
                 document.add_command('move_cursor_to_xy', x, y)
             self.content.grab_focus()
@@ -87,9 +87,9 @@ class DocumentViewController():
             if y >= -self.view.subtitle_height:
                 document = self.document_view.document
 
-                link_target = document.get_link_at_xy(x, y)
-                if link_target != None and link_target == self.document_view.selected_link_target:
-                    self.open_link(link_target)
+                link = document.get_link_at_xy(x, y)
+                if link != None and link.target == self.document_view.selected_link_target:
+                    self.open_link(link.target)
 
     def on_modifiers_change(self, controller, state):
         self.update_cursor()
@@ -121,7 +121,7 @@ class DocumentViewController():
 
             case ('return', _):
                 if insert_inside_link_no_selection(document):
-                    self.open_link(document.ast.get_insert_node().link_target)
+                    self.open_link(document.ast.get_insert_node().link.target)
                 else:
                     document.add_command('newline')
             case ('backspace', _): document.add_command('backspace')
@@ -158,22 +158,22 @@ class DocumentViewController():
         y = widget.scrolling_offset_y + (widget.cursor_y if widget.cursor_y != None else 0)
         x -= self.view.padding_left
         y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
-        link_target = None
+        link = None
 
         if y < -self.view.subtitle_height:
             self.content.set_cursor_from_name('text')
         elif y > 0:
             document = self.document_view.document
-            link_target = document.get_link_at_xy(x, y)
-            if link_target != None:
+            link = document.get_link_at_xy(x, y)
+            if link != None:
                 self.content.set_cursor_from_name('pointer')
             else:
                 self.content.set_cursor_from_name('text')
         else:
             self.content.set_cursor_from_name('default')
 
-        if link_target != None:
-            self.view.link_overlay.set_text(link_target)
+        if link != None:
+            self.view.link_overlay.set_text(link.target)
             self.view.link_overlay.set_visible(True)
         else:
             self.view.link_overlay.set_visible(False)

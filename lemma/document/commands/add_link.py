@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.node import Node
+from lemma.document.ast.link import Link
 
 
 class Command():
@@ -44,11 +45,11 @@ class Command():
             document.ast.set_cursor_state([cursor_state_2[0], cursor_state_1[1]])
 
         char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
-        prev_targets = []
+        prev_links = []
         for node in char_nodes:
-            prev_targets.append(node.link_target)
-            node.link_target = self.target
-        self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_targets))
+            prev_links.append(node.link)
+            node.link = Link(document.title, self.target)
+        self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_links))
 
         if self.pos1 != None and self.pos2 != None:
             document.ast.set_cursor_state(self.state['cursor_state_before'])
@@ -59,7 +60,7 @@ class Command():
         document.ast.set_cursor_state(self.state['cursor_state_before'])
 
         for item in self.state['nodes_and_prev_target']:
-            item[0].link_target = item[1]
+            item[0].link = item[1]
 
         document.set_scroll_insert_on_screen_after_layout_update()
 

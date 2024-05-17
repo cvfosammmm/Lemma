@@ -139,8 +139,8 @@ class DocumentViewPresenter():
                 fontname = 'math'
                 surface_color = ColorManager.get_ui_color('math')
             else:
-                if node.link_target != None:
-                    if urlparse(node.link_target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link_target) != None:
+                if node.link != None:
+                    if urlparse(node.link.target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link.target) != None:
                         surface_color = ColorManager.get_ui_color('links')
                     else:
                         surface_color = ColorManager.get_ui_color('links_page_not_existing')

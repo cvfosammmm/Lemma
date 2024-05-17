@@ -38,7 +38,7 @@ class Popover(object):
         document = self.workspace.get_active_document()
         if document == None: return
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.link_target != None]
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.link != None]
         self.view.remove_link_button.set_visible(len(char_nodes) > 0)
         self.view.link_buttons_separator.set_visible(len(char_nodes) > 0)
 

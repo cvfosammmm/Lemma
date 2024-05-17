@@ -29,17 +29,17 @@ class Command():
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
 
         char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
-        prev_targets = []
+        prev_links = []
         for node in char_nodes:
-            prev_targets.append(node.link_target)
-            node.link_target = None
-        self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_targets))
+            prev_links.append(node.link)
+            node.link = None
+        self.state['nodes_and_prev_links'] = list(zip(char_nodes, prev_links))
 
     def undo(self, document):
         document.ast.set_cursor_state(self.state['cursor_state_before'])
 
-        for item in self.state['nodes_and_prev_target']:
-            item[0].link_target = item[1]
+        for item in self.state['nodes_and_prev_links']:
+            item[0].link = item[1]
 
         document.set_scroll_insert_on_screen_after_layout_update()
 

@@ -42,7 +42,7 @@ class Dialog(object):
         self.setup()
 
         node = self.document.ast.get_insert_node()
-        match_func = lambda x: (x != None and x.link_target != None and x.link_target == node.link_target)
+        match_func = lambda x: (x != None and x.link != None and x.link == node.link)
         if self.document.ast.has_selection():
             nodes = document.ast.get_subtree(*document.ast.get_cursor_state())
             if len([node for node in nodes if match_func(node) == False]) > 0:
@@ -50,13 +50,13 @@ class Dialog(object):
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
             else:
                 self.subtree = nodes
-                self.view.entry_link_target.set_text(node.link_target)
+                self.view.entry_link_target.set_text(node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
         else:
             nodes = self.document.ast.get_matching_subtree_around_node(node, match_func)
             if len(nodes) > 0 and nodes[0] != node:
                 self.subtree = nodes
-                self.view.entry_link_target.set_text(node.link_target)
+                self.view.entry_link_target.set_text(node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
             else:
                 self.subtree = None

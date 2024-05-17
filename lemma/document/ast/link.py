@@ -16,20 +16,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class Command():
+class Link(object):
 
-    def __init__(self, new_title):
-        self.new_title = new_title
-        self.is_undo_checkpoint = True
-        self.update_implicit_x_position = False
-        self.state = dict()
+    def __init__(self, source=None, target=None):
+        self.source = source
+        self.target = target
 
-    def run(self, document):
-        self.state['prev_title'] = document.title
-        document.title = self.new_title
-        document.set_scroll_insert_on_screen_after_layout_update()
+    def __eq__(self, other):
+        return other != None and self.source == other.source and self.target == other.target
 
-    def undo(self, document):
-        document.title = self.state['prev_title']
-
+    def __ne__(self, other):
+        return not self.__eq__(other)
 

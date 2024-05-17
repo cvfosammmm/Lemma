@@ -24,7 +24,7 @@ class Node():
         self.head = head
         self.box = None
         self.tags = set()
-        self.link_target = None
+        self.link = None
 
     def set_parent(self, parent):
         self.parent = parent

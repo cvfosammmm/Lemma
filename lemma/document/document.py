@@ -49,6 +49,7 @@ class Document(Observable):
         self.layout = None
         self.markdown = None
         self.plaintext = None
+        self.links = []
 
         self.housekeeper = Housekeeper(self)
         self.layouter = Layouter(self)
@@ -81,6 +82,9 @@ class Document(Observable):
         if last_command != None and last_command.update_implicit_x_position:
             x, y = self.get_xy_at_insert()
             self.implicit_x_position = x
+
+    def set_title(self, title):
+        self.title = title
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True
@@ -133,6 +137,6 @@ class Document(Observable):
 
         node = box.get_node()
 
-        return node.link_target
+        return node.link
 
 
