@@ -32,16 +32,13 @@ class DocumentViewController():
         self.view = self.document_view.view
         self.content = self.view.content
 
-        self.mouse_cursor_default = Gdk.Cursor.new_from_name('default')
-        self.mouse_cursor_text = Gdk.Cursor.new_from_name('text')
-        self.mouse_cursor_pointer = Gdk.Cursor.new_from_name('pointer')
-
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
 
         self.key_controller_content = Gtk.EventControllerKey()
         self.key_controller_content.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller_content.connect('key-pressed', self.on_keypress_content)
+        self.key_controller_content.connect('modifiers', self.on_modifiers_change)
         self.content.add_controller(self.key_controller_content)
 
         self.im_context = Gtk.IMContextSimple()
@@ -63,21 +60,21 @@ class DocumentViewController():
         x, y, state = data
 
         self.document_view.selected_link_target = None
-        if state == 0:
-            x -= self.view.padding_left
-            y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
 
-            if y < -self.view.subtitle_height:
-                self.document_view.init_renaming()
-            elif y > 0:
-                document = self.document_view.document
+        x -= self.view.padding_left
+        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
 
-                link_target = document.get_link_at_xy(x, y)
-                if link_target != None:
-                    self.document_view.selected_link_target = link_target
-                else:
-                    document.add_command('move_cursor_to_xy', x, y)
-                self.content.grab_focus()
+        if y < -self.view.subtitle_height:
+            self.document_view.init_renaming()
+        elif y > 0:
+            document = self.document_view.document
+
+            link_target = document.get_link_at_xy(x, y)
+            if state == 0 and link_target != None:
+                self.document_view.selected_link_target = link_target
+            else:
+                document.add_command('move_cursor_to_xy', x, y)
+            self.content.grab_focus()
 
     def on_primary_button_release(self, content, data):
         x, y, state = data
@@ -92,6 +89,9 @@ class DocumentViewController():
                 link_target = document.get_link_at_xy(x, y)
                 if link_target != None and link_target == self.document_view.selected_link_target:
                     self.open_link(link_target)
+
+    def on_modifiers_change(self, controller, state):
+        self.update_cursor()
 
     def on_keypress_content(self, controller, keyval, keycode, state):
         if self.document_view.document == None: return False
@@ -137,12 +137,10 @@ class DocumentViewController():
     def on_focus_in(self, controller):
         self.im_context.focus_in()
         self.update_cursor()
-        self.content.queue_draw()
 
     def on_focus_out(self, controller):
         self.im_context.focus_out()
         self.update_cursor()
-        self.content.queue_draw()
 
     def on_hover_state_changed(self, widget):
         self.update_cursor()
@@ -162,22 +160,23 @@ class DocumentViewController():
         link_target = None
 
         if y < -self.view.subtitle_height:
-            self.content.set_cursor(self.mouse_cursor_text)
+            self.content.set_cursor_from_name('text')
         elif y > 0:
             document = self.document_view.document
             link_target = document.get_link_at_xy(x, y)
             if link_target != None:
-                self.content.set_cursor(self.mouse_cursor_pointer)
+                self.content.set_cursor_from_name('pointer')
             else:
-                self.content.set_cursor(self.mouse_cursor_text)
+                self.content.set_cursor_from_name('text')
         else:
-            self.content.set_cursor(self.mouse_cursor_default)
+            self.content.set_cursor_from_name('default')
 
         if link_target != None:
             self.view.link_overlay.set_text(link_target)
             self.view.link_overlay.set_visible(True)
         else:
             self.view.link_overlay.set_visible(False)
+        self.view.link_overlay.queue_draw()
 
     def open_link(self, link_target):
         workspace = self.document_view.workspace
