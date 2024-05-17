@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, cairo, PangoCairo
 
+from urllib.parse import urlparse
 import datetime
 
 from lemma.app.font_manager import FontManager
@@ -139,7 +140,10 @@ class DocumentViewPresenter():
                 surface_color = ColorManager.get_ui_color('math')
             else:
                 if node.link_target != None:
-                    surface_color = ColorManager.get_ui_color('links')
+                    if urlparse(node.link_target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link_target) != None:
+                        surface_color = ColorManager.get_ui_color('links')
+                    else:
+                        surface_color = ColorManager.get_ui_color('links_page_not_existing')
                 else:
                     surface_color = ColorManager.get_ui_color('text')
 
