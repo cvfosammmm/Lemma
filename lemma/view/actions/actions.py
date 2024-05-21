@@ -17,8 +17,9 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gio, GLib
+from gi.repository import Gio, GLib, Gdk
 
+from lemma.document.ast.services import node_to_char
 from lemma.app.service_locator import ServiceLocator
 from lemma.view.dialogs.dialog_locator import DialogLocator
 from lemma.view.popovers.popover_manager import PopoverManager
@@ -44,6 +45,7 @@ class Actions(object):
 
         self.add_simple_action('undo', self.undo)
         self.add_simple_action('redo', self.redo)
+        self.add_simple_action('copy', self.copy)
         self.add_simple_action('select-all', self.select_all)
 
         self.add_simple_action('insert-link', self.insert_link)
@@ -80,6 +82,7 @@ class Actions(object):
         can_redo = has_active_doc and active_document.can_redo()
         insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_root()
         insert_in_matharea = has_active_doc and active_document.ast.get_insert_node().parent.is_matharea()
+        chars_selected = has_active_doc and len([True for node in active_document.ast.get_subtree(*active_document.ast.get_cursor_state()) if node.is_char()]) > 0
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -90,6 +93,7 @@ class Actions(object):
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
+        self.actions['copy'].set_enabled(self.workspace.mode == 'documents' and chars_selected)
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-link'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
@@ -137,6 +141,12 @@ class Actions(object):
 
     def redo(self, action=None, parameter=''):
         self.workspace.active_document.redo()
+
+    def copy(self, action=None, parameter=''):
+        ast = self.workspace.active_document.ast
+        chars = ''.join([node_to_char(node) for node in ast.get_subtree(*ast.get_cursor_state()) if node.is_char()])
+        clipboard = Gdk.Display.get_default().get_clipboard()
+        clipboard.set(chars)
 
     def select_all(self, action=None, parameter=''):
         self.workspace.active_document.add_command('select_all')

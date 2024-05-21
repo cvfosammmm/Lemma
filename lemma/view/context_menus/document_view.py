@@ -47,6 +47,13 @@ class ContextMenuDocumentView(ContextMenu):
 
         self.box.append(Gtk.Separator())
 
+        self.copy_button = self.create_button('Copy', _('Ctrl') + '+C')
+        self.copy_button.set_action_name('win.copy')
+        self.copy_button.connect('clicked', self.on_button_click)
+        self.box.append(self.copy_button)
+
+        self.box.append(Gtk.Separator())
+
         self.select_all_button = self.create_button('Select All', _('Ctrl') + '+A')
         self.select_all_button.set_action_name('win.select-all')
         self.select_all_button.connect('clicked', self.on_button_click)

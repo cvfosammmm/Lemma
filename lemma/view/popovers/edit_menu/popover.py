@@ -49,6 +49,12 @@ class View(PopoverTop):
 
         self.set_width(306)
 
+        self.copy_button = MenuBuilder.create_button(_('Copy'), shortcut=_('Ctrl') + '+C')
+        self.copy_button.set_action_name('win.copy')
+        self.add_closing_button(self.copy_button)
+
+        self.add_widget(Gtk.Separator())
+
         self.select_all_button = MenuBuilder.create_button(_('Select All'), shortcut=_('Ctrl') + '+A')
         self.select_all_button.set_action_name('win.select-all')
         self.add_closing_button(self.select_all_button)

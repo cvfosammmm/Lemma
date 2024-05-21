@@ -47,6 +47,7 @@ class ShortcutControllerApp(ShortcutController):
         self.create_and_add_shortcut('<Control>l', self.actions.actions['insert-link'].activate)
         self.create_and_add_shortcut('<Control>z', self.actions.actions['undo'].activate)
         self.create_and_add_shortcut('<Control><Shift>z', self.actions.actions['redo'].activate)
+        self.create_and_add_shortcut('<Control>c', self.actions.actions['copy'].activate)
         self.create_and_add_shortcut('<Control>a', self.actions.actions['select-all'].activate)
 
 

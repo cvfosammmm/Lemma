@@ -106,20 +106,27 @@ def sort_positions(pos1, pos2):
 
 
 def position_to_node(pos, root_node):
-        node = root_node
+    node = root_node
 
-        for index in pos:
-            node = node[index]
-        return node
+    for index in pos:
+        node = node[index]
+    return node
 
 
 def node_to_position(node):
-        position = list()
-        while not node.is_root():
-            position.insert(0, node.parent.index(node))
-            node = node.parent
+    position = list()
+    while not node.is_root():
+        position.insert(0, node.parent.index(node))
+        node = node.parent
 
-        return position
+    return position
+
+
+def node_to_char(node):
+    if not node.is_char(): return None
+
+    if node.head == 'EOL': return '\n'
+    else: return node.head
 
 
 def flatten(list_of_nodes):
