@@ -137,10 +137,12 @@ class DocumentViewController():
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()
+        self.view.scrolling_widget.queue_draw()
         self.update_cursor()
 
     def on_focus_out(self, controller):
         self.im_context.focus_out()
+        self.view.scrolling_widget.queue_draw()
         self.update_cursor()
 
     def on_hover_state_changed(self, widget):
