@@ -45,6 +45,7 @@ class DocumentViewPresenter():
 
         self.update_size()
         self.update_scrolling_destination()
+        self.content.queue_draw()
         self.view.scrolling_widget.queue_draw()
 
     def update_size(self):

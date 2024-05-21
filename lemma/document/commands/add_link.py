@@ -36,7 +36,9 @@ class Command():
         if self.pos1 != None and self.pos2 != None:
             document.ast.set_cursor_state([self.pos1, self.pos2])
 
+        reset_selection = False
         if not document.ast.has_selection():
+            reset_selection = True
             cursor_state_1 = document.ast.get_cursor_state()
             for char in self.target:
                 character = Node(char)
@@ -53,6 +55,9 @@ class Command():
 
         if self.pos1 != None and self.pos2 != None:
             document.ast.set_cursor_state(self.state['cursor_state_before'])
+        elif reset_selection:
+            cursor_state = document.ast.get_cursor_state()
+            document.ast.set_cursor_state([cursor_state[0], cursor_state[0]])
 
     def undo(self, document):
         for node in self.state['nodes_added']:
