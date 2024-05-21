@@ -44,6 +44,7 @@ class Storage(object):
             data = pickle.loads(file.read())
 
             self.workspace.active_document = self.workspace.get_by_id(data['active_document_id'])
+            if self.workspace.active_document != None: self.workspace.active_document.connect('changed', self.workspace.on_document_change)
 
             for document_id in data['history']:
                 document = self.workspace.get_by_id(document_id)
