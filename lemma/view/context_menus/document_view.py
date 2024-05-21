@@ -47,10 +47,25 @@ class ContextMenuDocumentView(ContextMenu):
 
         self.box.append(Gtk.Separator())
 
+        self.cut_button = self.create_button('Cut', _('Ctrl') + '+X')
+        self.cut_button.set_action_name('win.cut')
+        self.cut_button.connect('clicked', self.on_button_click)
+        self.box.append(self.cut_button)
+
         self.copy_button = self.create_button('Copy', _('Ctrl') + '+C')
         self.copy_button.set_action_name('win.copy')
         self.copy_button.connect('clicked', self.on_button_click)
         self.box.append(self.copy_button)
+
+        self.paste_button = self.create_button('Paste', _('Ctrl') + '+V')
+        self.paste_button.set_action_name('win.paste')
+        self.paste_button.connect('clicked', self.on_button_click)
+        self.box.append(self.paste_button)
+
+        self.delete_button = self.create_button('Delete')
+        self.delete_button.set_action_name('win.delete')
+        self.delete_button.connect('clicked', self.on_button_click)
+        self.box.append(self.delete_button)
 
         self.box.append(Gtk.Separator())
 

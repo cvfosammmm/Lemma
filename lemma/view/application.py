@@ -18,7 +18,7 @@
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Gdk, Adw
 
 from lemma.app.service_locator import ServiceLocator
 from lemma.app.color_manager import ColorManager
@@ -73,12 +73,16 @@ class Application(Adw.Application):
         self.workspace.connect('mode_set', self.on_mode_set)
         self.workspace.history.connect('changed', self.on_history_change)
         ServiceLocator.get_settings().connect('settings_changed', self.on_settings_changed)
+        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
 
     def on_settings_changed(self, settings, parameter):
         section, item, value = parameter
 
         if item == 'color_scheme':
             self.colors.update()
+
+    def on_clipboard_changed(self, clipboard):
+        self.actions.update()
 
     def on_history_change(self, history):
         self.actions.update()

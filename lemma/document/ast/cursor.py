@@ -64,12 +64,12 @@ class Cursor():
         if self.node_insert.parent == self.node_selection.parent: return
 
         # compute the smallest common ancestor of both the insert and the selection node.
-        ancestors = zip(self.node_insert.ancestors()[:-1], self.node_selection.ancestors()[:-1])
+        ancestors = zip(self.node_insert.ancestors(), self.node_selection.ancestors())
         sca = list(filter(lambda x: x[0] == x[1], ancestors))[-1][0]
 
         # move both insert and selection bound to the sca.
-        node1 = [node for node in self.node_insert.ancestors() if node.parent == sca][0]
-        node2 = [node for node in self.node_selection.ancestors() if node.parent == sca][0]
+        node1 = [node for node in self.node_insert.ancestors() + [self.node_insert] if node.parent == sca][0]
+        node2 = [node for node in self.node_selection.ancestors() + [self.node_selection] if node.parent == sca][0]
         if position_less_than(self.get_position_selection(), self.get_position_insert()):
             insert_node = sca[sca.index(node1) + 1]
             selection_node = sca[sca.index(node2)]

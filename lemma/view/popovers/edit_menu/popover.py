@@ -49,9 +49,18 @@ class View(PopoverTop):
 
         self.set_width(306)
 
+        self.cut_button = MenuBuilder.create_button(_('Cut'), shortcut=_('Ctrl') + '+X')
+        self.cut_button.set_action_name('win.cut')
+        self.add_closing_button(self.cut_button)
         self.copy_button = MenuBuilder.create_button(_('Copy'), shortcut=_('Ctrl') + '+C')
         self.copy_button.set_action_name('win.copy')
         self.add_closing_button(self.copy_button)
+        self.paste_button = MenuBuilder.create_button(_('Paste'), shortcut=_('Ctrl') + '+V')
+        self.paste_button.set_action_name('win.paste')
+        self.add_closing_button(self.paste_button)
+        self.delete_button = MenuBuilder.create_button(_('Delete'))
+        self.delete_button.set_action_name('win.delete')
+        self.add_closing_button(self.delete_button)
 
         self.add_widget(Gtk.Separator())
 

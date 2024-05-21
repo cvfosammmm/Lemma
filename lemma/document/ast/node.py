@@ -54,7 +54,7 @@ class Node():
 
     def ancestors(self):
         node = self
-        ancestors = [node]
+        ancestors = []
         while not node.is_root():
             ancestors.insert(0, node.parent)
             node = node.parent
