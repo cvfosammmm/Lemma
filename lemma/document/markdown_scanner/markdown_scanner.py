@@ -40,8 +40,8 @@ class MarkdownScanner(object):
 
     def process_node(self, node):
         if node.link != self.current_link:
-            if node.link != None:
-                self.open_current_link()
+            if self.current_link != None:
+                self.close_current_link()
 
         if node.tags != self.current_tags:
             self.close_current_tags()
@@ -49,8 +49,8 @@ class MarkdownScanner(object):
             self.open_current_tags()
 
         if node.link != self.current_link:
-            if self.current_link != None:
-                self.close_current_link()
+            if node.link != None:
+                self.open_current_link()
             self.current_link = node.link
 
         if node.is_matharea():
