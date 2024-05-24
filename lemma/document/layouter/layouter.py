@@ -43,6 +43,7 @@ class Layouter(object):
 
     def process_node(self, node):
         if node.is_matharea():
+            self.process_current_word()
             self.in_math_mode = True
             self.current_math_box = boxes.BoxHContainer()
             box = boxes.BoxEmpty(node=node)

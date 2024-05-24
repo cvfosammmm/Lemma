@@ -50,7 +50,7 @@ class Command():
         prev_links = []
         for node in char_nodes:
             prev_links.append(node.link)
-            node.link = Link(document.title, self.target)
+            node.link = Link(self.target)
         self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_links))
 
         if self.pos1 != None and self.pos2 != None:

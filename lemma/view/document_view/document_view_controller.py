@@ -133,7 +133,7 @@ class DocumentViewController():
     def on_im_commit(self, im_context, text):
         if self.document_view.document == None: return False
 
-        self.document_view.document.add_command('im_commit', text)
+        self.document_view.document.add_command('insert_text', text)
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()

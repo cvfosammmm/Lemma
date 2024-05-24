@@ -92,7 +92,7 @@ class Command():
                 node = Node(char)
                 node.tags = tags.copy()
                 if link_target != None:
-                    node.link = Link(document.title, link_target)
+                    node.link = Link(link_target)
                 composite.append(node)
 
     def add_math(self, document, composite, text):

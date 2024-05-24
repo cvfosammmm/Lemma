@@ -17,7 +17,9 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gio, GLib, Gdk
+from gi.repository import Gio, GLib, GObject, Gdk
+
+import pickle
 
 from lemma.document.ast.services import node_to_char
 from lemma.app.service_locator import ServiceLocator
@@ -86,7 +88,6 @@ class Actions(object):
         insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_root()
         insert_in_matharea = has_active_doc and active_document.ast.get_insert_node().parent.is_matharea()
         has_selection = has_active_doc and active_document.ast.has_selection()
-        chars_selected = has_selection and len([True for node in active_document.ast.get_subtree(*active_document.ast.get_cursor_state()) if node.is_char()]) > 0
         clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         text_in_clipboard = 'text/plain' in clipboard_formats
 
@@ -99,8 +100,8 @@ class Actions(object):
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
-        self.actions['cut'].set_enabled(self.workspace.mode == 'documents' and chars_selected)
-        self.actions['copy'].set_enabled(self.workspace.mode == 'documents' and chars_selected)
+        self.actions['cut'].set_enabled(self.workspace.mode == 'documents' and has_selection)
+        self.actions['copy'].set_enabled(self.workspace.mode == 'documents' and has_selection)
         self.actions['paste'].set_enabled(self.workspace.mode == 'documents' and has_active_doc and text_in_clipboard)
         self.actions['delete'].set_enabled(self.workspace.mode == 'documents' and has_selection)
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
@@ -156,18 +157,30 @@ class Actions(object):
         self.delete_selection()
 
     def copy(self, action=None, parameter=''):
-        ast = self.workspace.active_document.ast
-        chars = ''.join([node_to_char(node) for node in ast.get_subtree(*ast.get_cursor_state()) if node.is_char()])
         clipboard = Gdk.Display.get_default().get_clipboard()
-        clipboard.set(chars)
+        ast = self.workspace.active_document.ast
+        subtree_body = ast.get_subtree(*ast.get_cursor_state())
+        subtree_head = ast.get_insert_node().parent.head
+        subtree = [subtree_head, subtree_body]
+        chars = ''.join([node_to_char(node) for node in subtree_body if node.is_char()])
+
+        cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
+        cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(pickle.dumps(subtree)))
+        cp_union = Gdk.ContentProvider.new_union([cp_text, cp_internal])
+
+        clipboard.set_content(cp_union)
 
     def paste(self, action=None, parameter=''):
-        if not self.workspace.active_document.ast.get_insert_node().is_math():
-            Gdk.Display.get_default().get_clipboard().read_text_async(None, self.on_paste_text)
+        Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'lemma/ast'], 0, None, self.on_paste)
 
-    def on_paste_text(self, clipboard, result):
-        text = clipboard.read_text_finish(result)
-        self.workspace.active_document.add_command('im_commit', text)
+    def on_paste(self, clipboard, result):
+        result = clipboard.read_finish(result)
+        if result[1] == 'lemma/ast':
+            subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
+            self.workspace.active_document.add_command('insert_subtree', subtree)
+        elif result[1] == 'text/plain':
+            text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
+            self.workspace.active_document.add_command('insert_text', text)
 
     def delete_selection(self, action=None, parameter=''):
         self.workspace.active_document.add_command('delete')

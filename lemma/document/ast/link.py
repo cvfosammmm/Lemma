@@ -18,12 +18,11 @@
 
 class Link(object):
 
-    def __init__(self, source=None, target=None):
-        self.source = source
+    def __init__(self, target=None):
         self.target = target
 
     def __eq__(self, other):
-        return other != None and self.source == other.source and self.target == other.target
+        return other != None and self.target == other.target
 
     def __ne__(self, other):
         return not self.__eq__(other)

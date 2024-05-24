@@ -115,7 +115,7 @@ class Workspace(Observable):
                 self.links_by_source[document.title].add(link.target)
                 if link.target not in self.links_by_target:
                     self.links_by_target[link.target] = set()
-                self.links_by_target[link.target].add(link.source)
+                self.links_by_target[link.target].add(document.title)
 
     def update_document_title(self, title_before, title_after):
         documents = []
@@ -127,8 +127,6 @@ class Workspace(Observable):
                     link.target = title_after
 
         document = self.get_by_title(title_before)
-        for link in document.links:
-            link.source = title_after
         documents.append(document)
 
         for document in documents:
