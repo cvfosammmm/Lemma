@@ -36,6 +36,17 @@ class ContextMenuDocumentView(ContextMenu):
         self.popover.set_offset(130, 0)
         self.popover.connect('closed', self.on_popover_close)
 
+        self.back_button = self.create_button('Back', _('Alt') + '+Left Arrow')
+        self.back_button.set_action_name('win.go-back')
+        self.back_button.connect('clicked', self.on_button_click)
+        self.box.append(self.back_button)
+        self.forward_button = self.create_button('Forward', _('Alt') + '+Right Arrow')
+        self.forward_button.set_action_name('win.go-forward')
+        self.forward_button.connect('clicked', self.on_button_click)
+        self.box.append(self.forward_button)
+
+        self.box.append(Gtk.Separator())
+
         self.undo_button = self.create_button('Undo', _('Ctrl') + '+Z')
         self.undo_button.set_action_name('win.undo')
         self.undo_button.connect('clicked', self.on_button_click)

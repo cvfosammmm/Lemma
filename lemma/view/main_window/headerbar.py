@@ -83,13 +83,13 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.set_child(self.box)
 
         self.back_button = Gtk.Button.new_from_icon_name('go-previous-symbolic')
-        self.back_button.set_tooltip_text('Go back (Alt+Left Arrow)')
+        self.back_button.set_tooltip_text('Back (Alt+Left Arrow)')
         self.back_button.set_action_name('win.go-back')
         self.back_button.set_can_focus(False)
         self.back_button.get_style_context().add_class('flat')
 
         self.forward_button = Gtk.Button.new_from_icon_name('go-next-symbolic')
-        self.forward_button.set_tooltip_text('Go forward (Alt+Right Arrow)')
+        self.forward_button.set_tooltip_text('Forward (Alt+Right Arrow)')
         self.forward_button.set_action_name('win.go-forward')
         self.forward_button.set_can_focus(False)
         self.forward_button.get_style_context().add_class('flat')
