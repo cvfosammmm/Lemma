@@ -41,6 +41,7 @@ class DocumentHistory(object):
         self.update_size()
         self.view.content.set_draw_func(self.draw)
         self.view.content.queue_draw()
+        self.scroll_active_document_on_screen()
 
     def update(self):
         self.update_size()
