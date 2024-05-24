@@ -42,6 +42,7 @@ class DocumentList(object):
         self.context_menu = ContextMenuDocumentList(self)
 
         self.view.content.set_draw_func(self.draw)
+        self.update()
 
     def update(self):
         self.view.scrolling_widget.set_size(1, max(len(self.workspace.documents) * self.view.line_height, 1))
