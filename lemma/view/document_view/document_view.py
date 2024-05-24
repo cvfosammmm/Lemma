@@ -101,7 +101,7 @@ class DocumentView(Observable):
 
     def submit(self):
         self.workspace.update_document_title(self.document.title, self.title_widget.title)
-        self.document.title = self.title_widget.title
+        self.document.set_title(self.title_widget.title)
         self.stop_renaming()
 
     def on_entry_keypress(self, controller, keyval, keycode, state):

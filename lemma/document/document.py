@@ -85,6 +85,10 @@ class Document(Observable):
 
     def set_title(self, title):
         self.title = title
+        self.markdown_scanner.update()
+
+        self.last_modified = time.time()
+        self.add_change_code('changed')
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True

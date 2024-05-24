@@ -32,10 +32,14 @@ class AST(object):
     ''' cursor movement '''
 
     def move_insert_left(self):
-        self.move_insert_to_node(ASTIterator.prev(self.get_insert_node()))
+        prev_node = ASTIterator.prev(self.get_insert_node())
+        if prev_node != None:
+            self.move_insert_to_node(prev_node)
 
     def move_insert_right(self):
-        self.move_insert_to_node(ASTIterator.next(self.get_insert_node()))
+        next_node = ASTIterator.next(self.get_insert_node())
+        if next_node != None:
+            self.move_insert_to_node(next_node)
 
     def move_insert_to_node(self, node):
         self.cursor.set_nodes_insert_selection(node, node)

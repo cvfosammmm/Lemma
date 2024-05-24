@@ -89,7 +89,8 @@ class Actions(object):
         insert_in_matharea = has_active_doc and active_document.ast.get_insert_node().parent.is_matharea()
         has_selection = has_active_doc and active_document.ast.has_selection()
         clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
-        text_in_clipboard = 'text/plain' in clipboard_formats
+        text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
+        subtree_in_clipboard = 'lemma/ast' in clipboard_formats
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -102,7 +103,7 @@ class Actions(object):
         self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
         self.actions['cut'].set_enabled(self.workspace.mode == 'documents' and has_selection)
         self.actions['copy'].set_enabled(self.workspace.mode == 'documents' and has_selection)
-        self.actions['paste'].set_enabled(self.workspace.mode == 'documents' and has_active_doc and text_in_clipboard)
+        self.actions['paste'].set_enabled(self.workspace.mode == 'documents' and has_active_doc and (text_in_clipboard or subtree_in_clipboard))
         self.actions['delete'].set_enabled(self.workspace.mode == 'documents' and has_selection)
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
@@ -175,7 +176,7 @@ class Actions(object):
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
-        if result[1] == 'lemma/ast':
+        if result[1].startswith('lemma/ast'):
             subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
             self.workspace.active_document.add_command('insert_subtree', subtree)
         elif result[1] == 'text/plain':
