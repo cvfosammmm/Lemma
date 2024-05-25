@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os.path, re, mistune
+import os.path, re, mistune, urllib.parse
 from lemma.document.ast.node import Node
 from lemma.document.ast.link import Link
 
@@ -68,7 +68,7 @@ class Command():
             self.add_math(document, matharea, section['raw'])
             root.append(matharea)
         elif section['type'] == 'link':
-            link_target = section['attrs']['url']
+            link_target = urllib.parse.unquote_plus(section['attrs']['url'])
             for child in section['children']:
                 self.parse_section(document, root, child, tags, link_target)
         elif section['type'] == 'emphasis':

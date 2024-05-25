@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import urllib.parse
+
 
 class MarkdownScanner(object):
 
@@ -82,6 +84,6 @@ class MarkdownScanner(object):
     def close_current_link(self):
         if self.current_link == None: return
 
-        self.markdown += '](' + self.current_link.target + ')'
+        self.markdown += '](<' + urllib.parse.quote_plus(self.current_link.target) + '>)'
 
 
