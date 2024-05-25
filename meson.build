@@ -1,6 +1,6 @@
 project(
   'Lemma',
-  version: '11',
+  version: '12',
   license: 'GPL-3.0-or-later',
 )
 

@@ -40,6 +40,11 @@
     <releases>
         ​<release version="11" date="2024-5-21">
             <description translatable="no">
+                <p>Copy and paste, improved document history, ...</p>
+            </description>
+        </release>
+        ​<release version="11" date="2024-5-21">
+            <description translatable="no">
                 <p>Add links, ...</p>
             </description>
         </release>
