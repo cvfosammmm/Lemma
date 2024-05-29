@@ -80,16 +80,16 @@ class TitleWidget(object):
 
         if self.title != self.document.title and self.title == '':
             self.view.subtext.set_text('Name cannot be empty.')
-            self.view.subtext.get_style_context().add_class('error')
-            self.view.title_entry.get_style_context().add_class('error')
+            self.view.subtext.add_css_class('error')
+            self.view.title_entry.add_css_class('error')
         elif self.title != self.document.title and self.document_view.workspace.get_by_title(self.title):
             self.view.subtext.set_text('A document with this name already exists.')
-            self.view.subtext.get_style_context().add_class('error')
-            self.view.title_entry.get_style_context().add_class('error')
+            self.view.subtext.add_css_class('error')
+            self.view.title_entry.add_css_class('error')
         else:
             self.view.subtext.set_text('Please enter a name for this document.')
-            self.view.subtext.get_style_context().remove_class('error')
-            self.view.title_entry.get_style_context().remove_class('error')
+            self.view.subtext.remove_css_class('error')
+            self.view.title_entry.remove_css_class('error')
 
         if validation_state != self.validation_state:
             self.validation_state = validation_state
@@ -130,6 +130,6 @@ class TitleWidget(object):
         else:
             datetime_last_modified = datetime.datetime.fromtimestamp(self.document.last_modified)
             self.view.subtext.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
-        self.view.subtext.get_style_context().remove_class('error')
+        self.view.subtext.remove_css_class('error')
 
 

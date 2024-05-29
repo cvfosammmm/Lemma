@@ -26,25 +26,25 @@ class WelcomeView(Gtk.CenterBox):
     def __init__(self):
         Gtk.CenterBox.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
-        self.get_style_context().add_class('welcome')
+        self.add_css_class('welcome')
 
         self.icon = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.icon.set_halign(Gtk.Align.CENTER)
-        self.icon.get_style_context().add_class('icon')
+        self.icon.add_css_class('icon')
 
         self.header = Gtk.Label.new('Welcome to Lemma')
-        self.header.get_style_context().add_class('header')
-        self.header.get_style_context().add_class('title-3')
+        self.header.add_css_class('header')
+        self.header.add_css_class('title-3')
 
         self.explainer = Gtk.Label.new('To create a new document, click the button below.')
-        self.explainer.get_style_context().add_class('explainer')
+        self.explainer.add_css_class('explainer')
 
         self.button = Gtk.Button.new_with_label('New Document')
         self.button.set_can_focus(False)
         self.button.set_halign(Gtk.Align.CENTER)
         self.button.set_action_name('win.add-document')
         self.button.set_tooltip_text('Add new document (Ctrl+N)')
-        self.button.get_style_context().add_class('suggested-action')
+        self.button.add_css_class('suggested-action')
         self.button.grab_focus()
 
         self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)

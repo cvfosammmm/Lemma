@@ -28,7 +28,7 @@ class ContextMenu():
         self.popover.set_child(self.box)
         self.popover.set_has_arrow(False)
         self.popover.set_can_focus(False)
-        self.popover.get_style_context().add_class('context-menu')
+        self.popover.add_css_class('context-menu')
 
     def create_button(self, label, shortcut=None):
         button = Gtk.Button()
@@ -39,7 +39,7 @@ class ContextMenu():
 
         if shortcut != None:
             shortcut_label = Gtk.Label.new(shortcut)
-            shortcut_label.get_style_context().add_class('shortcut')
+            shortcut_label.add_css_class('shortcut')
             shortcut_label.set_xalign(Gtk.Align.END)
             shortcut_label.set_hexpand(True)
             button_box.append(shortcut_label)

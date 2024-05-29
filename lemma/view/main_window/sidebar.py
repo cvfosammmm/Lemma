@@ -29,7 +29,7 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         self.set_size_request(262, 280)
 
         self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.box.get_style_context().add_class('tools-sidebar')
+        self.box.add_css_class('tools-sidebar')
 
         self.symbols = list()
         self.symbols.append({'id': 'greek', 'name': 'Greek Letters', 'symbols': ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'vartheta', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'pi', 'varpi', 'rho', 'varrho', 'sigma', 'varsigma', 'tau', 'upsilon', 'phi', 'varphi', 'chi', 'psi', 'omega', 'Gamma', 'Delta', 'Theta', 'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega']})
@@ -44,20 +44,20 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         for section in self.symbols:
             header = Gtk.Label.new(section['name'])
             header.set_xalign(Gtk.Align.FILL)
-            header.get_style_context().add_class('header')
+            header.add_css_class('header')
             self.box.append(header)
 
             flowbox = Gtk.FlowBox()
             flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
             flowbox.set_can_focus(False)
-            flowbox.get_style_context().add_class(section['id'])
+            flowbox.add_css_class(section['id'])
             flowbox.set_max_children_per_line(20)
             for name in section['symbols']:
                 button = Gtk.Button.new_from_icon_name('sidebar-' + name + '-symbolic')
                 button.set_action_name('win.insert-symbol')
                 button.set_can_focus(False)
                 button.set_action_target_value(GLib.Variant('as', [name]))
-                button.get_style_context().add_class('flat')
+                button.add_css_class('flat')
                 flowbox.append(button)
             self.box.append(flowbox)
 

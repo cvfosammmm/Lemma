@@ -27,7 +27,7 @@ class DocumentHistoryView(Gtk.Overlay):
     def __init__(self):
         Gtk.Overlay.__init__(self)
         self.set_hexpand(True)
-        self.get_style_context().add_class('history')
+        self.add_css_class('history')
 
         self.scrolling_widget = ScrollingWidget()
         self.content = self.scrolling_widget.content

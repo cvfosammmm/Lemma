@@ -31,7 +31,7 @@ class ImportDocumentsView(DialogView):
 
         self.set_default_size(400, -1)
         self.set_can_focus(False)
-        self.get_style_context().add_class('import-markdown-files-dialog')
+        self.add_css_class('import-markdown-files-dialog')
         self.headerbar.set_show_title_buttons(False)
         self.headerbar.set_title_widget(Gtk.Label.new(_('Import Markdown Files')))
         self.topbox.set_size_request(400, -1)
@@ -42,12 +42,12 @@ class ImportDocumentsView(DialogView):
 
         self.import_button = Gtk.Button.new_with_mnemonic(_('Import'))
         self.import_button.set_can_focus(False)
-        self.import_button.get_style_context().add_class('suggested-action')
+        self.import_button.add_css_class('suggested-action')
         self.headerbar.pack_end(self.import_button)
 
         self.explainer = Gtk.Label()
         self.explainer.set_markup(_('<b>Warning:</b> This will not work with arbitrary .md-files. It\'s only supposed to work with files previously exported from Lemma.'))
-        self.explainer.get_style_context().add_class('explainer')
+        self.explainer.add_css_class('explainer')
         self.explainer.set_wrap(True)
         self.explainer.set_xalign(0)
 
@@ -67,7 +67,7 @@ class ImportDocumentsView(DialogView):
         self.drop_message_inner_box.append(Gtk.Label.new('Drag and Drop .md-Files here'))
 
         self.drop_message_outer_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        self.drop_message_outer_box.get_style_context().add_class('drop-message')
+        self.drop_message_outer_box.add_css_class('drop-message')
         self.drop_message_outer_box.append(self.drop_message_inner_box)
 
         self.drop_stack = Gtk.Stack()
@@ -82,8 +82,8 @@ class ImportDocumentsView(DialogView):
         button_box.append(Gtk.Image.new_from_icon_name('list-add-symbolic'))
         button_box.append(Gtk.Label.new('Add files...'))
         self.add_file_button = Gtk.Button()
-        self.add_file_button.get_style_context().add_class('filechooser-button')
-        self.add_file_button.get_style_context().add_class('flat')
+        self.add_file_button.add_css_class('filechooser-button')
+        self.add_file_button.add_css_class('flat')
         self.add_file_button.set_child(button_box)
 
         self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -115,7 +115,7 @@ class Row(Gtk.ListBoxRow):
         self.path = path
 
         self.button = Gtk.Button.new_from_icon_name('user-trash-symbolic')
-        self.button.get_style_context().add_class('flat')
+        self.button.add_css_class('flat')
         box = Gtk.CenterBox()
         box.set_orientation(Gtk.Orientation.HORIZONTAL)
         box.set_start_widget(Gtk.Label.new(path))

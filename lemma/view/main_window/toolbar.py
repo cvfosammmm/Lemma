@@ -30,14 +30,14 @@ class ToolBarView(Gtk.ActionBar):
         self.bold_button = Gtk.ToggleButton()
         self.bold_button.set_child(Gtk.Image.new_from_icon_name('format-text-bold-symbolic'))
         self.bold_button.set_can_focus(False)
-        self.bold_button.get_style_context().add_class('flat')
+        self.bold_button.add_css_class('flat')
         self.bold_button.set_tooltip_text(_('Bold') + ' (Ctrl+B)')
         self.pack_start(self.bold_button)
 
         self.italic_button = Gtk.ToggleButton()
         self.italic_button.set_child(Gtk.Image.new_from_icon_name('format-text-italic-symbolic'))
         self.italic_button.set_can_focus(False)
-        self.italic_button.get_style_context().add_class('flat')
+        self.italic_button.add_css_class('flat')
         self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
         self.pack_start(self.italic_button)
 
@@ -53,7 +53,7 @@ class ToolBarView(Gtk.ActionBar):
         self.tools_sidebar_toggle.set_tooltip_text(_('Show Tools Sidebar') + ' (F9)')
         self.tools_sidebar_toggle.set_icon_name('sidebar-show-right-symbolic')
         self.tools_sidebar_toggle.set_can_focus(False)
-        self.tools_sidebar_toggle.get_style_context().add_class('flat')
+        self.tools_sidebar_toggle.add_css_class('flat')
         self.pack_start(self.tools_sidebar_toggle)
 
         self.pack_start(Gtk.Separator())
@@ -61,7 +61,7 @@ class ToolBarView(Gtk.ActionBar):
         self.insert_link_button = Gtk.ToggleButton()
         self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
         self.insert_link_button.set_can_focus(False)
-        self.insert_link_button.get_style_context().add_class('flat')
+        self.insert_link_button.add_css_class('flat')
         self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
         self.insert_link_button.set_action_name('win.insert-link')
         self.pack_start(self.insert_link_button)
@@ -70,7 +70,7 @@ class ToolBarView(Gtk.ActionBar):
         self.edit_menu_button.set_child(Gtk.Image.new_from_icon_name('document-edit-symbolic'))
         self.edit_menu_button.set_can_focus(False)
         self.edit_menu_button.set_tooltip_text(_('Edit Menu'))
-        self.edit_menu_button.get_style_context().add_class('flat')
+        self.edit_menu_button.add_css_class('flat')
         self.edit_menu_button.set_action_name('win.show-edit-menu')
         self.pack_end(self.edit_menu_button)
 

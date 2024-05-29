@@ -24,7 +24,7 @@ class PopoverButton(Gtk.Button):
 
     def __init__(self, name, popover_manager):
         Gtk.Button.__init__(self)
-        self.get_style_context().add_class('popover')
+        self.add_css_class('popover')
 
         self.popover_manager = popover_manager
         self.popover_name = name
@@ -43,8 +43,8 @@ class PopoverButton(Gtk.Button):
     def set_active(self, is_active):
         self.is_active = is_active
         if is_active:
-            self.get_style_context().add_class('active')
+            self.add_css_class('active')
         else:
-            self.get_style_context().remove_class('active')
+            self.remove_css_class('active')
 
 

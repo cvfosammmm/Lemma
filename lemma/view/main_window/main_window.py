@@ -54,7 +54,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.document_list = DocumentListView()
 
         self.content_paned = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
-        self.content_paned.get_style_context().add_class('content')
+        self.content_paned.add_css_class('content')
         self.content_paned.set_wide_handle(True)
         self.headerbar.bind_property('position', self.content_paned, 'position', GObject.BindingFlags.BIDIRECTIONAL)
 
@@ -64,13 +64,13 @@ class MainWindow(Adw.ApplicationWindow):
         self.draft_view = DocumentDraftView()
 
         self.content_stack = Gtk.Stack()
-        self.content_stack.get_style_context().add_class('content')
+        self.content_stack.add_css_class('content')
         self.content_stack.add_named(self.welcome, 'welcome')
         self.content_stack.add_named(self.draft_view, 'draft_view')
         self.content_stack.add_named(self.document_view, 'document_view')
 
         self.document_view_paned = AnimatedHPaned(self.content_stack, self.tools_sidebar, False)
-        self.document_view_paned.get_style_context().add_class('document-view')
+        self.document_view_paned.add_css_class('document-view')
         self.document_view_paned.set_wide_handle(True)
 
         self.content_with_toolbar = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)

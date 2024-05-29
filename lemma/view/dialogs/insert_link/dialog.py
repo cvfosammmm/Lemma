@@ -110,7 +110,7 @@ class InsertLinkView(DialogView):
         DialogView.__init__(self, main_window)
 
         self.set_default_size(400, -1)
-        self.get_style_context().add_class('insert-link-dialog')
+        self.add_css_class('insert-link-dialog')
         self.headerbar.set_show_title_buttons(False)
         self.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
         self.topbox.set_size_request(400, -1)
@@ -121,7 +121,7 @@ class InsertLinkView(DialogView):
 
         self.add_button = Gtk.Button.new_with_mnemonic(_('Insert'))
         self.add_button.set_can_focus(False)
-        self.add_button.get_style_context().add_class('suggested-action')
+        self.add_button.add_css_class('suggested-action')
         self.headerbar.pack_end(self.add_button)
 
         self.entry_link_target = Gtk.Entry()

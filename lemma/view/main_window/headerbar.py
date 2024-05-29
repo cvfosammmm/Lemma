@@ -29,7 +29,7 @@ class HeaderBar(Gtk.Paned):
         Gtk.Paned.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
         self.set_wide_handle(True)
-        self.get_style_context().add_class('header')
+        self.add_css_class('header')
 
         self.hb_left = HeaderBarLeft()
         self.hb_right = HeaderBarRight()
@@ -46,7 +46,7 @@ class HeaderBarLeft(Gtk.HeaderBar):
 
     def __init__(self):
         Gtk.HeaderBar.__init__(self)
-        self.get_style_context().add_class('left')
+        self.add_css_class('left')
 
         button_layout = ServiceLocator.get_settings().button_layout
         show_title_buttons = True if (button_layout.find('close') < button_layout.find(':') and button_layout.find('close') >= 0) else False
@@ -59,7 +59,7 @@ class HeaderBarLeft(Gtk.HeaderBar):
         self.hamburger_menu_button.set_child(Gtk.Image.new_from_icon_name('open-menu-symbolic'))
         self.hamburger_menu_button.set_can_focus(False)
         self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (F10)')
-        self.hamburger_menu_button.get_style_context().add_class('flat')
+        self.hamburger_menu_button.add_css_class('flat')
         self.pack_end(self.hamburger_menu_button)
 
         # add menu
@@ -67,7 +67,7 @@ class HeaderBarLeft(Gtk.HeaderBar):
         self.add_menu_button.set_child(Gtk.Image.new_from_icon_name('list-add-symbolic'))
         self.add_menu_button.set_can_focus(False)
         self.add_menu_button.set_tooltip_text(_('Add Documents'))
-        self.add_menu_button.get_style_context().add_class('flat')
+        self.add_menu_button.add_css_class('flat')
         self.pack_start(self.add_menu_button)
 
         self.set_title_widget(Gtk.Label())
@@ -77,7 +77,7 @@ class HeaderBarRight(Gtk.WindowHandle):
 
     def __init__(self):
         Gtk.WindowHandle.__init__(self)
-        self.get_style_context().add_class('right')
+        self.add_css_class('right')
 
         self.box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.set_child(self.box)
@@ -86,18 +86,18 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.back_button.set_tooltip_text('Back (Alt+Left Arrow)')
         self.back_button.set_action_name('win.go-back')
         self.back_button.set_can_focus(False)
-        self.back_button.get_style_context().add_class('flat')
+        self.back_button.add_css_class('flat')
 
         self.forward_button = Gtk.Button.new_from_icon_name('go-next-symbolic')
         self.forward_button.set_tooltip_text('Forward (Alt+Right Arrow)')
         self.forward_button.set_action_name('win.go-forward')
         self.forward_button.set_can_focus(False)
-        self.forward_button.get_style_context().add_class('flat')
+        self.forward_button.add_css_class('flat')
 
         self.back_forward_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.back_forward_box.append(self.back_button)
         self.back_forward_box.append(self.forward_button)
-        self.back_forward_box.get_style_context().add_class('linked')
+        self.back_forward_box.add_css_class('linked')
         self.box.append(self.back_forward_box)
 
         self.history_overlay = Gtk.Overlay()
@@ -115,7 +115,7 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.document_menu_button.set_child(Gtk.Image.new_from_icon_name('view-more-symbolic'))
         self.document_menu_button.set_can_focus(False)
         self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (F12)')
-        self.document_menu_button.get_style_context().add_class('flat')
+        self.document_menu_button.add_css_class('flat')
         self.document_menu_button.set_action_name('win.show-document-menu')
         self.headerbar.pack_start(self.document_menu_button)
 

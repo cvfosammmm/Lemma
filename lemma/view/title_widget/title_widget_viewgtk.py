@@ -25,7 +25,7 @@ class TitleWidgetView(Gtk.Box):
     def __init__(self):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
-        self.get_style_context().add_class('document-title')
+        self.add_css_class('document-title')
         self.set_valign(Gtk.Align.FILL)
 
         self.outer_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -40,7 +40,7 @@ class TitleWidgetView(Gtk.Box):
 
         self.submit_button = Gtk.Button.new_with_label('Change Name')
         self.submit_button.set_can_focus(False)
-        self.submit_button.get_style_context().add_class('suggested-action')
+        self.submit_button.add_css_class('suggested-action')
 
         self.cancel_button = Gtk.Button.new_with_label('Cancel')
         self.cancel_button.set_can_focus(False)

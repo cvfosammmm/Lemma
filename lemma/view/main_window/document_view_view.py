@@ -65,7 +65,7 @@ class DocumentViewView(Gtk.Overlay):
         self.link_overlay = Gtk.Label.new('http://url')
         self.link_overlay.set_valign(Gtk.Align.END)
         self.link_overlay.set_halign(Gtk.Align.END)
-        self.link_overlay.get_style_context().add_class('link-overlay')
+        self.link_overlay.add_css_class('link-overlay')
         self.add_overlay(self.link_overlay)
 
 

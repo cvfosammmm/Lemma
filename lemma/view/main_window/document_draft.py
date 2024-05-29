@@ -27,7 +27,7 @@ class DocumentDraftView(Gtk.Box):
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
         self.hbox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        self.hbox.get_style_context().add_class('document-title')
+        self.hbox.add_css_class('document-title')
         self.hbox.set_valign(Gtk.Align.FILL)
 
         self.outer_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -42,7 +42,7 @@ class DocumentDraftView(Gtk.Box):
 
         self.submit_button = Gtk.Button.new_with_label('Create Document')
         self.submit_button.set_can_focus(False)
-        self.submit_button.get_style_context().add_class('suggested-action')
+        self.submit_button.add_css_class('suggested-action')
 
         self.cancel_button = Gtk.Button.new_with_label('Cancel')
         self.cancel_button.set_can_focus(False)

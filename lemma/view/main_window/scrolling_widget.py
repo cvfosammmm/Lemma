@@ -42,15 +42,15 @@ class ScrollingWidget(Observable):
 
         self.scrollbar_x = Gtk.Scrollbar.new(Gtk.Orientation.HORIZONTAL)
         self.scrollbar_x.set_valign(Gtk.Align.END)
-        self.scrollbar_x.get_style_context().add_class('bottom')
-        self.scrollbar_x.get_style_context().add_class('overlay-indicator')
+        self.scrollbar_x.add_css_class('bottom')
+        self.scrollbar_x.add_css_class('overlay-indicator')
         self.adjustment_x = self.scrollbar_x.get_adjustment()
         self.view.add_overlay(self.scrollbar_x)
 
         self.scrollbar_y = Gtk.Scrollbar.new(Gtk.Orientation.VERTICAL)
         self.scrollbar_y.set_halign(Gtk.Align.END)
-        self.scrollbar_y.get_style_context().add_class('right')
-        self.scrollbar_y.get_style_context().add_class('overlay-indicator')
+        self.scrollbar_y.add_css_class('right')
+        self.scrollbar_y.add_css_class('overlay-indicator')
         self.adjustment_y = self.scrollbar_y.get_adjustment()
         self.view.add_overlay(self.scrollbar_y)
 
@@ -252,24 +252,24 @@ class ScrollingWidget(Observable):
         self.scrollbar_y.set_visible(self.adjustment_y.get_upper() - self.adjustment_y.get_page_size() >= 1)
 
         if self.cursor_x != None and self.cursor_x > self.width - 24:
-            self.scrollbar_y.get_style_context().add_class('hovering')
+            self.scrollbar_y.add_css_class('hovering')
         else:
-            self.scrollbar_y.get_style_context().remove_class('hovering')
+            self.scrollbar_y.remove_css_class('hovering')
             if self.last_cursor_scrolling_change < time.time() - 1.5:
-                self.scrollbar_x.get_style_context().add_class('hidden')
-                self.scrollbar_y.get_style_context().add_class('hidden')
+                self.scrollbar_x.add_css_class('hidden')
+                self.scrollbar_y.add_css_class('hidden')
             else:
-                self.scrollbar_x.get_style_context().remove_class('hidden')
-                self.scrollbar_y.get_style_context().remove_class('hidden')
+                self.scrollbar_x.remove_css_class('hidden')
+                self.scrollbar_y.remove_css_class('hidden')
 
         if self.cursor_y != None and self.cursor_y > self.height - 24:
-            self.scrollbar_x.get_style_context().add_class('hovering')
+            self.scrollbar_x.add_css_class('hovering')
         else:
-            self.scrollbar_x.get_style_context().remove_class('hovering')
+            self.scrollbar_x.remove_css_class('hovering')
             if self.last_cursor_scrolling_change < time.time() - 1.5:
-                self.scrollbar_x.get_style_context().add_class('hidden')
+                self.scrollbar_x.add_css_class('hidden')
             else:
-                self.scrollbar_x.get_style_context().remove_class('hidden')
+                self.scrollbar_x.remove_css_class('hidden')
 
         GObject.timeout_add(1750, self.update_scrollbars)
         return False

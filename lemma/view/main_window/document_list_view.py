@@ -27,7 +27,7 @@ class DocumentListView(Gtk.Overlay):
 
     def __init__(self):
         Gtk.Overlay.__init__(self)
-        self.get_style_context().add_class('document-list')
+        self.add_css_class('document-list')
         self.set_focusable(True)
         self.set_size_request(262, -1)
 
