@@ -17,10 +17,10 @@
 
 import sys, os.path, gettext
 
-from lemma.app.font_manager import FontManager
-from lemma.app.service_locator import ServiceLocator
+from lemma.infrastructure.font_manager import FontManager
+from lemma.infrastructure.service_locator import ServiceLocator
 import lemma.workspace.workspace as workspace
-import lemma.view.application as application
+import lemma.ui.application as application
 import lemma.storage.storage as storage
 
 # setup gettext
@@ -32,7 +32,6 @@ settings = ServiceLocator.get_settings()
 # init static variables
 ServiceLocator.init_lemma_version('@lemma_version@')
 ServiceLocator.init_resources_path('@resources_path@')
-ServiceLocator.init_app_icons_path('@app_icons_path@')
 
 # setup fonts
 font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')

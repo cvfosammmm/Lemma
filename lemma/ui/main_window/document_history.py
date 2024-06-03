@@ -15,28 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.latex_db.latex_db import LaTeXDB
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk, Pango
+
+from lemma.ui.main_window.scrolling_widget import ScrollingWidget
 
 
-class Housekeeper():
+class DocumentHistoryView(Gtk.Overlay):
 
-    def __init__(self, document):
-        self.document = document
-        self.links = []
+    def __init__(self):
+        Gtk.Overlay.__init__(self)
+        self.set_hexpand(True)
+        self.add_css_class('history')
 
-    def update(self):
-        self.links = []
-
-        for child in self.document.ast.root:
-            self.process_node(child)
-
-        self.document.links = self.links
-
-    def process_node(self, node):
-        if node.link != None:
-            self.links.append(node.link)
-
-        for child in node:
-            self.process_node(child)
+        self.scrolling_widget = ScrollingWidget()
+        self.content = self.scrolling_widget.content
+        self.set_child(self.scrolling_widget.view)
 
 

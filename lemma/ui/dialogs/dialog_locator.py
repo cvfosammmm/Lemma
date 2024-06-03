@@ -15,28 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.latex_db.latex_db import LaTeXDB
+import os.path
 
 
-class Housekeeper():
+class DialogLocator(object):
 
-    def __init__(self, document):
-        self.document = document
-        self.links = []
+    dialogs = dict()
 
-    def update(self):
-        self.links = []
+    def init_dialogs(main_window):
+        for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
+            if 'dialog.py' in files:
+                name = os.path.basename(path)
+                exec('import lemma.ui.dialogs.' + name + '.dialog as ' + name)
+                exec('DialogLocator.dialogs["' + name + '"] = ' + name + '.Dialog(main_window)')
 
-        for child in self.document.ast.root:
-            self.process_node(child)
-
-        self.document.links = self.links
-
-    def process_node(self, node):
-        if node.link != None:
-            self.links.append(node.link)
-
-        for child in node:
-            self.process_node(child)
+    def get_dialog(dialog_type):
+        return DialogLocator.dialogs[dialog_type]
 
 

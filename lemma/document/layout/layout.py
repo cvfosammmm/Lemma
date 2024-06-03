@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.app.font_manager import FontManager
+from lemma.infrastructure.font_manager import FontManager
 
 
 class BoxVContainer(object):

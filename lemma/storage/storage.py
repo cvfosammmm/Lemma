@@ -18,7 +18,7 @@
 import os, os.path, pickle
 
 from lemma.document.document import Document
-from lemma.app.service_locator import ServiceLocator
+from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class Storage(object):

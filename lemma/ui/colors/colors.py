@@ -15,28 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.latex_db.latex_db import LaTeXDB
+import os.path
+
+from lemma.infrastructure.service_locator import ServiceLocator
 
 
-class Housekeeper():
+class Colors(object):
 
-    def __init__(self, document):
-        self.document = document
-        self.links = []
+    def __init__(self, workspace, main_window):
+        self.workspace = workspace
+        self.main_window = main_window
+
+        self.update()
 
     def update(self):
-        self.links = []
-
-        for child in self.document.ast.root:
-            self.process_node(child)
-
-        self.document.links = self.links
-
-    def process_node(self, node):
-        if node.link != None:
-            self.links.append(node.link)
-
-        for child in node:
-            self.process_node(child)
+        path = os.path.join(ServiceLocator.get_resources_path(), 'themes', ServiceLocator.get_settings().get_value('preferences', 'color_scheme') + '.css')
+        self.main_window.css_provider_colors.load_from_path(path)
 
 

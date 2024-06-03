@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.app.font_manager import FontManager
-from lemma.app.latex_db import LaTeXDB
+from lemma.infrastructure.font_manager import FontManager
+from lemma.latex_db.latex_db import LaTeXDB
 import lemma.document.layout.layout as boxes
 import lemma.helpers.helpers as helpers
 
