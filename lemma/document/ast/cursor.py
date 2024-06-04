@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.services import position_to_node, node_to_position, position_less_than
+from lemma.document.ast.services import node_to_position, position_less_than
 
 
 class Cursor():
@@ -36,10 +36,10 @@ class Cursor():
         self.node_selection = node_selection
 
     def set_position_insert(self, position):
-        self.set_node_insert(position_to_node(position, self.ast.root))
+        self.set_node_insert(self.ast.get_node_at_position(position))
 
     def set_position_selection(self, position):
-        self.set_node_selection(position_to_node(position, self.ast.root))
+        self.set_node_selection(self.ast.get_node_at_position(position))
 
     def get_node_insert(self):
         return self.node_insert

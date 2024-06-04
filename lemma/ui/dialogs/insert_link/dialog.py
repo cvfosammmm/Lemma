@@ -24,7 +24,7 @@ import os
 from lemma.ui.dialogs.helpers.dialog_viewgtk import DialogView
 from lemma.document.document import Document
 from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.document.ast.services import ASTIterator, node_to_position, node_inside_link, get_link_bounds_by_node
+from lemma.document.ast.services import node_inside_link, get_link_bounds_by_node
 
 
 class Dialog(object):

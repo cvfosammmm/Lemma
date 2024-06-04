@@ -21,7 +21,7 @@ from gi.repository import Gio, GLib, GObject, Gdk
 
 import pickle
 
-from lemma.document.ast.services import node_to_char, node_inside_link
+from lemma.document.ast.services import node_inside_link
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
@@ -163,7 +163,7 @@ class Actions(object):
         clipboard = Gdk.Display.get_default().get_clipboard()
         ast = self.workspace.active_document.ast
         subtree = ast.get_subtree(*ast.get_cursor_state())
-        chars = ''.join([node_to_char(node) for node in subtree if node.is_char()])
+        chars = ''.join([node.value for node in subtree if node.is_char()])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
         cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(pickle.dumps(subtree)))

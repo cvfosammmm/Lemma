@@ -19,7 +19,8 @@ import time
 
 from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
-from lemma.document.ast.services import ASTIterator, sort_positions, node_to_position, position_to_node, position_less_than
+from lemma.document.ast.services import sort_positions, node_to_position, position_less_than
+from lemma.document.ast.iterator import ASTIterator
 
 
 class AST(object):
@@ -69,6 +70,12 @@ class AST(object):
     def get_insert_node(self):
         return self.cursor.get_node_insert()
 
+    def get_node_at_position(self, pos):
+        node = self.root
+        for index in pos:
+            node = node[index]
+        return node
+
     def get_first_cursor_pos(self):
         if position_less_than(self.cursor.get_position_insert(), self.cursor.get_position_selection()):
             return self.cursor.get_position_insert()
@@ -116,7 +123,7 @@ class AST(object):
 
     def get_subtree(self, pos1, pos2):
         pos1, pos2 = sort_positions(pos1, pos2)
-        parent = position_to_node(pos1[:-1], self.root)
+        parent = self.get_node_at_position(pos1[:-1])
 
         return parent[pos1[-1]:pos2[-1]]
 

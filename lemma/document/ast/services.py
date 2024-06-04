@@ -15,70 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-
-class ASTIterator():
-
-    def prev(node):
-        if node != node.parent[0]:
-            node = node.parent[node.parent.index(node) - 1]
-            while not node.is_leaf():
-                node = node[-1]
-            return node
-
-        elif not node.parent.is_root():
-            return node.parent
-
-        return None
-
-    def next(node):
-        if not node.is_leaf():
-            node = node[0]
-        else:
-            while not node.is_root() and node.parent.index(node) == node.parent.length() - 1:
-                node = node.parent
-            if node.is_root():
-                return None
-            else:
-                node = node.parent[node.parent.index(node) + 1]
-
-        return node
-
-    def prev_no_descent(node):
-        if node != node.parent[0]:
-            index = node.parent.index(node) - 1
-            node = node.parent[index]
-
-        elif not node.parent.is_root():
-            node = node.parent
-
-        return node
-
-    def next_no_descent(node):
-        if node != node.parent[-1]:
-            index = node.parent.index(node) + 1
-            node = node.parent[index]
-
-        else:
-            while not node.is_root() and node.parent.index(node) == node.parent.length() - 1:
-                node = node.parent
-            if node.is_root():
-                return
-            else:
-                node = node.parent[node.parent.index(node) + 1]
-
-        return node
-
-    def prev_in_parent(node):
-        if node != node.parent[0]:
-            index = node.parent.index(node) - 1
-            return node.parent[index]
-        return None
-
-    def next_in_parent(node):
-        if node != node.parent[-1]:
-            index = node.parent.index(node) + 1
-            return node.parent[index]
-        return None
+from lemma.document.ast.iterator import ASTIterator
 
 
 def position_less_than(pos1, pos2):
@@ -106,14 +43,6 @@ def sort_positions(pos1, pos2):
         return (pos1, pos2)
 
 
-def position_to_node(pos, root_node):
-    node = root_node
-
-    for index in pos:
-        node = node[index]
-    return node
-
-
 def node_to_position(node):
     position = list()
     while not node.is_root():
@@ -121,31 +50,6 @@ def node_to_position(node):
         node = node.parent
 
     return position
-
-
-def node_to_char(node):
-    if not node.is_char(): return None
-
-    if node.type == 'EOL': return '\n'
-    else: return node.value
-
-
-def flatten(list_of_nodes):
-    def append(flatlist, node):
-        flatlist.append(node)
-        for child in node:
-            append(flatlist, child)
-
-    flatlist = []
-    for node in list_of_nodes:
-        append(flatlist, node)
-    return flatlist
-
-
-def insert_inside_link_no_selection(document):
-    ins = document.ast.get_insert_node()
-    prev = ASTIterator.prev_in_parent(ins)
-    return prev != None and prev.link != None and ins.link == prev.link
 
 
 def node_inside_link(node):

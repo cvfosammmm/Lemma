@@ -22,7 +22,7 @@ from gi.repository import Gtk, Gdk
 from urllib.parse import urlparse
 import webbrowser
 
-from lemma.document.ast.services import insert_inside_link_no_selection
+from lemma.document.ast.services import node_inside_link
 from lemma.document.document import Document
 
 
@@ -120,7 +120,7 @@ class DocumentViewController():
             case ('page_down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_down', self.view.scrolling_widget.height)
 
             case ('return', _):
-                if insert_inside_link_no_selection(document):
+                if not document.ast.has_selection() and node_inside_link(document.ast.get_insert_node()):
                     self.open_link(document.ast.get_insert_node().link.target)
                 else:
                     document.add_command('newline')
