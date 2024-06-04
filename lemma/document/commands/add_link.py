@@ -21,10 +21,9 @@ from lemma.document.ast.link import Link
 
 class Command():
 
-    def __init__(self, target, pos1=None, pos2=None):
+    def __init__(self, target, positions):
         self.target = target
-        self.pos1 = pos1
-        self.pos2 = pos2
+        self.positions = positions
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = False
         self.state = dict()
@@ -33,15 +32,15 @@ class Command():
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
         self.state['nodes_added'] = []
 
-        if self.pos1 != None and self.pos2 != None:
-            document.ast.set_cursor_state([self.pos1, self.pos2])
+        if self.positions != None:
+            document.ast.set_cursor_state(self.positions)
 
         reset_selection = False
         if not document.ast.has_selection():
             reset_selection = True
             cursor_state_1 = document.ast.get_cursor_state()
             for char in self.target:
-                character = Node(char)
+                character = Node('char', char)
                 self.state['nodes_added'] += document.ast.insert_node(character)
             cursor_state_2 = document.ast.get_cursor_state()
             document.ast.set_cursor_state([cursor_state_2[0], cursor_state_1[1]])
@@ -53,7 +52,7 @@ class Command():
             node.link = Link(self.target)
         self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_links))
 
-        if self.pos1 != None and self.pos2 != None:
+        if self.positions != None:
             document.ast.set_cursor_state(self.state['cursor_state_before'])
         elif reset_selection:
             cursor_state = document.ast.get_cursor_state()

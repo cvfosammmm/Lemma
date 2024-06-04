@@ -18,10 +18,11 @@
 
 class Node():
 
-    def __init__(self, head):
+    def __init__(self, node_type, value=None):
         self.parent = None
         self.children = []
-        self.head = head
+        self.type = node_type
+        self.value = value
         self.box = None
         self.tags = set()
         self.link = None
@@ -49,8 +50,18 @@ class Node():
     def length(self):
         return len(self.children)
 
+    def __len__(self): return len(self.children)
     def __iter__(self): return self.children.__iter__()
-    def __getitem__(self, key): return self.children.__getitem__(key)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            node = Node(self.type, self.value)
+            node.tags = self.tags
+            node.link = self.link
+            node.children = self.children.__getitem__(key)
+            return node
+        else:
+            return self.children.__getitem__(key)
 
     def ancestors(self):
         node = self
@@ -65,8 +76,8 @@ class Node():
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
-    def is_math(self): return ('matharea' in [node.head for node in self.ancestors()])
-    def is_matharea(self): return self.head == 'matharea'
-    def is_char(self): return self.is_leaf() and not self.is_math()
+    def is_mathsymbol(self): return self.type == 'mathsymbol'
+    def is_matharea(self): return self.type == 'matharea'
+    def is_char(self): return self.type == 'char'
 
 

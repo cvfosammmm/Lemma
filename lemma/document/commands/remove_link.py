@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.node import Node
+from lemma.document.ast.services import node_inside_link, get_link_bounds_by_node
 
 
 class Command():
@@ -28,7 +29,14 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        if document.ast.has_selection():
+            bounds = document.ast.get_cursor_state()
+        elif node_inside_link(document.ast.get_insert_node()):
+            bounds = get_link_bounds_by_node(document.ast.get_insert_node())
+        else:
+            bounds = document.ast.get_cursor_state()
+
+        char_nodes = [node for node in document.ast.get_subtree(*bounds) if node.is_char()]
         prev_links = []
         for node in char_nodes:
             prev_links.append(node.link)

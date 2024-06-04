@@ -41,20 +41,20 @@ class PlaintextScanner(object):
             if self.current_line == '' or self.current_line[-1] != ' ':
                 self.current_line += ' '
 
-        elif node.head == 'EOL':
+        elif node.type == 'EOL':
             self.current_line = self.current_line.strip()
             if self.current_line != '':
                 self.text += self.current_line + '\n'
                 self.current_line = ''
 
-        elif node.head == 'placeholder':
+        elif node.type == 'placeholder':
             pass
 
-        else:
-            if LaTeXDB.is_whitespace(node.head):
+        elif node.type == 'char':
+            if LaTeXDB.is_whitespace(node.value):
                 if self.current_line == '' or self.current_line[-1] != ' ':
                     self.current_line += ' '
             else:
-                self.current_line += node.head
+                self.current_line += node.value
 
 

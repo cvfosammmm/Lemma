@@ -21,7 +21,7 @@ from gi.repository import Gio, GLib, GObject, Gdk
 
 import pickle
 
-from lemma.document.ast.services import node_to_char
+from lemma.document.ast.services import node_to_char, node_inside_link
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
@@ -91,6 +91,8 @@ class Actions(object):
         clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
+        links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.ast.get_cursor_state()) if node.link != None]) > 0
+        cursor_inside_link = has_active_doc and node_inside_link(active_document.ast.get_insert_node())
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -108,7 +110,7 @@ class Actions(object):
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-link'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
-        self.actions['remove-link'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['remove-link'].set_enabled(self.workspace.mode == 'documents' and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_matharea)
         self.actions['trigger-bold-button'].set_enabled(True)
         self.actions['trigger-italic-button'].set_enabled(True)
@@ -160,10 +162,8 @@ class Actions(object):
     def copy(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
         ast = self.workspace.active_document.ast
-        subtree_body = ast.get_subtree(*ast.get_cursor_state())
-        subtree_head = ast.get_insert_node().parent.head
-        subtree = [subtree_head, subtree_body]
-        chars = ''.join([node_to_char(node) for node in subtree_body if node.is_char()])
+        subtree = ast.get_subtree(*ast.get_cursor_state())
+        chars = ''.join([node_to_char(node) for node in subtree if node.is_char()])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
         cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(pickle.dumps(subtree)))

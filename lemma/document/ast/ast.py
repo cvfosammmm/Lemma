@@ -26,7 +26,7 @@ class AST(object):
 
     def __init__(self):
         self.root = Node('root')
-        self.root.insert(0, Node('EOL'))
+        self.root.insert(0, Node('EOL', '\n'))
         self.cursor = Cursor(self, self.root[0], self.root[0])
 
     ''' cursor movement '''
@@ -119,17 +119,5 @@ class AST(object):
         parent = position_to_node(pos1[:-1], self.root)
 
         return parent[pos1[-1]:pos2[-1]]
-
-    def get_matching_subtree_around_node(self, node, match_function):
-        parent = node.parent
-        node1 = node
-        node2 = node
-
-        while match_function(node2):
-            node2 = ASTIterator.next_in_parent(node2)
-        while match_function(ASTIterator.prev_in_parent(node1)):
-            node1 = ASTIterator.prev_in_parent(node1)
-
-        return self.get_subtree(node_to_position(node1), node_to_position(node2))
 
 

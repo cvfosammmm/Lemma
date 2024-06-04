@@ -39,7 +39,7 @@ class Command():
             if LaTeXDB.is_mathsymbol(char):
                 self.state['deleted_nodes'] = document.ast.delete_selection()
                 self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-                character = Node(char)
+                character = Node('mathsymbol', char)
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)

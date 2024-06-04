@@ -48,16 +48,16 @@ class Command():
 
     def build_ast(self, document, markdown):
         root = Node('root')
-        root.insert(0, Node('EOL'))
+        root.insert(0, Node('EOL', '\n'))
 
         parser = mistune.create_markdown(renderer=None)
         for line in parser(markdown):
             if line['type'] == 'blank_line':
-                root.append(Node('EOL'))
+                root.append(Node('EOL', '\n'))
             elif line['type'] == 'paragraph':
                 for section in line['children']:
                     self.parse_section(document, root, section)
-                root.append(Node('EOL'))
+                root.append(Node('EOL', '\n'))
 
         return root
 
@@ -84,12 +84,12 @@ class Command():
         elif section['type'] == 'text':
             self.add_non_math(document, root, section['raw'].strip('$'), tags, link_target)
         elif section['type'] == 'softbreak':
-            root.append(Node('EOL'))
+            root.append(Node('EOL', '\n'))
 
     def add_non_math(self, document, composite, text, tags, link_target=None):
         for char in text:
             if char != '\n':
-                node = Node(char)
+                node = Node('char', char)
                 node.tags = tags.copy()
                 if link_target != None:
                     node.link = Link(link_target)
@@ -97,6 +97,6 @@ class Command():
 
     def add_math(self, document, composite, text):
         for char in text:
-            composite.append(Node(char))
+            composite.append(Node('mathsymbol', char))
 
 

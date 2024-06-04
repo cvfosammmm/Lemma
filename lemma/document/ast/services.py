@@ -126,8 +126,8 @@ def node_to_position(node):
 def node_to_char(node):
     if not node.is_char(): return None
 
-    if node.head == 'EOL': return '\n'
-    else: return node.head
+    if node.type == 'EOL': return '\n'
+    else: return node.value
 
 
 def flatten(list_of_nodes):
@@ -146,5 +146,35 @@ def insert_inside_link_no_selection(document):
     ins = document.ast.get_insert_node()
     prev = ASTIterator.prev_in_parent(ins)
     return prev != None and prev.link != None and ins.link == prev.link
+
+
+def node_inside_link(node):
+    if node.link == None: return False
+    if node.is_first_in_parent(): return False
+
+    return node.link == ASTIterator.prev_in_parent(node).link
+
+
+def get_link_bounds_by_node(node):
+    if node.link == None: return (None, None)
+    if node.is_first_in_parent(): return (None, None)
+
+    node1 = node
+    node2 = node
+
+    while node2.link == node.link:
+        next_node = ASTIterator.next_in_parent(node2)
+        if next_node != None:
+            node2 = next_node
+        else:
+            break
+    while node1.link == node.link:
+        prev_node = ASTIterator.prev_in_parent(node1)
+        if prev_node != None:
+            node1 = prev_node
+        else:
+            break
+
+    return (node_to_position(node1), node_to_position(node2))
 
 

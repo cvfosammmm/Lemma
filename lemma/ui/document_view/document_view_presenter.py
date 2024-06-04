@@ -135,7 +135,7 @@ class DocumentViewPresenter():
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()
 
-            if node.is_math():
+            if node.is_mathsymbol():
                 fontname = 'math'
                 surface_color = ColorManager.get_ui_color('math')
             else:

@@ -24,7 +24,7 @@ import os
 from lemma.ui.dialogs.helpers.dialog_viewgtk import DialogView
 from lemma.document.document import Document
 from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.document.ast.services import ASTIterator, node_to_position
+from lemma.document.ast.services import ASTIterator, node_to_position, node_inside_link, get_link_bounds_by_node
 
 
 class Dialog(object):
@@ -32,7 +32,7 @@ class Dialog(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.document = None
-        self.subtree = None
+        self.bounds = None
         self.current_values = dict()
 
     def run(self, document):
@@ -41,25 +41,25 @@ class Dialog(object):
         self.view = InsertLinkView(self.main_window)
         self.setup()
 
-        node = self.document.ast.get_insert_node()
-        match_func = lambda x: (x != None and x.link != None and x.link == node.link)
         if self.document.ast.has_selection():
             nodes = document.ast.get_subtree(*document.ast.get_cursor_state())
+            first_node = nodes[0] if len(nodes) > 0 else None
+            match_func = lambda x: (x != None and x.link != None and x.link == first_node.link)
             if len([node for node in nodes if match_func(node) == False]) > 0:
-                self.subtree = None
+                self.bounds = None
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
             else:
-                self.subtree = nodes
-                self.view.entry_link_target.set_text(node.link.target)
+                self.bounds = document.ast.get_cursor_state()
+                self.view.entry_link_target.set_text(first_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
         else:
-            nodes = self.document.ast.get_matching_subtree_around_node(node, match_func)
-            if len(nodes) > 0 and nodes[0] != node:
-                self.subtree = nodes
-                self.view.entry_link_target.set_text(node.link.target)
+            insert_node = self.document.ast.get_insert_node()
+            if node_inside_link(insert_node):
+                self.bounds = get_link_bounds_by_node(insert_node)
+                self.view.entry_link_target.set_text(insert_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
             else:
-                self.subtree = None
+                self.bounds = None
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
 
         self.validate()
@@ -95,12 +95,7 @@ class Dialog(object):
 
     def submit(self):
         if self.is_valid():
-            if self.subtree != None: 
-                positions = (node_to_position(self.subtree[0]), node_to_position(ASTIterator.next_in_parent(self.subtree[-1])))
-            else:
-                positions = (None, None)
-
-            self.document.add_command('add_link', self.current_values['link_target'], *positions)
+            self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
             self.view.close()
 
 

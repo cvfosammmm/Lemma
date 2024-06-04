@@ -96,21 +96,10 @@ class ContextMenuDocumentView(ContextMenu):
         self.parent.connect('secondary_button_press', self.on_secondary_button_press)
 
     def on_secondary_button_press(self, content, data):
-        self.update_button_visibility()
-
         x_offset, y_offset, state = data
         self.popup_offset_x, self.popup_offset_y = x_offset, y_offset
         self.popup_at_cursor(x_offset - content.scrolling_offset_x, y_offset - content.scrolling_offset_y)
         return True
-
-    def update_button_visibility(self):
-        document = self.document_view.document
-
-        if document == None: return
-
-        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.link != None]
-        self.remove_link_button.set_visible(len(char_nodes) > 0)
-        self.link_buttons_separator.set_visible(len(char_nodes) > 0)
 
     def on_button_click(self, button):
         self.popover.popdown()

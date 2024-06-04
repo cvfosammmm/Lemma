@@ -61,14 +61,17 @@ class MarkdownScanner(object):
                 self.process_node(child)
             self.markdown += '`$'
 
-        elif node.head == 'EOL':
+        elif node.type == 'EOL':
             self.markdown += '\n'
 
-        elif node.head == 'placeholder':
+        elif node.type == 'placeholder':
             pass
 
-        else:
-            self.markdown += node.head
+        elif node.type == 'mathsymbol':
+            self.markdown += node.value
+
+        elif node.type == 'char':
+            self.markdown += node.value
 
     def open_current_tags(self):
         if 'bold' in self.current_tags: self.markdown += '**'

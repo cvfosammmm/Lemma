@@ -38,7 +38,7 @@ class Command():
             self.state['deleted_nodes'] = document.ast.delete_selection()
             self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
             for char in self.text:
-                character = Node(char)
+                character = Node('char', char)
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
         elif node.parent.is_matharea():
@@ -56,7 +56,7 @@ class Command():
                     elif char == '\'': char = '′'
 
                     if LaTeXDB.is_mathsymbol(char):
-                        character = Node(char)
+                        character = Node('mathsymbol', char)
                         self.state['nodes_added'] += document.ast.insert_node(character)
                 if len(self.state['nodes_added']) == 0:
                     for node in self.state['deleted_nodes']:
