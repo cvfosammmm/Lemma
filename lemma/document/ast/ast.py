@@ -25,7 +25,7 @@ from lemma.document.ast.iterator import ASTIterator
 class AST(object):
 
     def __init__(self):
-        self.root = Node('root')
+        self.root = Node('list')
         self.root.insert(0, Node('EOL', '\n'))
         self.cursor = Cursor(self, self.root[0], self.root[0])
 

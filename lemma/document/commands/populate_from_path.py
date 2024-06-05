@@ -47,7 +47,7 @@ class Command():
         pass
 
     def build_ast(self, document, markdown):
-        root = Node('root')
+        root = Node('list')
         root.insert(0, Node('EOL', '\n'))
 
         parser = mistune.create_markdown(renderer=None)
