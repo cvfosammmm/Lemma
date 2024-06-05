@@ -19,7 +19,6 @@ import time
 
 from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
-from lemma.document.ast.services import sort_positions, node_to_position, position_less_than
 from lemma.document.ast.iterator import ASTIterator
 
 
@@ -77,13 +76,13 @@ class AST(object):
         return node
 
     def get_first_cursor_pos(self):
-        if position_less_than(self.cursor.get_position_insert(), self.cursor.get_position_selection()):
+        if self.cursor.get_position_insert() < self.cursor.get_position_selection():
             return self.cursor.get_position_insert()
         else:
             return self.cursor.get_position_selection()
 
     def get_last_cursor_pos(self):
-        if position_less_than(self.cursor.get_position_insert(), self.cursor.get_position_selection()):
+        if self.cursor.get_position_insert() < self.cursor.get_position_selection():
             return self.cursor.get_position_selection()
         else:
             return self.cursor.get_position_insert()
@@ -100,7 +99,7 @@ class AST(object):
         return [node]
 
     def delete_selection(self):
-        if position_less_than(self.cursor.get_position_insert(), self.cursor.get_position_selection()):
+        if self.cursor.get_position_insert() < self.cursor.get_position_selection():
             first_node = self.cursor.get_node_insert()
             last_node = self.cursor.get_node_selection()
         else:
@@ -122,7 +121,7 @@ class AST(object):
         node.parent.remove(node.parent[node.parent.index(node)])
 
     def get_subtree(self, pos1, pos2):
-        pos1, pos2 = sort_positions(pos1, pos2)
+        pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
         parent = self.get_node_at_position(pos1[:-1])
 
         return parent[pos1[-1]:pos2[-1]]

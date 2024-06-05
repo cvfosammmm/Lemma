@@ -25,7 +25,6 @@ import datetime
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
 import lemma.document.layout.layout as boxes
-from lemma.document.ast.services import node_to_position
 
 
 class DocumentViewPresenter():
@@ -128,7 +127,7 @@ class DocumentViewPresenter():
 
         elif isinstance(box, boxes.BoxGlyph) or isinstance(box, boxes.BoxPlaceholder):
             node = box.node
-            pos = node_to_position(node)
+            pos = node.get_position()
 
             if pos >= self.first_cursor_pos and pos < self.last_cursor_pos:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))

@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.services import node_to_position, position_less_than
-
 
 class Cursor():
 
@@ -48,10 +46,10 @@ class Cursor():
         return self.node_selection
 
     def get_position_insert(self):
-        return node_to_position(self.node_insert)
+        return self.node_insert.get_position()
 
     def get_position_selection(self):
-        return node_to_position(self.node_selection)
+        return self.node_selection.get_position()
 
     def has_selection(self):
         return self.get_node_insert() != self.get_node_selection()
@@ -67,18 +65,22 @@ class Cursor():
         ancestors = zip(self.node_insert.ancestors(), self.node_selection.ancestors())
         sca = list(filter(lambda x: x[0] == x[1], ancestors))[-1][0]
 
-        # move both insert and selection bound to the sca.
-        node1 = [node for node in self.node_insert.ancestors() + [self.node_insert] if node.parent == sca][0]
-        node2 = [node for node in self.node_selection.ancestors() + [self.node_selection] if node.parent == sca][0]
-        if position_less_than(self.get_position_selection(), self.get_position_insert()):
-            insert_node = sca[sca.index(node1) + 1]
-            selection_node = sca[sca.index(node2)]
+        # compute the new positions
+        sca_pos = sca.get_position()
+        pos1, pos2 = self.get_position_selection(), self.get_position_insert()
+        pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
+        if len(pos1) > len(sca_pos) + 1:
+            pos1 = pos1[:len(sca_pos) + 1]
+        if len(pos2) > len(sca_pos) + 1:
+            pos2 = pos2[:len(sca_pos) + 1]
+            pos2[-1] += 1
+
+        # move both insert and selection bound to the sca
+        if self.get_position_insert() < self.get_position_selection():
+            self.set_position_insert(pos1)
+            self.set_position_selection(pos2)
         else:
-            insert_node = sca[sca.index(node1)]
-            selection_node = sca[sca.index(node2) + 1]
-        if self.node_selection.parent != sca:
-            self.set_node_selection(selection_node)
-        if self.node_insert.parent != sca:
-            self.set_node_insert(insert_node)
+            self.set_position_insert(pos2)
+            self.set_position_selection(pos1)
 
 

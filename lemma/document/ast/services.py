@@ -18,40 +18,6 @@
 from lemma.document.ast.iterator import ASTIterator
 
 
-def position_less_than(pos1, pos2):
-    if len(pos1) < len(pos2):
-        for i in range(len(pos1)):
-            if pos1[i] < pos2[i]: return True
-            if pos1[i] > pos2[i]: return False
-        return True
-    if len(pos1) > len(pos2):
-        for i in range(len(pos2)):
-            if pos1[i] < pos2[i]: return True
-            if pos1[i] > pos2[i]: return False
-        return False
-    else:
-        for i in range(len(pos1)):
-            if pos1[i] < pos2[i]: return True
-            if pos1[i] > pos2[i]: return False
-        return False
-
-
-def sort_positions(pos1, pos2):
-    if position_less_than(pos2, pos1):
-        return (pos2, pos1)
-    else:
-        return (pos1, pos2)
-
-
-def node_to_position(node):
-    position = list()
-    while not node.is_root():
-        position.insert(0, node.parent.index(node))
-        node = node.parent
-
-    return position
-
-
 def node_inside_link(node):
     if node.link == None: return False
     if node.is_first_in_parent(): return False
@@ -79,6 +45,6 @@ def get_link_bounds_by_node(node):
         else:
             break
 
-    return (node_to_position(node1), node_to_position(node2))
+    return (node1.get_position(), node2.get_position())
 
 

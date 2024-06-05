@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.document.ast.position import Position
+
 
 class Node():
 
@@ -49,6 +51,15 @@ class Node():
 
     def length(self):
         return len(self.children)
+
+    def get_position(self):
+        node = self
+        position = list()
+        while not node.is_root():
+            position.insert(0, node.parent.index(node))
+            node = node.parent
+
+        return Position(*position)
 
     def __len__(self): return len(self.children)
     def __iter__(self): return self.children.__iter__()
