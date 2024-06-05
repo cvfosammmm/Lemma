@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.position import Position
+from lemma.document.ast.iterator import ASTIterator
 
 
 class Node():
@@ -90,5 +91,32 @@ class Node():
     def is_mathsymbol(self): return self.type == 'mathsymbol'
     def is_matharea(self): return self.type == 'matharea'
     def is_char(self): return self.type == 'char'
+
+    def is_inside_link(self):
+        if self.link == None: return False
+        if self.is_first_in_parent(): return False
+        return self.link == ASTIterator.prev_in_parent(self).link
+
+    def get_bounds_for_link(self):
+        if self.link == None: return (None, None)
+        if self.is_first_in_parent(): return (None, None)
+
+        node1 = self
+        node2 = self
+
+        while node2.link == self.link:
+            next_node = ASTIterator.next_in_parent(node2)
+            if next_node != None:
+                node2 = next_node
+            else:
+                break
+        while node1.link == self.link:
+            prev_node = ASTIterator.prev_in_parent(node1)
+            if prev_node != None:
+                node1 = prev_node
+            else:
+                break
+
+        return (node1.get_position(), node2.get_position())
 
 

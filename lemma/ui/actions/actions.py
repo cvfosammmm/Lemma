@@ -21,7 +21,6 @@ from gi.repository import Gio, GLib, GObject, Gdk
 
 import pickle
 
-from lemma.document.ast.services import node_inside_link
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
@@ -92,7 +91,7 @@ class Actions(object):
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
         links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.ast.get_cursor_state()) if node.link != None]) > 0
-        cursor_inside_link = has_active_doc and node_inside_link(active_document.ast.get_insert_node())
+        cursor_inside_link = has_active_doc and active_document.ast.get_insert_node().is_inside_link()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
