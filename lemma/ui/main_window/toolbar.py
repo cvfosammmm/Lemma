@@ -32,30 +32,34 @@ class ToolBarView(Gtk.ActionBar):
         self.bold_button.set_can_focus(False)
         self.bold_button.add_css_class('flat')
         self.bold_button.set_tooltip_text(_('Bold') + ' (Ctrl+B)')
-        self.pack_start(self.bold_button)
 
         self.italic_button = Gtk.ToggleButton()
         self.italic_button.set_child(Gtk.Image.new_from_icon_name('format-text-italic-symbolic'))
         self.italic_button.set_can_focus(False)
         self.italic_button.add_css_class('flat')
         self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
-        self.pack_start(self.italic_button)
 
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.bold_button)
+        box.append(self.italic_button)
+        self.pack_start(box)
         self.pack_start(Gtk.Separator())
 
         self.add_math_button = Gtk.Button.new_from_icon_name('insert-math-symbolic')
         self.add_math_button.set_action_name('win.insert-matharea')
         self.add_math_button.set_can_focus(False)
         self.add_math_button.set_tooltip_text(_('Insert Math') + ' (Ctrl+M)')
-        self.pack_start(self.add_math_button)
 
         self.tools_sidebar_toggle = Gtk.ToggleButton()
         self.tools_sidebar_toggle.set_tooltip_text(_('Show Tools Sidebar') + ' (F9)')
         self.tools_sidebar_toggle.set_icon_name('sidebar-show-right-symbolic')
         self.tools_sidebar_toggle.set_can_focus(False)
         self.tools_sidebar_toggle.add_css_class('flat')
-        self.pack_start(self.tools_sidebar_toggle)
 
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.add_math_button)
+        box.append(self.tools_sidebar_toggle)
+        self.pack_start(box)
         self.pack_start(Gtk.Separator())
 
         self.insert_link_button = Gtk.ToggleButton()
@@ -64,7 +68,10 @@ class ToolBarView(Gtk.ActionBar):
         self.insert_link_button.add_css_class('flat')
         self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
         self.insert_link_button.set_action_name('win.insert-link')
-        self.pack_start(self.insert_link_button)
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.insert_link_button)
+        self.pack_start(box)
 
         self.edit_menu_button = PopoverManager.create_popover_button('edit_menu')
         self.edit_menu_button.set_child(Gtk.Image.new_from_icon_name('document-edit-symbolic'))
@@ -72,18 +79,21 @@ class ToolBarView(Gtk.ActionBar):
         self.edit_menu_button.set_tooltip_text(_('Edit Menu'))
         self.edit_menu_button.add_css_class('flat')
         self.edit_menu_button.set_action_name('win.show-edit-menu')
-        self.pack_end(self.edit_menu_button)
 
         self.redo_button = Gtk.Button.new_from_icon_name('edit-redo-symbolic')
         self.redo_button.set_action_name('win.redo')
         self.redo_button.set_can_focus(False)
         self.redo_button.set_tooltip_text(_('Redo') + ' (Shift+Ctrl+Z)')
-        self.pack_end(self.redo_button)
 
         self.undo_button = Gtk.Button.new_from_icon_name('edit-undo-symbolic')
         self.undo_button.set_action_name('win.undo')
         self.undo_button.set_can_focus(False)
         self.undo_button.set_tooltip_text(_('Undo') + ' (Ctrl+Z)')
-        self.pack_end(self.undo_button)
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.edit_menu_button)
+        box.append(self.redo_button)
+        box.append(self.undo_button)
+        self.pack_end(box)
 
 
