@@ -42,10 +42,10 @@ class AST(object):
             self.move_insert_to_node(next_node)
 
     def move_insert_to_node(self, node):
-        self.cursor.set_nodes_insert_selection(node, node)
+        self.cursor.set_insert_selection_nodes(node, node)
 
     def move_selection_bound_to_node(self, node):
-        self.cursor.set_node_selection(node)
+        self.cursor.set_selection_node(node)
 
     def move_insert_left_with_selection(self):
         self.move_insert_to_node_with_selection(ASTIterator.prev_no_descent(self.get_insert_node()))
@@ -54,20 +54,20 @@ class AST(object):
         self.move_insert_to_node_with_selection(ASTIterator.next_no_descent(self.get_insert_node()))
 
     def move_insert_to_node_with_selection(self, node):
-        self.cursor.set_node_insert(node)
+        self.cursor.set_insert_node(node)
         self.cursor.restore_selection_invariant()
 
     def set_cursor_state(self, position):
-        self.cursor.set_position_insert(position[0])
-        self.cursor.set_position_selection(position[1])
+        self.cursor.set_insert_position(position[0])
+        self.cursor.set_selection_position(position[1])
 
     ''' cursor state '''
 
     def get_cursor_state(self):
-        return [self.cursor.get_position_insert(), self.cursor.get_position_selection()]
+        return [self.cursor.get_insert_position(), self.cursor.get_selection_position()]
 
     def get_insert_node(self):
-        return self.cursor.get_node_insert()
+        return self.cursor.get_insert_node()
 
     def get_node_at_position(self, pos):
         node = self.root
@@ -76,16 +76,16 @@ class AST(object):
         return node
 
     def get_first_cursor_pos(self):
-        if self.cursor.get_position_insert() < self.cursor.get_position_selection():
-            return self.cursor.get_position_insert()
+        if self.cursor.get_insert_position() < self.cursor.get_selection_position():
+            return self.cursor.get_insert_position()
         else:
-            return self.cursor.get_position_selection()
+            return self.cursor.get_selection_position()
 
     def get_last_cursor_pos(self):
-        if self.cursor.get_position_insert() < self.cursor.get_position_selection():
-            return self.cursor.get_position_selection()
+        if self.cursor.get_insert_position() < self.cursor.get_selection_position():
+            return self.cursor.get_selection_position()
         else:
-            return self.cursor.get_position_insert()
+            return self.cursor.get_insert_position()
 
     def has_selection(self):
         return self.cursor.has_selection()
@@ -99,12 +99,12 @@ class AST(object):
         return [node]
 
     def delete_selection(self):
-        if self.cursor.get_position_insert() < self.cursor.get_position_selection():
-            first_node = self.cursor.get_node_insert()
-            last_node = self.cursor.get_node_selection()
+        if self.cursor.get_insert_position() < self.cursor.get_selection_position():
+            first_node = self.cursor.get_insert_node()
+            last_node = self.cursor.get_selection_node()
         else:
-            first_node = self.cursor.get_node_selection()
-            last_node = self.cursor.get_node_insert()
+            first_node = self.cursor.get_selection_node()
+            last_node = self.cursor.get_insert_node()
 
         deleted_nodes = []
         while first_node != last_node:

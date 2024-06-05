@@ -23,36 +23,36 @@ class Cursor():
         self.node_insert = node_insert
         self.node_selection = node_selection
 
-    def set_node_insert(self, node):
+    def set_insert_node(self, node):
         self.node_insert = node
 
-    def set_node_selection(self, node):
+    def set_selection_node(self, node):
         self.node_selection = node
 
-    def set_nodes_insert_selection(self, node_insert, node_selection):
+    def set_insert_selection_nodes(self, node_insert, node_selection):
         self.node_insert = node_insert
         self.node_selection = node_selection
 
-    def set_position_insert(self, position):
-        self.set_node_insert(self.ast.get_node_at_position(position))
+    def set_insert_position(self, position):
+        self.set_insert_node(self.ast.get_node_at_position(position))
 
-    def set_position_selection(self, position):
-        self.set_node_selection(self.ast.get_node_at_position(position))
+    def set_selection_position(self, position):
+        self.set_selection_node(self.ast.get_node_at_position(position))
 
-    def get_node_insert(self):
+    def get_insert_node(self):
         return self.node_insert
 
-    def get_node_selection(self):
+    def get_selection_node(self):
         return self.node_selection
 
-    def get_position_insert(self):
+    def get_insert_position(self):
         return self.node_insert.get_position()
 
-    def get_position_selection(self):
+    def get_selection_position(self):
         return self.node_selection.get_position()
 
     def has_selection(self):
-        return self.get_node_insert() != self.get_node_selection()
+        return self.get_insert_node() != self.get_selection_node()
 
     # restore the invariant that both the insert and the selection bound have the same parent.
     def restore_selection_invariant(self):
@@ -67,7 +67,7 @@ class Cursor():
 
         # compute the new positions
         sca_pos = sca.get_position()
-        pos1, pos2 = self.get_position_selection(), self.get_position_insert()
+        pos1, pos2 = self.get_selection_position(), self.get_insert_position()
         pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
         if len(pos1) > len(sca_pos) + 1:
             pos1 = pos1[:len(sca_pos) + 1]
@@ -76,11 +76,11 @@ class Cursor():
             pos2[-1] += 1
 
         # move both insert and selection bound to the sca
-        if self.get_position_insert() < self.get_position_selection():
-            self.set_position_insert(pos1)
-            self.set_position_selection(pos2)
+        if self.get_insert_position() < self.get_selection_position():
+            self.set_insert_position(pos1)
+            self.set_selection_position(pos2)
         else:
-            self.set_position_insert(pos2)
-            self.set_position_selection(pos1)
+            self.set_insert_position(pos2)
+            self.set_selection_position(pos1)
 
 

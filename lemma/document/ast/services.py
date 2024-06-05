@@ -25,7 +25,7 @@ def node_inside_link(node):
     return node.link == ASTIterator.prev_in_parent(node).link
 
 
-def get_link_bounds_by_node(node):
+def get_bounds_for_link_at_node(node):
     if node.link == None: return (None, None)
     if node.is_first_in_parent(): return (None, None)
 

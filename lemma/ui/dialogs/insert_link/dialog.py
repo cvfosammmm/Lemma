@@ -24,7 +24,7 @@ import os
 from lemma.ui.dialogs.helpers.dialog_viewgtk import DialogView
 from lemma.document.document import Document
 from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.document.ast.services import node_inside_link, get_link_bounds_by_node
+from lemma.document.ast.services import node_inside_link, get_bounds_for_link_at_node
 
 
 class Dialog(object):
@@ -55,7 +55,7 @@ class Dialog(object):
         else:
             insert_node = self.document.ast.get_insert_node()
             if node_inside_link(insert_node):
-                self.bounds = get_link_bounds_by_node(insert_node)
+                self.bounds = get_bounds_for_link_at_node(insert_node)
                 self.view.entry_link_target.set_text(insert_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
             else:
