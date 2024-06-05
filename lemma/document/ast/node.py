@@ -50,9 +50,6 @@ class Node():
     def index(self, node):
         return self.children.index(node)
 
-    def length(self):
-        return len(self.children)
-
     def get_position(self):
         node = self
         position = list()

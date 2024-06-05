@@ -30,7 +30,7 @@ class Command():
         node = document.ast.get_insert_node()
         if document.ast.has_selection():
             self.state['deleted_nodes'] = document.ast.delete_selection()
-        elif not node.is_first_in_parent() or node.parent.length() == 1:
+        elif not node.is_first_in_parent() or len(node.parent) == 1:
             document.ast.move_insert_left_with_selection()
             self.state['deleted_nodes'] = document.ast.delete_selection()
 

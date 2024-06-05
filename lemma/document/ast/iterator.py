@@ -34,7 +34,7 @@ class ASTIterator():
         if not node.is_leaf():
             node = node[0]
         else:
-            while not node.is_root() and node.parent.index(node) == node.parent.length() - 1:
+            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
                 node = node.parent
             if node.is_root():
                 return None
@@ -59,7 +59,7 @@ class ASTIterator():
             node = node.parent[index]
 
         else:
-            while not node.is_root() and node.parent.index(node) == node.parent.length() - 1:
+            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
                 node = node.parent
             if node.is_root():
                 return

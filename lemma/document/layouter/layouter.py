@@ -63,7 +63,7 @@ class Layouter(object):
         elif node.type == 'placeholder':
             self.process_current_word()
             self.process_current_number()
-            if node.parent.length() == 1:
+            if len(node.parent) == 1:
                 width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
                 box = boxes.BoxPlaceholder(width, height, left, top, node=node)
             else:
