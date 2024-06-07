@@ -54,6 +54,7 @@ class DocumentView(Observable):
         self.add_change_code('changed')
 
         self.selected_link_target = None
+        self.link_target_at_cursor = None
         self.tags_at_cursor = set()
 
         self.workspace.connect('new_active_document', self.on_new_active_document)
@@ -68,6 +69,7 @@ class DocumentView(Observable):
 
         self.document = document
         self.update_tags_at_cursor()
+        self.update_link_at_cursor()
         self.view.content.queue_draw()
         self.stop_renaming()
         self.title_widget.set_document(document)
@@ -78,6 +80,7 @@ class DocumentView(Observable):
 
     def on_change(self, document):
         self.update_tags_at_cursor()
+        self.update_link_at_cursor()
         self.add_change_code('changed')
 
     def init_renaming(self):
@@ -121,6 +124,17 @@ class DocumentView(Observable):
     def cancel(self):
         self.title_widget.reset_title()
         self.stop_renaming()
+
+    def update_link_at_cursor(self):
+        if self.document == None:
+            self.link_target_at_cursor = None
+        else:
+            current_node = self.document.ast.get_node_at_position(self.document.ast.get_first_cursor_pos())
+            prev_node = current_node.prev_in_parent()
+            if prev_node != None and prev_node.link != None and current_node.link != None and current_node.link.target == prev_node.link.target:
+                self.link_target_at_cursor = current_node.link.target
+            else:
+                self.link_target_at_cursor = None
 
     def update_tags_at_cursor(self):
         if self.document == None:

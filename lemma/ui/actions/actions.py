@@ -181,7 +181,7 @@ class Actions(object):
             self.workspace.active_document.add_command('insert_subtree', subtree)
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
-            self.workspace.active_document.add_command('insert_text', text)
+            self.workspace.active_document.add_command('insert_text', text, self.application.document_view.tags_at_cursor, self.application.document_view.link_target_at_cursor)
 
     def delete_selection(self, action=None, parameter=''):
         self.workspace.active_document.add_command('delete')

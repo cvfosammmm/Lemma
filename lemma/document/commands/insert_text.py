@@ -17,15 +17,17 @@
 
 from lemma.latex_db.latex_db import LaTeXDB
 from lemma.document.ast.node import Node
+from lemma.document.ast.link import Link
 
 
 class Command():
 
-    def __init__(self, text, tags=set()):
+    def __init__(self, text, tags=set(), link_target=None):
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.text = text
         self.tags = tags
+        self.link_target = link_target
         self.state = dict()
 
     def run(self, document):
@@ -41,6 +43,7 @@ class Command():
             for char in self.text:
                 character = Node('char', char)
                 character.tags = self.tags.copy()
+                character.link = Link(self.link_target)
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
         elif node.parent.is_matharea():
