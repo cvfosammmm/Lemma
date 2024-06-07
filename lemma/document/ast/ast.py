@@ -19,7 +19,6 @@ import time
 
 from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
-from lemma.document.ast.iterator import ASTIterator
 
 
 class AST(object):
@@ -32,12 +31,12 @@ class AST(object):
     ''' cursor movement '''
 
     def move_insert_left(self):
-        prev_node = ASTIterator.prev(self.get_insert_node())
+        prev_node = self.get_insert_node().prev()
         if prev_node != None:
             self.move_insert_to_node(prev_node)
 
     def move_insert_right(self):
-        next_node = ASTIterator.next(self.get_insert_node())
+        next_node = self.get_insert_node().next()
         if next_node != None:
             self.move_insert_to_node(next_node)
 
@@ -48,10 +47,10 @@ class AST(object):
         self.cursor.set_selection_node(node)
 
     def move_insert_left_with_selection(self):
-        self.move_insert_to_node_with_selection(ASTIterator.prev_no_descent(self.get_insert_node()))
+        self.move_insert_to_node_with_selection(self.get_insert_node().prev_no_descent())
 
     def move_insert_right_with_selection(self):
-        self.move_insert_to_node_with_selection(ASTIterator.next_no_descent(self.get_insert_node()))
+        self.move_insert_to_node_with_selection(self.get_insert_node().next_no_descent())
 
     def move_insert_to_node_with_selection(self, node):
         self.cursor.set_insert_node(node)
