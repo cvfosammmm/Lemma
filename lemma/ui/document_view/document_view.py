@@ -33,6 +33,11 @@ class DocumentView(Observable):
         self.main_window = main_window
         self.view = main_window.document_view
 
+        self.selected_link_target = None
+        self.link_target_at_cursor = None
+        self.link_target_at_pointer = None
+        self.tags_at_cursor = set()
+
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
@@ -52,10 +57,6 @@ class DocumentView(Observable):
         self.document = None
         self.set_document(workspace.get_active_document())
         self.add_change_code('changed')
-
-        self.selected_link_target = None
-        self.link_target_at_cursor = None
-        self.tags_at_cursor = set()
 
         self.workspace.connect('new_active_document', self.on_new_active_document)
 
@@ -135,6 +136,7 @@ class DocumentView(Observable):
                 self.link_target_at_cursor = current_node.link.target
             else:
                 self.link_target_at_cursor = None
+        self.update_link_overlay_text()
 
     def update_tags_at_cursor(self):
         if self.document == None:
@@ -171,5 +173,19 @@ class DocumentView(Observable):
                 button.add_css_class('checked')
             else:
                 button.remove_css_class('checked')
+
+    def set_link_target_at_pointer(self, link):
+        self.link_target_at_pointer = link
+        self.update_link_overlay_text()
+
+    def update_link_overlay_text(self):
+        if self.link_target_at_pointer != None:
+            self.view.link_overlay.set_text(self.link_target_at_pointer)
+            self.view.link_overlay.set_visible(True)
+        elif self.link_target_at_cursor != None:
+            self.view.link_overlay.set_text(self.link_target_at_cursor)
+            self.view.link_overlay.set_visible(True)
+        else:
+            self.view.link_overlay.set_visible(False)
 
 

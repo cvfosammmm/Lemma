@@ -43,7 +43,8 @@ class Command():
             for char in self.text:
                 character = Node('char', char)
                 character.tags = self.tags.copy()
-                character.link = Link(self.link_target)
+                if self.link_target != None:
+                    character.link = Link(self.link_target)
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
         elif node.parent.is_matharea():

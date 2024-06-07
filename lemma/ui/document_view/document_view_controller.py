@@ -174,11 +174,9 @@ class DocumentViewController():
             self.content.set_cursor_from_name('default')
 
         if link != None:
-            self.view.link_overlay.set_text(link.target)
-            self.view.link_overlay.set_visible(True)
+            self.document_view.set_link_target_at_pointer(link.target)
         else:
-            self.view.link_overlay.set_visible(False)
-        self.view.link_overlay.queue_draw()
+            self.document_view.set_link_target_at_pointer(None)
 
     def open_link(self, link_target):
         workspace = self.document_view.workspace
