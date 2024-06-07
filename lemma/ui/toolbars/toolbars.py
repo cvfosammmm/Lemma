@@ -20,40 +20,39 @@ from lemma.infrastructure.service_locator import ServiceLocator
 
 class Toolbars(object):
 
-    def __init__(self, workspace, main_window):
+    def __init__(self, workspace, main_window, application):
         self.workspace = workspace
         self.main_window = main_window
+        self.application = application
         self.toolbar = main_window.toolbar
 
         self.toolbar.tools_sidebar_toggle.set_active(ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar'))
         self.toolbar.tools_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
-        self.toolbar.bold_button.connect('clicked', self.on_tag_button_clicked, 'bold')
-        self.toolbar.italic_button.connect('clicked', self.on_tag_button_clicked, 'italic')
-
         self.update()
 
     def update(self):
+        self.update_tag_toggle(self.toolbar.bold_button, 'bold')
+        self.update_tag_toggle(self.toolbar.italic_button, 'italic')
+
+    def update_tag_toggle(self, button, tagname):
         document = self.workspace.active_document
         if self.workspace.mode != 'documents' or document == None: return
 
         char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
-        self.toolbar.bold_button.set_sensitive(len(char_nodes) > 0)
-        self.toolbar.italic_button.set_sensitive(len(char_nodes) > 0)
-
-        all_bold = True
-        all_italic = True
+        all_tagged = True
         for node in char_nodes:
-            if 'bold' not in node.tags: all_bold = False
-            if 'italic' not in node.tags: all_italic = False
-        self.toolbar.bold_button.set_active(len(char_nodes) > 0 and all_bold)
-        self.toolbar.italic_button.set_active(len(char_nodes) > 0 and all_italic)
+            if tagname not in node.tags: all_tagged = False
 
-    def on_tag_button_clicked(self, button, parameter):
-        document = self.workspace.active_document
-        if button.get_active():
-            document.add_command('add_tag', parameter)
+        if len(char_nodes) > 0:
+            if all_tagged:
+                button.add_css_class('checked')
+            else:
+                button.remove_css_class('checked')
         else:
-            document.add_command('remove_tag', parameter)
+            if tagname in self.application.tags_at_cursor:
+                button.add_css_class('checked')
+            else:
+                button.remove_css_class('checked')
 
     def on_tools_sidebar_toggle_toggled(self, toggle_button, parameter=None):
         self.main_window.document_view_paned.set_show_widget(toggle_button.get_active())

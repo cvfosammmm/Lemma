@@ -28,9 +28,10 @@ from lemma.ui.popovers.popover_manager import PopoverManager
 
 class Actions(object):
 
-    def __init__(self, workspace, main_window):
+    def __init__(self, workspace, main_window, application):
         self.workspace = workspace
         self.main_window = main_window
+        self.application = application
         self.document_view = main_window.document_view
         self.settings = ServiceLocator.get_settings()
 
@@ -57,8 +58,8 @@ class Actions(object):
         self.add_simple_action('insert-matharea', self.insert_matharea)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
-        self.add_simple_action('trigger-bold-button', self.trigger_bold_button)
-        self.add_simple_action('trigger-italic-button', self.trigger_italic_button)
+        self.add_simple_action('toggle-bold', self.toggle_bold)
+        self.add_simple_action('toggle-italic', self.toggle_italic)
 
         self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
@@ -111,8 +112,8 @@ class Actions(object):
         self.actions['insert-link'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['remove-link'].set_enabled(self.workspace.mode == 'documents' and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
         self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_matharea)
-        self.actions['trigger-bold-button'].set_enabled(True)
-        self.actions['trigger-italic-button'].set_enabled(True)
+        self.actions['toggle-bold'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['toggle-italic'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-edit-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
@@ -197,17 +198,33 @@ class Actions(object):
         name = parameter[0]
         self.workspace.active_document.add_command('insert_symbol', name)
 
+    def toggle_bold(self, action=None, parameter=''):
+        self.toggle_tag('bold')
+
+    def toggle_italic(self, action=None, parameter=''):
+        self.toggle_tag('italic')
+
+    def toggle_tag(self, tagname):
+        document = self.workspace.active_document
+
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        all_tagged = True
+        for node in char_nodes:
+            if tagname not in node.tags: all_tagged = False
+
+        if len(char_nodes) > 0:
+            if all_tagged:
+                document.add_command('remove_tag', tagname)
+            else:
+                document.add_command('add_tag', tagname)
+        else:
+            self.application.set_tags_at_cursor(self.application.tags_at_cursor ^ {tagname})
+
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.workspace.active_document)
 
     def remove_link(self, action=None, parameter=''):
         self.workspace.active_document.add_command('remove_link')
-
-    def trigger_bold_button(self, action=None, parameter=''):
-        self.main_window.toolbar.bold_button.emit('clicked')
-
-    def trigger_italic_button(self, action=None, parameter=''):
-        self.main_window.toolbar.italic_button.emit('clicked')
 
     def toggle_tools_sidebar(self, action=None, parameter=''):
         toggle = self.main_window.headerbar.hb_right.tools_sidebar_toggle

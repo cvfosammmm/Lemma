@@ -28,10 +28,11 @@ from lemma.helpers.observable import Observable
 
 class DocumentView(Observable):
 
-    def __init__(self, workspace, main_window):
+    def __init__(self, workspace, main_window, application):
         Observable.__init__(self)
-
         self.view = main_window.document_view
+        self.application = application
+
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 

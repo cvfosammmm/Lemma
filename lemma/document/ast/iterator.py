@@ -68,16 +68,4 @@ class ASTIterator():
 
         return node
 
-    def prev_in_parent(node):
-        if node != node.parent[0]:
-            index = node.parent.index(node) - 1
-            return node.parent[index]
-        return None
-
-    def next_in_parent(node):
-        if node != node.parent[-1]:
-            index = node.parent.index(node) + 1
-            return node.parent[index]
-        return None
-
 

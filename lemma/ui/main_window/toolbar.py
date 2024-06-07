@@ -27,16 +27,14 @@ class ToolBarView(Gtk.ActionBar):
     def __init__(self):
         Gtk.ActionBar.__init__(self)
 
-        self.bold_button = Gtk.ToggleButton()
-        self.bold_button.set_child(Gtk.Image.new_from_icon_name('format-text-bold-symbolic'))
+        self.bold_button = Gtk.Button.new_from_icon_name('format-text-bold-symbolic')
+        self.bold_button.set_action_name('win.toggle-bold')
         self.bold_button.set_can_focus(False)
-        self.bold_button.add_css_class('flat')
         self.bold_button.set_tooltip_text(_('Bold') + ' (Ctrl+B)')
 
-        self.italic_button = Gtk.ToggleButton()
-        self.italic_button.set_child(Gtk.Image.new_from_icon_name('format-text-italic-symbolic'))
+        self.italic_button = Gtk.Button.new_from_icon_name('format-text-italic-symbolic')
+        self.italic_button.set_action_name('win.toggle-italic')
         self.italic_button.set_can_focus(False)
-        self.italic_button.add_css_class('flat')
         self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)

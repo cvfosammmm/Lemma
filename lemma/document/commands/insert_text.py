@@ -21,10 +21,11 @@ from lemma.document.ast.node import Node
 
 class Command():
 
-    def __init__(self, text):
+    def __init__(self, text, tags=set()):
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.text = text
+        self.tags = tags
         self.state = dict()
 
     def run(self, document):
@@ -39,6 +40,7 @@ class Command():
             self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
             for char in self.text:
                 character = Node('char', char)
+                character.tags = self.tags.copy()
                 self.state['nodes_added'] += document.ast.insert_node(character)
 
         elif node.parent.is_matharea():

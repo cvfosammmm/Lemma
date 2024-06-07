@@ -41,8 +41,9 @@ class Application(Adw.Application):
 
     def __init__(self, workspace):
         Adw.Application.__init__(self, application_id='org.cvfosammmm.Lemma')
-
         self.workspace = workspace
+
+        self.tags_at_cursor = set()
 
     def do_activate(self):
         Adw.Application.do_activate(self)
@@ -55,11 +56,11 @@ class Application(Adw.Application):
 
         self.colors = colors.Colors(self.workspace, self.main_window)
         self.document_history = document_history.DocumentHistory(self.workspace, self.main_window)
-        self.document_view = document_view.DocumentView(self.workspace, self.main_window)
+        self.document_view = document_view.DocumentView(self.workspace, self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.workspace, self.main_window)
         self.document_list = document_list.DocumentList(self.workspace, self.main_window)
-        self.toolbars = toolbars.Toolbars(self.workspace, self.main_window)
-        self.actions = actions.Actions(self.workspace, self.main_window)
+        self.toolbars = toolbars.Toolbars(self.workspace, self.main_window, self)
+        self.actions = actions.Actions(self.workspace, self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.panels = panels.Panels(self.workspace, self.main_window, self)
 
@@ -100,6 +101,7 @@ class Application(Adw.Application):
         self.document = document
         if document != None: self.document.connect('changed', self.on_document_change)
 
+        self.update_tags_at_cursor()
         self.panels.update()
         self.actions.update()
         self.document_history.update()
@@ -107,6 +109,7 @@ class Application(Adw.Application):
         self.toolbars.update()
 
     def on_document_change(self, document):
+        self.update_tags_at_cursor()
         self.actions.update()
         self.document_list.update()
         self.toolbars.update()
@@ -115,5 +118,20 @@ class Application(Adw.Application):
         self.panels.update()
         self.actions.update()
         self.document_draft.update()
+
+    def update_tags_at_cursor(self):
+        if self.document == None:
+            self.set_tags_at_cursor(set())
+        else:
+            node = self.document.ast.get_node_at_position(self.document.ast.get_first_cursor_pos())
+            node = node.prev_in_parent()
+            if node == None:
+                self.set_tags_at_cursor(set())
+            else:
+                self.set_tags_at_cursor(node.tags.copy())
+
+    def set_tags_at_cursor(self, tags):
+        self.tags_at_cursor = tags
+        self.toolbars.update()
 
 

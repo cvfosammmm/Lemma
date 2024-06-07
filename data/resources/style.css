@@ -143,6 +143,12 @@ paned.document-view separator.wide {
     background-color: @bodypaned_border;
 }
 
+/* toolbar */
+
+button.checked {
+    background-color: @sidebar_selection;
+}
+
 /* tools sidebar */
 
 box.tools-sidebar {

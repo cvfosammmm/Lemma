@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.position import Position
-from lemma.document.ast.iterator import ASTIterator
 
 
 class Node():
@@ -92,7 +91,7 @@ class Node():
     def is_inside_link(self):
         if self.link == None: return False
         if self.is_first_in_parent(): return False
-        return self.link == ASTIterator.prev_in_parent(self).link
+        return self.link == self.prev_in_parent().link
 
     def get_bounds_for_link(self):
         if self.link == None: return (None, None)
@@ -102,18 +101,30 @@ class Node():
         node2 = self
 
         while node2.link == self.link:
-            next_node = ASTIterator.next_in_parent(node2)
+            next_node = node2.next_in_parent()
             if next_node != None:
                 node2 = next_node
             else:
                 break
         while node1.link == self.link:
-            prev_node = ASTIterator.prev_in_parent(node1)
+            prev_node = node1.prev_in_parent()
             if prev_node != None:
                 node1 = prev_node
             else:
                 break
 
         return (node1.get_position(), node2.get_position())
+
+    def prev_in_parent(self):
+        if self != self.parent[0]:
+            index = self.parent.index(self) - 1
+            return self.parent[index]
+        return None
+
+    def next_in_parent(self):
+        if self != self.parent[-1]:
+            index = self.parent.index(self) + 1
+            return self.parent[index]
+        return None
 
 
