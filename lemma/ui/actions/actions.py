@@ -218,7 +218,7 @@ class Actions(object):
             else:
                 document.add_command('add_tag', tagname)
         else:
-            self.application.set_tags_at_cursor(self.application.tags_at_cursor ^ {tagname})
+            self.application.document_view.set_tags_at_cursor(self.application.document_view.tags_at_cursor ^ {tagname})
 
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.workspace.active_document)

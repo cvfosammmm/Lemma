@@ -28,10 +28,10 @@ from lemma.helpers.observable import Observable
 
 class DocumentView(Observable):
 
-    def __init__(self, workspace, main_window, application):
+    def __init__(self, workspace, main_window):
         Observable.__init__(self)
+        self.main_window = main_window
         self.view = main_window.document_view
-        self.application = application
 
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
@@ -54,6 +54,7 @@ class DocumentView(Observable):
         self.add_change_code('changed')
 
         self.selected_link_target = None
+        self.tags_at_cursor = set()
 
         self.workspace.connect('new_active_document', self.on_new_active_document)
 
@@ -66,6 +67,7 @@ class DocumentView(Observable):
             self.document.disconnect('changed', self.on_change)
 
         self.document = document
+        self.update_tags_at_cursor()
         self.view.content.queue_draw()
         self.stop_renaming()
         self.title_widget.set_document(document)
@@ -75,6 +77,7 @@ class DocumentView(Observable):
             self.document.connect('changed', self.on_change)
 
     def on_change(self, document):
+        self.update_tags_at_cursor()
         self.add_change_code('changed')
 
     def init_renaming(self):
@@ -118,5 +121,41 @@ class DocumentView(Observable):
     def cancel(self):
         self.title_widget.reset_title()
         self.stop_renaming()
+
+    def update_tags_at_cursor(self):
+        if self.document == None:
+            self.set_tags_at_cursor(set())
+        else:
+            node = self.document.ast.get_node_at_position(self.document.ast.get_first_cursor_pos())
+            node = node.prev_in_parent()
+            if node == None:
+                self.set_tags_at_cursor(set())
+            else:
+                self.set_tags_at_cursor(node.tags.copy())
+
+    def set_tags_at_cursor(self, tags):
+        self.tags_at_cursor = tags
+        self.update_tag_toggle(self.main_window.toolbar.bold_button, 'bold')
+        self.update_tag_toggle(self.main_window.toolbar.italic_button, 'italic')
+
+    def update_tag_toggle(self, button, tagname):
+        document = self.workspace.active_document
+        if self.workspace.mode != 'documents' or document == None: return
+
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        all_tagged = True
+        for node in char_nodes:
+            if tagname not in node.tags: all_tagged = False
+
+        if len(char_nodes) > 0:
+            if all_tagged:
+                button.add_css_class('checked')
+            else:
+                button.remove_css_class('checked')
+        else:
+            if tagname in self.tags_at_cursor:
+                button.add_css_class('checked')
+            else:
+                button.remove_css_class('checked')
 
 

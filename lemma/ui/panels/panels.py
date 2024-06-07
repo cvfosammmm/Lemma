@@ -30,6 +30,8 @@ class Panels(object):
 
         self.app.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)
+        self.main_window.toolbar.tools_sidebar_toggle.set_active(ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar'))
+        self.main_window.toolbar.tools_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
 
         self.restore_window_state()
         self.update()
@@ -41,6 +43,10 @@ class Panels(object):
             self.main_window.content_stack.set_visible_child_name('draft_view')
         else:
             self.main_window.content_stack.set_visible_child_name('welcome')
+
+    def on_tools_sidebar_toggle_toggled(self, toggle_button, parameter=None):
+        self.main_window.document_view_paned.set_show_widget(toggle_button.get_active())
+        self.main_window.document_view_paned.animate(True)
 
     def on_window_close(self, window=None, parameter=None):
         self.save_quit()
