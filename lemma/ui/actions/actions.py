@@ -20,6 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gio, GLib, GObject, Gdk
 
 import pickle
+from urllib.parse import urlparse
 
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
@@ -176,14 +177,23 @@ class Actions(object):
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
+
         if result[1].startswith('lemma/ast'):
             subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
             self.workspace.active_document.add_command('insert_subtree', subtree)
-        elif result[1] == 'text/plain':
+            return
+
+        if result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
 
-            
+            if len(text) < 2000:
+                parsed_url = urlparse(text.strip())
+                if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
+                    self.workspace.active_document.add_command('insert_text', text.strip(), self.application.document_view.tags_at_cursor, text.strip())
+                    return
+
             self.workspace.active_document.add_command('insert_text', text, self.application.document_view.tags_at_cursor, self.application.document_view.link_target_at_cursor)
+            return
 
     def delete_selection(self, action=None, parameter=''):
         self.workspace.active_document.add_command('delete')
