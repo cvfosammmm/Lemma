@@ -38,7 +38,12 @@
     </supports>
 
     <releases>
-        ​<release version="11" date="2024-5-21">
+        ​<release version="13" date="2024-6-8">
+            <description translatable="no">
+                <p>Autoadd text tags / links when they are present at the cursor, autoadd link when pasting urls, ...</p>
+            </description>
+        </release>
+        ​<release version="12" date="2024-5-25">
             <description translatable="no">
                 <p>Copy and paste, improved document history, ...</p>
             </description>
