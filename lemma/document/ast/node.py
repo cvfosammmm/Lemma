@@ -85,7 +85,6 @@ class Node():
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
     def is_mathsymbol(self): return self.type == 'mathsymbol'
-    def is_matharea(self): return self.type == 'matharea'
     def is_char(self): return self.type == 'char'
 
     def is_inside_link(self):

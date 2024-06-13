@@ -56,13 +56,12 @@ class Actions(object):
 
         self.add_simple_action('insert-link', self.insert_link)
         self.add_simple_action('remove-link', self.remove_link)
-        self.add_simple_action('insert-matharea', self.insert_matharea)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
         self.add_simple_action('toggle-bold', self.toggle_bold)
         self.add_simple_action('toggle-italic', self.toggle_italic)
 
-        self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar)
+        self.add_simple_action('toggle-math-sidebar', self.toggle_math_sidebar)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
         self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
@@ -87,7 +86,6 @@ class Actions(object):
         can_undo = has_active_doc and active_document.can_undo()
         can_redo = has_active_doc and active_document.can_redo()
         insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_root()
-        insert_in_matharea = has_active_doc and active_document.ast.get_insert_node().parent.is_matharea()
         has_selection = has_active_doc and active_document.ast.has_selection()
         clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
@@ -109,13 +107,12 @@ class Actions(object):
         self.actions['paste'].set_enabled(self.workspace.mode == 'documents' and has_active_doc and (text_in_clipboard or subtree_in_clipboard))
         self.actions['delete'].set_enabled(self.workspace.mode == 'documents' and has_selection)
         self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['insert-matharea'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['insert-link'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
         self.actions['remove-link'].set_enabled(self.workspace.mode == 'documents' and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
-        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and insert_in_matharea)
+        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['toggle-bold'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['toggle-italic'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['toggle-tools-sidebar'].set_enabled(True)
+        self.actions['toggle-math-sidebar'].set_enabled(True)
         self.actions['show-edit-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
@@ -201,9 +198,6 @@ class Actions(object):
     def select_all(self, action=None, parameter=''):
         self.workspace.active_document.add_command('select_all')
 
-    def insert_matharea(self, action=None, parameter=''):
-        self.workspace.active_document.add_command('insert_matharea')
-
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return
 
@@ -238,8 +232,8 @@ class Actions(object):
     def remove_link(self, action=None, parameter=''):
         self.workspace.active_document.add_command('remove_link')
 
-    def toggle_tools_sidebar(self, action=None, parameter=''):
-        toggle = self.main_window.headerbar.hb_right.tools_sidebar_toggle
+    def toggle_math_sidebar(self, action=None, parameter=''):
+        toggle = self.main_window.toolbar.math_sidebar_toggle
         toggle.set_active(not toggle.get_active())
 
     def show_edit_menu(self, action=None, parameter=''):

@@ -32,18 +32,12 @@ class Command():
         self.state['deleted_nodes'] = []
         self.state['nodes_added'] = []
 
-        if document.ast.get_insert_node().parent.type == self.subtree.type or self.subtree.type == 'matharea':
+        if document.ast.get_insert_node().parent.type == self.subtree.type:
             self.state['deleted_nodes'] = document.ast.delete_selection()
             self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
 
-            if self.subtree.type == 'matharea' and document.ast.get_insert_node().parent.is_root():
-                subtree = Node('matharea')
-                for node in self.subtree:
-                    subtree.append(node)
-                self.state['nodes_added'] += document.ast.insert_node(subtree)
-            else:
-                for node in self.subtree:
-                    self.state['nodes_added'] += document.ast.insert_node(node)
+            for node in self.subtree:
+                self.state['nodes_added'] += document.ast.insert_node(node)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0 or len(self.state['deleted_nodes']) > 0 )
         document.set_scroll_insert_on_screen_after_layout_update()

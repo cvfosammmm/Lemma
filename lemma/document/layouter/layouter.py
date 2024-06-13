@@ -41,19 +41,10 @@ class Layouter(object):
         self.document.layout = self.root
 
     def process_node(self, node):
-        if node.is_matharea():
-            self.process_current_word()
-            self.current_math_box = boxes.BoxHContainer()
-            box = boxes.BoxEmpty(node=node)
-            node.set_box(box)
-            self.current_math_box.add(box)
-            for child in node:
-                self.process_node(child)
-            self.add_boxes_and_break_lines_in_case([self.current_math_box], self.current_math_box.width)
-
-        elif node.type == 'EOL':
+        if node.type == 'EOL':
             self.process_current_word()
             self.process_current_number()
+
             box = boxes.BoxEmpty(node=node)
             self.current_line_box.add(box)
             self.root.add(self.current_line_box)
@@ -63,37 +54,24 @@ class Layouter(object):
         elif node.type == 'placeholder':
             self.process_current_word()
             self.process_current_number()
+
             if len(node.parent) == 1:
                 width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
                 box = boxes.BoxPlaceholder(width, height, left, top, node=node)
             else:
                 box = boxes.BoxEmpty(node=node)
-            self.current_math_box.add(box)
+            self.current_line_box.add(box)
             node.set_box(box)
 
         elif node.type == 'mathsymbol':
-            if node.value.isdigit():
-                self.current_number.append(node)
-            else:
-                self.process_current_number()
+            self.process_current_word()
+            self.process_current_number()
 
-                width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
-
-                if LaTeXDB.is_binary_operation(node.value):
-                    width += FontManager.get_medspace() * 2
-                    left += FontManager.get_medspace()
-
-                if LaTeXDB.is_relation(node.value):
-                    width += FontManager.get_thickspace() * 2
-                    left += FontManager.get_thickspace()
-
-                if LaTeXDB.is_punctuation_mark(node.value):
-                    width += FontManager.get_thinspace()
-
-                box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
-                box.classes.add('math')
-                node.set_box(box)
-                self.current_math_box.add(box)
+            width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
+            box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
+            box.classes.add('math')
+            node.set_box(box)
+            self.current_line_box.add(box)
 
         elif node.type == 'char':
             if LaTeXDB.is_whitespace(node.value):

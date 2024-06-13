@@ -55,20 +55,16 @@ class MarkdownScanner(object):
                 self.open_current_link()
             self.current_link = node.link
 
-        if node.is_matharea():
-            self.markdown += '$`'
-            for child in node:
-                self.process_node(child)
-            self.markdown += '`$'
-
-        elif node.type == 'EOL':
+        if node.type == 'EOL':
             self.markdown += '\n'
 
         elif node.type == 'placeholder':
             pass
 
         elif node.type == 'mathsymbol':
+            self.markdown += '$`'
             self.markdown += node.value
+            self.markdown += '`$'
 
         elif node.type == 'char':
             self.markdown += node.value

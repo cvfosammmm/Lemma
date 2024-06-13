@@ -37,11 +37,7 @@ class PlaintextScanner(object):
         self.document.plaintext = self.text
 
     def process_node(self, node):
-        if node.is_matharea():
-            if self.current_line == '' or self.current_line[-1] != ' ':
-                self.current_line += ' '
-
-        elif node.type == 'EOL':
+        if node.type == 'EOL':
             self.current_line = self.current_line.strip()
             if self.current_line != '':
                 self.text += self.current_line + '\n'

@@ -32,43 +32,23 @@ class Command():
 
     def run(self, document):
         self.state['cursor_state_before_1'] = document.ast.get_cursor_state()
-        self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-        self.state['deleted_nodes'] = []
         self.state['nodes_added'] = []
+        self.state['deleted_nodes'] = document.ast.delete_selection()
+        self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
 
         node = document.ast.get_insert_node()
-        if node.parent.is_root():
-            self.state['deleted_nodes'] = document.ast.delete_selection()
-            self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-            for char in self.text:
-                character = Node('char', char)
-                character.tags = self.tags.copy()
-                if self.link_target != None:
-                    character.link = Link(self.link_target)
-                self.state['nodes_added'] += document.ast.insert_node(character)
+        for char in self.text:
+            character = Node('char', char)
+            character.tags = self.tags.copy()
+            if self.link_target != None:
+                character.link = Link(self.link_target)
+            self.state['nodes_added'] += document.ast.insert_node(character)
 
-        elif node.parent.is_matharea():
-            if not document.ast.has_selection() and self.text == ' ' and node == node.parent[-1]:
-                document.ast.move_insert_right()
-            else:
-                self.state['deleted_nodes'] = document.ast.delete_selection()
-                self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-                for char in self.text:
-                    if char == 'h': char = '\u210E'
-                    elif char.isalpha() and char.islower(): char = chr(ord(char) + 119789)
-                    elif char.isalpha() and char.isupper(): char = chr(ord(char) + 119795)
-                    elif char == '-': char = '−'
-                    elif char == '*': char = '∗'
-                    elif char == '\'': char = '′'
-
-                    if LaTeXDB.is_mathsymbol(char):
-                        character = Node('mathsymbol', char)
-                        self.state['nodes_added'] += document.ast.insert_node(character)
-                if len(self.state['nodes_added']) == 0:
-                    for node in self.state['deleted_nodes']:
-                        document.ast.insert_node(node)
-                    self.state['deleted_nodes'] = []
-                    document.ast.set_cursor_state(self.state['cursor_state_before_1'])
+        if len(self.state['nodes_added']) == 0:
+            for node in self.state['deleted_nodes']:
+                document.ast.insert_node(node)
+            self.state['deleted_nodes'] = []
+            document.ast.set_cursor_state(self.state['cursor_state_before_1'])
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0 or len(self.state['deleted_nodes']) > 0 )
         document.set_scroll_insert_on_screen_after_layout_update()

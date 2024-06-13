@@ -34,13 +34,12 @@ class Command():
         self.state['nodes_added'] = []
 
         node = document.ast.get_insert_node()
-        if node.parent.is_matharea():
-            char = LaTeXDB.get_unicode_from_latex_name(self.name)
-            if LaTeXDB.is_mathsymbol(char):
-                self.state['deleted_nodes'] = document.ast.delete_selection()
-                self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
-                character = Node('mathsymbol', char)
-                self.state['nodes_added'] += document.ast.insert_node(character)
+        char = LaTeXDB.get_unicode_from_latex_name(self.name)
+        if LaTeXDB.is_mathsymbol(char):
+            self.state['deleted_nodes'] = document.ast.delete_selection()
+            self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
+            character = Node('mathsymbol', char)
+            self.state['nodes_added'] += document.ast.insert_node(character)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()

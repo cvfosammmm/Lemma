@@ -63,10 +63,7 @@ class Command():
 
     def parse_section(self, document, root, section, tags=set(), link_target=None):
         if section['type'] == 'codespan':
-            matharea = Node('matharea')
-            matharea.insert(0, Node('placeholder'))
-            self.add_math(document, matharea, section['raw'])
-            root.append(matharea)
+            self.add_math(document, root, section['raw'])
         elif section['type'] == 'link':
             link_target = urllib.parse.unquote_plus(section['attrs']['url'])
             for child in section['children']:

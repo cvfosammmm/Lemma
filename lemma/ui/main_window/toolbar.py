@@ -43,23 +43,6 @@ class ToolBarView(Gtk.ActionBar):
         self.pack_start(box)
         self.pack_start(Gtk.Separator())
 
-        self.add_math_button = Gtk.Button.new_from_icon_name('insert-math-symbolic')
-        self.add_math_button.set_action_name('win.insert-matharea')
-        self.add_math_button.set_can_focus(False)
-        self.add_math_button.set_tooltip_text(_('Insert Math') + ' (Ctrl+M)')
-
-        self.tools_sidebar_toggle = Gtk.ToggleButton()
-        self.tools_sidebar_toggle.set_tooltip_text(_('Show Tools Sidebar') + ' (F9)')
-        self.tools_sidebar_toggle.set_icon_name('sidebar-show-right-symbolic')
-        self.tools_sidebar_toggle.set_can_focus(False)
-        self.tools_sidebar_toggle.add_css_class('flat')
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.add_math_button)
-        box.append(self.tools_sidebar_toggle)
-        self.pack_start(box)
-        self.pack_start(Gtk.Separator())
-
         self.insert_link_button = Gtk.ToggleButton()
         self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
         self.insert_link_button.set_can_focus(False)
@@ -69,6 +52,17 @@ class ToolBarView(Gtk.ActionBar):
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.insert_link_button)
+        self.pack_start(box)
+        self.pack_start(Gtk.Separator())
+
+        self.math_sidebar_toggle = Gtk.ToggleButton()
+        self.math_sidebar_toggle.set_tooltip_text(_('Math Toolbar') + ' (F9)')
+        self.math_sidebar_toggle.set_icon_name('insert-symbols-symbolic')
+        self.math_sidebar_toggle.set_can_focus(False)
+        self.math_sidebar_toggle.add_css_class('flat')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.math_sidebar_toggle)
         self.pack_start(box)
 
         self.edit_menu_button = PopoverManager.create_popover_button('edit_menu')
