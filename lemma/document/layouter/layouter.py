@@ -88,12 +88,7 @@ class Layouter(object):
         if self.current_line_box.width > 0 and self.current_line_box.width + total_width > 670:
             self.break_line()
 
-        width = 0
         for i, box in enumerate(char_boxes):
-            if width + box.width > 670:
-                width = 0
-                self.break_line()
-            width += box.width
             self.add_box(box)
 
     def process_node(self, node):
@@ -127,6 +122,8 @@ class Layouter(object):
             self.add_box(box)
 
     def add_box(self, box):
+        if self.current_line_box.width + box.width > 670:
+            self.break_line()
         self.current_line_box.add(box)
 
     def break_line(self):
