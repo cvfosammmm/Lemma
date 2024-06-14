@@ -28,112 +28,109 @@ class Layouter(object):
 
         self.root = boxes.BoxVContainer()
         self.current_line_box = boxes.BoxHContainer()
-        self.current_math_box = boxes.BoxHContainer()
-        self.current_word = []
         self.current_number = []
 
     def update(self):
         self.root = boxes.BoxVContainer()
 
-        for child in self.document.ast.root:
-            self.process_node(child)
+        node_lists = self.group_by_node_type(self.document.ast.root)
+        for node_list in node_lists:
+            self.process_list(node_list)
 
         self.document.layout = self.root
 
-    def process_node(self, node):
-        if node.type == 'EOL':
-            self.process_current_word()
-            self.process_current_number()
-
-            box = boxes.BoxEmpty(node=node)
-            self.current_line_box.add(box)
-            self.root.add(self.current_line_box)
-            self.current_line_box = boxes.BoxHContainer()
-            node.set_box(box)
-
-        elif node.type == 'placeholder':
-            self.process_current_word()
-            self.process_current_number()
-
-            if len(node.parent) == 1:
-                width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
-                box = boxes.BoxPlaceholder(width, height, left, top, node=node)
-            else:
-                box = boxes.BoxEmpty(node=node)
-            self.current_line_box.add(box)
-            node.set_box(box)
-
-        elif node.type == 'mathsymbol':
-            self.process_current_word()
-            self.process_current_number()
-
-            width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
-            box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
-            box.classes.add('math')
-            node.set_box(box)
-            self.current_line_box.add(box)
-
-        elif node.type == 'char':
+    def group_by_node_type(self, root_node):
+        last_type = None
+        last_tags = set()
+        result = list()
+        for node in root_node:
             if LaTeXDB.is_whitespace(node.value):
-                self.process_current_word()
-                width, height, left, top = FontManager.get_char_extents_single(node.value)
-                box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
-                self.current_line_box.add(box)
-                node.set_box(box)
-            else:
-                self.current_word.append(node)
+                result.append(list())
+                last_type = None
+                last_tags = set()
+            elif node.type != last_type or node.tags.symmetric_difference(last_tags):
+                result.append(list())
+                last_type = node.type
+                last_tags = node.tags
+            result[-1].append(node)
+        return result
 
-    def process_current_word(self):
-        if len(self.current_word) == 0: return
+    def process_list(self, node_list):
+        if node_list[0].type == 'char' and not LaTeXDB.is_whitespace(node_list[0].value):
+            self.process_word(node_list)
+        else:
+            for node in node_list:
+                self.process_node(node)
+
+    def process_word(self, node_list):
+        if len(node_list) == 0: return
 
         text = ''
-        for char in self.current_word:
+        for char in node_list:
             text += char.value
 
         total_width = 0
         char_boxes = []
 
-        node = self.current_word[0]
+        node = node_list[0]
         if 'bold' in node.tags and 'italic' not in node.tags: fontname = 'bold'
         elif 'bold' in node.tags and 'italic' in node.tags: fontname = 'bolditalic'
         elif 'bold' not in node.tags and 'italic' in node.tags: fontname = 'italic'
         else: fontname = 'book'
 
-        for char, extents in zip(self.current_word, FontManager.get_char_extents_multi(text, fontname=fontname)):
+        for char, extents in zip(node_list, FontManager.get_char_extents_multi(text, fontname=fontname)):
             width, height, left, top = extents
             total_width += width
-
             box = boxes.BoxGlyph(width, height, left, top, char.value, node=char)
             char.set_box(box)
             char_boxes.append(box)
-        self.current_word = []
 
-        self.add_boxes_and_break_lines_in_case(char_boxes, total_width)
+        if self.current_line_box.width > 0 and self.current_line_box.width + total_width > 670:
+            self.break_line()
 
-    def process_current_number(self):
-        if len(self.current_number) == 0: return
+        width = 0
+        for i, box in enumerate(char_boxes):
+            if width + box.width > 670:
+                width = 0
+                self.break_line()
+            width += box.width
+            self.add_box(box)
 
-        text = ''
-        for char in self.current_number:
-            text += char.value
+    def process_node(self, node):
+        if node.type == 'EOL':
+            box = boxes.BoxEmpty(node=node)
+            node.set_box(box)
 
-        total_width = 0
-        for char, extents in zip(self.current_number, FontManager.get_char_extents_multi(text, fontname='math')):
-            width, height, left, top = extents
-            total_width += width
+            self.add_box(box)
+            self.break_line()
 
-            box = boxes.BoxGlyph(width, height, left, top, char.value, node=char)
+        elif node.type == 'placeholder':
+            width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
+            box = boxes.BoxPlaceholder(width, height, left, top, node=node)
+            node.set_box(box)
+
+            self.add_box(box)
+
+        elif node.type == 'mathsymbol':
+            width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
+            box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
             box.classes.add('math')
-            char.set_box(box)
-            self.current_math_box.add(box)
-        self.current_number = []
+            node.set_box(box)
 
-    def add_boxes_and_break_lines_in_case(self, boxes_list, width):
-        if self.current_line_box.width + width > 670:
-            self.root.add(self.current_line_box)
-            self.current_line_box = boxes.BoxHContainer()
+            self.add_box(box)
 
-        for i, box in enumerate(boxes_list):
-            self.current_line_box.add(box)
+        elif node.type == 'char' and LaTeXDB.is_whitespace(node.value):
+            width, height, left, top = FontManager.get_char_extents_single(node.value)
+            box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
+            node.set_box(box)
+
+            self.add_box(box)
+
+    def add_box(self, box):
+        self.current_line_box.add(box)
+
+    def break_line(self):
+        self.root.add(self.current_line_box)
+        self.current_line_box = boxes.BoxHContainer()
 
 
