@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+from urllib.parse import urlparse
+
 from lemma.ui.document_view.document_view_controller import DocumentViewController
 from lemma.ui.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.ui.title_widget.title_widget import TitleWidget
@@ -180,10 +182,17 @@ class DocumentView(Observable):
 
     def update_link_overlay_text(self):
         if self.link_target_at_pointer != None:
-            self.view.link_overlay.set_text(self.link_target_at_pointer)
-            self.view.link_overlay.set_visible(True)
-        elif self.link_target_at_cursor != None:
-            self.view.link_overlay.set_text(self.link_target_at_cursor)
+            text = self.link_target_at_pointer
+        else:
+            text = self.link_target_at_cursor
+
+        if text != None:
+            if not urlparse(text).scheme in ['http', 'https']:
+                target_document = self.workspace.get_by_title(text)
+                if target_document == None:
+                    text = 'Create "' + text + '"'
+
+            self.view.link_overlay.set_text(text)
             self.view.link_overlay.set_visible(True)
         else:
             self.view.link_overlay.set_visible(False)
