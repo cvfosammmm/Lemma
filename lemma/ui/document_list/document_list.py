@@ -74,8 +74,8 @@ class DocumentList(object):
 
     #@helpers.timer
     def draw(self, widget, ctx, width, height):
-        title_color = ColorManager.get_ui_color('sidebar_fg_1')
-        teaser_color = ColorManager.get_ui_color('sidebar_fg_1')
+        sidebar_fg_1 = ColorManager.get_ui_color('sidebar_fg_1')
+        sidebar_fg_2 = ColorManager.get_ui_color('sidebar_fg_2')
         bg_color = ColorManager.get_ui_color('sidebar_bg_1')
         hover_color = ColorManager.get_ui_color('sidebar_hover')
         selected_color = ColorManager.get_ui_color('sidebar_selection')
@@ -91,16 +91,18 @@ class DocumentList(object):
         Gdk.cairo_set_source_rgba(ctx, bg_color)
         ctx.rectangle(0, 0, width, height)
         ctx.fill()
-        Gdk.cairo_set_source_rgba(ctx, title_color)
+        Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
 
         for i, document in enumerate(self.workspace.documents):
             highlight_active = (document == self.workspace.active_document and self.workspace.mode == 'documents')
             if highlight_active:
-                fg_color_1 = active_fg_color
-                fg_color_2 = active_fg_color
+                title_color = active_fg_color
+                teaser_color = active_fg_color
+                date_color = active_fg_color
             else:
-                fg_color_1 = title_color
-                fg_color_2 = teaser_color
+                title_color = sidebar_fg_1
+                teaser_color = sidebar_fg_1
+                date_color = sidebar_fg_1
 
             if i == self.selected_index:
                 Gdk.cairo_set_source_rgba(ctx, selected_color)
@@ -115,19 +117,27 @@ class DocumentList(object):
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
 
-            Gdk.cairo_set_source_rgba(ctx, fg_color_1)
+            title_text = document.title
+            if len(document.plaintext) == 0:
+                teaser_text = '(' + _('empty') + ')'
+                teaser_color = sidebar_fg_2
+            else:
+                teaser_text = ' '.join(document.plaintext.splitlines())[:100]
+            date_text = self.get_last_modified_string(document)
+
+            Gdk.cairo_set_source_rgba(ctx, title_color)
             ctx.move_to(15, self.view.line_height * i + 12 - scrolling_offset)
-            self.view.layout_header.set_text(document.title)
+            self.view.layout_header.set_text(title_text)
             PangoCairo.show_layout(ctx, self.view.layout_header)
 
-            Gdk.cairo_set_source_rgba(ctx, fg_color_2)
+            Gdk.cairo_set_source_rgba(ctx, date_color)
             ctx.move_to(15, self.view.line_height * i + 12 - scrolling_offset)
-            self.view.layout_date.set_text(self.get_last_modified_string(document))
+            self.view.layout_date.set_text(date_text)
             PangoCairo.show_layout(ctx, self.view.layout_date)
 
-            Gdk.cairo_set_source_rgba(ctx, fg_color_2)
+            Gdk.cairo_set_source_rgba(ctx, teaser_color)
             ctx.move_to(15, self.view.line_height * i + 35 - scrolling_offset)
-            self.view.layout_teaser.set_text(' '.join(document.plaintext.splitlines())[:100])
+            self.view.layout_teaser.set_text(teaser_text)
             PangoCairo.show_layout(ctx, self.view.layout_teaser)
 
     def get_last_modified_string(self, document):
