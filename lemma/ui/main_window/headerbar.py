@@ -68,7 +68,13 @@ class HeaderBarLeft(Gtk.HeaderBar):
         self.add_menu_button.set_can_focus(False)
         self.add_menu_button.set_tooltip_text(_('Add Documents'))
         self.add_menu_button.add_css_class('flat')
-        self.pack_start(self.add_menu_button)
+        self.pack_end(self.add_menu_button)
+
+        # add menu
+        self.search_entry = Gtk.Entry()
+        self.search_entry.set_placeholder_text(_('Search') + '…')
+        self.search_entry.add_css_class('search')
+        self.pack_start(self.search_entry)
 
         self.set_title_widget(Gtk.Label())
 

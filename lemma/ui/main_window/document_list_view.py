@@ -50,11 +50,4 @@ class DocumentListView(Gtk.Overlay):
         self.content = self.scrolling_widget.content
         self.set_child(self.scrolling_widget.view)
 
-    def get_item_at_cursor(self):
-        y = self.scrolling_widget.cursor_y
-        x = self.scrolling_widget.cursor_x
-
-        if y == None or x == None or x > self.scrolling_widget.width - 12: return None
-        return int((y + self.scrolling_widget.adjustment_y.get_value()) // self.line_height)
-
 

@@ -32,12 +32,16 @@ class DocumentList(object):
 
     def __init__(self, workspace, main_window):
         self.workspace = workspace
+        self.main_window = main_window
         self.view = main_window.document_list
 
+        self.documents = self.workspace.documents
+        self.search_terms = []
         self.selected_index = None
 
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
+        self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
 
         self.context_menu = ContextMenuDocumentList(self)
 
@@ -45,7 +49,12 @@ class DocumentList(object):
         self.update()
 
     def update(self):
-        self.view.scrolling_widget.set_size(1, max(len(self.workspace.documents) * self.view.line_height, 1))
+        self.documents = []
+        for document in self.workspace.documents:
+            if self.search_terms_in_document(document):
+                self.documents.append(document)
+
+        self.view.scrolling_widget.set_size(1, max(len(self.documents) * self.view.line_height, 1))
         self.view.scrolling_widget.queue_draw()
 
     def set_selected_index(self, index):
@@ -54,23 +63,27 @@ class DocumentList(object):
             self.view.content.queue_draw()
 
     def activate_item(self, index):
-        self.workspace.set_active_document(self.workspace.documents[index])
+        self.workspace.set_active_document(self.documents[index])
 
     def on_primary_button_press(self, scrolling_widget, data):
         x_offset, y_offset, state = data
 
         if state == 0:
-            item_num = self.view.get_item_at_cursor()
-            if item_num != None and item_num < len(self.workspace.documents):
+            item_num = self.get_item_at_cursor()
+            if item_num != None and item_num < len(self.documents):
                 self.set_selected_index(item_num)
 
     def on_primary_button_release(self, scrolling_widget, data):
         x_offset, y_offset, state = data
 
-        item_num = self.view.get_item_at_cursor()
+        item_num = self.get_item_at_cursor()
         if item_num != None and item_num == self.selected_index:
             self.activate_item(item_num)
         self.set_selected_index(None)
+
+    def on_search_entry_changed(self, entry, data=None):
+        self.search_terms = entry.get_text().split()
+        self.update()
 
     #@helpers.timer
     def draw(self, widget, ctx, width, height):
@@ -93,7 +106,7 @@ class DocumentList(object):
         ctx.fill()
         Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
 
-        for i, document in enumerate(self.workspace.documents):
+        for i, document in enumerate(self.documents):
             highlight_active = (document == self.workspace.active_document and self.workspace.mode == 'documents')
             if highlight_active:
                 title_color = active_fg_color
@@ -108,7 +121,7 @@ class DocumentList(object):
                 Gdk.cairo_set_source_rgba(ctx, selected_color)
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
-            elif not highlight_active and i == self.view.get_item_at_cursor():
+            elif not highlight_active and i == self.get_item_at_cursor():
                 Gdk.cairo_set_source_rgba(ctx, hover_color)
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
@@ -139,6 +152,17 @@ class DocumentList(object):
             ctx.move_to(15, self.view.line_height * i + 35 - scrolling_offset)
             self.view.layout_teaser.set_text(teaser_text)
             PangoCairo.show_layout(ctx, self.view.layout_teaser)
+
+    def search_terms_in_document(self, document):
+        if len(self.search_terms) == 0: return True
+        return min(map(lambda x: x in document.plaintext or x in document.title, self.search_terms))
+
+    def get_item_at_cursor(self):
+        y = self.view.scrolling_widget.cursor_y
+        x = self.view.scrolling_widget.cursor_x
+
+        if y == None or x == None or x > self.view.scrolling_widget.width - 12: return None
+        return int((y + self.view.scrolling_widget.adjustment_y.get_value()) // self.view.line_height)
 
     def get_last_modified_string(self, document):
         datetime_today, datetime_this_week, datetime_this_year = ServiceLocator.get_datetimes_today_week_year()
