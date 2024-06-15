@@ -42,6 +42,7 @@ class DocumentList(object):
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
+        self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)
 
         self.context_menu = ContextMenuDocumentList(self)
 
@@ -83,7 +84,17 @@ class DocumentList(object):
 
     def on_search_entry_changed(self, entry, data=None):
         self.search_terms = entry.get_text().split()
+
+        if len(self.search_terms) > 0:
+            self.main_window.headerbar.hb_left.search_entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, 'edit-clear-symbolic')
+        else:
+            self.main_window.headerbar.hb_left.search_entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, None)
+
         self.update()
+
+    def on_search_entry_icon_released(self, entry, icon_pos, data=None):
+        if icon_pos == Gtk.EntryIconPosition.SECONDARY:
+            self.main_window.headerbar.hb_left.search_entry.set_text('')
 
     #@helpers.timer
     def draw(self, widget, ctx, width, height):

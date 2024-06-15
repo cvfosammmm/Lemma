@@ -20,27 +20,26 @@ scrollbar.hidden slider {
 
 /* headerbar */
 
-headerbar.left {
+windowhandle.left {
     background-color: @headerbar_bg_1;
     border-bottom: 1px solid @header_border_bottom_1;
     box-shadow: none;
 }
-headerbar.left box {
-    border: none;
-    padding: 0px;
-}
-headerbar.left box.end {
-    padding: 6px;
+windowhandle.left button {
+    margin: 6px;
 }
 entry.search {
     outline: None;
     border-radius: 0px;
-    background: None;
+    background: @headerbar_bg_1;
     padding: 0px;
     color: @sidebar_fg_1;
 }
 entry.search text {
     padding-left: 16px;
+}
+entry.search image.right {
+    padding: 10px;
 }
 
 windowhandle.right {

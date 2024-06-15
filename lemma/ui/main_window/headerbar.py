@@ -42,17 +42,23 @@ class HeaderBar(Gtk.Paned):
         self.set_end_child(self.hb_right)
 
 
-class HeaderBarLeft(Gtk.HeaderBar):
+class HeaderBarLeft(Gtk.WindowHandle):
 
     def __init__(self):
-        Gtk.HeaderBar.__init__(self)
+        Gtk.WindowHandle.__init__(self)
         self.add_css_class('left')
-
-        button_layout = ServiceLocator.get_settings().button_layout
-        show_title_buttons = True if (button_layout.find('close') < button_layout.find(':') and button_layout.find('close') >= 0) else False
-
         self.set_size_request(250, -1)
-        self.set_show_title_buttons(show_title_buttons)
+
+        self.box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.set_child(self.box)
+
+        # search
+        self.search_entry = Gtk.Entry()
+        self.search_entry.set_placeholder_text(_('Search') + '…')
+        self.search_entry.add_css_class('flat')
+        self.search_entry.add_css_class('search')
+        self.search_entry.set_hexpand(True)
+        self.box.append(self.search_entry)
 
         # workspace menu
         self.hamburger_menu_button = PopoverManager.create_popover_button('hamburger_menu')
@@ -60,24 +66,7 @@ class HeaderBarLeft(Gtk.HeaderBar):
         self.hamburger_menu_button.set_can_focus(False)
         self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (F10)')
         self.hamburger_menu_button.add_css_class('flat')
-        self.pack_end(self.hamburger_menu_button)
-
-        # add menu
-        self.add_menu_button = PopoverManager.create_popover_button('add_menu')
-        self.add_menu_button.set_child(Gtk.Image.new_from_icon_name('list-add-symbolic'))
-        self.add_menu_button.set_can_focus(False)
-        self.add_menu_button.set_tooltip_text(_('Add Documents'))
-        self.add_menu_button.add_css_class('flat')
-        self.pack_end(self.add_menu_button)
-
-        # add menu
-        self.search_entry = Gtk.Entry()
-        self.search_entry.set_placeholder_text(_('Search') + '…')
-        self.search_entry.add_css_class('flat')
-        self.search_entry.add_css_class('search')
-        self.pack_start(self.search_entry)
-
-        self.set_title_widget(Gtk.Label())
+        self.box.append(self.hamburger_menu_button)
 
 
 class HeaderBarRight(Gtk.WindowHandle):
@@ -110,11 +99,16 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.history_overlay = Gtk.Overlay()
         self.box.append(self.history_overlay)
 
+        self.add_menu_button = PopoverManager.create_popover_button('add_menu')
+        self.add_menu_button.set_child(Gtk.Image.new_from_icon_name('list-add-symbolic'))
+        self.add_menu_button.set_can_focus(False)
+        self.add_menu_button.set_tooltip_text(_('Add Documents'))
+        self.add_menu_button.add_css_class('flat')
+        self.box.append(self.add_menu_button)
+
         # window buttons
-        button_layout = ServiceLocator.get_settings().button_layout
-        show_title_buttons = True if (button_layout.find('close') > button_layout.find(':') and button_layout.find('close') >= 0) else False
         self.headerbar = Gtk.HeaderBar()
-        self.headerbar.set_show_title_buttons(show_title_buttons)
+        self.headerbar.set_show_title_buttons(True)
         self.headerbar.set_title_widget(Gtk.Label.new(''))
         self.box.append(self.headerbar)
 
