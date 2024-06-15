@@ -73,6 +73,7 @@ class HeaderBarLeft(Gtk.HeaderBar):
         # add menu
         self.search_entry = Gtk.Entry()
         self.search_entry.set_placeholder_text(_('Search') + '…')
+        self.search_entry.add_css_class('flat')
         self.search_entry.add_css_class('search')
         self.pack_start(self.search_entry)
 
