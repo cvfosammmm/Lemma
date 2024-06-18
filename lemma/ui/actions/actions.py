@@ -71,12 +71,27 @@ class Actions(object):
         self.actions['quit'] = Gio.SimpleAction.new('quit', None)
         self.main_window.add_action(self.actions['quit'])
 
+        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
+        self.workspace.history.connect('changed', self.on_history_change)
+        self.workspace.connect('new_document', self.on_new_document)
+        self.workspace.connect('document_removed', self.on_document_removed)
+        self.workspace.connect('new_active_document', self.on_new_active_document)
+        self.workspace.connect('document_changed', self.on_document_change)
+        self.workspace.connect('mode_set', self.on_mode_set)
         self.update()
 
     def add_simple_action(self, name, callback, parameter=None):
         self.actions[name] = Gio.SimpleAction.new(name, parameter)
         self.main_window.add_action(self.actions[name])
         self.actions[name].connect('activate', callback)
+
+    def on_clipboard_changed(self, clipboard): self.update()
+    def on_history_change(self, history): self.update()
+    def on_new_document(self, workspace, document=None): self.update()
+    def on_document_removed(self, workspace, document=None): self.update()
+    def on_new_active_document(self, workspace, document=None): self.update()
+    def on_document_change(self, workspace, document): self.update()
+    def on_mode_set(self, workspace): self.update()
 
     def update(self):
         active_document = self.workspace.active_document

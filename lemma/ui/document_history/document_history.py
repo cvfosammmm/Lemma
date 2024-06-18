@@ -44,7 +44,13 @@ class DocumentHistory(object):
         self.view.content.set_draw_func(self.draw)
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
+
+        self.workspace.history.connect('changed', self.on_history_change)
+        self.workspace.connect('new_active_document', self.on_new_active_document)
         self.update()
+
+    def on_history_change(self, history): self.update()
+    def on_new_active_document(self, workspace, document=None): self.update()
 
     def update(self):
         self.update_size()

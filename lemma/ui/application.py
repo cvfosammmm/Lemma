@@ -16,11 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import gi
-gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-from gi.repository import Gtk, Gdk, Adw
+from gi.repository import Adw
 
-from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
@@ -59,56 +57,5 @@ class Application(Adw.Application):
         self.actions = actions.Actions(self.workspace, self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.panels = panels.Panels(self.workspace, self.main_window, self)
-
-        self.document = self.workspace.get_active_document()
-        if self.document != None: self.document.connect('changed', self.on_document_change)
-
-        self.workspace.connect('new_document', self.on_new_document)
-        self.workspace.connect('document_removed', self.on_document_removed)
-        self.workspace.connect('new_active_document', self.on_new_active_document)
-        self.workspace.connect('mode_set', self.on_mode_set)
-        self.workspace.history.connect('changed', self.on_history_change)
-        ServiceLocator.get_settings().connect('settings_changed', self.on_settings_changed)
-        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
-
-    def on_settings_changed(self, settings, parameter):
-        section, item, value = parameter
-
-        if item == 'color_scheme':
-            self.colors.update()
-
-    def on_clipboard_changed(self, clipboard):
-        self.actions.update()
-
-    def on_history_change(self, history):
-        self.actions.update()
-        self.document_history.update()
-
-    def on_new_document(self, workspace, document=None):
-        self.actions.update()
-        self.document_list.update()
-
-    def on_document_removed(self, workspace, document=None):
-        self.actions.update()
-        self.document_list.update()
-
-    def on_new_active_document(self, workspace, document=None):
-        if self.document != None: self.document.disconnect('changed', self.on_document_change)
-        self.document = document
-        if document != None: self.document.connect('changed', self.on_document_change)
-
-        self.panels.update()
-        self.actions.update()
-        self.document_history.update()
-        self.document_list.update()
-
-    def on_document_change(self, document):
-        self.actions.update()
-        self.document_list.update()
-
-    def on_mode_set(self, workspace):
-        self.panels.update()
-        self.actions.update()
-        self.document_draft.update()
 
 

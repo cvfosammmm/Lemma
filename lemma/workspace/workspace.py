@@ -103,6 +103,7 @@ class Workspace(Observable):
     def on_document_change(self, document):
         self.update_links(document)
         self.documents.sort(key=attrgetter('last_modified'), reverse=True)
+        self.add_change_code('document_changed', document)
 
     def update_links(self, document):
         if document.title in self.links_by_source:

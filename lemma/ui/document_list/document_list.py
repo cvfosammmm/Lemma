@@ -47,7 +47,17 @@ class DocumentList(object):
         self.context_menu = ContextMenuDocumentList(self)
 
         self.view.content.set_draw_func(self.draw)
+
+        self.workspace.connect('new_document', self.on_new_document)
+        self.workspace.connect('document_removed', self.on_document_removed)
+        self.workspace.connect('document_changed', self.on_document_change)
+        self.workspace.connect('new_active_document', self.on_new_active_document)
         self.update()
+
+    def on_new_document(self, workspace, document=None): self.update()
+    def on_document_removed(self, workspace, document=None): self.update()
+    def on_document_change(self, workspace, document): self.update()
+    def on_new_active_document(self, workspace, document=None): self.update()
 
     def update(self):
         self.documents = []

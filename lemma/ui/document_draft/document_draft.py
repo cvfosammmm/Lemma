@@ -46,6 +46,11 @@ class DocumentDraft():
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
         self.view.title_entry.add_controller(self.key_controller_window)
 
+        self.workspace.connect('mode_set', self.on_mode_set)
+        self.update()
+
+    def on_mode_set(self, workspace): self.update()
+
     def update(self):
         if self.workspace.mode == 'draft':
             self.init()

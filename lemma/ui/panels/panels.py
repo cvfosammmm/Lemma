@@ -34,7 +34,13 @@ class Panels(object):
         self.main_window.toolbar.math_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
 
         self.restore_window_state()
+
+        self.workspace.connect('new_active_document', self.on_new_active_document)
+        self.workspace.connect('mode_set', self.on_mode_set)
         self.update()
+
+    def on_new_active_document(self, workspace, document=None): self.update()
+    def on_mode_set(self, workspace): self.update()
 
     def update(self):
         if self.workspace.mode == 'documents' and self.workspace.active_document != None:
