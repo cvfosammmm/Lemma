@@ -64,10 +64,14 @@ overlay.history scrollbar {
 
 actionbar {
     border-top: 1px solid @bodypaned_border;
+    padding: 0px;
 }
 actionbar box {
     background: @window_bg_color;
     box-shadow: none;
+}
+actionbar revealer > box {
+    padding: 6px;
 }
 
 /* link-overlay */
