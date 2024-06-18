@@ -94,23 +94,17 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.back_forward_box.append(self.back_button)
         self.back_forward_box.append(self.forward_button)
         self.back_forward_box.add_css_class('linked')
+        self.back_forward_box.add_css_class('buttonbox')
         self.box.append(self.back_forward_box)
 
         self.history_overlay = Gtk.Overlay()
         self.box.append(self.history_overlay)
 
-        self.add_menu_button = PopoverManager.create_popover_button('add_menu')
-        self.add_menu_button.set_child(Gtk.Image.new_from_icon_name('list-add-symbolic'))
-        self.add_menu_button.set_can_focus(False)
-        self.add_menu_button.set_tooltip_text(_('Add Documents'))
-        self.add_menu_button.add_css_class('flat')
-        self.box.append(self.add_menu_button)
-
-        # window buttons
-        self.headerbar = Gtk.HeaderBar()
-        self.headerbar.set_show_title_buttons(True)
-        self.headerbar.set_title_widget(Gtk.Label.new(''))
-        self.box.append(self.headerbar)
+        self.add_document_button = Gtk.Button.new_from_icon_name('list-add-symbolic')
+        self.add_document_button.set_action_name('win.add-document')
+        self.add_document_button.set_can_focus(False)
+        self.add_document_button.set_tooltip_text(_('New Document') + ' (' + _('Ctrl') + '+N)')
+        self.add_document_button.add_css_class('flat')
 
         self.document_menu_button = PopoverManager.create_popover_button('document_menu')
         self.document_menu_button.set_child(Gtk.Image.new_from_icon_name('view-more-symbolic'))
@@ -118,6 +112,15 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (F12)')
         self.document_menu_button.add_css_class('flat')
         self.document_menu_button.set_action_name('win.show-document-menu')
-        self.headerbar.pack_start(self.document_menu_button)
+
+        self.add_docmenu_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.add_docmenu_box.append(self.add_document_button)
+        self.add_docmenu_box.append(self.document_menu_button)
+        self.add_docmenu_box.add_css_class('buttonbox')
+        self.box.append(self.add_docmenu_box)
+
+        # window buttons
+        self.window_controls = Gtk.WindowControls.new(Gtk.PackType.END)
+        self.box.append(self.window_controls)
 
 

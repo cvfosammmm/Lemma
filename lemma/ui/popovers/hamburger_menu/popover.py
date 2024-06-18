@@ -51,6 +51,12 @@ class View(PopoverBottom):
 
         self.set_width(306)
 
+        self.button_import_markdown = MenuBuilder.create_button(_('Import Markdown Files...'))
+        self.button_import_markdown.set_action_name('win.import-markdown-files')
+        self.add_closing_button(self.button_import_markdown)
+
+        self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
+
         self.button_shortcuts = MenuBuilder.create_button(_('Keyboard Shortcuts'), shortcut=_('Ctrl') + '+?')
         self.button_shortcuts.set_action_name('win.show-shortcuts-dialog')
         self.add_closing_button(self.button_shortcuts)

@@ -45,22 +45,12 @@ entry.search image.right {
 windowhandle.right {
     background-color: @headerbar_bg_2;
     border-bottom: 1px solid @header_border_bottom_2;
-}
-windowhandle.right headerbar {
-    background-color: @headerbar_bg_2;
-    border-bottom-width: 0px;
-    box-shadow: none;
-}
-windowhandle.right headerbar box > box.start {
-    margin-right: 2px;
-}
-windowhandle.right headerbar box > box.end {
-    margin-left: 0px;
+    padding-right: 6px;
 }
 windowhandle.right > box {
     padding: 0px;
 }
-windowhandle.right > box > box.linked {
+windowhandle.right > box > box.buttonbox {
     margin-top: 6px;
     margin-bottom: 6px;
     margin-left: 6px;

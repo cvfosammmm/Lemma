@@ -84,11 +84,12 @@ class DocumentList(object):
 
     def on_search_entry_changed(self, entry, data=None):
         self.search_terms = entry.get_text().split()
+        entry = self.main_window.headerbar.hb_left.search_entry
 
         if len(self.search_terms) > 0:
-            self.main_window.headerbar.hb_left.search_entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, 'edit-clear-symbolic')
+            entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, 'edit-clear-symbolic')
         else:
-            self.main_window.headerbar.hb_left.search_entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, None)
+            entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, None)
 
         self.update()
 
