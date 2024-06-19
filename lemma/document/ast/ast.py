@@ -31,20 +31,10 @@ class AST(object):
     ''' cursor movement '''
 
     def move_insert_left(self):
-        prev_node = self.get_insert_node().prev()
-        if prev_node != None:
-            self.move_insert_to_node(prev_node)
+        self.move_insert_to_node(self.get_insert_node().prev())
 
     def move_insert_right(self):
-        next_node = self.get_insert_node().next()
-        if next_node != None:
-            self.move_insert_to_node(next_node)
-
-    def move_insert_to_node(self, node):
-        self.cursor.set_insert_selection_nodes(node, node)
-
-    def move_selection_bound_to_node(self, node):
-        self.cursor.set_selection_node(node)
+        self.move_insert_to_node(self.get_insert_node().next())
 
     def move_insert_left_with_selection(self):
         self.move_insert_to_node_with_selection(self.get_insert_node().prev_no_descent())
@@ -52,9 +42,18 @@ class AST(object):
     def move_insert_right_with_selection(self):
         self.move_insert_to_node_with_selection(self.get_insert_node().next_no_descent())
 
+    def move_insert_to_node(self, node):
+        if node != None:
+            self.cursor.set_insert_selection_nodes(node, node)
+
+    def move_selection_bound_to_node(self, node):
+        if node != None:
+            self.cursor.set_selection_node(node)
+
     def move_insert_to_node_with_selection(self, node):
-        self.cursor.set_insert_node(node)
-        self.cursor.restore_selection_invariant()
+        if node != None:
+            self.cursor.set_insert_node(node)
+            self.cursor.restore_selection_invariant()
 
     def set_cursor_state(self, position):
         self.cursor.set_insert_position(position[0])
