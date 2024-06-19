@@ -58,6 +58,7 @@ class DocumentViewController():
 
     def on_primary_button_press(self, content, data):
         x, y, state = data
+        modifiers = Gtk.accelerator_get_default_mod_mask()
 
         self.document_view.selected_link_target = None
 
@@ -66,14 +67,20 @@ class DocumentViewController():
 
         if y < -self.view.subtitle_height:
             self.document_view.init_renaming()
+
         elif y > 0:
             document = self.document_view.document
-
             link = document.get_link_at_xy(x, y)
-            if state == 0 and link != None:
-                self.document_view.selected_link_target = link.target
-            else:
-                document.add_command('move_cursor_to_xy', x, y)
+
+            if state == 0:
+                if link != None:
+                    self.document_view.selected_link_target = link.target
+                else:
+                    document.add_command('move_cursor_to_xy', x, y)
+
+            elif int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
+                document.add_command('selection_xy', x, y)
+
             self.content.grab_focus()
 
     def on_primary_button_release(self, content, data):

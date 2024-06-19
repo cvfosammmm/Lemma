@@ -131,7 +131,7 @@ class DocumentViewPresenter():
 
             if pos >= self.first_cursor_pos and pos < self.last_cursor_pos:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-                ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, FontManager.get_cursor_height())
+                ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()
 
             if node.is_mathsymbol():
