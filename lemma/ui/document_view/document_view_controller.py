@@ -51,6 +51,12 @@ class DocumentViewController():
         self.focus_controller.connect('leave', self.on_focus_out)
         self.content.add_controller(self.focus_controller)
 
+        self.drag_controller = Gtk.GestureDrag()
+        self.drag_controller.connect('drag-begin', self.on_drag_begin)
+        self.drag_controller.connect('drag-update', self.on_drag_update)
+        self.drag_controller.connect('drag-end', self.on_drag_end)
+        self.content.add_controller(self.drag_controller)
+
         self.view.scrolling_widget.connect('size_changed', self.on_size_change)
         self.view.scrolling_widget.connect('scrolling_offset_changed', self.on_scrolling_offset_change)
         self.view.scrolling_widget.connect('hover_state_changed', self.on_hover_state_changed)
@@ -96,6 +102,28 @@ class DocumentViewController():
                 link = document.get_link_at_xy(x, y)
                 if link != None and link.target == self.document_view.selected_link_target:
                     self.open_link(link.target)
+
+    def on_drag_begin(self, gesture, x, y, data=None):
+        x -= self.view.padding_left
+        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        y += self.view.scrolling_widget.scrolling_offset_y
+
+        if y <= 0:
+            gesture.reset()
+
+    def on_drag_update(self, gesture, x, y, data=None):
+        start_point = gesture.get_start_point()
+        x, y = start_point.x + x, start_point.y + y
+        x -= self.view.padding_left
+        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        y += self.view.scrolling_widget.scrolling_offset_y
+
+        if y > 0:
+            document = self.document_view.document
+            document.add_command('selection_xy', x, y)
+
+    def on_drag_end(self, gesture, x, y, data=None):
+        pass
 
     def on_modifiers_change(self, controller, state):
         self.update_cursor()
