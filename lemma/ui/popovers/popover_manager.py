@@ -30,6 +30,7 @@ class PopoverManager():
     popovers = dict()
     popover_buttons = dict()
     current_popover_name = None
+    prev_focus_widget = None
     main_window = None
     workspace = None
     popoverlay = None
@@ -91,6 +92,7 @@ class PopoverManager():
             popover.view.arrow.set_margin_start(popover.view.width / 2 - arrow_width / 2)
         popover.view.set_margin_top(max(0, y))
 
+        PopoverManager.remember_focus_widget()
         PopoverManager.current_popover_name = name
         PopoverManager.popoverlay.add_overlay(popover.view)
         PopoverManager.inbetween.set_can_target(True)
@@ -115,7 +117,15 @@ class PopoverManager():
             PopoverManager.popover_buttons[name].set_active(False)
 
         PopoverManager.add_change_code('popdown', name)
-        PopoverManager.main_window.document_view.scrolling_widget.content.grab_focus()
+        if PopoverManager.prev_focus_widget != None:
+            PopoverManager.prev_focus_widget.grab_focus()
+            PopoverManager.prev_focus_widget = None
+
+    def remember_focus_widget():
+        widget = PopoverManager.main_window
+        while widget.get_focus_child() != None:
+            widget = widget.get_focus_child()
+        PopoverManager.prev_focus_widget = widget
 
     def on_click_inbetween(controller, n_press, x, y):
         PopoverManager.popdown()
