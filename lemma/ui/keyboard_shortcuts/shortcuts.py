@@ -22,6 +22,7 @@ from gi.repository import Gtk
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.ui.keyboard_shortcuts.shortcut_controller_app import ShortcutControllerApp
+from lemma.ui.keyboard_shortcuts.shortcut_controller_document import ShortcutControllerDocument
 
 
 class Shortcuts(object):
@@ -31,7 +32,10 @@ class Shortcuts(object):
         self.actions = actions
 
         self.shortcut_controller_app = ShortcutControllerApp(self.actions)
+        self.shortcut_controller_document = ShortcutControllerDocument(self.actions)
+
         self.main_window.add_controller(self.shortcut_controller_app)
+        self.main_window.document_view.scrolling_widget.content.add_controller(self.shortcut_controller_document)
 
         PopoverManager.connect('popup', self.on_popover_popup)
         PopoverManager.connect('popdown', self.on_popover_popdown)

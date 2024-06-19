@@ -22,7 +22,7 @@ from gi.repository import Gtk
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
 
 
-class ShortcutControllerApp(ShortcutController):
+class ShortcutControllerDocument(ShortcutController):
 
     def __init__(self, actions):
         ShortcutController.__init__(self)
@@ -30,15 +30,14 @@ class ShortcutControllerApp(ShortcutController):
 
         self.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
 
-        self.create_and_add_shortcut('<Control>q', self.actions.actions['quit'].activate)
-        self.create_and_add_shortcut('<Control>n', self.actions.actions['add-document'].activate)
-        self.create_and_add_shortcut('<Alt>Left', self.actions.actions['go-back'].activate)
-        self.create_and_add_shortcut('<Alt>Right', self.actions.actions['go-forward'].activate)
-        self.create_and_add_shortcut('F2', self.actions.actions['rename-document'].activate)
-        self.create_and_add_shortcut('<Control>e', self.actions.actions['export-as'].activate)
-        self.create_and_add_shortcut('<Control>question', self.actions.actions['show-shortcuts-dialog'].activate)
-        self.create_and_add_shortcut('<Control>m', self.actions.actions['toggle-math-sidebar'].activate)
-        self.create_and_add_shortcut('F10', self.actions.actions['show-hamburger-menu'].activate)
-        self.create_and_add_shortcut('F12', self.actions.actions['show-document-menu'].activate)
+        self.create_and_add_shortcut('<Control>b', self.actions.actions['toggle-bold'].activate)
+        self.create_and_add_shortcut('<Control>i', self.actions.actions['toggle-italic'].activate)
+        self.create_and_add_shortcut('<Control>l', self.actions.actions['insert-link'].activate)
+        self.create_and_add_shortcut('<Control>z', self.actions.actions['undo'].activate)
+        self.create_and_add_shortcut('<Control><Shift>z', self.actions.actions['redo'].activate)
+        self.create_and_add_shortcut('<Control>x', self.actions.actions['cut'].activate)
+        self.create_and_add_shortcut('<Control>c', self.actions.actions['copy'].activate)
+        self.create_and_add_shortcut('<Control>v', self.actions.actions['paste'].activate)
+        self.create_and_add_shortcut('<Control>a', self.actions.actions['select-all'].activate)
 
 
