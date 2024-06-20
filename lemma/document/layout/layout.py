@@ -18,27 +18,38 @@
 from lemma.infrastructure.font_manager import FontManager
 
 
-class BoxVContainer(object):
+class Box(object):
 
-    def __init__(self):
-        self.width = 0
-        self.height = 0
-        self.classes = set()
+    def __init__(self, box_type, width=0, height=0, left=0, top=0, node=None):
+        self.type = box_type
+        self.width = width
+        self.height = height
+        self.left = left
+        self.top = top
 
         self.parent = None
         self.children = list()
 
+        self.classes = set()
+        self.node = node
+
     def add(self, child):
         self.children.append(child)
-        self.height += child.height
-        self.width = max(child.width, self.width)
         child.set_parent(self)
+        self.update_size(child)
 
     def insert(self, position, child):
         self.children.insert(position, child)
-        self.height = max(child.height, self.height)
-        self.width += child.width
         child.set_parent(self)
+        self.update_size(child)
+
+    def update_size(self, new_child):
+        if self.is_vertical():
+            self.height += new_child.height
+            self.width = max(new_child.width, self.width)
+        else:
+            self.height = max(new_child.height, self.height)
+            self.width += new_child.width
 
     def get_xy_at_child(self, box):
         x = 0
@@ -46,7 +57,10 @@ class BoxVContainer(object):
         for child in self.children:
             if child == box:
                 break
-            y += child.height
+            if self.is_vertical():
+                y += child.height
+            else:
+                x += child.width
         return (x, y)
 
     def get_node_at_xy(self, x, y):
@@ -82,246 +96,33 @@ class BoxVContainer(object):
             return node.link
 
     def get_child_at_xy(self, x, y):
-        current_child, current_height = (None, 0)
-        for child in self.children:
-            current_child = child
-            if current_height + child.height + FontManager.get_descend() + FontManager.get_line_space() / 2 <= y:
-                current_height += child.height
-            else:
-                break
-        return (current_child, 0, current_height)
+        if self.is_vertical():
+            current_child, current_height = (None, 0)
+
+            for child in self.children:
+                current_child = child
+                if current_height + child.height + FontManager.get_descend() + FontManager.get_line_space() / 2 <= y:
+                    current_height += child.height
+                else:
+                    break
+            return (current_child, 0, current_height)
+
+        else:
+            current_child, current_width = (None, 0)
+
+            for child in self.children:
+                current_child = child
+                if current_width == x:
+                    break
+                elif current_width + child.width <= x:
+                    current_width += child.width
+                else:
+                    break
+            return (current_child, current_width, 0)
 
     def set_parent(self, parent): self.parent = parent
-    def is_leaf(self): return False
-    def get_node(self): return None
-
-
-class BoxHContainer(object):
-
-    def __init__(self):
-        self.width = 0
-        self.height = FontManager.get_line_height()
-        self.classes = set()
-
-        self.parent = None
-        self.children = list()
-
-    def add(self, child):
-        self.children.append(child)
-        self.height = max(child.height, self.height)
-        self.width += child.width
-        child.set_parent(self)
-
-    def insert(self, position, child):
-        self.children.insert(position, child)
-        self.height = max(child.height, self.height)
-        self.width += child.width
-        child.set_parent(self)
-
-    def get_xy_at_child(self, box):
-        x = 0
-        y = 0
-        for child in self.children:
-            if child == box:
-                break
-            x += child.width
-        return (x, y)
-
-    def get_node_at_xy(self, x, y):
-        x = max(0, min(self.width, x))
-        if y > self.height: x = self.width
-        y = max(0, min(self.height, y))
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_node_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            if x > self.width / 2 and x < self.width:
-                node = node.next()
-            return node
-
-    def get_link_at_xy(self, x, y):
-        if y > self.height or y < 0 or x > self.width or x < 0: return
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_link_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            return node.link
-
-    def get_child_at_xy(self, x, y):
-        current_child, current_width = (None, 0)
-        for child in self.children:
-            current_child = child
-            if current_width == x:
-                break
-            elif current_width + child.width <= x:
-                current_width += child.width
-            else:
-                break
-        return (current_child, current_width, 0)
-
-    def set_parent(self, parent): self.parent = parent
-    def is_leaf(self): return False
-    def get_node(self): return None
-
-
-class BoxGlyph(object):
-
-    def __init__(self, width, height, left, top, char, node=None):
-        self.width = width
-        self.height = height
-        self.left = left
-        self.top = top
-        self.classes = set()
-
-        self.parent = None
-        self.char = char
-        self.node = node
-
-    def get_node_at_xy(self, x, y):
-        x = max(0, min(self.width, x))
-        if y > self.height: x = self.width
-        y = max(0, min(self.height, y))
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_node_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            if x > self.width / 2 and x < self.width:
-                node = node.next()
-            return node
-
-    def get_link_at_xy(self, x, y):
-        if y > self.height or y < 0 or x > self.width or x < 0: return
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_link_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            return node.link
-
-    def set_parent(self, parent): self.parent = parent
-    def is_leaf(self): return True
-    def get_node(self): return self.node
-
-
-class BoxEmpty(object):
-
-    def __init__(self, node=None):
-        self.width = 0
-        self.height = 0
-        self.left = 0
-        self.top = 0
-        self.classes = set()
-
-        self.parent = None
-        self.node = node
-
-    def get_node_at_xy(self, x, y):
-        x = max(0, min(self.width, x))
-        if y > self.height: x = self.width
-        y = max(0, min(self.height, y))
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_node_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            if x > self.width / 2 and x < self.width:
-                node = node.next()
-            return node
-
-    def get_link_at_xy(self, x, y):
-        if y > self.height or y < 0 or x > self.width or x < 0: return
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_link_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            return node.link
-
-    def set_parent(self, parent): self.parent = parent
-    def is_leaf(self): return True
-    def get_node(self): return self.node
-
-
-class BoxPlaceholder(object):
-
-    def __init__(self, width, height, left, top, node=None):
-        self.width = width
-        self.height = height
-        self.left = left
-        self.top = top
-        self.classes = set()
-
-        self.parent = None
-        self.char = '•'
-        self.node = node
-
-    def get_node_at_xy(self, x, y):
-        x = max(0, min(self.width, x))
-        if y > self.height: x = self.width
-        y = max(0, min(self.height, y))
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_node_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            if x > self.width / 2 and x < self.width:
-                node = node.next()
-            return node
-
-    def get_link_at_xy(self, x, y):
-        if y > self.height or y < 0 or x > self.width or x < 0: return
-
-        x_offset, y_offset = (0, 0)
-        if not self.is_leaf():
-            box, x_offset, y_offset = self.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-            return box.get_link_at_xy(x, y)
-
-        else:
-            node = self.get_node()
-            return node.link
-
-    def set_parent(self, parent): self.parent = parent
-    def is_leaf(self): return True
+    def is_vertical(self): return self.type == 'vcontainer'
+    def is_leaf(self): return len(self.children) == 0
     def get_node(self): return self.node
 
 

@@ -24,7 +24,6 @@ import datetime
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
-import lemma.document.layout.layout as boxes
 
 
 class DocumentViewPresenter():
@@ -108,24 +107,24 @@ class DocumentViewPresenter():
 
     def draw_box(self, ctx, box, offset_x, offset_y):
         if box == self.model.document.ast.get_insert_node().box and not self.model.document.ast.has_selection():
-            if isinstance(box, boxes.BoxPlaceholder):
+            if box.type == 'placeholder':
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()
             else:
                 self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(), 1, FontManager.get_cursor_height())
 
-        if isinstance(box, boxes.BoxVContainer):
+        if box.type == 'vcontainer':
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_y += child.height
 
-        elif isinstance(box, boxes.BoxHContainer):
+        elif box.type == 'hcontainer':
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_x += child.width
 
-        elif isinstance(box, boxes.BoxGlyph) or isinstance(box, boxes.BoxPlaceholder):
+        elif box.type in ['glyph', 'placeholder']:
             node = box.node
             pos = node.get_position()
 
@@ -155,7 +154,7 @@ class DocumentViewPresenter():
                 else:
                     fontname = 'book'
 
-            surface = FontManager.get_surface(box.char, fontname=fontname)
+            surface = FontManager.get_surface(box.node.value, fontname=fontname)
 
             if surface != None:
                 ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.height + box.top)

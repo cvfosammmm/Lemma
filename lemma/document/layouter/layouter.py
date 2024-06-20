@@ -17,7 +17,7 @@
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.latex_db.latex_db import LaTeXDB
-import lemma.document.layout.layout as boxes
+from lemma.document.layout.layout import Box
 import lemma.helpers.helpers as helpers
 
 
@@ -26,12 +26,13 @@ class Layouter(object):
     def __init__(self, document):
         self.document = document
 
-        self.root = boxes.BoxVContainer()
-        self.current_line_box = boxes.BoxHContainer()
+        self.root = Box('vcontainer', width=0, height=0)
+        self.current_line_box = Box('hcontainer', width=0, height=FontManager.get_line_height())
+
         self.current_number = []
 
     def update(self):
-        self.root = boxes.BoxVContainer()
+        self.root = Box('vcontainer', width=0, height=0)
 
         node_lists = self.group_by_node_type(self.document.ast.root)
         for node_list in node_lists:
@@ -78,11 +79,11 @@ class Layouter(object):
         elif 'bold' not in node.tags and 'italic' in node.tags: fontname = 'italic'
         else: fontname = 'book'
 
-        for char, extents in zip(node_list, FontManager.get_char_extents_multi(text, fontname=fontname)):
+        for node, extents in zip(node_list, FontManager.get_char_extents_multi(text, fontname=fontname)):
             width, height, left, top = extents
             total_width += width
-            box = boxes.BoxGlyph(width, height, left, top, char.value, node=char)
-            char.set_box(box)
+            box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
+            node.set_box(box)
             char_boxes.append(box)
 
         if self.current_line_box.width > 0 and self.current_line_box.width + total_width > 670:
@@ -93,7 +94,7 @@ class Layouter(object):
 
     def process_node(self, node):
         if node.type == 'EOL':
-            box = boxes.BoxEmpty(node=node)
+            box = Box('empty', node=node)
             node.set_box(box)
 
             self.add_box(box)
@@ -101,14 +102,14 @@ class Layouter(object):
 
         elif node.type == 'placeholder':
             width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
-            box = boxes.BoxPlaceholder(width, height, left, top, node=node)
+            box = Box('placeholder', width=width, height=height, left=left, top=top, node=node)
             node.set_box(box)
 
             self.add_box(box)
 
         elif node.type == 'mathsymbol':
             width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
-            box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
+            box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
             box.classes.add('math')
             node.set_box(box)
 
@@ -116,7 +117,7 @@ class Layouter(object):
 
         elif node.type == 'char' and LaTeXDB.is_whitespace(node.value):
             width, height, left, top = FontManager.get_char_extents_single(node.value)
-            box = boxes.BoxGlyph(width, height, left, top, node.value, node=node)
+            box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
             node.set_box(box)
 
             self.add_box(box)
@@ -128,6 +129,6 @@ class Layouter(object):
 
     def break_line(self):
         self.root.add(self.current_line_box)
-        self.current_line_box = boxes.BoxHContainer()
+        self.current_line_box = Box('hcontainer', width=0, height=FontManager.get_line_height())
 
 
