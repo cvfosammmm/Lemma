@@ -40,7 +40,7 @@ class Node():
         node.set_parent(self)
 
     def append(self, node):
-        self.insert(-1, node)
+        self.insert(len(self.children), node)
 
     def remove(self, node):
         self.children.remove(node)

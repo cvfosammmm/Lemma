@@ -35,10 +35,9 @@ class Command():
 
         if content.startswith('# '):
             line, newline, rest = content.partition('\n')
-            document.title = line[1:].strip()
 
-            if rest != '':
-                document.ast.root = self.build_ast(document, rest)
+            document.title = line[1:].strip()
+            document.ast.root = self.build_ast(rest)
 
         document.ast.set_cursor_state([[0], [0]])
         document.set_scroll_insert_on_screen_after_layout_update()
@@ -46,44 +45,49 @@ class Command():
     def undo(self, document):
         pass
 
-    def build_ast(self, document, markdown):
+    def build_ast(self, markdown):
         root = Node('list')
-        root.insert(0, Node('EOL', '\n'))
 
-        parser = mistune.create_markdown(renderer=None)
-        for line in parser(markdown):
-            if line['type'] == 'blank_line':
-                root.append(Node('EOL', '\n'))
-            elif line['type'] == 'paragraph':
-                for section in line['children']:
-                    self.parse_section(document, root, section)
+        if markdown == '':
+            root.append(Node('EOL', '\n'))
+        else:
+            for line in markdown.splitlines():
+                if line != '':
+                    self.parse_markdown(root, line)
                 root.append(Node('EOL', '\n'))
 
         return root
 
-    def parse_section(self, document, root, section, tags=set(), link_target=None):
+    def parse_markdown(self, root, line):
+        parser = mistune.create_markdown(renderer=None)
+        for line in parser(line):
+            if line['type'] == 'paragraph':
+                for section in line['children']:
+                    self.parse_section(root, section)
+
+    def parse_section(self, root, section, tags=set(), link_target=None):
         if section['type'] == 'codespan':
-            self.add_math(document, root, section['raw'])
+            self.add_math(root, section['raw'])
         elif section['type'] == 'link':
             link_target = urllib.parse.unquote_plus(section['attrs']['url'])
             for child in section['children']:
-                self.parse_section(document, root, child, tags, link_target)
+                self.parse_section(root, child, tags, link_target)
         elif section['type'] == 'emphasis':
             tags.add('italic')
             for child in section['children']:
-                self.parse_section(document, root, child, tags, link_target)
+                self.parse_section(root, child, tags, link_target)
             tags.remove('italic')
         elif section['type'] == 'strong':
             tags.add('bold')
             for child in section['children']:
-                self.parse_section(document, root, child, tags, link_target)
+                self.parse_section(root, child, tags, link_target)
             tags.remove('bold')
         elif section['type'] == 'text':
-            self.add_non_math(document, root, section['raw'].strip('$'), tags, link_target)
+            self.add_non_math(root, section['raw'].strip('$'), tags, link_target)
         elif section['type'] == 'softbreak':
             root.append(Node('EOL', '\n'))
 
-    def add_non_math(self, document, composite, text, tags, link_target=None):
+    def add_non_math(self, composite, text, tags, link_target=None):
         for char in text:
             if char != '\n':
                 node = Node('char', char)
@@ -92,7 +96,7 @@ class Command():
                     node.link = Link(link_target)
                 composite.append(node)
 
-    def add_math(self, document, composite, text):
+    def add_math(self, composite, text):
         for char in text:
             composite.append(Node('mathsymbol', char))
 

@@ -37,7 +37,6 @@ class MarkdownScanner(object):
             self.process_node(child)
         self.close_current_tags()
 
-        self.markdown = self.markdown[:-1] # remove last EOL
         self.document.markdown = self.markdown
 
     def process_node(self, node):
