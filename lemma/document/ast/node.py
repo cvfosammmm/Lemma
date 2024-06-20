@@ -114,6 +114,18 @@ class Node():
 
         return (node1.get_position(), node2.get_position())
 
+    def get_xy(self):
+        box = self.box
+        x, y = (0, 0)
+
+        while not box.parent == None:
+            new_x, new_y = box.parent.get_xy_at_child(box)
+            x += new_x
+            y += new_y
+            box = box.parent
+
+        return x, y
+
     def prev(self):
         node = self
         if node != node.parent[0]:

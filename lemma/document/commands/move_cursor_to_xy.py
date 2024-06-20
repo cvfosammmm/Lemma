@@ -28,7 +28,7 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
 
-        document.ast.move_insert_to_node(document.get_node_at_xy(self.x, self.y))
+        document.ast.move_insert_to_node(document.layout.get_node_at_xy(self.x, self.y))
 
     def undo(self, document):
         document.ast.set_cursor_state(self.state['cursor_state_before'])

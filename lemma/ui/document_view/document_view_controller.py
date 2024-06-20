@@ -76,16 +76,19 @@ class DocumentViewController():
 
         elif y > 0:
             document = self.document_view.document
-            link = document.get_link_at_xy(x, y)
+            link = document.layout.get_link_at_xy(x, y)
 
-            if state == 0:
+            if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
+                document.add_command('selection_xy', x, y)
+
+            elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
+                document.add_command('move_cursor_to_xy', x, y)
+
+            else:
                 if link != None:
                     self.document_view.selected_link_target = link.target
                 else:
                     document.add_command('move_cursor_to_xy', x, y)
-
-            elif int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                document.add_command('selection_xy', x, y)
 
             self.content.grab_focus()
 
@@ -99,7 +102,7 @@ class DocumentViewController():
             if y >= -self.view.subtitle_height:
                 document = self.document_view.document
 
-                link = document.get_link_at_xy(x, y)
+                link = document.layout.get_link_at_xy(x, y)
                 if link != None and link.target == self.document_view.selected_link_target:
                     self.open_link(link.target)
 
@@ -200,7 +203,7 @@ class DocumentViewController():
             self.content.set_cursor_from_name('text')
         elif y > 0:
             document = self.document_view.document
-            link = document.get_link_at_xy(x, y)
+            link = document.layout.get_link_at_xy(x, y)
             if link != None:
                 self.content.set_cursor_from_name('pointer')
             else:

@@ -49,6 +49,38 @@ class BoxVContainer(object):
             y += child.height
         return (x, y)
 
+    def get_node_at_xy(self, x, y):
+        x = max(0, min(self.width, x))
+        if y > self.height: x = self.width
+        y = max(0, min(self.height, y))
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_node_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            if x > self.width / 2 and x < self.width:
+                node = node.next()
+            return node
+
+    def get_link_at_xy(self, x, y):
+        if y > self.height or y < 0 or x > self.width or x < 0: return
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_link_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            return node.link
+
     def get_child_at_xy(self, x, y):
         current_child, current_height = (None, 0)
         for child in self.children:
@@ -95,6 +127,38 @@ class BoxHContainer(object):
             x += child.width
         return (x, y)
 
+    def get_node_at_xy(self, x, y):
+        x = max(0, min(self.width, x))
+        if y > self.height: x = self.width
+        y = max(0, min(self.height, y))
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_node_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            if x > self.width / 2 and x < self.width:
+                node = node.next()
+            return node
+
+    def get_link_at_xy(self, x, y):
+        if y > self.height or y < 0 or x > self.width or x < 0: return
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_link_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            return node.link
+
     def get_child_at_xy(self, x, y):
         current_child, current_width = (None, 0)
         for child in self.children:
@@ -125,6 +189,38 @@ class BoxGlyph(object):
         self.char = char
         self.node = node
 
+    def get_node_at_xy(self, x, y):
+        x = max(0, min(self.width, x))
+        if y > self.height: x = self.width
+        y = max(0, min(self.height, y))
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_node_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            if x > self.width / 2 and x < self.width:
+                node = node.next()
+            return node
+
+    def get_link_at_xy(self, x, y):
+        if y > self.height or y < 0 or x > self.width or x < 0: return
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_link_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            return node.link
+
     def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return True
     def get_node(self): return self.node
@@ -141,6 +237,38 @@ class BoxEmpty(object):
 
         self.parent = None
         self.node = node
+
+    def get_node_at_xy(self, x, y):
+        x = max(0, min(self.width, x))
+        if y > self.height: x = self.width
+        y = max(0, min(self.height, y))
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_node_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            if x > self.width / 2 and x < self.width:
+                node = node.next()
+            return node
+
+    def get_link_at_xy(self, x, y):
+        if y > self.height or y < 0 or x > self.width or x < 0: return
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_link_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            return node.link
 
     def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return True
@@ -159,6 +287,38 @@ class BoxPlaceholder(object):
         self.parent = None
         self.char = '•'
         self.node = node
+
+    def get_node_at_xy(self, x, y):
+        x = max(0, min(self.width, x))
+        if y > self.height: x = self.width
+        y = max(0, min(self.height, y))
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_node_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            if x > self.width / 2 and x < self.width:
+                node = node.next()
+            return node
+
+    def get_link_at_xy(self, x, y):
+        if y > self.height or y < 0 or x > self.width or x < 0: return
+
+        x_offset, y_offset = (0, 0)
+        if not self.is_leaf():
+            box, x_offset, y_offset = self.get_child_at_xy(x, y)
+            x -= x_offset
+            y -= y_offset
+            return box.get_link_at_xy(x, y)
+
+        else:
+            node = self.get_node()
+            return node.link
 
     def set_parent(self, parent): self.parent = parent
     def is_leaf(self): return True

@@ -57,7 +57,7 @@ class DocumentViewPresenter():
 
     def scroll_insert_on_screen(self, animate=False):
         document = self.model.document
-        insert_position = document.get_xy_at_insert()
+        insert_position = document.ast.get_insert_node().get_xy()
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
         insert_y = insert_position[1] + content_offset + FontManager.get_cursor_offset()
         insert_height = FontManager.get_cursor_height()

@@ -79,7 +79,7 @@ class Document(Observable):
     def update_implicit_x_position(self):
         last_command = self.command_processor.get_last_command()
         if last_command != None and last_command.update_implicit_x_position:
-            x, y = self.get_xy_at_insert()
+            x, y = self.ast.get_insert_node().get_xy()
             self.implicit_x_position = x
 
     def set_title(self, title):
@@ -91,55 +91,5 @@ class Document(Observable):
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True
-
-    def get_xy_at_insert(self):
-        node = self.ast.get_insert_node()
-        return self.get_xy_at_node(node)
-
-    def get_xy_at_node(self, node):
-        box = node.box
-        x, y = (0, 0)
-
-        while not box == self.layout:
-            new_x, new_y = box.parent.get_xy_at_child(box)
-            x += new_x
-            y += new_y
-            box = box.parent
-
-        return x, y
-
-    def get_node_at_xy(self, x, y):
-        box = self.layout
-        x = max(0, min(box.width, x))
-        y = max(0, y)
-        if y > box.height:
-            y = box.height
-            x = box.width
-
-        x_offset, y_offset = (0, 0)
-        while not box.is_leaf():
-            box, x_offset, y_offset = box.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-
-        node = box.get_node()
-        if x > box.width / 2 and x < box.width:
-            node = node.next()
-
-        return node
-
-    def get_link_at_xy(self, x, y):
-        box = self.layout
-        if y > box.height or y < 0 or x > box.width or x < 0: return
-
-        x_offset, y_offset = (0, 0)
-        while not box.is_leaf():
-            box, x_offset, y_offset = box.get_child_at_xy(x, y)
-            x -= x_offset
-            y -= y_offset
-
-        node = box.get_node()
-
-        return node.link
 
 

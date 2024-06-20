@@ -26,8 +26,8 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.ast.get_cursor_state()
 
-        x, y = document.get_xy_at_insert()
-        node = document.get_node_at_xy(0, y + document.ast.get_insert_node().box.parent.height * 0.5)
+        x, y = document.ast.get_insert_node().get_xy()
+        node = document.layout.get_node_at_xy(0, y + document.ast.get_insert_node().box.parent.height * 0.5)
         document.ast.move_insert_to_node(node)
         document.set_scroll_insert_on_screen_after_layout_update()
 
