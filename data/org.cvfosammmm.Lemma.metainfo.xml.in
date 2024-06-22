@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="15" date="2024-6-22">
+            <description translatable="no">
+                <p>Change file format to HTML, HTML export, ...</p>
+            </description>
+        </release>
         ​<release version="14" date="2024-6-18">
             <description translatable="no">
                 <p>Redesigned math mode, document search, ...</p>
