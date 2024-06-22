@@ -20,11 +20,10 @@ import time, os.path
 from lemma.document.ast.ast import AST
 from lemma.document.housekeeper.housekeeper import Housekeeper
 from lemma.document.layouter.layouter import Layouter
-from lemma.document.markdown_scanner.markdown_scanner import MarkdownScanner
+from lemma.document.html_scanner.html_scanner import HTMLScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
 from lemma.document.command_processor.command_processor import CommandProcessor
 from lemma.helpers.observable import Observable
-import lemma.document.commands.populate_from_path as populate_from_path
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:
         if file.endswith('.py'):
@@ -34,7 +33,7 @@ for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.r
 
 class Document(Observable):
 
-    def __init__(self, id, path=None):
+    def __init__(self, id):
         Observable.__init__(self)
 
         self.last_modified = time.time()
@@ -46,19 +45,15 @@ class Document(Observable):
         self.implicit_x_position = 0
         self.scroll_insert_on_screen_after_layout_update = False
         self.layout = None
-        self.markdown = None
+        self.html = None
         self.plaintext = None
         self.links = []
 
         self.housekeeper = Housekeeper(self)
         self.layouter = Layouter(self)
-        self.markdown_scanner = MarkdownScanner(self)
+        self.html_scanner = HTMLScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
-        self.update() # this will create an empty layout, markdown string, ...
-
-        if path != None:
-            self.add_command('populate_from_path', path)
-            self.command_processor.reset_undo_stack()
+        self.update() # this will create an empty layout, ...
 
     def add_command(self, name, *parameters): self.command_processor.add_command(eval(name + '.Command')(*parameters))
     def can_undo(self): return self.command_processor.can_undo()
@@ -69,7 +64,7 @@ class Document(Observable):
     def update(self):
         self.housekeeper.update()
         self.layouter.update()
-        self.markdown_scanner.update()
+        self.html_scanner.update()
         self.plaintext_scanner.update()
         self.update_implicit_x_position()
 
@@ -84,7 +79,7 @@ class Document(Observable):
 
     def set_title(self, title):
         self.title = title
-        self.markdown_scanner.update()
+        self.html_scanner.update()
 
         self.last_modified = time.time()
         self.add_change_code('changed')

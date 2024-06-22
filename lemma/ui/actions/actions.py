@@ -33,7 +33,6 @@ class Actions(object):
         self.workspace = workspace
         self.main_window = main_window
         self.application = application
-        self.document_view = main_window.document_view
         self.settings = ServiceLocator.get_settings()
 
         self.actions = dict()
@@ -41,7 +40,8 @@ class Actions(object):
         self.add_simple_action('import-markdown-files', self.import_markdown_files)
         self.add_simple_action('delete-document', self.delete_document)
         self.add_simple_action('rename-document', self.rename_document)
-        self.add_simple_action('export-as', self.export_as)
+        self.add_simple_action('export-markdown', self.export_markdown)
+        self.add_simple_action('export-html', self.export_html)
 
         self.add_simple_action('go-back', self.go_back)
         self.add_simple_action('go-forward', self.go_forward)
@@ -112,7 +112,8 @@ class Actions(object):
         self.actions['import-markdown-files'].set_enabled(True)
         self.actions['delete-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['rename-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['export-as'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['export-markdown'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['export-html'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
         self.actions['go-back'].set_enabled(self.workspace.mode == 'draft' or prev_doc != None)
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
@@ -144,10 +145,13 @@ class Actions(object):
         self.workspace.delete_document(self.workspace.active_document)
 
     def rename_document(self, action=None, parameter=''):
-        self.document_view.init_renaming()
+        self.application.document_view.init_renaming()
 
-    def export_as(self, action=None, parameter=''):
-        DialogLocator.get_dialog('export_document').run(self.workspace.active_document)
+    def export_markdown(self, action=None, parameter=''):
+        DialogLocator.get_dialog('export_markdown').run(self.workspace.active_document)
+
+    def export_html(self, action=None, parameter=''):
+        DialogLocator.get_dialog('export_html').run(self.workspace.active_document)
 
     def go_back(self, action=None, parameter=''):
         if self.workspace.mode == 'draft':

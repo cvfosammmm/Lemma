@@ -35,7 +35,6 @@ class ShortcutControllerApp(ShortcutController):
         self.create_and_add_shortcut('<Alt>Left', self.actions.actions['go-back'].activate)
         self.create_and_add_shortcut('<Alt>Right', self.actions.actions['go-forward'].activate)
         self.create_and_add_shortcut('F2', self.actions.actions['rename-document'].activate)
-        self.create_and_add_shortcut('<Control>e', self.actions.actions['export-as'].activate)
         self.create_and_add_shortcut('<Control>question', self.actions.actions['show-shortcuts-dialog'].activate)
         self.create_and_add_shortcut('<Control>m', self.actions.actions['toggle-math-sidebar'].activate)
         self.create_and_add_shortcut('F10', self.actions.actions['show-hamburger-menu'].activate)

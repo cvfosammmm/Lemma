@@ -30,7 +30,6 @@ class Dialog():
         section = {'title': 'Windows and Panels', 'items': list()}
         section['items'].append({'title': 'Show global menu', 'shortcut': 'F10'})
         section['items'].append({'title': 'Show document menu', 'shortcut': 'F12'})
-        section['items'].append({'title': 'Show tools sidebar', 'shortcut': 'F9'})
         section['items'].append({'title': 'Show keyboard shortcuts', 'shortcut': '&lt;ctrl&gt;question'})
         section['items'].append({'title': 'Quit the application', 'shortcut': '&lt;ctrl&gt;Q'})
         data.append(section)
@@ -38,7 +37,6 @@ class Dialog():
         section = {'title': 'Documents', 'items': list()}
         section['items'].append({'title': 'Create new document', 'shortcut': '&lt;ctrl&gt;N'})
         section['items'].append({'title': 'Rename document', 'shortcut': 'F2'})
-        section['items'].append({'title': 'Export markdown', 'shortcut': '&lt;ctrl&gt;E'})
         data.append(section)
 
         section = {'title': 'Navigation', 'items': list()}
@@ -64,7 +62,7 @@ class Dialog():
         data.append(section)
 
         section = {'title': 'Math', 'items': list()}
-        section['items'].append({'title': 'Insert math', 'shortcut': '&lt;ctrl&gt;M'})
+        section['items'].append({'title': 'Show math toolbar', 'shortcut': '&lt;ctrl&gt;M'})
         data.append(section)
 
         self.data = data

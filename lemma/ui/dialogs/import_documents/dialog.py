@@ -21,6 +21,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
 
 import os.path, pickle, re
+from markdown_it import MarkdownIt
 
 import lemma.ui.dialogs.import_documents.import_documents_viewgtk as view
 from lemma.document.document import Document
@@ -115,8 +116,20 @@ class Dialog(object):
         self.view.drop_stack.set_visible_child_name(('files' if len(self.current_values['files']) > 0 else 'message'))
 
     def import_files(self):
+        mdi = MarkdownIt()
+
         for path in self.current_values['files']:
-            document = Document(self.workspace.documents.get_new_document_id(), path=path)
-            self.workspace.documents.add(document)
+            document = Document(self.workspace.get_new_document_id())
+            document.last_modified = os.path.getmtime(path)
+            document.title = os.path.basename(path)[:-3]
+
+            with open(path, 'r') as file:
+                markdown = file.read()
+            markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
+            html = mdi.render(markdown)
+            document.add_command('populate_from_html', html)
+            document.command_processor.reset_undo_stack()
+
+            self.workspace.add(document)
 
 

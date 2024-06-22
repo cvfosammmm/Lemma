@@ -33,7 +33,14 @@ class Storage(object):
     def populate_documents(self):
         for direntry in os.scandir(self.pathname):
             if direntry.is_file() and direntry.name.isdigit():
-                document = Document(int(direntry.name), path=direntry.path)
+                document = Document(int(direntry.name))
+                document.last_modified = os.path.getmtime(direntry.path)
+
+                with open(direntry.path, 'r') as file:
+                    html = file.read()
+                document.add_command('populate_from_html', html)
+                document.command_processor.reset_undo_stack()
+
                 self.workspace.add(document)
 
     def populate_workspace(self):
@@ -86,7 +93,7 @@ class Storage(object):
         try: filehandle = open(pathname, 'w')
         except IOError: pass
         else:
-            filehandle.write(document.markdown)
+            filehandle.write(document.html)
 
     def delete_document(self, document):
         pathname = os.path.join(self.pathname, str(document.id))

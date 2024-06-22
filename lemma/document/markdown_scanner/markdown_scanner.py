@@ -15,73 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import urllib.parse
-
-
 class MarkdownScanner(object):
 
     def __init__(self, document):
         self.document = document
-
-        self.markdown = ''
-        self.current_tags = set()
-        self.current_link = None
-
-    def update(self):
-        self.markdown = '# ' + self.document.title + '\n'
-
-        self.current_tags = set()
-        self.current_link = None
-
-        for child in self.document.ast.root:
-            self.process_node(child)
-        self.close_current_tags()
-
-        self.document.markdown = self.markdown
-
-    def process_node(self, node):
-        if node.link != self.current_link:
-            if self.current_link != None:
-                self.close_current_link()
-
-        if node.tags != self.current_tags:
-            self.close_current_tags()
-            self.current_tags = node.tags
-            self.open_current_tags()
-
-        if node.link != self.current_link:
-            if node.link != None:
-                self.open_current_link()
-            self.current_link = node.link
-
-        if node.type == 'EOL':
-            self.markdown += '\n'
-
-        elif node.type == 'placeholder':
-            pass
-
-        elif node.type == 'mathsymbol':
-            self.markdown += '$`'
-            self.markdown += node.value
-            self.markdown += '`$'
-
-        elif node.type == 'char':
-            self.markdown += node.value
-
-    def open_current_tags(self):
-        if 'bold' in self.current_tags: self.markdown += '**'
-        if 'italic' in self.current_tags: self.markdown += '*'
-
-    def close_current_tags(self):
-        if 'bold' in self.current_tags: self.markdown += '**'
-        if 'italic' in self.current_tags: self.markdown += '*'
-
-    def open_current_link(self):
-        self.markdown += '['
-
-    def close_current_link(self):
-        if self.current_link == None: return
-
-        self.markdown += '](<' + urllib.parse.quote_plus(self.current_link.target) + '>)'
 
 

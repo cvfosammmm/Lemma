@@ -21,6 +21,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio, GLib
 
 import os.path
+import urllib.parse
 
 from lemma.infrastructure.service_locator import ServiceLocator
 
@@ -30,6 +31,9 @@ class Dialog(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.document = None
+        self.markdown = ''
+        self.current_tags = set()
+        self.current_link = None
 
     def run(self, document):
         self.document = document
@@ -66,7 +70,66 @@ class Dialog(object):
                 if not filename.endswith('.md'):
                     filename += '.md'
 
+                self.generate_markdown()
+
                 with open(filename, 'w') as f:
-                    f.write(self.document.markdown)
+                    f.write(self.markdown)
+
+    def generate_markdown(self):
+        self.markdown = '# ' + self.document.title + '\n'
+
+        self.current_tags = set()
+        self.current_link = None
+
+        for child in self.document.ast.root:
+            self.process_node(child)
+        self.close_current_tags()
+
+        self.document.markdown = self.markdown
+
+    def process_node(self, node):
+        if node.link != self.current_link:
+            if self.current_link != None:
+                self.close_current_link()
+
+        if node.tags != self.current_tags:
+            self.close_current_tags()
+            self.current_tags = node.tags
+            self.open_current_tags()
+
+        if node.link != self.current_link:
+            if node.link != None:
+                self.open_current_link()
+            self.current_link = node.link
+
+        if node.type == 'EOL':
+            self.markdown += '\n'
+
+        elif node.type == 'placeholder':
+            pass
+
+        elif node.type == 'mathsymbol':
+            self.markdown += '$`'
+            self.markdown += node.value
+            self.markdown += '`$'
+
+        elif node.type == 'char':
+            self.markdown += node.value
+
+    def open_current_tags(self):
+        if 'bold' in self.current_tags: self.markdown += '**'
+        if 'italic' in self.current_tags: self.markdown += '*'
+
+    def close_current_tags(self):
+        if 'bold' in self.current_tags: self.markdown += '**'
+        if 'italic' in self.current_tags: self.markdown += '*'
+
+    def open_current_link(self):
+        self.markdown += '['
+
+    def close_current_link(self):
+        if self.current_link == None: return
+
+        self.markdown += '](<' + urllib.parse.quote_plus(self.current_link.target) + '>)'
 
 
