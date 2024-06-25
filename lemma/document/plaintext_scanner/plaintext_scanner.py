@@ -24,33 +24,27 @@ class PlaintextScanner(object):
         self.document = document
 
         self.text = ''
-        self.current_line = ''
 
     def update(self):
         self.text = ''
-        self.current_line = ''
 
         for child in self.document.ast.root:
             self.process_node(child)
 
-        self.text = self.text[:-1] # remove last EOL
         self.document.plaintext = self.text
 
     def process_node(self, node):
         if node.type == 'EOL':
-            self.current_line = self.current_line.strip()
-            if self.current_line != '':
-                self.text += self.current_line + '\n'
-                self.current_line = ''
+            self.text += '\n'
 
         elif node.type == 'placeholder':
             pass
 
         elif node.type == 'char':
             if LaTeXDB.is_whitespace(node.value):
-                if self.current_line == '' or self.current_line[-1] != ' ':
-                    self.current_line += ' '
+                if self.text == '' or self.text[-1] != ' ':
+                    self.text += ' '
             else:
-                self.current_line += node.value
+                self.text += node.value
 
 

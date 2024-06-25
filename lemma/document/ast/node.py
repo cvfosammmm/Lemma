@@ -192,4 +192,11 @@ class Node():
             return self.parent[index]
         return None
 
+    def __str__(self):
+        string = self.type + ':' + str(self.value) + '\n  '
+        for node in self:
+            string += node.__str__()
+
+        return string
+
 

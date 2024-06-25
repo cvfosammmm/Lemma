@@ -125,4 +125,11 @@ class Box(object):
     def is_leaf(self): return len(self.children) == 0
     def get_node(self): return self.node
 
+    def __str__(self):
+        string = self.type + '\n  '
+        for box in self.children:
+            string += box.__str__()
+
+        return string
+
 
