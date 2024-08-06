@@ -113,6 +113,8 @@
 
 @define-color actionbar_bg #ffffff;
 
+@define-color ac_bg #fff;
+
 @define-color content_border #c01c28;
 @define-color content_border #0003;
 @define-color bodypaned_border #ccc;

@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import re
-whitespace_regex = re.compile('\s')
+from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class LaTeXDB(object):
@@ -361,6 +360,6 @@ class LaTeXDB(object):
         return char in LaTeXDB.closing_symbols
 
     def is_whitespace(char):
-        return (whitespace_regex.match(char) != None)
+        return (ServiceLocator.get_regex_matcher('\\s').match(char) != None)
 
 

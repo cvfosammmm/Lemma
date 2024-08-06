@@ -37,7 +37,7 @@ class ServiceLocator():
             ServiceLocator.settings = settingscontroller.Settings(ServiceLocator.get_config_folder())
         return ServiceLocator.settings
 
-    def get_regex_object(pattern):
+    def get_regex_matcher(pattern):
         try:
             regex = ServiceLocator.regexes[pattern]
         except KeyError:

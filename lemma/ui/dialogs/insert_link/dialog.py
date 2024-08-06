@@ -76,6 +76,7 @@ class Dialog(object):
     def on_entry_link_target_changed(self, entry):
         self.current_values['link_target'] = entry.get_text()
         self.validate()
+        self.view.content.remove(self.view.label)
 
     def on_entry_link_target_activate(self, entry):
         self.submit()
@@ -124,6 +125,13 @@ class InsertLinkView(DialogView):
         self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.content.set_vexpand(True)
         self.content.append(self.entry_link_target)
+
+        self.label = Gtk.Label.new('asd')
+        self.content.append(self.label)
+        self.content.append(Gtk.Label.new('asd'))
+        self.content.append(Gtk.Label.new('asd'))
+        self.content.append(Gtk.Label.new('asd'))
+        self.content.append(Gtk.Label.new('asd'))
 
         self.topbox.append(self.content)
 

@@ -35,7 +35,7 @@ class Shortcuts(object):
         self.shortcut_controller_document = ShortcutControllerDocument(self.actions)
 
         self.main_window.add_controller(self.shortcut_controller_app)
-        self.main_window.document_view.scrolling_widget.content.add_controller(self.shortcut_controller_document)
+        self.main_window.document_view.content.add_controller(self.shortcut_controller_document)
 
         PopoverManager.connect('popup', self.on_popover_popup)
         PopoverManager.connect('popdown', self.on_popover_popdown)

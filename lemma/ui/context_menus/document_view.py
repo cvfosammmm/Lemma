@@ -26,12 +26,10 @@ class ContextMenuDocumentView(ContextMenu):
     
     def __init__(self, document_view):
         ContextMenu.__init__(self)
-        self.parent = document_view.view.scrolling_widget
+        self.parent = document_view.view.content
         self.document_view = document_view
 
-        self.popup_offset_x, self.popup_offset_y = 0, 0
-
-        self.popover.set_parent(self.parent.content)
+        self.popover.set_parent(self.parent)
         self.popover.set_size_request(260, -1)
         self.popover.set_offset(130, 0)
         self.popover.connect('closed', self.on_popover_close)
@@ -93,13 +91,14 @@ class ContextMenuDocumentView(ContextMenu):
         self.remove_link_button.connect('clicked', self.on_button_click)
         self.box.append(self.remove_link_button)
 
-        self.parent.connect('secondary_button_press', self.on_secondary_button_press)
+        secondary_click_controller = Gtk.GestureClick()
+        secondary_click_controller.set_button(3)
+        secondary_click_controller.connect('pressed', self.on_secondary_button_press)
+        document_view.view.content.add_controller(secondary_click_controller)
 
-    def on_secondary_button_press(self, content, data):
-        x_offset, y_offset, state = data
-        self.popup_offset_x, self.popup_offset_y = x_offset, y_offset
-        self.popup_at_cursor(x_offset - content.scrolling_offset_x, y_offset - content.scrolling_offset_y)
-        return True
+    def on_secondary_button_press(self, controller, n_press, x, y):
+        if n_press == 1:
+            self.popup_at_cursor(x, y)
 
     def on_button_click(self, button):
         self.popover.popdown()

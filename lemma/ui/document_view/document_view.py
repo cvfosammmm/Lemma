@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+import time
 from urllib.parse import urlparse
 
 from lemma.ui.document_view.document_view_controller import DocumentViewController
@@ -35,10 +36,18 @@ class DocumentView(Observable):
         self.main_window = main_window
         self.view = main_window.document_view
 
+        self.width, self.height = 0, 0
+        self.cursor_x, self.cursor_y = None, None
+        self.keyboard_modifiers_state = 0
+        self.scrolling_multiplier = 2.5
         self.selected_link_target = None
         self.link_target_at_cursor = None
         self.link_target_at_pointer = None
         self.tags_at_cursor = set()
+        self.last_cursor_or_scrolling_change = time.time()
+
+        self.workspace = workspace
+        self.document = None
 
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
@@ -55,12 +64,26 @@ class DocumentView(Observable):
 
         self.context_menu = ContextMenuDocumentView(self)
 
-        self.workspace = workspace
-        self.document = None
         self.set_document(workspace.get_active_document())
+        self.workspace.connect('new_active_document', self.on_new_active_document)
         self.add_change_code('changed')
 
-        self.workspace.connect('new_active_document', self.on_new_active_document)
+    def set_size(self, width, height):
+        self.width, self.height = width, height
+        self.last_cursor_or_scrolling_change = time.time()
+        self.add_change_code('changed')
+
+    def set_cursor_position(self, x, y):
+        if x != self.cursor_x or y != self.cursor_y:
+            self.cursor_x, self.cursor_y = x, y
+            self.last_cursor_or_scrolling_change = time.time()
+            self.add_change_code('changed')
+
+    def set_keyboard_modifiers_state(self, state):
+        if state != self.keyboard_modifiers_state:
+            self.keyboard_modifiers_state = state
+            self.last_cursor_or_scrolling_change = time.time()
+            self.add_change_code('changed')
 
     def on_new_active_document(self, workspace, document=None):
         self.set_document(document)
@@ -89,7 +112,7 @@ class DocumentView(Observable):
     def init_renaming(self):
         if self.document != None:
             self.title_widget.activate()
-            self.view.scrolling_widget.scroll_to_position([0, 0])
+            self.presenter.scroll_to_position([0, 0])
             self.title_widget.view.set_visible(True)
             self.view.title_buttons_height = 50
             self.view.content.queue_draw()

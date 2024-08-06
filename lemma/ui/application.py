@@ -32,6 +32,7 @@ import lemma.ui.document_list.document_list as document_list
 import lemma.ui.document_draft.document_draft as document_draft
 import lemma.ui.actions.actions as actions
 import lemma.ui.keyboard_shortcuts.shortcuts as shortcuts
+import lemma.ui.autocomplete.autocomplete_widget as autocomplete_widget
 
 
 class Application(Adw.Application):
@@ -57,5 +58,6 @@ class Application(Adw.Application):
         self.actions = actions.Actions(self.workspace, self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.panels = panels.Panels(self.workspace, self.main_window, self)
+        self.autocomplete_widget = autocomplete_widget.AutocompleteWidget(self.workspace, self.main_window)
 
 

@@ -20,6 +20,7 @@ import time, os.path
 from lemma.document.ast.ast import AST
 from lemma.document.housekeeper.housekeeper import Housekeeper
 from lemma.document.layouter.layouter import Layouter
+from lemma.document.clipping.clipping import Clipping
 from lemma.document.html_scanner.html_scanner import HTMLScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
 from lemma.document.command_processor.command_processor import CommandProcessor
@@ -51,6 +52,7 @@ class Document(Observable):
 
         self.housekeeper = Housekeeper(self)
         self.layouter = Layouter(self)
+        self.clipping = Clipping(self)
         self.html_scanner = HTMLScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
         self.update() # this will create an empty layout, ...
@@ -64,6 +66,7 @@ class Document(Observable):
     def update(self):
         self.housekeeper.update()
         self.layouter.update()
+        self.clipping.update()
         self.html_scanner.update()
         self.plaintext_scanner.update()
         self.update_implicit_x_position()

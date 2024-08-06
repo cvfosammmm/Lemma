@@ -3,13 +3,16 @@
 scrollbar {
     background-color: transparent;
     box-shadow: none;
+    min-height: 0px;
 }
 scrollbar trough {
     margin: 1px;
+    min-height: 0px;
 }
 scrollbar slider {
     padding: 0px;
     min-width: 3px;
+    min-height: 0px;
 }
 scrollbar:hover slider {
     min-width: 8px;

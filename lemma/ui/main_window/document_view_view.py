@@ -17,9 +17,10 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Gdk, Pango
 
-from lemma.ui.main_window.scrolling_widget import ScrollingWidget
+from lemma.infrastructure.color_manager import ColorManager
+from lemma.ui.main_window.autocomplete import AutocompleteWidgetView
 
 
 class DocumentViewView(Gtk.Overlay):
@@ -54,18 +55,33 @@ class DocumentViewView(Gtk.Overlay):
         font_description.set_size(11 * Pango.SCALE)
         self.layout_subtitle.set_font_description(font_description)
 
-        self.scrolling_widget = ScrollingWidget()
-
-        self.content = self.scrolling_widget.content
+        self.content = Gtk.DrawingArea()
         self.content.set_focusable(True)
         self.content.set_vexpand(True)
 
-        self.set_child(self.scrolling_widget.view)
+        self.set_child(self.content)
+
+        self.scrollbar_x = Gtk.Scrollbar.new(Gtk.Orientation.HORIZONTAL)
+        self.scrollbar_x.set_valign(Gtk.Align.END)
+        self.scrollbar_x.add_css_class('bottom')
+        self.scrollbar_x.add_css_class('overlay-indicator')
+        self.adjustment_x = self.scrollbar_x.get_adjustment()
+        self.add_overlay(self.scrollbar_x)
+
+        self.scrollbar_y = Gtk.Scrollbar.new(Gtk.Orientation.VERTICAL)
+        self.scrollbar_y.set_halign(Gtk.Align.END)
+        self.scrollbar_y.add_css_class('right')
+        self.scrollbar_y.add_css_class('overlay-indicator')
+        self.adjustment_y = self.scrollbar_y.get_adjustment()
+        self.add_overlay(self.scrollbar_y)
 
         self.link_overlay = Gtk.Label.new('http://url')
         self.link_overlay.set_valign(Gtk.Align.END)
         self.link_overlay.set_halign(Gtk.Align.END)
         self.link_overlay.add_css_class('link-overlay')
         self.add_overlay(self.link_overlay)
+
+        self.autocomplete = AutocompleteWidgetView()
+        #self.add_overlay(self.autocomplete)
 
 

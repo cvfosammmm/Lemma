@@ -17,10 +17,11 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, cairo, PangoCairo
+from gi.repository import Gtk, GObject, Gdk, cairo, PangoCairo
 
 from urllib.parse import urlparse
 import datetime
+import time
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
@@ -33,6 +34,7 @@ class DocumentViewPresenter():
         self.view = self.model.view
         self.content = self.view.content
         self.cursor_coords = None
+        self.scrolling_job = None
 
         self.content.set_draw_func(self.draw)
 
@@ -43,16 +45,78 @@ class DocumentViewPresenter():
 
         self.update_size()
         self.update_scrolling_destination()
-        self.view.scrolling_widget.queue_draw()
+        self.update_scrollbars()
+        self.update_cursor()
+        self.view.content.queue_draw()
 
     def update_size(self):
+        document = self.model.document
         height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
-        self.view.scrolling_widget.set_size(1, height)
+        scrolling_offset_y = document.clipping.offset_y
+
+        self.view.adjustment_x.set_page_size(1)
+        self.view.adjustment_y.set_page_size(self.model.height)
+        self.view.adjustment_x.set_upper(1)
+        self.view.adjustment_y.set_upper(height)
+
+        if scrolling_offset_y > self.view.adjustment_y.get_upper() - self.model.height:
+            self.view.adjustment_y.set_value(self.view.adjustment_y.get_upper())
 
     def update_scrolling_destination(self):
         if self.model.document.scroll_insert_on_screen_after_layout_update:
             self.model.document.scroll_insert_on_screen_after_layout_update = False
             self.scroll_insert_on_screen()
+
+    def update_scrollbars(self):
+        document = self.model.document
+        height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
+
+        self.view.scrollbar_x.set_visible(False)
+        self.view.scrollbar_y.set_visible(height > self.model.height)
+        self.view.adjustment_x.set_value(document.clipping.offset_x)
+        self.view.adjustment_y.set_value(document.clipping.offset_y)
+
+        if self.model.cursor_x != None and self.model.cursor_x > self.view.get_allocated_width() - 24:
+            self.view.scrollbar_y.add_css_class('hovering')
+        else:
+            self.view.scrollbar_y.remove_css_class('hovering')
+            if self.model.last_cursor_or_scrolling_change < time.time() - 1.5:
+                self.view.scrollbar_x.add_css_class('hidden')
+                self.view.scrollbar_y.add_css_class('hidden')
+            else:
+                self.view.scrollbar_x.remove_css_class('hidden')
+                self.view.scrollbar_y.remove_css_class('hidden')
+
+        GObject.timeout_add(1750, self.update_scrollbars)
+        return False
+
+    def update_cursor(self):
+        document = self.model.document
+        if document == None:
+            self.content.set_cursor_from_name('default')
+            return
+
+        x = document.clipping.offset_x + (self.model.cursor_x if self.model.cursor_x != None else 0)
+        y = document.clipping.offset_y + (self.model.cursor_y if self.model.cursor_y != None else 0)
+        x -= self.view.padding_left
+        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        link = None
+
+        if y < -self.view.subtitle_height:
+            self.content.set_cursor_from_name('text')
+        elif y > 0:
+            link = document.layout.get_link_at_xy(x, y)
+            if link != None:
+                self.content.set_cursor_from_name('pointer')
+            else:
+                self.content.set_cursor_from_name('text')
+        else:
+            self.content.set_cursor_from_name('default')
+
+        if link != None:
+            self.model.set_link_target_at_pointer(link.target)
+        else:
+            self.model.set_link_target_at_pointer(None)
 
     def scroll_insert_on_screen(self, animate=False):
         document = self.model.document
@@ -60,19 +124,56 @@ class DocumentViewPresenter():
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
         insert_y = insert_position[1] + content_offset + FontManager.get_cursor_offset()
         insert_height = FontManager.get_cursor_height()
-        window_height = self.view.scrolling_widget.height
-        scrolling_offset_y = self.view.scrolling_widget.scrolling_offset_y
+        window_height = self.model.height
+        scrolling_offset_y = document.clipping.offset_y
 
         if window_height <= 0: return
 
         if insert_y == content_offset + FontManager.get_cursor_offset():
-            self.view.scrolling_widget.scroll_to_position((0, 0), animate)
+            self.scroll_to_position((0, 0), animate)
         elif insert_y < scrolling_offset_y:
-            self.view.scrolling_widget.scroll_to_position((0, insert_y), animate)
+            self.scroll_to_position((0, insert_y), animate)
         elif insert_position[1] == self.model.document.layout.height - self.model.document.layout.children[-1].height:
-            self.view.scrolling_widget.scroll_to_position((0, self.model.document.layout.height + content_offset + self.view.padding_bottom - window_height), animate)
+            self.scroll_to_position((0, self.model.document.layout.height + content_offset + self.view.padding_bottom - window_height), animate)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
-            self.view.scrolling_widget.scroll_to_position((0, insert_y - window_height + insert_height), animate)
+            self.scroll_to_position((0, insert_y - window_height + insert_height), animate)
+
+    def scroll_to_position(self, position, animate=False):
+        document = self.model.document
+        window_width = self.model.width
+        yoffset = max(position[1], 0)
+        xoffset = max(position[0], 0)
+        scrolling_offset_x = document.clipping.offset_x
+        scrolling_offset_y = document.clipping.offset_y
+
+        self.scrolling_job = {'from': (scrolling_offset_x, scrolling_offset_y), 'to': (xoffset, yoffset), 'starting_time': time.time(), 'duration': 0.2 if animate else 0}
+        self.scroll_now()
+
+    def scroll_now(self):
+        if self.scrolling_job == None: return False
+
+        if self.scrolling_job['duration'] == 0:
+            fraction_done = 1
+        else:
+            time_percent = (time.time() - self.scrolling_job['starting_time']) / self.scrolling_job['duration']
+            fraction_done = (time_percent - 1)**3 + 1 # easing
+
+        if fraction_done >= 1:
+            new_x = self.scrolling_job['to'][0]
+            new_y = self.scrolling_job['to'][1]
+        else:
+            new_x = self.scrolling_job['from'][0] * (1 - fraction_done) + self.scrolling_job['to'][0] * fraction_done
+            new_y = self.scrolling_job['from'][1] * (1 - fraction_done) + self.scrolling_job['to'][1] * fraction_done
+
+        self.view.adjustment_x.set_value(new_x)
+        self.view.adjustment_y.set_value(new_y)
+
+        if (new_x, new_y) == self.scrolling_job['to']:
+            self.scrolling_job = None
+        else:
+            GObject.timeout_add(15, self.scroll_now)
+
+        return False
 
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return
@@ -80,7 +181,7 @@ class DocumentViewPresenter():
         self.cursor_coords = None
         self.first_cursor_pos = self.model.document.ast.get_first_cursor_pos()
         self.last_cursor_pos = self.model.document.ast.get_last_cursor_pos()
-        scrolling_offset_y = self.view.scrolling_widget.scrolling_offset_y
+        scrolling_offset_y = self.model.document.clipping.offset_y
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
 
