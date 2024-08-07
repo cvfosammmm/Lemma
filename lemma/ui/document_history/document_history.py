@@ -115,8 +115,8 @@ class DocumentHistory(object):
     def draw(self, widget, ctx, width, height):
         document_at_cursor = self.get_document_at_cursor()
         offset = -1 - int(self.view.scrolling_widget.scrolling_offset_x)
-        hover_color = ColorManager.get_ui_color('sidebar_hover')
-        selected_color = ColorManager.get_ui_color('sidebar_active_bg')
+        hover_color = ColorManager.get_ui_color('history_hover')
+        selected_color = ColorManager.get_ui_color('history_active_bg')
         fg_color = ColorManager.get_ui_color('fg')
 
         for i, document, document_offset in self.items:

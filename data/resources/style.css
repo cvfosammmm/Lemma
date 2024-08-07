@@ -30,19 +30,21 @@ windowhandle.left {
 }
 windowhandle.left button {
     margin: 6px;
+    color: @sidebar_fg_3;
 }
 entry.search {
     outline: None;
     border-radius: 0px;
     background: @headerbar_bg_1;
     padding: 0px;
-    color: @sidebar_fg_1;
+    color: #fff;
 }
 entry.search text {
     padding-left: 16px;
 }
 entry.search image.right {
     padding: 10px;
+    color: #fff;
 }
 
 windowhandle.right {
@@ -66,7 +68,7 @@ overlay.history scrollbar {
 /* actionbar */
 
 actionbar {
-    border-top: 1px solid @bodypaned_border;
+    border-top: 1px solid @border_1;
     padding: 0px;
 }
 actionbar box {
@@ -81,8 +83,8 @@ actionbar revealer > box {
 
 label.link-overlay {
     background: @window_bg_color;
-    border-top: 1px solid @bodypaned_border;
-    border-left: 1px solid @bodypaned_border;
+    border-top: 1px solid @border_1;
+    border-left: 1px solid @border_1;
     padding: 3px 6px;
     border-top-left-radius: 3px;
 }
@@ -151,7 +153,7 @@ paned.document-view separator.wide {
     border-right: 2px solid @window_bg_color;
     min-width: 1px;
     box-shadow: none;
-    background-color: @bodypaned_border;
+    background-color: @border_1;
 }
 
 /* toolbar */
@@ -415,3 +417,18 @@ window.import-markdown-files-dialog button.filechooser-button {
     padding: 12px 18px;
     border-radius: 0px;
 }
+
+/* autocomplete */
+
+box.autocomplete {
+    border: 1px solid @ac_border;
+    border-radius: 2px;
+}
+box.autocomplete entry {
+    outline: none;
+    border-radius: 0px;
+    border-bottom: 1px solid @ac_border;
+    background: @ac_bg;
+}
+
+

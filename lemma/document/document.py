@@ -57,7 +57,10 @@ class Document(Observable):
         self.plaintext_scanner = PlaintextScanner(self)
         self.update() # this will create an empty layout, ...
 
-    def add_command(self, name, *parameters): self.command_processor.add_command(eval(name + '.Command')(*parameters))
+    def add_command(self, name, *parameters):
+        command = eval(name + '.Command')(*parameters)
+        self.command_processor.add_command(command)
+
     def can_undo(self): return self.command_processor.can_undo()
     def can_redo(self): return self.command_processor.can_redo()
     def undo(self): self.command_processor.undo()
@@ -71,8 +74,10 @@ class Document(Observable):
         self.plaintext_scanner.update()
         self.update_implicit_x_position()
 
-        self.last_modified = time.time()
         self.add_change_code('changed')
+
+    def update_last_modified(self):
+        self.last_modified = time.time()
 
     def update_implicit_x_position(self):
         last_command = self.command_processor.get_last_command()
@@ -84,7 +89,7 @@ class Document(Observable):
         self.title = title
         self.html_scanner.update()
 
-        self.last_modified = time.time()
+        self.update_last_modified()
         self.add_change_code('changed')
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):

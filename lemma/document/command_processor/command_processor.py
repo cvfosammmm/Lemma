@@ -28,6 +28,8 @@ class CommandProcessor(object):
         self.last_command += 1
         command.run(self.document)
 
+        if command.is_undo_checkpoint:
+            self.document.update_last_modified()
         self.document.update()
 
     def can_undo(self):
@@ -48,10 +50,11 @@ class CommandProcessor(object):
             command.undo(self.document)
             self.last_command -= 1
 
-            if not command.is_undo_checkpoint:
-                self.undo()
-            else:
+            if command.is_undo_checkpoint:
+                self.document.update_last_modified()
                 self.document.update()
+            else:
+                self.undo()
         else:
             self.document.update()
 
@@ -61,10 +64,11 @@ class CommandProcessor(object):
             command.run(self.document)
             self.last_command += 1
 
-            if not command.is_undo_checkpoint:
-                self.redo()
-            else:
+            if command.is_undo_checkpoint:
+                self.document.update_last_modified()
                 self.document.update()
+            else:
+                self.redo()
         else:
             self.document.update()
 

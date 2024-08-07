@@ -20,7 +20,6 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, Pango
 
 from lemma.infrastructure.color_manager import ColorManager
-from lemma.ui.main_window.autocomplete import AutocompleteWidgetView
 
 
 class DocumentViewView(Gtk.Overlay):
@@ -80,8 +79,5 @@ class DocumentViewView(Gtk.Overlay):
         self.link_overlay.set_halign(Gtk.Align.END)
         self.link_overlay.add_css_class('link-overlay')
         self.add_overlay(self.link_overlay)
-
-        self.autocomplete = AutocompleteWidgetView()
-        #self.add_overlay(self.autocomplete)
 
 
