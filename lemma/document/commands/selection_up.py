@@ -24,19 +24,19 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.ast.get_cursor_state()
+        self.state['cursor_state_before'] = document.ast.cursor.get_state()
 
-        x, y = document.ast.get_insert_node().get_xy()
+        x, y = document.ast.cursor.get_insert_node().get_xy()
         if document.implicit_x_position != None:
             x = document.implicit_x_position
         if y == 0:
-            document.ast.move_insert_to_node_with_selection(document.layout.get_node_at_xy(0, 0))
+            document.ast.cursor.move_insert_to_node_with_selection(document.layout.get_node_at_xy(0, 0))
         else:
-            document.ast.move_insert_to_node_with_selection(document.layout.get_node_at_xy(x, y - document.ast.get_insert_node().box.parent.height * 0.5))
+            document.ast.cursor.move_insert_to_node_with_selection(document.layout.get_node_at_xy(x, y - document.ast.cursor.get_insert_node().box.parent.height * 0.5))
 
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.ast.set_cursor_state(self.state['cursor_state_before'])
+        document.ast.cursor.set_state(self.state['cursor_state_before'])
 
 

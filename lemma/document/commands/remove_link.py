@@ -26,14 +26,14 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.ast.get_cursor_state()
+        self.state['cursor_state_before'] = document.ast.cursor.get_state()
 
-        if document.ast.has_selection():
-            bounds = document.ast.get_cursor_state()
-        elif document.ast.get_insert_node().is_inside_link():
-            bounds = document.ast.get_insert_node().get_bounds_for_link()
+        if document.ast.cursor.has_selection():
+            bounds = document.ast.cursor.get_state()
+        elif document.ast.cursor.get_insert_node().is_inside_link():
+            bounds = document.ast.cursor.get_insert_node().get_bounds_for_link()
         else:
-            bounds = document.ast.get_cursor_state()
+            bounds = document.ast.cursor.get_state()
 
         char_nodes = [node for node in document.ast.get_subtree(*bounds) if node.is_char()]
         prev_links = []
@@ -43,7 +43,7 @@ class Command():
         self.state['nodes_and_prev_links'] = list(zip(char_nodes, prev_links))
 
     def undo(self, document):
-        document.ast.set_cursor_state(self.state['cursor_state_before'])
+        document.ast.cursor.set_state(self.state['cursor_state_before'])
 
         for item in self.state['nodes_and_prev_links']:
             item[0].link = item[1]

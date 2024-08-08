@@ -24,11 +24,11 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.ast.get_cursor_state()
-        document.ast.move_insert_to_node(document.ast.root[0])
-        document.ast.move_selection_bound_to_node(document.ast.root[-1])
+        self.state['cursor_state_before'] = document.ast.cursor.get_state()
+        document.ast.cursor.move_insert_to_node(document.ast.root[0])
+        document.ast.cursor.move_selection_bound_to_node(document.ast.root[-1])
 
     def undo(self, document):
-        document.ast.set_cursor_state(self.state['cursor_state_before'])
+        document.ast.cursor.set_state(self.state['cursor_state_before'])
 
 

@@ -28,16 +28,16 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before_1'] = document.ast.get_cursor_state()
-        self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
+        self.state['cursor_state_before_1'] = document.ast.cursor.get_state()
+        self.state['cursor_state_before_2'] = document.ast.cursor.get_state()
         self.state['deleted_nodes'] = []
         self.state['nodes_added'] = []
 
-        node = document.ast.get_insert_node()
+        node = document.ast.cursor.get_insert_node()
         char = LaTeXDB.get_unicode_from_latex_name(self.name)
         if LaTeXDB.is_mathsymbol(char):
             self.state['deleted_nodes'] = document.ast.delete_selection()
-            self.state['cursor_state_before_2'] = document.ast.get_cursor_state()
+            self.state['cursor_state_before_2'] = document.ast.cursor.get_state()
             character = Node('mathsymbol', char)
             self.state['nodes_added'] += document.ast.insert_node(character)
 
@@ -47,11 +47,11 @@ class Command():
     def undo(self, document):
         for node in self.state['nodes_added']:
             document.ast.delete_node(node)
-        document.ast.set_cursor_state(self.state['cursor_state_before_2'])
+        document.ast.cursor.set_state(self.state['cursor_state_before_2'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
         for node in self.state['deleted_nodes']:
             document.ast.insert_node(node)
-        document.ast.set_cursor_state(self.state['cursor_state_before_1'])
+        document.ast.cursor.set_state(self.state['cursor_state_before_1'])
 
 

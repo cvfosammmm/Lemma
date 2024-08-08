@@ -100,13 +100,13 @@ class Actions(object):
         next_doc = self.workspace.history.get_next_if_any(active_document)
         can_undo = has_active_doc and active_document.can_undo()
         can_redo = has_active_doc and active_document.can_redo()
-        insert_in_line = has_active_doc and active_document.ast.get_insert_node().parent.is_root()
-        has_selection = has_active_doc and active_document.ast.has_selection()
+        insert_in_line = has_active_doc and active_document.ast.cursor.get_insert_node().parent.is_root()
+        has_selection = has_active_doc and active_document.ast.cursor.has_selection()
         clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
-        links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.ast.get_cursor_state()) if node.link != None]) > 0
-        cursor_inside_link = has_active_doc and active_document.ast.get_insert_node().is_inside_link()
+        links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.ast.cursor.get_state()) if node.link != None]) > 0
+        cursor_inside_link = has_active_doc and active_document.ast.cursor.get_insert_node().is_inside_link()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -179,7 +179,7 @@ class Actions(object):
     def copy(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
         ast = self.workspace.active_document.ast
-        subtree = ast.get_subtree(*ast.get_cursor_state())
+        subtree = ast.get_subtree(*ast.cursor.get_state())
         chars = ''.join([node.value for node in subtree if node.is_char()])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
@@ -232,7 +232,7 @@ class Actions(object):
     def toggle_tag(self, tagname):
         document = self.workspace.active_document
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.cursor.get_state()) if node.is_char()]
         all_tagged = True
         for node in char_nodes:
             if tagname not in node.tags: all_tagged = False

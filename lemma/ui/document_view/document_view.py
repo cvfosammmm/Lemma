@@ -155,7 +155,7 @@ class DocumentView(Observable):
         if self.document == None:
             self.link_target_at_cursor = None
         else:
-            current_node = self.document.ast.get_node_at_position(self.document.ast.get_first_cursor_pos())
+            current_node = self.document.ast.root.get_node_at_position(self.document.ast.cursor.get_first_cursor_pos())
             prev_node = current_node.prev_in_parent()
             if prev_node != None and prev_node.link != None and current_node.link != None and current_node.link.target == prev_node.link.target:
                 self.link_target_at_cursor = current_node.link.target
@@ -167,7 +167,7 @@ class DocumentView(Observable):
         if self.document == None:
             self.set_tags_at_cursor(set())
         else:
-            node = self.document.ast.get_node_at_position(self.document.ast.get_first_cursor_pos())
+            node = self.document.ast.root.get_node_at_position(self.document.ast.cursor.get_first_cursor_pos())
             node = node.prev_in_parent()
             if node == None:
                 self.set_tags_at_cursor(set())
@@ -183,7 +183,7 @@ class DocumentView(Observable):
         document = self.workspace.active_document
         if self.workspace.mode != 'documents' or document == None: return
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.cursor.get_state()) if node.is_char()]
         all_tagged = True
         for node in char_nodes:
             if tagname not in node.tags: all_tagged = False

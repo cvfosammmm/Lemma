@@ -82,7 +82,7 @@ class Document(Observable):
     def update_implicit_x_position(self):
         last_command = self.command_processor.get_last_command()
         if last_command != None and last_command.update_implicit_x_position:
-            x, y = self.ast.get_insert_node().get_xy()
+            x, y = self.ast.cursor.get_insert_node().get_xy()
             self.implicit_x_position = x
 
     def set_title(self, title):

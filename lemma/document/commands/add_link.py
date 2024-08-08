@@ -29,23 +29,23 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.ast.get_cursor_state()
+        self.state['cursor_state_before'] = document.ast.cursor.get_state()
         self.state['nodes_added'] = []
 
         if self.positions != None:
-            document.ast.set_cursor_state(self.positions)
+            document.ast.cursor.set_state(self.positions)
 
         reset_selection = False
-        if not document.ast.has_selection():
+        if not document.ast.cursor.has_selection():
             reset_selection = True
-            cursor_state_1 = document.ast.get_cursor_state()
+            cursor_state_1 = document.ast.cursor.get_state()
             for char in self.target:
                 character = Node('char', char)
                 self.state['nodes_added'] += document.ast.insert_node(character)
-            cursor_state_2 = document.ast.get_cursor_state()
-            document.ast.set_cursor_state([cursor_state_2[0], cursor_state_1[1]])
+            cursor_state_2 = document.ast.cursor.get_state()
+            document.ast.cursor.set_state([cursor_state_2[0], cursor_state_1[1]])
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.ast.get_cursor_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.ast.cursor.get_state()) if node.is_char()]
         prev_links = []
         for node in char_nodes:
             prev_links.append(node.link)
@@ -53,15 +53,15 @@ class Command():
         self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_links))
 
         if self.positions != None:
-            document.ast.set_cursor_state(self.state['cursor_state_before'])
+            document.ast.cursor.set_state(self.state['cursor_state_before'])
         elif reset_selection:
-            cursor_state = document.ast.get_cursor_state()
-            document.ast.set_cursor_state([cursor_state[0], cursor_state[0]])
+            cursor_state = document.ast.cursor.get_state()
+            document.ast.cursor.set_state([cursor_state[0], cursor_state[0]])
 
     def undo(self, document):
         for node in self.state['nodes_added']:
             document.ast.delete_node(node)
-        document.ast.set_cursor_state(self.state['cursor_state_before'])
+        document.ast.cursor.set_state(self.state['cursor_state_before'])
 
         for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]

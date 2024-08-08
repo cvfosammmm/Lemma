@@ -120,7 +120,7 @@ class DocumentViewPresenter():
 
     def scroll_insert_on_screen(self, animate=False):
         document = self.model.document
-        insert_position = document.ast.get_insert_node().get_xy()
+        insert_position = document.ast.cursor.get_insert_node().get_xy()
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
         insert_y = insert_position[1] + content_offset + FontManager.get_cursor_offset()
         insert_height = FontManager.get_cursor_height()
@@ -179,8 +179,8 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         self.cursor_coords = None
-        self.first_cursor_pos = self.model.document.ast.get_first_cursor_pos()
-        self.last_cursor_pos = self.model.document.ast.get_last_cursor_pos()
+        self.first_cursor_pos = self.model.document.ast.cursor.get_first_cursor_pos()
+        self.last_cursor_pos = self.model.document.ast.cursor.get_last_cursor_pos()
         scrolling_offset_y = self.model.document.clipping.offset_y
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
@@ -207,7 +207,7 @@ class DocumentViewPresenter():
         ctx.fill()
 
     def draw_box(self, ctx, box, offset_x, offset_y):
-        if box == self.model.document.ast.get_insert_node().box and not self.model.document.ast.has_selection():
+        if box == self.model.document.ast.cursor.get_insert_node().box and not self.model.document.ast.cursor.has_selection():
             if box.type == 'placeholder':
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)

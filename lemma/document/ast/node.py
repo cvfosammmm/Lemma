@@ -192,6 +192,12 @@ class Node():
             return self.parent[index]
         return None
 
+    def get_node_at_position(self, pos):
+        node = self
+        for index in pos:
+            node = node[index]
+        return node
+
     def __str__(self):
         string = self.type + ':' + str(self.value) + '\n  '
         for node in self:

@@ -53,7 +53,7 @@ class Command(HTMLParser):
         self.document = None
         self.composite = None
 
-        document.ast.set_cursor_state([[0], [0]])
+        document.ast.cursor.set_state([[0], [0]])
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def handle_starttag(self, tag, attrs):
