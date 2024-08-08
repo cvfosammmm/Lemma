@@ -131,6 +131,7 @@ class InsertLinkView(DialogView):
     def __init__(self, main_window):
         DialogView.__init__(self, main_window)
 
+        self.set_resizable(False)
         self.set_default_size(400, -1)
         self.add_css_class('insert-link-dialog')
         self.headerbar.set_show_title_buttons(False)
