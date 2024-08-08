@@ -246,7 +246,7 @@ class Actions(object):
             self.application.document_view.set_tags_at_cursor(self.application.document_view.tags_at_cursor ^ {tagname})
 
     def insert_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.workspace.active_document)
+        DialogLocator.get_dialog('insert_link').run(self.workspace, self.workspace.active_document)
 
     def remove_link(self, action=None, parameter=''):
         self.workspace.active_document.add_command('remove_link')

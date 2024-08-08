@@ -30,11 +30,14 @@ class Dialog(object):
 
     def __init__(self, main_window):
         self.main_window = main_window
+        self.workspace = None
         self.document = None
         self.bounds = None
         self.current_values = dict()
+        self.search_terms = []
 
-    def run(self, document):
+    def run(self, workspace, document):
+        self.workspace = workspace
         self.document = document
         self.init_current_values()
         self.view = InsertLinkView(self.main_window)
@@ -47,19 +50,23 @@ class Dialog(object):
             if len([node for node in nodes if match_func(node) == False]) > 0:
                 self.bounds = None
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
+                self.view.add_button.set_label(_('Insert'))
             else:
                 self.bounds = document.ast.get_cursor_state()
                 self.view.entry_link_target.set_text(first_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
+                self.view.add_button.set_label(_('Edit'))
         else:
             insert_node = self.document.ast.get_insert_node()
             if insert_node.is_inside_link():
                 self.bounds = insert_node.get_bounds_for_link()
                 self.view.entry_link_target.set_text(insert_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
+                self.view.add_button.set_label(_('Edit'))
             else:
                 self.bounds = None
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
+                self.view.add_button.set_label(_('Insert'))
 
         self.validate()
         self.view.present()
@@ -72,20 +79,40 @@ class Dialog(object):
         self.view.add_button.connect('clicked', self.on_add_button_clicked)
         self.view.entry_link_target.connect('changed', self.on_entry_link_target_changed)
         self.view.entry_link_target.connect('activate', self.on_entry_link_target_activate)
+        self.view.listbox.connect('row-activated', self.on_suggestion_row_activated)
 
     def on_entry_link_target_changed(self, entry):
+        self.search_terms = entry.get_text().split()
         self.current_values['link_target'] = entry.get_text()
         self.validate()
-        self.view.content.remove(self.view.label)
 
     def on_entry_link_target_activate(self, entry):
         self.submit()
 
+    def on_suggestion_row_activated(self, listbox, row):
+        self.view.entry_link_target.set_text(row.title)
+        self.view.entry_link_target.set_position(-1)
+
     def validate(self):
+        line_height = 30
+        count = 0
+
+        self.view.listbox.remove_all()
+        for document in self.workspace.documents:
+            if self.is_match(document):
+                self.view.listbox.append(ACItem(document.title))
+                count += 1
+
+        self.view.scrolled_window.set_visible(count > 0)
+        self.view.set_default_size(400, (105 if count > 0 else 93) + min(count, 5) * line_height)
         self.view.add_button.set_sensitive(self.is_valid())
 
     def is_valid(self):
         return self.current_values['link_target'] != ''
+
+    def is_match(self, document):
+        if len(self.search_terms) == 0: return True
+        return min(map(lambda x: x in document.title, self.search_terms))
 
     def on_cancel_button_clicked(self, button):
         self.view.close()
@@ -114,7 +141,7 @@ class InsertLinkView(DialogView):
         self.cancel_button.set_can_focus(False)
         self.headerbar.pack_start(self.cancel_button)
 
-        self.add_button = Gtk.Button.new_with_mnemonic(_('Insert'))
+        self.add_button = Gtk.Button.new_with_label(_('Insert'))
         self.add_button.set_can_focus(False)
         self.add_button.add_css_class('suggested-action')
         self.headerbar.pack_end(self.add_button)
@@ -122,17 +149,33 @@ class InsertLinkView(DialogView):
         self.entry_link_target = Gtk.Entry()
         self.entry_link_target.set_placeholder_text(_('Link Target'))
 
+        self.listbox = Gtk.ListBox()
+        self.listbox.set_activate_on_single_click(True)
+        self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.listbox.set_can_focus(False)
+
+        self.scrolled_window = Gtk.ScrolledWindow()
+        self.scrolled_window.set_child(self.listbox)
+        self.scrolled_window.set_vexpand(True)
+
         self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.content.set_vexpand(True)
         self.content.append(self.entry_link_target)
-
-        self.label = Gtk.Label.new('asd')
-        self.content.append(self.label)
-        self.content.append(Gtk.Label.new('asd'))
-        self.content.append(Gtk.Label.new('asd'))
-        self.content.append(Gtk.Label.new('asd'))
-        self.content.append(Gtk.Label.new('asd'))
+        self.content.append(self.scrolled_window)
 
         self.topbox.append(self.content)
+
+
+class ACItem(Gtk.ListBoxRow):
+
+    def __init__(self, title):
+        Gtk.ListBoxRow.__init__(self)
+        self.set_size_request(-1, 30)
+
+        self.title = title
+
+        label = Gtk.Label.new(self.title)
+        label.set_xalign(Gtk.Align.FILL)
+        self.set_child(label)
 
 

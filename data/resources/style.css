@@ -349,8 +349,19 @@ window.insert-link-dialog entry {
     border: none;
     outline: none;
     border-radius: 0px;
+    padding: 12px;
     padding-top: 7px;
     padding-bottom: 7px;
+    background: @link_entry_bg;
+}
+window.insert-link-dialog list {
+    border-top: 1px solid @link_entry_border;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: @link_ac_bg;
+}
+window.insert-link-dialog row {
+    padding: 0px 12px;
 }
 
 /* import markdown dialog */
@@ -416,19 +427,6 @@ window.import-markdown-files-dialog button.filechooser-button {
     margin: 0px;
     padding: 12px 18px;
     border-radius: 0px;
-}
-
-/* autocomplete */
-
-box.autocomplete {
-    border: 1px solid @ac_border;
-    border-radius: 2px;
-}
-box.autocomplete entry {
-    outline: none;
-    border-radius: 0px;
-    border-bottom: 1px solid @ac_border;
-    background: @ac_bg;
 }
 
 

@@ -92,8 +92,10 @@
 
 @define-color actionbar_bg #ffffff;
 
-@define-color ac_bg #e4dfc5;
-@define-color ac_border #898361;
+@define-color link_ac_bg #e4dfc5;
+@define-color link_ac_border #898361;
+@define-color link_entry_bg #fff;
+@define-color link_entry_border #ddd;
 
 @define-color content_border #c01c28;
 @define-color content_border #0003;
