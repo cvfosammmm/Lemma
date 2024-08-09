@@ -71,10 +71,8 @@ class DocumentViewController():
         self.scrolling_controller.connect('scroll', self.on_scroll)
         self.content.add_controller(self.scrolling_controller)
 
-        self.view.adjustment_x.connect('changed', self.on_adjustment_changed)
-        self.view.adjustment_x.connect('value-changed', self.on_adjustment_changed)
-        self.view.adjustment_y.connect('changed', self.on_adjustment_changed)
-        self.view.adjustment_y.connect('value-changed', self.on_adjustment_changed)
+        self.view.adjustment_x.connect('value-changed', self.on_adjustment_value_changed)
+        self.view.adjustment_y.connect('value-changed', self.on_adjustment_value_changed)
 
         self.content.connect('resize', self.on_resize)
 
@@ -240,7 +238,7 @@ class DocumentViewController():
     def on_resize(self, drawing_area, width, height):
         self.model.set_size(width, height)
 
-    def on_adjustment_changed(self, adjustment):
+    def on_adjustment_value_changed(self, adjustment):
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
         self.model.last_cursor_or_scrolling_change = time.time()

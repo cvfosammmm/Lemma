@@ -39,8 +39,6 @@ class Cursor():
     def set_selection_position(self, position):
         self.set_selection_node(self.ast.root.get_node_at_position(position))
 
-    ''' cursor movement '''
-
     def move_insert_left(self):
         self.move_insert_to_node(self.get_insert_node().prev())
 

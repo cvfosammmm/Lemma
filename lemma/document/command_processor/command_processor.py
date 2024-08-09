@@ -21,14 +21,17 @@ class CommandProcessor(object):
     def __init__(self, document):
         self.document = document
         self.commands = list()
+        self.commands_preedit = list()
         self.last_command = -1
 
     def add_command(self, command):
-        self.commands = self.commands[:self.last_command + 1] + [command]
-        self.last_command += 1
         command.run(self.document)
+        self.commands_preedit.append(command)
 
         if command.is_undo_checkpoint:
+            self.commands = self.commands[:self.last_command + 1] + self.commands_preedit
+            self.last_command += len(self.commands_preedit)
+            self.commands_preedit = list()
             self.document.update_last_modified()
         self.document.update()
 
@@ -45,35 +48,32 @@ class CommandProcessor(object):
             return None
 
     def undo(self):
-        if self.last_command >= 0:
-            command = self.commands[self.last_command]
+        for command in reversed(self.commands_preedit):
+            command.undo(self.document)
+        self.commands_preedit = list()
+
+        for command in reversed(self.commands[:self.last_command + 1]):
             command.undo(self.document)
             self.last_command -= 1
-
             if command.is_undo_checkpoint:
                 self.document.update_last_modified()
-                self.document.update()
-            else:
-                self.undo()
-        else:
-            self.document.update()
+                break
+
+        self.document.update()
 
     def redo(self):
-        if self.last_command < len(self.commands) - 1:
-            command = self.commands[self.last_command + 1]
+        for command in self.commands[self.last_command + 1:]:
             command.run(self.document)
             self.last_command += 1
-
             if command.is_undo_checkpoint:
                 self.document.update_last_modified()
-                self.document.update()
-            else:
-                self.redo()
-        else:
-            self.document.update()
+                break
+
+        self.document.update()
 
     def reset_undo_stack(self):
         self.commands = list()
+        self.commands_preedit = list()
         self.last_command = -1
 
 
