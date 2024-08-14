@@ -24,12 +24,12 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.ast.cursor.get_state()
+        self.state['cursor_state_before'] = document.cursor.get_state()
 
-        document.ast.cursor.move_insert_right_with_selection()
+        document.cursor.move_insert_right_with_selection()
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.ast.cursor.set_state(self.state['cursor_state_before'])
+        document.cursor.set_state(self.state['cursor_state_before'])
 
 

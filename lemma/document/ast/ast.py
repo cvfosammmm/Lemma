@@ -18,7 +18,6 @@
 import time
 
 from lemma.document.ast.node import Node
-from lemma.document.ast.cursor import Cursor
 
 
 class AST(object):
@@ -26,22 +25,8 @@ class AST(object):
     def __init__(self):
         self.root = Node('list')
         self.root.insert(0, Node('EOL', '\n'))
-        self.cursor = Cursor(self, self.root[0], self.root[0])
 
-    def insert_node(self, node):
-        parent = self.cursor.get_insert_node().parent
-        index = parent.index(self.cursor.get_insert_node())
-        parent.insert(index, node)
-        return [node]
-
-    def delete_selection(self):
-        if self.cursor.get_insert_position() < self.cursor.get_selection_position():
-            first_node = self.cursor.get_insert_node()
-            last_node = self.cursor.get_selection_node()
-        else:
-            first_node = self.cursor.get_selection_node()
-            last_node = self.cursor.get_insert_node()
-
+    def delete_range(self, first_node, last_node):
         deleted_nodes = []
         while first_node != last_node:
             deleted_nodes += [first_node]
@@ -50,7 +35,6 @@ class AST(object):
             parent.remove(first_node)
             first_node = parent[index]
 
-        self.cursor.move_insert_to_node(first_node)
         return deleted_nodes
 
     def delete_node(self, node):

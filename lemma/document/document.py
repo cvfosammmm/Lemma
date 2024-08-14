@@ -18,6 +18,7 @@
 import time, os.path
 
 from lemma.document.ast.ast import AST
+from lemma.document.ast.cursor import Cursor
 from lemma.document.housekeeper.housekeeper import Housekeeper
 from lemma.document.layouter.layouter import Layouter
 from lemma.document.clipping.clipping import Clipping
@@ -43,6 +44,7 @@ class Document(Observable):
         self.id = id
         self.title = ''
         self.ast = AST()
+        self.cursor = Cursor(self.ast, self.ast.root[0], self.ast.root[0])
         self.implicit_x_position = 0
         self.scroll_insert_on_screen_after_layout_update = False
         self.layout = None
@@ -82,7 +84,7 @@ class Document(Observable):
     def update_implicit_x_position(self):
         last_command = self.command_processor.get_last_command()
         if last_command != None and last_command.update_implicit_x_position:
-            x, y = self.ast.cursor.get_insert_node().get_xy()
+            x, y = self.cursor.get_insert_node().get_xy()
             self.implicit_x_position = x
 
     def set_title(self, title):

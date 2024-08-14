@@ -43,8 +43,8 @@ class Dialog(object):
         self.view = InsertLinkView(self.main_window)
         self.setup()
 
-        if self.document.ast.cursor.has_selection():
-            nodes = document.ast.get_subtree(*document.ast.cursor.get_state())
+        if self.document.cursor.has_selection():
+            nodes = document.ast.get_subtree(*document.cursor.get_state())
             first_node = nodes[0] if len(nodes) > 0 else None
             match_func = lambda x: (x != None and x.link != None and x.link == first_node.link)
             if len([node for node in nodes if match_func(node) == False]) > 0:
@@ -52,12 +52,12 @@ class Dialog(object):
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
                 self.view.add_button.set_label(_('Insert'))
             else:
-                self.bounds = document.ast.cursor.get_state()
+                self.bounds = document.cursor.get_state()
                 self.view.entry_link_target.set_text(first_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
                 self.view.add_button.set_label(_('Edit'))
         else:
-            insert_node = self.document.ast.cursor.get_insert_node()
+            insert_node = self.document.cursor.get_insert_node()
             if insert_node.is_inside_link():
                 self.bounds = insert_node.get_bounds_for_link()
                 self.view.entry_link_target.set_text(insert_node.link.target)

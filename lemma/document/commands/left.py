@@ -24,15 +24,15 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.ast.cursor.get_state()
+        self.state['cursor_state_before'] = document.cursor.get_state()
 
-        if document.ast.cursor.has_selection():
-            document.ast.cursor.set_state([document.ast.cursor.get_first_cursor_pos(), document.ast.cursor.get_first_cursor_pos()])
+        if document.cursor.has_selection():
+            document.cursor.set_state([document.cursor.get_first_cursor_pos(), document.cursor.get_first_cursor_pos()])
         else:
-            document.ast.cursor.move_insert_left()
+            document.cursor.move_insert_left()
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        document.ast.cursor.set_state(self.state['cursor_state_before'])
+        document.cursor.set_state(self.state['cursor_state_before'])
 
 

@@ -83,6 +83,18 @@ class Cursor():
     def get_selection_position(self):
         return self.node_selection.get_position()
 
+    def get_first_node(self):
+        if self.get_insert_position() < self.get_selection_position():
+            return self.node_insert
+        else:
+            return self.node_selection
+
+    def get_last_node(self):
+        if self.get_insert_position() < self.get_selection_position():
+            return self.node_selection
+        else:
+            return self.node_insert
+
     def get_first_cursor_pos(self):
         if self.get_insert_position() < self.get_selection_position():
             return self.get_insert_position()

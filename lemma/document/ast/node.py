@@ -39,6 +39,14 @@ class Node():
         self.children.insert(index, node)
         node.set_parent(self)
 
+    def insert_after(self, child, node):
+        index = self.index(child)
+        self.insert(index, node)
+
+    def insert_before(self, child, node):
+        index = self.index(child)
+        self.insert(index, node)
+
     def append(self, node):
         self.insert(len(self.children), node)
 

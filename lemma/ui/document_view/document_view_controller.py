@@ -203,8 +203,8 @@ class DocumentViewController():
             case ('page_down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_down', self.model.height)
 
             case ('return', _):
-                if not document.ast.cursor.has_selection() and document.ast.cursor.get_insert_node().is_inside_link():
-                    self.open_link(document.ast.cursor.get_insert_node().link.target)
+                if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
+                    self.open_link(document.cursor.get_insert_node().link.target)
                 else:
                     document.add_command('newline')
             case ('backspace', _): document.add_command('backspace')
