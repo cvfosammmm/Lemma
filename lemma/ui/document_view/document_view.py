@@ -63,6 +63,30 @@ class DocumentView(Observable):
 
         self.set_document(workspace.get_active_document())
         self.workspace.connect('new_active_document', self.on_new_active_document)
+        self.workspace.connect('document_changed', self.on_document_change)
+        self.workspace.connect('mode_set', self.on_mode_set)
+        self.add_change_code('changed')
+
+    def on_new_active_document(self, workspace, document=None):
+        self.set_document(document)
+        self.update()
+
+    def on_document_change(self, workspace, document): self.update()
+    def on_mode_set(self, workspace): self.update()
+
+    def update(self):
+        active_document = self.workspace.active_document
+        has_active_doc = (self.workspace.mode == 'documents' and active_document != None)
+        has_selection = has_active_doc and active_document.cursor.has_selection()
+        links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.cursor.get_state()) if node.link != None]) > 0
+        cursor_inside_link = has_active_doc and active_document.cursor.get_insert_node().is_inside_link()
+        delete_link_visible = has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link))
+        edit_link_visible = has_active_doc and ((not has_selection) and cursor_inside_link)
+
+        self.view.context_menu.remove_link_button.set_visible(delete_link_visible)
+        self.view.context_menu.edit_link_button.set_visible(edit_link_visible)
+        self.view.context_menu.link_buttons_separator.set_visible(delete_link_visible or edit_link_visible)
+
         self.add_change_code('changed')
 
     def set_size(self, width, height):
@@ -81,10 +105,6 @@ class DocumentView(Observable):
             self.keyboard_modifiers_state = state
             self.last_cursor_or_scrolling_change = time.time()
             self.add_change_code('changed')
-
-    def on_new_active_document(self, workspace, document=None):
-        self.set_document(document)
-        self.add_change_code('changed')
 
     def set_document(self, document):
         if self.document != None:

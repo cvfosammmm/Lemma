@@ -56,6 +56,7 @@ class Actions(object):
 
         self.add_simple_action('insert-link', self.insert_link)
         self.add_simple_action('remove-link', self.remove_link)
+        self.add_simple_action('edit-link', self.edit_link)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
         self.add_simple_action('toggle-bold', self.toggle_bold)
@@ -95,7 +96,8 @@ class Actions(object):
 
     def update(self):
         active_document = self.workspace.active_document
-        has_active_doc = (active_document != None)
+        has_active_doc = (self.workspace.mode == 'documents' and active_document != None)
+
         prev_doc = self.workspace.history.get_previous_if_any(active_document)
         next_doc = self.workspace.history.get_next_if_any(active_document)
         can_undo = has_active_doc and active_document.can_undo()
@@ -110,27 +112,28 @@ class Actions(object):
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
-        self.actions['delete-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['rename-document'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['export-markdown'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['export-html'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['delete-document'].set_enabled(has_active_doc)
+        self.actions['rename-document'].set_enabled(has_active_doc)
+        self.actions['export-markdown'].set_enabled(has_active_doc)
+        self.actions['export-html'].set_enabled(has_active_doc)
         self.actions['go-back'].set_enabled(self.workspace.mode == 'draft' or prev_doc != None)
         self.actions['go-forward'].set_enabled(next_doc != None)
-        self.actions['undo'].set_enabled(self.workspace.mode == 'documents' and can_undo)
-        self.actions['redo'].set_enabled(self.workspace.mode == 'documents' and can_redo)
-        self.actions['cut'].set_enabled(self.workspace.mode == 'documents' and has_selection)
-        self.actions['copy'].set_enabled(self.workspace.mode == 'documents' and has_selection)
-        self.actions['paste'].set_enabled(self.workspace.mode == 'documents' and has_active_doc and (text_in_clipboard or subtree_in_clipboard))
+        self.actions['undo'].set_enabled(has_active_doc and can_undo)
+        self.actions['redo'].set_enabled(has_active_doc and can_redo)
+        self.actions['cut'].set_enabled(has_active_doc and has_selection)
+        self.actions['copy'].set_enabled(has_active_doc and has_selection)
+        self.actions['paste'].set_enabled(has_active_doc and (text_in_clipboard or subtree_in_clipboard))
         self.actions['delete'].set_enabled(self.workspace.mode == 'documents' and has_selection)
-        self.actions['select-all'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['insert-link'].set_enabled(self.workspace.mode == 'documents' and insert_in_line)
-        self.actions['remove-link'].set_enabled(self.workspace.mode == 'documents' and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
-        self.actions['insert-symbol'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['toggle-bold'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['toggle-italic'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['select-all'].set_enabled(has_active_doc)
+        self.actions['insert-link'].set_enabled(has_active_doc and insert_in_line)
+        self.actions['remove-link'].set_enabled(has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
+        self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
+        self.actions['insert-symbol'].set_enabled(has_active_doc)
+        self.actions['toggle-bold'].set_enabled(has_active_doc)
+        self.actions['toggle-italic'].set_enabled(has_active_doc)
         self.actions['toggle-math-sidebar'].set_enabled(True)
-        self.actions['show-edit-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
-        self.actions['show-document-menu'].set_enabled(self.workspace.mode == 'documents' and has_active_doc)
+        self.actions['show-edit-menu'].set_enabled(has_active_doc)
+        self.actions['show-document-menu'].set_enabled(has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
         self.actions['show-about-dialog'].set_enabled(True)
@@ -179,6 +182,7 @@ class Actions(object):
     def copy(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
         ast = self.workspace.active_document.ast
+        cursor = self.workspace.active_document.cursor
         subtree = ast.get_subtree(*cursor.get_state())
         chars = ''.join([node.value for node in subtree if node.is_char()])
 
@@ -250,6 +254,9 @@ class Actions(object):
 
     def remove_link(self, action=None, parameter=''):
         self.workspace.active_document.add_command('remove_link')
+
+    def edit_link(self, action=None, parameter=''):
+        DialogLocator.get_dialog('insert_link').run(self.workspace, self.workspace.active_document)
 
     def toggle_math_sidebar(self, action=None, parameter=''):
         toggle = self.main_window.toolbar.math_sidebar_toggle

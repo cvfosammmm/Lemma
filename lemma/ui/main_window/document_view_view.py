@@ -142,4 +142,8 @@ class ContextMenuDocumentView(ContextMenu):
         self.remove_link_button.set_action_name('win.remove-link')
         self.box.append(self.remove_link_button)
 
+        self.edit_link_button = self.create_button('Edit Link')
+        self.edit_link_button.set_action_name('win.edit-link')
+        self.box.append(self.edit_link_button)
+
 
