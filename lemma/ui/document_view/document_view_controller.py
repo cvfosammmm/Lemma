@@ -143,7 +143,8 @@ class DocumentViewController():
         y_offset = document.clipping.offset_y + y - self.view.padding_top - self.view.title_height - self.view.subtitle_height
 
         if y > 0:
-            document.add_command('move_cursor_to_xy', x_offset, y_offset)
+            if not document.cursor.has_selection():
+                document.add_command('move_cursor_to_xy', x_offset, y_offset)
             self.view.context_menu.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
