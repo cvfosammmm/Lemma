@@ -255,6 +255,11 @@ class DocumentViewController():
     def on_resize(self, drawing_area, width, height):
         self.model.set_size(width, height)
 
+        offset_x = self.view.adjustment_x.get_value()
+        offset_y = self.view.adjustment_y.get_value()
+        self.model.last_cursor_or_scrolling_change = time.time()
+        self.model.document.add_command('scroll_to_xy', offset_x, offset_y)
+
     def on_adjustment_value_changed(self, adjustment):
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
