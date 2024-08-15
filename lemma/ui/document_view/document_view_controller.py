@@ -158,6 +158,17 @@ class DocumentViewController():
     def on_drag_update(self, gesture, x, y, data=None):
         start_point = gesture.get_start_point()
         x, y = start_point.x + x, start_point.y + y
+
+        if y < 0:
+            new_x = self.model.document.clipping.offset_x
+            new_y = max(0, self.model.document.clipping.offset_y + y)
+            self.model.document.add_command('scroll_to_xy', new_x, new_y)
+        if y - self.model.height > 0:
+            height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
+            new_x = self.model.document.clipping.offset_x
+            new_y = min(max(0, height - self.model.height), self.model.document.clipping.offset_y + y - self.model.height)
+            self.model.document.add_command('scroll_to_xy', new_x, new_y)
+
         x -= self.view.padding_left
         y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
         y += self.model.document.clipping.offset_y
