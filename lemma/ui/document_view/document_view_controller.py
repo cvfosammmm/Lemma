@@ -38,6 +38,11 @@ class DocumentViewController():
         self.primary_click_controller.connect('released', self.on_primary_button_release)
         self.content.add_controller(self.primary_click_controller)
 
+        self.secondary_click_controller = Gtk.GestureClick()
+        self.secondary_click_controller.set_button(3)
+        self.secondary_click_controller.connect('pressed', self.on_secondary_button_press)
+        self.content.add_controller(self.secondary_click_controller)
+
         self.key_controller_content = Gtk.EventControllerKey()
         self.key_controller_content.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller_content.connect('key-pressed', self.on_keypress_content)
@@ -78,8 +83,8 @@ class DocumentViewController():
 
     def on_primary_button_press(self, controller, n_press, x, y):
         if n_press != 1: return
-        modifiers = Gtk.accelerator_get_default_mod_mask()
 
+        modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
         x = document.clipping.offset_x + x
         y = document.clipping.offset_y + y
@@ -112,8 +117,8 @@ class DocumentViewController():
 
     def on_primary_button_release(self, controller, n_press, x, y):
         if n_press != 1: return
-        modifiers = Gtk.accelerator_get_default_mod_mask()
 
+        modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
         x = document.clipping.offset_x + x
         y = document.clipping.offset_y + y
@@ -129,6 +134,17 @@ class DocumentViewController():
                 link = document.layout.get_link_at_xy(x, y)
                 if link != None and link.target == self.model.selected_link_target:
                     self.open_link(link.target)
+
+    def on_secondary_button_press(self, controller, n_press, x, y):
+        if n_press != 1: return
+
+        document = self.model.document
+        x_offset = document.clipping.offset_x + x - self.view.padding_left
+        y_offset = document.clipping.offset_y + y - self.view.padding_top - self.view.title_height - self.view.subtitle_height
+
+        if y > 0:
+            document.add_command('move_cursor_to_xy', x_offset, y_offset)
+            self.view.context_menu.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
         x -= self.view.padding_left

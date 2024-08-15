@@ -25,7 +25,6 @@ import lemma.helpers.helpers as helpers
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.infrastructure.color_manager import ColorManager
 import lemma.helpers.helpers as helpers
-from lemma.ui.context_menus.document_list import ContextMenuDocumentList
 
 
 class DocumentList(object):
@@ -41,12 +40,14 @@ class DocumentList(object):
 
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
+        self.view.scrolling_widget.connect('secondary_button_press', self.on_secondary_button_press)
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
         self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)
 
-        self.context_menu = ContextMenuDocumentList(self)
-
         self.view.content.set_draw_func(self.draw)
+
+        self.view.context_menu.delete_document_button.connect('clicked', self.on_delete_document_clicked)
+        self.view.context_menu.popover.connect('closed', self.on_context_menu_close)
 
         self.workspace.connect('new_document', self.on_new_document)
         self.workspace.connect('document_removed', self.on_document_removed)
@@ -91,6 +92,25 @@ class DocumentList(object):
         if item_num != None and item_num == self.selected_index:
             self.activate_item(item_num)
         self.set_selected_index(None)
+
+    def on_secondary_button_press(self, content, data):
+        x, y, state = data
+
+        if state == 0:
+            item_num = self.get_item_at_cursor()
+            if item_num != None and item_num < len(self.workspace.documents):
+                self.set_selected_index(item_num)
+                self.view.context_menu.popup_at_cursor(x - content.scrolling_offset_x, y - content.scrolling_offset_y)
+
+        return True
+
+    def on_context_menu_close(self, popover):
+        self.set_selected_index(None)
+
+    def on_delete_document_clicked(self, button):
+        index = self.selected_index
+        self.workspace.delete_document(self.workspace.documents[index])
+        self.view.context_menu.popover.popdown()
 
     def on_search_entry_changed(self, entry, data=None):
         self.search_terms = entry.get_text().split()

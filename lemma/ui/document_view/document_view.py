@@ -25,7 +25,6 @@ from urllib.parse import urlparse
 from lemma.ui.document_view.document_view_controller import DocumentViewController
 from lemma.ui.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.ui.title_widget.title_widget import TitleWidget
-from lemma.ui.context_menus.document_view import ContextMenuDocumentView
 from lemma.helpers.observable import Observable
 
 
@@ -61,8 +60,6 @@ class DocumentView(Observable):
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
         self.title_widget.view.title_entry.add_controller(self.key_controller_window)
         self.view.add_overlay(self.title_widget.view)
-
-        self.context_menu = ContextMenuDocumentView(self)
 
         self.set_document(workspace.get_active_document())
         self.workspace.connect('new_active_document', self.on_new_active_document)

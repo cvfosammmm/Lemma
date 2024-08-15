@@ -30,7 +30,7 @@ class ContextMenu():
         self.popover.set_can_focus(False)
         self.popover.add_css_class('context-menu')
 
-    def create_button(self, label, shortcut=None):
+    def create_button(self, label, shortcut=None, popdown=True):
         button = Gtk.Button()
         button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         button.set_child(button_box)
@@ -44,6 +44,9 @@ class ContextMenu():
             shortcut_label.set_hexpand(True)
             button_box.append(shortcut_label)
 
+        if popdown:
+            button.connect('clicked', self.on_button_click)
+
         return button
 
     def popup_at_cursor(self, x, y):
@@ -54,5 +57,8 @@ class ContextMenu():
         rect.height = 1
         self.popover.set_pointing_to(rect)
         self.popover.popup()
+
+    def on_button_click(self, button):
+        self.popover.popdown()
 
 
