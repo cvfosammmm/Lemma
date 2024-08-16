@@ -173,9 +173,7 @@ class DocumentViewController():
         y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
         y += self.model.document.clipping.offset_y
 
-        if y > 0:
-            document = self.model.document
-            document.add_command('selection_xy', x, y)
+        self.model.document.add_command('selection_xy', x, y)
 
     def on_drag_end(self, gesture, x, y, data=None):
         pass
