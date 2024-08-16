@@ -28,10 +28,10 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        if self.y < 0:
-            document.cursor.move_insert_to_node_with_selection(document.layout.get_node_at_xy(0, 0))
-        else:
-            document.cursor.move_insert_to_node_with_selection(document.layout.get_node_at_xy(self.x, self.y))
+        if self.y < 0: node = document.layout.get_node_at_xy(0, 0)
+        else: node = document.layout.get_node_at_xy(self.x, self.y)
+
+        document.cursor.move_insert_to_node_with_selection(node)
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])

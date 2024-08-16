@@ -105,7 +105,7 @@ class Box(object):
                     current_height += child.height
                 else:
                     break
-            return (current_child, 0, current_height)
+            return (current_child, 0, current_height + FontManager.get_descend() + FontManager.get_line_space() / 2)
 
         else:
             current_child, current_width = (None, 0)
