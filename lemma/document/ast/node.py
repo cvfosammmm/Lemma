@@ -28,6 +28,7 @@ class Node():
         self.box = None
         self.tags = set()
         self.link = None
+        self.paragraph_style = 'p'
 
     def set_parent(self, parent):
         self.parent = parent
@@ -94,6 +95,21 @@ class Node():
     def is_root(self): return self.parent == None
     def is_mathsymbol(self): return self.type == 'mathsymbol'
     def is_char(self): return self.type == 'char'
+    def is_eol(self): return self.type == 'EOL'
+
+    def is_first_in_line(self):
+        if not self.parent.is_root(): return False
+        if self.is_first_in_parent(): return True
+        if self.prev_in_parent().is_eol(): return True
+
+        return False
+
+    def is_last_in_line(self):
+        if not self.parent.is_root(): return False
+        if self.is_last_in_parent(): return True
+        if self.is_eol(): return True
+
+        return False
 
     def is_inside_link(self):
         if self.link == None: return False
@@ -200,6 +216,28 @@ class Node():
             index = self.parent.index(self) + 1
             return self.parent[index]
         return None
+
+    def line_start(self):
+        node = self
+
+        while not node.parent.is_root():
+            node = node.parent
+
+        while not node.is_first_in_line():
+            node = node.prev_in_parent()
+
+        return node
+
+    def line_end(self):
+        node = self
+
+        while not node.parent.is_root():
+            node = node.parent
+
+        while not node.is_last_in_line():
+            node = node.next_in_parent()
+
+        return node
 
     def get_node_at_position(self, pos):
         node = self

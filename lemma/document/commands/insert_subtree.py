@@ -35,11 +35,12 @@ class Command():
         if document.cursor.get_insert_node().parent.type == self.subtree.type:
             first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
             self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
-            document.cursor.move_insert_to_node(first_node)
+            document.cursor.move_insert_to_node(last_node)
             self.state['cursor_state_before_2'] = document.cursor.get_state()
 
             for node in self.subtree:
                 insert = document.cursor.get_insert_node()
+                node.paragraph_style = insert.paragraph_style
                 insert.parent.insert_before(insert, node)
                 self.state['nodes_added'].append(node)
 

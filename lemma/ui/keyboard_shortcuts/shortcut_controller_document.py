@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio, GLib
 
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
 
@@ -30,14 +30,21 @@ class ShortcutControllerDocument(ShortcutController):
 
         self.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
 
-        self.create_and_add_shortcut('<Control>b', self.actions.actions['toggle-bold'].activate)
-        self.create_and_add_shortcut('<Control>i', self.actions.actions['toggle-italic'].activate)
-        self.create_and_add_shortcut('<Control>l', self.actions.actions['insert-link'].activate)
-        self.create_and_add_shortcut('<Control>z', self.actions.actions['undo'].activate)
-        self.create_and_add_shortcut('<Control><Shift>z', self.actions.actions['redo'].activate)
-        self.create_and_add_shortcut('<Control>x', self.actions.actions['cut'].activate)
-        self.create_and_add_shortcut('<Control>c', self.actions.actions['copy'].activate)
-        self.create_and_add_shortcut('<Control>v', self.actions.actions['paste'].activate)
-        self.create_and_add_shortcut('<Control>a', self.actions.actions['select-all'].activate)
+        self.add_with_callback('<Control>b', self.actions.actions['toggle-bold'].activate)
+        self.add_with_callback('<Control>i', self.actions.actions['toggle-italic'].activate)
+        actions.application.set_accels_for_action('win.set-paragraph-style::p', ['<Control>7'])
+        actions.application.set_accels_for_action('win.set-paragraph-style::h2', ['<Control>2'])
+        actions.application.set_accels_for_action('win.set-paragraph-style::h3', ['<Control>3'])
+        actions.application.set_accels_for_action('win.set-paragraph-style::h4', ['<Control>4'])
+        actions.application.set_accels_for_action('win.set-paragraph-style::h5', ['<Control>5'])
+        actions.application.set_accels_for_action('win.set-paragraph-style::h6', ['<Control>6'])
+        self.add_with_callback('<Control>l', self.actions.actions['insert-link'].activate)
+
+        self.add_with_callback('<Control>z', self.actions.actions['undo'].activate)
+        self.add_with_callback('<Control><Shift>z', self.actions.actions['redo'].activate)
+        self.add_with_callback('<Control>x', self.actions.actions['cut'].activate)
+        self.add_with_callback('<Control>c', self.actions.actions['copy'].activate)
+        self.add_with_callback('<Control>v', self.actions.actions['paste'].activate)
+        self.add_with_callback('<Control>a', self.actions.actions['select-all'].activate)
 
 

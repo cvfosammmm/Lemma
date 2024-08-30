@@ -25,7 +25,7 @@ class ShortcutController(Gtk.ShortcutController):
     def __init__(self):
         Gtk.ShortcutController.__init__(self)
 
-    def create_and_add_shortcut(self, trigger_string, callback):
+    def add_with_callback(self, trigger_string, callback):
         shortcut = Gtk.Shortcut()
 
         shortcut.set_action(Gtk.CallbackAction.new(self.action, callback))

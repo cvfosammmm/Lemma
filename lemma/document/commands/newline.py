@@ -36,8 +36,11 @@ class Command():
             self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
             document.cursor.move_insert_to_node(first_node)
             self.state['cursor_state_before_2'] = document.cursor.get_state()
-            character = Node('EOL', '\n')
+
             insert = document.cursor.get_insert_node()
+            character = Node('EOL', '\n')
+            character.paragraph_style = insert.paragraph_style
+
             insert.parent.insert_before(insert, character)
             self.state['nodes_added'].append(character)
             document.set_scroll_insert_on_screen_after_layout_update()

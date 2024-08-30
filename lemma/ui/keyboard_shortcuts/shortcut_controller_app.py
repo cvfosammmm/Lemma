@@ -30,14 +30,14 @@ class ShortcutControllerApp(ShortcutController):
 
         self.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
 
-        self.create_and_add_shortcut('<Control>q', self.actions.actions['quit'].activate)
-        self.create_and_add_shortcut('<Control>n', self.actions.actions['add-document'].activate)
-        self.create_and_add_shortcut('<Alt>Left', self.actions.actions['go-back'].activate)
-        self.create_and_add_shortcut('<Alt>Right', self.actions.actions['go-forward'].activate)
-        self.create_and_add_shortcut('F2', self.actions.actions['rename-document'].activate)
-        self.create_and_add_shortcut('<Control>question', self.actions.actions['show-shortcuts-dialog'].activate)
-        self.create_and_add_shortcut('<Control>m', self.actions.actions['toggle-math-sidebar'].activate)
-        self.create_and_add_shortcut('F10', self.actions.actions['show-hamburger-menu'].activate)
-        self.create_and_add_shortcut('F12', self.actions.actions['show-document-menu'].activate)
+        self.add_with_callback('<Control>q', self.actions.actions['quit'].activate)
+        self.add_with_callback('<Control>n', self.actions.actions['add-document'].activate)
+        self.add_with_callback('<Alt>Left', self.actions.actions['go-back'].activate)
+        self.add_with_callback('<Alt>Right', self.actions.actions['go-forward'].activate)
+        self.add_with_callback('F2', self.actions.actions['rename-document'].activate)
+        self.add_with_callback('<Control>question', self.actions.actions['show-shortcuts-dialog'].activate)
+        self.add_with_callback('<Control>m', self.actions.actions['toggle-math-sidebar'].activate)
+        self.add_with_callback('F10', self.actions.actions['show-hamburger-menu'].activate)
+        self.add_with_callback('F12', self.actions.actions['show-document-menu'].activate)
 
 

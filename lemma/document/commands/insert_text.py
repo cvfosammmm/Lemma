@@ -22,11 +22,10 @@ from lemma.document.ast.link import Link
 
 class Command():
 
-    def __init__(self, text, tags=set(), link_target=None):
+    def __init__(self, text, link_target=None):
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.text = text
-        self.tags = tags
         self.link_target = link_target
         self.state = dict()
 
@@ -35,13 +34,17 @@ class Command():
         self.state['nodes_added'] = []
         first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
         self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
-        document.cursor.move_insert_to_node(first_node)
+        document.cursor.move_insert_to_node(last_node)
         self.state['cursor_state_before_2'] = document.cursor.get_state()
 
         insert = document.cursor.get_insert_node()
+        tags_at_cursor = insert.tags
+        paragraph_style_at_cursor = insert.paragraph_style
+
         for char in self.text:
             character = Node('char', char)
-            character.tags = self.tags.copy()
+            character.tags = tags_at_cursor.copy()
+            character.paragraph_style = paragraph_style_at_cursor
             if self.link_target != None:
                 character.link = Link(self.link_target)
             insert.parent.insert_before(insert, character)

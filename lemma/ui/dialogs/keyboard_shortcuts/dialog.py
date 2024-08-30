@@ -59,6 +59,12 @@ class Dialog():
         section = {'title': 'Formatting', 'items': list()}
         section['items'].append({'title': 'Bold text', 'shortcut': '&lt;ctrl&gt;B'})
         section['items'].append({'title': 'Italic text', 'shortcut': '&lt;ctrl&gt;I'})
+        section['items'].append({'title': 'Heading 2', 'shortcut': '&lt;ctrl&gt;2'})
+        section['items'].append({'title': 'Heading 3', 'shortcut': '&lt;ctrl&gt;3'})
+        section['items'].append({'title': 'Heading 4', 'shortcut': '&lt;ctrl&gt;4'})
+        section['items'].append({'title': 'Heading 5', 'shortcut': '&lt;ctrl&gt;5'})
+        section['items'].append({'title': 'Heading 6', 'shortcut': '&lt;ctrl&gt;6'})
+        section['items'].append({'title': 'Normal Paragraph', 'shortcut': '&lt;ctrl&gt;7'})
         data.append(section)
 
         section = {'title': 'Math', 'items': list()}

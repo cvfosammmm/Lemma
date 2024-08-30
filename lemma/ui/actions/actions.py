@@ -59,10 +59,12 @@ class Actions(object):
         self.add_simple_action('edit-link', self.edit_link)
         self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
 
+        self.add_simple_action('set-paragraph-style', self.set_paragraph_style, GLib.VariantType('s'))
         self.add_simple_action('toggle-bold', self.toggle_bold)
         self.add_simple_action('toggle-italic', self.toggle_italic)
 
         self.add_simple_action('toggle-math-sidebar', self.toggle_math_sidebar)
+        self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
         self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
@@ -129,9 +131,11 @@ class Actions(object):
         self.actions['remove-link'].set_enabled(has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
         self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
         self.actions['insert-symbol'].set_enabled(has_active_doc)
+        self.actions['set-paragraph-style'].set_enabled(has_active_doc)
         self.actions['toggle-bold'].set_enabled(has_active_doc)
         self.actions['toggle-italic'].set_enabled(has_active_doc)
         self.actions['toggle-math-sidebar'].set_enabled(True)
+        self.actions['show-paragraph-style-menu'].set_enabled(has_active_doc)
         self.actions['show-edit-menu'].set_enabled(has_active_doc)
         self.actions['show-document-menu'].set_enabled(has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
@@ -201,19 +205,16 @@ class Actions(object):
         if result[1].startswith('lemma/ast'):
             subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
             self.workspace.active_document.add_command('insert_subtree', subtree)
-            return
 
-        if result[1] == 'text/plain':
+        elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
 
             if len(text) < 2000:
                 parsed_url = urlparse(text.strip())
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                    self.workspace.active_document.add_command('insert_text', text.strip(), self.application.document_view.tags_at_cursor, text.strip())
+                    self.workspace.active_document.add_command('insert_text', text.strip(), text.strip())
                     return
-
-            self.workspace.active_document.add_command('insert_text', text, self.application.document_view.tags_at_cursor, self.application.document_view.link_target_at_cursor)
-            return
+            self.workspace.active_document.add_command('insert_text', text)
 
     def delete_selection(self, action=None, parameter=''):
         self.workspace.active_document.add_command('delete')
@@ -226,6 +227,10 @@ class Actions(object):
 
         name = parameter[0]
         self.workspace.active_document.add_command('insert_symbol', name)
+
+    def set_paragraph_style(self, action=None, parameter=None):
+        name = parameter.get_string()
+        self.workspace.active_document.add_command('set_paragraph_style', name)
 
     def toggle_bold(self, action=None, parameter=''):
         self.toggle_tag('bold')
@@ -261,6 +266,9 @@ class Actions(object):
     def toggle_math_sidebar(self, action=None, parameter=''):
         toggle = self.main_window.toolbar.math_sidebar_toggle
         toggle.set_active(not toggle.get_active())
+
+    def show_paragraph_style_menu(self, action=None, parameter=''):
+        PopoverManager.popup_at_button('paragraph_style')
 
     def show_edit_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('edit_menu')

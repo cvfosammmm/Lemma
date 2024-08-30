@@ -246,7 +246,9 @@ class DocumentViewPresenter():
                 else:
                     surface_color = ColorManager.get_ui_color('text')
 
-                if 'bold' in node.tags and 'italic' not in node.tags:
+                if node.paragraph_style.startswith('h'):
+                    fontname = node.paragraph_style
+                elif 'bold' in node.tags and 'italic' not in node.tags:
                     fontname = 'bold'
                 elif 'bold' in node.tags and 'italic' in node.tags:
                     fontname = 'bolditalic'

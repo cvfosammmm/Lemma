@@ -34,7 +34,7 @@ class PlaintextScanner(object):
         self.document.plaintext = self.text
 
     def process_node(self, node):
-        if node.type == 'EOL':
+        if node.is_eol():
             self.text += '\n'
 
         elif node.type == 'placeholder':

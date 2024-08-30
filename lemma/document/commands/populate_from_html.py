@@ -33,6 +33,7 @@ class Command(HTMLParser):
         self.open_tags = list()
         self.tags = set()
         self.link_target = None
+        self.paragraph_style = 'p'
         self.document = None
         self.composite = None
 
@@ -60,7 +61,9 @@ class Command(HTMLParser):
         self.open_tags.append(tag)
 
         if tag == 'br':
-            self.composite.append(Node('EOL', '\n'))
+            node = Node('EOL', '\n')
+            node.paragraph_style = self.paragraph_style
+            self.composite.append(node)
 
         if tag == 'strong': self.tags.add('bold')
         if tag == 'em': self.tags.add('italic')
@@ -68,9 +71,16 @@ class Command(HTMLParser):
             for name, value in attrs:
                 if name == 'href':
                     self.link_target = urllib.parse.unquote_plus(value)
+        if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+            self.paragraph_style = tag
 
     def handle_endtag(self, tag):
         self.open_tags.pop()
+
+        if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+            node = Node('EOL', '\n')
+            node.paragraph_style = self.paragraph_style
+            self.composite.append(node)
 
         if tag == 'strong': self.tags.remove('bold')
         if tag == 'em': self.tags.remove('italic')
@@ -89,6 +99,7 @@ class Command(HTMLParser):
                 if char != '\n':
                     node = Node('char', char)
                     node.tags = self.tags.copy()
+                    node.paragraph_style = self.paragraph_style
                     if self.link_target != None:
                         node.link = Link(self.link_target)
                     self.composite.append(node)

@@ -34,26 +34,43 @@ class HTMLScanner(object):
         self.html += '</head>'
 
         self.html += '<body>'
-        node_lists = self.group_by_node_type(self.document.ast.root)
-        for node_list in node_lists:
-            self.process_list(node_list)
+        lines = self.group_by_line(self.document.ast.root)
+        for line in lines:
+            node_lists = self.group_by_node_type(line)
+
+            self.html += '<' + line[-1].paragraph_style + '>'
+            for node_list in node_lists:
+                self.process_list(node_list)
+            self.html += '</' + line[-1].paragraph_style + '>\n'
         self.html += '</body>'
 
         self.html += '</html>'
         self.document.html = self.html
 
-    def group_by_node_type(self, root_node):
+    def group_by_line(self, root_node):
+        result = list()
+        result.append(list())
+        for node in root_node:
+            result[-1].append(node)
+            if node.is_eol():
+                result.append(list())
+        result.pop()
+
+        return result
+
+    def group_by_node_type(self, node_list):
         last_type = None
         last_tags = set()
         last_link = None
         result = list()
-        for node in root_node:
+        for node in node_list:
             if node.type != last_type or node.tags.symmetric_difference(last_tags) or node.link != last_link:
                 result.append(list())
                 last_type = node.type
                 last_tags = node.tags
                 last_link = node.link
             result[-1].append(node)
+
         return result
 
     def process_list(self, node_list):
@@ -81,10 +98,7 @@ class HTMLScanner(object):
         self.html += text
 
     def process_node(self, node):
-        if node.type == 'EOL':
-            self.html += '<br>\n'
-
-        elif node.type == 'placeholder':
+        if node.type == 'placeholder':
             pass
 
         elif node.type == 'mathsymbol':

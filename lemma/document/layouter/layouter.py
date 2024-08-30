@@ -75,7 +75,8 @@ class Layouter(object):
         char_boxes = []
 
         node = node_list[0]
-        if 'bold' in node.tags and 'italic' not in node.tags: fontname = 'bold'
+        if node.paragraph_style.startswith('h'): fontname = node.paragraph_style
+        elif 'bold' in node.tags and 'italic' not in node.tags: fontname = 'bold'
         elif 'bold' in node.tags and 'italic' in node.tags: fontname = 'bolditalic'
         elif 'bold' not in node.tags and 'italic' in node.tags: fontname = 'italic'
         else: fontname = 'book'
@@ -94,7 +95,7 @@ class Layouter(object):
             self.add_box(box)
 
     def process_node(self, node):
-        if node.type == 'EOL':
+        if node.is_eol():
             box = Box('empty', node=node)
             node.set_box(box)
 

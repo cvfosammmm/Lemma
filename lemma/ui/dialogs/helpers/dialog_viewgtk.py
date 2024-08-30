@@ -38,7 +38,7 @@ class DialogView(Gtk.Window):
         self.set_child(self.topbox)
 
         self.shortcuts_controller = ShortcutController()
-        self.shortcuts_controller.create_and_add_shortcut('Escape', self.close)
+        self.shortcuts_controller.add_with_callback('Escape', self.close)
         self.add_controller(self.shortcuts_controller)
 
 

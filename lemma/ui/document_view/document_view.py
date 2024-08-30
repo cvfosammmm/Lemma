@@ -43,6 +43,7 @@ class DocumentView(Observable):
         self.link_target_at_cursor = None
         self.link_target_at_pointer = None
         self.tags_at_cursor = set()
+        self.paragraph_style_at_cursor = 'p'
         self.last_cursor_or_scrolling_change = time.time()
 
         self.workspace = workspace
@@ -124,6 +125,7 @@ class DocumentView(Observable):
     def on_change(self, document):
         self.update_tags_at_cursor()
         self.update_link_at_cursor()
+        self.update_paragraph_style_at_cursor()
         self.add_change_code('changed')
 
     def init_renaming(self):
@@ -191,6 +193,14 @@ class DocumentView(Observable):
             else:
                 self.set_tags_at_cursor(node.tags.copy())
 
+    def update_paragraph_style_at_cursor(self):
+        if self.document == None:
+            self.paragraph_style_at_cursor = 'p'
+        else:
+            current_node = self.document.ast.root.get_node_at_position(self.document.cursor.get_first_cursor_pos())
+            self.paragraph_style_at_cursor = current_node.paragraph_style
+        self.update_paragraph_style_button()
+
     def set_tags_at_cursor(self, tags):
         self.tags_at_cursor = tags
         self.update_tag_toggle(self.main_window.toolbar.bold_button, 'bold')
@@ -219,6 +229,11 @@ class DocumentView(Observable):
     def set_link_target_at_pointer(self, link):
         self.link_target_at_pointer = link
         self.update_link_overlay_text()
+
+    def update_paragraph_style_button(self):
+        labels_dict = {'p': _('Paragraph'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6')}
+
+        self.main_window.toolbar.paragraph_style_menu_button_label.set_text(labels_dict[self.paragraph_style_at_cursor])
 
     def update_link_overlay_text(self):
         if self.link_target_at_pointer != None:

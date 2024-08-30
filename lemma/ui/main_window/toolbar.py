@@ -27,6 +27,16 @@ class ToolBarView(Gtk.ActionBar):
     def __init__(self):
         Gtk.ActionBar.__init__(self)
 
+        self.paragraph_style_menu_button_label = Gtk.Label()
+        self.paragraph_style_menu_button = PopoverManager.create_popover_button('paragraph_style')
+        self.paragraph_style_menu_button.set_child(self.paragraph_style_menu_button_label)
+        self.paragraph_style_menu_button.set_can_focus(False)
+        self.paragraph_style_menu_button.set_tooltip_text(_('Paragraph Style'))
+        self.paragraph_style_menu_button.add_css_class('flat')
+        self.paragraph_style_menu_button.set_action_name('win.show-paragraph-style-menu')
+        self.pack_start(self.paragraph_style_menu_button)
+        self.pack_start(Gtk.Separator())
+
         self.bold_button = Gtk.Button.new_from_icon_name('bold-text-symbolic')
         self.bold_button.set_action_name('win.toggle-bold')
         self.bold_button.set_can_focus(False)
