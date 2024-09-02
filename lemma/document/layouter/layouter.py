@@ -102,13 +102,6 @@ class Layouter(object):
             self.add_box(box)
             self.break_line()
 
-        elif node.type == 'placeholder':
-            width, height, left, top = FontManager.get_char_extents_single('•', fontname='math')
-            box = Box('placeholder', width=width, height=height, left=left, top=top, node=node)
-            node.set_box(box)
-
-            self.add_box(box)
-
         elif node.type == 'mathsymbol':
             width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
             box = Box('glyph', width=width, height=height, left=left, top=top, node=node)

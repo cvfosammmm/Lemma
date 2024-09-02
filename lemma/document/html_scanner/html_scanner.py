@@ -98,10 +98,7 @@ class HTMLScanner(object):
         self.html += text
 
     def process_node(self, node):
-        if node.type == 'placeholder':
-            pass
-
-        elif node.type == 'mathsymbol':
+        if node.type == 'mathsymbol':
             self.html += '<math>'
             self.html += node.value
             self.html += '</math>'

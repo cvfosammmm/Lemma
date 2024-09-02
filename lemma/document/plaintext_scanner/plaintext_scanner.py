@@ -37,9 +37,6 @@ class PlaintextScanner(object):
         if node.is_eol():
             self.text += '\n'
 
-        elif node.type == 'placeholder':
-            pass
-
         elif node.type == 'char':
             if LaTeXDB.is_whitespace(node.value):
                 if self.text == '' or self.text[-1] != ' ':
