@@ -42,7 +42,9 @@ class CommandProcessor(object):
         return self.last_command < len(self.commands) - 1
 
     def get_last_command(self):
-        if self.last_command >= 0:
+        if len(self.commands_preedit) > 0:
+            return self.commands_preedit[-1]
+        elif self.last_command >= 0:
             return self.commands[self.last_command]
         else:
             return None
