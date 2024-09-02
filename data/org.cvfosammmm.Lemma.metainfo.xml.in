@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="18" date="2024-9-2">
+            <description translatable="no">
+                <p>Add paragraph styles, ...</p>
+            </description>
+        </release>
         ​<release version="17" date="2024-8-16">
             <description translatable="no">
                 <p>Move cursor on right click, ...</p>
