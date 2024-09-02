@@ -102,5 +102,7 @@ class HTMLScanner(object):
             self.html += '<math>'
             self.html += node.value
             self.html += '</math>'
+        else:
+            self.html += node.value
 
 
