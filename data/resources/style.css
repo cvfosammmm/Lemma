@@ -158,8 +158,15 @@ paned.document-view separator.wide {
 
 /* toolbar */
 
-button.checked {
+.toolbar button.checked {
     background-color: @sidebar_selection;
+}
+.toolbar button > box {
+    background: None;
+}
+.toolbar button > box > label {
+    min-width: 96px;
+    font-weight: normal;
 }
 
 /* tools sidebar */
