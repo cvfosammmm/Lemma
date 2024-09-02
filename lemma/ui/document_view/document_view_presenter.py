@@ -224,7 +224,7 @@ class DocumentViewPresenter():
             self.update_fg_color(box.node)
 
             if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
-                self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(fontname=self.fontname), 1, FontManager.get_cursor_height(fontname=self.fontname))
+                self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(fontname=self.fontname) + box.parent.height - FontManager.get_line_height(fontname=self.fontname), 1, FontManager.get_cursor_height(fontname=self.fontname))
 
         if box.type == 'glyph':
             node = box.node
@@ -238,7 +238,7 @@ class DocumentViewPresenter():
             surface = FontManager.get_surface(box.node.value, fontname=self.fontname)
 
             if surface != None:
-                ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.height + box.top)
+                ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height + box.top)
                 pattern = ctx.get_source()
                 pattern.set_filter(cairo.Filter.BEST)
                 Gdk.cairo_set_source_rgba(ctx, self.fg_color)
