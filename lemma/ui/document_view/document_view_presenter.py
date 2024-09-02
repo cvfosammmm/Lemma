@@ -35,6 +35,8 @@ class DocumentViewPresenter():
         self.content = self.view.content
         self.cursor_coords = None
         self.scrolling_job = None
+        self.fontname = None
+        self.fg_color = None
 
         self.content.set_draw_func(self.draw)
 
@@ -207,25 +209,24 @@ class DocumentViewPresenter():
         ctx.fill()
 
     def draw_box(self, ctx, box, offset_x, offset_y):
-        if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
-            if box.type == 'placeholder':
-                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-                ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
-                ctx.fill()
-            else:
-                self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(), 1, FontManager.get_cursor_height())
-
         if box.type == 'vcontainer':
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_y += child.height
 
-        elif box.type == 'hcontainer':
+        if box.type == 'hcontainer':
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_x += child.width
 
-        elif box.type in ['glyph', 'placeholder']:
+        if box.type in ['glyph', 'empty']:
+            self.update_fontname(box.node)
+            self.update_fg_color(box.node)
+
+            if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
+                self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(fontname=self.fontname), 1, FontManager.get_cursor_height(fontname=self.fontname))
+
+        if box.type == 'glyph':
             node = box.node
             pos = node.get_position()
 
@@ -234,36 +235,13 @@ class DocumentViewPresenter():
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()
 
-            if node.is_mathsymbol():
-                fontname = 'math'
-                surface_color = ColorManager.get_ui_color('math')
-            else:
-                if node.link != None:
-                    if urlparse(node.link.target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link.target) != None:
-                        surface_color = ColorManager.get_ui_color('links')
-                    else:
-                        surface_color = ColorManager.get_ui_color('links_page_not_existing')
-                else:
-                    surface_color = ColorManager.get_ui_color('text')
-
-                if node.paragraph_style.startswith('h'):
-                    fontname = node.paragraph_style
-                elif 'bold' in node.tags and 'italic' not in node.tags:
-                    fontname = 'bold'
-                elif 'bold' in node.tags and 'italic' in node.tags:
-                    fontname = 'bolditalic'
-                elif 'bold' not in node.tags and 'italic' in node.tags:
-                    fontname = 'italic'
-                else:
-                    fontname = 'book'
-
-            surface = FontManager.get_surface(box.node.value, fontname=fontname)
+            surface = FontManager.get_surface(box.node.value, fontname=self.fontname)
 
             if surface != None:
                 ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.height + box.top)
                 pattern = ctx.get_source()
                 pattern.set_filter(cairo.Filter.BEST)
-                Gdk.cairo_set_source_rgba(ctx, surface_color)
+                Gdk.cairo_set_source_rgba(ctx, self.fg_color)
                 ctx.mask(pattern)
                 ctx.fill()
 
@@ -274,5 +252,30 @@ class DocumentViewPresenter():
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('cursor'))
         ctx.rectangle(*self.cursor_coords)
         ctx.fill()
+
+    def update_fontname(self, node):
+        if node.is_mathsymbol():
+            self.fontname = 'math'
+        elif node.paragraph_style.startswith('h'):
+            self.fontname = node.paragraph_style
+        elif 'bold' in node.tags and 'italic' not in node.tags:
+            self.fontname = 'bold'
+        elif 'bold' in node.tags and 'italic' in node.tags:
+            self.fontname = 'bolditalic'
+        elif 'bold' not in node.tags and 'italic' in node.tags:
+            self.fontname = 'italic'
+        else:
+            self.fontname = 'book'
+
+    def update_fg_color(self, node):
+        if node.is_mathsymbol():
+            self.fg_color = ColorManager.get_ui_color('math')
+        elif node.link != None:
+            if urlparse(node.link.target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link.target) != None:
+                self.fg_color = ColorManager.get_ui_color('links')
+            else:
+                self.fg_color = ColorManager.get_ui_color('links_page_not_existing')
+        else:
+            self.fg_color = ColorManager.get_ui_color('text')
 
 

@@ -65,20 +65,6 @@ overlay.history scrollbar {
     opacity: 0;
 }
 
-/* actionbar */
-
-actionbar {
-    border-top: 1px solid @border_1;
-    padding: 0px;
-}
-actionbar box {
-    background: @window_bg_color;
-    box-shadow: none;
-}
-actionbar revealer > box {
-    padding: 6px;
-}
-
 /* link-overlay */
 
 label.link-overlay {
@@ -158,6 +144,10 @@ paned.document-view separator.wide {
 
 /* toolbar */
 
+.toolbar {
+    border-top: 1px solid @border_1;
+    padding: 0px;
+}
 .toolbar button.checked {
     background-color: @sidebar_selection;
 }
@@ -165,8 +155,12 @@ paned.document-view separator.wide {
     background: None;
 }
 .toolbar button > box > label {
-    min-width: 96px;
+    min-width: 86px;
     font-weight: normal;
+}
+.toolbar box {
+    background: @window_bg_color;
+    box-shadow: none;
 }
 
 /* tools sidebar */

@@ -41,11 +41,11 @@ FontManager.add_font('bolditalic', os.path.join(font_path, 'newcomputermodern/ot
 FontManager.add_font('italic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Italic.otf'), size=19.407, line_height=28, ascend=19, descend=5)
 FontManager.add_font('math', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
 FontManager.add_font('teaser', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'), size=14, line_height=28, ascend=19, descend=5)
-FontManager.add_font('h2', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), size=28, line_height=36, ascend=19, descend=5)
-FontManager.add_font('h3', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), size=24, line_height=36, ascend=19, descend=5)
-FontManager.add_font('h4', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), size=24, line_height=36, ascend=19, descend=5)
-FontManager.add_font('h5', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-BookOblique.otf'), size=24, line_height=36, ascend=19, descend=5)
-FontManager.add_font('h6', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), size=19.407, line_height=36, ascend=19, descend=5)
+FontManager.add_font('h2', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), size=28, line_height=35, ascend=25, descend=7)
+FontManager.add_font('h3', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), size=24, line_height=35, ascend=22, descend=6)
+FontManager.add_font('h4', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), size=24, line_height=35, ascend=22, descend=6)
+FontManager.add_font('h5', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-BookOblique.otf'), size=24, line_height=35, ascend=22, descend=6)
+FontManager.add_font('h6', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), size=19.407, line_height=28, ascend=19, descend=5)
 
 workspace = workspace.Workspace()
 
