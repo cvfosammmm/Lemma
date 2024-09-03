@@ -181,17 +181,17 @@ class DocumentList(object):
             date_text = self.get_last_modified_string(document)
 
             Gdk.cairo_set_source_rgba(ctx, title_color)
-            ctx.move_to(15, self.view.line_height * i + 12 - scrolling_offset)
+            ctx.move_to(15, self.view.line_height * i + 14 - scrolling_offset)
             self.view.layout_header.set_text(title_text)
             PangoCairo.show_layout(ctx, self.view.layout_header)
 
             Gdk.cairo_set_source_rgba(ctx, date_color)
-            ctx.move_to(15, self.view.line_height * i + 12 - scrolling_offset)
+            ctx.move_to(15, self.view.line_height * i + 14 - scrolling_offset)
             self.view.layout_date.set_text(date_text)
             PangoCairo.show_layout(ctx, self.view.layout_date)
 
             Gdk.cairo_set_source_rgba(ctx, teaser_color)
-            ctx.move_to(15, self.view.line_height * i + 35 - scrolling_offset)
+            ctx.move_to(15, self.view.line_height * i + 37 - scrolling_offset)
             self.view.layout_teaser.set_text(teaser_text)
             PangoCairo.show_layout(ctx, self.view.layout_teaser)
 

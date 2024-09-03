@@ -33,7 +33,7 @@ class DocumentListView(Gtk.Overlay):
         self.set_size_request(262, -1)
 
         self.page_size = 1
-        self.line_height = 67
+        self.line_height = 70
 
         self.layout_header = Pango.Layout(self.get_pango_context())
         self.layout_header.set_ellipsize(Pango.EllipsizeMode.END)

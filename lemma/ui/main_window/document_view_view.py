@@ -32,9 +32,9 @@ class DocumentViewView(Gtk.Overlay):
 
         self.padding_left = 48
         self.padding_bottom = 120
-        self.padding_top = 49
+        self.padding_top = 48
         self.title_height = 54
-        self.subtitle_height = 50
+        self.subtitle_height = 51
         self.title_buttons_height = 0
         self.title_width = 500
         self.insert_height = 25

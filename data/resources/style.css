@@ -81,7 +81,7 @@ label.link-overlay {
     background: none;
 }
 .document-title > box > box {
-    margin-top: 49px;
+    margin-top: 48px;
     margin-right: 48px;
     margin-left: 48px;
     background: @window_bg_color;
