@@ -87,8 +87,8 @@ label.link-overlay {
     background: @window_bg_color;
 }
 .document-title entry {
-    font-size: 24pt;
-    font-weight: bold;
+    font-family: NewComputerModernSans10;
+    font-size: 36px;
     background: none;
     border: none;
     box-shadow: none;
@@ -96,7 +96,6 @@ label.link-overlay {
     border-radius: 0px;
     border-bottom: 1px solid @border_1;
     padding: 0px;
-    padding-bottom: 10px;
     color: @title_color;
 }
 .document-title entry.error {

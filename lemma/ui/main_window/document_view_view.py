@@ -33,7 +33,7 @@ class DocumentViewView(Gtk.Overlay):
         self.padding_left = 48
         self.padding_bottom = 120
         self.padding_top = 49
-        self.title_height = 49
+        self.title_height = 54
         self.subtitle_height = 50
         self.title_buttons_height = 0
         self.title_width = 500
@@ -43,17 +43,12 @@ class DocumentViewView(Gtk.Overlay):
         self.layout_title = Pango.Layout(self.get_pango_context())
         self.layout_title.set_ellipsize(Pango.EllipsizeMode.END)
         self.layout_title.set_width(self.title_width * Pango.SCALE)
-        font_description = self.layout_title.get_context().get_font_description()
-        font_description.set_weight(Pango.Weight.BOLD)
-        font_description.set_size(24 * Pango.SCALE)
-        self.layout_title.set_font_description(font_description)
+        self.layout_title.set_font_description(Pango.FontDescription.from_string('NewComputerModernSans10 Regular 36px'))
 
         self.layout_subtitle = Pango.Layout(self.get_pango_context())
         self.layout_subtitle.set_ellipsize(Pango.EllipsizeMode.END)
         self.layout_subtitle.set_width(self.title_width * Pango.SCALE)
-        font_description = self.layout_subtitle.get_context().get_font_description()
-        font_description.set_size(11 * Pango.SCALE)
-        self.layout_subtitle.set_font_description(font_description)
+        self.layout_subtitle.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
 
         self.content = Gtk.DrawingArea()
         self.content.set_focusable(True)
