@@ -117,7 +117,7 @@ class DocumentHistory(object):
         offset = -1 - int(self.view.scrolling_widget.scrolling_offset_x)
         hover_color = ColorManager.get_ui_color('history_hover')
         selected_color = ColorManager.get_ui_color('history_active_bg')
-        fg_color = ColorManager.get_ui_color('fg')
+        fg_color = ColorManager.get_ui_color('history_fg')
 
         for i, document, document_offset in self.items:
             is_active = (i == self.workspace.history.active_document_index)

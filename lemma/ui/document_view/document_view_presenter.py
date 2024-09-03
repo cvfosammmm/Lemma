@@ -200,7 +200,7 @@ class DocumentViewPresenter():
         PangoCairo.show_layout(ctx, self.view.layout_title)
 
         ctx.move_to(offset_x, offset_y + self.view.title_height + 8)
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('description'))
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('description_color'))
 
         datetime_last_modified = datetime.datetime.fromtimestamp(self.model.document.last_modified)
         self.view.layout_subtitle.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
