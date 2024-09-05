@@ -47,24 +47,24 @@
 @define-color thumbnail_fg_color rgba(0, 0, 0, 0.8);
 
 /* Headerbar */
-@define-color headerbar_bg_1 #333;
+@define-color headerbar_bg_1 #3e804b;
 @define-color headerbar_bg_2 #f9f9f9;
-@define-color header_border_bottom_1 #777;
+@define-color header_border_bottom_1 #2f6139;
 @define-color header_border_bottom_2 #00000033;
 
 /* Sidebar */
-@define-color sidebar_bg_1 #333;
+@define-color sidebar_bg_1 #3e804b;
 @define-color sidebar_fg_1 #fffd;
 @define-color sidebar_fg_2 #fff7;
 @define-color sidebar_fg_3 #fffc;
 @define-color sidebar_active_fg #fffc;
-@define-color sidebar_active_bg #000;
+@define-color sidebar_active_bg #002b36;
 @define-color sidebar_hover #00000011;
 @define-color sidebar_selection #00000022;
 
 /* Paneds */
-@define-color headerpaned_border #666;
-@define-color bodypaned_border #666;
+@define-color headerpaned_border #002b36;
+@define-color bodypaned_border #002b36;
 
 /* Borders */
 @define-color borders #ccc;
@@ -76,7 +76,7 @@
 @define-color history_active_bg #00000022;
 
 /* Document View */
-@define-color title_color #222f;
+@define-color title_color green;
 @define-color text #222f;
 @define-color math @text;
 @define-color links #37e;

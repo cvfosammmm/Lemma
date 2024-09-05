@@ -66,6 +66,7 @@ class DocumentView(Observable):
         self.workspace.connect('new_active_document', self.on_new_active_document)
         self.workspace.connect('document_changed', self.on_document_change)
         self.workspace.connect('mode_set', self.on_mode_set)
+
         self.add_change_code('changed')
 
     def on_new_active_document(self, workspace, document=None):

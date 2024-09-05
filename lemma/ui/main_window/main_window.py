@@ -90,10 +90,14 @@ class MainWindow(Adw.ApplicationWindow):
         self.main_box.append(self.content_paned)
         self.popoverlay.set_child(self.main_box)
 
-        self.css_provider = Gtk.CssProvider()
         resources_path = ServiceLocator.get_resources_path()
+
+        self.css_provider = Gtk.CssProvider()
         self.css_provider.load_from_path(os.path.join(resources_path, 'style.css'))
         Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self.css_provider_colors_default = Gtk.CssProvider()
+        self.css_provider_colors_default.load_from_path(os.path.join(resources_path, 'themes', 'default.css'))
+        Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors_default, Gtk.STYLE_PROVIDER_PRIORITY_USER)
         self.css_provider_colors = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 

@@ -57,6 +57,12 @@ class View(PopoverBottom):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
+        self.button_preferences = MenuBuilder.create_button(_('Settings'))
+        self.button_preferences.set_action_name('win.show-preferences-dialog')
+        self.add_closing_button(self.button_preferences)
+
+        self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
+
         self.button_shortcuts = MenuBuilder.create_button(_('Keyboard Shortcuts'), shortcut=_('Ctrl') + '+?')
         self.button_shortcuts.set_action_name('win.show-shortcuts-dialog')
         self.add_closing_button(self.button_shortcuts)

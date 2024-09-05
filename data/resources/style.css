@@ -343,6 +343,68 @@ box.welcome label.explainer {
     margin-bottom: 42px;
 }
 
+/* preferences dialog */
+
+window.preferences notebook {
+    border: none;
+    background: @dialog_bg_color;
+}
+window.preferences notebook stack {
+    background: @dialog_bg_color;
+}
+window.preferences notebook header {
+    padding-left: 0px;
+}
+window.preferences notebook tabs {
+    background: @dialog_bg_color;
+    border-bottom: 1px solid @borders;
+    padding-top: 6px;
+    padding-left: 0px;
+}
+window.preferences notebook tab {
+    min-height: 45px;
+    margin: 0px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+window.preferences headerbar {
+    background: @dialog_bg_color;
+    border-bottom: none;
+    box-shadow: none;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+}
+window.preferences headerbar box.start {
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+}
+window.preferences headerbar label {
+    font-size: 24px;
+    font-weight: bold;
+    padding-left: 11px;
+    padding-top: 11px;
+    padding-bottom: 0px;
+}
+window.preferences flowbox {
+    background: @dialog_bg_color;
+    padding-bottom: 18px;
+    padding-left: 16px;
+}
+window.preferences flowboxchild {
+    padding: 0px;
+    padding-top: 18px;
+    padding-right: 16px;
+}
+window.preferences flowboxchild box.color-preview-wrapper {
+    border: 1px solid @borders;
+    border-radius: 4px;
+    margin-bottom: 3px;
+    padding: 2px;
+}
+window.preferences flowboxchild checkbutton {
+    margin-left: -1px;
+}
+
 /* insert link dialog */
 
 window.insert-link-dialog entry {

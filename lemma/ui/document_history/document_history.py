@@ -19,10 +19,9 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gdk, Pango, PangoCairo
 
-import math
-
 import lemma.helpers.helpers as helpers
 from lemma.infrastructure.color_manager import ColorManager
+from lemma.ui.helpers.helpers import rounded_rectangle
 
 
 class DocumentHistory(object):
@@ -130,7 +129,7 @@ class DocumentHistory(object):
                     Gdk.cairo_set_source_rgba(ctx, selected_color)
                 else:
                     Gdk.cairo_set_source_rgba(ctx, hover_color)
-                self.rounded_rectangle(ctx, offset, 6, px_width, 35, 6)
+                rounded_rectangle(ctx, offset, 6, px_width, 35, 6)
                 ctx.fill()
 
             ctx.move_to(offset + 18, int((height - extents.height / Pango.SCALE) / 2) - 1)
@@ -160,17 +159,6 @@ class DocumentHistory(object):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('border_1'))
         ctx.rectangle(offset, 9, 1, height - 18)
         ctx.fill()
-
-    def rounded_rectangle(self, ctx, x, y, width, height, radius):
-        ctx.move_to(x + radius, y)
-        ctx.line_to(x + width - radius, y)
-        ctx.arc(x + width - radius, y + radius, radius, -math.pi / 2, 0)
-        ctx.line_to(x + width, y + height - radius)
-        ctx.arc(x + width - radius, y + height - radius, radius, 0, math.pi / 2)
-        ctx.line_to(x + radius, y + height)
-        ctx.arc(x + radius, y + height - radius, radius, math.pi / 2, math.pi)
-        ctx.line_to(x, y + radius)
-        ctx.arc(x + radius, y + radius, radius, math.pi / 2, -math.pi / 2)
 
     def get_document_at_cursor(self):
         y = self.view.scrolling_widget.cursor_y

@@ -68,6 +68,7 @@ class Actions(object):
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
         self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
+        self.add_simple_action('show-preferences-dialog', self.show_preferences_dialog)
         self.add_simple_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
         self.add_simple_action('show-about-dialog', self.show_about_dialog)
 
@@ -139,6 +140,7 @@ class Actions(object):
         self.actions['show-edit-menu'].set_enabled(has_active_doc)
         self.actions['show-document-menu'].set_enabled(has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
+        self.actions['show-preferences-dialog'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
         self.actions['show-about-dialog'].set_enabled(True)
 
@@ -279,6 +281,9 @@ class Actions(object):
     def show_hamburger_menu(self, action=None, parameter=''):
         PopoverManager.popup_at_button('hamburger_menu')
         return True
+
+    def show_preferences_dialog(self, action=None, parameter=''):
+        DialogLocator.get_dialog('preferences').run()
 
     def show_shortcuts_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('keyboard_shortcuts').run()
