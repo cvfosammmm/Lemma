@@ -72,7 +72,7 @@ class ToolBarView(Gtk.ActionBar):
         self.pack_start(box)
 
         self.math_sidebar_toggle = Gtk.ToggleButton()
-        self.math_sidebar_toggle.set_tooltip_text(_('Math Toolbar') + ' (F9)')
+        self.math_sidebar_toggle.set_tooltip_text(_('Math Toolbar') + ' (Ctrl+M)')
         self.math_sidebar_toggle.set_icon_name('insert-symbols-symbolic')
         self.math_sidebar_toggle.set_can_focus(False)
         self.math_sidebar_toggle.add_css_class('flat')
