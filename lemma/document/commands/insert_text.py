@@ -22,11 +22,12 @@ from lemma.document.ast.link import Link
 
 class Command():
 
-    def __init__(self, text, link_target=None):
+    def __init__(self, text, link_target=None, tags=set()):
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.text = text
         self.link_target = link_target
+        self.tags = tags
         self.state = dict()
 
     def run(self, document):
@@ -38,12 +39,11 @@ class Command():
         self.state['cursor_state_before_2'] = document.cursor.get_state()
 
         insert = document.cursor.get_insert_node()
-        tags_at_cursor = insert.tags
         paragraph_style_at_cursor = insert.paragraph_style
 
         for char in self.text:
             character = Node('char', char)
-            character.tags = tags_at_cursor.copy()
+            character.tags = self.tags.copy()
             character.paragraph_style = paragraph_style_at_cursor
             if self.link_target != None:
                 character.link = Link(self.link_target)

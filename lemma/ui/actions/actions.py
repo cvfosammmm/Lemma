@@ -210,13 +210,14 @@ class Actions(object):
 
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
+            tags_at_cursor = self.application.document_view.tags_at_cursor
 
             if len(text) < 2000:
                 parsed_url = urlparse(text.strip())
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                    self.workspace.active_document.add_command('insert_text', text.strip(), text.strip())
+                    self.workspace.active_document.add_command('insert_text', text.strip(), text.strip(), tags_at_cursor)
                     return
-            self.workspace.active_document.add_command('insert_text', text)
+            self.workspace.active_document.add_command('insert_text', text, None, tags_at_cursor)
 
     def delete_selection(self, action=None, parameter=''):
         self.workspace.active_document.add_command('delete')
