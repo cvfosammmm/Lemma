@@ -26,7 +26,7 @@
 @define-color window_fg_color rgba(0, 0, 0, 0.8);
 
 /* Views - e.g. text view or tree view */
-@define-color view_bg_color #ffffff;
+@define-color view_bg_color #f9f9f9;
 @define-color view_fg_color #000000;
 @define-color view_hover_color rgba(0, 0, 0, 0.07);
 @define-color view_active_color rgba(0, 0, 0, 0.16);
@@ -49,7 +49,7 @@
 /* Headerbar */
 @define-color headerbar_bg_1 #333;
 @define-color headerbar_bg_2 #f9f9f9;
-@define-color header_border_bottom_1 #777;
+@define-color header_border_bottom_1 #000;
 @define-color header_border_bottom_2 #00000033;
 
 /* Sidebar */
@@ -63,8 +63,12 @@
 @define-color sidebar_selection #00000066;
 
 /* Paneds */
-@define-color headerpaned_border #666;
-@define-color bodypaned_border #666;
+@define-color headerpaned_border_1 #666;
+@define-color headerpaned_border_2 #666;
+@define-color headerpaned_bg #666;
+@define-color bodypaned_border_1 #666;
+@define-color bodypaned_border_2 #666;
+@define-color bodypaned_bg #666;
 
 /* Borders */
 @define-color borders #ccc;
@@ -101,6 +105,7 @@
 /* Widgets */
 @define-color shade_color rgba(0, 0, 0, 0.07);
 @define-color description_color #0005;
+@define-color list_bg #fff;
 @define-color list_row_border #eee;
 @define-color list_row_hover #f9f9f9;
 @define-color scrollbar_outline_color white;

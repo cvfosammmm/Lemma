@@ -68,7 +68,7 @@ overlay.history scrollbar {
 /* link-overlay */
 
 label.link-overlay {
-    background: @window_bg_color;
+    background: @view_bg_color;
     border-top: 1px solid @border_1;
     border-left: 1px solid @border_1;
     padding: 3px 6px;
@@ -84,7 +84,7 @@ label.link-overlay {
     margin-top: 48px;
     margin-right: 48px;
     margin-left: 48px;
-    background: @window_bg_color;
+    background: @view_bg_color;
 }
 .document-title entry {
     font-family: NewComputerModernSans10;
@@ -119,23 +119,26 @@ label.link-overlay {
 paned.header separator.wide {
     padding: 0px;
     margin: 0px;
-    border-width: 0px;
-    min-width: 3px;
+    border-left: 1px solid @headerpaned_border_1;
+    border-right: 1px solid @headerpaned_border_2;
+    min-width: 1px;
     box-shadow: none;
-    background-color: @headerpaned_border;
+    background-color: @headerpaned_bg;
 }
 paned.content separator.wide {
     padding: 0px;
     margin: 0px;
-    border-width: 0px;
-    min-width: 3px;
+    border-left: 1px solid @bodypaned_border_1;
+    border-right: 1px solid @bodypaned_border_2;
+    min-width: 1px;
     box-shadow: none;
-    background-color: @bodypaned_border;
+    background-color: @bodypaned_bg;
 }
 paned.document-view separator.wide {
     padding: 0px;
     margin: 0px;
-    border-right: 2px solid @window_bg_color;
+    border-right: 2px solid @view_bg_color;
+    border-left: 0px solid @view_bg_color;
     min-width: 1px;
     box-shadow: none;
     background-color: @border_1;
@@ -158,7 +161,7 @@ paned.document-view separator.wide {
     font-weight: normal;
 }
 .toolbar box {
-    background: @window_bg_color;
+    background: @view_bg_color;
     box-shadow: none;
 }
 
@@ -432,7 +435,7 @@ window.import-markdown-files-dialog label.explainer {
     margin: 18px;
 }
 window.import-markdown-files-dialog stack {
-    background: @view_bg_color;
+    background: @list_bg;
     border-top: 1px solid @dialog_border;
     border-bottom: 1px solid @dialog_border;
 }

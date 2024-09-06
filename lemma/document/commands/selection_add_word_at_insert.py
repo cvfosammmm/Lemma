@@ -15,39 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.node import Node
-
 
 class Command():
 
     def __init__(self):
-        self.is_undo_checkpoint = True
-        self.update_implicit_x_position = False
+        self.is_undo_checkpoint = False
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        if document.cursor.has_selection():
-            bounds = document.cursor.get_state()
-        elif document.cursor.get_insert_node().is_inside_link():
-            bounds = document.cursor.get_insert_node().link_bounds()
-        else:
-            bounds = document.cursor.get_state()
-
-        char_nodes = [node for node in document.ast.get_subtree(*bounds) if node.is_char()]
-        prev_links = []
-        for node in char_nodes:
-            prev_links.append(node.link)
-            node.link = None
-        self.state['nodes_and_prev_links'] = list(zip(char_nodes, prev_links))
+        word_start, word_end = document.cursor.get_insert_node().word_bounds()
+        if word_start != None and word_end != None:
+            document.cursor.extend_selection_to_position(word_start)
+            document.cursor.extend_selection_to_position(word_end)
+            document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])
-
-        for item in self.state['nodes_and_prev_links']:
-            item[0].link = item[1]
-
-        document.set_scroll_insert_on_screen_after_layout_update()
 
 

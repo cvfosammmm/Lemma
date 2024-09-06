@@ -26,7 +26,7 @@ class Position(object):
     def __iter__(self): return self.level_positions.__iter__()
     def __getitem__(self, key): return self.level_positions.__getitem__(key)
     def __eq__(self, other): return not self.__ne__(other)
-    def __ne__(self, other): return self.__lt__(other) or self.__gt__(other)
+    def __ne__(self, other): return other == None or self.__lt__(other) or self.__gt__(other)
     def __le__(self, other): return not self.__gt__(other)
     def __gt__(self, other): return other.__lt__(self)
     def __ge__(self, other): return not self.__lt__(other)

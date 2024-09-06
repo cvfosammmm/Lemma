@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.position import Position
+from lemma.latex_db.latex_db import LaTeXDB
 
 
 class Node():
@@ -96,6 +97,7 @@ class Node():
     def is_mathsymbol(self): return self.type == 'mathsymbol'
     def is_char(self): return self.type == 'char'
     def is_eol(self): return self.type == 'EOL'
+    def is_whitespace(self): return self.is_eol() or (self.is_char() and LaTeXDB.is_whitespace(self.value))
 
     def is_first_in_line(self):
         if not self.parent.is_root(): return False
@@ -116,7 +118,7 @@ class Node():
         if self.is_first_in_parent(): return False
         return self.link == self.prev_in_parent().link
 
-    def get_bounds_for_link(self):
+    def link_bounds(self):
         if self.link == None: return (None, None)
         if self.is_first_in_parent(): return (None, None)
 
@@ -137,6 +139,29 @@ class Node():
                 node1 = prev_node
             else:
                 break
+        return (node1.get_position(), node2.get_position())
+
+    def word_bounds(self):
+        if self.is_whitespace(): return (None, None)
+
+        node1 = self
+        node2 = self
+
+        while node2 != None:
+            next_node = node2.next_in_parent()
+            if next_node == None:
+                break
+            elif next_node.is_whitespace():
+                node2 = next_node
+                break
+            else:
+                node2 = next_node
+        while node1 != None:
+            prev_node = node1.prev_in_parent()
+            if prev_node == None or prev_node.is_whitespace():
+                break
+            else:
+                node1 = prev_node
         return (node1.get_position(), node2.get_position())
 
     def get_xy(self):

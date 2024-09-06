@@ -59,7 +59,7 @@ class Dialog(object):
         else:
             insert_node = self.document.cursor.get_insert_node()
             if insert_node.is_inside_link():
-                self.bounds = insert_node.get_bounds_for_link()
+                self.bounds = insert_node.link_bounds()
                 self.view.entry_link_target.set_text(insert_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
                 self.view.add_button.set_label(_('Edit'))
