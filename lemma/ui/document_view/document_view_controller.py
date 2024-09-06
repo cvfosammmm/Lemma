@@ -93,13 +93,13 @@ class DocumentViewController():
         x -= self.view.padding_left
         y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
 
-        if y < -self.view.subtitle_height and n_press == 1:
+        if y < -self.view.subtitle_height and n_press % 3 == 1:
             self.model.init_renaming()
 
         elif y > 0:
             link = document.layout.get_link_at_xy(x, y)
 
-            if n_press == 1:
+            if n_press % 3 == 1:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
                     document.add_command('selection_xy', x, y)
 
@@ -112,7 +112,7 @@ class DocumentViewController():
                     else:
                         document.add_command('move_cursor_to_xy', x, y)
 
-            if n_press == 2:
+            if n_press % 3 == 2:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
                     document.add_command('selection_add_word_at_insert')
 
@@ -125,10 +125,23 @@ class DocumentViewController():
                     else:
                         document.add_command('selection_add_word_at_insert')
 
+            if n_press % 3 == 0:
+                if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
+                    document.add_command('selection_add_line_at_insert')
+
+                elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
+                    document.add_command('selection_add_line_at_insert')
+
+                else:
+                    if link != None:
+                        self.model.selected_link_target = link.target
+                    else:
+                        document.add_command('selection_add_line_at_insert')
+
             self.content.grab_focus()
 
     def on_primary_button_release(self, controller, n_press, x, y):
-        if n_press != 1: return
+        if n_press % 3 != 1: return
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
@@ -148,7 +161,7 @@ class DocumentViewController():
                     self.open_link(link.target)
 
     def on_secondary_button_press(self, controller, n_press, x, y):
-        if n_press != 1: return
+        if n_press % 3 != 1: return
 
         document = self.model.document
         x_offset = document.clipping.offset_x + x - self.view.padding_left

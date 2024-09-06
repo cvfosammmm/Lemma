@@ -164,6 +164,9 @@ class Node():
                 node1 = prev_node
         return (node1.get_position(), node2.get_position())
 
+    def line_bounds(self):
+        return (self.line_start().get_position(), self.line_end().get_position())
+
     def get_xy(self):
         box = self.box
         x, y = (0, 0)
