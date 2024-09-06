@@ -151,7 +151,7 @@ paned.document-view separator.wide {
     padding: 0px;
 }
 .toolbar button.checked {
-    background-color: @sidebar_selection;
+    background-color: @view_active_color;
 }
 .toolbar button > box {
     background: None;
