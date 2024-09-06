@@ -125,6 +125,10 @@ class Dialog(object):
 
             with open(path, 'r') as file:
                 markdown = file.read()
+
+            if markdown.startswith('# ' + document.title):
+                markdown = markdown[len(document.title) + 3:]
+
             markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
             html = mdi.render(markdown)
             document.add_command('populate_from_html', html)
