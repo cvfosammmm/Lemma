@@ -70,7 +70,6 @@ class ToolBarView(Gtk.ActionBar):
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.insert_link_button)
         self.pack_start(box)
-        self.pack_start(Gtk.Separator())
 
         self.math_sidebar_toggle = Gtk.ToggleButton()
         self.math_sidebar_toggle.set_tooltip_text(_('Math Toolbar') + ' (F9)')
@@ -80,7 +79,8 @@ class ToolBarView(Gtk.ActionBar):
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.math_sidebar_toggle)
-        self.pack_start(box)
+        self.pack_end(box)
+        self.pack_end(Gtk.Separator())
 
         self.edit_menu_button = PopoverManager.create_popover_button('edit_menu')
         self.edit_menu_button.set_child(Gtk.Image.new_from_icon_name('document-edit-symbolic'))
