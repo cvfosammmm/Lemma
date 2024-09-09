@@ -40,6 +40,7 @@ class Dialog():
         data.append(section)
 
         section = {'title': 'Navigation', 'items': list()}
+        section['items'].append({'title': 'Search', 'shortcut': '&lt;ctrl&gt;F'})
         section['items'].append({'title': 'Go back', 'shortcut': '&lt;alt&gt;Left'})
         section['items'].append({'title': 'Go forward', 'shortcut': '&lt;alt&gt;Right'})
         data.append(section)

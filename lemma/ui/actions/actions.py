@@ -63,6 +63,7 @@ class Actions(object):
         self.add_simple_action('toggle-bold', self.toggle_bold)
         self.add_simple_action('toggle-italic', self.toggle_italic)
 
+        self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-math-sidebar', self.toggle_math_sidebar)
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
@@ -265,6 +266,10 @@ class Actions(object):
 
     def edit_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.workspace, self.workspace.active_document)
+
+    def start_global_search(self, action=None, parameter=''):
+        search_entry = self.main_window.headerbar.hb_left.search_entry
+        search_entry.grab_focus()
 
     def toggle_math_sidebar(self, action=None, parameter=''):
         toggle = self.main_window.toolbar.math_sidebar_toggle

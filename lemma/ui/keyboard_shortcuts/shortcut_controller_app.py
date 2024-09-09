@@ -32,6 +32,7 @@ class ShortcutControllerApp(ShortcutController):
 
         self.add_with_callback('<Control>q', self.actions.actions['quit'].activate)
         self.add_with_callback('<Control>n', self.actions.actions['add-document'].activate)
+        self.add_with_callback('<Control>f', self.actions.actions['start-global-search'].activate)
         self.add_with_callback('<Alt>Left', self.actions.actions['go-back'].activate)
         self.add_with_callback('<Alt>Right', self.actions.actions['go-forward'].activate)
         self.add_with_callback('F2', self.actions.actions['rename-document'].activate)
