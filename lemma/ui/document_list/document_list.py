@@ -24,6 +24,7 @@ import datetime
 import lemma.helpers.helpers as helpers
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.infrastructure.color_manager import ColorManager
+from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
 import lemma.helpers.helpers as helpers
 
 
@@ -43,6 +44,9 @@ class DocumentList(object):
         self.view.scrolling_widget.connect('secondary_button_press', self.on_secondary_button_press)
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
         self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)
+        self.shortcuts_controller = ShortcutController()
+        self.shortcuts_controller.add_with_callback('Escape', self.stop_search)
+        self.main_window.headerbar.hb_left.search_entry.add_controller(self.shortcuts_controller)
 
         self.view.content.set_draw_func(self.draw)
 
@@ -126,6 +130,10 @@ class DocumentList(object):
     def on_search_entry_icon_released(self, entry, icon_pos, data=None):
         if icon_pos == Gtk.EntryIconPosition.SECONDARY:
             self.main_window.headerbar.hb_left.search_entry.set_text('')
+
+    def stop_search(self):
+        self.main_window.headerbar.hb_left.search_entry.set_text('')
+        self.main_window.document_view.content.grab_focus()
 
     #@helpers.timer
     def draw(self, widget, ctx, width, height):
