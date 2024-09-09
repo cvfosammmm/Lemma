@@ -112,10 +112,16 @@ class Layouter(object):
 
         elif node.type == 'char' and LaTeXDB.is_whitespace(node.value):
             width, height, left, top = FontManager.get_char_extents_single(node.value)
-            box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
-            node.set_box(box)
 
-            self.add_box(box)
+            if self.current_line_box.width + width > 670:
+                box = Box('empty', node=node)
+                node.set_box(box)
+                self.current_line_box.add(box)
+                self.break_line()
+            else:
+                box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
+                node.set_box(box)
+                self.current_line_box.add(box)
 
     def add_box(self, box):
         if self.current_line_box.width + box.width > 670:
