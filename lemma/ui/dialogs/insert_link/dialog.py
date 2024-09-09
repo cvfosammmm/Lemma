@@ -80,6 +80,7 @@ class Dialog(object):
         self.view.entry_link_target.connect('changed', self.on_entry_link_target_changed)
         self.view.entry_link_target.connect('activate', self.on_entry_link_target_activate)
         self.view.listbox.connect('row-activated', self.on_suggestion_row_activated)
+        self.search_terms = self.view.entry_link_target.get_text().split()
 
     def on_entry_link_target_changed(self, entry):
         self.search_terms = entry.get_text().split()
