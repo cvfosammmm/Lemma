@@ -104,7 +104,7 @@
 
 /* Widgets */
 @define-color shade_color rgba(0, 0, 0, 0.07);
-@define-color description_color #0005;
+@define-color description_color #666;
 @define-color list_bg #fff;
 @define-color list_row_border #eee;
 @define-color list_row_hover #f9f9f9;
