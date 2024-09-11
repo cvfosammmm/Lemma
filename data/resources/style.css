@@ -404,6 +404,9 @@ window.preferences flowboxchild box.color-preview-wrapper {
     margin-bottom: 3px;
     padding: 2px;
 }
+window.preferences flowboxchild box.selected box.color-preview-wrapper {
+    border: 1px solid @accent_color;
+}
 window.preferences flowboxchild checkbutton {
     margin-left: -1px;
 }

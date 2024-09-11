@@ -79,6 +79,9 @@ class PageColors(object):
     def on_style_switcher_changed(self, button, name):
         if button.get_active():
             self.settings.set_value('preferences', 'color_scheme', name)
+            button.get_parent().add_css_class('selected')
+        else:
+            button.get_parent().remove_css_class('selected')
 
 
 class PageFontColorView(Gtk.Box):
@@ -112,7 +115,7 @@ class StyleSwitcher(Gtk.FlowBox):
 
     def __init__(self):
         Gtk.FlowBox.__init__(self)
-        self.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.set_selection_mode(Gtk.SelectionMode.SINGLE)
         self.set_homogeneous(True)
         self.set_max_children_per_line(2)
         self.set_row_spacing(0)
