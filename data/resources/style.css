@@ -398,13 +398,14 @@ window.preferences flowboxchild {
     padding-top: 18px;
     padding-right: 16px;
 }
-window.preferences flowboxchild box.color-preview-wrapper {
+window.preferences flowboxchild button.color-preview-wrapper {
     border: 1px solid @borders;
     border-radius: 4px;
     margin-bottom: 3px;
     padding: 2px;
+    background: none;
 }
-window.preferences flowboxchild box.selected box.color-preview-wrapper {
+window.preferences flowboxchild box.selected button.color-preview-wrapper {
     border: 1px solid @accent_color;
 }
 window.preferences flowboxchild checkbutton {

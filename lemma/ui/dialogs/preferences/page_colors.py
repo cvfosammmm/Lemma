@@ -68,20 +68,25 @@ class PageColors(object):
 
         if name == 'default':
             self.style_previews[name] = StylePreview(name, count)
-            self.style_previews[name].checkbutton.connect('toggled', self.on_style_switcher_changed, name)
+            self.style_previews[name].checkbutton.connect('toggled', self.on_checkbutton_toggled, name)
+            self.style_previews[name].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, name)
             self.view.style_switcher.append(self.style_previews[name])
         else:
             self.style_previews[filename] = StylePreview(name, count)
             self.style_previews[filename].checkbutton.set_group(self.style_previews['default'].checkbutton)
-            self.style_previews[filename].checkbutton.connect('toggled', self.on_style_switcher_changed, filename)
+            self.style_previews[filename].checkbutton.connect('toggled', self.on_checkbutton_toggled, filename)
+            self.style_previews[filename].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, filename)
             self.view.style_switcher.append(self.style_previews[filename])
 
-    def on_style_switcher_changed(self, button, name):
+    def on_checkbutton_toggled(self, button, name):
         if button.get_active():
             self.settings.set_value('preferences', 'color_scheme', name)
             button.get_parent().add_css_class('selected')
         else:
             button.get_parent().remove_css_class('selected')
+
+    def on_wrapperbutton_clicked(self, button, name):
+        button.get_parent().checkbutton.set_active(True)
 
 
 class PageFontColorView(Gtk.Box):
@@ -115,7 +120,7 @@ class StyleSwitcher(Gtk.FlowBox):
 
     def __init__(self):
         Gtk.FlowBox.__init__(self)
-        self.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        self.set_selection_mode(Gtk.SelectionMode.NONE)
         self.set_homogeneous(True)
         self.set_max_children_per_line(2)
         self.set_row_spacing(0)
@@ -132,15 +137,16 @@ class StylePreview(Gtk.Box):
         self.name = name
         self.count = count
 
-        self.wrapper = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.wrapper.add_css_class('color-preview-wrapper')
         self.drawing_area = Gtk.DrawingArea()
         self.drawing_area.set_size_request(-1, 84)
         self.drawing_area.set_draw_func(self.draw)
+
+        self.wrapperbutton = Gtk.Button()#.new(Gtk.Orientation.VERTICAL, 0)
+        self.wrapperbutton.add_css_class('color-preview-wrapper')
+        self.wrapperbutton.set_child(self.drawing_area)
         self.checkbutton = Gtk.CheckButton.new_with_label(' ' + name)
 
-        self.wrapper.append(self.drawing_area)
-        self.append(self.wrapper)
+        self.append(self.wrapperbutton)
         self.append(self.checkbutton)
 
     def draw(self, widget, ctx, width, height):
