@@ -48,6 +48,12 @@ class ServiceLocator():
     def get_config_folder():
         return os.path.join(xdg_config_home, 'lemma')
 
+    def get_notes_folder():
+        return os.path.expanduser(ServiceLocator.get_config_folder() + '/notes')
+
+    def get_user_themes_folder():
+        return os.path.expanduser(ServiceLocator.get_config_folder() + '/themes')
+
     def init_lemma_version(lemma_version):
         ServiceLocator.lemma_version = lemma_version
 

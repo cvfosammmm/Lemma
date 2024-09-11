@@ -35,7 +35,13 @@ class Colors(object):
             self.update()
 
     def update(self):
-        path = os.path.join(ServiceLocator.get_resources_path(), 'themes', ServiceLocator.get_settings().get_value('preferences', 'color_scheme') + '.css')
+        color_scheme = ServiceLocator.get_settings().get_value('preferences', 'color_scheme')
+
+        if color_scheme == 'default':
+            path = os.path.join(ServiceLocator.get_resources_path(), 'themes', 'default.css')
+        else:
+            path = ServiceLocator.get_settings().get_value('preferences', 'color_scheme')
+
         self.main_window.css_provider_colors.load_from_path(path)
         self.main_window.main_box.queue_draw()
         self.main_window.document_view.content.queue_draw()

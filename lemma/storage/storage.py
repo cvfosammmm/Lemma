@@ -26,7 +26,7 @@ class Storage(object):
     def __init__(self, workspace):
         self.workspace = workspace
 
-        self.pathname = os.path.expanduser(ServiceLocator.get_config_folder() + '/notes')
+        self.pathname = ServiceLocator.get_notes_folder()
         if not os.path.exists(self.pathname):
             os.mkdir(self.pathname)
 
