@@ -88,12 +88,23 @@ class PageFontColorView(Gtk.Box):
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.get_style_context().add_class('preferences-page')
 
+        self.explainer = Gtk.Label()
+        self.explainer.set_markup('<b>Note:</b>  If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming/">https://www.cvfosammmm.org/lemma/book/theming/</a>.')
+        self.explainer.set_wrap(True)
+        self.explainer.set_halign(Gtk.Align.START)
+        self.explainer.add_css_class('explainer')
+
         self.style_switcher = StyleSwitcher()
+
+        self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.vbox.append(self.explainer)
+        self.vbox.append(self.style_switcher)
+
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_propagate_natural_height(True)
         self.scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.scrolled_window.set_child(self.vbox)
 
-        self.scrolled_window.set_child(self.style_switcher)
         self.append(self.scrolled_window)
 
 

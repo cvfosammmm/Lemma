@@ -407,6 +407,11 @@ window.preferences flowboxchild box.color-preview-wrapper {
 window.preferences flowboxchild checkbutton {
     margin-left: -1px;
 }
+window.preferences label.explainer {
+    margin-left: 18px;
+    margin-right: 18px;
+    margin-top: 18px;
+}
 
 /* insert link dialog */
 
@@ -492,6 +497,12 @@ window.import-markdown-files-dialog button.filechooser-button {
     margin: 0px;
     padding: 12px 18px;
     border-radius: 0px;
+}
+
+/* widgets */
+
+label.explainer {
+    color: @description_color;
 }
 
 
