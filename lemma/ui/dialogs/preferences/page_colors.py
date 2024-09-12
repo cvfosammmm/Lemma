@@ -44,39 +44,39 @@ class PageColors(object):
         self.style_previews = dict()
         dirname = os.path.join(ServiceLocator.get_resources_path(), 'themes')
 
-        self.add_theme_choice(os.path.join(dirname, 'default.css'), 'default', 0)
+        self.add_theme_choice(os.path.join(dirname, 'default.css'), 0)
+        self.add_chooser('default', 'default', 0, False)
 
         count = 1
         for name in [file[:-4] for file in os.listdir(dirname) if file != 'default.css']:
-            self.add_theme_choice(os.path.join(dirname, name + '.css'), name, count)
+            self.add_theme_choice(os.path.join(dirname, name + '.css'), count)
+            self.add_chooser(os.path.join(dirname, name + '.css'), name, count, True)
             count += 1
 
         for name in [file[:-4] for file in os.listdir(ServiceLocator.get_user_themes_folder())]:
-            self.add_theme_choice(os.path.join(ServiceLocator.get_user_themes_folder(), name + '.css'), name, count)
+            self.add_theme_choice(os.path.join(ServiceLocator.get_user_themes_folder(), name + '.css'), count)
+            self.add_chooser(os.path.join(ServiceLocator.get_user_themes_folder(), name + '.css'), name, count, True)
             count += 1
 
         active_id = self.settings.get_value('preferences', 'color_scheme')
         if active_id in self.style_previews: self.style_previews[active_id].checkbutton.set_active(True)
         else: self.style_previews['default'].checkbutton.set_active(True)
 
-    def add_theme_choice(self, filename, name, count):
+    def add_theme_choice(self, filename, count):
         with open(filename, 'r') as file:
             data = file.read().replace('@define-color ', '@define-color theme_' + str(count) + '_')
             provider = Gtk.CssProvider()
             provider.load_from_string(data)
             Gtk.StyleContext.add_provider_for_display(self.main_window.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        if name == 'default':
-            self.style_previews[name] = StylePreview(name, count)
-            self.style_previews[name].checkbutton.connect('toggled', self.on_checkbutton_toggled, name)
-            self.style_previews[name].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, name)
-            self.view.style_switcher.append(self.style_previews[name])
-        else:
-            self.style_previews[filename] = StylePreview(name, count)
-            self.style_previews[filename].checkbutton.set_group(self.style_previews['default'].checkbutton)
-            self.style_previews[filename].checkbutton.connect('toggled', self.on_checkbutton_toggled, filename)
-            self.style_previews[filename].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, filename)
-            self.view.style_switcher.append(self.style_previews[filename])
+    def add_chooser(self, identifier, name, count, link_to_default = False):
+        self.style_previews[identifier] = StylePreview(name, count)
+        self.style_previews[identifier].checkbutton.connect('toggled', self.on_checkbutton_toggled, identifier)
+        self.style_previews[identifier].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, identifier)
+        self.view.style_switcher.append(self.style_previews[identifier])
+
+        if link_to_default:
+            self.style_previews[identifier].checkbutton.set_group(self.style_previews['default'].checkbutton)
 
     def on_checkbutton_toggled(self, button, name):
         if button.get_active():
