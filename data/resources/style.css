@@ -291,7 +291,16 @@ overlay.popover label.explaination-header {
     font-weight: bold;
 }
 button.popover.active {
-    background: @headerbar_button_active_color;
+    background: @view_active_color;
+}
+button.popover.active.sidebar {
+    background: @sidebar_selection;
+}
+button.sidebar:hover {
+    background: @sidebar_hover;
+}
+button.sidebar:active {
+    background: @sidebar_selection;
 }
 
 /*

@@ -66,6 +66,7 @@ class HeaderBarLeft(Gtk.WindowHandle):
         self.hamburger_menu_button.set_can_focus(False)
         self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (F10)')
         self.hamburger_menu_button.add_css_class('flat')
+        self.hamburger_menu_button.add_css_class('sidebar')
         self.box.append(self.hamburger_menu_button)
 
 
