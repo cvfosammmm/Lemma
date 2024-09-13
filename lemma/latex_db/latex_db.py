@@ -337,6 +337,12 @@ class LaTeXDB(object):
     ligatures = {
         '--': '–',
         '---': '—',
+        '<<': '«',
+        '>>': '»',
+        ',,': '„',
+        '``': '“',
+        '´´': '”',
+        '\'\'': '”'
     }
 
     def get_unicode_from_latex_name(name):
