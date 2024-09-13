@@ -334,6 +334,10 @@ class LaTeXDB(object):
         'mathcalY': '𝒴',
         'mathcalZ': '𝒵'
     }
+    ligatures = {
+        '--': '–',
+        '---': '—',
+    }
 
     def get_unicode_from_latex_name(name):
         return LaTeXDB.latex_to_unicode[name]
@@ -361,5 +365,11 @@ class LaTeXDB(object):
 
     def is_whitespace(char):
         return (ServiceLocator.get_regex_matcher('\\s').match(char) != None)
+
+    def has_ligature(text):
+        return text in LaTeXDB.ligatures
+
+    def get_ligature(text):
+        return LaTeXDB.ligatures[text]
 
 

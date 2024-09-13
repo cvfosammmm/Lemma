@@ -23,6 +23,7 @@ from urllib.parse import urlparse
 import webbrowser, time
 
 from lemma.document.document import Document
+from lemma.latex_db.latex_db import LaTeXDB
 
 
 class DocumentViewController():
@@ -266,8 +267,28 @@ class DocumentViewController():
 
     def on_im_commit(self, im_context, text):
         if self.model.document == None: return False
+        document = self.model.document
 
-        self.model.document.add_command('insert_text', text, None, self.model.tags_at_cursor)
+        if LaTeXDB.is_whitespace(text) and not document.cursor.has_selection():
+            insert = document.cursor.get_insert_node()
+            first_node = insert
+            for i in range(5):
+                prev_node = first_node.prev_in_parent()
+                if prev_node != None and prev_node.is_char():
+                    first_node = prev_node
+                else:
+                    break
+
+            nodes = document.ast.get_subtree(first_node.get_position(), insert.get_position())
+            chars = ''.join([node.value for node in nodes])
+            if len(chars) >= 2:
+                for i in range(len(chars) - 1):
+                    if LaTeXDB.has_ligature(chars[i:]):
+                        document.add_command('delete_range', nodes[i], insert)
+                        document.add_command('insert_text', LaTeXDB.get_ligature(chars[i:]), None, self.model.tags_at_cursor)
+                        break
+
+        document.add_command('insert_text', text, None, self.model.tags_at_cursor)
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()
