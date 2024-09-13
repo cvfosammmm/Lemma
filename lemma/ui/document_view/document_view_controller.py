@@ -269,6 +269,8 @@ class DocumentViewController():
         if self.model.document == None: return False
         document = self.model.document
 
+        document.begin_chain_of_commands()
+
         if LaTeXDB.is_whitespace(text) and not document.cursor.has_selection():
             insert = document.cursor.get_insert_node()
             first_node = insert
@@ -289,6 +291,7 @@ class DocumentViewController():
                         break
 
         document.add_command('insert_text', text, None, self.model.tags_at_cursor)
+        document.end_chain_of_commands()
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()

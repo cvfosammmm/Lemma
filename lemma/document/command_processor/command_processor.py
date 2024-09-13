@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import lemma.document.commands.composite as composite
+
 
 class CommandProcessor(object):
 
@@ -23,8 +25,21 @@ class CommandProcessor(object):
         self.commands = list()
         self.commands_preedit = list()
         self.last_command = -1
+        self.command_buffer = None
+
+    def begin_chain_of_commands(self):
+        self.command_buffer = []
+
+    def end_chain_of_commands(self):
+        commands = self.command_buffer
+        self.command_buffer = None
+        self.add_command(composite.Command(commands))
 
     def add_command(self, command):
+        if self.command_buffer != None:
+            self.command_buffer.append(command)
+            return
+
         command.run(self.document)
         self.commands_preedit.append(command)
 

@@ -59,6 +59,12 @@ class Document(Observable):
         self.plaintext_scanner = PlaintextScanner(self)
         self.update() # this will create an empty layout, ...
 
+    def begin_chain_of_commands(self):
+        self.command_processor.begin_chain_of_commands()
+
+    def end_chain_of_commands(self):
+        self.command_processor.end_chain_of_commands()
+
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
         self.command_processor.add_command(command)
