@@ -334,7 +334,7 @@ class CharacterDB(object):
         'mathcalY': '𝒴',
         'mathcalZ': '𝒵'
     }
-    ligatures = {
+    replacements = {
         '--': '–',
         '---': '—',
         '<<': '«',
@@ -372,10 +372,10 @@ class CharacterDB(object):
     def is_whitespace(char):
         return (ServiceLocator.get_regex_matcher('\\s').match(char) != None)
 
-    def has_ligature(text):
-        return text in CharacterDB.ligatures
+    def has_replacement(text):
+        return text in CharacterDB.replacements
 
-    def get_ligature(text):
-        return CharacterDB.ligatures[text]
+    def get_replacement(text):
+        return CharacterDB.replacements[text]
 
 

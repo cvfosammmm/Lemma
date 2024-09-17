@@ -260,7 +260,7 @@ class DocumentViewController():
                 else:
                     document.add_command('newline')
                     if not document.cursor.has_selection():
-                        self.replace_max_ligature_before_cursor(document)
+                        self.replace_max_string_before_cursor(document)
 
             case ('backspace', _): document.add_command('backspace')
             case ('delete', _): document.add_command('delete')
@@ -274,9 +274,9 @@ class DocumentViewController():
 
         document.add_command('insert_text', text, None, self.model.tags_at_cursor)
         if CharacterDB.is_whitespace(text) and not document.cursor.has_selection():
-            self.replace_max_ligature_before_cursor(document)
+            self.replace_max_string_before_cursor(document)
 
-    def replace_max_ligature_before_cursor(self, document):
+    def replace_max_string_before_cursor(self, document):
         last_node = document.cursor.get_insert_node().prev()
         first_node = last_node
         for i in range(5):
@@ -290,11 +290,11 @@ class DocumentViewController():
         chars = ''.join([node.value for node in nodes])
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
-                if CharacterDB.has_ligature(chars[i:]):
+                if CharacterDB.has_replacement(chars[i:]):
                     document.begin_chain_of_commands()
                     document.add_command('delete_range', nodes[i], last_node)
                     document.add_command('left')
-                    document.add_command('insert_text', CharacterDB.get_ligature(chars[i:]), None, self.model.tags_at_cursor)
+                    document.add_command('insert_text', CharacterDB.get_replacement(chars[i:]), None, self.model.tags_at_cursor)
                     document.add_command('right')
                     document.end_chain_of_commands()
 
