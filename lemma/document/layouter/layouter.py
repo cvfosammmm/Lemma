@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.infrastructure.font_manager import FontManager
-from lemma.latex_db.latex_db import LaTeXDB
 from lemma.document.layout.layout import Box
 import lemma.helpers.helpers as helpers
 
@@ -46,7 +45,7 @@ class Layouter(object):
         last_tags = set()
         result = list()
         for node in root_node:
-            if LaTeXDB.is_whitespace(node.value):
+            if node.is_whitespace():
                 result.append(list())
                 last_type = None
                 last_tags = set()
@@ -58,7 +57,7 @@ class Layouter(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].type == 'char' and not LaTeXDB.is_whitespace(node_list[0].value):
+        if node_list[0].type == 'char' and not node_list[0].is_whitespace():
             self.process_word(node_list)
         else:
             for node in node_list:
@@ -110,7 +109,7 @@ class Layouter(object):
 
             self.add_box(box)
 
-        elif node.type == 'char' and LaTeXDB.is_whitespace(node.value):
+        elif node.type == 'char' and node.is_whitespace():
             width, height, left, top = FontManager.get_char_extents_single(node.value)
 
             if self.current_line_box.width + width > 670:

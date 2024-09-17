@@ -18,7 +18,7 @@
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
-class LaTeXDB(object):
+class CharacterDB(object):
 
     alphabetical_symbols = {'𝑎', '𝑏', '𝑐', '𝑑', '𝑒', '𝑓', '𝑔', '\u210E', '𝑖', '𝑗', '𝑘', '𝑙', '𝑚', '𝑛', '𝑜', '𝑝', '𝑞', '𝑟', '𝑠', '𝑡', '𝑢', '𝑣', '𝑤', '𝑥', '𝑦', '𝑧', '𝐴', '𝐵', '𝐶', '𝐷', '𝐸', '𝐹', '𝐺', '𝐻', '𝐼', '𝐽', '𝐾', '𝐿', '𝑀', '𝑁', '𝑂', '𝑃', '𝑄', '𝑅', '𝑆', '𝑇', '𝑈', '𝑉', '𝑊', '𝑋', '𝑌', '𝑍', '𝛼', '𝛽', '𝛾', '𝛿', '𝜀', '𝜁', '𝜂', '𝜃', '𝜄', '𝜅', '𝜆', '𝜇', '𝜈', '𝜉', '𝜊', '𝜋', '𝜌', '𝜍', '𝜎', '𝜏', '𝜐', '𝜑', '𝜒', '𝜓', '𝜔', '𝜕', '𝜖', '𝜗', '𝜘', '𝜙', '𝜚', '𝜛', '𝛢', '𝛣', '𝛤', '𝛥', '𝛦', '𝛧', '𝛨', '𝛩', '𝛪', '𝛫', '𝛬', '𝛭', '𝛮', '𝛯', '𝛰', '𝛱', '𝛲', '𝛳', '𝛴', '𝛵', '𝛶', '𝛷', '𝛸', '𝛹', '𝛺', 'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'ς', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω', 'ϊ', 'ϋ', 'ό', 'ύ', 'ώ', 'Ϗ', 'ϐ', 'ϑ', 'ϒ', 'ϓ', 'ϔ', 'ϕ', 'ϖ', 'ϗ', 'Ϙ', 'ϙ', 'Ϛ', 'ϛ', 'Ϝ', 'ϝ', 'Ϟ', 'ϟ', 'Ϡ', 'ϡ', 'Ϣ', 'ϣ', 'Ϥ', 'ϥ', 'Ϧ', 'ϧ', 'Ϩ', 'ϩ', 'Ϫ', 'ϫ', 'Ϭ', 'ϭ', 'Ϯ', 'ϯ', 'ϰ', 'ϱ', 'ϲ', 'ϳ', 'ϴ', 'ϵ', 'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω', '𝒜', 'ℬ', '𝒞', '𝒟', 'ℰ', 'ℱ', '𝒢', 'ℋ', 'ℐ', '𝒥', '𝒦', 'ℒ', 'ℳ', '𝒩', '𝒪', '𝒫', '𝒬', 'ℛ', '𝒮', '𝒯', '𝒰', '𝒱', '𝒲', '𝒳', '𝒴', '𝒵'}
     ordinary_symbols = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '?', '.', '|', '‖', '/', '′', '@', '"', '¬', '∞', '\\', '∅', '♯', '♭', '♮', '∠', '∢', '∡', '♣', '♢', '♡', '♠', '∀', '∃', '∄', '∁', 'ℕ', 'ℤ', 'ℚ', '𝕀', 'ℝ', 'ℂ', 'ℑ', 'ℜ', 'ℵ', '℘', 'ℏ', '𝚤', '𝚥', '𝕂', 'ℓ', '⊥', '⊤', '∂', '∇', 'ð', '℧', '⋮', '⋯'}
@@ -346,36 +346,36 @@ class LaTeXDB(object):
     }
 
     def get_unicode_from_latex_name(name):
-        return LaTeXDB.latex_to_unicode[name]
+        return CharacterDB.latex_to_unicode[name]
 
     def is_mathsymbol(char):
-        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.binary_operations or char in LaTeXDB.relations or char in LaTeXDB.punctuation_marks or char in LaTeXDB.opening_symbols or char in LaTeXDB.closing_symbols or char in LaTeXDB.alphabetical_symbols
+        return char in CharacterDB.ordinary_symbols or char in CharacterDB.binary_operations or char in CharacterDB.relations or char in CharacterDB.punctuation_marks or char in CharacterDB.opening_symbols or char in CharacterDB.closing_symbols or char in CharacterDB.alphabetical_symbols
 
     def is_ordinary_symbol(char):
-        return char in LaTeXDB.ordinary_symbols or char in LaTeXDB.alphabetical_symbols
+        return char in CharacterDB.ordinary_symbols or char in CharacterDB.alphabetical_symbols
 
     def is_binary_operation(char):
-        return char in LaTeXDB.binary_operations
+        return char in CharacterDB.binary_operations
 
     def is_relation(char):
-        return char in LaTeXDB.relations
+        return char in CharacterDB.relations
 
     def is_punctuation_mark(char):
-        return char in LaTeXDB.punctuation_marks
+        return char in CharacterDB.punctuation_marks
 
     def is_opening_symbol(char):
-        return char in LaTeXDB.opening_symbols
+        return char in CharacterDB.opening_symbols
 
     def is_closing_symbol(char):
-        return char in LaTeXDB.closing_symbols
+        return char in CharacterDB.closing_symbols
 
     def is_whitespace(char):
         return (ServiceLocator.get_regex_matcher('\\s').match(char) != None)
 
     def has_ligature(text):
-        return text in LaTeXDB.ligatures
+        return text in CharacterDB.ligatures
 
     def get_ligature(text):
-        return LaTeXDB.ligatures[text]
+        return CharacterDB.ligatures[text]
 
 

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.latex_db.latex_db import LaTeXDB
+from lemma.db.character_db import CharacterDB
 from lemma.document.ast.node import Node
 
 
@@ -34,8 +34,8 @@ class Command():
         self.state['nodes_added'] = []
 
         node = document.cursor.get_insert_node()
-        char = LaTeXDB.get_unicode_from_latex_name(self.name)
-        if LaTeXDB.is_mathsymbol(char):
+        char = CharacterDB.get_unicode_from_latex_name(self.name)
+        if CharacterDB.is_mathsymbol(char):
             first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
             self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
             document.cursor.move_insert_to_node(last_node)

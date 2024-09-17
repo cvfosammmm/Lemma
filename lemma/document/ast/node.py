@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.position import Position
-from lemma.latex_db.latex_db import LaTeXDB
+from lemma.db.character_db import CharacterDB
 
 
 class Node():
@@ -97,7 +97,7 @@ class Node():
     def is_mathsymbol(self): return self.type == 'mathsymbol'
     def is_char(self): return self.type == 'char'
     def is_eol(self): return self.type == 'EOL'
-    def is_whitespace(self): return self.is_eol() or (self.is_char() and LaTeXDB.is_whitespace(self.value))
+    def is_whitespace(self): return self.is_eol() or (self.is_char() and CharacterDB.is_whitespace(self.value))
 
     def is_first_in_line(self):
         if not self.parent.is_root(): return False

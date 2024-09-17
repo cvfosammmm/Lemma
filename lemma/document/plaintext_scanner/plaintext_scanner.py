@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.latex_db.latex_db import LaTeXDB
-
 
 class PlaintextScanner(object):
 
@@ -38,7 +36,7 @@ class PlaintextScanner(object):
             self.text += '\n'
 
         elif node.type == 'char':
-            if LaTeXDB.is_whitespace(node.value):
+            if node.is_whitespace():
                 if self.text == '' or self.text[-1] != ' ':
                     self.text += ' '
             else:

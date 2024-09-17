@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import urllib.parse
-from lemma.latex_db.latex_db import LaTeXDB
 
 
 class HTMLScanner(object):
@@ -74,7 +73,7 @@ class HTMLScanner(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].type == 'char' and not LaTeXDB.is_whitespace(node_list[0].value):
+        if node_list[0].type == 'char' and not node_list[0].is_whitespace():
             self.process_word(node_list)
         else:
             for node in node_list:

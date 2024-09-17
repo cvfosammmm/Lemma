@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.latex_db.latex_db import LaTeXDB
 from lemma.document.ast.node import Node
 from lemma.document.ast.link import Link
 

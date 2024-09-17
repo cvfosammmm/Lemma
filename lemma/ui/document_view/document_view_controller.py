@@ -23,7 +23,7 @@ from urllib.parse import urlparse
 import webbrowser, time
 
 from lemma.document.document import Document
-from lemma.latex_db.latex_db import LaTeXDB
+from lemma.db.character_db import CharacterDB
 
 
 class DocumentViewController():
@@ -273,7 +273,7 @@ class DocumentViewController():
         document = self.model.document
 
         document.add_command('insert_text', text, None, self.model.tags_at_cursor)
-        if LaTeXDB.is_whitespace(text) and not document.cursor.has_selection():
+        if CharacterDB.is_whitespace(text) and not document.cursor.has_selection():
             self.replace_max_ligature_before_cursor(document)
 
     def replace_max_ligature_before_cursor(self, document):
@@ -290,11 +290,11 @@ class DocumentViewController():
         chars = ''.join([node.value for node in nodes])
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
-                if LaTeXDB.has_ligature(chars[i:]):
+                if CharacterDB.has_ligature(chars[i:]):
                     document.begin_chain_of_commands()
                     document.add_command('delete_range', nodes[i], last_node)
                     document.add_command('left')
-                    document.add_command('insert_text', LaTeXDB.get_ligature(chars[i:]), None, self.model.tags_at_cursor)
+                    document.add_command('insert_text', CharacterDB.get_ligature(chars[i:]), None, self.model.tags_at_cursor)
                     document.add_command('right')
                     document.end_chain_of_commands()
 
