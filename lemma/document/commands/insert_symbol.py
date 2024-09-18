@@ -15,38 +15,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.db.character_db import CharacterDB
 from lemma.document.ast.node import Node
 
 
 class Command():
 
-    def __init__(self, name):
+    def __init__(self, character):
+        self.character = character
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
-        self.name = name
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before_1'] = document.cursor.get_state()
-        self.state['cursor_state_before_2'] = document.cursor.get_state()
-        self.state['deleted_nodes'] = []
+        self.state['cursor_state_before'] = document.cursor.get_state()
         self.state['nodes_added'] = []
 
-        node = document.cursor.get_insert_node()
-        char = CharacterDB.get_unicode_from_latex_name(self.name)
-        if CharacterDB.is_mathsymbol(char):
-            first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
-            self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
-            document.cursor.move_insert_to_node(last_node)
-            self.state['cursor_state_before_2'] = document.cursor.get_state()
-
-            insert = document.cursor.get_insert_node()
-            character = Node('mathsymbol', char)
-            character.paragraph_style = insert.paragraph_style
-
-            insert.parent.insert_before(insert, character)
-            self.state['nodes_added'].append(character)
+        insert = document.cursor.get_insert_node()
+        character = Node('mathsymbol', self.character)
+        character.paragraph_style = insert.paragraph_style
+        insert.parent.insert_before(insert, character)
+        self.state['nodes_added'].append(character)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
@@ -54,12 +42,7 @@ class Command():
     def undo(self, document):
         for node in self.state['nodes_added']:
             document.ast.delete_node(node)
-        document.cursor.set_state(self.state['cursor_state_before_2'])
+        document.cursor.set_state(self.state['cursor_state_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
-
-        for node in self.state['deleted_nodes']:
-            insert = document.cursor.get_insert_node()
-            insert.parent.insert_before(insert, node)
-        document.cursor.set_state(self.state['cursor_state_before_1'])
 
 

@@ -71,14 +71,14 @@ class ToolBarView(Gtk.ActionBar):
         box.append(self.insert_link_button)
         self.pack_start(box)
 
-        self.math_sidebar_toggle = Gtk.ToggleButton()
-        self.math_sidebar_toggle.set_tooltip_text(_('Math Toolbar') + ' (Ctrl+M)')
-        self.math_sidebar_toggle.set_icon_name('insert-symbols-symbolic')
-        self.math_sidebar_toggle.set_can_focus(False)
-        self.math_sidebar_toggle.add_css_class('flat')
+        self.symbols_sidebar_toggle = Gtk.ToggleButton()
+        self.symbols_sidebar_toggle.set_tooltip_text(_('Symbols Sidebar') + ' (Alt+1)')
+        self.symbols_sidebar_toggle.set_icon_name('insert-symbols-symbolic')
+        self.symbols_sidebar_toggle.set_can_focus(False)
+        self.symbols_sidebar_toggle.add_css_class('flat')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.math_sidebar_toggle)
+        box.append(self.symbols_sidebar_toggle)
         self.pack_end(box)
         self.pack_end(Gtk.Separator())
 

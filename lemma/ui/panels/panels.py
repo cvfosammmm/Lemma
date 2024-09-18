@@ -30,8 +30,8 @@ class Panels(object):
 
         self.app.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)
-        self.main_window.toolbar.math_sidebar_toggle.set_active(ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar'))
-        self.main_window.toolbar.math_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+        self.main_window.toolbar.symbols_sidebar_toggle.set_active(ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar'))
+        self.main_window.toolbar.symbols_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
 
         self.restore_window_state()
 

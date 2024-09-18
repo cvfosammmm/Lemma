@@ -26,17 +26,10 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before_1'] = document.cursor.get_state()
-        self.state['cursor_state_before_2'] = document.cursor.get_state()
-        self.state['deleted_nodes'] = []
+        self.state['cursor_state_before'] = document.cursor.get_state()
         self.state['nodes_added'] = []
 
         if document.cursor.get_insert_node().parent.is_root():
-            first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
-            self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
-            document.cursor.move_insert_to_node(first_node)
-            self.state['cursor_state_before_2'] = document.cursor.get_state()
-
             insert = document.cursor.get_insert_node()
             character = Node('EOL', '\n')
             character.paragraph_style = insert.paragraph_style
@@ -50,12 +43,7 @@ class Command():
     def undo(self, document):
         for node in self.state['nodes_added']:
             document.ast.delete_node(node)
-        document.cursor.set_state(self.state['cursor_state_before_2'])
+        document.cursor.set_state(self.state['cursor_state_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
-
-        for node in self.state['deleted_nodes']:
-            insert = document.cursor.get_insert_node()
-            insert.parent.insert_before(insert, node)
-        document.cursor.set_state(self.state['cursor_state_before_1'])
 
 

@@ -28,6 +28,13 @@ class CharacterDB(object):
     opening_symbols = {'(', '[', '{', '⌊', '⌈', '⟨'}
     closing_symbols = {')', ']', '}', '⌋', '⌉', '⟩'}
     latex_to_unicode = {
+        'textendash': '–',
+        'textemdash': '—',
+        'guillemetleft': '«',
+        'guillemetright': '»',
+        'quotedblbase': '„',
+        'textquotedblleft': '“',
+        'textquotedblright': '”',
         'alpha': '𝛼',
         'beta': '𝛽',
         'gamma': '𝛾',

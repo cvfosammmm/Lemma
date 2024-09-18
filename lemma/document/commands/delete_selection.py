@@ -15,34 +15,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.node import Node
-
 
 class Command():
 
-    def __init__(self, subtree):
+    def __init__(self):
         self.is_undo_checkpoint = True
-        self.update_implicit_x_position = True
-        self.subtree = subtree
+        self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
-        self.state['nodes_added'] = []
 
-        if document.cursor.get_insert_node().parent.type == self.subtree.type:
-            for node in self.subtree:
-                insert = document.cursor.get_insert_node()
-                node.paragraph_style = insert.paragraph_style
-                insert.parent.insert_before(insert, node)
-                self.state['nodes_added'].append(node)
+        first_node = document.cursor.get_first_node()
+        last_node = document.cursor.get_last_node()
+        self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
+        document.cursor.set_insert_selection_nodes(last_node, last_node)
 
-        self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
+        self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
-        for node in self.state['nodes_added']:
-            document.ast.delete_node(node)
+        insert = document.cursor.get_insert_node()
+        for node in self.state['deleted_nodes']:
+            insert.parent.insert_before(insert, node)
+
         document.cursor.set_state(self.state['cursor_state_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 

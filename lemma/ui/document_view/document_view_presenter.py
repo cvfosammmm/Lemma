@@ -34,6 +34,7 @@ class DocumentViewPresenter():
         self.view = self.model.view
         self.content = self.view.content
         self.cursor_coords = None
+        self.current_node_in_selection = False
         self.scrolling_job = None
         self.fontname = None
         self.fg_color = None
@@ -183,8 +184,9 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         self.cursor_coords = None
-        self.first_cursor_pos = self.model.document.cursor.get_first_cursor_pos()
-        self.last_cursor_pos = self.model.document.cursor.get_last_cursor_pos()
+        self.current_node_in_selection = False
+        self.first_cursor_node = self.model.document.cursor.get_first_node()
+        self.last_cursor_node = self.model.document.cursor.get_last_node()
         scrolling_offset_y = self.model.document.clipping.offset_y
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
@@ -225,14 +227,16 @@ class DocumentViewPresenter():
             self.update_fontname(box.node)
             self.update_fg_color(box.node)
 
+            if box.node == self.first_cursor_node:
+                self.current_node_in_selection = True
+            if box.node == self.last_cursor_node:
+                self.current_node_in_selection = False
+
             if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
                 self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(fontname=self.fontname) + box.parent.height - FontManager.get_line_height(fontname=self.fontname), 1, FontManager.get_cursor_height(fontname=self.fontname))
 
         if box.type == 'glyph':
-            node = box.node
-            pos = node.get_position()
-
-            if pos >= self.first_cursor_pos and pos < self.last_cursor_pos:
+            if self.current_node_in_selection:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
                 ctx.fill()

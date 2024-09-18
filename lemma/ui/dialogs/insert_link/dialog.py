@@ -30,13 +30,15 @@ class Dialog(object):
 
     def __init__(self, main_window):
         self.main_window = main_window
+        self.application = None
         self.workspace = None
         self.document = None
         self.bounds = None
         self.current_values = dict()
         self.search_terms = []
 
-    def run(self, workspace, document):
+    def run(self, application, workspace, document):
+        self.application = application
         self.workspace = workspace
         self.document = document
         self.init_current_values()
@@ -48,7 +50,7 @@ class Dialog(object):
             first_node = nodes[0] if len(nodes) > 0 else None
             match_func = lambda x: (x != None and x.link != None and x.link == first_node.link)
             if len([node for node in nodes if match_func(node) == False]) > 0:
-                self.bounds = None
+                self.bounds = document.cursor.get_state()
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
                 self.view.add_button.set_label(_('Insert'))
             else:
@@ -123,7 +125,13 @@ class Dialog(object):
 
     def submit(self):
         if self.is_valid():
-            self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
+            if self.bounds == None:
+                tags_at_cursor = self.application.document_view.tags_at_cursor
+                self.workspace.active_document.begin_chain_of_commands()
+                self.workspace.active_document.add_command('insert_text', self.current_values['link_target'], self.current_values['link_target'], tags_at_cursor)
+                self.workspace.active_document.end_chain_of_commands()
+            else:
+                self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
             self.view.close()
 
 

@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
+from lemma.db.character_db import CharacterDB
 
 
 class Actions(object):
@@ -64,7 +65,7 @@ class Actions(object):
         self.add_simple_action('toggle-italic', self.toggle_italic)
 
         self.add_simple_action('start-global-search', self.start_global_search)
-        self.add_simple_action('toggle-math-sidebar', self.toggle_math_sidebar)
+        self.add_simple_action('toggle-symbols-sidebar', self.toggle_symbols_sidebar)
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
@@ -136,7 +137,7 @@ class Actions(object):
         self.actions['set-paragraph-style'].set_enabled(has_active_doc)
         self.actions['toggle-bold'].set_enabled(has_active_doc)
         self.actions['toggle-italic'].set_enabled(has_active_doc)
-        self.actions['toggle-math-sidebar'].set_enabled(True)
+        self.actions['toggle-symbols-sidebar'].set_enabled(True)
         self.actions['show-paragraph-style-menu'].set_enabled(has_active_doc)
         self.actions['show-edit-menu'].set_enabled(has_active_doc)
         self.actions['show-document-menu'].set_enabled(has_active_doc)
@@ -207,7 +208,10 @@ class Actions(object):
 
         if result[1].startswith('lemma/ast'):
             subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
+            self.workspace.active_document.begin_chain_of_commands()
+            self.workspace.active_document.add_command('delete_selection')
             self.workspace.active_document.add_command('insert_subtree', subtree)
+            self.workspace.active_document.end_chain_of_commands()
 
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
@@ -216,12 +220,21 @@ class Actions(object):
             if len(text) < 2000:
                 parsed_url = urlparse(text.strip())
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
+                    self.workspace.active_document.begin_chain_of_commands()
+                    self.workspace.active_document.add_command('delete_selection')
                     self.workspace.active_document.add_command('insert_text', text.strip(), text.strip(), tags_at_cursor)
+                    self.workspace.active_document.end_chain_of_commands()
                     return
+            self.workspace.active_document.begin_chain_of_commands()
+            self.workspace.active_document.add_command('delete_selection')
             self.workspace.active_document.add_command('insert_text', text, None, tags_at_cursor)
+            self.workspace.active_document.end_chain_of_commands()
 
     def delete_selection(self, action=None, parameter=''):
-        self.workspace.active_document.add_command('delete')
+        if self.workspace.active_document.cursor.has_selection():
+            self.workspace.active_document.add_command('delete_selection')
+        else:
+            self.workspace.active_document.add_command('delete')
 
     def select_all(self, action=None, parameter=''):
         self.workspace.active_document.add_command('select_all')
@@ -229,8 +242,18 @@ class Actions(object):
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return
 
-        name = parameter[0]
-        self.workspace.active_document.add_command('insert_symbol', name)
+        character = CharacterDB.get_unicode_from_latex_name(parameter[0])
+        if CharacterDB.is_mathsymbol(character):
+            self.workspace.active_document.begin_chain_of_commands()
+            self.workspace.active_document.add_command('delete_selection')
+            self.workspace.active_document.add_command('insert_symbol', name)
+            self.workspace.active_document.end_chain_of_commands()
+        else:
+            tags_at_cursor = self.application.document_view.tags_at_cursor
+            self.workspace.active_document.begin_chain_of_commands()
+            self.workspace.active_document.add_command('delete_selection')
+            self.workspace.active_document.add_command('insert_text', character, None, tags_at_cursor)
+            self.workspace.active_document.end_chain_of_commands()
 
     def set_paragraph_style(self, action=None, parameter=None):
         name = parameter.get_string()
@@ -259,20 +282,28 @@ class Actions(object):
             self.application.document_view.set_tags_at_cursor(self.application.document_view.tags_at_cursor ^ {tagname})
 
     def insert_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.workspace, self.workspace.active_document)
+        DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
 
     def remove_link(self, action=None, parameter=''):
-        self.workspace.active_document.add_command('remove_link')
+        document = self.workspace.active_document
+
+        if document.cursor.has_selection():
+            bounds = document.cursor.get_state()
+        elif document.cursor.get_insert_node().is_inside_link():
+            bounds = document.cursor.get_insert_node().link_bounds()
+        else:
+            bounds = document.cursor.get_state()
+        self.workspace.active_document.add_command('remove_link', bounds)
 
     def edit_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.workspace, self.workspace.active_document)
+        DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry
         search_entry.grab_focus()
 
-    def toggle_math_sidebar(self, action=None, parameter=''):
-        toggle = self.main_window.toolbar.math_sidebar_toggle
+    def toggle_symbols_sidebar(self, action=None, parameter=''):
+        toggle = self.main_window.toolbar.symbols_sidebar_toggle
         toggle.set_active(not toggle.get_active())
 
     def show_paragraph_style_menu(self, action=None, parameter=''):

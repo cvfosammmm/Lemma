@@ -28,11 +28,7 @@ class Command():
         self.state['deleted_nodes'] = []
 
         node = document.cursor.get_insert_node()
-        if document.cursor.has_selection():
-            first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
-            self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
-            document.cursor.move_insert_to_node(last_node)
-        elif not node.is_first_in_parent() or len(node.parent) == 1:
+        if not node.is_first_in_parent() or len(node.parent) == 1:
             document.cursor.move_insert_left_with_selection()
             first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
             self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)

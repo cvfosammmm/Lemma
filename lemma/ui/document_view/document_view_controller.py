@@ -258,12 +258,25 @@ class DocumentViewController():
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
                     self.open_link(document.cursor.get_insert_node().link.target)
                 else:
-                    document.add_command('newline')
-                    if not document.cursor.has_selection():
+                    if document.cursor.has_selection():
+                        document.begin_chain_of_commands()
+                        document.add_command('delete_selection')
+                        document.add_command('newline')
+                        document.end_chain_of_commands()
+                    else:
+                        document.add_command('newline')
                         self.replace_max_string_before_cursor(document)
 
-            case ('backspace', _): document.add_command('backspace')
-            case ('delete', _): document.add_command('delete')
+            case ('backspace', _):
+                if document.cursor.has_selection():
+                    document.add_command('delete_selection')
+                else:
+                    document.add_command('backspace')
+            case ('delete', _):
+                if document.cursor.has_selection():
+                    document.add_command('delete_selection')
+                else:
+                    document.add_command('delete')
 
             case _: return False
         return True
@@ -272,9 +285,15 @@ class DocumentViewController():
         if self.model.document == None: return False
         document = self.model.document
 
-        document.add_command('insert_text', text, None, self.model.tags_at_cursor)
-        if CharacterDB.is_whitespace(text) and not document.cursor.has_selection():
-            self.replace_max_string_before_cursor(document)
+        if document.cursor.has_selection():
+            document.begin_chain_of_commands()
+            document.add_command('delete_selection')
+            document.add_command('insert_text', text, None, tags_at_cursor)
+            document.end_chain_of_commands()
+        else:
+            document.add_command('insert_text', text, None, self.model.tags_at_cursor)
+            if CharacterDB.is_whitespace(text):
+                self.replace_max_string_before_cursor(document)
 
     def replace_max_string_before_cursor(self, document):
         last_node = document.cursor.get_insert_node().prev()

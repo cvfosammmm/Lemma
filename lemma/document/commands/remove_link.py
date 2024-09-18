@@ -20,7 +20,8 @@ from lemma.document.ast.node import Node
 
 class Command():
 
-    def __init__(self):
+    def __init__(self, bounds):
+        self.bounds = bounds
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = False
         self.state = dict()
@@ -28,14 +29,7 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        if document.cursor.has_selection():
-            bounds = document.cursor.get_state()
-        elif document.cursor.get_insert_node().is_inside_link():
-            bounds = document.cursor.get_insert_node().link_bounds()
-        else:
-            bounds = document.cursor.get_state()
-
-        char_nodes = [node for node in document.ast.get_subtree(*bounds) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*self.bounds) if node.is_char()]
         prev_links = []
         for node in char_nodes:
             prev_links.append(node.link)
