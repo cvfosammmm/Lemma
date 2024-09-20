@@ -15,10 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import GLib, Gio
+
 import zipfile
 import html2text
+import os.path
 
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
+from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class Dialog(object):
@@ -44,6 +50,12 @@ class Dialog(object):
         self.current_values['documents'] = set(self.workspace.documents)
 
     def populate_view(self):
+        last_export_folder = ServiceLocator.get_settings().get_value('app_state', 'last_bulk_export_folder')
+        if last_export_folder == None or not os.path.exists(last_export_folder) or not os.path.isdir(last_export_folder):
+            last_export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
+        if last_export_folder != None:
+            self.view.file_chooser_button.dialog.set_initial_folder(Gio.File.new_for_path(last_export_folder))
+
         self.view.file_format_buttons[self.current_values['format']].set_active(True)
 
         for i, document in enumerate(self.workspace.documents):
@@ -88,6 +100,7 @@ class Dialog(object):
 
     def on_submit_button_clicked(self, button):
         filename = self.current_values['filename']
+        ServiceLocator.get_settings().set_value('app_state', 'last_bulk_export_folder', os.path.dirname(filename))
 
         with zipfile.ZipFile(filename, 'x') as file:
             if self.current_values['format'] == 'html':
