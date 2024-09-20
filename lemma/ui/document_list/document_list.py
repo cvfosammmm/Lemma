@@ -19,10 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, Pango, PangoCairo
 
-import datetime
-
 import lemma.helpers.helpers as helpers
-from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
 import lemma.helpers.helpers as helpers
@@ -186,7 +183,7 @@ class DocumentList(object):
                 teaser_color = sidebar_fg_2
             else:
                 teaser_text = ' '.join(document.plaintext.splitlines())[:100]
-            date_text = self.get_last_modified_string(document)
+            date_text = document.get_last_modified_string()
 
             Gdk.cairo_set_source_rgba(ctx, title_color)
             ctx.move_to(15, self.view.line_height * i + 14 - scrolling_offset)
@@ -213,17 +210,5 @@ class DocumentList(object):
 
         if y == None or x == None or x > self.view.scrolling_widget.width - 12: return None
         return int((y + self.view.scrolling_widget.adjustment_y.get_value()) // self.view.line_height)
-
-    def get_last_modified_string(self, document):
-        datetime_today, datetime_this_week, datetime_this_year = ServiceLocator.get_datetimes_today_week_year()
-        datetime_last_modified = datetime.datetime.fromtimestamp(document.last_modified)
-        if document.last_modified >= datetime_today.timestamp():
-            return '{datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified)
-        elif document.last_modified >= datetime_this_week.timestamp():
-            return '{datetime:%a}'.format(datetime=datetime_last_modified)
-        elif document.last_modified >= datetime_this_year.timestamp():
-            return '{datetime.day} {datetime:%b}'.format(datetime=datetime_last_modified)
-        else:
-            return '{datetime.day} {datetime:%b} {datetime.year}'.format(datetime=datetime_last_modified)
 
 

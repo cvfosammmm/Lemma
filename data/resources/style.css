@@ -355,6 +355,30 @@ box.welcome label.explainer {
     margin-bottom: 42px;
 }
 
+/* action dialog */
+
+window.action-dialog {
+    background: @dialog_bg_color;
+}
+window.action-dialog label.header {
+    margin-left: 18px;
+    margin-top: 18px;
+    margin-bottom: 6px;
+}
+window.action-dialog label.explainer {
+    margin-left: 18px;
+    margin-bottom: 6px;
+}
+window.action-dialog .filechooser {
+    margin-left: 18px;
+}
+window.action-dialog checkbutton.radio-group {
+    margin-left: 14px;
+}
+window.action-dialog checkbutton.radio-group label {
+    margin-left: 6px;
+}
+
 /* preferences dialog */
 
 window.preferences notebook {
@@ -512,10 +536,28 @@ window.import-markdown-files-dialog button.filechooser-button {
     border-radius: 0px;
 }
 
+/* buld export dialog */
+
+window.export-bulk-dialog scrolledwindow {
+    border-top: 1px solid @dialog_border;
+}
+window.export-bulk-dialog list {
+    padding: 6px 0px;
+}
+window.export-bulk-dialog list row {
+    padding: 1px 18px 1px 15px;
+}
+window.export-bulk-dialog list row checkbutton label {
+    margin-left: 6px;
+}
+
 /* widgets */
 
 label.explainer {
     color: @description_color;
+}
+.filechooser button.link {
+    padding: 0px;
 }
 
 

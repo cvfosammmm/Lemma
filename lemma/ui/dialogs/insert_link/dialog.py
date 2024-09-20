@@ -21,7 +21,7 @@ from gi.repository import Gtk, Gdk, GObject
 
 import os
 
-from lemma.ui.dialogs.helpers.dialog_viewgtk import DialogView
+from lemma.ui.dialogs.helpers.dialog_view import DialogView
 from lemma.document.document import Document
 from lemma.infrastructure.service_locator import ServiceLocator
 

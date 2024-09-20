@@ -39,6 +39,7 @@ class Actions(object):
         self.actions = dict()
         self.add_simple_action('add-document', self.add_document)
         self.add_simple_action('import-markdown-files', self.import_markdown_files)
+        self.add_simple_action('export-bulk', self.export_bulk)
         self.add_simple_action('delete-document', self.delete_document)
         self.add_simple_action('rename-document', self.rename_document)
         self.add_simple_action('export-markdown', self.export_markdown)
@@ -117,6 +118,7 @@ class Actions(object):
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
+        self.actions['export-bulk'].set_enabled(has_active_doc)
         self.actions['delete-document'].set_enabled(has_active_doc)
         self.actions['rename-document'].set_enabled(has_active_doc)
         self.actions['export-markdown'].set_enabled(has_active_doc)
@@ -151,6 +153,9 @@ class Actions(object):
 
     def import_markdown_files(self, action=None, paramenter=''):
         DialogLocator.get_dialog('import_documents').run(self.workspace)
+
+    def export_bulk(self, action=None, paramenter=''):
+        DialogLocator.get_dialog('export_bulk').run(self.workspace)
 
     def delete_document(self, action=None, parameter=''):
         self.workspace.delete_document(self.workspace.active_document)

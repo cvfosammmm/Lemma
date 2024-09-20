@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import time, os.path
+import time, os.path, datetime
 
 from lemma.document.ast.ast import AST
 from lemma.document.ast.cursor import Cursor
@@ -25,6 +25,7 @@ from lemma.document.clipping.clipping import Clipping
 from lemma.document.html_scanner.html_scanner import HTMLScanner
 from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
 from lemma.document.command_processor.command_processor import CommandProcessor
+from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.helpers.observable import Observable
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:
@@ -99,6 +100,18 @@ class Document(Observable):
 
         self.update_last_modified()
         self.add_change_code('changed')
+
+    def get_last_modified_string(self):
+        datetime_today, datetime_this_week, datetime_this_year = ServiceLocator.get_datetimes_today_week_year()
+        datetime_last_modified = datetime.datetime.fromtimestamp(self.last_modified)
+        if self.last_modified >= datetime_today.timestamp():
+            return '{datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified)
+        elif self.last_modified >= datetime_this_week.timestamp():
+            return '{datetime:%a}'.format(datetime=datetime_last_modified)
+        elif self.last_modified >= datetime_this_year.timestamp():
+            return '{datetime.day} {datetime:%b}'.format(datetime=datetime_last_modified)
+        else:
+            return '{datetime.day} {datetime:%b} {datetime.year}'.format(datetime=datetime_last_modified)
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True
