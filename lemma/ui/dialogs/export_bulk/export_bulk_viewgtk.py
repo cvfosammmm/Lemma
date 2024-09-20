@@ -25,24 +25,28 @@ from lemma.ui.dialogs.helpers.dialog_view_action import DialogViewAction
 class ExportBulkView(DialogViewAction):
 
     def __init__(self, main_window):
-        DialogViewAction.__init__(self, main_window, _('Bulk Export'), 500, 'export-bulk-dialog', _('Export'))
+        DialogViewAction.__init__(self, main_window, _('Export Documents'), 500, 'export-bulk-dialog', _('Export'))
 
-        self.add_header_label('<b>' + _('Filename') + '</b>')
+        self.filename_label = self.add_header_label('<b>' + _('Filename') + '</b>')
+        self.filename_label.set_margin_bottom(1)
         self.file_chooser_button = self.add_file_chooser_button_save()
         self.file_chooser_button.dialog.set_initial_name('.zip')
         self.file_chooser_button.dialog.set_title(_('Choose File'))
 
-        self.add_header_label('<b>' + _('Format') + '</b>')
+        self.format_label = self.add_header_label('<b>' + _('Format') + '</b>')
+        self.format_label.set_margin_top(2)
+        self.format_label.set_margin_bottom(-1)
         self.file_format_buttons = self.add_radio_group({'html': _('HTML (recommended)'), 'markdown': _('Markdown')})
 
-        self.add_header_label('<b>' + _('Documents to export') + '</b>')
+        self.documents_label = self.add_header_label('<b>' + _('Documents to export') + '</b>')
+        self.documents_label.set_margin_bottom(1)
 
         self.list = Gtk.ListBox()
         self.list.set_selection_mode(Gtk.SelectionMode.NONE)
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_child(self.list)
         self.scrolled_window.set_propagate_natural_height(True)
-        self.scrolled_window.set_max_content_height(250)
+        self.scrolled_window.set_max_content_height(240)
         self.content.append(self.scrolled_window)
 
 
@@ -62,7 +66,7 @@ class Row(Gtk.ListBoxRow):
         box = Gtk.CenterBox()
         box.set_orientation(Gtk.Orientation.HORIZONTAL)
         box.set_start_widget(self.button)
-        box.set_end_widget(Gtk.Label.new(document.get_last_modified_string()))
+        #box.set_end_widget(Gtk.Label.new(document.get_last_modified_string()))
         self.set_child(box)
 
 

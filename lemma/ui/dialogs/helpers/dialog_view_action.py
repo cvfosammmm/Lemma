@@ -36,14 +36,23 @@ class DialogViewAction(Gtk.Window):
         self.set_destroy_with_parent(True)
         self.set_can_focus(False)
 
+        header_label = Gtk.Label.new(name)
+        header_label.add_css_class('title')
+
         self.headerbar = Gtk.HeaderBar()
-        self.headerbar.set_show_title_buttons(False)
-        self.headerbar.set_title_widget(Gtk.Label.new(name))
+        self.headerbar.set_show_title_buttons(True)
+        self.headerbar.set_title_widget(Gtk.Label.new(''))
+        self.headerbar.pack_start(header_label)
+
         self.set_titlebar(self.headerbar)
 
         self.topbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.topbox.set_size_request(default_width, -1)
         self.set_child(self.topbox)
+
+        self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.content.set_vexpand(True)
+        self.topbox.append(self.content)
 
         self.shortcuts_controller = ShortcutController()
         self.shortcuts_controller.add_with_callback('Escape', self.close)
@@ -51,16 +60,15 @@ class DialogViewAction(Gtk.Window):
 
         self.cancel_button = Gtk.Button.new_with_mnemonic(_('_Cancel'))
         self.cancel_button.set_can_focus(False)
-        self.headerbar.pack_start(self.cancel_button)
 
         self.submit_button = Gtk.Button.new_with_mnemonic(action_label)
         self.submit_button.set_can_focus(False)
         self.submit_button.add_css_class('suggested-action')
-        self.headerbar.pack_end(self.submit_button)
 
-        self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.content.set_vexpand(True)
-        self.topbox.append(self.content)
+        self.action_bar = Gtk.ActionBar()
+        self.action_bar.pack_start(self.cancel_button)
+        self.action_bar.pack_end(self.submit_button)
+        self.topbox.append(self.action_bar)
 
     def add_header_label(self, markup):
         label = Gtk.Label()
@@ -68,6 +76,7 @@ class DialogViewAction(Gtk.Window):
         label.set_xalign(0)
         label.add_css_class('header')
         self.content.append(label)
+        return label
 
     def add_explainer_label(self, markup):
         label = Gtk.Label()
@@ -75,6 +84,7 @@ class DialogViewAction(Gtk.Window):
         label.set_xalign(0)
         label.add_css_class('explainer')
         self.content.append(label)
+        return label
 
     def add_radio_group(self, choices):
         hbox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)

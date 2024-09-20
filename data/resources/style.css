@@ -360,6 +360,27 @@ box.welcome label.explainer {
 window.action-dialog {
     background: @dialog_bg_color;
 }
+window.action-dialog headerbar {
+    background: @dialog_bg_color;
+    border-bottom: 1px solid @dialog_border;
+    box-shadow: none;
+}
+window.action-dialog actionbar {
+    box-shadow: none;
+    border-top: 1px solid @dialog_list_border;
+}
+window.action-dialog actionbar box {
+    background: @dialog_bg_color;
+    border: none;
+    box-shadow: none;
+}
+window.action-dialog label.title {
+    font-size: 24px;
+    font-weight: bold;
+    padding-left: 11px;
+    padding-top: 11px;
+    padding-bottom: 10px;
+}
 window.action-dialog label.header {
     margin-left: 18px;
     margin-top: 18px;
@@ -539,13 +560,19 @@ window.import-markdown-files-dialog button.filechooser-button {
 /* buld export dialog */
 
 window.export-bulk-dialog scrolledwindow {
-    border-top: 1px solid @dialog_border;
+    border: 1px solid @dialog_list_border;
+    margin: 0px 10px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+    background: @dialog_list_bg;
 }
 window.export-bulk-dialog list {
-    padding: 6px 0px;
+    padding: 4px 0px;
+    background: none;
 }
 window.export-bulk-dialog list row {
-    padding: 1px 18px 1px 15px;
+    padding: 1px 9px 1px 4px;
+    background: none;
 }
 window.export-bulk-dialog list row checkbutton label {
     margin-left: 6px;

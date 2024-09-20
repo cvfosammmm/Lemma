@@ -57,7 +57,7 @@ class View(PopoverBottom):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.button_bulk_export = MenuBuilder.create_button(_('Bulk Export...'))
+        self.button_bulk_export = MenuBuilder.create_button(_('Export Documents...'))
         self.button_bulk_export.set_action_name('win.export-bulk')
         self.add_closing_button(self.button_bulk_export)
 
