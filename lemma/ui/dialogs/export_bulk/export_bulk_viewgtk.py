@@ -46,8 +46,12 @@ class ExportBulkView(DialogViewAction):
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_child(self.list)
         self.scrolled_window.set_propagate_natural_height(True)
-        self.scrolled_window.set_max_content_height(240)
+        self.scrolled_window.set_max_content_height(242)
         self.content.append(self.scrolled_window)
+
+        self.select_all_button = Gtk.CheckButton.new_with_label(_('Select All'))
+        self.select_all_button.add_css_class('select-all')
+        self.content.append(self.select_all_button)
 
 
 class Row(Gtk.ListBoxRow):
@@ -59,14 +63,10 @@ class Row(Gtk.ListBoxRow):
         self.document = document
         label = Gtk.Label.new(document.title)
         label.set_ellipsize(Pango.EllipsizeMode.END)
-        label.set_margin_end(18)
+        label.set_margin_end(12)
         self.button = Gtk.CheckButton()
         self.button.set_child(label)
 
-        box = Gtk.CenterBox()
-        box.set_orientation(Gtk.Orientation.HORIZONTAL)
-        box.set_start_widget(self.button)
-        #box.set_end_widget(Gtk.Label.new(document.get_last_modified_string()))
-        self.set_child(box)
+        self.set_child(self.button)
 
 

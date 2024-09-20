@@ -561,9 +561,10 @@ window.import-markdown-files-dialog button.filechooser-button {
 
 window.export-bulk-dialog scrolledwindow {
     border: 1px solid @dialog_list_border;
+    border-bottom: 1px dotted @dialog_border;
     margin: 0px 10px;
-    margin-bottom: 18px;
-    border-radius: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
     background: @dialog_list_bg;
 }
 window.export-bulk-dialog list {
@@ -571,10 +572,27 @@ window.export-bulk-dialog list {
     background: none;
 }
 window.export-bulk-dialog list row {
-    padding: 1px 9px 1px 4px;
+    padding: 0px;
     background: none;
 }
+window.export-bulk-dialog list row checkbutton {
+    padding: 4px 9px 4px 7px;
+}
 window.export-bulk-dialog list row checkbutton label {
+    margin-left: 6px;
+}
+window.export-bulk-dialog checkbutton.select-all {
+    padding: 8px 9px 8px 7px;
+    margin: 0px 10px;
+    margin-bottom: 18px;
+    border-radius: 0px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border: 1px solid @dialog_list_border;
+    border-top: none;
+    background: @dialog_list_bg;
+}
+window.export-bulk-dialog checkbutton.select-all label {
     margin-left: 6px;
 }
 

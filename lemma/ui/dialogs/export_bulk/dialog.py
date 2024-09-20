@@ -62,6 +62,7 @@ class Dialog(object):
             row = view.Row(document)
             row.button.set_active(document in self.current_values['documents'])
             self.view.list.append(row)
+        self.view.select_all_button.set_active(True)
 
     def observe_view(self):
         self.view.file_chooser_button.connect('file-set', self.on_file_chosen)
@@ -71,6 +72,7 @@ class Dialog(object):
 
         for row in self.view.list:
             row.button.connect('toggled', self.on_document_button_toggled, row.document)
+        self.view.select_all_button.connect('toggled', self.on_select_all_button_toggled)
 
         self.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
         self.view.submit_button.connect('clicked', self.on_submit_button_clicked)
@@ -79,12 +81,22 @@ class Dialog(object):
         is_valid = self.current_values['filename'] != None and len(self.current_values['documents']) > 0
         self.view.submit_button.set_sensitive(is_valid)
 
+        if len(self.current_values['documents']) == len(self.workspace.documents):
+            self.view.select_all_button.set_active(True)
+        elif len(self.current_values['documents']) == 0:
+            self.view.select_all_button.set_active(False)
+
     def on_document_button_toggled(self, button, document):
         if button.get_active():
             self.current_values['documents'].add(document)
         else:
             self.current_values['documents'].discard(document)
         self.validate()
+
+    def on_select_all_button_toggled(self, button):
+        is_active = button.get_active()
+        for row in self.view.list:
+            row.button.set_active(is_active)
 
     def on_checkbutton_toggled(self, button, name, value):
         if button.get_active():
