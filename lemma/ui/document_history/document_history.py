@@ -21,7 +21,7 @@ from gi.repository import Gdk, Pango, PangoCairo
 
 import lemma.helpers.helpers as helpers
 from lemma.infrastructure.color_manager import ColorManager
-from lemma.ui.helpers.helpers import rounded_rectangle
+from lemma.ui.helpers.cairo import rounded_rectangle
 
 
 class DocumentHistory(object):

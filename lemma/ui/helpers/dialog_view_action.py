@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-import lemma.ui.dialogs.helpers.filechooser_button_save as filechooser_button_save
+import lemma.ui.helpers.filechooser_button_save as filechooser_button_save
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
 
 

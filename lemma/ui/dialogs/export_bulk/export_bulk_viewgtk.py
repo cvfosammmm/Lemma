@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Pango
 
-from lemma.ui.dialogs.helpers.dialog_view_action import DialogViewAction
+from lemma.ui.helpers.dialog_view_action import DialogViewAction
 
 
 class ExportBulkView(DialogViewAction):

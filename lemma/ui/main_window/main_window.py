@@ -32,7 +32,7 @@ from lemma.ui.main_window.sidebar import ToolsSidebar
 from lemma.ui.main_window.document_view_view import DocumentViewView
 from lemma.ui.main_window.document_draft import DocumentDraftView
 from lemma.ui.title_widget.title_widget import TitleWidget
-from lemma.ui.main_window.animated_paned import AnimatedHPaned
+from lemma.ui.helpers.animated_paned import AnimatedHPaned
 
 
 class MainWindow(Adw.ApplicationWindow):

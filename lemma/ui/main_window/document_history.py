@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Pango
 
-from lemma.ui.main_window.scrolling_widget import ScrollingWidget
+from lemma.ui.helpers.scrolling_widget import ScrollingWidget
 
 
 class DocumentHistoryView(Gtk.Overlay):

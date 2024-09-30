@@ -21,7 +21,7 @@ from gi.repository import Gtk, GLib, Gdk, GObject
 
 import os
 
-from lemma.ui.dialogs.helpers.dialog_view import DialogView
+from lemma.ui.helpers.dialog_view import DialogView
 
 
 class ImportDocumentsView(DialogView):
