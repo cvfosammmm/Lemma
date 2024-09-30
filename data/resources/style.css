@@ -496,20 +496,25 @@ window.insert-link-dialog row {
 
 window.import-markdown-files-dialog label.explainer {
     margin: 18px;
+    margin-top: 17px;
+    margin-bottom: 11px;
+    line-height: 21px;
 }
 window.import-markdown-files-dialog stack {
     background: @list_bg;
-    border-top: 1px solid @dialog_border;
-    border-bottom: 1px solid @dialog_border;
+    margin: 0px 10px;
+    border: 1px solid @dialog_list_border;
+    border-radius: 6px;
+    background: @dialog_list_bg;
 }
 window.import-markdown-files-dialog box.drop-message {
-    padding: 16px;
+    padding: 2px;
 }
 window.import-markdown-files-dialog box.drop-message > box {
-    border: 2px dashed @borders;
+    border: 4px dashed @dialog_list_border;
     border-radius: 6px;
     min-width: 484px;
-    min-height: 216px;
+    min-height: 230px;
 }
 window.import-markdown-files-dialog box.drop-message > box > box {
     min-height: 112px;
@@ -519,9 +524,6 @@ window.import-markdown-files-dialog box.drop-message > box > box {
     0% { margin-top: 36px; }
     50% { margin-top: 48px; }
     100% { margin-top: 36px; }
-}
-window.import-markdown-files-dialog headerbar button {
-    padding: 6px 12px;
 }
 window.import-markdown-files-dialog box.drop-message > box image {
     margin-top: 48px;
@@ -533,28 +535,22 @@ window.import-markdown-files-dialog box.drop-message > box label {
 }
 window.import-markdown-files-dialog list {
     background: none;
+    padding-top: 3px;
 }
 window.import-markdown-files-dialog list row {
     padding: 0px;
-    border-bottom: 1px solid @list_row_border;
-}
-window.import-markdown-files-dialog list row:hover {
-    background: @list_row_hover;
 }
 window.import-markdown-files-dialog list row label {
     padding-top: 1px;
-    padding-left: 18px;
+    padding-left: 8px;
 }
 window.import-markdown-files-dialog list row button {
-    padding: 7px;
-    padding-right: 12px;
-    padding-left: 12px;
-    border-radius: 1px;
+    padding: 2px;
+    margin-right: 3px;
+    border-radius: 100px;
 }
-window.import-markdown-files-dialog button.filechooser-button {
-    margin: 0px;
-    padding: 12px 18px;
-    border-radius: 0px;
+window.import-markdown-files-dialog box.button-box {
+    margin: 0px 18px 18px 18px;
 }
 
 /* buld export dialog */

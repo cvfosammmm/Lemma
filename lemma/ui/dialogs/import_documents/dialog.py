@@ -47,18 +47,18 @@ class Dialog(object):
         self.current_values['files'] = set()
 
     def setup(self):
-        self.view.import_button.set_sensitive(False)
+        self.view.submit_button.set_sensitive(False)
         self.view.drop_stack.set_visible_child_name('message')
 
         self.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
-        self.view.import_button.connect('clicked', self.on_import_button_clicked)
+        self.view.submit_button.connect('clicked', self.on_submit_button_clicked)
         self.view.add_file_button.connect('clicked', self.on_add_file_button_clicked)
         self.view.drop_controller.connect('drop', self.on_drop)
 
     def on_cancel_button_clicked(self, button):
         self.view.close()
 
-    def on_import_button_clicked(self, button):
+    def on_submit_button_clicked(self, button):
         self.import_files()
         self.view.close()
 
@@ -104,7 +104,7 @@ class Dialog(object):
             row.button.connect('clicked', self.remove_file_from_list)
             self.view.list.append(row)
 
-        self.view.import_button.set_sensitive(True)
+        self.view.submit_button.set_sensitive(True)
         self.view.drop_stack.set_visible_child_name('files')
 
     def remove_file_from_list(self, button):
@@ -112,7 +112,7 @@ class Dialog(object):
         self.view.list.remove(row)
         self.current_values['files'].remove(row.path)
 
-        self.view.import_button.set_sensitive(len(self.current_values['files']) > 0)
+        self.view.submit_button.set_sensitive(len(self.current_values['files']) > 0)
         self.view.drop_stack.set_visible_child_name(('files' if len(self.current_values['files']) > 0 else 'message'))
 
     def import_files(self):

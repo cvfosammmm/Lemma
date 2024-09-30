@@ -82,6 +82,7 @@ class DialogViewAction(Gtk.Window):
         label = Gtk.Label()
         label.set_markup(markup)
         label.set_xalign(0)
+        label.set_wrap(True)
         label.add_css_class('explainer')
         self.content.append(label)
         return label

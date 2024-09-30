@@ -21,35 +21,18 @@ from gi.repository import Gtk, GLib, Gdk, GObject
 
 import os
 
-from lemma.ui.helpers.dialog_view import DialogView
+from lemma.ui.helpers.dialog_view_action import DialogViewAction
 
 
-class ImportDocumentsView(DialogView):
+class ImportDocumentsView(DialogViewAction):
 
     def __init__(self, main_window):
-        DialogView.__init__(self, main_window)
+        DialogViewAction.__init__(self, main_window, _('Import Markdown Files'), 500, 'import-markdown-files-dialog', _('Import'))
 
-        self.set_default_size(400, -1)
-        self.set_can_focus(False)
-        self.add_css_class('import-markdown-files-dialog')
-        self.headerbar.set_show_title_buttons(False)
-        self.headerbar.set_title_widget(Gtk.Label.new(_('Import Markdown Files')))
-        self.topbox.set_size_request(400, -1)
+        self.explainer = self.add_explainer_label(_('<b>Warning:</b> This will not work with arbitrary .md-files. It\'s only supposed to work with files previously exported from Lemma.'))
 
-        self.cancel_button = Gtk.Button.new_with_mnemonic(_('_Cancel'))
-        self.cancel_button.set_can_focus(False)
-        self.headerbar.pack_start(self.cancel_button)
-
-        self.import_button = Gtk.Button.new_with_mnemonic(_('Import'))
-        self.import_button.set_can_focus(False)
-        self.import_button.add_css_class('suggested-action')
-        self.headerbar.pack_end(self.import_button)
-
-        self.explainer = Gtk.Label()
-        self.explainer.set_markup(_('<b>Warning:</b> This will not work with arbitrary .md-files. It\'s only supposed to work with files previously exported from Lemma.'))
-        self.explainer.add_css_class('explainer')
-        self.explainer.set_wrap(True)
-        self.explainer.set_xalign(0)
+        self.list_label = self.add_header_label('<b>' + _('Files to import') + '</b>')
+        self.list_label.set_margin_bottom(1)
 
         self.list = Gtk.ListBox()
         self.list.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -57,6 +40,8 @@ class ImportDocumentsView(DialogView):
 
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_child(self.list)
+        self.scrolled_window.set_propagate_natural_height(True)
+        self.scrolled_window.set_max_content_height(242)
 
         self.drop_message_inner_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         image = Gtk.Image.new_from_icon_name('arrow1-down-symbolic')
@@ -73,26 +58,20 @@ class ImportDocumentsView(DialogView):
         self.drop_stack = Gtk.Stack()
         self.drop_stack.add_named(self.drop_message_outer_box, 'message')
         self.drop_stack.add_named(self.scrolled_window, 'files')
-
         self.drop_controller = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
         self.drop_controller.set_gtypes([Gdk.FileList])
         self.drop_stack.add_controller(self.drop_controller)
-
-        button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
-        button_box.append(Gtk.Image.new_from_icon_name('list-add-symbolic'))
-        button_box.append(Gtk.Label.new('Add files...'))
-        self.add_file_button = Gtk.Button()
-        self.add_file_button.add_css_class('filechooser-button')
-        self.add_file_button.add_css_class('flat')
-        self.add_file_button.set_child(button_box)
-
-        self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.content.set_vexpand(True)
-        self.content.append(self.explainer)
         self.content.append(self.drop_stack)
-        self.content.append(self.add_file_button)
 
-        self.topbox.append(self.content)
+        self.add_file_button = Gtk.Button.new_with_label(_('Add files...'))
+        self.add_file_button.add_css_class('add-file-button')
+        self.add_file_button.add_css_class('link')
+
+        self.button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.button_box.add_css_class('button-box')
+        self.button_box.append(Gtk.Image.new_from_icon_name('list-add-symbolic'))
+        self.button_box.append(self.add_file_button)
+        self.content.append(self.button_box)
 
     def sort_function(self, row1, row2, user_data=None):
         val1 = row1.path.lower()
