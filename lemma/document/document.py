@@ -60,15 +60,15 @@ class Document(Observable):
         self.plaintext_scanner = PlaintextScanner(self)
         self.update() # this will create an empty layout, ...
 
-    def begin_chain_of_commands(self):
-        self.command_processor.begin_chain_of_commands()
-
-    def end_chain_of_commands(self):
-        self.command_processor.end_chain_of_commands()
-
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
         self.command_processor.add_command(command)
+
+    def add_composite_command(self, *commands):
+        self.command_processor.begin_chain_of_commands()
+        for command in commands:
+            self.add_command(*command)
+        self.command_processor.end_chain_of_commands()
 
     def can_undo(self): return self.command_processor.can_undo()
     def can_redo(self): return self.command_processor.can_redo()

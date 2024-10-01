@@ -101,20 +101,20 @@ class Actions(object):
     def on_mode_set(self, workspace): self.update()
 
     def update(self):
-        active_document = self.workspace.active_document
-        has_active_doc = (self.workspace.mode == 'documents' and active_document != None)
+        document = self.workspace.active_document
+        has_active_doc = (self.workspace.mode == 'documents' and document != None)
 
-        prev_doc = self.workspace.history.get_previous_if_any(active_document)
-        next_doc = self.workspace.history.get_next_if_any(active_document)
-        can_undo = has_active_doc and active_document.can_undo()
-        can_redo = has_active_doc and active_document.can_redo()
-        insert_in_line = has_active_doc and active_document.cursor.get_insert_node().parent.is_root()
-        has_selection = has_active_doc and active_document.cursor.has_selection()
+        prev_doc = self.workspace.history.get_previous_if_any(document)
+        next_doc = self.workspace.history.get_next_if_any(document)
+        can_undo = has_active_doc and document.can_undo()
+        can_redo = has_active_doc and document.can_redo()
+        insert_in_line = has_active_doc and document.cursor.get_insert_node().parent.is_root()
+        has_selection = has_active_doc and document.cursor.has_selection()
         clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
-        links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.cursor.get_state()) if node.link != None]) > 0
-        cursor_inside_link = has_active_doc and active_document.cursor.get_insert_node().is_inside_link()
+        links_inside_selection = has_active_doc and len([node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.link != None]) > 0
+        cursor_inside_link = has_active_doc and document.cursor.get_insert_node().is_inside_link()
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -210,30 +210,24 @@ class Actions(object):
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
+        document = self.workspace.active_document
 
         if result[1].startswith('lemma/ast'):
             subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
-            self.workspace.active_document.begin_chain_of_commands()
-            self.workspace.active_document.add_command('delete_selection')
-            self.workspace.active_document.add_command('insert_subtree', subtree)
-            self.workspace.active_document.end_chain_of_commands()
+            document.add_composite_command(['delete_selection'], ['insert_subtree', subtree])
 
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
             tags_at_cursor = self.application.document_view.tags_at_cursor
 
             if len(text) < 2000:
-                parsed_url = urlparse(text.strip())
+                stext = text.strip()
+                parsed_url = urlparse(stext)
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                    self.workspace.active_document.begin_chain_of_commands()
-                    self.workspace.active_document.add_command('delete_selection')
-                    self.workspace.active_document.add_command('insert_text', text.strip(), text.strip(), tags_at_cursor)
-                    self.workspace.active_document.end_chain_of_commands()
+                    document.add_composite_command(['delete_selection'], ['insert_text', stext, stext, tags_at_cursor])
                     return
-            self.workspace.active_document.begin_chain_of_commands()
-            self.workspace.active_document.add_command('delete_selection')
-            self.workspace.active_document.add_command('insert_text', text, None, tags_at_cursor)
-            self.workspace.active_document.end_chain_of_commands()
+
+            document.add_composite_command(['delete_selection'], ['insert_text', text, None, tags_at_cursor])
 
     def delete_selection(self, action=None, parameter=''):
         if self.workspace.active_document.cursor.has_selection():
@@ -247,18 +241,13 @@ class Actions(object):
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return
 
+        document = self.workspace.active_document
         character = CharacterDB.get_unicode_from_latex_name(parameter[0])
         if CharacterDB.is_mathsymbol(character):
-            self.workspace.active_document.begin_chain_of_commands()
-            self.workspace.active_document.add_command('delete_selection')
-            self.workspace.active_document.add_command('insert_symbol', name)
-            self.workspace.active_document.end_chain_of_commands()
+            document.add_composite_command(['delete_selection'], ['insert_symbol', name])
         else:
             tags_at_cursor = self.application.document_view.tags_at_cursor
-            self.workspace.active_document.begin_chain_of_commands()
-            self.workspace.active_document.add_command('delete_selection')
-            self.workspace.active_document.add_command('insert_text', character, None, tags_at_cursor)
-            self.workspace.active_document.end_chain_of_commands()
+            document.add_composite_command(['delete_selection'], ['insert_text', character, None, tags_at_cursor])
 
     def set_paragraph_style(self, action=None, parameter=None):
         name = parameter.get_string()
@@ -298,7 +287,7 @@ class Actions(object):
             bounds = document.cursor.get_insert_node().link_bounds()
         else:
             bounds = document.cursor.get_state()
-        self.workspace.active_document.add_command('remove_link', bounds)
+        document.add_command('remove_link', bounds)
 
     def edit_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)

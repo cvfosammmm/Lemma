@@ -127,9 +127,7 @@ class Dialog(object):
         if self.is_valid():
             if self.bounds == None:
                 tags_at_cursor = self.application.document_view.tags_at_cursor
-                self.workspace.active_document.begin_chain_of_commands()
                 self.workspace.active_document.add_command('insert_text', self.current_values['link_target'], self.current_values['link_target'], tags_at_cursor)
-                self.workspace.active_document.end_chain_of_commands()
             else:
                 self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
             self.view.close()

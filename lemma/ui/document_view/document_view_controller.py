@@ -259,10 +259,7 @@ class DocumentViewController():
                     self.open_link(document.cursor.get_insert_node().link.target)
                 else:
                     if document.cursor.has_selection():
-                        document.begin_chain_of_commands()
-                        document.add_command('delete_selection')
-                        document.add_command('newline')
-                        document.end_chain_of_commands()
+                        document.add_composite_command(['delete_selection'], ['newline'])
                     else:
                         document.add_command('newline')
                         self.replace_max_string_before_cursor(document)
@@ -286,10 +283,7 @@ class DocumentViewController():
         document = self.model.document
 
         if document.cursor.has_selection():
-            document.begin_chain_of_commands()
-            document.add_command('delete_selection')
-            document.add_command('insert_text', text, None, tags_at_cursor)
-            document.end_chain_of_commands()
+            document.add_composite_command(['delete_selection'], ['insert_text', text, None, tags_at_cursor])
         else:
             document.add_command('insert_text', text, None, self.model.tags_at_cursor)
             if CharacterDB.is_whitespace(text):
@@ -310,12 +304,7 @@ class DocumentViewController():
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
                 if CharacterDB.has_replacement(chars[i:]):
-                    document.begin_chain_of_commands()
-                    document.add_command('delete_range', nodes[i], last_node)
-                    document.add_command('left')
-                    document.add_command('insert_text', CharacterDB.get_replacement(chars[i:]), None, self.model.tags_at_cursor)
-                    document.add_command('right')
-                    document.end_chain_of_commands()
+                    document.add_composite_command(['delete_range', nodes[i], last_node], ['left'], ['insert_text', CharacterDB.get_replacement(chars[i:]), None, self.model.tags_at_cursor], ['right'])
 
                     return True
         return False
