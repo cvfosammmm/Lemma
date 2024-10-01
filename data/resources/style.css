@@ -37,14 +37,14 @@ entry.search {
     border-radius: 0px;
     background: @headerbar_bg_1;
     padding: 0px;
-    color: #fff;
+    color: @headerbar_fg_1;
 }
 entry.search text {
     padding-left: 16px;
 }
 entry.search image.right {
     padding: 10px;
-    color: #fff;
+    color: @headerbar_fg_1;
 }
 
 windowhandle.right {
@@ -230,18 +230,18 @@ overlay.popover .content {
     padding: 6px;
     border-radius: 10px;
     border: 1px solid @borders;
-    box-shadow: 0 1px 5px 1px mix(black, transparent, .91), 0 2px 14px 3px mix(black, transparent, .95);
+    box-shadow: 0 1px 5px 1px @popover_shadow_1, 0 2px 14px 3px @popover_shadow_2;
 }
 overlay.popover .arrow {
     min-width: 20px;
     min-height: 16px;
 }
 overlay.popover-bottom .arrow {
-    color: #000;
+    color: @popover_arrow_color;
     background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
 }
 overlay.popover-top .arrow {
-    color: #000;
+    color: @popover_arrow_color;
     background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
 }
 overlay.popover-bottom .content {

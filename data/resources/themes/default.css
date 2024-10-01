@@ -41,7 +41,10 @@
 /* Popovers */
 @define-color popover_bg_color #fafafa;
 @define-color popover_fg_color rgba(0, 0, 0, 0.8);
+@define-color popover_arrow_color #000000;
 @define-color popover_shade_color rgba(0, 0, 0, 0.07);
+@define-color popover_shadow_1 mix(black, transparent, .91);
+@define-color popover_shadow_2 mix(black, transparent, .95);
 @define-color menu_shortcut_color #888888;
 
 /* Thumbnails */
@@ -50,6 +53,7 @@
 
 /* Headerbar */
 @define-color headerbar_bg_1 #333;
+@define-color headerbar_fg_1 #fff;
 @define-color headerbar_bg_2 #f9f9f9;
 @define-color header_border_bottom_1 #000;
 @define-color header_border_bottom_2 #00000033;
