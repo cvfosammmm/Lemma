@@ -20,7 +20,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio, GLib
 
-import os.path
+import os.path, shutil, os
 import urllib.parse
 import html2text
 
@@ -75,5 +75,9 @@ class Dialog(object):
 
                 with open(filename, 'w') as f:
                     f.write(markdown)
+
+                data_dir = ServiceLocator.get_notes_folder()
+                for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:
+                    shutil.copy(os.path.join(data_dir, file), os.path.dirname(filename))
 
 

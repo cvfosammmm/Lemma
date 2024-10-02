@@ -15,7 +15,7 @@ Website: <a href="https://www.cvfosammmm.org/lemma/">https://www.cvfosammmm.org/
 I develop Lemma on Debian and that's what I tested it with. On Debian derivatives (like Ubuntu) it should probably work the same. On distributions other than Debian and Debian derivatives it should work more or less the same. If you want to run Lemma from source on another distribution and don't know how please open an issue here on GitHub. I will then try to provide instructions for your system.
 
 1. Run the following command to install prerequisite Debian packages:<br />
-`apt-get install meson python3-gi gir1.2-gtk-4.0 gir1.2-pango-1.0 gettext python3-cairo python3-gi-cairo gir1.2-adw-1 python3-xdg python3-markdown-it python3-html2text`
+`apt-get install meson python3-gi gir1.2-gtk-4.0 gir1.2-pango-1.0 gettext python3-cairo python3-gi-cairo gir1.2-adw-1 python3-xdg python3-markdown-it python3-html2text python3-willow`
 
 2. Download und Unpack Lemma from GitHub
 

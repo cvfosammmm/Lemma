@@ -20,10 +20,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio, GLib
 
-import os.path, shutil, os
+import os.path
+from PIL import Image
 
 from lemma.infrastructure.service_locator import ServiceLocator
-
 
 class Dialog(object):
 
@@ -34,44 +34,27 @@ class Dialog(object):
     def run(self, document):
         self.document = document
         self.setup()
-        self.view.save(self.main_window, None, self.dialog_process_response)
+        self.view.open(self.main_window, None, self.dialog_process_response)
 
     def setup(self):
         self.view = Gtk.FileDialog()
         self.view.set_modal(True)
-        self.view.set_title(_('Export Document'))
+        self.view.set_title(_('Insert Image'))
 
         file_filter = Gtk.FileFilter()
-        file_filter.add_pattern('*.html')
-        file_filter.set_name(_('HTML Files'))
+        for extension, name in [(extension, name) for (extension, name) in Image.registered_extensions().items() if name in Image.OPEN]:
+            file_filter.add_pattern('*' + extension)
+        file_filter.set_name(_('Image Files'))
         self.view.set_default_filter(file_filter)
-
-        export_folder = ServiceLocator.get_settings().get_value('app_state', 'last_export_folder')
-        if export_folder == None or not os.path.exists(export_folder) or not os.path.isdir(export_folder):
-            export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
-        if export_folder != None:
-            self.view.set_initial_folder(Gio.File.new_for_path(export_folder))
-
-        self.view.set_initial_name(self.document.title + '.html')
 
     def dialog_process_response(self, dialog, result):
         try:
-            file = dialog.save_finish(result)
+            file = dialog.open_finish(result)
         except Exception: pass
         else:
             if file != None:
                 filename = file.get_path()
-                ServiceLocator.get_settings().set_value('app_state', 'last_export_folder', os.path.dirname(filename))
-
-                if not filename.endswith('.html'):
-                    filename += '.html'
-
-                with open(filename, 'w') as f:
-                    html = self.document.html.replace('<body>', '<body><h1>' + self.document.title + '</h1>')
-                    f.write(html)
-
-                data_dir = ServiceLocator.get_notes_folder()
-                for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:
-                    shutil.copy(os.path.join(data_dir, file), os.path.dirname(filename))
+                image = Image.open(filename)
+                self.document.add_command('insert_image', image)
 
 

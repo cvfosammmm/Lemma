@@ -58,7 +58,6 @@ class Document(Observable):
         self.clipping = Clipping(self)
         self.html_scanner = HTMLScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
-        self.update() # this will create an empty layout, ...
 
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)

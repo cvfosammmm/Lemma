@@ -21,7 +21,7 @@ from gi.repository import GLib, Gio
 
 import zipfile
 import html2text
-import os.path
+import os.path, os
 
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
 from lemma.infrastructure.service_locator import ServiceLocator
@@ -115,16 +115,20 @@ class Dialog(object):
         ServiceLocator.get_settings().set_value('app_state', 'last_bulk_export_folder', os.path.dirname(filename))
 
         with zipfile.ZipFile(filename, 'x') as file:
-            if self.current_values['format'] == 'html':
-                for document in self.current_values['documents']:
+            for document in self.current_values['documents']:
+
+                if self.current_values['format'] == 'html':
                     html = document.html.replace('<body>', '<body><h1>' + document.title + '</h1>')
                     file.writestr(str(document.id) + '.html', html)
 
-            if self.current_values['format'] == 'markdown':
-                for document in self.current_values['documents']:
+                if self.current_values['format'] == 'markdown':
                     markdown = '# ' + document.title + '\n'
                     markdown += html2text.html2text(document.html)
                     file.writestr(str(document.id) + '.md', markdown)
+
+                data_dir = ServiceLocator.get_notes_folder()
+                for include in [file for file in os.listdir(data_dir) if file.startswith(str(document.id) + '-')]:
+                    file.write(os.path.join(data_dir, include), arcname=include)
 
         self.view.close()
 

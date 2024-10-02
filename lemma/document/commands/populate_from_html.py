@@ -15,18 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import re, urllib.parse
+import re, urllib.parse, os.path
+from PIL import Image
 from html.parser import HTMLParser
+
 from lemma.document.ast.node import Node
 from lemma.document.ast.link import Link
 
 
 class Command(HTMLParser):
 
-    def __init__(self, html):
+    def __init__(self, html, path):
         HTMLParser.__init__(self)
 
         self.html = html
+        self.path = path
         self.is_undo_checkpoint = False
         self.update_implicit_x_position = True
 
@@ -73,6 +76,12 @@ class Command(HTMLParser):
                     self.link_target = urllib.parse.unquote_plus(value)
         if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             self.paragraph_style = tag
+        if tag == 'img':
+            for name, value in attrs:
+                if name == 'src':
+                    node = Node('image', Image.open(os.path.join(self.path, value)))
+                    node.paragraph_style = self.paragraph_style
+                    self.composite.append(node)
 
     def handle_endtag(self, tag):
         self.open_tags.pop()

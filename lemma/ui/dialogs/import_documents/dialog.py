@@ -131,7 +131,7 @@ class Dialog(object):
 
             markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
             html = mdi.render(markdown)
-            document.add_command('populate_from_html', html)
+            document.add_command('populate_from_html', html, os.path.dirname(path))
             document.command_processor.reset_undo_stack()
 
             self.workspace.add(document)

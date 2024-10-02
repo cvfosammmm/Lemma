@@ -29,7 +29,7 @@ class Command():
         x, y = document.cursor.get_insert_node().get_xy()
         if document.implicit_x_position != None:
             x = document.implicit_x_position
-        node = document.layout.get_node_at_xy(x, y + document.cursor.get_insert_node().box.parent.height * 1.5)
+        node = document.layout.get_node_at_xy(x, y + document.cursor.get_insert_node().box.parent.height + 1)
         document.cursor.move_insert_to_node(node)
         document.set_scroll_insert_on_screen_after_layout_update()
 

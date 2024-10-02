@@ -17,11 +17,12 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, GObject, Gdk, cairo, PangoCairo
+from gi.repository import Gtk, GObject, Gdk, PangoCairo
 
 from urllib.parse import urlparse
 import datetime
 import time
+import cairo
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
@@ -223,17 +224,16 @@ class DocumentViewPresenter():
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_x += child.width
 
+        if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
+            self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(fontname=self.fontname) + box.parent.height - FontManager.get_line_height(fontname=self.fontname), 1, FontManager.get_cursor_height(fontname=self.fontname))
+        if box.node == self.first_cursor_node:
+            self.current_node_in_selection = True
+        if box.node == self.last_cursor_node:
+            self.current_node_in_selection = False
+
         if box.type in ['glyph', 'empty']:
             self.update_fontname(box.node)
             self.update_fg_color(box.node)
-
-            if box.node == self.first_cursor_node:
-                self.current_node_in_selection = True
-            if box.node == self.last_cursor_node:
-                self.current_node_in_selection = False
-
-            if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
-                self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(fontname=self.fontname) + box.parent.height - FontManager.get_line_height(fontname=self.fontname), 1, FontManager.get_cursor_height(fontname=self.fontname))
 
         if box.type == 'glyph':
             if self.current_node_in_selection:
@@ -250,6 +250,15 @@ class DocumentViewPresenter():
                 Gdk.cairo_set_source_rgba(ctx, self.fg_color)
                 ctx.mask(pattern)
                 ctx.fill()
+
+        if box.type == 'image':
+            pil_img = box.node.value
+            pil_img.putalpha(256)
+            im_bytes = bytearray(pil_img.tobytes('raw', 'BGRa'))
+            surface = cairo.ImageSurface.create_for_data(im_bytes, cairo.FORMAT_ARGB32, box.width, box.height)
+            ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.top)
+            ctx.rectangle(offset_x + box.left, offset_y + box.top, box.width, box.height)
+            ctx.fill()
 
     def draw_cursor(self, ctx):
         if self.cursor_coords == None: return

@@ -60,6 +60,16 @@ class ToolBarView(Gtk.ActionBar):
         self.pack_start(box)
         self.pack_start(Gtk.Separator())
 
+        self.image_button = Gtk.Button.new_from_icon_name('insert-image-symbolic')
+        self.image_button.set_action_name('win.show-insert-image-dialog')
+        self.image_button.set_can_focus(False)
+        self.image_button.set_tooltip_text(_('Insert Image'))
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.image_button)
+        self.pack_start(box)
+        self.pack_start(Gtk.Separator())
+
         self.insert_link_button = Gtk.ToggleButton()
         self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
         self.insert_link_button.set_can_focus(False)

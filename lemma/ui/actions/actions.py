@@ -65,6 +65,8 @@ class Actions(object):
         self.add_simple_action('toggle-bold', self.toggle_bold)
         self.add_simple_action('toggle-italic', self.toggle_italic)
 
+        self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
+
         self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-symbols-sidebar', self.toggle_symbols_sidebar)
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
@@ -133,6 +135,7 @@ class Actions(object):
         self.actions['delete'].set_enabled(self.workspace.mode == 'documents' and has_selection)
         self.actions['select-all'].set_enabled(has_active_doc)
         self.actions['insert-link'].set_enabled(has_active_doc and insert_in_line)
+        self.actions['show-insert-image-dialog'].set_enabled(has_active_doc and insert_in_line)
         self.actions['remove-link'].set_enabled(has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
         self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
         self.actions['insert-symbol'].set_enabled(has_active_doc)
@@ -274,6 +277,9 @@ class Actions(object):
                 document.add_command('add_tag', tagname)
         else:
             self.application.document_view.set_tags_at_cursor(self.application.document_view.tags_at_cursor ^ {tagname})
+
+    def show_insert_image_dialog(self, action=None, parameter=''):
+        DialogLocator.get_dialog('insert_image').run(self.workspace.active_document)
 
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)

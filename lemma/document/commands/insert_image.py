@@ -15,28 +15,34 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.document.ast.node import Node
+
 
 class Command():
 
-    def __init__(self):
-        self.is_undo_checkpoint = False
-        self.update_implicit_x_position = False
+    def __init__(self, pil_image):
+        self.image = pil_image
+        self.is_undo_checkpoint = True
+        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
+        self.state['nodes_added'] = []
 
-        x, y = document.cursor.get_insert_node().get_xy()
-        if document.implicit_x_position != None:
-            x = document.implicit_x_position
-        if y == 0:
-            document.cursor.move_insert_to_node(document.layout.get_node_at_xy(0, 0))
-        else:
-            document.cursor.move_insert_to_node(document.layout.get_node_at_xy(x, y - 1))
+        insert = document.cursor.get_insert_node()
+        node = Node('image', self.image)
+        node.paragraph_style = insert.paragraph_style
+        insert.parent.insert_before(insert, node)
+        self.state['nodes_added'].append(node)
 
+        self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
+        for node in self.state['nodes_added']:
+            document.ast.delete_node(node)
         document.cursor.set_state(self.state['cursor_state_before'])
+        document.set_scroll_insert_on_screen_after_layout_update()
 
 

@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.infrastructure.font_manager import FontManager
-
 
 class Box(object):
 
@@ -101,11 +99,11 @@ class Box(object):
 
             for child in self.children:
                 current_child = child
-                if current_height + child.height + FontManager.get_descend() + FontManager.get_line_space() / 2 <= y:
+                if current_height + child.height <= y:
                     current_height += child.height
                 else:
                     break
-            return (current_child, 0, current_height + FontManager.get_descend() + FontManager.get_line_space() / 2)
+            return (current_child, 0, current_height)
 
         else:
             current_child, current_width = (None, 0)

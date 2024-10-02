@@ -16,16 +16,27 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import urllib.parse
+import os, os.path
+
+from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.db.file_format_db import FileFormatDB
 
 
 class HTMLScanner(object):
 
     def __init__(self, document):
         self.document = document
+        self.pathname = ServiceLocator.get_notes_folder()
 
+        self.file_no = 0
         self.html = ''
 
     def update(self):
+        data_dir = ServiceLocator.get_notes_folder()
+        for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:
+            os.remove(os.path.join(data_dir, file))
+        self.file_no = 0
+
         self.html = '<html>'
 
         self.html += '<head>'
@@ -101,7 +112,12 @@ class HTMLScanner(object):
             self.html += '<math>'
             self.html += node.value
             self.html += '</math>'
-        else:
+        elif node.type in ['char', 'mathsymbol']:
             self.html += node.value
+        elif node.type == 'image':
+            filename = str(self.document.id) + '-' + str(self.file_no) + FileFormatDB.get_ending_from_format_name(node.value.format)
+            node.value.save(os.path.join(self.pathname, filename))
+            self.file_no += 1
+            self.html += '<img src="' + filename + '" />'
 
 

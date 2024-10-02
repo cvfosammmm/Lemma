@@ -122,6 +122,13 @@ class Layouter(object):
                 node.set_box(box)
                 self.current_line_box.add(box)
 
+        elif node.type == 'image':
+            width, height, left, top = node.value.width, node.value.height, 0, 0
+            box = Box('image', width=width, height=height, left=left, top=top, node=node)
+            node.set_box(box)
+
+            self.add_box(box)
+
     def add_box(self, box):
         if self.current_line_box.width + box.width > 670:
             self.break_line()

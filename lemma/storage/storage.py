@@ -38,7 +38,7 @@ class Storage(object):
 
                 with open(direntry.path, 'r') as file:
                     html = file.read()
-                document.add_command('populate_from_html', html)
+                document.add_command('populate_from_html', html, self.pathname)
                 document.command_processor.reset_undo_stack()
 
                 self.workspace.add(document)
