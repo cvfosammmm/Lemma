@@ -40,7 +40,7 @@ class FontManager():
         FontManager.fonts[name]['medspace'] = int(2 * face.size['metrics']['x_ppem'] / 9)
         FontManager.fonts[name]['thickspace'] = int(5 * face.size['metrics']['x_ppem'] / 18)
         FontManager.fonts[name]['line_height'] = line_height
-        FontManager.fonts[name]['cursor_offset'] = line_height - ascend
+        FontManager.fonts[name]['cursor_offset'] = descend
         FontManager.fonts[name]['cursor_height'] = ascend + descend
         FontManager.fonts[name]['line_space'] = (line_height - ascend - descend) / 2
         FontManager.fonts[name]['harfbuzz_font'] = harfbuzz.Font.ft_create(face)

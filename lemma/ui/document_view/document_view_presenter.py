@@ -225,7 +225,7 @@ class DocumentViewPresenter():
                 offset_x += child.width
 
         if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
-            self.cursor_coords = (offset_x, offset_y + FontManager.get_cursor_offset(fontname=self.fontname) + box.parent.height - FontManager.get_line_height(fontname=self.fontname), 1, FontManager.get_cursor_height(fontname=self.fontname))
+            self.cursor_coords = (offset_x, offset_y + box.parent.height - box.height, 1, box.height)
         if box.node == self.first_cursor_node:
             self.current_node_in_selection = True
         if box.node == self.last_cursor_node:
@@ -235,12 +235,13 @@ class DocumentViewPresenter():
             self.update_fontname(box.node)
             self.update_fg_color(box.node)
 
-        if box.type == 'glyph':
+        if box.type in ['glyph', 'image']:
             if self.current_node_in_selection:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-                ctx.rectangle(offset_x, offset_y + FontManager.get_cursor_offset(), box.width, box.parent.height)
+                ctx.rectangle(offset_x, offset_y, box.width, box.parent.height)
                 ctx.fill()
 
+        if box.type == 'glyph':
             surface = FontManager.get_surface(box.node.value, fontname=self.fontname)
 
             if surface != None:
@@ -255,7 +256,7 @@ class DocumentViewPresenter():
             pil_img = box.node.value
             pil_img.putalpha(256)
             im_bytes = bytearray(pil_img.tobytes('raw', 'BGRa'))
-            surface = cairo.ImageSurface.create_for_data(im_bytes, cairo.FORMAT_ARGB32, box.width, box.height)
+            surface = cairo.ImageSurface.create_for_data(im_bytes, cairo.FORMAT_ARGB32, box.node.value.width, box.node.value.height)
             ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.top)
             ctx.rectangle(offset_x + box.left, offset_y + box.top, box.width, box.height)
             ctx.fill()

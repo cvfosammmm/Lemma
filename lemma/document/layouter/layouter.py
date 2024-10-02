@@ -82,6 +82,7 @@ class Layouter(object):
 
         for node, extents in zip(node_list, FontManager.get_char_extents_multi(text, fontname=fontname)):
             width, height, left, top = extents
+            top -= FontManager.get_cursor_offset()
             total_width += width
             box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
             node.set_box(box)
@@ -103,6 +104,7 @@ class Layouter(object):
 
         elif node.type == 'mathsymbol':
             width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
+            top -= FontManager.get_cursor_offset()
             box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
             box.classes.add('math')
             node.set_box(box)
@@ -111,7 +113,8 @@ class Layouter(object):
 
         elif node.type == 'char' and node.is_whitespace():
             width, height, left, top = FontManager.get_char_extents_single(node.value)
-
+            top -= FontManager.get_cursor_offset()
+ 
             if self.current_line_box.width + width > 670:
                 box = Box('empty', node=node)
                 node.set_box(box)
@@ -124,6 +127,8 @@ class Layouter(object):
 
         elif node.type == 'image':
             width, height, left, top = node.value.width, node.value.height, 0, 0
+            height += 2 * FontManager.get_cursor_offset()
+            top += FontManager.get_cursor_offset()
             box = Box('image', width=width, height=height, left=left, top=top, node=node)
             node.set_box(box)
 
