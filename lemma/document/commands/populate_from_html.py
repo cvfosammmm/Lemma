@@ -79,7 +79,8 @@ class Command(HTMLParser):
         if tag == 'img':
             for name, value in attrs:
                 if name == 'src':
-                    node = Node('image', Image.open(os.path.join(self.path, value)))
+                    path = urllib.parse.unquote_plus(value)
+                    node = Node('image', Image.open(os.path.join(self.path, path)))
                     node.paragraph_style = self.paragraph_style
                     self.composite.append(node)
 

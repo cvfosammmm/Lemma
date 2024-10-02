@@ -66,12 +66,20 @@ class Dialog(object):
                 if not filename.endswith('.html'):
                     filename += '.html'
 
-                with open(filename, 'w') as f:
-                    html = self.document.html.replace('<body>', '<body><h1>' + self.document.title + '</h1>')
-                    f.write(html)
-
                 data_dir = ServiceLocator.get_notes_folder()
+                files_folder = filename[:-5] + '_files'
+                has_files = False
                 for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:
-                    shutil.copy(os.path.join(data_dir, file), os.path.dirname(filename))
+                    if not os.path.exists(files_folder):
+                        os.makedirs(files_folder)
+                    shutil.copy(os.path.join(data_dir, file), files_folder)
+                    has_files = True
+
+                html = self.document.html.replace('<body>', '<body><h1>' + self.document.title + '</h1>')
+                if has_files:
+                    html = html.replace('src="', 'src="' + os.path.basename(files_folder) + '/')
+
+                with open(filename, 'w') as f:
+                    f.write(html)
 
 

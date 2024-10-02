@@ -31,10 +31,11 @@ class Command():
         self.state['nodes_added'] = []
 
         insert = document.cursor.get_insert_node()
-        node = Node('image', self.image)
-        node.paragraph_style = insert.paragraph_style
-        insert.parent.insert_before(insert, node)
-        self.state['nodes_added'].append(node)
+        if insert.parent.is_root():
+            node = Node('image', self.image)
+            node.paragraph_style = insert.paragraph_style
+            insert.parent.insert_before(insert, node)
+            self.state['nodes_added'].append(node)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()

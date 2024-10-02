@@ -70,14 +70,20 @@ class Dialog(object):
                 if not filename.endswith('.md'):
                     filename += '.md'
 
+                data_dir = ServiceLocator.get_notes_folder()
+                files_folder = filename[:-3] + '_files'
+                has_files = False
+                for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:
+                    if not os.path.exists(files_folder):
+                        os.makedirs(files_folder)
+                    shutil.copy(os.path.join(data_dir, file), files_folder)
+                    has_files = True
+
                 markdown = '# ' + self.document.title + '\n'
                 markdown += html2text.html2text(self.document.html)
+                if has_files:
+                    markdown = markdown.replace('![](', '![](' + os.path.basename(files_folder) + '/')
 
                 with open(filename, 'w') as f:
                     f.write(markdown)
-
-                data_dir = ServiceLocator.get_notes_folder()
-                for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:
-                    shutil.copy(os.path.join(data_dir, file), os.path.dirname(filename))
-
 
