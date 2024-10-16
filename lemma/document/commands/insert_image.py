@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.node import Node
+from lemma.infrastructure.layout_info import LayoutInfo
 
 
 class Command():
@@ -32,7 +33,12 @@ class Command():
 
         insert = document.cursor.get_insert_node()
         if insert.parent.is_root():
-            node = Node('image', self.image)
+            image = {'pil_image': self.image, 'pil_image_display': self.image}
+            width = min(self.image.width, LayoutInfo.get_layout_width())
+            height = int((width / image['pil_image'].width) * image['pil_image'].height)
+            image['pil_image_display'] = image['pil_image'].resize((width, height))
+
+            node = Node('image', image)
             node.paragraph_style = insert.paragraph_style
             insert.parent.insert_before(insert, node)
             self.state['nodes_added'].append(node)

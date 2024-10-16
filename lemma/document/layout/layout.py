@@ -80,18 +80,27 @@ class Box(object):
             return node
 
     def get_link_at_xy(self, x, y):
-        if y > self.height or y < 0 or x > self.width or x < 0: return
+        box = self.get_leaf_at_xy(x, y)
 
+        if box != None:
+            return box.get_node().link
+        else:
+            return None
+
+    def get_leaf_at_xy(self, x, y):
         x_offset, y_offset = (0, 0)
         if not self.is_leaf():
+            if y > self.height or y < 0 or x > self.width or x < 0: return None
+
             box, x_offset, y_offset = self.get_child_at_xy(x, y)
             x -= x_offset
             y -= y_offset
-            return box.get_link_at_xy(x, y)
+            return box.get_leaf_at_xy(x, y)
 
         else:
-            node = self.get_node()
-            return node.link
+            if y > self.parent.height or y < self.parent.height - self.height or x > self.width or x < 0: return None
+
+            return self
 
     def get_child_at_xy(self, x, y):
         if self.is_vertical():

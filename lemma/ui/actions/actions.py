@@ -26,6 +26,7 @@ from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.db.character_db import CharacterDB
+from lemma.infrastructure.layout_info import LayoutInfo
 
 
 class Actions(object):
@@ -67,6 +68,9 @@ class Actions(object):
 
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
 
+        self.add_simple_action('image-shrink', self.image_shrink)
+        self.add_simple_action('image-enlarge', self.image_enlarge)
+
         self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-symbols-sidebar', self.toggle_symbols_sidebar)
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
@@ -105,6 +109,7 @@ class Actions(object):
     def update(self):
         document = self.workspace.active_document
         has_active_doc = (self.workspace.mode == 'documents' and document != None)
+        selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
 
         prev_doc = self.workspace.history.get_previous_if_any(document)
         next_doc = self.workspace.history.get_next_if_any(document)
@@ -115,7 +120,10 @@ class Actions(object):
         clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
-        links_inside_selection = has_active_doc and len([node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.link != None]) > 0
+        links_inside_selection = has_active_doc and len([node for node in selected_nodes if node.link != None]) > 0
+        image_selected = len(selected_nodes) == 1 and selected_nodes[0].type == 'image'
+        selected_image_is_max = image_selected and selected_nodes[0].value['pil_image_display'].width == LayoutInfo.get_layout_width()
+        selected_image_is_min = image_selected and selected_nodes[0].value['pil_image_display'].width == LayoutInfo.get_min_image_size()
         cursor_inside_link = has_active_doc and document.cursor.get_insert_node().is_inside_link()
 
         self.actions['add-document'].set_enabled(True)
@@ -136,6 +144,8 @@ class Actions(object):
         self.actions['select-all'].set_enabled(has_active_doc)
         self.actions['insert-link'].set_enabled(has_active_doc and insert_in_line)
         self.actions['show-insert-image-dialog'].set_enabled(has_active_doc and insert_in_line)
+        self.actions['image-shrink'].set_enabled(has_active_doc and image_selected and not selected_image_is_min)
+        self.actions['image-enlarge'].set_enabled(has_active_doc and image_selected and not selected_image_is_max)
         self.actions['remove-link'].set_enabled(has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
         self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
         self.actions['insert-symbol'].set_enabled(has_active_doc)
@@ -221,7 +231,7 @@ class Actions(object):
 
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
-            tags_at_cursor = self.application.document_view.tags_at_cursor
+            tags_at_cursor = self.application.cursor_state.tags_at_cursor
 
             if len(text) < 2000:
                 stext = text.strip()
@@ -249,7 +259,7 @@ class Actions(object):
         if CharacterDB.is_mathsymbol(character):
             document.add_composite_command(['delete_selection'], ['insert_symbol', name])
         else:
-            tags_at_cursor = self.application.document_view.tags_at_cursor
+            tags_at_cursor = self.application.cursor_state.tags_at_cursor
             document.add_composite_command(['delete_selection'], ['insert_text', character, None, tags_at_cursor])
 
     def set_paragraph_style(self, action=None, parameter=None):
@@ -276,10 +286,18 @@ class Actions(object):
             else:
                 document.add_command('add_tag', tagname)
         else:
-            self.application.document_view.set_tags_at_cursor(self.application.document_view.tags_at_cursor ^ {tagname})
+            self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {tagname})
 
     def show_insert_image_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_image').run(self.workspace.active_document)
+
+    def image_shrink(self, action=None, parameter=None):
+        value = self.main_window.toolbar.toolbar_image.scale.get_value()
+        self.workspace.active_document.add_command('scale_image', value - 1)
+
+    def image_enlarge(self, action=None, parameter=None):
+        value = self.main_window.toolbar.toolbar_image.scale.get_value()
+        self.workspace.active_document.add_command('scale_image', value + 1)
 
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)

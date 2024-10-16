@@ -115,9 +115,9 @@ class HTMLScanner(object):
         elif node.type in ['char', 'mathsymbol']:
             self.html += node.value
         elif node.type == 'image':
-            filename = str(self.document.id) + '-' + str(self.file_no) + FileFormatDB.get_ending_from_format_name(node.value.format)
-            node.value.save(os.path.join(self.pathname, filename))
+            filename = str(self.document.id) + '-' + str(self.file_no) + FileFormatDB.get_ending_from_format_name(node.value['pil_image'].format)
+            node.value['pil_image'].save(os.path.join(self.pathname, filename))
             self.file_no += 1
-            self.html += '<img src="' + filename + '" />'
+            self.html += '<img src="' + filename + '" width="' + str(node.value['pil_image_display'].width) + '" />'
 
 

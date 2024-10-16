@@ -50,7 +50,7 @@ class DocumentViewPresenter():
         self.update_size()
         self.update_scrolling_destination()
         self.update_scrollbars()
-        self.update_cursor()
+        self.update_pointer()
         self.view.content.queue_draw()
 
     def update_size(self):
@@ -94,7 +94,7 @@ class DocumentViewPresenter():
         GObject.timeout_add(1750, self.update_scrollbars)
         return False
 
-    def update_cursor(self):
+    def update_pointer(self):
         document = self.model.document
         if document == None:
             self.content.set_cursor_from_name('default')
@@ -109,9 +109,16 @@ class DocumentViewPresenter():
         if y < -self.view.subtitle_height:
             self.content.set_cursor_from_name('text')
         elif y > 0:
-            link = document.layout.get_link_at_xy(x, y)
-            if link != None:
-                self.content.set_cursor_from_name('pointer')
+            leaf_box = document.layout.get_leaf_at_xy(x, y)
+            if leaf_box != None:
+                node = leaf_box.get_node()
+                if node.link != None:
+                    self.content.set_cursor_from_name('pointer')
+                    link = node.link
+                elif node.type == 'image':
+                    self.content.set_cursor_from_name('default')
+                else:
+                    self.content.set_cursor_from_name('text')
             else:
                 self.content.set_cursor_from_name('text')
         else:
@@ -253,12 +260,12 @@ class DocumentViewPresenter():
                 ctx.fill()
 
         if box.type == 'image':
-            pil_img = box.node.value
+            pil_img = box.node.value['pil_image_display']
             pil_img.putalpha(256)
             im_bytes = bytearray(pil_img.tobytes('raw', 'BGRa'))
-            surface = cairo.ImageSurface.create_for_data(im_bytes, cairo.FORMAT_ARGB32, box.node.value.width, box.node.value.height)
-            ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.top)
-            ctx.rectangle(offset_x + box.left, offset_y + box.top, box.width, box.height)
+            surface = cairo.ImageSurface.create_for_data(im_bytes, cairo.FORMAT_ARGB32, pil_img.width, pil_img.height)
+            ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height - box.height + box.top)
+            ctx.rectangle(offset_x + box.left, offset_y + box.parent.height - box.height + box.top, box.width, box.height)
             ctx.fill()
 
     def draw_cursor(self, ctx):

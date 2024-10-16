@@ -99,6 +99,7 @@ class DocumentViewController():
 
         elif y > 0:
             link = document.layout.get_link_at_xy(x, y)
+            leaf_box = document.layout.get_leaf_at_xy(x, y)
 
             if n_press % 3 == 1:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
@@ -110,6 +111,8 @@ class DocumentViewController():
                 else:
                     if link != None:
                         self.model.selected_link_target = link.target
+                    elif leaf_box != None and leaf_box.node.type == 'image':
+                        document.add_command('focus_node', leaf_box.node)
                     else:
                         document.add_command('move_cursor_to_xy', x, y)
 
@@ -182,6 +185,8 @@ class DocumentViewController():
             gesture.reset()
 
     def on_drag_update(self, gesture, x, y, data=None):
+        if x == 0 and y == 0: return
+
         start_point = gesture.get_start_point()
         x, y = start_point.x + x, start_point.y + y
 
@@ -281,11 +286,12 @@ class DocumentViewController():
     def on_im_commit(self, im_context, text):
         if self.model.document == None: return False
         document = self.model.document
+        cursor_state = self.model.application.cursor_state
 
         if document.cursor.has_selection():
-            document.add_composite_command(['delete_selection'], ['insert_text', text, None, tags_at_cursor])
+            document.add_composite_command(['delete_selection'], ['insert_text', text, None, cursor_state.tags_at_cursor])
         else:
-            document.add_command('insert_text', text, None, self.model.tags_at_cursor)
+            document.add_command('insert_text', text, None, cursor_state.tags_at_cursor)
             if CharacterDB.is_whitespace(text):
                 self.replace_max_string_before_cursor(document)
 
@@ -301,10 +307,11 @@ class DocumentViewController():
 
         nodes = document.ast.get_subtree(first_node.get_position(), last_node.get_position())
         chars = ''.join([node.value for node in nodes])
+        cursor_state = self.model.application.cursor_state
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
                 if CharacterDB.has_replacement(chars[i:]):
-                    document.add_composite_command(['delete_range', nodes[i], last_node], ['left'], ['insert_text', CharacterDB.get_replacement(chars[i:]), None, self.model.tags_at_cursor], ['right'])
+                    document.add_composite_command(['delete_range', nodes[i], last_node], ['left'], ['insert_text', CharacterDB.get_replacement(chars[i:]), None, cursor_state.tags_at_cursor], ['right'])
 
                     return True
         return False

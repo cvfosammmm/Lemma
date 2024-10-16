@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.infrastructure.font_manager import FontManager
+from lemma.infrastructure.layout_info import LayoutInfo
 from lemma.document.layout.layout import Box
 import lemma.helpers.helpers as helpers
 
@@ -88,7 +89,7 @@ class Layouter(object):
             node.set_box(box)
             char_boxes.append(box)
 
-        if self.current_line_box.width > 0 and self.current_line_box.width + total_width > 670:
+        if self.current_line_box.width > 0 and self.current_line_box.width + total_width > LayoutInfo.get_layout_width():
             self.break_line()
 
         for i, box in enumerate(char_boxes):
@@ -118,7 +119,7 @@ class Layouter(object):
             width, height, left, top = FontManager.get_char_extents_single(node.value)
             top -= FontManager.get_cursor_offset()
  
-            if self.current_line_box.width + width > 670:
+            if self.current_line_box.width + width > LayoutInfo.get_layout_width():
                 box = Box('empty', width=0, height=height, left=left, top=top, node=node)
                 node.set_box(box)
                 self.current_line_box.add(box)
@@ -129,7 +130,7 @@ class Layouter(object):
                 self.current_line_box.add(box)
 
         elif node.type == 'image':
-            width, height, left, top = node.value.width, node.value.height, 0, 0
+            width, height, left, top = node.value['pil_image_display'].width, node.value['pil_image_display'].height, 0, 0
             height += 2 * FontManager.get_cursor_offset()
             top += FontManager.get_cursor_offset()
             box = Box('image', width=width, height=height, left=left, top=top, node=node)
@@ -138,7 +139,7 @@ class Layouter(object):
             self.add_box(box)
 
     def add_box(self, box):
-        if self.current_line_box.width + box.width > 670:
+        if self.current_line_box.width + box.width > LayoutInfo.get_layout_width():
             self.break_line()
         self.current_line_box.add(box)
 

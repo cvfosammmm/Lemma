@@ -164,6 +164,12 @@ paned.document-view separator.wide {
     background: @view_bg_color;
     box-shadow: none;
 }
+.toolbar separator {
+    margin: 0px 6px;
+}
+.toolbar label.status {
+    margin: 0px 10px;
+}
 
 /* tools sidebar */
 

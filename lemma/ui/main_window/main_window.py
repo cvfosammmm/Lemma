@@ -27,7 +27,7 @@ from lemma.ui.main_window.welcome_view import WelcomeView
 from lemma.ui.main_window.headerbar import HeaderBar
 from lemma.ui.main_window.document_history import DocumentHistoryView
 from lemma.ui.main_window.document_list_view import DocumentListView
-from lemma.ui.main_window.toolbar import ToolBarView
+from lemma.ui.main_window.toolbar import ToolBar
 from lemma.ui.main_window.sidebar import ToolsSidebar
 from lemma.ui.main_window.document_view_view import DocumentViewView
 from lemma.ui.main_window.document_draft import DocumentDraftView
@@ -50,7 +50,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.headerbar = HeaderBar()
         self.history_view = DocumentHistoryView()
         self.headerbar.hb_right.history_overlay.set_child(self.history_view)
-        self.toolbar = ToolBarView()
+        self.toolbar = ToolBar()
         self.document_list = DocumentListView()
 
         self.content_paned = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)

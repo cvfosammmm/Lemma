@@ -28,6 +28,8 @@ import lemma.ui.panels.panels as panels
 import lemma.ui.main_window.main_window as main_window
 import lemma.ui.document_history.document_history as document_history
 import lemma.ui.document_view.document_view as document_view
+import lemma.ui.cursor_state.cursor_state as cursor_state
+import lemma.ui.toolbar.toolbar as toolbar
 import lemma.ui.document_list.document_list as document_list
 import lemma.ui.document_draft.document_draft as document_draft
 import lemma.ui.actions.actions as actions
@@ -51,7 +53,9 @@ class Application(Adw.Application):
 
         self.colors = colors.Colors(self.workspace, self.main_window)
         self.document_history = document_history.DocumentHistory(self.workspace, self.main_window)
-        self.document_view = document_view.DocumentView(self.workspace, self.main_window)
+        self.document_view = document_view.DocumentView(self.workspace, self.main_window, self)
+        self.cursor_state = cursor_state.CursorState(self.workspace, self.main_window)
+        self.toolbar = toolbar.ToolBar(self.workspace, self.main_window)
         self.document_draft = document_draft.DocumentDraft(self.workspace, self.main_window)
         self.document_list = document_list.DocumentList(self.workspace, self.main_window)
         self.actions = actions.Actions(self.workspace, self.main_window, self)

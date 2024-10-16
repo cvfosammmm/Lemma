@@ -20,67 +20,27 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib
 
 from lemma.ui.popovers.popover_manager import PopoverManager
+from lemma.infrastructure.layout_info import LayoutInfo
 
 
-class ToolBarView(Gtk.ActionBar):
+class ToolBar(Gtk.ActionBar):
 
     def __init__(self):
         Gtk.ActionBar.__init__(self)
         self.add_css_class('toolbar')
 
-        self.paragraph_style_menu_button_label = Gtk.Label()
-        self.paragraph_style_menu_button_label.set_xalign(Gtk.Align.FILL)
+        self.mode_stack = Gtk.Stack()
+        self.pack_start(self.mode_stack)
 
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
-        box.append(self.paragraph_style_menu_button_label)
-        box.append(Gtk.Image.new_from_icon_name('pan-down-symbolic'))
+        self.toolbar_main = ToolBarMain()
+        self.mode_stack.add_named(self.toolbar_main, 'main')
 
-        self.paragraph_style_menu_button = PopoverManager.create_popover_button('paragraph_style')
-        self.paragraph_style_menu_button.set_child(box)
-        self.paragraph_style_menu_button.set_can_focus(False)
-        self.paragraph_style_menu_button.set_tooltip_text(_('Paragraph Style'))
-        self.paragraph_style_menu_button.add_css_class('flat')
-        self.paragraph_style_menu_button.set_action_name('win.show-paragraph-style-menu')
-        self.pack_start(self.paragraph_style_menu_button)
-        self.pack_start(Gtk.Separator())
+        self.toolbar_image = ToolBarImage()
+        self.mode_stack.add_named(self.toolbar_image, 'image')
 
-        self.bold_button = Gtk.Button.new_from_icon_name('bold-text-symbolic')
-        self.bold_button.set_action_name('win.toggle-bold')
-        self.bold_button.set_can_focus(False)
-        self.bold_button.set_tooltip_text(_('Bold') + ' (Ctrl+B)')
+        self.add_right_menu()
 
-        self.italic_button = Gtk.Button.new_from_icon_name('italic-text-symbolic')
-        self.italic_button.set_action_name('win.toggle-italic')
-        self.italic_button.set_can_focus(False)
-        self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.bold_button)
-        box.append(self.italic_button)
-        self.pack_start(box)
-        self.pack_start(Gtk.Separator())
-
-        self.image_button = Gtk.Button.new_from_icon_name('insert-image-symbolic')
-        self.image_button.set_action_name('win.show-insert-image-dialog')
-        self.image_button.set_can_focus(False)
-        self.image_button.set_tooltip_text(_('Insert Image'))
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.image_button)
-        self.pack_start(box)
-        self.pack_start(Gtk.Separator())
-
-        self.insert_link_button = Gtk.ToggleButton()
-        self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
-        self.insert_link_button.set_can_focus(False)
-        self.insert_link_button.add_css_class('flat')
-        self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
-        self.insert_link_button.set_action_name('win.insert-link')
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.insert_link_button)
-        self.pack_start(box)
-
+    def add_right_menu(self):
         self.symbols_sidebar_toggle = Gtk.ToggleButton()
         self.symbols_sidebar_toggle.set_tooltip_text(_('Symbols Sidebar') + ' (Alt+1)')
         self.symbols_sidebar_toggle.set_icon_name('insert-symbols-symbolic')
@@ -114,5 +74,101 @@ class ToolBarView(Gtk.ActionBar):
         box.append(self.redo_button)
         box.append(self.undo_button)
         self.pack_end(box)
+
+
+class ToolBarMain(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+
+        self.paragraph_style_menu_button_label = Gtk.Label()
+        self.paragraph_style_menu_button_label.set_xalign(Gtk.Align.FILL)
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+        box.append(self.paragraph_style_menu_button_label)
+        box.append(Gtk.Image.new_from_icon_name('pan-down-symbolic'))
+
+        self.paragraph_style_menu_button = PopoverManager.create_popover_button('paragraph_style')
+        self.paragraph_style_menu_button.set_child(box)
+        self.paragraph_style_menu_button.set_can_focus(False)
+        self.paragraph_style_menu_button.set_tooltip_text(_('Paragraph Style'))
+        self.paragraph_style_menu_button.add_css_class('flat')
+        self.paragraph_style_menu_button.set_action_name('win.show-paragraph-style-menu')
+        self.append(self.paragraph_style_menu_button)
+        self.append(Gtk.Separator())
+
+        self.bold_button = Gtk.Button.new_from_icon_name('bold-text-symbolic')
+        self.bold_button.set_action_name('win.toggle-bold')
+        self.bold_button.set_can_focus(False)
+        self.bold_button.set_tooltip_text(_('Bold') + ' (Ctrl+B)')
+
+        self.italic_button = Gtk.Button.new_from_icon_name('italic-text-symbolic')
+        self.italic_button.set_action_name('win.toggle-italic')
+        self.italic_button.set_can_focus(False)
+        self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.bold_button)
+        box.append(self.italic_button)
+        self.append(box)
+        self.append(Gtk.Separator())
+
+        self.image_button = Gtk.Button.new_from_icon_name('insert-image-symbolic')
+        self.image_button.set_action_name('win.show-insert-image-dialog')
+        self.image_button.set_can_focus(False)
+        self.image_button.set_tooltip_text(_('Insert Image'))
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.image_button)
+        self.append(box)
+        self.append(Gtk.Separator())
+
+        self.insert_link_button = Gtk.ToggleButton()
+        self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
+        self.insert_link_button.set_can_focus(False)
+        self.insert_link_button.add_css_class('flat')
+        self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
+        self.insert_link_button.set_action_name('win.insert-link')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.insert_link_button)
+        self.append(box)
+
+
+class ToolBarImage(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+
+        self.status_label = Gtk.Label.new('')
+        self.status_label.add_css_class('status')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.status_label)
+        self.append(box)
+        self.append(Gtk.Separator())
+
+        self.shrink_button = Gtk.Button.new_from_icon_name('value-decrease-symbolic')
+        self.shrink_button.set_action_name('win.image-shrink')
+        self.shrink_button.set_can_focus(False)
+        self.shrink_button.set_tooltip_text(_('Shrink'))
+
+        self.enlarge_button = Gtk.Button.new_from_icon_name('value-increase-symbolic')
+        self.enlarge_button.set_action_name('win.image-enlarge')
+        self.enlarge_button.set_can_focus(False)
+        self.enlarge_button.set_tooltip_text(_('Enlarge'))
+
+        self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, LayoutInfo.get_min_image_size(), LayoutInfo.get_layout_width(), 1)
+        self.scale.set_show_fill_level(False)
+        self.scale.set_can_focus(False)
+        self.scale.set_size_request(240, -1)
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.shrink_button)
+        box.append(self.scale)
+        box.append(self.enlarge_button)
+        self.append(box)
 
 
