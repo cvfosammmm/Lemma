@@ -170,6 +170,9 @@ paned.document-view separator.wide {
 .toolbar label.status {
     margin: 0px 10px;
 }
+.toolbar scale highlight {
+    background: none;
+}
 
 /* tools sidebar */
 

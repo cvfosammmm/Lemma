@@ -163,7 +163,7 @@ class ToolBarImage(Gtk.Box):
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, LayoutInfo.get_min_image_size(), LayoutInfo.get_layout_width(), 1)
         self.scale.set_show_fill_level(False)
         self.scale.set_can_focus(False)
-        self.scale.set_size_request(240, -1)
+        self.scale.set_size_request(218, -1)
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.shrink_button)
