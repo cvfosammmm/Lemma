@@ -39,13 +39,11 @@ class Command():
             height = int((self.width / image['pil_image'].width) * image['pil_image'].height)
             image['pil_image_display'] = image['pil_image'].resize((width, height))
             self.is_undo_checkpoint = True
-            document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
         if self.state['size_before'] != None:
             image = self.state['image']
             width, height = self.state['size_before']
             image['pil_image_display'] = image['pil_image'].resize((width, height))
-            document.set_scroll_insert_on_screen_after_layout_update()
 
 
