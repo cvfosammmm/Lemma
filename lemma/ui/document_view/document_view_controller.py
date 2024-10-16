@@ -269,6 +269,12 @@ class DocumentViewController():
                         document.add_command('newline')
                         self.replace_max_string_before_cursor(document)
 
+            case ('escape', _):
+                if document.cursor.has_selection():
+                    selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+                    if len(selected_nodes) == 1 and selected_nodes[0].type == 'image':
+                        document.add_command('right')
+
             case ('backspace', _):
                 if document.cursor.has_selection():
                     document.add_command('delete_selection')
