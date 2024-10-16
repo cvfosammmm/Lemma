@@ -173,6 +173,9 @@ paned.document-view separator.wide {
 .toolbar scale highlight {
     background: none;
 }
+.toolbar scale slider {
+    border-radius: 100px;
+}
 
 /* tools sidebar */
 
