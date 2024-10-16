@@ -56,6 +56,7 @@ class Actions(object):
         self.add_simple_action('paste', self.paste)
         self.add_simple_action('delete', self.delete_selection)
         self.add_simple_action('select-all', self.select_all)
+        self.add_simple_action('remove-selection', self.remove_selection)
 
         self.add_simple_action('insert-link', self.insert_link)
         self.add_simple_action('remove-link', self.remove_link)
@@ -142,6 +143,7 @@ class Actions(object):
         self.actions['paste'].set_enabled(has_active_doc and (text_in_clipboard or subtree_in_clipboard))
         self.actions['delete'].set_enabled(self.workspace.mode == 'documents' and has_selection)
         self.actions['select-all'].set_enabled(has_active_doc)
+        self.actions['remove-selection'].set_enabled(has_active_doc and has_selection)
         self.actions['insert-link'].set_enabled(has_active_doc and insert_in_line)
         self.actions['show-insert-image-dialog'].set_enabled(has_active_doc and insert_in_line)
         self.actions['image-shrink'].set_enabled(has_active_doc and image_selected and not selected_image_is_min)
@@ -250,6 +252,10 @@ class Actions(object):
 
     def select_all(self, action=None, parameter=''):
         self.workspace.active_document.add_command('select_all')
+
+    def remove_selection(self, action=None, parameter=''):
+        if self.workspace.active_document.cursor.has_selection():
+            self.workspace.active_document.add_command('right')
 
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return

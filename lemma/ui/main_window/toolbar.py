@@ -171,5 +171,15 @@ class ToolBarImage(Gtk.Box):
         box.append(self.scale)
         box.append(self.enlarge_button)
         self.append(box)
+        self.append(Gtk.Separator())
+
+        self.escape_button = Gtk.Button.new_from_icon_name('remove-selection-symbolic')
+        self.escape_button.set_action_name('win.remove-selection')
+        self.escape_button.set_can_focus(False)
+        self.escape_button.set_tooltip_text(_('Deselect Image (Esc)'))
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.escape_button)
+        self.append(box)
 
 
