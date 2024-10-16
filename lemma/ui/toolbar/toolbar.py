@@ -15,7 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk
+
 from lemma.helpers.observable import Observable
+from lemma.infrastructure.layout_info import LayoutInfo
 
 
 class ToolBar(Observable):
@@ -47,6 +52,11 @@ class ToolBar(Observable):
             self.toolbar.mode_stack.set_visible_child_name('image')
             self.toolbar.toolbar_image.status_label.set_text(image['pil_image'].format + _(' Image'))
             self.toolbar.toolbar_image.scale.set_value(image['pil_image_display'].width)
+            self.toolbar.toolbar_image.scale.clear_marks()
+
+            orig_width = image['pil_image'].width
+            if orig_width > LayoutInfo.get_min_image_size() and orig_width < LayoutInfo.get_layout_width():
+                self.toolbar.toolbar_image.scale.add_mark(orig_width, Gtk.PositionType.TOP)
         else:
             self.toolbar.mode_stack.set_visible_child_name('main')
 
