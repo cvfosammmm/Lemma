@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Pango
 
 from lemma.helpers.observable import Observable
 from lemma.infrastructure.layout_info import LayoutInfo
@@ -50,7 +50,18 @@ class ToolBar(Observable):
             image = selected_nodes[0].value
 
             self.toolbar.mode_stack.set_visible_child_name('image')
-            self.toolbar.toolbar_image.status_label.set_text(image['pil_image'].format + _(' Image'))
+
+            size_string = str(image['pil_image_display'].width) + ' × ' + str(image['pil_image_display'].height)
+            text = image['pil_image'].format + _(' Image') + ' (' + size_string + ')'
+            self.toolbar.toolbar_image.status_label.set_text(text)
+
+            max_width = LayoutInfo.get_layout_width()
+            max_height = int((max_width / image['pil_image'].width) * image['pil_image'].height)
+            max_digits = len(str(max_width)) + len(str(max_height))
+            layout = Pango.Layout(self.toolbar.toolbar_image.status_label.get_pango_context())
+            layout.set_text(image['pil_image'].format + _(' Image') + ' ( × ' + max_digits * '0' + ')')
+            self.toolbar.toolbar_image.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 20, -1)
+
             self.toolbar.toolbar_image.scale.set_value(image['pil_image_display'].width)
             self.toolbar.toolbar_image.scale.clear_marks()
 

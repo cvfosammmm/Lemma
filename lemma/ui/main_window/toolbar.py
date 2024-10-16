@@ -143,6 +143,7 @@ class ToolBarImage(Gtk.Box):
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
         self.status_label = Gtk.Label.new('')
+        self.status_label.set_xalign(0)
         self.status_label.add_css_class('status')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
