@@ -19,7 +19,6 @@ import urllib.parse
 import os, os.path
 
 from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.db.file_format_db import FileFormatDB
 
 
 class HTMLScanner(object):
@@ -115,9 +114,9 @@ class HTMLScanner(object):
         elif node.type in ['char', 'mathsymbol']:
             self.html += node.value
         elif node.type == 'image':
-            filename = str(self.document.id) + '-' + str(self.file_no) + FileFormatDB.get_ending_from_format_name(node.value['pil_image'].format)
-            node.value['pil_image'].save(os.path.join(self.pathname, filename))
+            filename = str(self.document.id) + '-' + str(self.file_no) + node.value.get_file_ending()
+            node.value.save_as(os.path.join(self.pathname, filename))
             self.file_no += 1
-            self.html += '<img src="' + filename + '" width="' + str(node.value['pil_image_display'].width) + '" />'
+            self.html += '<img src="' + filename + '" width="' + str(node.value.get_width()) + '" />'
 
 

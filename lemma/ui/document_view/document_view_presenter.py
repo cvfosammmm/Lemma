@@ -262,10 +262,7 @@ class DocumentViewPresenter():
                 ctx.fill()
 
         if box.type == 'image':
-            pil_img = box.node.value['pil_image_display']
-            pil_img.putalpha(256)
-            im_bytes = bytearray(pil_img.tobytes('raw', 'BGRa'))
-            surface = cairo.ImageSurface.create_for_data(im_bytes, cairo.FORMAT_ARGB32, pil_img.width, pil_img.height)
+            surface = box.node.value.get_cairo_surface()
             ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height - box.height + box.top)
             ctx.rectangle(offset_x + box.left, offset_y + box.parent.height - box.height + box.top, box.width, box.height)
             ctx.fill()

@@ -21,7 +21,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio, GLib
 
 import os.path
-from PIL import Image
+from PIL import Image as PIL_Image
 
 from lemma.infrastructure.service_locator import ServiceLocator
 
@@ -42,7 +42,7 @@ class Dialog(object):
         self.view.set_title(_('Insert Image'))
 
         file_filter = Gtk.FileFilter()
-        for extension, name in [(extension, name) for (extension, name) in Image.registered_extensions().items() if name in Image.OPEN]:
+        for extension, name in [(extension, name) for (extension, name) in PIL_Image.registered_extensions().items() if name in PIL_Image.OPEN]:
             file_filter.add_pattern('*' + extension)
         file_filter.set_name(_('Image Files'))
         self.view.set_default_filter(file_filter)
@@ -54,7 +54,6 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                image = Image.open(filename)
-                self.document.add_command('insert_image', image)
+                self.document.add_command('insert_image', filename)
 
 

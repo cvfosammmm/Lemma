@@ -16,10 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import re, urllib.parse, os.path
-from PIL import Image
 from html.parser import HTMLParser
 
 from lemma.document.ast.node import Node
+from lemma.document.widgets.image import Image
 from lemma.document.ast.link import Link
 from lemma.infrastructure.layout_info import LayoutInfo
 
@@ -81,20 +81,13 @@ class Command(HTMLParser):
             width = LayoutInfo.get_layout_width()
             for name, value in attrs:
                 if name == 'src':
-                    path = urllib.parse.unquote_plus(value)
+                    filename = urllib.parse.unquote_plus(value)
                 if name == 'width':
                     width = int(value)
 
-            try:
-                pil_image = Image.open(os.path.join(self.path, path))
-            except FileNotFoundError:
-                pass
+            try: image = Image(os.path.join(self.path, filename), width=width)
+            except FileNotFoundError: pass
             else:
-                image = {'pil_image': pil_image, 'pil_image_display': pil_image}
-                width = min(width, pil_image.width)
-                height = int((width / image['pil_image'].width) * image['pil_image'].height)
-                image['pil_image_display'] = image['pil_image'].resize((width, height))
-
                 node = Node('image', image)
                 node.paragraph_style = self.paragraph_style
                 self.composite.append(node)

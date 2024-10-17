@@ -123,8 +123,8 @@ class Actions(object):
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
         links_inside_selection = has_active_doc and len([node for node in selected_nodes if node.link != None]) > 0
         image_selected = len(selected_nodes) == 1 and selected_nodes[0].type == 'image'
-        selected_image_is_max = image_selected and selected_nodes[0].value['pil_image_display'].width == LayoutInfo.get_layout_width()
-        selected_image_is_min = image_selected and selected_nodes[0].value['pil_image_display'].width == LayoutInfo.get_min_image_size()
+        selected_image_is_max = image_selected and selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width()
+        selected_image_is_min = image_selected and selected_nodes[0].value.get_width() == LayoutInfo.get_min_image_size()
         cursor_inside_link = has_active_doc and document.cursor.get_insert_node().is_inside_link()
 
         self.actions['add-document'].set_enabled(True)

@@ -130,7 +130,7 @@ class Layouter(object):
                 self.current_line_box.add(box)
 
         elif node.type == 'image':
-            width, height, left, top = node.value['pil_image_display'].width, node.value['pil_image_display'].height, 0, 0
+            width, height, left, top = node.value.get_width(), node.value.get_height(), 0, 0
             height += 2 * FontManager.get_cursor_offset()
             top += FontManager.get_cursor_offset()
             box = Box('image', width=width, height=height, left=left, top=top, node=node)

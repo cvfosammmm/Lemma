@@ -27,23 +27,19 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['size_before'] = None
+        self.state['width_before'] = None
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         if len(selected_nodes) == 1 and selected_nodes[0].type == 'image':
             image = selected_nodes[0].value
-            self.state['size_before'] = (image['pil_image_display'].width, image['pil_image_display'].height)
+            self.state['width_before'] = image.get_width()
             self.state['image'] = image
-
-            width = self.width
-            height = int((self.width / image['pil_image'].width) * image['pil_image'].height)
-            image['pil_image_display'] = image['pil_image'].resize((width, height))
+            image.set_width(self.width)
             self.is_undo_checkpoint = True
 
     def undo(self, document):
-        if self.state['size_before'] != None:
+        if self.state['width_before'] != None:
             image = self.state['image']
-            width, height = self.state['size_before']
-            image['pil_image_display'] = image['pil_image'].resize((width, height))
+            image.set_width(self.state['width_before'])
 
 

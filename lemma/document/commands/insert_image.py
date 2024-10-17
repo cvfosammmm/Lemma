@@ -16,13 +16,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.node import Node
-from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.document.widgets.image import Image
 
 
 class Command():
 
-    def __init__(self, pil_image):
-        self.image = pil_image
+    def __init__(self, filename):
+        self.filename = filename
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.state = dict()
@@ -33,11 +33,7 @@ class Command():
 
         insert = document.cursor.get_insert_node()
         if insert.parent.is_root():
-            image = {'pil_image': self.image, 'pil_image_display': self.image}
-            width = min(self.image.width, LayoutInfo.get_layout_width())
-            height = int((width / image['pil_image'].width) * image['pil_image'].height)
-            image['pil_image_display'] = image['pil_image'].resize((width, height))
-
+            image = Image(self.filename)
             node = Node('image', image)
             node.paragraph_style = insert.paragraph_style
             insert.parent.insert_before(insert, node)
