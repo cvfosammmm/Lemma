@@ -261,9 +261,10 @@ class Actions(object):
         if parameter == None: return
 
         document = self.workspace.active_document
-        character = CharacterDB.get_unicode_from_latex_name(parameter[0])
+        name = parameter[0]
+        character = CharacterDB.get_unicode_from_latex_name(name)
         if CharacterDB.is_mathsymbol(character):
-            document.add_composite_command(['delete_selection'], ['insert_symbol', name])
+            document.add_composite_command(['delete_selection'], ['insert_symbol', character])
         else:
             tags_at_cursor = self.application.cursor_state.tags_at_cursor
             document.add_composite_command(['delete_selection'], ['insert_text', character, None, tags_at_cursor])
