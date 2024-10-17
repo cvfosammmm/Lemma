@@ -27,22 +27,26 @@ class Image(object):
 
     def __init__(self, filename, width=None):
         self.pil_image = PIL_Image.open(filename)
-        self.pil_image_display = self.pil_image
+        self.cairo_surface = None
 
         if width != None:
-            self.set_width(min(self.pil_image.width, width))
+            self.set_width(width)
         else:
             self.set_width(min(self.pil_image.width, LayoutInfo.get_layout_width()))
 
     def set_width(self, width):
         height = int((width / self.pil_image.width) * self.pil_image.height)
-        self.pil_image_display = self.pil_image.resize((width, height))
+        img = self.pil_image.resize((width, height))
+        if 'A' not in img.getbands():
+            img.putalpha(256)
+        img_bytes = bytearray(img.tobytes('raw', 'BGRa'))
+        self.cairo_surface = cairo.ImageSurface.create_for_data(img_bytes, cairo.FORMAT_ARGB32, img.width, img.height)
 
     def get_width(self):
-        return self.pil_image_display.width
+        return self.cairo_surface.get_width()
 
     def get_height(self):
-        return self.pil_image_display.height
+        return self.cairo_surface.get_height()
 
     def get_original_width(self):
         return self.pil_image.width
@@ -57,12 +61,17 @@ class Image(object):
         return FileFormatDB.get_ending_from_format_name(self.pil_image.format)
 
     def get_cairo_surface(self):
-        pil_img = self.pil_image_display
-        pil_img.putalpha(256)
-        im_bytes = bytearray(pil_img.tobytes('raw', 'BGRa'))
-        return cairo.ImageSurface.create_for_data(im_bytes, cairo.FORMAT_ARGB32, pil_img.width, pil_img.height)
+        return self.cairo_surface
 
     def save_as(self, filename):
         self.pil_image.save(filename)
+
+    # make this pickle
+    def __getstate__(self):
+        return {'pil_image': self.pil_image, 'width': self.get_width()}
+
+    def __setstate__(self, state):
+        self.pil_image = state['pil_image']
+        self.set_width(state['width'])
 
 
