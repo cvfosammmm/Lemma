@@ -182,7 +182,7 @@ class DocumentList(object):
                 teaser_text = '(' + _('empty') + ')'
                 teaser_color = sidebar_fg_2
             else:
-                teaser_text = ' '.join(document.plaintext.splitlines())[:100]
+                teaser_text = ' '.join(document.plaintext.splitlines())[:100].strip()
             date_text = document.get_last_modified_string()
 
             Gdk.cairo_set_source_rgba(ctx, title_color)
