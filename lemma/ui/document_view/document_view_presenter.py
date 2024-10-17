@@ -132,20 +132,22 @@ class DocumentViewPresenter():
     def scroll_insert_on_screen(self, animate=False):
         document = self.model.document
         insert_node = document.cursor.get_insert_node()
-        self.update_fontname(insert_node)
         insert_position = insert_node.get_xy()
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
-        insert_y = insert_position[1] + content_offset + FontManager.get_cursor_offset(self.fontname)
-        insert_height = FontManager.get_cursor_height(self.fontname)
+        insert_y = insert_position[1] + content_offset
+        insert_height = insert_node.box.parent.height
         window_height = self.model.height
         scrolling_offset_y = document.clipping.offset_y
 
         if window_height <= 0: return
 
-        if insert_y == content_offset + FontManager.get_cursor_offset(self.fontname):
+        if insert_y == content_offset:
             self.scroll_to_position((0, 0), animate)
         elif insert_y < scrolling_offset_y:
-            self.scroll_to_position((0, insert_y), animate)
+            if insert_height > window_height:
+                self.scroll_to_position((0, insert_y - window_height + insert_height), animate)
+            else:
+                self.scroll_to_position((0, insert_y), animate)
         elif insert_position[1] == self.model.document.layout.height - self.model.document.layout.children[-1].height:
             self.scroll_to_position((0, self.model.document.layout.height + content_offset + self.view.padding_bottom - window_height), animate)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
