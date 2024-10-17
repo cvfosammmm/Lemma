@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="22" date="2024-10-17">
+            <description translatable="no">
+                <p>Images in documents, ...</p>
+            </description>
+        </release>
         ​<release version="21" date="2024-9-20">
             <description translatable="no">
                 <p>Quotes and dashes input helpers, bulk export dialog, ...</p>
