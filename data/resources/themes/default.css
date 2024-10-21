@@ -64,9 +64,9 @@
 @define-color sidebar_fg_2 #fff7;
 @define-color sidebar_fg_3 #fffc;
 @define-color sidebar_active_fg #fffc;
-@define-color sidebar_active_bg #000;
-@define-color sidebar_hover #00000033;
-@define-color sidebar_selection #00000066;
+@define-color sidebar_active_bg #222;
+@define-color sidebar_hover #3a3a3a;
+@define-color sidebar_selection #414141;
 
 /* Paneds */
 @define-color headerpaned_border_1 #666;
