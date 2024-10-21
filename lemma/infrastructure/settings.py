@@ -54,6 +54,8 @@ class Settings(Observable):
         self.defaults['window_state']['sidebar_position'] = 250
         self.defaults['window_state']['show_tools_sidebar'] = False
         self.defaults['window_state']['tools_sidebar_position'] = -1
+        self.defaults['window_state']['show_backlinks'] = False
+        self.defaults['window_state']['navbar_paned_position'] = -1
 
         self.defaults['app_state'] = dict()
         self.defaults['app_state']['last_export_folder'] = None

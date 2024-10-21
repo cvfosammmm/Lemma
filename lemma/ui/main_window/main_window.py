@@ -27,9 +27,11 @@ from lemma.ui.main_window.welcome_view import WelcomeView
 from lemma.ui.main_window.headerbar import HeaderBar
 from lemma.ui.main_window.document_history import DocumentHistoryView
 from lemma.ui.main_window.document_list_view import DocumentListView
+from lemma.ui.main_window.backlinks import BacklinksView
 from lemma.ui.main_window.toolbar import ToolBar
-from lemma.ui.main_window.sidebar import ToolsSidebar
-from lemma.ui.main_window.document_view_view import DocumentViewView
+from lemma.ui.main_window.tools_sidebar import ToolsSidebar
+from lemma.ui.main_window.document_view import DocumentView
+from lemma.ui.main_window.navigation_sidebar import NavigationSidebar
 from lemma.ui.main_window.document_draft import DocumentDraftView
 from lemma.ui.title_widget.title_widget import TitleWidget
 from lemma.ui.helpers.animated_paned import AnimatedHPaned
@@ -51,7 +53,10 @@ class MainWindow(Adw.ApplicationWindow):
         self.history_view = DocumentHistoryView()
         self.headerbar.hb_right.history_overlay.set_child(self.history_view)
         self.toolbar = ToolBar()
+
         self.document_list = DocumentListView()
+        self.backlinks = BacklinksView()
+        self.navigation_sidebar = NavigationSidebar(self.document_list, self.backlinks)
 
         self.content_paned = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
         self.content_paned.add_css_class('content')
@@ -59,7 +64,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.headerbar.bind_property('position', self.content_paned, 'position', GObject.BindingFlags.BIDIRECTIONAL)
 
         self.welcome = WelcomeView()
-        self.document_view = DocumentViewView()
+        self.document_view = DocumentView()
         self.tools_sidebar = ToolsSidebar()
         self.draft_view = DocumentDraftView()
 
@@ -77,7 +82,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.content_with_toolbar.append(self.document_view_paned)
         self.content_with_toolbar.append(self.toolbar)
 
-        self.content_paned.set_start_child(self.document_list)
+        self.content_paned.set_start_child(self.navigation_sidebar)
         self.content_paned.set_resize_start_child(False)
         self.content_paned.set_shrink_start_child(False)
 

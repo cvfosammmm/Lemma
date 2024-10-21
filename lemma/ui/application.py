@@ -32,6 +32,7 @@ import lemma.ui.cursor_state.cursor_state as cursor_state
 import lemma.ui.toolbar.toolbar as toolbar
 import lemma.ui.document_list.document_list as document_list
 import lemma.ui.document_draft.document_draft as document_draft
+import lemma.ui.backlinks.backlinks as backlinks
 import lemma.ui.actions.actions as actions
 import lemma.ui.keyboard_shortcuts.shortcuts as shortcuts
 
@@ -58,6 +59,7 @@ class Application(Adw.Application):
         self.toolbar = toolbar.ToolBar(self.workspace, self.main_window)
         self.document_draft = document_draft.DocumentDraft(self.workspace, self.main_window)
         self.document_list = document_list.DocumentList(self.workspace, self.main_window)
+        self.backlinks = backlinks.Backlinks(self.workspace, self.main_window, self)
         self.actions = actions.Actions(self.workspace, self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.panels = panels.Panels(self.workspace, self.main_window, self)

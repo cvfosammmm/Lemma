@@ -23,7 +23,7 @@ from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.helpers.context_menu import ContextMenu
 
 
-class DocumentViewView(Gtk.Overlay):
+class DocumentView(Gtk.Overlay):
 
     def __init__(self):
         Gtk.Overlay.__init__(self)

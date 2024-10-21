@@ -30,8 +30,14 @@ class Panels(object):
 
         self.app.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)
-        self.main_window.toolbar.symbols_sidebar_toggle.set_active(ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar'))
+
+        toggle_state = ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar')
+        self.main_window.toolbar.symbols_sidebar_toggle.set_active(toggle_state)
         self.main_window.toolbar.symbols_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+
+        toggle_state = ServiceLocator.get_settings().get_value('window_state', 'show_backlinks')
+        self.main_window.navigation_sidebar.backlinks_toggle.set_active(toggle_state)
+        self.main_window.navigation_sidebar.backlinks_toggle.connect('toggled', self.on_backlinks_toggle_toggled)
 
         self.restore_window_state()
 
@@ -53,6 +59,10 @@ class Panels(object):
     def on_tools_sidebar_toggle_toggled(self, toggle_button, parameter=None):
         self.main_window.document_view_paned.set_show_widget(toggle_button.get_active())
         self.main_window.document_view_paned.animate(True)
+
+    def on_backlinks_toggle_toggled(self, toggle_button, parameter=None):
+        self.main_window.navigation_sidebar.paned.set_show_widget(toggle_button.get_active())
+        self.main_window.navigation_sidebar.paned.animate(True)
 
     def on_window_close(self, window=None, parameter=None):
         self.save_quit()
@@ -82,6 +92,14 @@ class Panels(object):
         self.main_window.document_view_paned.first_set_show_widget(show_tools_sidebar)
         self.main_window.document_view_paned.set_target_position(tools_sidebar_position)
 
+        show_backlinks = self.settings.get_value('window_state', 'show_backlinks')
+        navbar_paned_position = self.settings.get_value('window_state', 'navbar_paned_position')
+
+        if navbar_paned_position in [None, -1]: self.main_window.navigation_sidebar.paned.set_end_on_first_show()
+
+        self.main_window.navigation_sidebar.paned.first_set_show_widget(show_backlinks)
+        self.main_window.navigation_sidebar.paned.set_target_position(navbar_paned_position)
+
     def save_window_state(self):
         self.settings.set_value('window_state', 'width', self.main_window.get_property('default-width'))
         self.settings.set_value('window_state', 'height', self.main_window.get_property('default-height'))
@@ -89,6 +107,8 @@ class Panels(object):
         self.settings.set_value('window_state', 'sidebar_position', self.main_window.headerbar.get_property('position'))
         self.settings.set_value('window_state', 'show_tools_sidebar', self.main_window.document_view_paned.show_widget)
         self.settings.set_value('window_state', 'tools_sidebar_position', self.main_window.document_view_paned.target_position)
+        self.settings.set_value('window_state', 'show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
+        self.settings.set_value('window_state', 'navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)
         self.settings.pickle()
 
 
