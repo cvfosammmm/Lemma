@@ -115,7 +115,7 @@ class Dialog(object):
 
     def is_match(self, document):
         if len(self.search_terms) == 0: return True
-        return min(map(lambda x: x in document.title, self.search_terms))
+        return min(map(lambda x: x.lower() in document.title.lower(), self.search_terms))
 
     def on_cancel_button_clicked(self, button):
         self.view.close()
