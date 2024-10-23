@@ -60,6 +60,4 @@ storage.populate_workspace()
 storage.init_writer()
 
 view = application.Application(workspace)
-
-exit_status = view.run(sys.argv)
-sys.exit(exit_status)
+view.run(sys.argv)
