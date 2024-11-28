@@ -293,10 +293,7 @@ class Node():
         return node
 
     def __str__(self):
-        string = self.type + ':' + str(self.value) + '\n  '
-        #for node in self:
-        #    string += node.__str__()
-
+        string = self.type + ':' + str(self.value)
         return string
 
 
