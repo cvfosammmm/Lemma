@@ -6,7 +6,7 @@ Note-taking app for the GNU/Linux desktop, written in Python with Gtk.
 
 Website: <a href="https://www.cvfosammmm.org/lemma/">https://www.cvfosammmm.org/lemma/</a>
 
-<a href="https://flathub.org/apps/org.cvfosammmm.Lemma"><img src="https://dl.flathub.org/assets/badges/flathub-badge-en.png" width="150" height="50" alt="Download on Flathub"></a>
+<a href="https://flathub.org/apps/org.cvfosammmm.Lemma"><img src="https://flathub.org/api/badge?svg&locale=en" width="150" height="50" alt="Download on Flathub"></a>
 
 ![Screenshot](https://github.com/cvfosammmm/Lemma/raw/master/data/screenshot.png)
 
