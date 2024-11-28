@@ -122,7 +122,7 @@ class Actions(object):
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
         links_inside_selection = has_active_doc and len([node for node in selected_nodes if node.link != None]) > 0
-        image_selected = len(selected_nodes) == 1 and selected_nodes[0].type == 'image'
+        image_selected = len(selected_nodes) == 1 and selected_nodes[0].type.is_image()
         selected_image_is_max = image_selected and selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width()
         selected_image_is_min = image_selected and selected_nodes[0].value.get_width() == LayoutInfo.get_min_image_size()
         cursor_inside_link = has_active_doc and document.cursor.get_insert_node().is_inside_link()
@@ -212,7 +212,7 @@ class Actions(object):
         ast = self.workspace.active_document.ast
         cursor = self.workspace.active_document.cursor
         subtree = ast.get_subtree(*cursor.get_state())
-        chars = ''.join([node.value for node in subtree if node.is_char()])
+        chars = ''.join([node.value for node in subtree if node.type.is_char()])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
         cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(pickle.dumps(subtree)))
@@ -282,7 +282,7 @@ class Actions(object):
     def toggle_tag(self, tagname):
         document = self.workspace.active_document
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type.is_char()]
         all_tagged = True
         for node in char_nodes:
             if tagname not in node.tags: all_tagged = False
@@ -300,11 +300,11 @@ class Actions(object):
 
     def image_shrink(self, action=None, parameter=None):
         value = self.main_window.toolbar.toolbar_image.scale.get_value()
-        self.workspace.active_document.add_command('scale_image', value - 1)
+        self.workspace.active_document.add_command('resize_widget', value - 1)
 
     def image_enlarge(self, action=None, parameter=None):
         value = self.main_window.toolbar.toolbar_image.scale.get_value()
-        self.workspace.active_document.add_command('scale_image', value + 1)
+        self.workspace.active_document.add_command('resize_widget', value + 1)
 
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)

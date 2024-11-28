@@ -46,7 +46,7 @@ class ToolBar(Observable):
         if self.workspace.mode != 'documents' or document == None: return
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-        if len(selected_nodes) == 1 and selected_nodes[0].type == 'image':
+        if len(selected_nodes) == 1 and selected_nodes[0].type.is_image():
             image = selected_nodes[0].value
 
             self.toolbar.mode_stack.set_visible_child_name('image')
@@ -72,7 +72,7 @@ class ToolBar(Observable):
             self.toolbar.mode_stack.set_visible_child_name('main')
 
     def on_image_scale_change_value(self, scale, scroll, value):
-        self.workspace.active_document.add_command('scale_image', value)
+        self.workspace.active_document.add_command('resize_widget', value)
         return True
 
 

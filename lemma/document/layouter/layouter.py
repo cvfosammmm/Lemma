@@ -58,7 +58,7 @@ class Layouter(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].type == 'char' and not node_list[0].is_whitespace():
+        if node_list[0].type.is_char() and not node_list[0].is_whitespace():
             self.process_word(node_list)
         else:
             for node in node_list:
@@ -96,7 +96,7 @@ class Layouter(object):
             self.add_box(box)
 
     def process_node(self, node):
-        if node.is_eol():
+        if node.type.is_eol():
             width, height, left, top = FontManager.get_char_extents_single('\n')
             top -= FontManager.get_cursor_offset()
 
@@ -106,7 +106,7 @@ class Layouter(object):
             self.add_box(box)
             self.break_line()
 
-        elif node.type == 'mathsymbol':
+        elif node.type.is_mathsymbol():
             width, height, left, top = FontManager.get_char_extents_single(node.value, fontname='math')
             top -= FontManager.get_cursor_offset()
             box = Box('glyph', width=width, height=height, left=left, top=top, node=node)
@@ -115,7 +115,7 @@ class Layouter(object):
 
             self.add_box(box)
 
-        elif node.type == 'char' and node.is_whitespace():
+        elif node.type.is_char() and node.is_whitespace():
             width, height, left, top = FontManager.get_char_extents_single(node.value)
             top -= FontManager.get_cursor_offset()
  
@@ -129,7 +129,7 @@ class Layouter(object):
                 node.set_box(box)
                 self.current_line_box.add(box)
 
-        elif node.type == 'image':
+        elif node.type.is_image():
             width, height, left, top = node.value.get_width(), node.value.get_height(), 0, 0
             height += 2 * FontManager.get_cursor_offset()
             top += FontManager.get_cursor_offset()

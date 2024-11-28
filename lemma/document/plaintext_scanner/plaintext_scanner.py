@@ -32,10 +32,10 @@ class PlaintextScanner(object):
         self.document.plaintext = self.text
 
     def process_node(self, node):
-        if node.is_eol():
+        if node.type.is_eol():
             self.text += '\n'
 
-        elif node.type == 'char':
+        elif node.type.is_char():
             if node.is_whitespace():
                 if self.text == '' or self.text[-1] != ' ':
                     self.text += ' '

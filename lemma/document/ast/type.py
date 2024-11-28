@@ -16,25 +16,21 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class Command():
+class Type():
 
-    def __init__(self, tag_name):
-        self.tag_name = tag_name
-        self.is_undo_checkpoint = True
-        self.update_implicit_x_position = False
-        self.state = dict()
+    def __init__(self, type_str):
+        self.type_str = type_str
 
-    def run(self, document):
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type.is_char()]
+    def is_eol(self): return self.type_str == 'EOL'
+    def is_mathsymbol(self): return self.type_str == 'mathsymbol'
+    def is_image(self): return self.type_str == 'image'
+    def is_char(self): return self.type_str == 'char'
 
-        self.state['affected_nodes'] = list()
-        for node in char_nodes:
-            if self.tag_name in node.tags:
-                self.state['affected_nodes'].append(node)
-                node.tags.remove(self.tag_name)
+    def is_resizable(self): return self.type_str == 'image'
 
-    def undo(self, document):
-        for node in self.state['affected_nodes']:
-            node.tags.add(self.tag_name)
+    def to_str(self):
+        return self.type_str
+
+    def __eq__(self, other): return isinstance(other, Type) and self.type_str == other.type_str
 
 

@@ -16,15 +16,16 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.position import Position
+from lemma.document.ast.type import Type
 from lemma.db.character_db import CharacterDB
 
 
 class Node():
 
-    def __init__(self, node_type, value=None):
+    def __init__(self, type_str, value=None):
         self.parent = None
         self.children = []
-        self.type = node_type
+        self.type = Type(type_str)
         self.value = value
         self.box = None
         self.tags = set()
@@ -90,7 +91,7 @@ class Node():
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            node = Node(self.type, self.value)
+            node = Node(self.type.to_str(), self.value)
             node.tags = self.tags
             node.link = self.link
             node.children = self.children.__getitem__(key)
@@ -111,23 +112,19 @@ class Node():
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
-    def is_mathsymbol(self): return self.type == 'mathsymbol'
-    def is_char(self): return self.type == 'char'
-    def is_eol(self): return self.type == 'EOL'
-    def is_eolist(self): return self.type == 'EOList'
-    def is_whitespace(self): return self.is_eol() or (self.is_char() and CharacterDB.is_whitespace(self.value))
+    def is_whitespace(self): return self.type.is_eol() or (self.type.is_char() and CharacterDB.is_whitespace(self.value))
 
     def is_first_in_line(self):
         if not self.parent.is_root(): return False
         if self.is_first_in_parent(): return True
-        if self.prev_in_parent().is_eol(): return True
+        if self.prev_in_parent().type.is_eol(): return True
 
         return False
 
     def is_last_in_line(self):
         if not self.parent.is_root(): return False
         if self.is_last_in_parent(): return True
-        if self.is_eol(): return True
+        if self.type.is_eol(): return True
 
         return False
 
@@ -293,7 +290,7 @@ class Node():
         return node
 
     def __str__(self):
-        string = self.type + ':' + str(self.value)
+        string = self.type.to_str() + ':' + str(self.value)
         return string
 
 

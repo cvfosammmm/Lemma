@@ -115,7 +115,7 @@ class DocumentViewPresenter():
                 if node.link != None:
                     self.content.set_cursor_from_name('pointer')
                     link = node.link
-                elif node.type == 'image':
+                elif node.type.is_image():
                     self.content.set_cursor_from_name('default')
                 else:
                     self.content.set_cursor_from_name('text')
@@ -276,7 +276,7 @@ class DocumentViewPresenter():
         ctx.fill()
 
     def update_fontname(self, node):
-        if node.is_mathsymbol():
+        if node.type.is_mathsymbol():
             self.fontname = 'math'
         elif node.paragraph_style.startswith('h'):
             self.fontname = node.paragraph_style
@@ -290,7 +290,7 @@ class DocumentViewPresenter():
             self.fontname = 'book'
 
     def update_fg_color(self, node):
-        if node.is_mathsymbol():
+        if node.type.is_mathsymbol():
             self.fg_color = ColorManager.get_ui_color('math')
         elif node.link != None:
             if urlparse(node.link.target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link.target) != None:

@@ -61,7 +61,7 @@ class HTMLScanner(object):
         result.append(list())
         for node in root_node:
             result[-1].append(node)
-            if node.is_eol():
+            if node.type.is_eol():
                 result.append(list())
         result.pop()
 
@@ -83,7 +83,7 @@ class HTMLScanner(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].type == 'char' and not node_list[0].is_whitespace():
+        if node_list[0].type.is_char() and not node_list[0].is_whitespace():
             self.process_word(node_list)
         else:
             for node in node_list:
@@ -107,13 +107,13 @@ class HTMLScanner(object):
         self.html += text
 
     def process_node(self, node):
-        if node.type == 'mathsymbol':
+        if node.type.is_mathsymbol():
             self.html += '<math>'
             self.html += node.value
             self.html += '</math>'
-        elif node.type in ['char', 'mathsymbol']:
+        elif node.type.is_char():
             self.html += node.value
-        elif node.type == 'image':
+        elif node.type.is_image():
             filename = str(self.document.id) + '-' + str(self.file_no) + node.value.get_file_ending()
             node.value.save_as(os.path.join(self.pathname, filename))
             self.file_no += 1

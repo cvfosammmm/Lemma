@@ -33,7 +33,7 @@ class Command():
         self.state['nodes_added'] = []
 
         document.cursor.set_state(self.positions)
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type.is_char()]
         prev_links = []
         for node in char_nodes:
             prev_links.append(node.link)
