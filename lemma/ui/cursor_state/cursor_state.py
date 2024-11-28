@@ -57,7 +57,7 @@ class CursorState(Observable):
         if self.document == None:
             self.set_tags_at_cursor(set())
         else:
-            node = self.document.ast.root.get_node_at_position(self.document.cursor.get_first_cursor_pos())
+            node = self.document.ast.get_node_at_position(self.document.cursor.get_first_cursor_pos())
             node = node.prev_in_parent()
             if node == None:
                 self.set_tags_at_cursor(set())
@@ -93,7 +93,7 @@ class CursorState(Observable):
         document = self.workspace.active_document
         if self.workspace.mode != 'documents' or document == None: return
 
-        current_node = document.ast.root.get_node_at_position(document.cursor.get_first_cursor_pos())
+        current_node = document.ast.get_node_at_position(document.cursor.get_first_cursor_pos())
         paragraph_style_at_cursor = current_node.paragraph_style
 
         labels_dict = {'p': _('Paragraph'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6')}

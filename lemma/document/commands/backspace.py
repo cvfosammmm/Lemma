@@ -31,7 +31,7 @@ class Command():
         if not node.is_first_in_parent() or len(node.parent) == 1:
             document.cursor.move_insert_left_with_selection()
             first_node, last_node = document.cursor.get_first_node(), document.cursor.get_last_node()
-            self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
+            self.state['deleted_nodes'] = first_node.parent.remove_range(first_node, last_node)
             document.cursor.move_insert_to_node(last_node)
 
         self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)

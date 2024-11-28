@@ -56,6 +56,17 @@ class Node():
         self.children.remove(node)
         node.set_parent(None)
 
+    def remove_range(self, first_node, last_node):
+        index_1 = self.index(first_node)
+        index_2 = self.index(last_node)
+        nodes = self.children[index_1:index_2]
+        del(self.children[index_1:index_2])
+
+        return nodes
+
+    def remove_from_parent(self):
+        self.parent.remove(self)
+
     def index(self, node):
         return self.children.index(node)
 
@@ -67,6 +78,12 @@ class Node():
             node = node.parent
 
         return Position(*position)
+
+    def get_subtree(self, pos1, pos2):
+        pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
+        parent = self.get_node_at_position(pos1[:-1])
+
+        return parent[pos1[-1]:pos2[-1]]
 
     def __len__(self): return len(self.children)
     def __iter__(self): return self.children.__iter__()
@@ -97,6 +114,7 @@ class Node():
     def is_mathsymbol(self): return self.type == 'mathsymbol'
     def is_char(self): return self.type == 'char'
     def is_eol(self): return self.type == 'EOL'
+    def is_eolist(self): return self.type == 'EOList'
     def is_whitespace(self): return self.is_eol() or (self.is_char() and CharacterDB.is_whitespace(self.value))
 
     def is_first_in_line(self):
@@ -181,7 +199,7 @@ class Node():
 
     def prev(self):
         node = self
-        if node != node.parent[0]:
+        if not node.is_first_in_parent():
             node = node.parent[node.parent.index(node) - 1]
             while not node.is_leaf():
                 node = node[-1]
@@ -190,7 +208,8 @@ class Node():
         elif not node.parent.is_root():
             return node.parent
 
-        return None
+        else:
+            return None
 
     def next(self):
         node = self
@@ -275,8 +294,8 @@ class Node():
 
     def __str__(self):
         string = self.type + ':' + str(self.value) + '\n  '
-        for node in self:
-            string += node.__str__()
+        #for node in self:
+        #    string += node.__str__()
 
         return string
 

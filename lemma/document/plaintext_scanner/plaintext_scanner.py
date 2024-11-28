@@ -26,7 +26,7 @@ class PlaintextScanner(object):
     def update(self):
         self.text = ''
 
-        for child in self.document.ast.root:
+        for child in self.document.ast:
             self.process_node(child)
 
         self.document.plaintext = self.text

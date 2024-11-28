@@ -35,7 +35,7 @@ class Layouter(object):
         self.root = Box('vcontainer', width=0, height=0)
         self.current_line_box = Box('hcontainer', width=0, height=FontManager.get_line_height())
 
-        node_lists = self.group_by_node_type(self.document.ast.root)
+        node_lists = self.group_by_node_type(self.document.ast)
         for node_list in node_lists:
             self.process_list(node_list)
 

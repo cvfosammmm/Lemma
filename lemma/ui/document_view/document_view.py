@@ -171,7 +171,7 @@ class DocumentView(Observable):
         if self.document == None:
             self.link_target_at_cursor = None
         else:
-            current_node = self.document.ast.root.get_node_at_position(self.document.cursor.get_first_cursor_pos())
+            current_node = self.document.ast.get_node_at_position(self.document.cursor.get_first_cursor_pos())
             prev_node = current_node.prev_in_parent()
             if prev_node != None and prev_node.link != None and current_node.link != None and current_node.link.target == prev_node.link.target:
                 self.link_target_at_cursor = current_node.link.target

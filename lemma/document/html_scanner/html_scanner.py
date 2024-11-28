@@ -43,7 +43,7 @@ class HTMLScanner(object):
         self.html += '</head>'
 
         self.html += '<body>'
-        lines = self.group_by_line(self.document.ast.root)
+        lines = self.group_by_line(self.document.ast)
         for line in lines:
             node_lists = self.group_by_node_type(line)
 

@@ -25,7 +25,7 @@ class Housekeeper():
     def update(self):
         self.links = []
 
-        for child in self.document.ast.root:
+        for child in self.document.ast:
             self.process_node(child)
 
         self.document.links = self.links

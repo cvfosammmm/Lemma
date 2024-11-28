@@ -17,7 +17,7 @@
 
 import time, os.path, datetime
 
-from lemma.document.ast.ast import AST
+from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
 from lemma.document.housekeeper.housekeeper import Housekeeper
 from lemma.document.layouter.layouter import Layouter
@@ -44,8 +44,9 @@ class Document(Observable):
 
         self.id = id
         self.title = ''
-        self.ast = AST()
-        self.cursor = Cursor(self.ast, self.ast.root[0], self.ast.root[0])
+        self.ast = Node('list')
+        self.ast.insert(0, Node('EOL', '\n'))
+        self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.implicit_x_position = 0
         self.scroll_insert_on_screen_after_layout_update = False
         self.layout = None
@@ -80,7 +81,7 @@ class Document(Observable):
         self.clipping.update()
         self.html_scanner.update()
         self.plaintext_scanner.update()
-        self.update_implicit_x_position()
+        #self.update_implicit_x_position()
 
         self.add_change_code('changed')
 

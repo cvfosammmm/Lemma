@@ -53,13 +53,12 @@ class Command(HTMLParser):
             self.composite.append(Node('EOL', '\n'))
         else:
             self.feed(body)
+        document.ast = self.composite
+        document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
+        document.set_scroll_insert_on_screen_after_layout_update()
 
-        self.document.ast.root = self.composite
         self.document = None
         self.composite = None
-
-        document.cursor.set_state([[0], [0]])
-        document.set_scroll_insert_on_screen_after_layout_update()
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)

@@ -25,8 +25,8 @@ class Command():
 
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
-        document.cursor.move_insert_to_node(document.ast.root[0])
-        document.cursor.move_selection_bound_to_node(document.ast.root[-1])
+        document.cursor.move_insert_to_node(document.ast[0])
+        document.cursor.move_selection_bound_to_node(document.ast[-1])
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])

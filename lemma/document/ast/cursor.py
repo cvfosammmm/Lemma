@@ -18,8 +18,8 @@
 
 class Cursor():
 
-    def __init__(self, ast, node_insert=None, node_selection=None):
-        self.ast = ast
+    def __init__(self, document, node_insert=None, node_selection=None):
+        self.document = document
         self.node_insert = node_insert
         self.node_selection = node_selection
 
@@ -34,10 +34,10 @@ class Cursor():
         self.node_selection = node_selection
 
     def set_insert_position(self, position):
-        self.set_insert_node(self.ast.root.get_node_at_position(position))
+        self.set_insert_node(self.document.ast.get_node_at_position(position))
 
     def set_selection_position(self, position):
-        self.set_selection_node(self.ast.root.get_node_at_position(position))
+        self.set_selection_node(self.document.ast.get_node_at_position(position))
 
     def move_insert_left(self):
         self.move_insert_to_node(self.get_insert_node().prev())

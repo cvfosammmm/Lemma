@@ -28,7 +28,7 @@ class Command():
 
         first_node = document.cursor.get_first_node()
         last_node = document.cursor.get_last_node()
-        self.state['deleted_nodes'] = document.ast.delete_range(first_node, last_node)
+        self.state['deleted_nodes'] = first_node.parent.remove_range(first_node, last_node)
         document.cursor.set_insert_selection_nodes(last_node, last_node)
 
         self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)

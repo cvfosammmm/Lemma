@@ -27,7 +27,7 @@ class Command():
 
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
-        self.state['deleted_nodes'] = document.ast.delete_range(self.first_node, self.last_node)
+        self.state['deleted_nodes'] = self.first_node.parent.remove_range(self.first_node, self.last_node)
 
         self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
         document.set_scroll_insert_on_screen_after_layout_update()
