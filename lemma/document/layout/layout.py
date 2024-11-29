@@ -76,7 +76,8 @@ class Box(object):
         else:
             node = self.get_node()
             if x > self.width / 2 and x < self.width:
-                node = node.next()
+                x_self, y_self = self.parent.get_xy_at_child(self)
+                return self.parent.get_node_at_xy(x_self + self.width, y_self + y)
             return node
 
     def get_link_at_xy(self, x, y):

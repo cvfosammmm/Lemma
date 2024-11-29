@@ -56,11 +56,13 @@ class ToolBar(Observable):
             layout.set_text(widget.get_longest_possible_status_text())
             self.toolbar.toolbar_widget_resizable.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 20, -1)
 
+            self.toolbar.toolbar_widget_resizable.scale.set_range(widget.get_minimum_width(), LayoutInfo.get_layout_width())
+
             self.toolbar.toolbar_widget_resizable.scale.set_value(widget.get_width())
             self.toolbar.toolbar_widget_resizable.scale.clear_marks()
 
             orig_width = widget.get_original_width()
-            if orig_width > LayoutInfo.get_min_image_size() and orig_width < LayoutInfo.get_layout_width():
+            if orig_width > widget.get_minimum_width() and orig_width < LayoutInfo.get_layout_width():
                 self.toolbar.toolbar_widget_resizable.scale.add_mark(orig_width, Gtk.PositionType.TOP)
         else:
             self.toolbar.mode_stack.set_visible_child_name('main')

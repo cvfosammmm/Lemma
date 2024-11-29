@@ -45,6 +45,9 @@ class Image(object):
     def get_width(self):
         return self.cairo_surface.get_width()
 
+    def get_minimum_width(self):
+        return LayoutInfo.get_min_image_size()
+
     def get_height(self):
         return self.cairo_surface.get_height()
 

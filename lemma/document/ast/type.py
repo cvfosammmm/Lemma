@@ -25,6 +25,7 @@ class Type():
     def is_mathsymbol(self): return self.type_str == 'mathsymbol'
     def is_char(self): return self.type_str == 'char'
     def is_widget(self): return self.type_str == 'widget'
+    def can_hold_cursor(self): return self.type_str != 'mathlist' and self.type_str != 'list'
 
     def to_str(self):
         return self.type_str

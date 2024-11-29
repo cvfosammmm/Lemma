@@ -302,7 +302,7 @@ class DocumentViewController():
                 self.replace_max_string_before_cursor(document)
 
     def replace_max_string_before_cursor(self, document):
-        last_node = document.cursor.get_insert_node().prev()
+        last_node = document.cursor.get_insert_node().prev_in_parent()
         first_node = last_node
         for i in range(5):
             prev_node = first_node.prev_in_parent()

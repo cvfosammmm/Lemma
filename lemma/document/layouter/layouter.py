@@ -99,7 +99,6 @@ class Layouter(object):
         if node.type.is_eol():
             width, height, left, top = FontManager.get_char_extents_single('\n')
             top -= FontManager.get_cursor_offset()
-
             box = Box('empty', width=0, height=height, left=left, top=top, node=node)
             node.set_box(box)
 
@@ -134,6 +133,25 @@ class Layouter(object):
             height += 2 * FontManager.get_cursor_offset()
             top += FontManager.get_cursor_offset()
             box = Box('widget', width=width, height=height, left=left, top=top, node=node)
+            node.set_box(box)
+
+            self.add_box(box)
+
+        elif node.type.is_composite():
+            width, height, left, top = FontManager.get_char_extents_single('\n')
+            top -= FontManager.get_cursor_offset()
+            box = Box('empty', width=0, height=height, left=left, top=top, node=node)
+            node.set_box(box)
+
+            self.add_box(box)
+
+            for child in node:
+                self.process_node(child)
+
+        else:
+            width, height, left, top = FontManager.get_char_extents_single('\n')
+            top -= FontManager.get_cursor_offset()
+            box = Box('empty', width=0, height=height, left=left, top=top, node=node)
             node.set_box(box)
 
             self.add_box(box)

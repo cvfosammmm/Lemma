@@ -40,16 +40,78 @@ class Cursor():
         self.set_selection_node(self.document.ast.get_node_at_position(position))
 
     def move_insert_left(self):
-        self.move_insert_to_node(self.get_insert_node().prev())
+        self.move_insert_to_node(self.prev(self.get_insert_node()))
 
     def move_insert_right(self):
-        self.move_insert_to_node(self.get_insert_node().next())
+        self.move_insert_to_node(self.next(self.get_insert_node()))
+
+    def prev(self, node):
+        if not node.is_first_in_parent():
+            node = node.parent[node.parent.index(node) - 1]
+            while not node.is_leaf():
+                node = node[-1]
+
+        elif not node.parent.is_root():
+            node = node.parent
+
+        if not node.type.can_hold_cursor():
+            return self.prev(node)
+
+        return node
+
+    def next(self, node):
+        if not node.is_leaf():
+            node = node[0]
+
+        else:
+            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
+                node = node.parent
+            if not node.is_root():
+                node = node.parent[node.parent.index(node) + 1]
+            else:
+                node = node[-1]
+
+        if not node.type.can_hold_cursor():
+            return self.next(node)
+
+        return node
 
     def move_insert_left_with_selection(self):
-        self.move_insert_to_node_with_selection(self.get_insert_node().prev_no_descent())
+        self.move_insert_to_node_with_selection(self.prev_no_descent(self.get_insert_node()))
 
     def move_insert_right_with_selection(self):
-        self.move_insert_to_node_with_selection(self.get_insert_node().next_no_descent())
+        self.move_insert_to_node_with_selection(self.next_no_descent(self.get_insert_node()))
+
+    def prev_no_descent(self, node):
+        if node != node.parent[0]:
+            index = node.parent.index(node) - 1
+            node = node.parent[index]
+
+        elif not node.parent.is_root():
+            node = node.parent
+
+        if not node.type.can_hold_cursor():
+            return self.prev_no_descent(node)
+
+        return node
+
+    def next_no_descent(self, node):
+        if node != node.parent[-1]:
+            index = node.parent.index(node) + 1
+            node = node.parent[index]
+
+        else:
+            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
+                node = node.parent
+            if not node.is_root():
+                node = node.parent[node.parent.index(node) + 1]
+            else:
+                node = node[-1]
+
+        if not node.type.can_hold_cursor():
+            return self.next_no_descent(node)
+
+        return node
 
     def move_insert_to_node(self, node):
         if node != None:

@@ -72,6 +72,9 @@ class Actions(object):
         self.add_simple_action('widget-shrink', self.widget_shrink)
         self.add_simple_action('widget-enlarge', self.widget_enlarge)
 
+        self.add_simple_action('subscript', self.subscript)
+        self.add_simple_action('superscript', self.superscript)
+
         self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-symbols-sidebar', self.toggle_symbols_sidebar)
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
@@ -124,7 +127,7 @@ class Actions(object):
         links_inside_selection = has_active_doc and len([node for node in selected_nodes if node.link != None]) > 0
         widget_selected = len(selected_nodes) == 1 and selected_nodes[0].type.is_widget()
         selected_widget_is_max = widget_selected and (selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width() or not selected_nodes[0].value.is_resizable())
-        selected_widget_is_min = widget_selected and (selected_nodes[0].value.get_width() == LayoutInfo.get_min_image_size() or not selected_nodes[0].value.is_resizable())
+        selected_widget_is_min = widget_selected and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable())
         cursor_inside_link = has_active_doc and document.cursor.get_insert_node().is_inside_link()
 
         self.actions['add-document'].set_enabled(True)
@@ -150,6 +153,8 @@ class Actions(object):
         self.actions['widget-enlarge'].set_enabled(has_active_doc and not selected_widget_is_max)
         self.actions['remove-link'].set_enabled(has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
         self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
+        self.actions['subscript'].set_enabled(has_active_doc)
+        self.actions['superscript'].set_enabled(has_active_doc)
         self.actions['insert-symbol'].set_enabled(has_active_doc)
         self.actions['set-paragraph-style'].set_enabled(has_active_doc)
         self.actions['toggle-bold'].set_enabled(has_active_doc)
@@ -299,12 +304,12 @@ class Actions(object):
         DialogLocator.get_dialog('insert_image').run(self.workspace.active_document)
 
     def widget_shrink(self, action=None, parameter=None):
-        value = self.main_window.toolbar.toolbar_widget_resizable.scale.get_value()
-        self.workspace.active_document.add_command('resize_widget', value - 1)
+        selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
+        self.workspace.active_document.add_command('resize_widget', selected_nodes[0].value.get_width() - 1)
 
     def widget_enlarge(self, action=None, parameter=None):
-        value = self.main_window.toolbar.toolbar_widget_resizable.scale.get_value()
-        self.workspace.active_document.add_command('resize_widget', value + 1)
+        selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
+        self.workspace.active_document.add_command('resize_widget', selected_nodes[0].value.get_width() + 1)
 
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
@@ -322,6 +327,12 @@ class Actions(object):
 
     def edit_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
+
+    def subscript(self, action=None, parameter=''):
+        pass
+
+    def superscript(self, action=None, parameter=''):
+        pass
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry

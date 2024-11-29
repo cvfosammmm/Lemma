@@ -194,61 +194,6 @@ class Node():
 
         return x, y
 
-    def prev(self):
-        node = self
-        if not node.is_first_in_parent():
-            node = node.parent[node.parent.index(node) - 1]
-            while not node.is_leaf():
-                node = node[-1]
-            return node
-
-        elif not node.parent.is_root():
-            return node.parent
-
-        else:
-            return None
-
-    def next(self):
-        node = self
-        if not node.is_leaf():
-            node = node[0]
-        else:
-            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
-                node = node.parent
-            if node.is_root():
-                return None
-            else:
-                node = node.parent[node.parent.index(node) + 1]
-
-        return node
-
-    def prev_no_descent(self):
-        node = self
-        if node != node.parent[0]:
-            index = node.parent.index(node) - 1
-            node = node.parent[index]
-
-        elif not node.parent.is_root():
-            node = node.parent
-
-        return node
-
-    def next_no_descent(self):
-        node = self
-        if node != node.parent[-1]:
-            index = node.parent.index(node) + 1
-            node = node.parent[index]
-
-        else:
-            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
-                node = node.parent
-            if node.is_root():
-                return
-            else:
-                node = node.parent[node.parent.index(node) + 1]
-
-        return node
-
     def prev_in_parent(self):
         if self != self.parent[0]:
             index = self.parent.index(self) - 1

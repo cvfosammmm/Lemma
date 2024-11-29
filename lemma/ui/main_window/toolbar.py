@@ -161,7 +161,8 @@ class ToolBarWidgetResizable(Gtk.Box):
         self.enlarge_button.set_can_focus(False)
         self.enlarge_button.set_tooltip_text(_('Enlarge'))
 
-        self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, LayoutInfo.get_min_image_size(), LayoutInfo.get_layout_width(), 1)
+        self.scale = Gtk.Scale()
+        self.scale.set_increments(1, 1)
         self.scale.set_show_fill_level(False)
         self.scale.set_can_focus(False)
         self.scale.set_size_request(218, -1)
