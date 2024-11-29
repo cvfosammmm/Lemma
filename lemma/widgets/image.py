@@ -57,14 +57,30 @@ class Image(object):
     def get_format(self):
         return self.pil_image.format
 
-    def get_file_ending(self):
-        return FileFormatDB.get_ending_from_format_name(self.pil_image.format)
-
     def get_cairo_surface(self):
         return self.cairo_surface
 
-    def save_as(self, filename):
+    def get_cursor_name(self):
+        return 'default'
+
+    def get_status_text(self):
+        size_string = str(self.get_width()) + ' × ' + str(self.get_height())
+        return self.get_format() + _(' Image') + ' (' + size_string + ')'
+
+    def get_longest_possible_status_text(self):
+        max_width = LayoutInfo.get_layout_width()
+        max_height = int((max_width / self.get_original_width()) * self.get_original_height())
+        max_digits = len(str(max_width)) + len(str(max_height))
+        return self.get_format() + _(' Image') + ' ( × ' + max_digits * '0' + ')'
+
+    def is_resizable(self):
+        return True
+
+    def to_html(self, data_location_prefix):
+        file_ending = FileFormatDB.get_ending_from_format_name(self.pil_image.format)
+        filename = data_location_prefix + file_ending
         self.pil_image.save(filename)
+        return '<img src="' + filename + '" width="' + str(self.get_width()) + '" />'
 
     # make this pickle
     def __getstate__(self):

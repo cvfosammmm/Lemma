@@ -23,6 +23,7 @@ from gi.repository import Gtk, Gio, GLib
 import os.path
 from PIL import Image as PIL_Image
 
+from lemma.widgets.image import Image
 from lemma.infrastructure.service_locator import ServiceLocator
 
 class Dialog(object):
@@ -54,6 +55,7 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                self.document.add_command('insert_image', filename)
+                image = Image(filename)
+                self.document.add_command('insert_widget', image)
 
 

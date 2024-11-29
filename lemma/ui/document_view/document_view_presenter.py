@@ -115,8 +115,8 @@ class DocumentViewPresenter():
                 if node.link != None:
                     self.content.set_cursor_from_name('pointer')
                     link = node.link
-                elif node.type.is_image():
-                    self.content.set_cursor_from_name('default')
+                elif node.type.is_widget():
+                    self.content.set_cursor_from_name(node.value.get_cursor_name())
                 else:
                     self.content.set_cursor_from_name('text')
             else:
@@ -244,7 +244,7 @@ class DocumentViewPresenter():
             self.update_fontname(box.node)
             self.update_fg_color(box.node)
 
-        if box.type in ['glyph', 'image']:
+        if box.type in ['glyph', 'widget']:
             if self.current_node_in_selection:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y, box.width, box.parent.height)
@@ -261,7 +261,7 @@ class DocumentViewPresenter():
                 ctx.mask(pattern)
                 ctx.fill()
 
-        if box.type == 'image':
+        if box.type == 'widget':
             surface = box.node.value.get_cairo_surface()
             ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height - box.height + box.top)
             ctx.rectangle(offset_x + box.left, offset_y + box.parent.height - box.height + box.top, box.width, box.height)

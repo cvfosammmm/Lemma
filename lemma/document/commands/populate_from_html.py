@@ -19,7 +19,7 @@ import re, urllib.parse, os.path
 from html.parser import HTMLParser
 
 from lemma.document.ast.node import Node
-from lemma.document.widgets.image import Image
+from lemma.widgets.image import Image
 from lemma.document.ast.link import Link
 from lemma.infrastructure.layout_info import LayoutInfo
 
@@ -87,7 +87,7 @@ class Command(HTMLParser):
             try: image = Image(os.path.join(self.path, filename), width=width)
             except FileNotFoundError: pass
             else:
-                node = Node('image', image)
+                node = Node('widget', image)
                 node.paragraph_style = self.paragraph_style
                 self.composite.append(node)
 

@@ -113,10 +113,8 @@ class HTMLScanner(object):
             self.html += '</math>'
         elif node.type.is_char():
             self.html += node.value
-        elif node.type.is_image():
-            filename = str(self.document.id) + '-' + str(self.file_no) + node.value.get_file_ending()
-            node.value.save_as(os.path.join(self.pathname, filename))
+        elif node.type.is_widget():
+            self.html += node.value.to_html(os.path.join(self.pathname, str(self.document.id) + '-' + str(self.file_no)))
             self.file_no += 1
-            self.html += '<img src="' + filename + '" width="' + str(node.value.get_width()) + '" />'
 
 

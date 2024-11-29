@@ -23,10 +23,8 @@ class Type():
 
     def is_eol(self): return self.type_str == 'EOL'
     def is_mathsymbol(self): return self.type_str == 'mathsymbol'
-    def is_image(self): return self.type_str == 'image'
     def is_char(self): return self.type_str == 'char'
-
-    def is_resizable(self): return self.type_str == 'image'
+    def is_widget(self): return self.type_str == 'widget'
 
     def to_str(self):
         return self.type_str

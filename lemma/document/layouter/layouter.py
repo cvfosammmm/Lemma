@@ -129,11 +129,11 @@ class Layouter(object):
                 node.set_box(box)
                 self.current_line_box.add(box)
 
-        elif node.type.is_image():
+        elif node.type.is_widget():
             width, height, left, top = node.value.get_width(), node.value.get_height(), 0, 0
             height += 2 * FontManager.get_cursor_offset()
             top += FontManager.get_cursor_offset()
-            box = Box('image', width=width, height=height, left=left, top=top, node=node)
+            box = Box('widget', width=width, height=height, left=left, top=top, node=node)
             node.set_box(box)
 
             self.add_box(box)

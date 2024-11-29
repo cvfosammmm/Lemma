@@ -111,7 +111,7 @@ class DocumentViewController():
                 else:
                     if link != None:
                         self.model.selected_link_target = link.target
-                    elif leaf_box != None and leaf_box.node.type.is_image():
+                    elif leaf_box != None and leaf_box.node.type.is_widget():
                         document.add_command('focus_node', leaf_box.node)
                     else:
                         document.add_command('move_cursor_to_xy', x, y)
@@ -272,7 +272,7 @@ class DocumentViewController():
             case ('escape', _):
                 if document.cursor.has_selection():
                     selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-                    if len(selected_nodes) == 1 and selected_nodes[0].type.is_image():
+                    if len(selected_nodes) == 1 and selected_nodes[0].type.is_widget():
                         document.add_command('right')
 
             case ('backspace', _):

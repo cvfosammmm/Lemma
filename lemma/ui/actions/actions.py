@@ -69,8 +69,8 @@ class Actions(object):
 
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
 
-        self.add_simple_action('image-shrink', self.image_shrink)
-        self.add_simple_action('image-enlarge', self.image_enlarge)
+        self.add_simple_action('widget-shrink', self.widget_shrink)
+        self.add_simple_action('widget-enlarge', self.widget_enlarge)
 
         self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-symbols-sidebar', self.toggle_symbols_sidebar)
@@ -122,9 +122,9 @@ class Actions(object):
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
         links_inside_selection = has_active_doc and len([node for node in selected_nodes if node.link != None]) > 0
-        image_selected = len(selected_nodes) == 1 and selected_nodes[0].type.is_image()
-        selected_image_is_max = image_selected and selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width()
-        selected_image_is_min = image_selected and selected_nodes[0].value.get_width() == LayoutInfo.get_min_image_size()
+        widget_selected = len(selected_nodes) == 1 and selected_nodes[0].type.is_widget()
+        selected_widget_is_max = widget_selected and (selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width() or not selected_nodes[0].value.is_resizable())
+        selected_widget_is_min = widget_selected and (selected_nodes[0].value.get_width() == LayoutInfo.get_min_image_size() or not selected_nodes[0].value.is_resizable())
         cursor_inside_link = has_active_doc and document.cursor.get_insert_node().is_inside_link()
 
         self.actions['add-document'].set_enabled(True)
@@ -146,8 +146,8 @@ class Actions(object):
         self.actions['remove-selection'].set_enabled(has_active_doc and has_selection)
         self.actions['insert-link'].set_enabled(has_active_doc and insert_in_line)
         self.actions['show-insert-image-dialog'].set_enabled(has_active_doc and insert_in_line)
-        self.actions['image-shrink'].set_enabled(has_active_doc and image_selected and not selected_image_is_min)
-        self.actions['image-enlarge'].set_enabled(has_active_doc and image_selected and not selected_image_is_max)
+        self.actions['widget-shrink'].set_enabled(has_active_doc and not selected_widget_is_min)
+        self.actions['widget-enlarge'].set_enabled(has_active_doc and not selected_widget_is_max)
         self.actions['remove-link'].set_enabled(has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
         self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
         self.actions['insert-symbol'].set_enabled(has_active_doc)
@@ -298,12 +298,12 @@ class Actions(object):
     def show_insert_image_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_image').run(self.workspace.active_document)
 
-    def image_shrink(self, action=None, parameter=None):
-        value = self.main_window.toolbar.toolbar_image.scale.get_value()
+    def widget_shrink(self, action=None, parameter=None):
+        value = self.main_window.toolbar.toolbar_widget_resizable.scale.get_value()
         self.workspace.active_document.add_command('resize_widget', value - 1)
 
-    def image_enlarge(self, action=None, parameter=None):
-        value = self.main_window.toolbar.toolbar_image.scale.get_value()
+    def widget_enlarge(self, action=None, parameter=None):
+        value = self.main_window.toolbar.toolbar_widget_resizable.scale.get_value()
         self.workspace.active_document.add_command('resize_widget', value + 1)
 
     def insert_link(self, action=None, parameter=''):

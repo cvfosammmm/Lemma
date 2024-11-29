@@ -35,8 +35,8 @@ class ToolBar(Gtk.ActionBar):
         self.toolbar_main = ToolBarMain()
         self.mode_stack.add_named(self.toolbar_main, 'main')
 
-        self.toolbar_image = ToolBarImage()
-        self.mode_stack.add_named(self.toolbar_image, 'image')
+        self.toolbar_widget_resizable = ToolBarWidgetResizable()
+        self.mode_stack.add_named(self.toolbar_widget_resizable, 'widget_resizable')
 
         self.add_right_menu()
 
@@ -136,7 +136,7 @@ class ToolBarMain(Gtk.Box):
         self.append(box)
 
 
-class ToolBarImage(Gtk.Box):
+class ToolBarWidgetResizable(Gtk.Box):
 
     def __init__(self):
         Gtk.Box.__init__(self)
@@ -152,12 +152,12 @@ class ToolBarImage(Gtk.Box):
         self.append(Gtk.Separator())
 
         self.shrink_button = Gtk.Button.new_from_icon_name('value-decrease-symbolic')
-        self.shrink_button.set_action_name('win.image-shrink')
+        self.shrink_button.set_action_name('win.widget-shrink')
         self.shrink_button.set_can_focus(False)
         self.shrink_button.set_tooltip_text(_('Shrink'))
 
         self.enlarge_button = Gtk.Button.new_from_icon_name('value-increase-symbolic')
-        self.enlarge_button.set_action_name('win.image-enlarge')
+        self.enlarge_button.set_action_name('win.widget-enlarge')
         self.enlarge_button.set_can_focus(False)
         self.enlarge_button.set_tooltip_text(_('Enlarge'))
 
@@ -176,7 +176,7 @@ class ToolBarImage(Gtk.Box):
         self.escape_button = Gtk.Button.new_from_icon_name('remove-selection-symbolic')
         self.escape_button.set_action_name('win.remove-selection')
         self.escape_button.set_can_focus(False)
-        self.escape_button.set_tooltip_text(_('Deselect Image (Esc)'))
+        self.escape_button.set_tooltip_text(_('Remove Selection (Esc)'))
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.escape_button)

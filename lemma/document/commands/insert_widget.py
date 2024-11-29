@@ -16,13 +16,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.node import Node
-from lemma.document.widgets.image import Image
 
 
 class Command():
 
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, widget):
+        self.widget = widget
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.state = dict()
@@ -33,8 +32,7 @@ class Command():
 
         insert = document.cursor.get_insert_node()
         if insert.parent.is_root():
-            image = Image(self.filename)
-            node = Node('image', image)
+            node = Node('widget', self.widget)
             node.paragraph_style = insert.paragraph_style
             insert.parent.insert_before(insert, node)
             self.state['nodes_added'].append(node)
