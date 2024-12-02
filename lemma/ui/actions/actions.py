@@ -254,10 +254,13 @@ class Actions(object):
             document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, tags_at_cursor])
 
     def delete_selection(self, action=None, parameter=''):
-        if self.workspace.active_document.cursor.has_selection():
-            self.workspace.active_document.add_command('delete_selection')
-        else:
-            self.workspace.active_document.add_command('delete')
+        document = self.workspace.active_document
+        insert = document.cursor.get_insert_node()
+
+        if document.cursor.has_selection():
+            document.add_command('delete_selection')
+        elif not insert.is_last_in_parent() or len(insert.parent) == 1:
+            document.add_composite_command(['selection_right'], ['delete_selection'])
 
     def select_all(self, action=None, parameter=''):
         self.workspace.active_document.add_command('select_all')

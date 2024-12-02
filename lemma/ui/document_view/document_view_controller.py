@@ -241,6 +241,7 @@ class DocumentViewController():
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
         document = self.model.document
+        insert = document.cursor.get_insert_node()
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
             case ('left', 0): document.add_command('left')
             case ('right', 0): document.add_command('right')
@@ -280,12 +281,14 @@ class DocumentViewController():
                 if document.cursor.has_selection():
                     document.add_command('delete_selection')
                 else:
-                    document.add_command('backspace')
+                    if not insert.is_first_in_parent() or len(insert.parent) == 1:
+                        document.add_composite_command(['selection_left'], ['delete_selection'])
             case ('delete', _):
                 if document.cursor.has_selection():
                     document.add_command('delete_selection')
                 else:
-                    document.add_command('delete')
+                    if not insert.is_last_in_parent() or len(insert.parent) == 1:
+                        document.add_composite_command(['selection_right'], ['delete_selection'])
 
             case _: return False
         return True
@@ -320,8 +323,12 @@ class DocumentViewController():
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
                 if CharacterDB.has_replacement(chars[i:]):
+                    length = len(chars) - i
                     nodes = [Node('char', char) for char in CharacterDB.get_replacement(chars[i:])]
-                    document.add_composite_command(['delete_range', subtree[i], last_node], ['left'], ['insert_nodes', nodes, None, cursor_state.tags_at_cursor], ['right'])
+                    commands = [['left']] * (length + 1) + [['selection_right']] * length + [['delete_selection']]
+                    commands.append(['insert_nodes', nodes, None, cursor_state.tags_at_cursor])
+                    commands.append(['right'])
+                    document.add_composite_command(*commands)
                     return True
         return False
 
