@@ -27,6 +27,7 @@ from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.db.character_db import CharacterDB
 from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.document.ast.node import Node
 
 
 class Actions(object):
@@ -234,7 +235,8 @@ class Actions(object):
 
         if result[1].startswith('lemma/ast'):
             subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
-            document.add_composite_command(['delete_selection'], ['insert_subtree', subtree])
+            if document.cursor.get_insert_node().parent.type == subtree.type:
+                document.add_composite_command(['delete_selection'], ['insert_nodes', subtree])
 
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
@@ -244,10 +246,12 @@ class Actions(object):
                 stext = text.strip()
                 parsed_url = urlparse(stext)
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                    document.add_composite_command(['delete_selection'], ['insert_text', stext, stext, tags_at_cursor])
+                    nodes = [Node('char', char) for char in stext]
+                    document.add_composite_command(['delete_selection'], ['insert_nodes', stext, stext, tags_at_cursor])
                     return
 
-            document.add_composite_command(['delete_selection'], ['insert_text', text, None, tags_at_cursor])
+            nodes = [Node('char', char) for char in text]
+            document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, tags_at_cursor])
 
     def delete_selection(self, action=None, parameter=''):
         if self.workspace.active_document.cursor.has_selection():
@@ -269,10 +273,11 @@ class Actions(object):
         name = parameter[0]
         character = CharacterDB.get_unicode_from_latex_name(name)
         if CharacterDB.is_mathsymbol(character):
-            document.add_composite_command(['delete_selection'], ['insert_symbol', character])
+            node = Node('mathsymbol', character)
+            document.add_composite_command(['delete_selection'], ['insert_nodes', [node]])
         else:
             tags_at_cursor = self.application.cursor_state.tags_at_cursor
-            document.add_composite_command(['delete_selection'], ['insert_text', character, None, tags_at_cursor])
+            document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('char', character)], None, tags_at_cursor])
 
     def set_paragraph_style(self, action=None, parameter=None):
         name = parameter.get_string()

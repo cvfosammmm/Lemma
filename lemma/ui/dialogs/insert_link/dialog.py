@@ -24,6 +24,7 @@ import os
 from lemma.ui.helpers.dialog_view import DialogView
 from lemma.document.document import Document
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.document.ast.node import Node
 
 
 class Dialog(object):
@@ -127,7 +128,8 @@ class Dialog(object):
         if self.is_valid():
             if self.bounds == None:
                 tags_at_cursor = self.application.cursor_state.tags_at_cursor
-                self.workspace.active_document.add_command('insert_text', self.current_values['link_target'], self.current_values['link_target'], tags_at_cursor)
+                nodes = [Node('char', char) for char in self.current_values['link_target']]
+                self.workspace.active_document.add_command('insert_nodes', nodes, self.current_values['link_target'], tags_at_cursor)
             else:
                 self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
             self.view.close()

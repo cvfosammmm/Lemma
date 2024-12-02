@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio, GLib
@@ -25,6 +24,8 @@ from PIL import Image as PIL_Image
 
 from lemma.widgets.image import Image
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.document.ast.node import Node
+
 
 class Dialog(object):
 
@@ -56,6 +57,8 @@ class Dialog(object):
             if file != None:
                 filename = file.get_path()
                 image = Image(filename)
-                self.document.add_command('insert_widget', image)
+                if self.document.cursor.get_insert_node().parent.is_root():
+                    node = Node('widget', image)
+                    self.document.add_command('insert_nodes', [node])
 
 

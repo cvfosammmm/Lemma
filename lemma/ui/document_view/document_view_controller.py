@@ -24,6 +24,7 @@ import webbrowser, time
 
 from lemma.document.document import Document
 from lemma.db.character_db import CharacterDB
+from lemma.document.ast.node import Node
 
 
 class DocumentViewController():
@@ -264,9 +265,9 @@ class DocumentViewController():
                     self.open_link(document.cursor.get_insert_node().link.target)
                 else:
                     if document.cursor.has_selection():
-                        document.add_composite_command(['delete_selection'], ['newline'])
+                        document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('EOL', '\n')]])
                     else:
-                        document.add_command('newline')
+                        document.add_command('insert_nodes', [Node('EOL', '\n')])
                         self.replace_max_string_before_cursor(document)
 
             case ('escape', _):
@@ -295,9 +296,11 @@ class DocumentViewController():
         cursor_state = self.model.application.cursor_state
 
         if document.cursor.has_selection():
-            document.add_composite_command(['delete_selection'], ['insert_text', text, None, cursor_state.tags_at_cursor])
+            nodes = [Node('char', char) for char in text]
+            document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, cursor_state.tags_at_cursor])
         else:
-            document.add_command('insert_text', text, None, cursor_state.tags_at_cursor)
+            nodes = [Node('char', char) for char in text]
+            document.add_command('insert_nodes', nodes, None, cursor_state.tags_at_cursor)
             if CharacterDB.is_whitespace(text):
                 self.replace_max_string_before_cursor(document)
 
@@ -311,14 +314,14 @@ class DocumentViewController():
             else:
                 break
 
-        nodes = document.ast.get_subtree(first_node.get_position(), last_node.get_position())
-        chars = ''.join([node.value for node in nodes])
+        subtree = document.ast.get_subtree(first_node.get_position(), last_node.get_position())
+        chars = ''.join([node.value for node in subtree])
         cursor_state = self.model.application.cursor_state
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
                 if CharacterDB.has_replacement(chars[i:]):
-                    document.add_composite_command(['delete_range', nodes[i], last_node], ['left'], ['insert_text', CharacterDB.get_replacement(chars[i:]), None, cursor_state.tags_at_cursor], ['right'])
-
+                    nodes = [Node('char', char) for char in CharacterDB.get_replacement(chars[i:])]
+                    document.add_composite_command(['delete_range', subtree[i], last_node], ['left'], ['insert_nodes', nodes, None, cursor_state.tags_at_cursor], ['right'])
                     return True
         return False
 
