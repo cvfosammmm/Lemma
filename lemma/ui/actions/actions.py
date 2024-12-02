@@ -260,14 +260,15 @@ class Actions(object):
         if document.cursor.has_selection():
             document.add_command('delete_selection')
         elif not insert.is_last_in_parent() or len(insert.parent) == 1:
-            document.add_composite_command(['selection_right'], ['delete_selection'])
+            document.add_composite_command(['selection_by_offset', 1], ['delete_selection'])
 
     def select_all(self, action=None, parameter=''):
         self.workspace.active_document.add_command('select_all')
 
     def remove_selection(self, action=None, parameter=''):
-        if self.workspace.active_document.cursor.has_selection():
-            self.workspace.active_document.add_command('right')
+        document = self.workspace.active_document
+        if document.cursor.has_selection():
+            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
 
     def insert_symbol(self, action=None, parameter=None):
         if parameter == None: return

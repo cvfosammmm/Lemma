@@ -243,8 +243,18 @@ class DocumentViewController():
         document = self.model.document
         insert = document.cursor.get_insert_node()
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
-            case ('left', 0): document.add_command('left')
-            case ('right', 0): document.add_command('right')
+            case ('left', 0):
+                if document.cursor.has_selection():
+                    document.add_command('move_cursor_to_node', document.cursor.get_first_node())
+                else:
+                    document.add_command('move_cursor_by_offset', -1)
+
+            case ('right', 0):
+                if document.cursor.has_selection():
+                    document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+                else:
+                    document.add_command('move_cursor_by_offset', 1)
+
             case ('up', 0): document.add_command('up')
             case ('down', 0): document.add_command('down')
             case ('home', 0): document.add_command('line_start')
@@ -252,8 +262,8 @@ class DocumentViewController():
             case ('page_up', 0): document.add_command('page_up', self.model.height)
             case ('page_down', 0): document.add_command('page_down', self.model.height)
 
-            case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_left')
-            case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_right')
+            case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_by_offset', -1)
+            case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_by_offset', 1)
             case ('up', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_up')
             case ('down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_down')
             case ('home', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_line_start')
@@ -275,20 +285,20 @@ class DocumentViewController():
                 if document.cursor.has_selection():
                     selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
                     if len(selected_nodes) == 1 and selected_nodes[0].type.is_widget():
-                        document.add_command('right')
+                        document.add_command('move_cursor_to_node', document.cursor.get_last_node())
 
             case ('backspace', _):
                 if document.cursor.has_selection():
                     document.add_command('delete_selection')
                 else:
                     if not insert.is_first_in_parent() or len(insert.parent) == 1:
-                        document.add_composite_command(['selection_left'], ['delete_selection'])
+                        document.add_composite_command(['selection_by_offset', -1], ['delete_selection'])
             case ('delete', _):
                 if document.cursor.has_selection():
                     document.add_command('delete_selection')
                 else:
                     if not insert.is_last_in_parent() or len(insert.parent) == 1:
-                        document.add_composite_command(['selection_right'], ['delete_selection'])
+                        document.add_composite_command(['selection_by_offset', 1], ['delete_selection'])
 
             case _: return False
         return True
@@ -325,9 +335,10 @@ class DocumentViewController():
                 if CharacterDB.has_replacement(chars[i:]):
                     length = len(chars) - i
                     nodes = [Node('char', char) for char in CharacterDB.get_replacement(chars[i:])]
-                    commands = [['left']] * (length + 1) + [['selection_right']] * length + [['delete_selection']]
+                    commands = [['move_cursor_by_offset', -(length + 1)], ['selection_by_offset', length]]
+                    commands.append(['delete_selection'])
                     commands.append(['insert_nodes', nodes, None, cursor_state.tags_at_cursor])
-                    commands.append(['right'])
+                    commands.append(['move_cursor_by_offset', 1])
                     document.add_composite_command(*commands)
                     return True
         return False

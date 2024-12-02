@@ -18,7 +18,8 @@
 
 class Command():
 
-    def __init__(self):
+    def __init__(self, offset):
+        self.offset = offset
         self.is_undo_checkpoint = False
         self.update_implicit_x_position = True
         self.state = dict()
@@ -26,7 +27,13 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        document.cursor.move_insert_right_with_selection()
+        if self.offset < 0:
+            for i in range(-self.offset):
+                document.cursor.move_insert_left_with_selection()
+        else:
+            for i in range(self.offset):
+                document.cursor.move_insert_right_with_selection()
+
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def undo(self, document):
