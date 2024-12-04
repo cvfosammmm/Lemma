@@ -32,8 +32,8 @@ class Panels(object):
         self.main_window.connect('close-request', self.on_window_close)
 
         toggle_state = ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar')
-        self.main_window.toolbar.symbols_sidebar_toggle.set_active(toggle_state)
-        self.main_window.toolbar.symbols_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+        self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.set_active(toggle_state)
+        self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
 
         toggle_state = ServiceLocator.get_settings().get_value('window_state', 'show_backlinks')
         self.main_window.navigation_sidebar.backlinks_toggle.set_active(toggle_state)

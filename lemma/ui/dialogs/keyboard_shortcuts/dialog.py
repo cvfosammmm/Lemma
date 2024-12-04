@@ -69,6 +69,11 @@ class Dialog():
         section['items'].append({'title': 'Normal Paragraph', 'shortcut': '&lt;ctrl&gt;7'})
         data.append(section)
 
+        section = {'title': 'Math', 'items': list()}
+        section['items'].append({'title': 'Subscript', 'shortcut': '&lt;ctrl&gt;minus'})
+        section['items'].append({'title': 'Superscript', 'shortcut': '&lt;ctrl&gt;underscore'})
+        data.append(section)
+
         self.data = data
 
     def run(self):

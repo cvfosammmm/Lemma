@@ -169,9 +169,6 @@ paned.document-view separator.wide {
     color: @headerbar_fg_1;
     box-shadow: none;
 }
-.toolbar separator {
-    margin: 0px 6px;
-}
 
 /* backlinks */
 

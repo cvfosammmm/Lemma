@@ -38,19 +38,15 @@ class ToolBar(Gtk.ActionBar):
         self.toolbar_widget_resizable = ToolBarWidgetResizable()
         self.mode_stack.add_named(self.toolbar_widget_resizable, 'widget_resizable')
 
-        self.add_right_menu()
+        self.toolbar_right = ToolBarRight()
+        self.pack_end(self.toolbar_right)
 
-    def add_right_menu(self):
-        self.symbols_sidebar_toggle = Gtk.ToggleButton()
-        self.symbols_sidebar_toggle.set_tooltip_text(_('Symbols Sidebar') + ' (Alt+1)')
-        self.symbols_sidebar_toggle.set_icon_name('insert-symbols-symbolic')
-        self.symbols_sidebar_toggle.set_can_focus(False)
-        self.symbols_sidebar_toggle.add_css_class('flat')
 
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.symbols_sidebar_toggle)
-        self.pack_end(box)
-        self.pack_end(Gtk.Separator())
+class ToolBarRight(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
         self.edit_menu_button = PopoverManager.create_popover_button('edit_menu')
         self.edit_menu_button.set_child(Gtk.Image.new_from_icon_name('document-edit-symbolic'))
@@ -73,7 +69,18 @@ class ToolBar(Gtk.ActionBar):
         box.append(self.edit_menu_button)
         box.append(self.redo_button)
         box.append(self.undo_button)
-        self.pack_end(box)
+        self.append(box)
+        self.append(Gtk.Separator())
+
+        self.symbols_sidebar_toggle = Gtk.ToggleButton()
+        self.symbols_sidebar_toggle.set_tooltip_text(_('Symbols Sidebar') + ' (Alt+1)')
+        self.symbols_sidebar_toggle.set_icon_name('insert-symbols-symbolic')
+        self.symbols_sidebar_toggle.set_can_focus(False)
+        self.symbols_sidebar_toggle.add_css_class('flat')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.symbols_sidebar_toggle)
+        self.append(box)
 
 
 class ToolBarMain(Gtk.Box):

@@ -370,7 +370,7 @@ class Actions(object):
         search_entry.grab_focus()
 
     def toggle_symbols_sidebar(self, action=None, parameter=''):
-        toggle = self.main_window.toolbar.symbols_sidebar_toggle
+        toggle = self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle
         toggle.set_active(not toggle.get_active())
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
