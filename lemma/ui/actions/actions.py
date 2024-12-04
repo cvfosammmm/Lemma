@@ -284,8 +284,14 @@ class Actions(object):
             document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('char', character)], None, tags_at_cursor])
 
     def set_paragraph_style(self, action=None, parameter=None):
-        name = parameter.get_string()
-        self.workspace.active_document.add_command('set_paragraph_style', name)
+        document = self.workspace.active_document
+        current_style = document.cursor.get_insert_node().paragraph_style
+        new_style = parameter.get_string()
+
+        if current_style == new_style:
+            new_style = 'p'
+
+        document.add_command('set_paragraph_style', new_style)
 
     def toggle_bold(self, action=None, parameter=''):
         self.toggle_tag('bold')
