@@ -120,20 +120,20 @@ class Node():
 
         return ancestors
 
-    def is_eol(self): return self.type == 'EOL'
-    def is_mathsymbol(self): return self.type == 'mathsymbol'
+    def is_eol(self): return self.type == 'char' and self.value == '\n'
+    def is_mathsymbol(self): return self.type == 'char' and CharacterDB.is_mathsymbol(self.value)
+    def is_whitespace(self): return self.is_char() and CharacterDB.is_whitespace(self.value)
+    def is_text(self): return self.type == 'char' and not self.is_mathsymbol() and not self.is_whitespace()
     def is_char(self): return self.type == 'char'
     def is_widget(self): return self.type == 'widget'
     def is_mathatom(self): return self.type == 'mathatom'
     def is_mathlist(self): return self.type == 'mathlist'
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list'
-
     def is_leaf(self): return len(self.children) == 0
     def is_composite(self): return len(self.children) > 0
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
-    def is_whitespace(self): return self.is_eol() or (self.is_char() and CharacterDB.is_whitespace(self.value))
     def is_nucleus(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[0]
     def is_subscript(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[1]
     def is_superscript(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[2]

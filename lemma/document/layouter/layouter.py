@@ -58,7 +58,7 @@ class Layouter(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].is_char() and not node_list[0].is_whitespace():
+        if node_list[0].is_text():
             self.process_word(node_list)
         else:
             for node in node_list:
@@ -109,7 +109,7 @@ class Layouter(object):
 
             self.add_box(container, box)
 
-        elif node.is_char() and node.is_whitespace():
+        elif node.is_whitespace():
             width, height, left, top = FontManager.get_char_extents_single(node.value, fontname=self.get_fontname(node))
             top -= FontManager.get_cursor_offset(fontname=self.get_fontname(node))
  

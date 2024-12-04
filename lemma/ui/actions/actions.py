@@ -276,12 +276,8 @@ class Actions(object):
         document = self.workspace.active_document
         name = parameter[0]
         character = CharacterDB.get_unicode_from_latex_name(name)
-        if CharacterDB.is_mathsymbol(character):
-            node = Node('mathsymbol', character)
-            document.add_composite_command(['delete_selection'], ['insert_nodes', [node]])
-        else:
-            tags_at_cursor = self.application.cursor_state.tags_at_cursor
-            document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('char', character)], None, tags_at_cursor])
+        tags_at_cursor = self.application.cursor_state.tags_at_cursor
+        document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('char', character)], None, tags_at_cursor])
 
     def set_paragraph_style(self, action=None, parameter=None):
         document = self.workspace.active_document

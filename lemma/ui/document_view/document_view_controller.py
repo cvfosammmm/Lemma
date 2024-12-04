@@ -276,9 +276,9 @@ class DocumentViewController():
                     self.open_link(document.cursor.get_insert_node().link.target)
                 else:
                     if document.cursor.has_selection():
-                        document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('EOL', '\n')]])
+                        document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('char', '\n')]])
                     else:
-                        document.add_command('insert_nodes', [Node('EOL', '\n')])
+                        document.add_command('insert_nodes', [Node('char', '\n')])
                         self.replace_max_string_before_cursor(document)
 
             case ('escape', _):

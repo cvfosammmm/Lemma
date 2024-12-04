@@ -83,7 +83,7 @@ class HTMLScanner(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].is_char() and not node_list[0].is_whitespace():
+        if node_list[0].is_text():
             self.process_word(node_list)
         else:
             for node in node_list:

@@ -50,7 +50,7 @@ class Command(HTMLParser):
         self.feed(head)
 
         if body == '':
-            self.composite.append(Node('EOL', '\n'))
+            self.composite.append(Node('char', '\n'))
         else:
             self.feed(body)
         document.ast = self.composite
@@ -64,7 +64,7 @@ class Command(HTMLParser):
         self.open_tags.append(tag)
 
         if tag == 'br':
-            node = Node('EOL', '\n')
+            node = Node('char', '\n')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
 
@@ -110,7 +110,7 @@ class Command(HTMLParser):
         self.open_tags.pop()
 
         if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-            node = Node('EOL', '\n')
+            node = Node('char', '\n')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
 
@@ -134,7 +134,9 @@ class Command(HTMLParser):
 
         elif 'math' in self.open_tags:
             for char in data:
-                self.composite.append(Node('mathsymbol', char))
+                node = Node('char', char)
+                node.paragraph_style = self.paragraph_style
+                self.composite.append(node)
 
         else:
             for char in data:
