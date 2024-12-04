@@ -79,6 +79,12 @@ class Node():
 
         return Position(*position)
 
+    def get_paragraph_style(self):
+        node = self
+        while not node.parent.is_root():
+            node = node.parent
+        return node.paragraph_style
+
     def copy(self):
         node = Node(self.type, self.value)
         node.tags = self.tags

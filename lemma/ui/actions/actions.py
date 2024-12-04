@@ -285,7 +285,7 @@ class Actions(object):
 
     def set_paragraph_style(self, action=None, parameter=None):
         document = self.workspace.active_document
-        current_style = document.cursor.get_insert_node().paragraph_style
+        current_style = document.cursor.get_insert_node().get_paragraph_style()
         new_style = parameter.get_string()
 
         if current_style == new_style:

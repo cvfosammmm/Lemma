@@ -47,10 +47,10 @@ class HTMLScanner(object):
         for line in lines:
             node_lists = self.group_by_node_type(line)
 
-            self.html += '<' + line[-1].paragraph_style + '>'
+            self.html += '<' + line[-1].get_paragraph_style() + '>'
             for node_list in node_lists:
                 self.process_list(node_list)
-            self.html += '</' + line[-1].paragraph_style + '>\n'
+            self.html += '</' + line[-1].get_paragraph_style() + '>\n'
         self.html += '</body>'
 
         self.html += '</html>'

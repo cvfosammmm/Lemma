@@ -94,7 +94,7 @@ class CursorState(Observable):
         if self.workspace.mode != 'documents' or document == None: return
 
         current_node = document.ast.get_node_at_position(document.cursor.get_first_cursor_pos())
-        paragraph_style_at_cursor = current_node.paragraph_style
+        paragraph_style_at_cursor = current_node.get_paragraph_style()
 
         labels_dict = {'p': _('Paragraph'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6')}
         self.toolbar.toolbar_main.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
