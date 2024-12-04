@@ -73,7 +73,7 @@ class CursorState(Observable):
         document = self.workspace.active_document
         if self.workspace.mode != 'documents' or document == None: return
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
         all_tagged = True
         for node in char_nodes:
             if tagname not in node.tags: all_tagged = False

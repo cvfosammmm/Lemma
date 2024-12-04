@@ -54,7 +54,7 @@ class Cursor():
         elif not node.parent.is_root():
             node = node.parent
 
-        if not node.type.can_hold_cursor():
+        if not node.can_hold_cursor():
             return self.prev(node)
 
         return node
@@ -71,7 +71,7 @@ class Cursor():
             else:
                 node = node[-1]
 
-        if not node.type.can_hold_cursor():
+        if not node.can_hold_cursor():
             return self.next(node)
 
         return node
@@ -90,7 +90,7 @@ class Cursor():
         elif not node.parent.is_root():
             node = node.parent
 
-        if not node.type.can_hold_cursor():
+        if not node.can_hold_cursor():
             return self.prev_no_descent(node)
 
         return node
@@ -108,7 +108,7 @@ class Cursor():
             else:
                 node = node[-1]
 
-        if not node.type.can_hold_cursor():
+        if not node.can_hold_cursor():
             return self.next_no_descent(node)
 
         return node

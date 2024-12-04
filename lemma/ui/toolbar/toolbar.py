@@ -46,7 +46,7 @@ class ToolBar(Observable):
         if self.workspace.mode != 'documents' or document == None: return
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-        if len(selected_nodes) == 1 and selected_nodes[0].type.is_widget() and selected_nodes[0].value.is_resizable():
+        if len(selected_nodes) == 1 and selected_nodes[0].is_widget() and selected_nodes[0].value.is_resizable():
             widget = selected_nodes[0].value
 
             self.toolbar.mode_stack.set_visible_child_name('widget_resizable')

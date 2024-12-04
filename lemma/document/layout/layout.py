@@ -18,17 +18,17 @@
 
 class Box(object):
 
-    def __init__(self, box_type, width=0, height=0, left=0, top=0, node=None):
+    def __init__(self, box_type, width=0, height=0, left=0, top=0, fontname=None, node=None):
         self.type = box_type
         self.width = width
         self.height = height
         self.left = left
         self.top = top
+        self.fontname = fontname
 
         self.parent = None
         self.children = list()
 
-        self.classes = set()
         self.node = node
 
     def add(self, child):

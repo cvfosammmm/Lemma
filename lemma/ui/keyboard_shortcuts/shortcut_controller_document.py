@@ -40,6 +40,7 @@ class ShortcutControllerDocument(ShortcutController):
         actions.application.set_accels_for_action('win.set-paragraph-style::h6', ['<Control>6'])
         self.add_with_callback('<Control>l', self.actions.actions['insert-link'].activate)
         self.add_with_callback('<Control>minus', self.actions.actions['subscript'].activate)
+        self.add_with_callback('<Control>underscore', self.actions.actions['superscript'].activate)
 
         self.add_with_callback('<Control>z', self.actions.actions['undo'].activate)
         self.add_with_callback('<Control><Shift>z', self.actions.actions['redo'].activate)

@@ -61,7 +61,7 @@ class HTMLScanner(object):
         result.append(list())
         for node in root_node:
             result[-1].append(node)
-            if node.type.is_eol():
+            if node.is_eol():
                 result.append(list())
         result.pop()
 
@@ -83,7 +83,7 @@ class HTMLScanner(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].type.is_char() and not node_list[0].is_whitespace():
+        if node_list[0].is_char() and not node_list[0].is_whitespace():
             self.process_word(node_list)
         else:
             for node in node_list:
@@ -107,13 +107,34 @@ class HTMLScanner(object):
         self.html += text
 
     def process_node(self, node):
-        if node.type.is_mathsymbol():
-            self.html += '<math>'
+        if node.is_mathsymbol():
+            if node.parent.is_root():
+                self.html += '<math>'
             self.html += node.value
-            self.html += '</math>'
-        elif node.type.is_char():
+            if node.parent.is_root():
+                self.html += '</math>'
+        elif node.is_mathatom():
+            if node.parent.is_root():
+                self.html += '<math>'
+            self.html += '<msubsup>'
+            self.html += '<mo>'
+            self.process_node(node[0])
+            self.html += '</mo>'
+            self.html += '<mn>'
+            self.process_node(node[1])
+            self.html += '</mn>'
+            self.html += '<mn>'
+            self.process_node(node[2])
+            self.html += '</mn>'
+            self.html += '</msubsup>'
+            if node.parent.is_root():
+                self.html += '</math>'
+        elif node.is_mathlist():
+            for child in node:
+                self.process_node(child)
+        elif node.is_char():
             self.html += node.value
-        elif node.type.is_widget():
+        elif node.is_widget():
             self.html += node.value.to_html(os.path.join(self.pathname, str(self.document.id) + '-' + str(self.file_no)))
             self.file_no += 1
 

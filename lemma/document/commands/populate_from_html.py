@@ -90,6 +90,21 @@ class Command(HTMLParser):
                 node = Node('widget', image)
                 node.paragraph_style = self.paragraph_style
                 self.composite.append(node)
+        if tag == 'msubsup':
+            node = Node('mathatom')
+            node.paragraph_style = self.paragraph_style
+            self.composite.append(node)
+            self.composite = node
+        if tag == 'mo':
+            node = Node('mathlist')
+            node.paragraph_style = self.paragraph_style
+            self.composite.append(node)
+            self.composite = node
+        if tag == 'mn':
+            node = Node('mathlist')
+            node.paragraph_style = self.paragraph_style
+            self.composite.append(node)
+            self.composite = node
 
     def handle_endtag(self, tag):
         self.open_tags.pop()
@@ -102,6 +117,16 @@ class Command(HTMLParser):
         if tag == 'strong': self.tags.remove('bold')
         if tag == 'em': self.tags.remove('italic')
         if tag == 'a': self.link_target = None
+        if tag == 'msubsup':
+            self.composite = self.composite.parent
+        if tag == 'mo':
+            if len(self.composite) > 0:
+                self.composite.append(Node('END'))
+            self.composite = self.composite.parent
+        if tag == 'mn':
+            if len(self.composite) > 0:
+                self.composite.append(Node('END'))
+            self.composite = self.composite.parent
 
     def handle_data(self, data):
         if 'title' in self.open_tags:

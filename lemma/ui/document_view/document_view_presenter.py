@@ -115,7 +115,7 @@ class DocumentViewPresenter():
                 if node.link != None:
                     self.content.set_cursor_from_name('pointer')
                     link = node.link
-                elif node.type.is_widget():
+                elif node.is_widget():
                     self.content.set_cursor_from_name(node.value.get_cursor_name())
                 else:
                     self.content.set_cursor_from_name('text')
@@ -241,7 +241,6 @@ class DocumentViewPresenter():
             self.current_node_in_selection = False
 
         if box.type in ['glyph', 'empty']:
-            self.update_fontname(box.node)
             self.update_fg_color(box.node)
 
         if box.type in ['glyph', 'widget']:
@@ -251,7 +250,7 @@ class DocumentViewPresenter():
                 ctx.fill()
 
         if box.type == 'glyph':
-            surface = FontManager.get_surface(box.node.value, fontname=self.fontname)
+            surface = FontManager.get_surface(box.node.value, fontname=box.fontname)
 
             if surface != None:
                 ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height + box.top)
@@ -275,22 +274,8 @@ class DocumentViewPresenter():
         ctx.rectangle(*self.cursor_coords)
         ctx.fill()
 
-    def update_fontname(self, node):
-        if node.type.is_mathsymbol():
-            self.fontname = 'math'
-        elif node.paragraph_style.startswith('h'):
-            self.fontname = node.paragraph_style
-        elif 'bold' in node.tags and 'italic' not in node.tags:
-            self.fontname = 'bold'
-        elif 'bold' in node.tags and 'italic' in node.tags:
-            self.fontname = 'bolditalic'
-        elif 'bold' not in node.tags and 'italic' in node.tags:
-            self.fontname = 'italic'
-        else:
-            self.fontname = 'book'
-
     def update_fg_color(self, node):
-        if node.type.is_mathsymbol():
+        if node.is_mathsymbol():
             self.fg_color = ColorManager.get_ui_color('math')
         elif node.link != None:
             if urlparse(node.link.target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link.target) != None:
