@@ -128,6 +128,7 @@ class Node():
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
     def is_whitespace(self): return self.is_eol() or (self.is_char() and CharacterDB.is_whitespace(self.value))
+    def is_nucleus(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[0]
     def is_subscript(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[1]
     def is_superscript(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[2]
 
