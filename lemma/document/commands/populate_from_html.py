@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import re, urllib.parse, os.path
+import urllib.parse, os.path
 from html.parser import HTMLParser
 
 from lemma.document.ast.node import Node

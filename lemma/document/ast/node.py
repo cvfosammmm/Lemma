@@ -121,8 +121,10 @@ class Node():
         return ancestors
 
     def is_eol(self): return self.type == 'char' and self.value == '\n'
+    def is_end(self): return self.type == 'END'
     def is_mathsymbol(self): return self.type == 'char' and CharacterDB.is_mathsymbol(self.value)
     def is_whitespace(self): return self.is_char() and CharacterDB.is_whitespace(self.value)
+    def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
     def is_text(self): return self.type == 'char' and not self.is_mathsymbol() and not self.is_whitespace()
     def is_char(self): return self.type == 'char'
     def is_widget(self): return self.type == 'widget'

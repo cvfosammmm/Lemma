@@ -46,7 +46,7 @@ class Layouter(object):
         last_tags = set()
         result = list()
         for node in root_node:
-            if node.is_whitespace():
+            if node.is_whitespace() or not node.is_text():
                 result.append(list())
                 last_type = None
                 last_tags = set()
@@ -95,11 +95,19 @@ class Layouter(object):
         if node.is_eol():
             width, height, left, top = FontManager.get_char_extents_single('\n', fontname=self.get_fontname(node))
             top -= FontManager.get_cursor_offset(fontname=self.get_fontname(node))
-            box = Box('empty', width=0, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
+            box = Box('empty', width=1, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
             node.set_box(box)
 
             self.add_box(container, box)
             self.break_line()
+
+        elif node.is_end():
+            width, height, left, top = FontManager.get_char_extents_single('\n', fontname=self.get_fontname(node))
+            top -= FontManager.get_cursor_offset(fontname=self.get_fontname(node))
+            box = Box('empty', width=1, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
+            node.set_box(box)
+
+            self.add_box(container, box)
 
         elif node.is_mathsymbol():
             width, height, left, top = FontManager.get_char_extents_single(node.value, fontname=self.get_fontname(node))
@@ -114,7 +122,7 @@ class Layouter(object):
             top -= FontManager.get_cursor_offset(fontname=self.get_fontname(node))
  
             if self.current_line_box.width + width > LayoutInfo.get_layout_width():
-                box = Box('empty', width=0, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
+                box = Box('empty', width=1, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
                 node.set_box(box)
                 self.current_line_box.add(box)
                 self.break_line()

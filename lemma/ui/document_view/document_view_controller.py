@@ -24,7 +24,7 @@ import webbrowser, time
 
 from lemma.document.document import Document
 from lemma.db.character_db import CharacterDB
-from lemma.document.ast.node import Node
+from lemma.infrastructure.xml_helpers import XMLHelpers
 
 
 class DocumentViewController():
@@ -276,9 +276,9 @@ class DocumentViewController():
                     self.open_link(document.cursor.get_insert_node().link.target)
                 else:
                     if document.cursor.has_selection():
-                        document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('char', '\n')]])
+                        document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', '\n'])
                     else:
-                        document.add_command('insert_nodes', [Node('char', '\n')])
+                        document.add_command('insert_nodes_from_xml', '\n')
                         self.replace_max_string_before_cursor(document)
 
             case ('escape', _):
@@ -309,11 +309,9 @@ class DocumentViewController():
         cursor_state = self.model.application.cursor_state
 
         if document.cursor.has_selection():
-            nodes = [Node('char', char) for char in text]
-            document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, cursor_state.tags_at_cursor])
+            document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', XMLHelpers.escape(text), None, cursor_state.tags_at_cursor])
         else:
-            nodes = [Node('char', char) for char in text]
-            document.add_command('insert_nodes', nodes, None, cursor_state.tags_at_cursor)
+            document.add_command('insert_nodes_from_xml', XMLHelpers.escape(text), None, cursor_state.tags_at_cursor)
             if CharacterDB.is_whitespace(text):
                 self.replace_max_string_before_cursor(document)
 
@@ -334,10 +332,10 @@ class DocumentViewController():
             for i in range(len(chars) - 1):
                 if CharacterDB.has_replacement(chars[i:]):
                     length = len(chars) - i
-                    nodes = [Node('char', char) for char in CharacterDB.get_replacement(chars[i:])]
+                    text = XMLHelpers.escape(CharacterDB.get_replacement(chars[i:]))
                     commands = [['move_cursor_by_offset', -(length + 1)], ['selection_by_offset', length]]
                     commands.append(['delete_selection'])
-                    commands.append(['insert_nodes', nodes, None, cursor_state.tags_at_cursor])
+                    commands.append(['insert_nodes_from_xml', text, None, cursor_state.tags_at_cursor])
                     commands.append(['move_cursor_by_offset', 1])
                     document.add_composite_command(*commands)
                     return True

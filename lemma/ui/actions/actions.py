@@ -27,7 +27,7 @@ from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.db.character_db import CharacterDB
 from lemma.infrastructure.layout_info import LayoutInfo
-from lemma.document.ast.node import Node
+from lemma.infrastructure.xml_helpers import XMLHelpers
 
 
 class Actions(object):
@@ -239,19 +239,19 @@ class Actions(object):
                 document.add_composite_command(['delete_selection'], ['insert_nodes', subtree])
 
         elif result[1] == 'text/plain':
-            text = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf-8')
+            text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
             tags_at_cursor = self.application.cursor_state.tags_at_cursor
 
             if len(text) < 2000:
                 stext = text.strip()
                 parsed_url = urlparse(stext)
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                    nodes = [Node('char', char) for char in stext]
-                    document.add_composite_command(['delete_selection'], ['insert_nodes', stext, stext, tags_at_cursor])
+                    text = XMLHelpers.escape(stext)
+                    document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', text, stext, tags_at_cursor])
                     return
 
-            nodes = [Node('char', char) for char in text]
-            document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, tags_at_cursor])
+            text = XMLHelpers.escape(text)
+            document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', text, None, tags_at_cursor])
 
     def delete_selection(self, action=None, parameter=''):
         document = self.workspace.active_document
@@ -277,7 +277,7 @@ class Actions(object):
         name = parameter[0]
         character = CharacterDB.get_unicode_from_latex_name(name)
         tags_at_cursor = self.application.cursor_state.tags_at_cursor
-        document.add_composite_command(['delete_selection'], ['insert_nodes', [Node('char', character)], None, tags_at_cursor])
+        document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', character, None, tags_at_cursor])
 
     def set_paragraph_style(self, action=None, parameter=None):
         document = self.workspace.active_document
@@ -343,29 +343,19 @@ class Actions(object):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()
 
-        if not document.cursor.has_selection() and insert.parent.is_root() and not insert.is_first_in_parent():
-            node = Node('mathatom')
-            node.append(Node('mathlist'))
-            node.append(Node('mathlist'))
-            node.append(Node('mathlist'))
-            node[0].append(insert.prev_in_parent().copy())
-            node[0].append(Node('END'))
-            node[1].append(Node('END'))
-            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes', [node]], ['move_cursor_by_offset', -1])
+        if document.cursor.has_selection(): return
+        if insert.parent.is_root() and not insert.is_first_in_parent() and insert.prev_in_parent().is_symbol():
+            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<END/></mathlist><mathlist><END/></mathlist><mathlist></mathlist></mathatom>'
+            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes_from_xml', xml], ['move_cursor_by_offset', -1])
 
     def superscript(self, action=None, parameter=''):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()
 
-        if not document.cursor.has_selection() and insert.parent.is_root() and not insert.is_first_in_parent():
-            node = Node('mathatom')
-            node.append(Node('mathlist'))
-            node.append(Node('mathlist'))
-            node.append(Node('mathlist'))
-            node[0].append(insert.prev_in_parent().copy())
-            node[0].append(Node('END'))
-            node[2].append(Node('END'))
-            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes', [node]], ['move_cursor_by_offset', -1])
+        if document.cursor.has_selection(): return
+        if insert.parent.is_root() and not insert.is_first_in_parent() and insert.prev_in_parent().is_symbol():
+            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<END/></mathlist><mathlist></mathlist><mathlist><END/></mathlist></mathatom>'
+            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes_from_xml', xml], ['move_cursor_by_offset', -1])
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry
