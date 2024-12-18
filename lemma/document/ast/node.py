@@ -41,10 +41,6 @@ class Node():
         self.children.insert(index, node)
         node.set_parent(self)
 
-    def insert_after(self, child, node):
-        index = self.index(child)
-        self.insert(index, node)
-
     def insert_before(self, child, node):
         index = self.index(child)
         self.insert(index, node)
@@ -120,8 +116,8 @@ class Node():
 
         return ancestors
 
-    def is_eol(self): return self.type == 'char' and self.value == '\n'
-    def is_end(self): return self.type == 'END'
+    def is_eol(self): return self.type == 'eol'
+    def is_end(self): return self.type == 'end'
     def is_mathsymbol(self): return self.type == 'char' and CharacterDB.is_mathsymbol(self.value)
     def is_whitespace(self): return self.is_char() and CharacterDB.is_whitespace(self.value)
     def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
@@ -130,7 +126,7 @@ class Node():
     def is_widget(self): return self.type == 'widget'
     def is_mathatom(self): return self.type == 'mathatom'
     def is_mathlist(self): return self.type == 'mathlist'
-    def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list'
+    def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
     def is_leaf(self): return len(self.children) == 0
     def is_composite(self): return len(self.children) > 0
     def is_first_in_parent(self): return self == self.parent[0]
@@ -263,5 +259,24 @@ class Node():
     def __str__(self):
         string = self.type + ':' + str(self.value)
         return string
+
+    def validate(self):
+        if self.type == 'root':
+            return all([child.type in {'char', 'eol', 'widget', 'mathatom'} for child in self.children[:-1]]) \
+                and all([child.validate() for child in self.children])
+
+        if self.type == 'mathatom':
+            return len(self.children) == 3 \
+                and all([child.type == 'mathlist' for child in self.children]) \
+                and all([child.validate() for child in self.children])
+
+        if self.type == 'mathlist':
+            return len(self.children) == 0 \
+                or self.children[-1].type == 'end' \
+                and all([child.type == 'char' for child in self.children[:-1]]) \
+                and all([child.validate() for child in self.children])
+
+        if self.type in {'char', 'widget', 'eol', 'end'}:
+            return len(self.children) == 0
 
 

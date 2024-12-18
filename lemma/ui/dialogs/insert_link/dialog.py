@@ -25,7 +25,8 @@ from lemma.ui.helpers.dialog_view import DialogView
 from lemma.document.document import Document
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.document.ast.node import Node
-from lemma.infrastructure.xml_helpers import XMLHelpers
+import lemma.infrastructure.xml_helpers as xml_helpers
+import lemma.infrastructure.xml_parser as xml_parser
 
 
 class Dialog(object):
@@ -129,8 +130,10 @@ class Dialog(object):
         if self.is_valid():
             if self.bounds == None:
                 tags_at_cursor = self.application.cursor_state.tags_at_cursor
-                text = XMLHelpers.escape(self.current_values['link_target'])
-                self.workspace.active_document.add_command('insert_nodes_from_xml', text, self.current_values['link_target'], tags_at_cursor)
+                text = xml_helpers.escape(self.current_values['link_target'])
+                parser = xml_parser.XMLParser()
+                nodes = parser.parse(text)
+                self.workspace.active_document.add_command('insert_nodes', nodes, self.current_values['link_target'], tags_at_cursor)
             else:
                 self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
             self.view.close()

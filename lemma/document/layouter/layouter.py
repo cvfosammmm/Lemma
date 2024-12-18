@@ -151,7 +151,7 @@ class Layouter(object):
         elif node.is_mathatom():
             width, height, left, top = FontManager.get_char_extents_single('\n', fontname=self.get_fontname(node))
             top -= FontManager.get_cursor_offset(fontname=self.get_fontname(node))
-            box = Box('empty', width=0, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
+            box = Box('empty', width=1, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
             node.set_box(box)
 
             self.add_box(container, box)

@@ -43,14 +43,14 @@ class Command(HTMLParser):
 
     def run(self, document):
         self.document = document
-        self.composite = Node('list')
+        self.composite = Node('root')
 
         head, divider, rest = self.html.partition('<body>')
         body, divider, rest = rest.partition('</body>')
         self.feed(head)
 
         if body == '':
-            self.composite.append(Node('char', '\n'))
+            self.composite.append(Node('eol'))
         else:
             self.feed(body)
         document.ast = self.composite
@@ -64,7 +64,7 @@ class Command(HTMLParser):
         self.open_tags.append(tag)
 
         if tag == 'br':
-            node = Node('char', '\n')
+            node = Node('eol')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
 
@@ -110,7 +110,7 @@ class Command(HTMLParser):
         self.open_tags.pop()
 
         if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-            node = Node('char', '\n')
+            node = Node('eol')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
 
@@ -121,11 +121,11 @@ class Command(HTMLParser):
             self.composite = self.composite.parent
         if tag == 'mo':
             if len(self.composite) > 0:
-                self.composite.append(Node('END'))
+                self.composite.append(Node('end'))
             self.composite = self.composite.parent
         if tag == 'mn':
             if len(self.composite) > 0:
-                self.composite.append(Node('END'))
+                self.composite.append(Node('end'))
             self.composite = self.composite.parent
 
     def handle_data(self, data):

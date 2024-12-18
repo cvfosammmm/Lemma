@@ -22,7 +22,6 @@ from lemma.infrastructure.service_locator import ServiceLocator
 import lemma.workspace.workspace as workspace
 import lemma.ui.application as application
 import lemma.storage.storage as storage
-from lemma.infrastructure.xml_helpers import XMLHelpers
 
 # setup gettext
 gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
@@ -33,7 +32,6 @@ settings = ServiceLocator.get_settings()
 # init static variables
 ServiceLocator.init_lemma_version('@lemma_version@')
 ServiceLocator.init_resources_path('@resources_path@')
-XMLHelpers.init()
 
 # setup fonts
 font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')

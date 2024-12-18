@@ -25,9 +25,9 @@ from urllib.parse import urlparse
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
-from lemma.db.character_db import CharacterDB
 from lemma.infrastructure.layout_info import LayoutInfo
-from lemma.infrastructure.xml_helpers import XMLHelpers
+import lemma.infrastructure.xml_helpers as xml_helpers
+import lemma.infrastructure.xml_parser as xml_parser
 
 
 class Actions(object):
@@ -62,7 +62,7 @@ class Actions(object):
         self.add_simple_action('insert-link', self.insert_link)
         self.add_simple_action('remove-link', self.remove_link)
         self.add_simple_action('edit-link', self.edit_link)
-        self.add_simple_action('insert-symbol', self.insert_symbol, GLib.VariantType('as'))
+        self.add_simple_action('insert-xml', self.insert_xml, GLib.VariantType('s'))
 
         self.add_simple_action('set-paragraph-style', self.set_paragraph_style, GLib.VariantType('s'))
         self.add_simple_action('toggle-bold', self.toggle_bold)
@@ -156,7 +156,7 @@ class Actions(object):
         self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
         self.actions['subscript'].set_enabled(has_active_doc)
         self.actions['superscript'].set_enabled(has_active_doc)
-        self.actions['insert-symbol'].set_enabled(has_active_doc)
+        self.actions['insert-xml'].set_enabled(has_active_doc)
         self.actions['set-paragraph-style'].set_enabled(has_active_doc)
         self.actions['toggle-bold'].set_enabled(has_active_doc)
         self.actions['toggle-italic'].set_enabled(has_active_doc)
@@ -241,17 +241,20 @@ class Actions(object):
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
             tags_at_cursor = self.application.cursor_state.tags_at_cursor
+            parser = xml_parser.XMLParser()
 
             if len(text) < 2000:
                 stext = text.strip()
                 parsed_url = urlparse(stext)
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                    text = XMLHelpers.escape(stext)
-                    document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', text, stext, tags_at_cursor])
+                    text = xml_helpers.escape(stext)
+                    nodes = parser.parse(text)
+                    document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, stext, tags_at_cursor])
                     return
 
-            text = XMLHelpers.escape(text)
-            document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', text, None, tags_at_cursor])
+            text = xml_helpers.escape(text)
+            nodes = parser.parse(text)
+            document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, tags_at_cursor])
 
     def delete_selection(self, action=None, parameter=''):
         document = self.workspace.active_document
@@ -270,14 +273,26 @@ class Actions(object):
         if document.cursor.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
 
-    def insert_symbol(self, action=None, parameter=None):
+    def insert_xml(self, action=None, parameter=None):
         if parameter == None: return
 
         document = self.workspace.active_document
-        name = parameter[0]
-        character = CharacterDB.get_unicode_from_latex_name(name)
+        insert = document.cursor.get_insert_node()
+        xml = parameter.get_string()
+        parser = xml_parser.XMLParser()
+        nodes = parser.parse(xml, insert.parent.type)
         tags_at_cursor = self.application.cursor_state.tags_at_cursor
-        document.add_composite_command(['delete_selection'], ['insert_nodes_from_xml', character, None, tags_at_cursor])
+        commands = [['delete_selection'], ['insert_nodes', nodes, None, tags_at_cursor]]
+
+        if parser.prev_selection_node != None:
+            subtree = document.ast.get_subtree(*document.cursor.get_state())
+            for node in subtree:
+                parser.prev_selection_node.parent.insert_before(parser.prev_selection_node, node.copy())
+        if parser.insert_node != None:
+            commands.append(['move_cursor_to_node', parser.insert_node])
+
+        if nodes.validate():
+            document.add_composite_command(*commands)
 
     def set_paragraph_style(self, action=None, parameter=None):
         document = self.workspace.active_document
@@ -345,8 +360,10 @@ class Actions(object):
 
         if document.cursor.has_selection(): return
         if insert.parent.is_root() and not insert.is_first_in_parent() and insert.prev_in_parent().is_symbol():
-            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<END/></mathlist><mathlist><END/></mathlist><mathlist></mathlist></mathatom>'
-            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes_from_xml', xml], ['move_cursor_by_offset', -1])
+            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<end/></mathlist><mathlist><end/></mathlist><mathlist></mathlist></mathatom>'
+            parser = xml_parser.XMLParser()
+            nodes = parser.parse(xml)
+            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes', nodes], ['move_cursor_by_offset', -1])
 
     def superscript(self, action=None, parameter=''):
         document = self.workspace.active_document
@@ -354,8 +371,10 @@ class Actions(object):
 
         if document.cursor.has_selection(): return
         if insert.parent.is_root() and not insert.is_first_in_parent() and insert.prev_in_parent().is_symbol():
-            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<END/></mathlist><mathlist></mathlist><mathlist><END/></mathlist></mathatom>'
-            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes_from_xml', xml], ['move_cursor_by_offset', -1])
+            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<end/></mathlist><mathlist></mathlist><mathlist><end/></mathlist></mathatom>'
+            parser = xml_parser.XMLParser()
+            nodes = parser.parse(xml)
+            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes', nodes], ['move_cursor_by_offset', -1])
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry

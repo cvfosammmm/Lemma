@@ -44,8 +44,8 @@ class Document(Observable):
 
         self.id = id
         self.title = ''
-        self.ast = Node('list')
-        self.ast.insert(0, Node('char', '\n'))
+        self.ast = Node('root')
+        self.ast.insert(0, Node('eol'))
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.implicit_x_position = 0
         self.scroll_insert_on_screen_after_layout_update = False

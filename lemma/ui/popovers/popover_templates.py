@@ -110,18 +110,6 @@ class Popover(Gtk.Overlay):
         self.register_button_for_keyboard_navigation(button, 'main')
         self.add_widget(button)
 
-    def add_before_after_item(self, pagename, title, commands, icon=None, shortcut=None):
-        button = MenuBuilder.create_button(title, icon_name=icon, shortcut=shortcut)
-        button.set_action_name('win.insert-before-after')
-        button.set_action_target_value(GLib.Variant('as', commands))
-        self.add_closing_button(button, pagename)
-
-    def add_insert_symbol_item(self, pagename, title, command, icon=None, shortcut=None):
-        button = MenuBuilder.create_button(title, icon_name=icon, shortcut=shortcut)
-        button.set_action_name('win.insert-symbol')
-        button.set_action_target_value(GLib.Variant('as', command))
-        self.add_closing_button(button, pagename)
-
     def add_action_button(self, pagename, title, action_name, parameter=None, icon=None, shortcut=None):
         button = MenuBuilder.create_button(title, icon_name=icon, shortcut=shortcut)
         button.set_action_name(action_name)
