@@ -134,6 +134,8 @@ class HTMLScanner(object):
                 self.process_node(child)
         elif node.is_char():
             self.html += node.value
+        elif node.is_placeholder():
+            self.html += '<placeholder value="' + node.value + '"/>'
         elif node.is_widget():
             self.html += node.value.to_html(os.path.join(self.pathname, str(self.document.id) + '-' + str(self.file_no)))
             self.file_no += 1

@@ -48,7 +48,7 @@ class DocumentView(Observable):
         self.workspace = workspace
         self.document = None
 
-        self.controller = DocumentViewController(self)
+        self.controller = DocumentViewController(self, self.application.use_cases)
         self.presenter = DocumentViewPresenter(self)
 
         self.title_widget = TitleWidget(self)

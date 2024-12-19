@@ -106,6 +106,13 @@ class Command(HTMLParser):
             self.composite.append(node)
             self.composite = node
 
+        if tag == 'placeholder':
+            for name, value in attrs:
+                if name == 'value':
+                    node = Node('placeholder', value)
+                    node.paragraph_style = self.paragraph_style
+                    self.composite.append(node)
+
     def handle_endtag(self, tag):
         self.open_tags.pop()
 

@@ -36,6 +36,7 @@ class Actions(object):
         self.workspace = workspace
         self.main_window = main_window
         self.application = application
+        self.use_cases = application.use_cases
         self.settings = ServiceLocator.get_settings()
 
         self.actions = dict()
@@ -274,25 +275,15 @@ class Actions(object):
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
 
     def insert_xml(self, action=None, parameter=None):
-        if parameter == None: return
+        self.use_cases.insert_xml(parameter.get_string(), self.application.cursor_state.tags_at_cursor)
 
-        document = self.workspace.active_document
-        insert = document.cursor.get_insert_node()
-        xml = parameter.get_string()
-        parser = xml_parser.XMLParser()
-        nodes = parser.parse(xml, insert.parent.type)
-        tags_at_cursor = self.application.cursor_state.tags_at_cursor
-        commands = [['delete_selection'], ['insert_nodes', nodes, None, tags_at_cursor]]
+    def subscript(self, action=None, parameter=''):
+        xml = '<mathatom><mathlist><end marks="add_prev_selection_or_placeholder"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>'
+        self.use_cases.insert_xml(xml, self.application.cursor_state.tags_at_cursor)
 
-        if parser.prev_selection_node != None:
-            subtree = document.ast.get_subtree(*document.cursor.get_state())
-            for node in subtree:
-                parser.prev_selection_node.parent.insert_before(parser.prev_selection_node, node.copy())
-        if parser.insert_node != None:
-            commands.append(['move_cursor_to_node', parser.insert_node])
-
-        if nodes.validate():
-            document.add_composite_command(*commands)
+    def superscript(self, action=None, parameter=''):
+        xml = '<mathatom><mathlist><end marks="add_prev_selection_or_placeholder"/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>'
+        self.use_cases.insert_xml(xml, self.application.cursor_state.tags_at_cursor)
 
     def set_paragraph_style(self, action=None, parameter=None):
         document = self.workspace.active_document
@@ -327,7 +318,7 @@ class Actions(object):
             self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {tagname})
 
     def show_insert_image_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_image').run(self.workspace.active_document)
+        DialogLocator.get_dialog('insert_image').run(self.use_cases)
 
     def widget_shrink(self, action=None, parameter=None):
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
@@ -353,28 +344,6 @@ class Actions(object):
 
     def edit_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
-
-    def subscript(self, action=None, parameter=''):
-        document = self.workspace.active_document
-        insert = document.cursor.get_insert_node()
-
-        if document.cursor.has_selection(): return
-        if insert.parent.is_root() and not insert.is_first_in_parent() and insert.prev_in_parent().is_symbol():
-            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<end/></mathlist><mathlist><end/></mathlist><mathlist></mathlist></mathatom>'
-            parser = xml_parser.XMLParser()
-            nodes = parser.parse(xml)
-            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes', nodes], ['move_cursor_by_offset', -1])
-
-    def superscript(self, action=None, parameter=''):
-        document = self.workspace.active_document
-        insert = document.cursor.get_insert_node()
-
-        if document.cursor.has_selection(): return
-        if insert.parent.is_root() and not insert.is_first_in_parent() and insert.prev_in_parent().is_symbol():
-            xml = '<mathatom><mathlist>' + insert.prev_in_parent().value + '<end/></mathlist><mathlist></mathlist><mathlist><end/></mathlist></mathatom>'
-            parser = xml_parser.XMLParser()
-            nodes = parser.parse(xml)
-            document.add_composite_command(['selection_by_offset', -1], ['delete_selection'], ['insert_nodes', nodes], ['move_cursor_by_offset', -1])
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry

@@ -44,6 +44,7 @@ class Dialog(object):
         self.application = application
         self.workspace = workspace
         self.document = document
+        self.use_cases = application.use_cases
         self.init_current_values()
         self.view = InsertLinkView(self.main_window)
         self.setup()
@@ -131,9 +132,7 @@ class Dialog(object):
             if self.bounds == None:
                 tags_at_cursor = self.application.cursor_state.tags_at_cursor
                 text = xml_helpers.escape(self.current_values['link_target'])
-                parser = xml_parser.XMLParser()
-                nodes = parser.parse(text)
-                self.workspace.active_document.add_command('insert_nodes', nodes, self.current_values['link_target'], tags_at_cursor)
+                self.use_cases.insert_xml(text, tags_at_cursor, self.current_values['link_target'])
             else:
                 self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
             self.view.close()

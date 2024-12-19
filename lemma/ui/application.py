@@ -39,9 +39,10 @@ import lemma.ui.keyboard_shortcuts.shortcuts as shortcuts
 
 class Application(Adw.Application):
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, use_cases):
         Adw.Application.__init__(self, application_id='org.cvfosammmm.Lemma')
         self.workspace = workspace
+        self.use_cases = use_cases
 
     def do_activate(self):
         Adw.Application.do_activate(self)

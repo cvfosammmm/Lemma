@@ -30,10 +30,8 @@ class XMLParser(object):
         self.expat_parser.CharacterDataHandler = self.handle_data
 
         self.current_node = None
+        self.marks = dict()
         self.open_tags = []
-        self.insert_node = None
-        self.selection_node = None
-        self.prev_selection_node = None
 
     def parse(self, xml_string, root_node_type='root'):
         self.current_node = Node(root_node_type)
@@ -56,14 +54,13 @@ class XMLParser(object):
         if tag == 'end':
             node = Node('end')
             self.current_node.append(node)
+        if tag == 'placeholder':
+            node = Node('placeholder', '')
+            self.current_node.append(node)
 
-        if node != None and node.can_hold_cursor():
-            if 'grab_insert' in attrs:
-                self.insert_node = node
-            elif 'grab_selection' in attrs:
-                self.selection_node = node
-            elif 'add_prev_selection' in attrs:
-                self.prev_selection_node = node
+        if node != None and 'marks' in attrs:
+            for mark in attrs['marks'].split():
+                self.marks[mark] = node
 
     def handle_endtag(self, tag):
         self.open_tags.pop()

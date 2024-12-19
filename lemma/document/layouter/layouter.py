@@ -139,6 +139,14 @@ class Layouter(object):
 
             self.add_box(container, box)
 
+        elif node.is_placeholder():
+            width, height, left, top = FontManager.get_char_extents_single('▯', fontname=self.get_fontname(node))
+            top -= FontManager.get_cursor_offset(fontname=self.get_fontname(node))
+            box = Box('placeholder', width=width, height=height, left=left, top=top, node=node, fontname=self.get_fontname(node))
+            node.set_box(box)
+
+            self.add_box(container, box)
+
         elif node.is_widget():
             width, height, left, top = node.value.get_width(), node.value.get_height(), 0, 0
             height += 2 * FontManager.get_cursor_offset(fontname=self.get_fontname(node))

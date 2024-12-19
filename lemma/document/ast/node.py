@@ -123,6 +123,7 @@ class Node():
     def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
     def is_text(self): return self.type == 'char' and not self.is_mathsymbol() and not self.is_whitespace()
     def is_char(self): return self.type == 'char'
+    def is_placeholder(self): return self.type == 'placeholder'
     def is_widget(self): return self.type == 'widget'
     def is_mathatom(self): return self.type == 'mathatom'
     def is_mathlist(self): return self.type == 'mathlist'
@@ -262,7 +263,7 @@ class Node():
 
     def validate(self):
         if self.type == 'root':
-            return all([child.type in {'char', 'eol', 'widget', 'mathatom'} for child in self.children[:-1]]) \
+            return all([child.type in {'char', 'placeholder', 'eol', 'widget', 'mathatom'} for child in self.children]) \
                 and all([child.validate() for child in self.children])
 
         if self.type == 'mathatom':
@@ -272,11 +273,10 @@ class Node():
 
         if self.type == 'mathlist':
             return len(self.children) == 0 \
-                or self.children[-1].type == 'end' \
-                and all([child.type == 'char' for child in self.children[:-1]]) \
+                or all([child.type in {'char', 'placeholder', 'end'} for child in self.children]) \
                 and all([child.validate() for child in self.children])
 
-        if self.type in {'char', 'widget', 'eol', 'end'}:
+        if self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
             return len(self.children) == 0
 
 

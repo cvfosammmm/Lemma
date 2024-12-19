@@ -20,6 +20,7 @@ import sys, os.path, gettext
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.service_locator import ServiceLocator
 import lemma.workspace.workspace as workspace
+import lemma.use_cases.use_cases as use_cases
 import lemma.ui.application as application
 import lemma.storage.storage as storage
 
@@ -54,11 +55,12 @@ pathname = ServiceLocator.get_user_themes_folder()
 if not os.path.exists(pathname): os.mkdir(pathname)
 
 workspace = workspace.Workspace()
+use_cases = use_cases.UseCases(workspace)
 
 storage = storage.Storage(workspace)
 storage.populate_documents()
 storage.populate_workspace()
 storage.init_writer()
 
-view = application.Application(workspace)
+view = application.Application(workspace, use_cases)
 view.run(sys.argv)

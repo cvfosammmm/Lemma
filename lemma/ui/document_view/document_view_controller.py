@@ -30,8 +30,9 @@ import lemma.infrastructure.xml_parser as xml_parser
 
 class DocumentViewController():
 
-    def __init__(self, document_view):
+    def __init__(self, document_view, use_cases):
         self.model = document_view
+        self.use_cases = use_cases
         self.view = self.model.view
         self.content = self.view.content
 
@@ -242,6 +243,7 @@ class DocumentViewController():
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
         document = self.model.document
+        cursor_state = self.model.application.cursor_state
         insert = document.cursor.get_insert_node()
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
             case ('left', 0):
@@ -277,13 +279,9 @@ class DocumentViewController():
                     self.open_link(document.cursor.get_insert_node().link.target)
                 else:
                     parser = xml_parser.XMLParser()
-                    if document.cursor.has_selection():
-                        nodes = parser.parse('\n')
-                        document.add_composite_command(['delete_selection'], ['insert_nodes', nodes])
-                    else:
-                        nodes = parser.parse('\n')
-                        document.add_command('insert_nodes', nodes)
-                        self.replace_max_string_before_cursor(document)
+                    self.use_cases.insert_xml('\n')
+                    if not document.cursor.has_selection():
+                        self.use_cases.replace_max_string_before_cursor(cursor_state.tags_at_cursor)
 
             case ('escape', _):
                 if document.cursor.has_selection():
@@ -311,43 +309,10 @@ class DocumentViewController():
         if self.model.document == None: return False
         document = self.model.document
         cursor_state = self.model.application.cursor_state
-        parser = xml_parser.XMLParser()
-        nodes = parser.parse(xml_helpers.escape(text))
 
-        if document.cursor.has_selection():
-            document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, cursor_state.tags_at_cursor])
-        else:
-            document.add_command('insert_nodes', nodes, None, cursor_state.tags_at_cursor)
-            if CharacterDB.is_whitespace(text):
-                self.replace_max_string_before_cursor(document)
-
-    def replace_max_string_before_cursor(self, document):
-        last_node = document.cursor.get_insert_node().prev_in_parent()
-        first_node = last_node
-        for i in range(5):
-            prev_node = first_node.prev_in_parent()
-            if prev_node != None and prev_node.is_char():
-                first_node = prev_node
-            else:
-                break
-
-        subtree = document.ast.get_subtree(first_node.get_position(), last_node.get_position())
-        chars = ''.join([node.value for node in subtree])
-        cursor_state = self.model.application.cursor_state
-        if len(chars) >= 2:
-            for i in range(len(chars) - 1):
-                if CharacterDB.has_replacement(chars[i:]):
-                    length = len(chars) - i
-                    text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
-                    parser = xml_parser.XMLParser()
-                    nodes = parser.parse(text)
-                    commands = [['move_cursor_by_offset', -(length + 1)], ['selection_by_offset', length]]
-                    commands.append(['delete_selection'])
-                    commands.append(['insert_nodes', nodes, None, cursor_state.tags_at_cursor])
-                    commands.append(['move_cursor_by_offset', 1])
-                    document.add_composite_command(*commands)
-                    return True
-        return False
+        self.use_cases.insert_xml(xml_helpers.escape(text), cursor_state.tags_at_cursor)
+        if not document.cursor.has_selection() and CharacterDB.is_whitespace(text):
+            self.use_cases.replace_max_string_before_cursor(cursor_state.tags_at_cursor)
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()

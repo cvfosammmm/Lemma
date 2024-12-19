@@ -17,24 +17,18 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gio, GLib
+from gi.repository import Gtk
 
-import os.path
 from PIL import Image as PIL_Image
-
-from lemma.widgets.image import Image
-from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.document.ast.node import Node
 
 
 class Dialog(object):
 
     def __init__(self, main_window):
         self.main_window = main_window
-        self.document = None
 
-    def run(self, document):
-        self.document = document
+    def run(self, use_cases):
+        self.use_cases = use_cases
         self.setup()
         self.view.open(self.main_window, None, self.dialog_process_response)
 
@@ -56,9 +50,6 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                image = Image(filename)
-                if self.document.cursor.get_insert_node().parent.is_root():
-                    node = Node('widget', image)
-                    self.document.add_command('insert_nodes', [node])
+                self.use_cases.add_image_from_filename(filename)
 
 

@@ -240,10 +240,10 @@ class DocumentViewPresenter():
         if box.node == self.last_cursor_node:
             self.current_node_in_selection = False
 
-        if box.type in ['glyph', 'empty']:
+        if box.type in ['glyph', 'placeholder', 'empty']:
             self.update_fg_color(box.node)
 
-        if box.type in ['glyph', 'widget']:
+        if box.type in ['glyph', 'placeholder', 'widget']:
             if self.current_node_in_selection:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
                 ctx.rectangle(offset_x, offset_y, box.width, box.parent.height)
@@ -251,6 +251,17 @@ class DocumentViewPresenter():
 
         if box.type == 'glyph':
             surface = FontManager.get_surface(box.node.value, fontname=box.fontname)
+
+            if surface != None:
+                ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height + box.top)
+                pattern = ctx.get_source()
+                pattern.set_filter(cairo.Filter.BEST)
+                Gdk.cairo_set_source_rgba(ctx, self.fg_color)
+                ctx.mask(pattern)
+                ctx.fill()
+
+        if box.type == 'placeholder':
+            surface = FontManager.get_surface('▯', fontname=box.fontname)
 
             if surface != None:
                 ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height + box.top)

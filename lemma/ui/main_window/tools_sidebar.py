@@ -35,9 +35,9 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         self.symbols = list()
 
         self.math_sym = []
-        self.math_sym.append(['subscript', 'win.insert-xml(\'<mathatom><mathlist><end add_prev_selection=""/></mathlist><mathlist><end grab_insert=""/></mathlist><mathlist></mathlist></mathatom>\')'])
-        self.math_sym.append(['superscript', 'win.insert-xml(\'<mathatom><mathlist><end add_prev_selection=""/></mathlist><mathlist></mathlist><mathlist><end grab_insert=""/></mathlist></mathatom>\')'])
-        self.math_sym.append(['subsuperscript', 'win.insert-xml(\'<mathatom><mathlist><end add_prev_selection=""/></mathlist><mathlist><end grab_insert=""/></mathlist><mathlist><end/></mathlist></mathatom>\')'])
+        self.math_sym.append(['subscript', 'win.insert-xml(\'<mathatom><mathlist><end marks="add_prev_selection_or_placeholder"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>\')'])
+        self.math_sym.append(['superscript', 'win.insert-xml(\'<mathatom><mathlist><end marks="add_prev_selection_or_placeholder"/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>\')'])
+        self.math_sym.append(['subsuperscript', 'win.insert-xml(\'<mathatom><mathlist><end marks="add_prev_selection_or_placeholder"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
         self.symbols.append({'id': 'punctuation', 'name': 'Math Typesetting', 'symbols': self.math_sym})
 
         self.punctuation_sym = []
