@@ -34,15 +34,15 @@ class UseCases(object):
         nodes = parser.parse(xml, insert.parent.type)
         commands = [['delete_selection'], ['insert_nodes', nodes, link_target, tags_at_cursor]]
 
-        if 'add_prev_selection_or_placeholder' in parser.marks:
-            prev_selection_node = parser.marks['add_prev_selection_or_placeholder']
+        if 'prev_selection_start' in parser.marks and 'prev_selection_end' in parser.marks:
+            prev_selection_start = parser.marks['prev_selection_start']
+            prev_selection_end = parser.marks['prev_selection_end']
 
-            if document.cursor.has_selection():
+            if document.cursor.has_selection() and prev_selection_start.parent == prev_selection_end.parent:
                 subtree = document.ast.get_subtree(*document.cursor.get_state())
+                prev_selection_start.parent.remove_range(prev_selection_start, prev_selection_end)
                 for node in subtree:
-                    prev_selection_node.parent.insert_before(prev_selection_node, node.copy())
-            else:
-                prev_selection_node.parent.insert_before(prev_selection_node, Node('placeholder', ''))
+                    prev_selection_end.parent.insert_before(prev_selection_end, node.copy())
 
         if 'new_insert' in parser.marks and 'new_selection_bound' in parser.marks:
             commands.append(['move_cursor_to_node', parser.marks['new_insert'], parser.marks['new_selection_bound']])
