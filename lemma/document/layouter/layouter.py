@@ -31,6 +31,7 @@ class Layouter(object):
 
         self.current_number = []
 
+    #@helpers.timer
     def update(self):
         self.root = Box('vcontainer', width=0, height=0, fontname=self.get_fontname())
         self.current_line_box = Box('hcontainer', width=0, height=FontManager.get_line_height(fontname=self.get_fontname()), fontname=self.get_fontname())
@@ -221,7 +222,8 @@ class Layouter(object):
         if node.is_mathsymbol():
             return 'math'
 
-        if node.get_paragraph_style().startswith('h'): return node.get_paragraph_style()
+        if node.get_paragraph_style().startswith('h'):
+            return node.get_paragraph_style()
 
         if 'bold' in node.tags and 'italic' not in node.tags: return 'bold'
         if 'bold' in node.tags and 'italic' in node.tags: return 'bolditalic'

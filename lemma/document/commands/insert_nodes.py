@@ -20,12 +20,10 @@ from lemma.document.ast.link import Link
 
 class Command():
 
-    def __init__(self, nodes, link_target=None, tags=set()):
+    def __init__(self, nodes):
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = True
         self.nodes = nodes
-        self.link_target = link_target
-        self.tags = tags
         self.state = dict()
 
     def run(self, document):
@@ -34,10 +32,6 @@ class Command():
 
         for node in self.nodes:
             insert = document.cursor.get_insert_node()
-            node.tags = self.tags.copy()
-            node.paragraph_style = insert.paragraph_style
-            if self.link_target != None:
-                node.link = Link(self.link_target)
             insert.parent.insert_before(insert, node)
             self.state['nodes_added'].append(node)
 

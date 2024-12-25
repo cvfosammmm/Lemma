@@ -20,6 +20,7 @@ import lemma.infrastructure.xml_parser as xml_parser
 from lemma.db.character_db import CharacterDB
 from lemma.widgets.image import Image
 from lemma.document.ast.node import Node
+import lemma.helpers.helpers as helpers
 
 
 class UseCases(object):
@@ -27,12 +28,13 @@ class UseCases(object):
     def __init__(self, workspace):
         self.workspace = workspace
 
-    def insert_xml(self, xml, tags_at_cursor=set(), link_target=None):
+    @helpers.timer
+    def insert_xml(self, xml):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()
         parser = xml_parser.XMLParser()
         nodes = parser.parse(xml, insert.parent.type)
-        commands = [['delete_selection'], ['insert_nodes', nodes, link_target, tags_at_cursor]]
+        commands = [['delete_selection'], ['insert_nodes', nodes]]
 
         if 'prev_selection_start' in parser.marks and 'prev_selection_end' in parser.marks:
             prev_selection_start = parser.marks['prev_selection_start']
@@ -63,7 +65,7 @@ class UseCases(object):
             node = Node('widget', image)
             document.add_command('insert_nodes', [node])
 
-    def replace_max_string_before_cursor(self, tags_at_cursor=set()):
+    def replace_max_string_before_cursor(self, tags):
         document = self.workspace.active_document
 
         last_node = document.cursor.get_insert_node().prev_in_parent()
@@ -82,11 +84,12 @@ class UseCases(object):
                 if CharacterDB.has_replacement(chars[i:]):
                     length = len(chars) - i
                     text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
+                    xml = '<char tags="' + ' '.join(tags) + '">' + text + '</char>'
                     parser = xml_parser.XMLParser()
-                    nodes = parser.parse(text)
+                    nodes = parser.parse(xml)
                     commands = [['move_cursor_by_offset', -(length + 1)], ['selection_by_offset', length]]
                     commands.append(['delete_selection'])
-                    commands.append(['insert_nodes', nodes, None, tags_at_cursor])
+                    commands.append(['insert_nodes', nodes])
                     commands.append(['move_cursor_by_offset', 1])
                     document.add_composite_command(*commands)
                     return True

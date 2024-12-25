@@ -19,15 +19,15 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gio, GLib, GObject, Gdk
 
-import pickle
 from urllib.parse import urlparse
+import pickle, base64
 
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.infrastructure.layout_info import LayoutInfo
 import lemma.infrastructure.xml_helpers as xml_helpers
-import lemma.infrastructure.xml_parser as xml_parser
+import lemma.infrastructure.xml_exporter as xml_exporter
 
 
 class Actions(object):
@@ -220,9 +220,11 @@ class Actions(object):
         cursor = self.workspace.active_document.cursor
         subtree = ast.get_subtree(*cursor.get_state())
         chars = ''.join([node.value for node in subtree if node.is_char()])
+        exporter = xml_exporter.XMLExporter()
+        xml = b''.join([exporter.export_xml_bytes(node) for node in subtree])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
-        cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(pickle.dumps(subtree)))
+        cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml))
         cp_union = Gdk.ContentProvider.new_union([cp_text, cp_internal])
 
         clipboard.set_content(cp_union)
@@ -235,27 +237,25 @@ class Actions(object):
         document = self.workspace.active_document
 
         if result[1].startswith('lemma/ast'):
-            subtree = pickle.loads(result[0].read_bytes(8192 * 8192, None).get_data())
-            if document.cursor.get_insert_node().parent.type == subtree.type:
-                document.add_composite_command(['delete_selection'], ['insert_nodes', subtree])
+            xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
+            self.use_cases.insert_xml(xml)
 
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
             tags_at_cursor = self.application.cursor_state.tags_at_cursor
-            parser = xml_parser.XMLParser()
 
             if len(text) < 2000:
                 stext = text.strip()
                 parsed_url = urlparse(stext)
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
                     text = xml_helpers.escape(stext)
-                    nodes = parser.parse(text)
-                    document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, stext, tags_at_cursor])
+                    xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + stext + '">' + text + '</char>'
+                    self.use_cases.insert_xml(xml)
                     return
 
             text = xml_helpers.escape(text)
-            nodes = parser.parse(text)
-            document.add_composite_command(['delete_selection'], ['insert_nodes', nodes, None, tags_at_cursor])
+            xml = '<char tags="' + ' '.join(tags_at_cursor) + '">' + text + '</char>'
+            self.use_cases.insert_xml(text)
 
     def delete_selection(self, action=None, parameter=''):
         document = self.workspace.active_document
@@ -275,15 +275,15 @@ class Actions(object):
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
 
     def insert_xml(self, action=None, parameter=None):
-        self.use_cases.insert_xml(parameter.get_string(), self.application.cursor_state.tags_at_cursor)
+        self.use_cases.insert_xml(parameter.get_string())
 
     def subscript(self, action=None, parameter=''):
         xml = '<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>'
-        self.use_cases.insert_xml(xml, self.application.cursor_state.tags_at_cursor)
+        self.use_cases.insert_xml(xml)
 
     def superscript(self, action=None, parameter=''):
         xml = '<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>'
-        self.use_cases.insert_xml(xml, self.application.cursor_state.tags_at_cursor)
+        self.use_cases.insert_xml(xml)
 
     def set_paragraph_style(self, action=None, parameter=None):
         document = self.workspace.active_document

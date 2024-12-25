@@ -26,6 +26,7 @@ import cairo
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
+import lemma.helpers.helpers as helpers
 
 
 class DocumentViewPresenter():
@@ -44,6 +45,7 @@ class DocumentViewPresenter():
 
         self.model.connect('changed', self.on_change)
 
+    #@helpers.timer
     def on_change(self, model):
         if self.model.document == None: return
 
@@ -190,6 +192,7 @@ class DocumentViewPresenter():
 
         return False
 
+    #@helpers.timer
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return
 
@@ -224,6 +227,9 @@ class DocumentViewPresenter():
 
     def draw_box(self, ctx, box, offset_x, offset_y):
         if box.type == 'vcontainer':
+            if box.parent != None:
+                offset_y += box.parent.height - box.height
+
             for child in box.children:
                 self.draw_box(ctx, child, offset_x, offset_y)
                 offset_y += child.height

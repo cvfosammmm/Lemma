@@ -132,7 +132,8 @@ class Dialog(object):
             if self.bounds == None:
                 tags_at_cursor = self.application.cursor_state.tags_at_cursor
                 text = xml_helpers.escape(self.current_values['link_target'])
-                self.use_cases.insert_xml(text, tags_at_cursor, self.current_values['link_target'])
+                xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + self.current_values['link_target'] + '">' + text + '</char>'
+                self.use_cases.insert_xml(xml)
             else:
                 self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
             self.view.close()

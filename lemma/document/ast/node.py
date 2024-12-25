@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import lemma.infrastructure.xml_helpers as xml_helpers
 from lemma.document.ast.position import Position
 from lemma.db.character_db import CharacterDB
 
@@ -119,7 +120,7 @@ class Node():
     def is_eol(self): return self.type == 'eol'
     def is_end(self): return self.type == 'end'
     def is_mathsymbol(self): return self.type == 'char' and CharacterDB.is_mathsymbol(self.value)
-    def is_whitespace(self): return self.is_char() and CharacterDB.is_whitespace(self.value)
+    def is_whitespace(self): return self.type == 'eol' or (self.is_char() and CharacterDB.is_whitespace(self.value))
     def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
     def is_text(self): return self.type == 'char' and not self.is_mathsymbol() and not self.is_whitespace()
     def is_char(self): return self.type == 'char'

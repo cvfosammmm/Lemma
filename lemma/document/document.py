@@ -81,7 +81,7 @@ class Document(Observable):
         self.clipping.update()
         self.html_scanner.update()
         self.plaintext_scanner.update()
-        #self.update_implicit_x_position()
+        self.update_implicit_x_position()
 
         self.add_change_code('changed')
 

@@ -310,7 +310,7 @@ class DocumentViewController():
         document = self.model.document
         cursor_state = self.model.application.cursor_state
 
-        self.use_cases.insert_xml(xml_helpers.escape(text), cursor_state.tags_at_cursor)
+        self.use_cases.insert_xml('<char tags="' + ' '.join(cursor_state.tags_at_cursor) + '">' + xml_helpers.escape(text) + '</char>')
         if not document.cursor.has_selection() and CharacterDB.is_whitespace(text):
             self.use_cases.replace_max_string_before_cursor(cursor_state.tags_at_cursor)
 

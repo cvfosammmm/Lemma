@@ -16,8 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import xml.parsers.expat
+import pickle, base64
 
 from lemma.document.ast.node import Node
+from lemma.document.ast.link import Link
 
 
 class XMLParser(object):
@@ -32,6 +34,9 @@ class XMLParser(object):
         self.current_node = None
         self.marks = dict()
         self.open_tags = []
+        self.current_link = None
+        self.current_tags = None
+        self.current_paragraph_style = 'p'
 
     def parse(self, xml_string, root_node_type='root'):
         self.current_node = Node(root_node_type)
@@ -41,6 +46,19 @@ class XMLParser(object):
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)
+
+        if 'link_target' in attrs:
+            self.current_link = Link(attrs['link_target'])
+        else:
+            self.current_link = None
+        if 'tags' in attrs:
+            self.current_tags = set(attrs['tags'].split())
+        else:
+            self.current_tags = set()
+        if 'paragraph_style' in attrs:
+            self.current_paragraph_style = attrs['paragraph_style']
+        else:
+            self.current_paragraph_style = 'p'
 
         node = None
         if tag == 'mathatom':
@@ -53,9 +71,15 @@ class XMLParser(object):
             self.current_node = node
         if tag == 'end':
             node = Node('end')
+            node.link = self.current_link
+            node.tags = self.current_tags
+            node.paragraph_style = self.current_paragraph_style
             self.current_node.append(node)
         if tag == 'placeholder':
             node = Node('placeholder', '')
+            node.link = self.current_link
+            node.tags = self.current_tags
+            node.paragraph_style = self.current_paragraph_style
             self.current_node.append(node)
 
         if node != None and 'marks' in attrs:
@@ -71,11 +95,25 @@ class XMLParser(object):
             self.current_node = self.current_node.parent
 
     def handle_data(self, data):
-        for char in data:
-            if char == '\n':
-                node = Node('eol')
-            else:
-                node = Node('char', char)
+        if 'widget' in self.open_tags:
+            node = Node('widget', pickle.loads(base64.b64decode(data)))
+            node.link = self.current_link
+            node.tags = self.current_tags
+            node.paragraph_style = self.current_paragraph_style
             self.current_node.append(node)
+
+        else:
+            for char in data:
+                if char == '\n':
+                    node = Node('eol')
+                    node.link = self.current_link
+                    node.tags = self.current_tags
+                    node.paragraph_style = self.current_paragraph_style
+                else:
+                    node = Node('char', char)
+                    node.link = self.current_link
+                    node.tags = self.current_tags
+                    node.paragraph_style = self.current_paragraph_style
+                self.current_node.append(node)
 
 
