@@ -63,7 +63,6 @@ class HTMLScanner(object):
             result[-1].append(node)
             if node.is_eol():
                 result.append(list())
-        result.pop()
 
         return result
 

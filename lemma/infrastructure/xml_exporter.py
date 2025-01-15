@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import pickle, base64
+import pickle
+import lemma.infrastructure.xml_helpers as xml_helpers
 
 
 class XMLExporter(object):
@@ -24,37 +25,37 @@ class XMLExporter(object):
         pass
 
     def export_xml_bytes(self, node):
-        attributes = b' paragraph_style="' + node.paragraph_style.encode() + b'"'
+        attributes = ' paragraph_style="' + node.paragraph_style + '"'
         if node.link != None:
-            attributes += b' link_target="' + node.link.target.encode() + b'"'
+            attributes += ' link_target="' + node.link.target + '"'
         if len(node.tags) > 0:
-            attributes += b' tags="' + ' '.join(node.tags).encode() + b'"'
+            attributes += ' tags="' + ' '.join(node.tags) + '"'
 
         if node.type == 'root':
-            return b'<root' + attributes + b'>'\
-                + b''.join([self.export_xml_bytes(child) for child in node.children]) + b'</root>'
+            return '<root' + attributes + '>'\
+                + ''.join([self.export_xml_bytes(child) for child in node.children]) + '</root>'
 
         if node.type == 'mathatom':
-            return b'<mathatom' + attributes + b'>'\
-                + b''.join([self.export_xml_bytes(child) for child in node.children]) + b'</mathatom>'
+            return '<mathatom' + attributes + '>'\
+                + ''.join([self.export_xml_bytes(child) for child in node.children]) + '</mathatom>'
 
         if node.type == 'mathlist':
-            return b'<mathlist' + attributes + b'>'\
-                + b''.join([self.export_xml_bytes(child) for child in node.children]) + b'</mathlist>'
+            return '<mathlist' + attributes + '>'\
+                + ''.join([self.export_xml_bytes(child) for child in node.children]) + '</mathlist>'
 
         if node.type == 'char':
-            return b'<char' + attributes + b'>' + node.value.encode() + b'</char>'
+            return '<char' + attributes + '>' + xml_helpers.escape(node.value) + '</char>'
 
         if node.type == 'widget':
-            return b'<widget' + attributes + b'><![CDATA[' + base64.b64encode(pickle.dumps(node.value)) + b']]></widget>'
+            return '<widget' + attributes + '><![CDATA[' + str(pickle.dumps(node.value)) + ']]></widget>'
 
         if node.type == 'placeholder':
-            return b'<placeholder' + attributes + b'/>'
+            return '<placeholder' + attributes + '/>'
 
         if node.type == 'eol':
-            return b'<eol' + attributes + b'/>'
+            return '<char' + attributes + '>\n</char>'
 
         if node.type == 'end':
-            return b'<end' + attributes + b'/>'
+            return '<end' + attributes + '/>'
 
 

@@ -28,13 +28,29 @@ class UseCases(object):
     def __init__(self, workspace):
         self.workspace = workspace
 
-    @helpers.timer
+    #@helpers.timer
     def insert_xml(self, xml):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()
+        insert_prev = insert.prev_in_parent()
         parser = xml_parser.XMLParser()
         nodes = parser.parse(xml, insert.parent.type)
         commands = [['delete_selection'], ['insert_nodes', nodes]]
+
+        if len(nodes) == 0: return
+
+        if insert_prev != None and not insert_prev.is_eol():
+            last_node_style = nodes[-1].paragraph_style
+            for node in nodes:
+                node.paragraph_style = insert_prev.paragraph_style
+                if node.is_eol():
+                    if insert.is_eol():
+                        insert.paragraph_style = last_node_style
+                    break
+        if not insert.is_eol():
+            for node in reversed(nodes):
+                if node.is_eol(): break
+                node.paragraph_style = insert.paragraph_style
 
         if 'prev_selection_start' in parser.marks and 'prev_selection_end' in parser.marks:
             prev_selection_start = parser.marks['prev_selection_start']
@@ -87,7 +103,7 @@ class UseCases(object):
                     xml = '<char tags="' + ' '.join(tags) + '">' + text + '</char>'
                     parser = xml_parser.XMLParser()
                     nodes = parser.parse(xml)
-                    commands = [['move_cursor_by_offset', -(length + 1)], ['selection_by_offset', length]]
+                    commands = [['move_cursor_by_offset', -(length + 1)], ['move_cursor_by_offset', length, True]]
                     commands.append(['delete_selection'])
                     commands.append(['insert_nodes', nodes])
                     commands.append(['move_cursor_by_offset', 1])

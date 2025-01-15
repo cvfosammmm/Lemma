@@ -50,9 +50,12 @@ class Command(HTMLParser):
         self.feed(head)
 
         if body == '':
-            self.composite.append(Node('eol'))
+            self.composite.append(Node('end'))
         else:
             self.feed(body)
+            del(self.composite.children[-1])
+            self.composite.append(Node('end'))
+            self.composite.children[-1].paragraph_style = self.paragraph_style
         document.ast = self.composite
         document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
         document.set_scroll_insert_on_screen_after_layout_update()

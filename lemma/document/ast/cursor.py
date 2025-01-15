@@ -39,12 +39,6 @@ class Cursor():
     def set_selection_position(self, position):
         self.set_selection_node(self.document.ast.get_node_at_position(position))
 
-    def move_insert_left(self):
-        self.move_insert_to_node(self.prev(self.get_insert_node()))
-
-    def move_insert_right(self):
-        self.move_insert_to_node(self.next(self.get_insert_node()))
-
     def prev(self, node):
         if not node.is_first_in_parent():
             node = node.parent[node.parent.index(node) - 1]
@@ -75,12 +69,6 @@ class Cursor():
             return self.next(node)
 
         return node
-
-    def move_insert_left_with_selection(self):
-        self.move_insert_to_node_with_selection(self.prev_no_descent(self.get_insert_node()))
-
-    def move_insert_right_with_selection(self):
-        self.move_insert_to_node_with_selection(self.next_no_descent(self.get_insert_node()))
 
     def prev_no_descent(self, node):
         if node != node.parent[0]:

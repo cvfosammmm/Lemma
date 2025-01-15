@@ -27,6 +27,7 @@ import lemma.infrastructure.settings as settingscontroller
 class ServiceLocator():
 
     settings = None
+    workspace = None
     lemma_version = None
     resources_path = None
     app_icons_path = None
@@ -36,6 +37,12 @@ class ServiceLocator():
         if ServiceLocator.settings == None:
             ServiceLocator.settings = settingscontroller.Settings(ServiceLocator.get_config_folder())
         return ServiceLocator.settings
+
+    def set_workspace(workspace):
+        ServiceLocator.workspace = workspace
+
+    def get_workspace():
+        return ServiceLocator.workspace
 
     def get_regex_matcher(pattern):
         try:

@@ -31,6 +31,7 @@ class Node():
         self.tags = set()
         self.link = None
         self.paragraph_style = 'p'
+        self.layout = None
 
     def set_parent(self, parent):
         self.parent = parent
@@ -120,7 +121,7 @@ class Node():
     def is_eol(self): return self.type == 'eol'
     def is_end(self): return self.type == 'end'
     def is_mathsymbol(self): return self.type == 'char' and CharacterDB.is_mathsymbol(self.value)
-    def is_whitespace(self): return self.type == 'eol' or (self.is_char() and CharacterDB.is_whitespace(self.value))
+    def is_whitespace(self): return self.type == 'eol' or (self.is_char() and self.value.isspace())
     def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
     def is_text(self): return self.type == 'char' and not self.is_mathsymbol() and not self.is_whitespace()
     def is_char(self): return self.type == 'char'
@@ -205,18 +206,6 @@ class Node():
 
     def line_bounds(self):
         return (self.line_start().get_position(), self.line_end().get_position())
-
-    def get_xy(self):
-        box = self.box
-        x, y = (0, 0)
-
-        while not box.parent == None:
-            new_x, new_y = box.parent.get_xy_at_child(box)
-            x += new_x
-            y += new_y
-            box = box.parent
-
-        return x, y
 
     def prev_in_parent(self):
         if self != self.parent[0]:

@@ -18,8 +18,9 @@
 
 class Command():
 
-    def __init__(self, offset):
+    def __init__(self, offset, do_selection=False):
         self.offset = offset
+        self.do_selection = do_selection
         self.is_undo_checkpoint = False
         self.update_implicit_x_position = True
         self.state = dict()
@@ -27,12 +28,21 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        if self.offset < 0:
-            for i in range(-self.offset):
-                document.cursor.move_insert_left()
+        cursor = document.cursor
+        if self.do_selection:
+            if self.offset < 0:
+                for i in range(-self.offset):
+                    cursor.move_insert_to_node_with_selection(cursor.prev_no_descent(cursor.get_insert_node()))
+            else:
+                for i in range(self.offset):
+                    cursor.move_insert_to_node_with_selection(cursor.next_no_descent(cursor.get_insert_node()))
         else:
-            for i in range(self.offset):
-                document.cursor.move_insert_right()
+            if self.offset < 0:
+                for i in range(-self.offset):
+                    cursor.move_insert_to_node(cursor.prev(cursor.get_insert_node()))
+            else:
+                for i in range(self.offset):
+                    cursor.move_insert_to_node(cursor.next(cursor.get_insert_node()))
 
         document.set_scroll_insert_on_screen_after_layout_update()
 

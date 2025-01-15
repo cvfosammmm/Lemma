@@ -15,20 +15,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.infrastructure.font_manager import FontManager
+from lemma.document.layout.layout import Layout
 
-class Command():
 
-    def __init__(self):
-        self.is_undo_checkpoint = False
-        self.update_implicit_x_position = True
-        self.state = dict()
+class LayoutPlaceholder(Layout):
 
-    def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
-        document.cursor.move_insert_to_node(document.ast[0])
-        document.cursor.move_selection_bound_to_node(document.ast[-1])
+    def __init__(self, node, parent):
+        Layout.__init__(self)
 
-    def undo(self, document):
-        document.cursor.set_state(self.state['cursor_state_before'])
+        self.node = node
+        node.layout = self
+
+        self.parent = parent
+        self.children = list()
+
+    def layout(self):
+        fontname = FontManager.get_fontname_from_node(self.node)
+        width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
+
+        self.width = width
+        self.height = height
+        self.x = None
+        self.y = None
+
+    def accept_presenter(self, presenter):
+        presenter.draw_layout_placeholder(self)
 
 

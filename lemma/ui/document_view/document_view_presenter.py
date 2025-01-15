@@ -35,11 +35,7 @@ class DocumentViewPresenter():
         self.model = model
         self.view = self.model.view
         self.content = self.view.content
-        self.cursor_coords = None
-        self.current_node_in_selection = False
         self.scrolling_job = None
-        self.fontname = None
-        self.fg_color = None
 
         self.content.set_draw_func(self.draw)
 
@@ -111,18 +107,18 @@ class DocumentViewPresenter():
         if y < -self.view.subtitle_height:
             self.content.set_cursor_from_name('text')
         elif y > 0:
+            self.content.set_cursor_from_name('text')
             leaf_box = document.layout.get_leaf_at_xy(x, y)
             if leaf_box != None:
-                node = leaf_box.get_node()
-                if node.link != None:
-                    self.content.set_cursor_from_name('pointer')
-                    link = node.link
-                elif node.is_widget():
-                    self.content.set_cursor_from_name(node.value.get_cursor_name())
-                else:
-                    self.content.set_cursor_from_name('text')
-            else:
-                self.content.set_cursor_from_name('text')
+                node = leaf_box.node
+                if node != None:
+                    if node.link != None:
+                        self.content.set_cursor_from_name('pointer')
+                        link = node.link
+                    elif node.is_widget():
+                        self.content.set_cursor_from_name(node.value.get_cursor_name())
+                    else:
+                        self.content.set_cursor_from_name('text')
         else:
             self.content.set_cursor_from_name('default')
 
@@ -134,10 +130,10 @@ class DocumentViewPresenter():
     def scroll_insert_on_screen(self, animate=False):
         document = self.model.document
         insert_node = document.cursor.get_insert_node()
-        insert_position = insert_node.get_xy()
+        insert_position = insert_node.layout.get_absolute_xy()
         content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
         insert_y = insert_position[1] + content_offset
-        insert_height = insert_node.box.parent.height
+        insert_height = insert_node.layout.height
         window_height = self.model.height
         scrolling_offset_y = document.clipping.offset_y
 
@@ -196,17 +192,123 @@ class DocumentViewPresenter():
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return
 
-        self.cursor_coords = None
-        self.current_node_in_selection = False
-        self.first_cursor_node = self.model.document.cursor.get_first_node()
-        self.last_cursor_node = self.model.document.cursor.get_last_node()
-        scrolling_offset_y = self.model.document.clipping.offset_y
+        document = self.model.document
+        offset_x = self.view.padding_left
+        scrolling_offset_y = document.clipping.offset_y
+        offset_y = self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset_y
+
+        self.ctx = ctx
+        self.drawing_state = {'in_selection': False}
+        self.offset_x, self.offset_y = offset_x, offset_y
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
+        document.layout.accept_presenter(self)
+        self.draw_cursor(ctx, self.offset_x, self.offset_y)
 
-        self.draw_box(ctx, self.model.document.layout, self.view.padding_left, self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset_y)
+    def draw_layout_block(self, layout):
+        self.update_selection_state(layout)
+        self.draw_children(layout)
 
-        self.draw_cursor(ctx)
+    def draw_layout_line(self, layout):
+        self.update_selection_state(layout)
+        self.draw_children(layout)
+
+    def draw_layout_char(self, layout):
+        self.update_selection_state(layout)
+        self.draw_selection(layout)
+
+        fontname = FontManager.get_fontname_from_node(layout.node)
+        fg_color = self.get_fg_color_by_node(layout.node)
+        baseline = FontManager.get_ascend(fontname=fontname)
+
+        surface = FontManager.get_surface(layout.node.value, fontname=fontname)
+        if surface != None:
+            self.ctx.set_source_surface(surface, self.offset_x + layout.x + layout.left, self.offset_y + baseline + layout.y + layout.top)
+            pattern = self.ctx.get_source()
+            pattern.set_filter(cairo.Filter.BEST)
+            Gdk.cairo_set_source_rgba(self.ctx, fg_color)
+            self.ctx.mask(pattern)
+            self.ctx.fill()
+
+    def draw_layout_widget(self, layout):
+        self.update_selection_state(layout)
+        self.draw_selection(layout)
+
+        surface = layout.node.value.get_cairo_surface()
+        fontname = FontManager.get_fontname_from_node(layout.node)
+        top = -FontManager.get_descend(fontname=fontname)
+        self.ctx.set_source_surface(surface, self.offset_x + layout.x, self.offset_y + layout.y + top)
+        self.ctx.rectangle(self.offset_x + layout.x, self.offset_y + layout.y, layout.width, layout.height)
+        self.ctx.fill()
+
+    def draw_layout_placeholder(self, layout):
+        self.update_selection_state(layout)
+        self.draw_selection(layout)
+
+        fontname = FontManager.get_fontname_from_node(layout.node)
+        baseline = FontManager.get_ascend(fontname=fontname)
+
+        width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
+        fg_color = self.get_fg_color_by_node(layout.node)
+        top += baseline
+
+        surface = FontManager.get_surface('▯', fontname=fontname)
+        self.ctx.set_source_surface(surface, self.offset_x + layout.x + left, self.offset_y + layout.y + top)
+        pattern = self.ctx.get_source()
+        pattern.set_filter(cairo.Filter.BEST)
+        Gdk.cairo_set_source_rgba(self.ctx, fg_color)
+        self.ctx.mask(pattern)
+        self.ctx.fill()
+
+    def draw_layout_mathatom(self, layout):
+        self.update_selection_state(layout)
+
+        if self.drawing_state['in_selection']:
+            Gdk.cairo_set_source_rgba(self.ctx, ColorManager.get_ui_color('selection_bg'))
+            self.ctx.rectangle(self.offset_x + layout.x, self.offset_y, layout.width, layout.parent.height)
+            self.ctx.fill()
+
+        self.draw_children(layout)
+
+    def draw_layout(self, layout):
+        self.update_selection_state(layout)
+        self.draw_children(layout)
+
+    def draw_selection(self, layout):
+        if self.drawing_state['in_selection']:
+            Gdk.cairo_set_source_rgba(self.ctx, ColorManager.get_ui_color('selection_bg'))
+            self.ctx.rectangle(self.offset_x + layout.x, self.offset_y, layout.width, layout.parent.height)
+            self.ctx.fill()
+
+    def draw_children(self, layout):
+        self.offset_x += layout.x
+        self.offset_y += layout.y
+        for child in layout.children:
+            child.accept_presenter(self)
+        self.offset_x -= layout.x
+        self.offset_y -= layout.y
+
+    def update_selection_state(self, layout):
+        document = self.model.document
+        self.first_selection_node = document.cursor.get_first_node()
+        self.last_selection_node = document.cursor.get_last_node()
+
+        if layout.node != None and layout.node == self.first_selection_node:
+            self.drawing_state['in_selection'] = True
+        if layout.node != None and layout.node == self.last_selection_node:
+            self.drawing_state['in_selection'] = False
+
+    def get_fg_color_by_node(self, node):
+        if node.is_mathsymbol():
+            return ColorManager.get_ui_color('math')
+        elif node.link != None:
+            if urlparse(node.link.target).scheme in ['http', 'https'] or \
+                self.model.workspace.get_by_title(node.link.target) != None:
+                return ColorManager.get_ui_color('links')
+            else:
+                return ColorManager.get_ui_color('links_page_not_existing')
+        else:
+            return ColorManager.get_ui_color('text')
 
     def draw_title(self, ctx, offset_x, offset_y):
         ctx.move_to(offset_x, offset_y)
@@ -225,81 +327,17 @@ class DocumentViewPresenter():
         ctx.rectangle(offset_x, offset_y + self.view.title_height, self.view.title_width, 1)
         ctx.fill()
 
-    def draw_box(self, ctx, box, offset_x, offset_y):
-        if box.type == 'vcontainer':
-            if box.parent != None:
-                offset_y += box.parent.height - box.height
-
-            for child in box.children:
-                self.draw_box(ctx, child, offset_x, offset_y)
-                offset_y += child.height
-
-        if box.type == 'hcontainer':
-            for child in box.children:
-                self.draw_box(ctx, child, offset_x, offset_y)
-                offset_x += child.width
-
-        if box == self.model.document.cursor.get_insert_node().box and not self.model.document.cursor.has_selection():
-            self.cursor_coords = (offset_x, offset_y + box.parent.height - box.height, 1, box.height)
-        if box.node == self.first_cursor_node:
-            self.current_node_in_selection = True
-        if box.node == self.last_cursor_node:
-            self.current_node_in_selection = False
-
-        if box.type in ['glyph', 'placeholder', 'empty']:
-            self.update_fg_color(box.node)
-
-        if box.type in ['glyph', 'placeholder', 'widget']:
-            if self.current_node_in_selection:
-                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-                ctx.rectangle(offset_x, offset_y, box.width, box.parent.height)
-                ctx.fill()
-
-        if box.type == 'glyph':
-            surface = FontManager.get_surface(box.node.value, fontname=box.fontname)
-
-            if surface != None:
-                ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height + box.top)
-                pattern = ctx.get_source()
-                pattern.set_filter(cairo.Filter.BEST)
-                Gdk.cairo_set_source_rgba(ctx, self.fg_color)
-                ctx.mask(pattern)
-                ctx.fill()
-
-        if box.type == 'placeholder':
-            surface = FontManager.get_surface('▯', fontname=box.fontname)
-
-            if surface != None:
-                ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height + box.top)
-                pattern = ctx.get_source()
-                pattern.set_filter(cairo.Filter.BEST)
-                Gdk.cairo_set_source_rgba(ctx, self.fg_color)
-                ctx.mask(pattern)
-                ctx.fill()
-
-        if box.type == 'widget':
-            surface = box.node.value.get_cairo_surface()
-            ctx.set_source_surface(surface, offset_x + box.left, offset_y + box.parent.height - box.height + box.top)
-            ctx.rectangle(offset_x + box.left, offset_y + box.parent.height - box.height + box.top, box.width, box.height)
-            ctx.fill()
-
-    def draw_cursor(self, ctx):
-        if self.cursor_coords == None: return
+    def draw_cursor(self, ctx, offset_x, offset_y):
         if not self.content.has_focus(): return
+        if self.model.document.cursor.has_selection(): return
+
+        insert = self.model.document.cursor.get_insert_node()
+        layout = insert.layout
+        x, y = insert.layout.get_absolute_xy()
+        cursor_coords = (x + offset_x, y + offset_y, 1, layout.height)
 
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('cursor'))
-        ctx.rectangle(*self.cursor_coords)
+        ctx.rectangle(*cursor_coords)
         ctx.fill()
-
-    def update_fg_color(self, node):
-        if node.is_mathsymbol():
-            self.fg_color = ColorManager.get_ui_color('math')
-        elif node.link != None:
-            if urlparse(node.link.target).scheme in ['http', 'https'] or self.model.workspace.get_by_title(node.link.target) != None:
-                self.fg_color = ColorManager.get_ui_color('links')
-            else:
-                self.fg_color = ColorManager.get_ui_color('links_page_not_existing')
-        else:
-            self.fg_color = ColorManager.get_ui_color('text')
 
 

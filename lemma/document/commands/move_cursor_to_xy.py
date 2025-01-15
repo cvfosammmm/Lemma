@@ -18,9 +18,10 @@
 
 class Command():
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, do_selection=False):
         self.x = x
         self.y = y
+        self.do_selection = do_selection
         self.is_undo_checkpoint = False
         self.update_implicit_x_position = True
         self.state = dict()
@@ -28,8 +29,12 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        node = document.layout.get_node_at_xy(self.x, self.y)
-        document.cursor.move_insert_to_node(node)
+        layout = document.layout.get_closest_leaf_at_xy(self.x, self.y)
+
+        if self.do_selection:
+            document.cursor.move_insert_to_node_with_selection(layout.node)
+        else:
+            document.cursor.move_insert_to_node(layout.node)
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])

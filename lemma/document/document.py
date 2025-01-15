@@ -19,11 +19,11 @@ import time, os.path, datetime
 
 from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
+from lemma.document.layout.layouter import Layouter
 from lemma.document.housekeeper.housekeeper import Housekeeper
-from lemma.document.layouter.layouter import Layouter
 from lemma.document.clipping.clipping import Clipping
-from lemma.document.html_scanner.html_scanner import HTMLScanner
-from lemma.document.plaintext_scanner.plaintext_scanner import PlaintextScanner
+from lemma.document.html.html_scanner import HTMLScanner
+from lemma.document.plaintext.plaintext_scanner import PlaintextScanner
 from lemma.document.command_processor.command_processor import CommandProcessor
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.helpers.observable import Observable
@@ -45,17 +45,16 @@ class Document(Observable):
         self.id = id
         self.title = ''
         self.ast = Node('root')
-        self.ast.insert(0, Node('eol'))
+        self.ast.insert(0, Node('end'))
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.implicit_x_position = 0
         self.scroll_insert_on_screen_after_layout_update = False
-        self.layout = None
         self.html = None
         self.plaintext = None
         self.links = []
 
-        self.housekeeper = Housekeeper(self)
         self.layouter = Layouter(self)
+        self.housekeeper = Housekeeper(self)
         self.clipping = Clipping(self)
         self.html_scanner = HTMLScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
@@ -91,7 +90,7 @@ class Document(Observable):
     def update_implicit_x_position(self):
         last_command = self.command_processor.get_last_command()
         if last_command != None and last_command.update_implicit_x_position:
-            x, y = self.cursor.get_insert_node().get_xy()
+            x, y = self.cursor.get_insert_node().layout.get_absolute_xy()
             self.implicit_x_position = x
 
     def set_title(self, title):

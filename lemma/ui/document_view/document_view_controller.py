@@ -101,12 +101,12 @@ class DocumentViewController():
             self.model.init_renaming()
 
         elif y > 0:
-            link = document.layout.get_link_at_xy(x, y)
+            link = self.get_link_at_xy(x, y)
             leaf_box = document.layout.get_leaf_at_xy(x, y)
 
             if n_press % 3 == 1:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                    document.add_command('selection_xy', x, y)
+                    document.add_command('move_cursor_to_xy', x, y, True)
 
                 elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
                     document.add_command('move_cursor_to_xy', x, y)
@@ -163,7 +163,7 @@ class DocumentViewController():
             if y >= -self.view.subtitle_height:
                 document = self.model.document
 
-                link = document.layout.get_link_at_xy(x, y)
+                link = self.get_link_at_xy(x, y)
                 if link != None and link.target == self.model.selected_link_target:
                     self.open_link(link.target)
 
@@ -207,7 +207,7 @@ class DocumentViewController():
         y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
         y += self.model.document.clipping.offset_y
 
-        self.model.document.add_command('selection_xy', x, y)
+        self.model.document.add_command('move_cursor_to_xy', x, y, True)
 
     def on_drag_end(self, gesture, x, y, data=None):
         pass
@@ -262,17 +262,17 @@ class DocumentViewController():
             case ('down', 0): document.add_command('down')
             case ('home', 0): document.add_command('line_start')
             case ('end', 0): document.add_command('line_end')
-            case ('page_up', 0): document.add_command('page_up', self.model.height)
-            case ('page_down', 0): document.add_command('page_down', self.model.height)
+            case ('page_up', 0): document.add_command('page', -self.model.height + 100)
+            case ('page_down', 0): document.add_command('page', self.model.height - 100)
 
-            case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_by_offset', -1)
-            case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_by_offset', 1)
-            case ('up', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_up')
-            case ('down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_down')
-            case ('home', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_line_start')
-            case ('end', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_line_end')
-            case ('page_up', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_up', self.model.height)
-            case ('page_down', Gdk.ModifierType.SHIFT_MASK): document.add_command('selection_page_down', self.model.height)
+            case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', -1, True)
+            case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', 1, True)
+            case ('up', Gdk.ModifierType.SHIFT_MASK): document.add_command('up', True)
+            case ('down', Gdk.ModifierType.SHIFT_MASK): document.add_command('down', True)
+            case ('home', Gdk.ModifierType.SHIFT_MASK): document.add_command('line_start', True)
+            case ('end', Gdk.ModifierType.SHIFT_MASK): document.add_command('line_end', True)
+            case ('page_up', Gdk.ModifierType.SHIFT_MASK): document.add_command('page', -self.model.height + 100, True)
+            case ('page_down', Gdk.ModifierType.SHIFT_MASK): document.add_command('page', self.model.height - 100, True)
 
             case ('return', _):
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
@@ -294,13 +294,13 @@ class DocumentViewController():
                     document.add_command('delete_selection')
                 else:
                     if not insert.is_first_in_parent() or len(insert.parent) == 1:
-                        document.add_composite_command(['selection_by_offset', -1], ['delete_selection'])
+                        document.add_composite_command(['move_cursor_by_offset', -1, True], ['delete_selection'])
             case ('delete', _):
                 if document.cursor.has_selection():
                     document.add_command('delete_selection')
                 else:
                     if not insert.is_last_in_parent() or len(insert.parent) == 1:
-                        document.add_composite_command(['selection_by_offset', 1], ['delete_selection'])
+                        document.add_composite_command(['move_cursor_by_offset', 1, True], ['delete_selection'])
 
             case _: return False
         return True
@@ -311,7 +311,7 @@ class DocumentViewController():
         cursor_state = self.model.application.cursor_state
 
         self.use_cases.insert_xml('<char tags="' + ' '.join(cursor_state.tags_at_cursor) + '">' + xml_helpers.escape(text) + '</char>')
-        if not document.cursor.has_selection() and CharacterDB.is_whitespace(text):
+        if not document.cursor.has_selection() and text.isspace():
             self.use_cases.replace_max_string_before_cursor(cursor_state.tags_at_cursor)
 
     def on_focus_in(self, controller):
@@ -344,6 +344,14 @@ class DocumentViewController():
         offset_y = self.view.adjustment_y.get_value()
         self.model.last_cursor_or_scrolling_change = time.time()
         self.model.document.add_command('scroll_to_xy', offset_x, offset_y)
+
+    def get_link_at_xy(self, x, y):
+        layout = self.model.document.layout.get_leaf_at_xy(x, y)
+
+        if layout != None:
+            return layout.node.link
+        else:
+            return None
 
     def open_link(self, link_target):
         workspace = self.model.workspace

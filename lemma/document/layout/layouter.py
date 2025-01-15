@@ -18,6 +18,7 @@
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.layout_info import LayoutInfo
 from lemma.document.layout.layout_block import LayoutBlock
+from lemma.document.layout.layout_word import LayoutWord
 from lemma.document.layout.layout_char import LayoutChar
 from lemma.document.layout.layout_placeholder import LayoutPlaceholder
 from lemma.document.layout.layout_widget import LayoutWidget
@@ -53,15 +54,16 @@ class Layouter(object):
         if node.type == 'root':
             for child in self.group_words(node):
                 if isinstance(child, list) and child[0].is_text():
+                    subtree = LayoutWord(node)
                     char_nodes = child
                     text = ''.join([char.value for char in char_nodes])
                     fontname = FontManager.get_fontname_from_node(char_nodes[0])
                     for char_node, extents in zip(char_nodes, FontManager.measure(text, fontname=fontname)):
-                        layout_tree.children.append(LayoutChar(char_node, node, extents=extents))
+                        subtree.children.append(LayoutChar(char_node, node, extents=extents))
                 else:
                     subtree = self.make_layout_tree(child, layout_tree)
-                    if subtree != None:
-                        layout_tree.children.append(subtree)
+                if subtree != None:
+                    layout_tree.children.append(subtree)
         else:
             for child in node.children:
                 subtree = self.make_layout_tree(child, layout_tree)

@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import xml.parsers.expat
-import pickle, base64
+import pickle
 
 from lemma.document.ast.node import Node
 from lemma.document.ast.link import Link
@@ -81,6 +81,8 @@ class XMLParser(object):
             node.tags = self.current_tags
             node.paragraph_style = self.current_paragraph_style
             self.current_node.append(node)
+        if tag == 'widget':
+            self.widget_data = ''
 
         if node != None and 'marks' in attrs:
             for mark in attrs['marks'].split():
@@ -93,14 +95,17 @@ class XMLParser(object):
             self.current_node = self.current_node.parent
         if tag == 'mathlist':
             self.current_node = self.current_node.parent
-
-    def handle_data(self, data):
-        if 'widget' in self.open_tags:
-            node = Node('widget', pickle.loads(base64.b64decode(data)))
+        if tag == 'widget':
+            node = Node('widget', pickle.loads(eval(self.widget_data)))
             node.link = self.current_link
             node.tags = self.current_tags
             node.paragraph_style = self.current_paragraph_style
             self.current_node.append(node)
+            self.widget_data = ''
+
+    def handle_data(self, data):
+        if 'widget' in self.open_tags:
+            self.widget_data += data
 
         else:
             for char in data:

@@ -221,10 +221,10 @@ class Actions(object):
         subtree = ast.get_subtree(*cursor.get_state())
         chars = ''.join([node.value for node in subtree if node.is_char()])
         exporter = xml_exporter.XMLExporter()
-        xml = b''.join([exporter.export_xml_bytes(node) for node in subtree])
+        xml = ''.join([exporter.export_xml_bytes(node) for node in subtree])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
-        cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml))
+        cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode()))
         cp_union = Gdk.ContentProvider.new_union([cp_text, cp_internal])
 
         clipboard.set_content(cp_union)
@@ -237,7 +237,7 @@ class Actions(object):
         document = self.workspace.active_document
 
         if result[1].startswith('lemma/ast'):
-            xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
+            xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
             self.use_cases.insert_xml(xml)
 
         elif result[1] == 'text/plain':
@@ -264,10 +264,11 @@ class Actions(object):
         if document.cursor.has_selection():
             document.add_command('delete_selection')
         elif not insert.is_last_in_parent() or len(insert.parent) == 1:
-            document.add_composite_command(['selection_by_offset', 1], ['delete_selection'])
+            document.add_composite_command(['move_cursor_by_offset', 1, True], ['delete_selection'])
 
     def select_all(self, action=None, parameter=''):
-        self.workspace.active_document.add_command('select_all')
+        document = self.workspace.active_document
+        document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
 
     def remove_selection(self, action=None, parameter=''):
         document = self.workspace.active_document

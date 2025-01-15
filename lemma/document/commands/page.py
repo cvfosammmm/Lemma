@@ -18,7 +18,8 @@
 
 class Command():
 
-    def __init__(self, do_selection=False):
+    def __init__(self, offset, do_selection=False):
+        self.offset = offset
         self.do_selection = do_selection
         self.is_undo_checkpoint = False
         self.update_implicit_x_position = False
@@ -31,14 +32,25 @@ class Command():
         while layout.parent.parent != None:
             layout = layout.parent
         line_index = layout.parent.children.index(layout)
-        if line_index == 0:
+
+        if self.offset > 0 and line_index == len(layout.parent.children) - 1:
+            new_node = layout.children[-1].node
+        elif self.offset <= 0 and line_index == 0:
             new_node = layout.children[0].node
         else:
             x, y = document.cursor.get_insert_node().layout.get_absolute_xy()
             if document.implicit_x_position != None:
                 x = document.implicit_x_position
+            target_pos = y + self.offset
 
-            new_line = layout.parent.children[line_index - 1]
+            if self.offset > 0:
+                while line_index < len(layout.parent.children) - 1 and layout.parent.children[line_index].y < target_pos:
+                    line_index += 1
+            else:
+                while line_index > 0 and layout.parent.children[line_index].y > target_pos:
+                    line_index -= 1
+            new_line = layout.parent.children[line_index]
+
             closest_child = None
             closest_child_dist = 10000
             for child in new_line.children:
@@ -57,4 +69,4 @@ class Command():
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])
 
-
+  
