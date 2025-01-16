@@ -25,7 +25,8 @@ from lemma.document.layout.layout_widget import LayoutWidget
 from lemma.document.layout.layout_eol import LayoutEOL
 from lemma.document.layout.layout_end import LayoutEnd
 from lemma.document.layout.layout_mathatom import LayoutMathAtom
-from lemma.document.layout.layout_mathlist import LayoutMathList
+from lemma.document.layout.layout_mathroot import LayoutMathRoot
+from lemma.document.layout.layout_hbox import LayoutHBox
 import lemma.helpers.helpers as helpers
 
 
@@ -48,7 +49,8 @@ class Layouter(object):
         elif node.type == 'end': layout_tree = LayoutEnd(node, parent)
         elif node.type == 'widget': layout_tree = LayoutWidget(node, parent)
         elif node.type == 'mathatom': layout_tree = LayoutMathAtom(node, parent)
-        elif node.type == 'mathlist': layout_tree = LayoutMathList(node, parent)
+        elif node.type == 'mathroot': layout_tree = LayoutMathRoot(node, parent)
+        elif node.type == 'mathlist': layout_tree = LayoutHBox(parent)
         else: layout_tree = None
 
         if node.type == 'root':

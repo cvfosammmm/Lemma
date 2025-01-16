@@ -128,6 +128,19 @@ class HTMLScanner(object):
             self.html += '</msubsup>'
             if node.parent.is_root():
                 self.html += '</math>'
+        elif node.is_mathroot():
+            if node.parent.is_root():
+                self.html += '<math>'
+            self.html += '<mroot>'
+            self.html += '<mtext>'
+            self.process_node(node[0])
+            self.html += '</mtext>'
+            self.html += '<mtext>'
+            self.process_node(node[1])
+            self.html += '</mtext>'
+            self.html += '</mroot>'
+            if node.parent.is_root():
+                self.html += '</math>'
         elif node.is_mathlist():
             for child in node:
                 self.process_node(child)

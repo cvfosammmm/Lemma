@@ -35,6 +35,7 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         self.symbols = list()
 
         self.math_sym = []
+        self.math_sym.append(['sqrt', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathroot>\')'])
         self.math_sym.append(['subscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>\')'])
         self.math_sym.append(['superscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>\')'])
         self.math_sym.append(['subsuperscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])

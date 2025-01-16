@@ -20,20 +20,16 @@ from lemma.infrastructure.font_manager import FontManager
 from lemma.document.layout.layout import Layout
 
 
-class LayoutLine(Layout):
+class LayoutHBox(Layout):
 
-    def __init__(self, parent, prev_line):
+    def __init__(self, parent):
         Layout.__init__(self)
 
         self.node = None
         self.parent = parent
-        self.prev_line = prev_line
         self.children = list()
 
     def layout(self):
-        self.x = 0
-        self.y = 0 if not self.prev_line else self.prev_line.y + self.prev_line.height
-
         new_children = []
         for child in self.children:
             if isinstance(child, LayoutWord):
@@ -44,10 +40,17 @@ class LayoutLine(Layout):
                 new_children.append(child)
         self.children = new_children
 
+        for child in self.children:
+            child.layout()
+
         min_descend = 0
         for child in self.children:
             fontname = FontManager.get_fontname_from_node(child.node)
             min_descend = min(min_descend, FontManager.get_descend(fontname=fontname))
+
+        for child in self.children:
+            fontname = FontManager.get_fontname_from_node(child.node)
+            child.height -= min_descend - FontManager.get_descend(fontname=fontname)
 
         self.width = 0
         self.height = 0
@@ -63,6 +66,6 @@ class LayoutLine(Layout):
             child.y = self.height - child.height + min_descend - FontManager.get_descend(fontname=fontname)
 
     def accept_presenter(self, presenter):
-        presenter.draw_layout_line(self)
+        presenter.draw_layout(self)
 
 

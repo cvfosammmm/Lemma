@@ -39,6 +39,10 @@ class XMLExporter(object):
             return '<mathatom' + attributes + '>'\
                 + ''.join([self.export_xml(child) for child in node.children]) + '</mathatom>'
 
+        if node.type == 'mathroot':
+            return '<mathroot' + attributes + '>'\
+                + ''.join([self.export_xml(child) for child in node.children]) + '</mathroot>'
+
         if node.type == 'mathlist':
             return '<mathlist' + attributes + '>'\
                 + ''.join([self.export_xml(child) for child in node.children]) + '</mathlist>'

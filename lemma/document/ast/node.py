@@ -128,6 +128,7 @@ class Node():
     def is_placeholder(self): return self.type == 'placeholder'
     def is_widget(self): return self.type == 'widget'
     def is_mathatom(self): return self.type == 'mathatom'
+    def is_mathroot(self): return self.type == 'mathroot'
     def is_mathlist(self): return self.type == 'mathlist'
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
     def is_leaf(self): return len(self.children) == 0
@@ -135,9 +136,22 @@ class Node():
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
-    def is_nucleus(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[0]
-    def is_subscript(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[1]
-    def is_superscript(self): return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[2]
+    def is_nucleus(self):
+        return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[0]
+    def is_subscript(self):
+        if self.parent.is_root(): return False
+
+        if self.parent.parent.is_mathatom():
+            return self.parent == self.parent.parent[1]
+        return False
+    def is_superscript(self):
+        if self.parent.is_root(): return False
+
+        if self.parent.parent.is_mathatom():
+            return self.parent == self.parent.parent[2]
+        if self.parent.parent.is_mathroot():
+            return self.parent == self.parent.parent[1]
+        return False
 
     def is_first_in_line(self):
         if not self.parent.is_root(): return False
@@ -259,11 +273,16 @@ class Node():
 
     def validate(self):
         if self.type == 'root':
-            return all([child.type in {'char', 'placeholder', 'eol', 'widget', 'mathatom'} for child in self.children]) \
+            return all([child.type in {'char', 'placeholder', 'eol', 'widget', 'mathatom', 'mathroot'} for child in self.children]) \
                 and all([child.validate() for child in self.children])
 
         if self.type == 'mathatom':
             return len(self.children) == 3 \
+                and all([child.type == 'mathlist' for child in self.children]) \
+                and all([child.validate() for child in self.children])
+
+        if self.type == 'mathroot':
+            return len(self.children) == 2 \
                 and all([child.type == 'mathlist' for child in self.children]) \
                 and all([child.validate() for child in self.children])
 

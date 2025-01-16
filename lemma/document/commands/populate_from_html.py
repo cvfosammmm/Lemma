@@ -98,12 +98,12 @@ class Command(HTMLParser):
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
-        if tag == 'mo':
-            node = Node('mathlist')
+        if tag == 'mroot':
+            node = Node('mathroot')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
-        if tag == 'mn':
+        if tag in ['mtext', 'mo', 'mn']:
             node = Node('mathlist')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
@@ -129,11 +129,9 @@ class Command(HTMLParser):
         if tag == 'a': self.link_target = None
         if tag == 'msubsup':
             self.composite = self.composite.parent
-        if tag == 'mo':
-            if len(self.composite) > 0:
-                self.composite.append(Node('end'))
+        if tag == 'mroot':
             self.composite = self.composite.parent
-        if tag == 'mn':
+        if tag in ['mtext', 'mo', 'mn']:
             if len(self.composite) > 0:
                 self.composite.append(Node('end'))
             self.composite = self.composite.parent

@@ -65,6 +65,10 @@ class XMLParser(object):
             node = Node('mathatom')
             self.current_node.append(node)
             self.current_node = node
+        if tag == 'mathroot':
+            node = Node('mathroot')
+            self.current_node.append(node)
+            self.current_node = node
         if tag == 'mathlist':
             node = Node('mathlist')
             self.current_node.append(node)
@@ -92,6 +96,8 @@ class XMLParser(object):
         self.open_tags.pop()
 
         if tag == 'mathatom':
+            self.current_node = self.current_node.parent
+        if tag == 'mathroot':
             self.current_node = self.current_node.parent
         if tag == 'mathlist':
             self.current_node = self.current_node.parent

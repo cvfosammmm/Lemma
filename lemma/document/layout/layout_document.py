@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.infrastructure.layout_info import LayoutInfo
-from lemma.document.layout.layout_line import LayoutLine
+from lemma.document.layout.layout_hbox import LayoutHBox
 from lemma.document.layout.layout_eol import LayoutEOL
 from lemma.document.layout.layout_char import LayoutChar
 from lemma.document.layout.layout import Layout
@@ -38,14 +38,14 @@ class LayoutDocument(Layout):
             child.layout()
 
         lines = list()
-        current_line = LayoutLine(self, None)
+        current_line = LayoutHBox(self)
         current_line_width = 0
         for child in self.children:
             if isinstance(child, LayoutEOL):
                 current_line.children.append(child)
                 child.parent = current_line
                 lines.append(current_line)
-                current_line = LayoutLine(self, current_line)
+                current_line = LayoutHBox(self)
                 current_line_width = 0
             else:
                 break_after_char = isinstance(child, LayoutChar) and child.node.is_whitespace()
@@ -55,23 +55,26 @@ class LayoutDocument(Layout):
                     current_line_width += child.width
                     if current_line_width > 0 and child.width + current_line_width > LayoutInfo.get_layout_width():
                         lines.append(current_line)
-                        current_line = LayoutLine(self, current_line)
+                        current_line = LayoutHBox(self)
                         current_line_width = 0
                 else:
                     if current_line_width > 0 and child.width + current_line_width > LayoutInfo.get_layout_width():
                         lines.append(current_line)
-                        current_line = LayoutLine(self, current_line)
+                        current_line = LayoutHBox(self)
                         current_line_width = 0
                     current_line.children.append(child)
                     child.parent = current_line
                     current_line_width += child.width
         lines.append(current_line)
+
+        self.height = 0
         for line in lines:
             line.layout()
+            line.x = 0
+            line.y = self.height
+            self.height += line.height
         self.children = lines
-
         self.width = LayoutInfo.get_layout_width()
-        self.height = sum([child.height for child in self.children])
         self.x = 0
         self.y = 0
 

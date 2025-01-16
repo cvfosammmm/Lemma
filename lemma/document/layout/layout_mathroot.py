@@ -15,11 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.infrastructure.font_manager import FontManager
 from lemma.document.layout.layout import Layout
 
 
-class LayoutMathList(Layout):
+class LayoutMathRoot(Layout):
 
     def __init__(self, node, parent):
         Layout.__init__(self)
@@ -34,27 +33,17 @@ class LayoutMathList(Layout):
         for child in self.children:
             child.layout()
 
-        min_descend = 0
-        for child in self.children:
-            fontname = FontManager.get_fontname_from_node(child.node)
-            min_descend = min(min_descend, FontManager.get_descend(fontname=fontname))
+        self.children[0].x = max(7, self.children[1].width) + 10
+        self.children[0].y = 0
+        self.children[1].x = 0
+        self.children[1].y = self.children[0].height / 2 - self.children[1].height
 
-        for child in self.children:
-            fontname = FontManager.get_fontname_from_node(child.node)
-            child.height -= min_descend - FontManager.get_descend(fontname=fontname)
-
-        self.width = 0
-        self.height = 0
-        for child in self.children:
-            child.x = self.width
-
-            self.width += child.width
-            self.height = max(self.height, child.height)
-
-        for child in self.children:
-            child.y = self.height - child.height
+        self.width = self.children[0].width + max(7, self.children[1].width) + 10
+        self.height = self.children[0].height
+        self.x = None
+        self.y = None
 
     def accept_presenter(self, presenter):
-        presenter.draw_layout(self)
+        presenter.draw_layout_mathroot(self)
 
 

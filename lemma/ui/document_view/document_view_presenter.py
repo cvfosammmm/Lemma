@@ -209,10 +209,6 @@ class DocumentViewPresenter():
         self.update_selection_state(layout)
         self.draw_children(layout)
 
-    def draw_layout_line(self, layout):
-        self.update_selection_state(layout)
-        self.draw_children(layout)
-
     def draw_layout_char(self, layout):
         self.update_selection_state(layout)
         self.draw_selection(layout)
@@ -269,6 +265,33 @@ class DocumentViewPresenter():
             self.ctx.fill()
 
         self.draw_children(layout)
+
+    def draw_layout_mathroot(self, layout):
+        self.update_selection_state(layout)
+
+        if self.drawing_state['in_selection']:
+            Gdk.cairo_set_source_rgba(self.ctx, ColorManager.get_ui_color('selection_bg'))
+            self.ctx.rectangle(self.offset_x + layout.x, self.offset_y, layout.width, layout.parent.height)
+            self.ctx.fill()
+
+        self.draw_children(layout)
+
+        fg_color = self.get_fg_color_by_node(layout.node)
+        Gdk.cairo_set_source_rgba(self.ctx, fg_color)
+
+        line_offset = max(7, layout.children[1].width)
+        line_width = layout.children[0].width
+        line_height = layout.children[0].height
+
+        self.ctx.set_line_width(2)
+        self.ctx.move_to(self.offset_x + layout.x + line_offset - 6, self.offset_y + line_height - 10)
+        self.ctx.line_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 1)
+        self.ctx.stroke()
+        self.ctx.set_line_width(1)
+        self.ctx.move_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 1)
+        self.ctx.line_to(self.offset_x + layout.x + line_offset + 9, self.offset_y)
+        self.ctx.line_to(self.offset_x + layout.x + line_offset + 10 + line_width, self.offset_y)
+        self.ctx.stroke()
 
     def draw_layout(self, layout):
         self.update_selection_state(layout)
