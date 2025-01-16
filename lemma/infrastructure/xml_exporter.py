@@ -24,7 +24,7 @@ class XMLExporter(object):
     def __init__(self):
         pass
 
-    def export_xml_bytes(self, node):
+    def export_xml(self, node):
         attributes = ' paragraph_style="' + node.paragraph_style + '"'
         if node.link != None:
             attributes += ' link_target="' + node.link.target + '"'
@@ -33,15 +33,15 @@ class XMLExporter(object):
 
         if node.type == 'root':
             return '<root' + attributes + '>'\
-                + ''.join([self.export_xml_bytes(child) for child in node.children]) + '</root>'
+                + ''.join([self.export_xml(child) for child in node.children]) + '</root>'
 
         if node.type == 'mathatom':
             return '<mathatom' + attributes + '>'\
-                + ''.join([self.export_xml_bytes(child) for child in node.children]) + '</mathatom>'
+                + ''.join([self.export_xml(child) for child in node.children]) + '</mathatom>'
 
         if node.type == 'mathlist':
             return '<mathlist' + attributes + '>'\
-                + ''.join([self.export_xml_bytes(child) for child in node.children]) + '</mathlist>'
+                + ''.join([self.export_xml(child) for child in node.children]) + '</mathlist>'
 
         if node.type == 'char':
             return '<char' + attributes + '>' + xml_helpers.escape(node.value) + '</char>'

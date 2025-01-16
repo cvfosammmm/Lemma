@@ -221,7 +221,7 @@ class Actions(object):
         subtree = ast.get_subtree(*cursor.get_state())
         chars = ''.join([node.value for node in subtree if node.is_char()])
         exporter = xml_exporter.XMLExporter()
-        xml = ''.join([exporter.export_xml_bytes(node) for node in subtree])
+        xml = ''.join([exporter.export_xml(node) for node in subtree])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
         cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode()))
