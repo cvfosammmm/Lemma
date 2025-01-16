@@ -334,7 +334,10 @@ class DocumentViewPresenter():
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
         x, y = insert.layout.get_absolute_xy()
-        cursor_coords = (x + offset_x, y + offset_y, 1, layout.height)
+        fontname = FontManager.get_fontname_from_node(insert)
+        padding_top = FontManager.get_padding_top(fontname)
+        padding_bottom = FontManager.get_padding_bottom(fontname)
+        cursor_coords = (x + offset_x, y + offset_y + padding_top, 1, layout.height - padding_top - padding_bottom)
 
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('cursor'))
         ctx.rectangle(*cursor_coords)

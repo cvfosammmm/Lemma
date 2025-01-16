@@ -24,7 +24,7 @@ class FontManager():
 
     fonts = dict()
 
-    def add_font(name, filename, size, ascend, descend):
+    def add_font(name, filename, size, ascend, descend, padding_top, padding_bottom):
         fontconfig.Config.get_current().app_font_add_file(filename)
 
         FontManager.fonts[name] = dict()
@@ -35,6 +35,8 @@ class FontManager():
         FontManager.fonts[name]['ascend'] = ascend
         FontManager.fonts[name]['descend'] = -descend
         FontManager.fonts[name]['line_height'] = FontManager.fonts[name]['ascend'] - FontManager.fonts[name]['descend']
+        FontManager.fonts[name]['padding_top'] = padding_top
+        FontManager.fonts[name]['padding_bottom'] = padding_bottom
         FontManager.fonts[name]['harfbuzz_font'] = harfbuzz.Font.ft_create(face)
         FontManager.fonts[name]['char_extents'] = dict()
         FontManager.fonts[name]['surface_cache'] = dict()
@@ -64,6 +66,12 @@ class FontManager():
 
     def get_ascend(fontname='book'):
         return FontManager.fonts[fontname]['ascend']
+
+    def get_padding_top(fontname='book'):
+        return FontManager.fonts[fontname]['padding_top']
+
+    def get_padding_bottom(fontname='book'):
+        return FontManager.fonts[fontname]['padding_bottom']
 
     def measure_single(char, fontname='book'):
         if char not in FontManager.fonts[fontname]['char_extents']:
