@@ -42,7 +42,7 @@ class Cursor():
     def prev(self, node):
         if not node.is_first_in_parent():
             node = node.parent[node.parent.index(node) - 1]
-            while not node.is_leaf():
+            while not len(node.children) == 0:
                 node = node[-1]
 
         elif not node.parent.is_root():
@@ -54,7 +54,7 @@ class Cursor():
         return node
 
     def next(self, node):
-        if not node.is_leaf():
+        if not len(node.children) == 0:
             node = node[0]
 
         else:
@@ -179,8 +179,14 @@ class Cursor():
         if self.node_insert.parent == self.node_selection.parent: return
 
         # compute the smallest common ancestor of both the insert and the selection node.
-        ancestors = zip(self.node_insert.ancestors(), self.node_selection.ancestors())
-        sca = list(filter(lambda x: x[0] == x[1], ancestors))[-1][0]
+        ancestors = list(zip(self.node_insert.ancestors() + [self.node_insert], self.node_selection.ancestors() + [self.node_selection]))
+        common_ancestors_and_their_children = [(node_1, node_2) for (node_1, node_2) in list(ancestors) if node_1.parent == node_2.parent or node_1.is_root()]
+
+        # if the children of the sca can't hold the cursor, go up some more
+        for node_1, node_2 in reversed(common_ancestors_and_their_children):
+            if node_1.can_hold_cursor() and node_2.can_hold_cursor():
+                sca = node_1.parent
+                break
 
         # compute the new positions
         sca_pos = sca.get_position()
