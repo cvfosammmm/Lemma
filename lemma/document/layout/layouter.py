@@ -17,7 +17,7 @@
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.layout_info import LayoutInfo
-from lemma.document.layout.layout_block import LayoutBlock
+from lemma.document.layout.layout_document import LayoutDocument
 from lemma.document.layout.layout_word import LayoutWord
 from lemma.document.layout.layout_char import LayoutChar
 from lemma.document.layout.layout_placeholder import LayoutPlaceholder
@@ -41,7 +41,7 @@ class Layouter(object):
         self.document.layout = layout_tree
 
     def make_layout_tree(self, node, parent=None):
-        if node.type == 'root': layout_tree = LayoutBlock(node, parent)
+        if node.type == 'root': layout_tree = LayoutDocument(node, parent)
         elif node.type == 'char': layout_tree = LayoutChar(node, parent)
         elif node.type == 'placeholder': layout_tree = LayoutPlaceholder(node, parent)
         elif node.type == 'eol': layout_tree = LayoutEOL(node, parent)

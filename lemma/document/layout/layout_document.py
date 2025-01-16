@@ -22,7 +22,7 @@ from lemma.document.layout.layout_char import LayoutChar
 from lemma.document.layout.layout import Layout
 
 
-class LayoutBlock(Layout):
+class LayoutDocument(Layout):
 
     def __init__(self, node, parent):
         Layout.__init__(self)
