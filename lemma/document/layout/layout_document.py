@@ -85,7 +85,7 @@ class LayoutDocument(Layout):
         line = self.get_line_at_y(y)
 
         if y >= line.y and y < line.y + line.height:
-            for node in [node for node in line.flatten() if len(node.children) == 0]:
+            for node in [node for node in line.flatten() if node.node != None and node.node.is_leaf()]:
                 node_x, node_y = node.get_absolute_xy()
                 if x >= node_x and x < node_x + node.width:
                     return node
@@ -96,7 +96,7 @@ class LayoutDocument(Layout):
 
         closest_leaf = None
         min_distance = 10000
-        for node in [node for node in line.flatten() if len(node.children) == 0]:
+        for node in [node for node in line.flatten() if node.node != None and node.node.is_leaf()]:
             node_x, node_y = node.get_absolute_xy()
             distance = abs(node_x - x) + abs(node_y - y)
             if distance < min_distance:

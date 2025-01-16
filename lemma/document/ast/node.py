@@ -59,6 +59,8 @@ class Node():
         index_2 = self.index(last_node)
         nodes = self.children[index_1:index_2]
         del(self.children[index_1:index_2])
+        for node in nodes:
+            node.set_parent(None)
 
         return nodes
 
@@ -131,7 +133,7 @@ class Node():
     def is_mathroot(self): return self.type == 'mathroot'
     def is_mathlist(self): return self.type == 'mathlist'
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
-    def is_leaf(self): return len(self.children) == 0
+    def is_leaf(self): return self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}
     def is_composite(self): return len(self.children) > 0
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
