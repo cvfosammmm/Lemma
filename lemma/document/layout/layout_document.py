@@ -91,18 +91,18 @@ class LayoutDocument(Layout):
                     return node
         return None
 
-    def get_closest_leaf_at_xy(self, x, y):
+    def get_closest_cursor_holding_node_at_xy(self, x, y):
         line = self.get_line_at_y(y)
 
-        closest_leaf = None
+        closest_node = None
         min_distance = 10000
-        for node in [node for node in line.flatten() if node.node != None and node.node.is_leaf()]:
+        for node in [node for node in line.flatten() if node.node != None and node.node.can_hold_cursor()]:
             node_x, node_y = node.get_absolute_xy()
             distance = abs(node_x - x) + abs(node_y - y)
             if distance < min_distance:
-                closest_leaf = node
+                closest_node = node
                 min_distance = distance
-        return closest_leaf
+        return closest_node
 
     def get_line_at_y(self, y):
         if y < 0:
