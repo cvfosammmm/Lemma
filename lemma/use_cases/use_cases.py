@@ -113,4 +113,28 @@ class UseCases(object):
                     return True
         return False
 
+    def select_word_at_insert(self):
+        document = self.workspace.active_document
+
+        word_start, word_end = document.cursor.get_insert_node().word_bounds()
+        if word_start != None and word_end != None:
+            self.extend_selection(word_start, word_end)
+
+    def select_line_at_insert(self):
+        document = self.workspace.active_document
+
+        line_start, line_end = document.cursor.get_insert_node().line_bounds()
+        self.extend_selection(line_start, line_end)
+
+    def extend_selection(self, node_start, node_end):
+        document = self.workspace.active_document
+
+        node_1 = document.cursor.get_first_node()
+        node_2 = document.cursor.get_last_node()
+
+        if node_1.get_position() > node_start.get_position(): node_1 = node_start
+        if node_2.get_position() < node_end.get_position(): node_2 = node_end
+
+        document.add_command('move_cursor_to_node', node_2, node_1)
+
 

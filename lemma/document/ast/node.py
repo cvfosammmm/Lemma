@@ -218,10 +218,10 @@ class Node():
                 break
             else:
                 node1 = prev_node
-        return (node1.get_position(), node2.get_position())
+        return (node1, node2)
 
     def line_bounds(self):
-        return (self.line_start().get_position(), self.line_end().get_position())
+        return (self.line_start(), self.line_end())
 
     def prev_in_parent(self):
         if self != self.parent[0]:

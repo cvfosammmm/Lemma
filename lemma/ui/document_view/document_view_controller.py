@@ -121,29 +121,29 @@ class DocumentViewController():
 
             if n_press % 3 == 2:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                    document.add_command('selection_add_word_at_insert')
+                    self.use_cases.select_word_at_insert()
 
                 elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
-                    document.add_command('selection_add_word_at_insert')
+                    self.use_cases.select_word_at_insert()
 
                 else:
                     if link != None:
                         self.model.selected_link_target = link.target
                     else:
-                        document.add_command('selection_add_word_at_insert')
+                        self.use_cases.select_word_at_insert()
 
             if n_press % 3 == 0:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                    document.add_command('selection_add_line_at_insert')
+                    self.use_cases.select_line_at_insert()
 
                 elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
-                    document.add_command('selection_add_line_at_insert')
+                    self.use_cases.select_line_at_insert()
 
                 else:
                     if link != None:
                         self.model.selected_link_target = link.target
                     else:
-                        document.add_command('selection_add_line_at_insert')
+                        self.use_cases.select_line_at_insert()
 
             self.content.grab_focus()
 

@@ -114,17 +114,6 @@ class Cursor():
             self.set_insert_node(node)
             self.restore_selection_invariant()
 
-    def extend_selection_to_position(self, position):
-        insert_position = self.get_insert_position()
-        selection_position = self.get_selection_position()
-
-        if insert_position < selection_position:
-            if position < insert_position: self.set_insert_position(position)
-            if position > selection_position: self.set_selection_position(position)
-        else:
-            if position < selection_position: self.set_selection_position(position)
-            if position > insert_position: self.set_insert_position(position)
-
     def set_state(self, position):
         self.set_insert_position(position[0])
         self.set_selection_position(position[1])
