@@ -285,12 +285,12 @@ class DocumentViewPresenter():
 
         self.ctx.set_line_width(2)
         self.ctx.move_to(self.offset_x + layout.x + line_offset - 6, self.offset_y + line_height - 10)
-        self.ctx.line_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 1)
+        self.ctx.line_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 2)
         self.ctx.stroke()
         self.ctx.set_line_width(1)
-        self.ctx.move_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 1)
-        self.ctx.line_to(self.offset_x + layout.x + line_offset + 9, self.offset_y)
-        self.ctx.line_to(self.offset_x + layout.x + line_offset + 10 + line_width, self.offset_y)
+        self.ctx.move_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 2)
+        self.ctx.line_to(self.offset_x + layout.x + line_offset + 9, self.offset_y + 1)
+        self.ctx.line_to(self.offset_x + layout.x + line_offset + 10 + line_width, self.offset_y + 1)
         self.ctx.stroke()
 
     def draw_layout(self, layout):
