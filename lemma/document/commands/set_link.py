@@ -16,32 +16,31 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.document.ast.node import Node
+from lemma.document.ast.link import Link
 
 
 class Command():
 
-    def __init__(self, bounds):
+    def __init__(self, bounds, target=None):
         self.bounds = bounds
+        self.target = target
         self.is_undo_checkpoint = True
         self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
-
-        char_nodes = [node for node in document.ast.get_subtree(*self.bounds) if node.is_char()]
+        pos_1, pos_2 = self.bounds[0].get_position(), self.bounds[1].get_position()
+        char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
         prev_links = []
         for node in char_nodes:
             prev_links.append(node.link)
-            node.link = None
-        self.state['nodes_and_prev_links'] = list(zip(char_nodes, prev_links))
+            node.link = None if self.target == None else Link(self.target)
+        self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_links))
 
     def undo(self, document):
-        document.cursor.set_state(self.state['cursor_state_before'])
-
-        for item in self.state['nodes_and_prev_links']:
+        for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]
-
+        document.cursor.set_state(self.state['cursor_state_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

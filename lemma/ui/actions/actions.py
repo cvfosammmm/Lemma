@@ -336,12 +336,12 @@ class Actions(object):
         document = self.workspace.active_document
 
         if document.cursor.has_selection():
-            bounds = document.cursor.get_state()
+            bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
         elif document.cursor.get_insert_node().is_inside_link():
             bounds = document.cursor.get_insert_node().link_bounds()
         else:
-            bounds = document.cursor.get_state()
-        document.add_command('remove_link', bounds)
+            bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
+        document.add_command('set_link', bounds)
 
     def edit_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)

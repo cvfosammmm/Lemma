@@ -183,7 +183,7 @@ class Node():
 
         while node2 != None:
             next_node = node2.next_in_parent()
-            if next_node.link == self.link:
+            if next_node != None and next_node.link == self.link:
                 node2 = next_node
             else:
                 if next_node != self and next_node != None:
@@ -191,11 +191,11 @@ class Node():
                 break
         while node1 != None:
             prev_node = node1.prev_in_parent()
-            if prev_node.link == self.link:
+            if prev_node != None and prev_node.link == self.link:
                 node1 = prev_node
             else:
                 break
-        return (node1.get_position(), node2.get_position())
+        return (node1, node2)
 
     def word_bounds(self):
         if self.is_whitespace(): return (None, None)

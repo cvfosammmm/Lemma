@@ -54,11 +54,11 @@ class Dialog(object):
             first_node = nodes[0] if len(nodes) > 0 else None
             match_func = lambda x: (x != None and x.link != None and x.link == first_node.link)
             if len([node for node in nodes if match_func(node) == False]) > 0:
-                self.bounds = document.cursor.get_state()
+                self.bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Insert Link')))
                 self.view.add_button.set_label(_('Insert'))
             else:
-                self.bounds = document.cursor.get_state()
+                self.bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
                 self.view.entry_link_target.set_text(first_node.link.target)
                 self.view.headerbar.set_title_widget(Gtk.Label.new(_('Edit Link')))
                 self.view.add_button.set_label(_('Edit'))
@@ -132,10 +132,10 @@ class Dialog(object):
             if self.bounds == None:
                 tags_at_cursor = self.application.cursor_state.tags_at_cursor
                 text = xml_helpers.escape(self.current_values['link_target'])
-                xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + self.current_values['link_target'] + '">' + text + '</char>'
+                xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
                 self.use_cases.insert_xml(xml)
             else:
-                self.document.add_command('add_link', self.current_values['link_target'], self.bounds)
+                self.document.add_command('set_link', self.bounds, self.current_values['link_target'])
             self.view.close()
 
 
