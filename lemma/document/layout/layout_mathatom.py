@@ -33,14 +33,14 @@ class LayoutMathAtom(Layout):
         for child in self.children:
             child.layout()
 
-        self.children[0].x = 0
+        self.children[0].x = 1
         self.children[0].y = 0
-        self.children[1].x = self.children[0].width
+        self.children[1].x = self.children[0].width + 1
         self.children[1].y = self.children[0].height / 2
-        self.children[2].x = self.children[0].width
+        self.children[2].x = self.children[0].width + 1
         self.children[2].y = self.children[0].height / 2 - self.children[2].height
 
-        self.width = self.children[0].width + max(self.children[1].width, self.children[2].width)
+        self.width = self.children[0].width + max(self.children[1].width, self.children[2].width) + 1
         self.height = self.children[0].height
         self.x = None
         self.y = None

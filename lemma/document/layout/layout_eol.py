@@ -34,7 +34,7 @@ class LayoutEOL(Layout):
         fontname = FontManager.get_fontname_from_node(self.node)
         width, height, left, top = FontManager.measure_single('\n', fontname=fontname)
 
-        self.width = 0
+        self.width = 1
         self.height = height
         self.x = None
         self.y = None
