@@ -23,7 +23,7 @@
      inkscape:document-units="px"
      showgrid="false"
      inkscape:zoom="15.677591"
-     inkscape:cx="7.6861298"
+     inkscape:cx="7.7499151"
      inkscape:cy="7.5266666"
      inkscape:window-width="1440"
      inkscape:window-height="831"
@@ -66,12 +66,12 @@
          x="7.3750005e-07"
          y="4.0000005" />
       <rect
-         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1.26315;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-         id="rect383"
-         width="4.7368441"
-         height="4.7368464"
-         x="10.631575"
-         y="10.631575" />
+         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         id="rect383-6"
+         width="5"
+         height="5"
+         x="10.5"
+         y="10.5" />
     </g>
   </g>
 </svg>
