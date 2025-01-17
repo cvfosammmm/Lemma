@@ -133,6 +133,7 @@ class Node():
     def is_mathroot(self): return self.type == 'mathroot'
     def is_mathlist(self): return self.type == 'mathlist'
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
+    def focus_on_click(self): return self.type in {'widget', 'placeholder'}
     def is_leaf(self): return self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}
     def is_composite(self): return len(self.children) > 0
     def is_first_in_parent(self): return self == self.parent[0]

@@ -117,6 +117,8 @@ class DocumentViewPresenter():
                         link = node.link
                     elif node.is_widget():
                         self.content.set_cursor_from_name(node.value.get_cursor_name())
+                    elif node.is_placeholder():
+                        self.content.set_cursor_from_name('default')
                     else:
                         self.content.set_cursor_from_name('text')
         else:

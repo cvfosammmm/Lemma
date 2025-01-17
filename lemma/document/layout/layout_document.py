@@ -87,7 +87,7 @@ class LayoutDocument(Layout):
         if y >= line.y and y < line.y + line.height:
             for node in [node for node in line.flatten() if node.node != None and node.node.is_leaf()]:
                 node_x, node_y = node.get_absolute_xy()
-                if x >= node_x and x < node_x + node.width:
+                if x >= node_x and x <= node_x + node.width and y >= node_y and y <= node_y + node.height:
                     return node
         return None
 
