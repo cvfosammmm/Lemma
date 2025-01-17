@@ -36,7 +36,7 @@ class LayoutMathRoot(Layout):
         self.children[0].x = max(7, self.children[1].width) + 10
         self.children[0].y = 0
         self.children[1].x = 0
-        self.children[1].y = self.children[0].height / 2 - self.children[1].height
+        self.children[1].y = self.children[0].height - 13 - self.children[1].height
 
         self.width = self.children[0].width + max(7, self.children[1].width) + 10
         self.height = self.children[0].height

@@ -66,9 +66,11 @@ class UseCases(object):
         if len(placeholders) > 0:
             commands.append(['move_cursor_to_node', placeholders[0], placeholders[0].next_in_parent()])
         elif 'new_insert' in parser.marks and 'new_selection_bound' in parser.marks:
-            commands.append(['move_cursor_to_node', parser.marks['new_insert'], parser.marks['new_selection_bound']])
+            if parser.marks['new_insert'].parent != None and parser.marks['new_selection_bound'].parent != None:
+                commands.append(['move_cursor_to_node', parser.marks['new_insert'], parser.marks['new_selection_bound']])
         elif 'new_insert' in parser.marks:
-            commands.append(['move_cursor_to_node', parser.marks['new_insert']])
+            if parser.marks['new_insert'].parent != None:
+                commands.append(['move_cursor_to_node', parser.marks['new_insert']])
 
         if nodes.validate():
             document.add_composite_command(*commands)
