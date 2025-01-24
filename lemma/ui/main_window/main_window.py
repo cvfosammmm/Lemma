@@ -109,6 +109,5 @@ class MainWindow(Adw.ApplicationWindow):
         resources_path = ServiceLocator.get_resources_path()
         icon_theme = Gtk.IconTheme.get_for_display(self.get_display())
         icon_theme.add_search_path(os.path.join(resources_path, 'icons'))
-        icon_theme.add_search_path(os.path.join(resources_path, 'symbols'))
 
 
