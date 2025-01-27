@@ -15,43 +15,37 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.document.layout.layout_word import LayoutWord
+from lemma.infrastructure.font_manager import FontManager
 from lemma.document.layout.layout import Layout
-from lemma.document.layout.layout_vbox import LayoutVBox
 
 
-class LayoutMathAtom(Layout):
+class LayoutVBox(Layout):
 
-    def __init__(self, node, parent):
+    def __init__(self, parent):
         Layout.__init__(self)
 
-        self.node = node
-        node.layout = self
-
+        self.node = None
         self.parent = parent
         self.children = list()
 
     def layout(self):
-        if len(self.children) == 3:
-            vbox = LayoutVBox(self)
-            for child in self.children[1:]:
-                child.parent = vbox
-                vbox.children.insert(0, child)
-            self.children = [self.children[0], vbox]
-
         for child in self.children:
             child.layout()
 
-        self.children[0].x = 1
-        self.children[0].y = 0
-        self.children[1].x = self.children[0].width + 1
-        self.children[1].y = self.children[0].height / 2 - self.children[1].height / 2
+        self.width = 0
+        self.height = 0
+        for child in self.children:
+            child.x = 0
+            child.y = self.height
 
-        self.width = self.children[0].width + self.children[1].width + 1
-        self.height = max(self.children[0].height, self.children[1].height)
+            self.height += child.height
+            self.width = max(self.width, child.width)
+
         self.x = None
         self.y = None
 
     def accept_presenter(self, presenter):
-        presenter.draw_layout_mathatom(self)
+        presenter.draw_layout(self)
 
 

@@ -91,18 +91,27 @@ class LayoutDocument(Layout):
                     return node
         return None
 
-    def get_closest_cursor_holding_node_at_xy(self, x, y):
-        line = self.get_line_at_y(y)
+    def get_cursor_holding_layout_close_to_xy(self, x, y):
+        vbox = self.get_line_at_y(y)
+        if y >= vbox.y and y < vbox.y + vbox.height:
+            for layout in vbox.flatten():
+                if isinstance(layout, LayoutHBox):
+                    layout_x, layout_y = layout.get_absolute_xy()
+                    if x >= layout_x and x <= layout_x + layout.width \
+                            and y >= layout_y and y <= layout_y + layout.height \
+                            and vbox in layout.get_ancestors():
+                        vbox = layout
 
-        closest_node = None
+        closest_layout = None
         min_distance = 10000
-        for node in [node for node in line.flatten() if node.node != None and node.node.can_hold_cursor()]:
-            node_x, node_y = node.get_absolute_xy()
-            distance = abs(node_x - x) + abs(node_y - y)
+        for layout in vbox.children:
+            layout_x, layout_y = layout.get_absolute_xy()
+            distance = abs(layout_x - x)
             if distance < min_distance:
-                closest_node = node
+                closest_layout = layout
                 min_distance = distance
-        return closest_node
+
+        return closest_layout
 
     def get_line_at_y(self, y):
         if y < 0:

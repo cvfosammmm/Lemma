@@ -38,4 +38,12 @@ class Layout():
             result += child.flatten()
         return result
 
+    def get_ancestors(self):
+        ancestors = []
+        node = self
+        while node.parent != None:
+            ancestors.append(node.parent)
+            node = node.parent
+        return ancestors
+
 
