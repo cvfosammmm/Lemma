@@ -95,19 +95,19 @@ class LayoutDocument(Layout):
         if y < 0: x = 0
         if y > self.height: x = self.width
 
-        vbox = self.get_line_at_y(y)
-        if y >= vbox.y and y < vbox.y + vbox.height:
-            for layout in vbox.flatten():
+        hbox = self.get_line_at_y(y)
+        if y >= hbox.y and y < hbox.y + hbox.height:
+            for layout in hbox.flatten():
                 if isinstance(layout, LayoutHBox):
                     layout_x, layout_y = layout.get_absolute_xy()
                     if x >= layout_x and x <= layout_x + layout.width \
                             and y >= layout_y and y <= layout_y + layout.height \
-                            and vbox in layout.get_ancestors():
-                        vbox = layout
+                            and hbox in layout.get_ancestors():
+                        hbox = layout
 
         closest_layout = None
         min_distance = 10000
-        for layout in vbox.children:
+        for layout in hbox.children:
             layout_x, layout_y = layout.get_absolute_xy()
             distance = abs(layout_x - x)
             if distance < min_distance:

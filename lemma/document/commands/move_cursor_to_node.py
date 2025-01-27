@@ -18,17 +18,21 @@
 
 class Command():
 
-    def __init__(self, insert, selection_bound=None):
+    def __init__(self, insert, selection_bound=None, update_implicit_x=True):
         self.insert = insert
         self.selection_bound = (selection_bound if selection_bound != None else insert)
+        self.update_implicit_x = update_implicit_x
         self.is_undo_checkpoint = False
         self.state = dict()
 
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
+
         document.cursor.set_insert_selection_nodes(self.insert, self.selection_bound)
         document.set_scroll_insert_on_screen_after_layout_update()
-        document.cursor.update_implicit_x_position()
+
+        if self.update_implicit_x:
+            document.cursor.update_implicit_x_position()
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])

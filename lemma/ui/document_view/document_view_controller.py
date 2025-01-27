@@ -258,16 +258,16 @@ class DocumentViewController():
                 else:
                     document.add_command('move_cursor_by_offset', 1)
 
-            case ('up', 0): document.add_command('up')
-            case ('down', 0): document.add_command('down')
+            case ('up', 0): self.use_cases.up()
+            case ('down', 0): self.use_cases.down()
             case ('home', 0): document.add_command('line_start')
             case ('end', 0): document.add_command('line_end')
             case ('page_up', 0): self.use_cases.move_cursor_by_xy_offset(0, -self.model.height + 100)
             case ('page_down', 0): self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100)
             case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', -1, True)
             case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', 1, True)
-            case ('up', Gdk.ModifierType.SHIFT_MASK): document.add_command('up', True)
-            case ('down', Gdk.ModifierType.SHIFT_MASK): document.add_command('down', True)
+            case ('up', Gdk.ModifierType.SHIFT_MASK): self.use_cases.up(True)
+            case ('down', Gdk.ModifierType.SHIFT_MASK): self.use_cases.down(True)
             case ('home', Gdk.ModifierType.SHIFT_MASK): document.add_command('line_start', True)
             case ('end', Gdk.ModifierType.SHIFT_MASK): document.add_command('line_end', True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):

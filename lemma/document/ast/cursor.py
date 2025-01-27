@@ -24,21 +24,23 @@ class Cursor():
         self.node_selection = node_selection
         self.implicit_x_position = 0
 
-    def set_insert_node(self, node):
-        self.node_insert = node
-
-    def set_selection_node(self, node):
-        self.node_selection = node
-
     def set_insert_selection_nodes(self, node_insert, node_selection):
         self.node_insert = node_insert
         self.node_selection = node_selection
+        self.restore_selection_invariant()
 
-    def set_insert_position(self, position):
-        self.set_insert_node(self.document.ast.get_node_at_position(position))
+    def move_insert_to_node(self, node):
+        if node != None:
+            self.set_insert_selection_nodes(node, node)
 
-    def set_selection_position(self, position):
-        self.set_selection_node(self.document.ast.get_node_at_position(position))
+    def move_insert_to_node_with_selection(self, node):
+        if node != None:
+            self.node_insert = node
+            self.restore_selection_invariant()
+
+    def set_state(self, position):
+        self.node_insert = self.document.ast.get_node_at_position(position[0])
+        self.node_selection = self.document.ast.get_node_at_position(position[1])
 
     def update_implicit_x_position(self):
         x, y = self.get_insert_node().layout.get_absolute_xy()
@@ -105,23 +107,6 @@ class Cursor():
             return self.next_no_descent(node)
 
         return node
-
-    def move_insert_to_node(self, node):
-        if node != None:
-            self.set_insert_selection_nodes(node, node)
-
-    def move_selection_bound_to_node(self, node):
-        if node != None:
-            self.set_selection_node(node)
-
-    def move_insert_to_node_with_selection(self, node):
-        if node != None:
-            self.set_insert_node(node)
-            self.restore_selection_invariant()
-
-    def set_state(self, position):
-        self.set_insert_position(position[0])
-        self.set_selection_position(position[1])
 
     def get_state(self):
         return [self.get_insert_position(), self.get_selection_position()]
@@ -194,10 +179,10 @@ class Cursor():
 
         # move both insert and selection bound to the sca
         if self.get_insert_position() < self.get_selection_position():
-            self.set_insert_position(pos1)
-            self.set_selection_position(pos2)
+            self.node_insert = self.document.ast.get_node_at_position(pos1)
+            self.node_selection = self.document.ast.get_node_at_position(pos2)
         else:
-            self.set_insert_position(pos2)
-            self.set_selection_position(pos1)
+            self.node_insert = self.document.ast.get_node_at_position(pos2)
+            self.node_selection = self.document.ast.get_node_at_position(pos1)
 
 

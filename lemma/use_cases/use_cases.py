@@ -20,6 +20,8 @@ import lemma.infrastructure.xml_parser as xml_parser
 from lemma.db.character_db import CharacterDB
 from lemma.widgets.image import Image
 from lemma.document.ast.node import Node
+from lemma.document.layout.layout_vbox import LayoutVBox
+from lemma.document.layout.layout_document import LayoutDocument
 import lemma.helpers.helpers as helpers
 
 
@@ -112,6 +114,62 @@ class UseCases(object):
                     document.add_composite_command(*commands)
                     return True
         return False
+
+    def up(self, do_selection=False):
+        document = self.workspace.active_document
+
+        x, y = document.cursor.get_insert_node().layout.get_absolute_xy()
+        if document.cursor.implicit_x_position != None:
+            x = document.cursor.implicit_x_position
+
+        new_node = None
+        insert_layout = document.cursor.get_insert_node().layout
+        ancestors = insert_layout.get_ancestors()
+        for i, box in enumerate(ancestors):
+            if new_node == None and isinstance(box, LayoutVBox) or isinstance(box, LayoutDocument):
+                j = box.children.index(ancestors[i - 1])
+                for child in reversed(box.children[:j]):
+                    if new_node == None:
+                        min_distance = 10000
+                        for layout in child.children:
+                            layout_x, layout_y = layout.get_absolute_xy()
+                            distance = abs(layout_x - x)
+                            if distance < min_distance:
+                                new_node = layout.node
+                                min_distance = distance
+        if new_node == None:
+            new_node = document.ast[0]
+
+        selection_node = document.cursor.get_selection_node()
+        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
+
+    def down(self, do_selection=False):
+        document = self.workspace.active_document
+
+        x, y = document.cursor.get_insert_node().layout.get_absolute_xy()
+        if document.cursor.implicit_x_position != None:
+            x = document.cursor.implicit_x_position
+
+        new_node = None
+        insert_layout = document.cursor.get_insert_node().layout
+        ancestors = insert_layout.get_ancestors()
+        for i, box in enumerate(ancestors):
+            if new_node == None and isinstance(box, LayoutVBox) or isinstance(box, LayoutDocument):
+                j = box.children.index(ancestors[i - 1])
+                for child in box.children[j + 1:]:
+                    if new_node == None:
+                        min_distance = 10000
+                        for layout in child.children:
+                            layout_x, layout_y = layout.get_absolute_xy()
+                            distance = abs(layout_x - x)
+                            if distance < min_distance:
+                                new_node = layout.node
+                                min_distance = distance
+        if new_node == None:
+            new_node = document.ast[-1]
+
+        selection_node = document.cursor.get_selection_node()
+        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
 
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
         document = self.workspace.active_document
