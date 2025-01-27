@@ -62,6 +62,9 @@ class Command(HTMLParser):
         self.document = None
         self.composite = None
 
+    def run_after_layout(self, document):
+        pass
+
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)
 

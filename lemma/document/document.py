@@ -81,6 +81,9 @@ class Document(Observable):
         self.html_scanner.update()
         self.plaintext_scanner.update()
 
+        last_command = self.command_processor.get_last_command()
+        if last_command != None: last_command.run_after_layout(self)
+
         self.add_change_code('changed')
 
     def update_last_modified(self):

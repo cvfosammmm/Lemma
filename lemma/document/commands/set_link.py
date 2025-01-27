@@ -36,6 +36,9 @@ class Command():
             node.link = None if self.target == None else Link(self.target)
         self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_links))
 
+    def run_after_layout(self, document):
+        pass
+
     def undo(self, document):
         for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]

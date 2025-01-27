@@ -44,6 +44,8 @@ class Command():
                     cursor.move_insert_to_node(cursor.next(cursor.get_insert_node()))
 
         document.set_scroll_insert_on_screen_after_layout_update()
+
+    def run_after_layout(self, document):
         document.cursor.update_implicit_x_position()
 
     def undo(self, document):

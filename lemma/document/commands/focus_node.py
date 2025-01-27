@@ -30,7 +30,9 @@ class Command():
         if next_node != None:
             document.cursor.set_insert_selection_nodes(self.node, next_node)
             document.set_scroll_insert_on_screen_after_layout_update()
-            document.cursor.update_implicit_x_position()
+
+    def run_after_layout(self, document):
+        document.cursor.update_implicit_x_position()
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])

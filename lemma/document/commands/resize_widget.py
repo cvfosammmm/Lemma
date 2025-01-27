@@ -36,6 +36,9 @@ class Command():
             widget.set_width(self.width)
             self.is_undo_checkpoint = True
 
+    def run_after_layout(self, document):
+        pass
+
     def undo(self, document):
         if self.state['width_before'] != None:
             widget = self.state['widget']
