@@ -74,15 +74,14 @@ class Document(Observable):
     def undo(self): self.command_processor.undo()
     def redo(self): self.command_processor.redo()
 
-    def update(self):
-        self.housekeeper.update()
+    def update_layout(self):
         self.layouter.update()
         self.clipping.update()
+
+    def update(self):
+        self.housekeeper.update()
         self.html_scanner.update()
         self.plaintext_scanner.update()
-
-        last_command = self.command_processor.get_last_command()
-        if last_command != None: last_command.run_after_layout(self)
 
         self.add_change_code('changed')
 

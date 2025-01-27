@@ -41,6 +41,9 @@ class CommandProcessor(object):
             return
 
         command.run(self.document)
+        self.document.update_layout()
+        command.run_after_layout(self.document)
+
         self.commands_preedit.append(command)
 
         if command.is_undo_checkpoint:
@@ -67,10 +70,12 @@ class CommandProcessor(object):
     def undo(self):
         for command in reversed(self.commands_preedit):
             command.undo(self.document)
+            self.document.update_layout()
         self.commands_preedit = list()
 
         for command in reversed(self.commands[:self.last_command + 1]):
             command.undo(self.document)
+            self.document.update_layout()
             self.last_command -= 1
             if command.is_undo_checkpoint:
                 self.document.update_last_modified()
@@ -81,6 +86,9 @@ class CommandProcessor(object):
     def redo(self):
         for command in self.commands[self.last_command + 1:]:
             command.run(self.document)
+            self.document.update_layout()
+            command.run_after_layout(self.document)
+
             self.last_command += 1
             if command.is_undo_checkpoint:
                 self.document.update_last_modified()
