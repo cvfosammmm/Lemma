@@ -22,6 +22,7 @@ class Cursor():
         self.document = document
         self.node_insert = node_insert
         self.node_selection = node_selection
+        self.implicit_x_position = 0
 
     def set_insert_node(self, node):
         self.node_insert = node
@@ -38,6 +39,10 @@ class Cursor():
 
     def set_selection_position(self, position):
         self.set_selection_node(self.document.ast.get_node_at_position(position))
+
+    def update_implicit_x_position(self):
+        x, y = self.get_insert_node().layout.get_absolute_xy()
+        self.implicit_x_position = x
 
     def prev(self, node):
         if not node.is_first_in_parent():

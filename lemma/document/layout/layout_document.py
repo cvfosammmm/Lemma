@@ -92,6 +92,9 @@ class LayoutDocument(Layout):
         return None
 
     def get_cursor_holding_layout_close_to_xy(self, x, y):
+        if y < 0: x = 0
+        if y > self.height: x = self.width
+
         vbox = self.get_line_at_y(y)
         if y >= vbox.y and y < vbox.y + vbox.height:
             for layout in vbox.flatten():

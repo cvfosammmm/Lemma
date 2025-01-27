@@ -22,7 +22,6 @@ class Command():
         self.x = x
         self.y = y
         self.is_undo_checkpoint = False
-        self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):

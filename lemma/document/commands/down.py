@@ -21,7 +21,6 @@ class Command():
     def __init__(self, do_selection=False):
         self.do_selection = do_selection
         self.is_undo_checkpoint = False
-        self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):
@@ -35,8 +34,8 @@ class Command():
             new_node = layout.children[-1].node
         else:
             x, y = document.cursor.get_insert_node().layout.get_absolute_xy()
-            if document.implicit_x_position != None:
-                x = document.implicit_x_position
+            if document.cursor.implicit_x_position != None:
+                x = document.cursor.implicit_x_position
 
             new_line = layout.parent.children[line_index + 1]
             closest_child = None

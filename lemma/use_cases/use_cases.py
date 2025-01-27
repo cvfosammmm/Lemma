@@ -113,6 +113,16 @@ class UseCases(object):
                     return True
         return False
 
+    def move_cursor_by_xy_offset(self, x, y, do_selection=False):
+        document = self.workspace.active_document
+
+        orig_x, orig_y = document.cursor.get_insert_node().layout.get_absolute_xy()
+        if document.cursor.implicit_x_position != None:
+            orig_x = document.cursor.implicit_x_position
+        new_y = orig_y + y
+
+        document.add_command('move_cursor_to_xy', orig_x, new_y, do_selection, False)
+
     def select_word_at_insert(self):
         document = self.workspace.active_document
 

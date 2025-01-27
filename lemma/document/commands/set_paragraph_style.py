@@ -24,7 +24,6 @@ class Command():
     def __init__(self, paragraph_style):
         self.paragraph_style = paragraph_style
         self.is_undo_checkpoint = True
-        self.update_implicit_x_position = False
         self.state = dict()
 
     def run(self, document):

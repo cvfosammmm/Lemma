@@ -23,7 +23,6 @@ class Command():
     def __init__(self, width):
         self.width = int(width)
         self.is_undo_checkpoint = False
-        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):

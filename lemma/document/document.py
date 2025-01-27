@@ -47,7 +47,7 @@ class Document(Observable):
         self.ast = Node('root')
         self.ast.insert(0, Node('end'))
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
-        self.implicit_x_position = 0
+
         self.scroll_insert_on_screen_after_layout_update = False
         self.html = None
         self.plaintext = None
@@ -80,18 +80,11 @@ class Document(Observable):
         self.clipping.update()
         self.html_scanner.update()
         self.plaintext_scanner.update()
-        self.update_implicit_x_position()
 
         self.add_change_code('changed')
 
     def update_last_modified(self):
         self.last_modified = time.time()
-
-    def update_implicit_x_position(self):
-        last_command = self.command_processor.get_last_command()
-        if last_command != None and last_command.update_implicit_x_position:
-            x, y = self.cursor.get_insert_node().layout.get_absolute_xy()
-            self.implicit_x_position = x
 
     def set_title(self, title):
         self.title = title

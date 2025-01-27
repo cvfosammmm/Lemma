@@ -21,7 +21,6 @@ class Command():
     def __init__(self, children):
         self.children = children
         self.is_undo_checkpoint = True
-        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):

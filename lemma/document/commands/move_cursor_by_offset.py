@@ -22,7 +22,6 @@ class Command():
         self.offset = offset
         self.do_selection = do_selection
         self.is_undo_checkpoint = False
-        self.update_implicit_x_position = True
         self.state = dict()
 
     def run(self, document):
@@ -45,6 +44,7 @@ class Command():
                     cursor.move_insert_to_node(cursor.next(cursor.get_insert_node()))
 
         document.set_scroll_insert_on_screen_after_layout_update()
+        document.cursor.update_implicit_x_position()
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])

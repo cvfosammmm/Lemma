@@ -32,7 +32,6 @@ class Command(HTMLParser):
         self.html = html
         self.path = path
         self.is_undo_checkpoint = False
-        self.update_implicit_x_position = True
 
         self.open_tags = list()
         self.tags = set()
