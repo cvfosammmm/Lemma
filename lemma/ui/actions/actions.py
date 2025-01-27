@@ -322,12 +322,16 @@ class Actions(object):
         DialogLocator.get_dialog('insert_image').run(self.use_cases)
 
     def widget_shrink(self, action=None, parameter=None):
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
-        self.workspace.active_document.add_command('resize_widget', selected_nodes[0].value.get_width() - 1)
+        document = self.workspace.active_document
+
+        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        document.add_command('resize_widget', selected_nodes[0].value.get_width() - 1)
 
     def widget_enlarge(self, action=None, parameter=None):
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
-        self.workspace.active_document.add_command('resize_widget', selected_nodes[0].value.get_width() + 1)
+        document = self.workspace.active_document
+
+        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        document.add_command('resize_widget', selected_nodes[0].value.get_width() + 1)
 
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
