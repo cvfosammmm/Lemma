@@ -32,14 +32,31 @@ class LayoutMathAtom(Layout):
 
     def layout(self):
         if len(self.children) == 3:
+            for child in self.children[1:]:
+                child.layout()
+
             vbox = LayoutVBox(self)
+            height = 0
             for child in self.children[1:]:
                 child.parent = vbox
+                child.x = 0
+                child.y = height
+                height += child.height
                 vbox.children.insert(0, child)
+
             self.children = [self.children[0], vbox]
 
         for child in self.children:
             child.layout()
+
+        if self.children[1].children[0].height == 0:
+            self.children[1].children[0].height = self.children[1].children[1].height
+            self.children[1].children[1].y = self.children[1].children[1].height
+            self.children[1].height += self.children[1].children[0].height
+
+        if self.children[1].children[1].height == 0:
+            self.children[1].children[1].height = self.children[1].children[0].height
+            self.children[1].height += self.children[1].children[1].height
 
         self.children[0].x = 1
         self.children[0].y = 0
