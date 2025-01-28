@@ -186,7 +186,7 @@ class UseCases(object):
         new_node = layout.children[0].node
 
         selection_node = document.cursor.get_selection_node()
-        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
+        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, True)
 
     def line_end(self, do_selection=False):
         document = self.workspace.active_document
@@ -199,11 +199,13 @@ class UseCases(object):
         new_node = layout.children[-1].node
 
         selection_node = document.cursor.get_selection_node()
-        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
+        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, True)
 
     def select_node(self, node):
         document = self.workspace.active_document
-        document.add_command('focus_node', node)
+
+        next_node = node.next_in_parent()
+        document.add_command('move_cursor_to_node', node, next_node, False)
 
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
         document = self.workspace.active_document
