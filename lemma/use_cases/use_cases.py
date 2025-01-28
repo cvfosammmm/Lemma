@@ -30,6 +30,10 @@ class UseCases(object):
     def __init__(self, workspace):
         self.workspace = workspace
 
+    def set_title(self, title):
+        document = self.workspace.active_document
+        document.add_command('set_title', title)
+
     #@helpers.timer
     def insert_xml(self, xml):
         document = self.workspace.active_document

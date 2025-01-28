@@ -76,7 +76,6 @@ class Storage(object):
         self.save_workspace()
 
     def on_new_document(self, workspace, document):
-        document.update()
         self.save_document(document)
         document.connect('changed', self.on_document_change)
 

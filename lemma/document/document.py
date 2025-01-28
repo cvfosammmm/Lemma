@@ -58,6 +58,9 @@ class Document(Observable):
         self.html_scanner = HTMLScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
 
+        self.update_layout()
+        self.update()
+
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
         self.command_processor.add_command(command)
@@ -86,13 +89,6 @@ class Document(Observable):
 
     def update_last_modified(self):
         self.last_modified = time.time()
-
-    def set_title(self, title):
-        self.title = title
-        self.html_scanner.update()
-
-        self.update_last_modified()
-        self.add_change_code('changed')
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True

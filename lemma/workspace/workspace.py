@@ -35,7 +35,6 @@ class Workspace(Observable):
         self.active_document = None
 
         self.history = DocumentHistory(self)
-        self.links_by_source = dict()
         self.links_by_target = dict()
 
     def add(self, document):
@@ -43,7 +42,7 @@ class Workspace(Observable):
         self.documents.append(document)
         self.documents.sort(key=attrgetter('last_modified'), reverse=True)
         self.documents_by_id[document.id] = document
-        self.update_links(document)
+        self.update_links()
         self.add_change_code('new_document', document)
         self.add_change_code('changed')
 
@@ -54,7 +53,7 @@ class Workspace(Observable):
 
         self.history.delete(document)
         self.documents.remove(document)
-        self.update_links(document)
+        self.update_links()
         self.add_change_code('document_removed', document)
         self.add_change_code('changed')
 
@@ -101,36 +100,18 @@ class Workspace(Observable):
         return self.max_document_id + 1
 
     def on_document_change(self, document):
-        self.update_links(document)
+        self.update_links()
         self.documents.sort(key=attrgetter('last_modified'), reverse=True)
         self.add_change_code('document_changed', document)
 
-    def update_links(self, document):
-        if document.title in self.links_by_source:
-            for target in self.links_by_source[document.title]:
-                self.links_by_target[target].remove(document.title)
-            del(self.links_by_source[document.title])
-        if document in self.documents:
-            self.links_by_source[document.title] = set()
+    def update_links(self):
+        links_by_target = dict()
+        for document in self.documents:
             for link in document.links:
-                self.links_by_source[document.title].add(link.target)
-                if link.target not in self.links_by_target:
-                    self.links_by_target[link.target] = set()
-                self.links_by_target[link.target].add(document.title)
+                if link.target not in links_by_target:
+                    links_by_target[link.target] = set()
+                links_by_target[link.target].add(document.title)
 
-    def update_document_title(self, title_before, title_after):
-        documents = []
-        if title_before in self.links_by_target:
-            for document_title in self.links_by_target[title_before]:
-                document = self.get_by_title(document_title)
-                documents.append(document)
-                for link in document.links:
-                    link.target = title_after
-
-        document = self.get_by_title(title_before)
-        documents.append(document)
-
-        for document in documents:
-            self.update_links(document)
+        self.links_by_target = links_by_target
 
 
