@@ -135,7 +135,7 @@ class Dialog(object):
                 xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
                 self.use_cases.insert_xml(xml)
             else:
-                self.document.add_command('set_link', self.bounds, self.current_values['link_target'])
+                self.use_cases.set_link(self.bounds, self.current_values['link_target'])
             self.view.close()
 
 

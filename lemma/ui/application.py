@@ -57,7 +57,7 @@ class Application(Adw.Application):
         self.document_history = document_history.DocumentHistory(self.workspace, self.main_window)
         self.document_view = document_view.DocumentView(self.workspace, self.main_window, self)
         self.cursor_state = cursor_state.CursorState(self.workspace, self.main_window)
-        self.toolbar = toolbar.ToolBar(self.workspace, self.main_window)
+        self.toolbar = toolbar.ToolBar(self.workspace, self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.workspace, self.main_window)
         self.document_list = document_list.DocumentList(self.workspace, self.main_window)
         self.backlinks = backlinks.Backlinks(self.workspace, self.main_window, self)

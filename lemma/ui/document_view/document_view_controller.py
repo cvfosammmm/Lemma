@@ -19,8 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-from urllib.parse import urlparse
-import webbrowser, time
+import time
 
 from lemma.document.document import Document
 from lemma.db.character_db import CharacterDB
@@ -106,10 +105,10 @@ class DocumentViewController():
 
             if n_press % 3 == 1:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                    document.add_command('move_cursor_to_xy', x, y, True)
+                    self.use_cases.move_cursor_to_xy(x, y, True)
 
                 elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
-                    document.add_command('move_cursor_to_xy', x, y)
+                    self.use_cases.move_cursor_to_xy(x, y, False)
 
                 else:
                     if link != None:
@@ -117,7 +116,7 @@ class DocumentViewController():
                     elif leaf_box != None and leaf_box.node.focus_on_click():
                         self.use_cases.select_node(leaf_box.node)
                     else:
-                        document.add_command('move_cursor_to_xy', x, y)
+                        self.use_cases.move_cursor_to_xy(x, y, False)
 
             if n_press % 3 == 2:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
@@ -165,7 +164,7 @@ class DocumentViewController():
 
                 link = self.get_link_at_xy(x, y)
                 if link != None and link.target == self.model.selected_link_target:
-                    self.open_link(link.target)
+                    self.use_cases.open_link(link.target)
 
     def on_secondary_button_press(self, controller, n_press, x, y):
         if n_press % 3 != 1: return
@@ -176,7 +175,7 @@ class DocumentViewController():
 
         if y > 0:
             if not document.cursor.has_selection():
-                document.add_command('move_cursor_to_xy', x_offset, y_offset)
+                self.use_cases.move_cursor_to_xy(x_offset, y_offset, False)
             self.view.context_menu.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
@@ -196,18 +195,19 @@ class DocumentViewController():
         if y < 0:
             new_x = self.model.document.clipping.offset_x
             new_y = max(0, self.model.document.clipping.offset_y + y)
-            self.model.document.add_command('scroll_to_xy', new_x, new_y)
+            self.use_cases.scroll_to_xy(new_x, new_y)
+
         if y - self.model.height > 0:
             height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
             new_x = self.model.document.clipping.offset_x
             new_y = min(max(0, height - self.model.height), self.model.document.clipping.offset_y + y - self.model.height)
-            self.model.document.add_command('scroll_to_xy', new_x, new_y)
+            self.use_cases.scroll_to_xy(new_x, new_y)
 
         x -= self.view.padding_left
         y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
         y += self.model.document.clipping.offset_y
 
-        self.model.document.add_command('move_cursor_to_xy', x, y, True)
+        self.use_cases.move_cursor_to_xy(x, y, True)
 
     def on_drag_end(self, gesture, x, y, data=None):
         pass
@@ -231,7 +231,7 @@ class DocumentViewController():
             x = min(0, max(0, document.clipping.offset_x + dx))
             y = min(max(0, height - self.model.height), max(0, document.clipping.offset_y + dy))
 
-            document.add_command('scroll_to_xy', x, y)
+            self.use_cases.scroll_to_xy(x, y)
         return
 
     def on_modifiers_change(self, controller, state):
@@ -244,28 +244,18 @@ class DocumentViewController():
 
         document = self.model.document
         cursor_state = self.model.application.cursor_state
-        insert = document.cursor.get_insert_node()
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
-            case ('left', 0):
-                if document.cursor.has_selection():
-                    document.add_command('move_cursor_to_node', document.cursor.get_first_node())
-                else:
-                    document.add_command('move_cursor_by_offset', -1)
-
-            case ('right', 0):
-                if document.cursor.has_selection():
-                    document.add_command('move_cursor_to_node', document.cursor.get_last_node())
-                else:
-                    document.add_command('move_cursor_by_offset', 1)
-
+            case ('left', 0): self.use_cases.left()
+            case ('right', 0): self.use_cases.right()
             case ('up', 0): self.use_cases.up()
             case ('down', 0): self.use_cases.down()
             case ('home', 0): self.use_cases.line_start()
             case ('end', 0): self.use_cases.line_end()
             case ('page_up', 0): self.use_cases.move_cursor_by_xy_offset(0, -self.model.height + 100)
             case ('page_down', 0): self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100)
-            case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', -1, True)
-            case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', 1, True)
+
+            case ('left', Gdk.ModifierType.SHIFT_MASK): self.use_cases.left(True)
+            case ('right', Gdk.ModifierType.SHIFT_MASK): self.use_cases.right(True)
             case ('up', Gdk.ModifierType.SHIFT_MASK): self.use_cases.up(True)
             case ('down', Gdk.ModifierType.SHIFT_MASK): self.use_cases.down(True)
             case ('home', Gdk.ModifierType.SHIFT_MASK): self.use_cases.line_start(True)
@@ -275,39 +265,23 @@ class DocumentViewController():
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
                 self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100, True)
 
-            case ('tab', 0):
-                self.use_cases.select_next_placeholder()
-
-            case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK):
-                self.use_cases.select_prev_placeholder()
-
+            case ('tab', 0): self.use_cases.select_next_placeholder()
+            case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK): self.use_cases.select_prev_placeholder()
+            case ('escape', _):
+                if document.cursor.has_selection():
+                    selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+                    if len(selected_nodes) == 1 and selected_nodes[0].is_widget():
+                        self.use_cases.remove_selection()
             case ('return', _):
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
-                    self.open_link(document.cursor.get_insert_node().link.target)
+                    self.use_cases.open_link(document.cursor.get_insert_node().link.target)
                 else:
                     parser = xml_parser.XMLParser()
                     self.use_cases.insert_xml('\n')
                     if not document.cursor.has_selection():
                         self.use_cases.replace_max_string_before_cursor(cursor_state.tags_at_cursor)
-
-            case ('escape', _):
-                if document.cursor.has_selection():
-                    selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-                    if len(selected_nodes) == 1 and selected_nodes[0].is_widget():
-                        document.add_command('move_cursor_to_node', document.cursor.get_last_node())
-
-            case ('backspace', _):
-                if document.cursor.has_selection():
-                    document.add_command('delete_selection')
-                else:
-                    if not insert.is_first_in_parent() or len(insert.parent) == 1:
-                        document.add_composite_command(['move_cursor_by_offset', -1, True], ['delete_selection'])
-            case ('delete', _):
-                if document.cursor.has_selection():
-                    document.add_command('delete_selection')
-                else:
-                    if not insert.is_last_in_parent() or len(insert.parent) == 1:
-                        document.add_composite_command(['move_cursor_by_offset', 1, True], ['delete_selection'])
+            case ('backspace', _): self.use_cases.backspace()
+            case ('delete', _): self.use_cases.delete()
 
             case _: return False
         return True
@@ -344,13 +318,13 @@ class DocumentViewController():
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
         self.model.last_cursor_or_scrolling_change = time.time()
-        self.model.document.add_command('scroll_to_xy', offset_x, offset_y)
+        self.use_cases.scroll_to_xy(offset_x, offset_y)
 
     def on_adjustment_value_changed(self, adjustment):
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
         self.model.last_cursor_or_scrolling_change = time.time()
-        self.model.document.add_command('scroll_to_xy', offset_x, offset_y)
+        self.use_cases.scroll_to_xy(offset_x, offset_y)
 
     def get_link_at_xy(self, x, y):
         layout = self.model.document.layout.get_leaf_at_xy(x, y)
@@ -359,21 +333,5 @@ class DocumentViewController():
             return layout.node.link
         else:
             return None
-
-    def open_link(self, link_target):
-        workspace = self.model.workspace
-
-        if urlparse(link_target).scheme in ['http', 'https']:
-            webbrowser.open(link_target)
-        else:
-            target_document = workspace.get_by_title(link_target)
-            if target_document != None:
-                workspace.set_active_document(target_document)
-            else:
-                id = workspace.get_new_document_id()
-                document = Document(id)
-                document.title = link_target
-                workspace.add(document)
-                workspace.set_active_document(document)
 
 

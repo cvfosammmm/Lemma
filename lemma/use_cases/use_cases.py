@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from urllib.parse import urlparse
+import webbrowser
+
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_parser as xml_parser
 from lemma.db.character_db import CharacterDB
@@ -29,6 +32,22 @@ class UseCases(object):
 
     def __init__(self, workspace):
         self.workspace = workspace
+
+    def open_link(self, link_target):
+        workspace = self.workspace
+
+        if urlparse(link_target).scheme in ['http', 'https']:
+            webbrowser.open(link_target)
+        else:
+            target_document = workspace.get_by_title(link_target)
+            if target_document != None:
+                workspace.set_active_document(target_document)
+            else:
+                id = workspace.get_new_document_id()
+                document = Document(id)
+                document.title = link_target
+                workspace.add(document)
+                workspace.set_active_document(document)
 
     def set_title(self, title):
         document = self.workspace.active_document
@@ -81,6 +100,29 @@ class UseCases(object):
         if nodes.validate():
             document.add_composite_command(*commands)
 
+    def backspace(self):
+        document = self.workspace.active_document
+        insert = document.cursor.get_insert_node()
+
+        if document.cursor.has_selection():
+            self.delete_selection()
+        else:
+            if not insert.is_first_in_parent() or len(insert.parent) == 1:
+                document.add_composite_command(['move_cursor_by_offset', -1, True], ['delete_selection'])
+
+    def delete(self):
+        document = self.workspace.active_document
+        insert = document.cursor.get_insert_node()
+
+        if document.cursor.has_selection():
+            self.delete_selection()
+        elif not insert.is_last_in_parent() or len(insert.parent) == 1:
+            document.add_composite_command(['move_cursor_by_offset', 1, True], ['delete_selection'])
+
+    def delete_selection(self):
+        document = self.workspace.active_document
+        document.add_command('delete_selection')
+
     def add_image_from_filename(self, filename):
         document = self.workspace.active_document
 
@@ -118,6 +160,57 @@ class UseCases(object):
                     document.add_composite_command(*commands)
                     return True
         return False
+
+    def resize_widget(self, new_width):
+        document = self.workspace.active_document
+        document.add_command('resize_widget', new_width)
+
+    def set_link(self, bounds, target):
+        document = self.workspace.active_document
+        document.add_command('set_link', bounds, target)
+
+    def set_paragraph_style(self, style):
+        document = self.workspace.active_document
+
+        current_style = document.cursor.get_insert_node().get_paragraph_style()
+        if current_style == style:
+            style = 'p'
+
+        document.add_command('set_paragraph_style', style)
+
+    def toggle_tag(self, tagname):
+        document = self.workspace.active_document
+
+        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
+        all_tagged = True
+        for node in char_nodes:
+            if tagname not in node.tags: all_tagged = False
+
+        if len(char_nodes) > 0:
+            if all_tagged:
+                document.add_command('remove_tag', tagname)
+            else:
+                document.add_command('add_tag', tagname)
+
+    def left(self, do_selection=False):
+        document = self.workspace.active_document
+
+        if do_selection:
+            document.add_command('move_cursor_by_offset', -1, True)
+        elif document.cursor.has_selection():
+            document.add_command('move_cursor_to_node', document.cursor.get_first_node())
+        else:
+            document.add_command('move_cursor_by_offset', -1)
+
+    def right(self, do_selection=False):
+        document = self.workspace.active_document
+
+        if do_selection:
+            document.add_command('move_cursor_by_offset', 1, True)
+        elif document.cursor.has_selection():
+            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+        else:
+            document.add_command('move_cursor_by_offset', 1)
 
     def up(self, do_selection=False):
         document = self.workspace.active_document
@@ -251,6 +344,11 @@ class UseCases(object):
         document = self.workspace.active_document
         document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
 
+    def remove_selection(self):
+        document = self.workspace.active_document
+        if document.cursor.has_selection():
+            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
         document = self.workspace.active_document
 
@@ -260,6 +358,10 @@ class UseCases(object):
         new_y = orig_y + y
 
         document.add_command('move_cursor_to_xy', orig_x, new_y, do_selection, False)
+
+    def move_cursor_to_xy(self, x, y, do_selection=False):
+        document = self.workspace.active_document
+        document.add_command('move_cursor_to_xy', x, y, do_selection, True)
 
     def select_word_at_insert(self):
         document = self.workspace.active_document
@@ -284,5 +386,9 @@ class UseCases(object):
         if node_2.get_position() < node_end.get_position(): node_2 = node_end
 
         document.add_command('move_cursor_to_node', node_2, node_1)
+
+    def scroll_to_xy(self, x, y):
+        document = self.workspace.active_document
+        document.add_command('scroll_to_xy', x, y)
 
 

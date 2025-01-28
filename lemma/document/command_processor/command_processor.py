@@ -96,9 +96,4 @@ class CommandProcessor(object):
 
         self.document.signal_changes()
 
-    def reset_undo_stack(self):
-        self.commands = list()
-        self.commands_preedit = list()
-        self.last_command = -1
-
 

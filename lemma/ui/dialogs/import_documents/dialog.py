@@ -25,6 +25,7 @@ from markdown_it import MarkdownIt
 
 import lemma.ui.dialogs.import_documents.import_documents_viewgtk as view
 from lemma.document.document import Document
+from lemma.infrastructure.html_parser import HTMLParser
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -132,8 +133,13 @@ class Dialog(object):
             markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
             html = mdi.render(markdown)
 
-            document.add_command('populate_from_html', html, os.path.dirname(path))
-            document.command_processor.reset_undo_stack()
+            parser = HTMLParser(html, os.path.dirname(path))
+            parser.run()
+            document.ast = parser.composite
+            document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
+            document.set_scroll_insert_on_screen_after_layout_update()
+            document.update()
+            document.signal_changes()
 
             self.workspace.add(document)
 

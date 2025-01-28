@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import urllib.parse, os.path
-from html.parser import HTMLParser
+from html.parser import HTMLParser as HTMLParserLib
 
 from lemma.document.ast.node import Node
 from lemma.widgets.image import Image
@@ -24,24 +24,23 @@ from lemma.document.ast.link import Link
 from lemma.infrastructure.layout_info import LayoutInfo
 
 
-class Command(HTMLParser):
+class HTMLParser(HTMLParserLib):
 
     def __init__(self, html, path):
-        HTMLParser.__init__(self)
+        HTMLParserLib.__init__(self)
 
         self.html = html
         self.path = path
-        self.is_undo_checkpoint = False
 
         self.open_tags = list()
         self.tags = set()
         self.link_target = None
         self.paragraph_style = 'p'
-        self.document = None
+
+        self.title = None
         self.composite = None
 
-    def run(self, document):
-        self.document = document
+    def run(self):
         self.composite = Node('root')
 
         head, divider, rest = self.html.partition('<body>')
@@ -55,15 +54,6 @@ class Command(HTMLParser):
             del(self.composite.children[-1])
             self.composite.append(Node('end'))
             self.composite.children[-1].paragraph_style = self.paragraph_style
-        document.ast = self.composite
-        document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
-        document.set_scroll_insert_on_screen_after_layout_update()
-
-        self.document = None
-        self.composite = None
-
-    def run_after_layout(self, document):
-        pass
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)
@@ -140,7 +130,7 @@ class Command(HTMLParser):
 
     def handle_data(self, data):
         if 'title' in self.open_tags:
-            self.document.title = data
+            self.title = data
 
         elif 'math' in self.open_tags:
             for char in data:
@@ -157,8 +147,5 @@ class Command(HTMLParser):
                     if self.link_target != None:
                         node.link = Link(self.link_target)
                     self.composite.append(node)
-
-    def undo(self, document):
-        pass
 
 

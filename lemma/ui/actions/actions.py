@@ -56,7 +56,7 @@ class Actions(object):
         self.add_simple_action('cut', self.cut)
         self.add_simple_action('copy', self.copy)
         self.add_simple_action('paste', self.paste)
-        self.add_simple_action('delete', self.delete_selection)
+        self.add_simple_action('delete', self.delete)
         self.add_simple_action('select-all', self.select_all)
         self.add_simple_action('remove-selection', self.remove_selection)
 
@@ -212,7 +212,7 @@ class Actions(object):
 
     def cut(self, action=None, parameter=''):
         self.copy()
-        self.delete_selection()
+        self.use_cases.delete_selection()
 
     def copy(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
@@ -257,22 +257,14 @@ class Actions(object):
             xml = '<char tags="' + ' '.join(tags_at_cursor) + '">' + text + '</char>'
             self.use_cases.insert_xml(text)
 
-    def delete_selection(self, action=None, parameter=''):
-        document = self.workspace.active_document
-        insert = document.cursor.get_insert_node()
-
-        if document.cursor.has_selection():
-            document.add_command('delete_selection')
-        elif not insert.is_last_in_parent() or len(insert.parent) == 1:
-            document.add_composite_command(['move_cursor_by_offset', 1, True], ['delete_selection'])
+    def delete(self, action=None, parameter=''):
+        self.use_cases.delete()
 
     def select_all(self, action=None, parameter=''):
         self.use_cases.select_all()
 
     def remove_selection(self, action=None, parameter=''):
-        document = self.workspace.active_document
-        if document.cursor.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+        self.use_cases.remove_selection()
 
     def insert_xml(self, action=None, parameter=None):
         self.use_cases.insert_xml(parameter.get_string())
@@ -286,36 +278,21 @@ class Actions(object):
         self.use_cases.insert_xml(xml)
 
     def set_paragraph_style(self, action=None, parameter=None):
-        document = self.workspace.active_document
-        current_style = document.cursor.get_insert_node().get_paragraph_style()
-        new_style = parameter.get_string()
-
-        if current_style == new_style:
-            new_style = 'p'
-
-        document.add_command('set_paragraph_style', new_style)
+        self.use_cases.set_paragraph_style(parameter.get_string())
 
     def toggle_bold(self, action=None, parameter=''):
-        self.toggle_tag('bold')
+        document = self.workspace.active_document
+        if document.cursor.has_selection():
+            self.use_cases.toggle_tag('bold')
+        else:
+            self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {'bold'})
 
     def toggle_italic(self, action=None, parameter=''):
-        self.toggle_tag('italic')
-
-    def toggle_tag(self, tagname):
         document = self.workspace.active_document
-
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
-        all_tagged = True
-        for node in char_nodes:
-            if tagname not in node.tags: all_tagged = False
-
-        if len(char_nodes) > 0:
-            if all_tagged:
-                document.add_command('remove_tag', tagname)
-            else:
-                document.add_command('add_tag', tagname)
+        if document.cursor.has_selection():
+            self.use_cases.toggle_tag('italic')
         else:
-            self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {tagname})
+            self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {'italic'})
 
     def show_insert_image_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_image').run(self.use_cases)
@@ -324,13 +301,13 @@ class Actions(object):
         document = self.workspace.active_document
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-        document.add_command('resize_widget', selected_nodes[0].value.get_width() - 1)
+        self.use_cases.resize_widget(selected_nodes[0].value.get_width() - 1)
 
     def widget_enlarge(self, action=None, parameter=None):
         document = self.workspace.active_document
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-        document.add_command('resize_widget', selected_nodes[0].value.get_width() + 1)
+        self.use_cases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
     def insert_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
@@ -344,7 +321,7 @@ class Actions(object):
             bounds = document.cursor.get_insert_node().link_bounds()
         else:
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
-        document.add_command('set_link', bounds)
+        self.use_cases.set_link(bounds, None)
 
     def edit_link(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)

@@ -25,10 +25,11 @@ from lemma.infrastructure.layout_info import LayoutInfo
 
 class ToolBar(Observable):
 
-    def __init__(self, workspace, main_window):
+    def __init__(self, workspace, main_window, application):
         Observable.__init__(self)
         self.toolbar = main_window.toolbar
         self.workspace = workspace
+        self.application = application
 
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
 
@@ -68,7 +69,7 @@ class ToolBar(Observable):
             self.toolbar.mode_stack.set_visible_child_name('main')
 
     def on_widget_scale_change_value(self, scale, scroll, value):
-        self.workspace.active_document.add_command('resize_widget', value)
+        self.application.use_cases.resize_widget(value)
         return True
 
 

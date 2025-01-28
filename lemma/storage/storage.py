@@ -19,6 +19,7 @@ import os, os.path, pickle
 
 from lemma.document.document import Document
 from lemma.infrastructure.html_exporter import HTMLExporter
+from lemma.infrastructure.html_parser import HTMLParser
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -39,8 +40,15 @@ class Storage(object):
 
                 with open(direntry.path, 'r') as file:
                     html = file.read()
-                document.add_command('populate_from_html', html, self.pathname)
-                document.command_processor.reset_undo_stack()
+
+                parser = HTMLParser(html, self.pathname)
+                parser.run()
+                document.title = parser.title
+                document.ast = parser.composite
+                document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
+                document.set_scroll_insert_on_screen_after_layout_update()
+                document.update()
+                document.signal_changes()
 
                 self.workspace.add(document)
 
