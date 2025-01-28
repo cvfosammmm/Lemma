@@ -68,7 +68,7 @@ class UseCases(object):
                 for node in subtree:
                     prev_selection_end.parent.insert_before(prev_selection_end, node.copy())
 
-        placeholders = nodes.collect(lambda n: n.is_placeholder())
+        placeholders = [n for n in nodes.flatten() if n.is_placeholder()]
         if len(placeholders) > 0:
             commands.append(['move_cursor_to_node', placeholders[0], placeholders[0].next_in_parent()])
         elif 'new_insert' in parser.marks and 'new_selection_bound' in parser.marks:

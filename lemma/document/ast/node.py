@@ -236,10 +236,10 @@ class Node():
             return self.parent[index]
         return None
 
-    def collect(self, filter_function):
-        result = ([self] if filter_function(self) else [])
+    def flatten(self):
+        result = [self]
         for child in self.children:
-            result += child.collect(filter_function)
+            result += child.flatten()
         return result
 
     def line_start(self):
