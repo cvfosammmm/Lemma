@@ -18,6 +18,7 @@
 import os, os.path, pickle
 
 from lemma.document.document import Document
+from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -88,11 +89,13 @@ class Storage(object):
 
     def save_document(self, document):
         pathname = os.path.join(self.pathname, str(document.id))
+        exporter = HTMLExporter()
+        html = exporter.export_html(document)
 
         try: filehandle = open(pathname, 'w')
         except IOError: pass
         else:
-            filehandle.write(document.html)
+            filehandle.write(html)
 
     def delete_document(self, document):
         pathname = os.path.join(self.pathname, str(document.id))

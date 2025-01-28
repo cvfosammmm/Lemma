@@ -21,29 +21,30 @@ import os, os.path
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
-class HTMLScanner(object):
+class HTMLExporter(object):
 
-    def __init__(self, document):
-        self.document = document
+    def __init__(self):
         self.pathname = ServiceLocator.get_notes_folder()
-
         self.file_no = 0
+        self.document_id = None
         self.html = ''
 
-    def update(self):
+    def export_html(self, document):
+        self.document_id = document.id
+
         data_dir = ServiceLocator.get_notes_folder()
-        for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:
+        for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document_id) + '-')]:
             os.remove(os.path.join(data_dir, file))
         self.file_no = 0
 
         self.html = '<html>'
 
         self.html += '<head>'
-        self.html += '<title>' + self.document.title + '</title>'
+        self.html += '<title>' + document.title + '</title>'
         self.html += '</head>'
 
         self.html += '<body>'
-        lines = self.group_by_line(self.document.ast)
+        lines = self.group_by_line(document.ast)
         for line in lines:
             node_lists = self.group_by_node_type(line)
 
@@ -54,7 +55,7 @@ class HTMLScanner(object):
         self.html += '</body>'
 
         self.html += '</html>'
-        self.document.html = self.html
+        return self.html
 
     def group_by_line(self, root_node):
         result = list()
@@ -149,7 +150,7 @@ class HTMLScanner(object):
         elif node.is_placeholder():
             self.html += '<placeholder value="' + node.value + '"/>'
         elif node.is_widget():
-            self.html += node.value.to_html(os.path.join(self.pathname, str(self.document.id) + '-' + str(self.file_no)))
+            self.html += node.value.to_html(os.path.join(self.pathname, str(self.document_id) + '-' + str(self.file_no)))
             self.file_no += 1
 
 

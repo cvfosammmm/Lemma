@@ -20,10 +20,8 @@ import time, os.path
 from lemma.document.ast.node import Node
 from lemma.document.ast.cursor import Cursor
 from lemma.document.layout.layouter import Layouter
-from lemma.document.housekeeper.housekeeper import Housekeeper
-from lemma.document.clipping.clipping import Clipping
-from lemma.document.html.html_scanner import HTMLScanner
 from lemma.document.plaintext.plaintext_scanner import PlaintextScanner
+from lemma.document.clipping.clipping import Clipping
 from lemma.document.command_processor.command_processor import CommandProcessor
 from lemma.helpers.observable import Observable
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
@@ -46,19 +44,15 @@ class Document(Observable):
         self.ast = Node('root')
         self.ast.insert(0, Node('end'))
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
+        self.layout = None
+        self.plaintext = None
 
         self.scroll_insert_on_screen_after_layout_update = False
-        self.html = None
-        self.plaintext = None
-        self.links = []
 
         self.layouter = Layouter(self)
-        self.housekeeper = Housekeeper(self)
         self.clipping = Clipping(self)
-        self.html_scanner = HTMLScanner(self)
         self.plaintext_scanner = PlaintextScanner(self)
 
-        self.update_layout()
         self.update()
 
     def add_command(self, name, *parameters):
@@ -76,19 +70,16 @@ class Document(Observable):
     def undo(self): self.command_processor.undo()
     def redo(self): self.command_processor.redo()
 
-    def update_layout(self):
+    def update(self):
         self.layouter.update()
         self.clipping.update()
-
-    def update(self):
-        self.housekeeper.update()
-        self.html_scanner.update()
         self.plaintext_scanner.update()
-
-        self.add_change_code('changed')
 
     def update_last_modified(self):
         self.last_modified = time.time()
+
+    def signal_changes(self):
+        self.add_change_code('changed')
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True

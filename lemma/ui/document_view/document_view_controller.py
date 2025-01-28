@@ -115,7 +115,7 @@ class DocumentViewController():
                     if link != None:
                         self.model.selected_link_target = link.target
                     elif leaf_box != None and leaf_box.node.focus_on_click():
-                        document.add_command('focus_node', leaf_box.node)
+                        self.use_cases.select_node(leaf_box.node)
                     else:
                         document.add_command('move_cursor_to_xy', x, y)
 
@@ -260,16 +260,16 @@ class DocumentViewController():
 
             case ('up', 0): self.use_cases.up()
             case ('down', 0): self.use_cases.down()
-            case ('home', 0): document.add_command('line_start')
-            case ('end', 0): document.add_command('line_end')
+            case ('home', 0): self.use_cases.line_start()
+            case ('end', 0): self.use_cases.line_end()
             case ('page_up', 0): self.use_cases.move_cursor_by_xy_offset(0, -self.model.height + 100)
             case ('page_down', 0): self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100)
             case ('left', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', -1, True)
             case ('right', Gdk.ModifierType.SHIFT_MASK): document.add_command('move_cursor_by_offset', 1, True)
             case ('up', Gdk.ModifierType.SHIFT_MASK): self.use_cases.up(True)
             case ('down', Gdk.ModifierType.SHIFT_MASK): self.use_cases.down(True)
-            case ('home', Gdk.ModifierType.SHIFT_MASK): document.add_command('line_start', True)
-            case ('end', Gdk.ModifierType.SHIFT_MASK): document.add_command('line_end', True)
+            case ('home', Gdk.ModifierType.SHIFT_MASK): self.use_cases.line_start(True)
+            case ('end', Gdk.ModifierType.SHIFT_MASK): self.use_cases.line_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
                 self.use_cases.move_cursor_by_xy_offset(0, -self.model.height + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):

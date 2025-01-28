@@ -24,6 +24,7 @@ import os.path, shutil, os
 import urllib.parse
 import html2text
 
+from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -79,11 +80,14 @@ class Dialog(object):
                     shutil.copy(os.path.join(data_dir, file), files_folder)
                     has_files = True
 
+                exporter = HTMLExporter()
+                html = exporter.export_html(self.document)
                 markdown = '# ' + self.document.title + '\n'
-                markdown += html2text.html2text(self.document.html)
+                markdown += html2text.html2text(html)
                 if has_files:
                     markdown = markdown.replace('![](', '![](' + os.path.basename(files_folder) + '/')
 
                 with open(filename, 'w') as f:
                     f.write(markdown)
+
 

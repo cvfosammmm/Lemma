@@ -107,11 +107,20 @@ class Workspace(Observable):
     def update_links(self):
         links_by_target = dict()
         for document in self.documents:
-            for link in document.links:
+            links = self.find_links(document.ast)
+            for link in links:
                 if link.target not in links_by_target:
                     links_by_target[link.target] = set()
                 links_by_target[link.target].add(document.title)
 
         self.links_by_target = links_by_target
+
+    def find_links(self, node):
+        links = []
+        if node.link != None:
+            links.append(node.link)
+        for child in node:
+            links += self.find_links(child)
+        return links
 
 

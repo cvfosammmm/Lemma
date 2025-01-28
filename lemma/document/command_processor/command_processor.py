@@ -41,7 +41,7 @@ class CommandProcessor(object):
             return
 
         command.run(self.document)
-        self.document.update_layout()
+        self.document.update()
         command.run_after_layout(self.document)
 
         self.commands_preedit.append(command)
@@ -51,7 +51,7 @@ class CommandProcessor(object):
             self.last_command += len(self.commands_preedit)
             self.commands_preedit = list()
             self.document.update_last_modified()
-        self.document.update()
+        self.document.signal_changes()
 
     def can_undo(self):
         return self.last_command >= 0
@@ -70,23 +70,23 @@ class CommandProcessor(object):
     def undo(self):
         for command in reversed(self.commands_preedit):
             command.undo(self.document)
-            self.document.update_layout()
+            self.document.update()
         self.commands_preedit = list()
 
         for command in reversed(self.commands[:self.last_command + 1]):
             command.undo(self.document)
-            self.document.update_layout()
+            self.document.update()
             self.last_command -= 1
             if command.is_undo_checkpoint:
                 self.document.update_last_modified()
                 break
 
-        self.document.update()
+        self.document.signal_changes()
 
     def redo(self):
         for command in self.commands[self.last_command + 1:]:
             command.run(self.document)
-            self.document.update_layout()
+            self.document.update()
             command.run_after_layout(self.document)
 
             self.last_command += 1
@@ -94,7 +94,7 @@ class CommandProcessor(object):
                 self.document.update_last_modified()
                 break
 
-        self.document.update()
+        self.document.signal_changes()
 
     def reset_undo_stack(self):
         self.commands = list()

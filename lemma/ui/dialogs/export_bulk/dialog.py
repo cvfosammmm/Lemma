@@ -24,6 +24,7 @@ import html2text
 import os.path, os
 
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
+from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -118,12 +119,16 @@ class Dialog(object):
             for document in self.current_values['documents']:
 
                 if self.current_values['format'] == 'html':
-                    html = document.html.replace('<body>', '<body><h1>' + document.title + '</h1>')
+                    exporter = HTMLExporter()
+                    html = exporter.export_html(document)
+                    html = html.replace('<body>', '<body><h1>' + document.title + '</h1>')
                     file.writestr(str(document.id) + '.html', html)
 
                 if self.current_values['format'] == 'markdown':
+                    exporter = HTMLExporter()
+                    html = exporter.export_html(document)
                     markdown = '# ' + document.title + '\n'
-                    markdown += html2text.html2text(document.html)
+                    markdown += html2text.html2text(html)
                     file.writestr(str(document.id) + '.md', markdown)
 
                 data_dir = ServiceLocator.get_notes_folder()

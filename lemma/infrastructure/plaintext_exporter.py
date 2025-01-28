@@ -16,25 +16,31 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class Housekeeper():
+class PlaintextExporter(object):
 
-    def __init__(self, document):
-        self.document = document
-        self.links = []
+    def __init__(self):
+        self.text = ''
 
-    def update(self):
-        self.links = []
+    def export_plaintext(self, document, max_length=None):
+        self.text = ''
 
-        for child in self.document.ast:
+        for child in document.ast:
             self.process_node(child)
 
-        self.document.links = self.links
+            if max_length != None and len(self.text) >= max_length:
+                break
+
+        return self.text
 
     def process_node(self, node):
-        if node.link != None:
-            self.links.append(node.link)
+        if node.is_eol():
+            self.text += '\n'
 
-        for child in node:
-            self.process_node(child)
+        elif node.is_char():
+            if node.is_whitespace():
+                if self.text == '' or self.text[-1] != ' ':
+                    self.text += ' '
+            else:
+                self.text += node.value
 
 

@@ -22,6 +22,7 @@ from gi.repository import Gtk, Gio, GLib
 
 import os.path, shutil, os
 
+from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -75,7 +76,9 @@ class Dialog(object):
                     shutil.copy(os.path.join(data_dir, file), files_folder)
                     has_files = True
 
-                html = self.document.html.replace('<body>', '<body><h1>' + self.document.title + '</h1>')
+                exporter = HTMLExporter()
+                html = exporter.export_html(self.document)
+                html = html.replace('<body>', '<body><h1>' + self.document.title + '</h1>')
                 if has_files:
                     html = html.replace('src="', 'src="' + os.path.basename(files_folder) + '/')
 

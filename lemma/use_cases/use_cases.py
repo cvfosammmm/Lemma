@@ -175,6 +175,36 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
 
+    def line_start(self, do_selection=False):
+        document = self.workspace.active_document
+
+        layout = document.cursor.get_insert_node().layout
+        while layout.parent.parent != None:
+            layout = layout.parent
+        while layout.children[0].node == None:
+            layout = layout.children[0]
+        new_node = layout.children[0].node
+
+        selection_node = document.cursor.get_selection_node()
+        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
+
+    def line_end(self, do_selection=False):
+        document = self.workspace.active_document
+
+        layout = document.cursor.get_insert_node().layout
+        while layout.parent.parent != None:
+            layout = layout.parent
+        while layout.children[-1].node == None:
+            layout = layout.children[-1]
+        new_node = layout.children[-1].node
+
+        selection_node = document.cursor.get_selection_node()
+        document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
+
+    def select_node(self, node):
+        document = self.workspace.active_document
+        document.add_command('focus_node', node)
+
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
         document = self.workspace.active_document
 
