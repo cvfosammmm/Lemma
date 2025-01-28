@@ -52,10 +52,12 @@ class Dialog():
         data.append(section)
 
         section = {'title': 'Selection', 'items': list()}
-        section['items'].append({'title': 'Select all', 'shortcut': '&lt;ctrl&gt;A'})
-        section['items'].append({'title': 'Cut', 'shortcut': '&lt;ctrl&gt;X'})
         section['items'].append({'title': 'Copy', 'shortcut': '&lt;ctrl&gt;C'})
+        section['items'].append({'title': 'Cut', 'shortcut': '&lt;ctrl&gt;X'})
         section['items'].append({'title': 'Paste', 'shortcut': '&lt;ctrl&gt;V'})
+        section['items'].append({'title': 'Select all', 'shortcut': '&lt;ctrl&gt;A'})
+        section['items'].append({'title': 'Select next placeholder', 'shortcut': 'Tab'})
+        section['items'].append({'title': 'Select previous placeholder', 'shortcut': '&lt;shift&gt;Tab'})
         data.append(section)
 
         section = {'title': 'Formatting', 'items': list()}

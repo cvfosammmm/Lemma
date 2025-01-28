@@ -267,8 +267,7 @@ class Actions(object):
             document.add_composite_command(['move_cursor_by_offset', 1, True], ['delete_selection'])
 
     def select_all(self, action=None, parameter=''):
-        document = self.workspace.active_document
-        document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
+        self.use_cases.select_all()
 
     def remove_selection(self, action=None, parameter=''):
         document = self.workspace.active_document

@@ -201,11 +201,55 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, True)
 
+    def select_next_placeholder(self):
+        document = self.workspace.active_document
+
+        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        insert = document.cursor.get_insert_node()
+        node = insert
+
+        if len(selected_nodes) == 1 and selected_nodes[0].is_placeholder():
+            node = document.cursor.next(node)
+
+        while not node.is_placeholder():
+            if node == document.ast[-1]:
+                node = document.ast[0]
+            else:
+                node = document.cursor.next(node)
+            if node == insert: break
+
+        if node.is_placeholder():
+            self.select_node(node)
+
+    def select_prev_placeholder(self):
+        document = self.workspace.active_document
+
+        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        insert = document.cursor.get_insert_node()
+        node = insert
+
+        if insert.is_placeholder() or (len(selected_nodes) == 1 and selected_nodes[0].is_placeholder()):
+            node = document.cursor.prev(node)
+
+        while not node.is_placeholder():
+            if node == document.ast[0]:
+                node = document.ast[-1]
+            else:
+                node = document.cursor.prev(node)
+            if node == insert: break
+
+        if node.is_placeholder():
+            self.select_node(node)
+
     def select_node(self, node):
         document = self.workspace.active_document
 
         next_node = node.next_in_parent()
         document.add_command('move_cursor_to_node', node, next_node, False)
+
+    def select_all(self):
+        document = self.workspace.active_document
+        document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
 
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
         document = self.workspace.active_document

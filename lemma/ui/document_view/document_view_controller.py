@@ -275,6 +275,12 @@ class DocumentViewController():
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
                 self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100, True)
 
+            case ('tab', 0):
+                self.use_cases.select_next_placeholder()
+
+            case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK):
+                self.use_cases.select_prev_placeholder()
+
             case ('return', _):
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
                     self.open_link(document.cursor.get_insert_node().link.target)
