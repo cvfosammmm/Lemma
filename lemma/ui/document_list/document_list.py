@@ -30,9 +30,10 @@ import lemma.helpers.helpers as helpers
 
 class DocumentList(object):
 
-    def __init__(self, workspace, main_window):
+    def __init__(self, workspace, main_window, application):
         self.workspace = workspace
         self.main_window = main_window
+        self.application = application
         self.view = main_window.document_list
 
         self.documents = self.workspace.documents
@@ -79,7 +80,7 @@ class DocumentList(object):
             self.view.content.queue_draw()
 
     def activate_item(self, index):
-        self.workspace.set_active_document(self.documents[index])
+        self.application.use_cases.set_active_document(self.documents[index])
 
     def on_primary_button_press(self, scrolling_widget, data):
         x_offset, y_offset, state = data

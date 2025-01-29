@@ -43,13 +43,18 @@ class UseCases(object):
         else:
             target_document = workspace.get_by_title(link_target)
             if target_document != None:
-                workspace.set_active_document(target_document)
+                self.set_active_document(target_document)
             else:
                 id = workspace.get_new_document_id()
                 document = Document(id)
                 document.title = link_target
                 workspace.add(document)
-                workspace.set_active_document(document)
+                self.set_active_document(document)
+
+    def set_active_document(self, document, update_history=True, scroll_to_top=True):
+        self.workspace.set_active_document(document, update_history)
+        if scroll_to_top:
+            self.scroll_to_xy(0, 0)
 
     def set_title(self, title):
         document = self.workspace.active_document

@@ -197,12 +197,12 @@ class Actions(object):
         else:
             prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
             if prev_doc != None:
-                self.workspace.set_active_document(prev_doc, update_history=False)
+                self.use_cases.set_active_document(prev_doc, update_history=False, scroll_to_top=False)
 
     def go_forward(self, action=None, parameter=''):
         next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
         if next_doc != None:
-            self.workspace.set_active_document(next_doc, update_history=False)
+            self.use_cases.set_active_document(next_doc, update_history=False, scroll_to_top=False)
 
     def undo(self, action=None, parameter=''):
         self.workspace.active_document.undo()

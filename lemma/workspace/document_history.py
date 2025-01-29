@@ -41,7 +41,11 @@ class DocumentHistory(Observable):
     def activate_document(self, document):
         if document != None and document in self.documents:
             self.active_document_index = self.documents.index(document)
-            self.set_active_document(document)
+            if self.active_document != None:
+                self.active_document.disconnect('changed', self.on_document_change)
+            self.active_document = document
+            self.active_document.connect('changed', self.on_document_change)
+
         self.add_change_code('changed')
         self.add_change_code('active_document_changed')
 
@@ -79,12 +83,6 @@ class DocumentHistory(Observable):
         index = self.documents.index(document)
         if index == (len(self.documents) - 1): return None
         else: return self.documents[index + 1]
-
-    def set_active_document(self, document):
-        if self.active_document != None:
-            self.active_document.disconnect('changed', self.on_document_change)
-        self.active_document = document
-        self.active_document.connect('changed', self.on_document_change)
 
     def on_document_change(self, document):
         self.add_change_code('changed')

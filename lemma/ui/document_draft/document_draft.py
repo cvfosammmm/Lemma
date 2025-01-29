@@ -26,9 +26,10 @@ from lemma.document.document import Document
 
 class DocumentDraft():
 
-    def __init__(self, workspace, main_window):
+    def __init__(self, workspace, main_window, application):
         self.workspace = workspace
         self.view = main_window.draft_view
+        self.application = application
         self.document = None
 
         self.title = ''
@@ -142,7 +143,7 @@ class DocumentDraft():
         self.document.title = self.title
         self.deactivate()
         self.workspace.add(self.document)
-        self.workspace.set_active_document(self.document)
+        self.application.use_cases.set_active_document(self.document)
         self.document = None
 
     def on_entry_keypress(self, controller, keyval, keycode, state):

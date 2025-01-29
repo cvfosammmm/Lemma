@@ -54,6 +54,6 @@ class Backlinks(object):
                     self.view.add_item(document)
 
     def on_row_activated(self, listbox, row):
-        self.workspace.set_active_document(row.get_child().document)
+        self.application.use_cases.set_active_document(row.get_child().document)
 
 

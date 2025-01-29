@@ -26,9 +26,10 @@ from lemma.ui.helpers.cairo import rounded_rectangle
 
 class DocumentHistory(object):
 
-    def __init__(self, workspace, main_window):
+    def __init__(self, workspace, main_window, application):
         self.workspace = workspace
         self.view = main_window.history_view
+        self.application = application
 
         self.layout = Pango.Layout(self.view.get_pango_context())
         self.layout.set_ellipsize(Pango.EllipsizeMode.END)
@@ -109,7 +110,7 @@ class DocumentHistory(object):
             self.view.content.queue_draw()
 
     def activate_document(self, document):
-        self.workspace.set_active_document(document, update_history=False)
+        self.application.use_cases.set_active_document(document, update_history=False, scroll_to_top=False)
 
     def draw(self, widget, ctx, width, height):
         document_at_cursor = self.get_document_at_cursor()
