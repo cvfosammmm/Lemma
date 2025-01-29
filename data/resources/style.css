@@ -105,6 +105,9 @@ label.link-overlay {
     padding: 3px 9px;
     margin-bottom: 25px;
 }
+.document-title button.submit {
+    margin-right: 6px;
+}
 .document-title > box > box > label {
     margin-top: 7px;
     margin-bottom: 10px;

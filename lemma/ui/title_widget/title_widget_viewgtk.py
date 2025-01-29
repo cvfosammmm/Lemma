@@ -41,6 +41,7 @@ class TitleWidgetView(Gtk.Box):
         self.submit_button = Gtk.Button.new_with_label('Change Name')
         self.submit_button.set_can_focus(False)
         self.submit_button.add_css_class('suggested-action')
+        self.submit_button.add_css_class('submit')
 
         self.cancel_button = Gtk.Button.new_with_label('Cancel')
         self.cancel_button.set_can_focus(False)
