@@ -527,6 +527,13 @@ window.preferences label.explainer {
     margin-right: 18px;
     margin-top: 18px;
 }
+window.preferences checkbutton.single {
+    margin-left: 14px;
+    margin-right: 14px;
+}
+window.preferences checkbutton.single check {
+    margin-right: 6px;
+}
 
 /* insert link dialog */
 

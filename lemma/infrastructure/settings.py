@@ -64,6 +64,7 @@ class Settings(Observable):
 
         self.defaults['preferences'] = dict()
         self.defaults['preferences']['color_scheme'] = 'default'
+        self.defaults['preferences']['update_backlinks'] = True
 
     def get_value(self, section, item):
         try: value = self.data[section][item]

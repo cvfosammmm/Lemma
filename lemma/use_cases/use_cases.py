@@ -20,6 +20,7 @@ import webbrowser
 
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_parser as xml_parser
+from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.db.character_db import CharacterDB
 from lemma.widgets.image import Image
 from lemma.document.ast.node import Node
@@ -51,6 +52,14 @@ class UseCases(object):
 
     def set_title(self, title):
         document = self.workspace.active_document
+
+        if ServiceLocator.get_settings().get_value('preferences', 'update_backlinks'):
+            if document.title in self.workspace.links_by_target:
+                for link_source in self.workspace.links_by_target[document.title]:
+                    linking_doc = self.workspace.get_by_title(link_source)
+                    nodes = [n for n in linking_doc.ast.flatten() if n.link != None and n.link.target == document.title]
+                    linking_doc.add_command('set_link', nodes, title)
+
         document.title = title
         document.update()
         document.update_last_modified()
@@ -170,7 +179,10 @@ class UseCases(object):
 
     def set_link(self, bounds, target):
         document = self.workspace.active_document
-        document.add_command('set_link', bounds, target)
+
+        pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
+        char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
+        document.add_command('set_link', char_nodes, target)
 
     def set_paragraph_style(self, style):
         document = self.workspace.active_document

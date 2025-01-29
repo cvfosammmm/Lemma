@@ -21,20 +21,20 @@ from lemma.document.ast.link import Link
 
 class Command():
 
-    def __init__(self, bounds, target=None):
-        self.bounds = bounds
+    def __init__(self, nodes, target=None):
+        self.nodes = nodes
         self.target = target
         self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):
-        pos_1, pos_2 = self.bounds[0].get_position(), self.bounds[1].get_position()
-        char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
+        self.state['cursor_state_before'] = document.cursor.get_state()
+
         prev_links = []
-        for node in char_nodes:
+        for node in self.nodes:
             prev_links.append(node.link)
             node.link = None if self.target == None else Link(self.target)
-        self.state['nodes_and_prev_target'] = list(zip(char_nodes, prev_links))
+        self.state['nodes_and_prev_target'] = list(zip(self.nodes, prev_links))
 
     def run_after_layout(self, document):
         pass

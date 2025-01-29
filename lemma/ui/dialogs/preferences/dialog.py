@@ -21,6 +21,7 @@ from gi.repository import Gtk
 
 import lemma.ui.dialogs.preferences.preferences_viewgtk as view
 import lemma.ui.dialogs.preferences.page_colors as page_colors
+import lemma.ui.dialogs.preferences.page_workspace as page_workspace
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -38,10 +39,13 @@ class Dialog(object):
         self.view = view.Preferences(self.main_window)
 
         self.page_colors = page_colors.PageColors(self, self.settings, self.main_window)
+        self.page_workspace = page_workspace.PageWorkspace(self, self.settings, self.main_window)
 
         self.view.notebook.append_page(self.page_colors.view, Gtk.Label.new(_('Colors')))
+        self.view.notebook.append_page(self.page_workspace.view, Gtk.Label.new(_('Workspace')))
 
         self.page_colors.init()
+        self.page_workspace.init()
 
     def on_check_button_toggle(self, button, preference_name):
         self.settings.set_value('preferences', preference_name, button.get_active())
