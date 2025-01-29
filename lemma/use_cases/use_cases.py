@@ -384,29 +384,57 @@ class UseCases(object):
         document = self.workspace.active_document
         document.add_command('move_cursor_to_xy', x, y, do_selection, True)
 
-    def select_word_at_insert(self):
+    def move_cursor_to_parent(self):
         document = self.workspace.active_document
+
+        insert = document.cursor.get_insert_node()
+        new_insert = None
+        for ancestor in reversed(insert.ancestors()):
+            if ancestor.can_hold_cursor():
+                new_insert = ancestor
+                break
+            if (ancestor.is_mathlist() or ancestor.is_root()) and insert != ancestor[0]:
+                new_insert = ancestor[0]
+                break
+
+        if new_insert != None:
+            document.add_command('move_cursor_to_node', new_insert, new_insert, True)
+
+    def extend_selection(self):
+        document = self.workspace.active_document
+
+        insert = document.cursor.get_insert_node()
+        selection = document.cursor.get_selection_node()
 
         word_start, word_end = document.cursor.get_insert_node().word_bounds()
-        if word_start != None and word_end != None:
-            self.extend_selection(word_start, word_end)
+        if word_start != None and word_end != None and (document.cursor.get_first_node().get_position() > word_start.get_position() or document.cursor.get_last_node().get_position() < word_end.get_position()):
+            new_insert = word_end
+            new_selection = word_start
 
-    def select_line_at_insert(self):
-        document = self.workspace.active_document
+        else:
+            for ancestor in reversed(insert.ancestors()):
+                if ancestor.can_hold_cursor():
+                    new_insert = ancestor
+                    new_selection = document.cursor.get_selection_node()
+                    break
 
-        line_start, line_end = document.cursor.get_insert_node().line_bounds()
-        self.extend_selection(line_start, line_end)
+                if ancestor.is_mathlist():
+                    if insert == ancestor[0] and selection == ancestor[-1]: continue
+                    if insert == ancestor[-1] and selection == ancestor[0]: continue
+                    new_insert = ancestor[-1]
+                    new_selection = ancestor[0]
+                    break
 
-    def extend_selection(self, node_start, node_end):
-        document = self.workspace.active_document
+                if ancestor.is_root():
+                    line_start, line_end = document.cursor.get_insert_node().line_bounds()
+                    if line_start != None and line_end != None and (document.cursor.get_first_node().get_position() > line_start.get_position() or document.cursor.get_last_node().get_position() < line_end.get_position()):
+                        new_insert = line_end
+                        new_selection = line_start
+                    else:
+                        new_insert = document.ast[0]
+                        new_selection = document.ast[-1]
 
-        node_1 = document.cursor.get_first_node()
-        node_2 = document.cursor.get_last_node()
-
-        if node_1.get_position() > node_start.get_position(): node_1 = node_start
-        if node_2.get_position() < node_end.get_position(): node_2 = node_end
-
-        document.add_command('move_cursor_to_node', node_2, node_1)
+        document.add_command('move_cursor_to_node', new_insert, new_selection, True)
 
     def scroll_to_xy(self, x, y):
         document = self.workspace.active_document

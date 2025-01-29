@@ -101,7 +101,7 @@ class DocumentViewController():
             link = self.get_link_at_xy(x, y)
             leaf_box = document.layout.get_leaf_at_xy(x, y)
 
-            if n_press % 3 == 1:
+            if n_press == 1:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
                     self.use_cases.move_cursor_to_xy(x, y, True)
 
@@ -116,31 +116,18 @@ class DocumentViewController():
                     else:
                         self.use_cases.move_cursor_to_xy(x, y, False)
 
-            if n_press % 3 == 2:
-                if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                    self.use_cases.select_word_at_insert()
-
-                elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
-                    self.use_cases.select_word_at_insert()
+            else:
+                if link != None and int(state & modifiers) == 0:
+                    self.model.selected_link_target = link.target
 
                 else:
-                    if link != None:
-                        self.model.selected_link_target = link.target
+                    insert = document.cursor.get_insert_node()
+                    selection = document.cursor.get_selection_node()
+                    line_start, line_end = insert.line_bounds()
+                    if insert == line_start and selection == line_end or insert == line_end and selection == line_start:
+                        self.use_cases.move_cursor_to_xy(x, y, False)
                     else:
-                        self.use_cases.select_word_at_insert()
-
-            if n_press % 3 == 0:
-                if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                    self.use_cases.select_line_at_insert()
-
-                elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
-                    self.use_cases.select_line_at_insert()
-
-                else:
-                    if link != None:
-                        self.model.selected_link_target = link.target
-                    else:
-                        self.use_cases.select_line_at_insert()
+                        self.use_cases.extend_selection()
 
             self.content.grab_focus()
 
@@ -239,6 +226,7 @@ class DocumentViewController():
         if self.model.document == None: return False
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
+        ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
 
         document = self.model.document
         cursor_state = self.model.application.cursor_state
@@ -262,6 +250,9 @@ class DocumentViewController():
                 self.use_cases.move_cursor_by_xy_offset(0, -self.model.height + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
                 self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100, True)
+
+            case ('up', Gdk.ModifierType.CONTROL_MASK): self.use_cases.move_cursor_to_parent()
+            case ('up', 5): self.use_cases.extend_selection()
 
             case ('tab', 0): self.use_cases.select_next_placeholder()
             case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK): self.use_cases.select_prev_placeholder()

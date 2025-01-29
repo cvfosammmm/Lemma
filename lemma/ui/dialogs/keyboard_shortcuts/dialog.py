@@ -51,10 +51,15 @@ class Dialog():
         section['items'].append({'title': 'Redo', 'shortcut': '&lt;ctrl&gt;&lt;shift&gt;Z'})
         data.append(section)
 
-        section = {'title': 'Selection', 'items': list()}
+        section = {'title': 'Copy and Paste', 'items': list()}
         section['items'].append({'title': 'Copy', 'shortcut': '&lt;ctrl&gt;C'})
         section['items'].append({'title': 'Cut', 'shortcut': '&lt;ctrl&gt;X'})
         section['items'].append({'title': 'Paste', 'shortcut': '&lt;ctrl&gt;V'})
+        data.append(section)
+
+        section = {'title': 'Cursor Movement', 'items': list()}
+        section['items'].append({'title': 'Go to parent node', 'shortcut': '&lt;ctrl&gt;Up'})
+        section['items'].append({'title': 'Extend selection', 'shortcut': '&lt;ctrl&gt;&lt;shift&gt;Up'})
         section['items'].append({'title': 'Select all', 'shortcut': '&lt;ctrl&gt;A'})
         section['items'].append({'title': 'Select next placeholder', 'shortcut': 'Tab'})
         section['items'].append({'title': 'Select previous placeholder', 'shortcut': '&lt;shift&gt;Tab'})
