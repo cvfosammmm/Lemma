@@ -17,8 +17,9 @@
 
 from lemma.infrastructure.layout_info import LayoutInfo
 from lemma.document.layout.layout_hbox import LayoutHBox
-from lemma.document.layout.layout_eol import LayoutEOL
 from lemma.document.layout.layout_char import LayoutChar
+from lemma.document.layout.layout_eol import LayoutEOL
+from lemma.document.layout.layout_end import LayoutEnd
 from lemma.document.layout.layout import Layout
 
 
@@ -48,7 +49,7 @@ class LayoutDocument(Layout):
                 current_line = LayoutHBox(self)
                 current_line_width = 0
             else:
-                break_after_char = isinstance(child, LayoutChar) and child.node.is_whitespace()
+                break_after_char = (isinstance(child, LayoutChar) and child.node.is_whitespace()) or isinstance(child, LayoutEnd) or isinstance(child, LayoutEOL)
                 if break_after_char:
                     current_line.children.append(child)
                     child.parent = current_line
