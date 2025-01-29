@@ -324,14 +324,14 @@ class DocumentViewPresenter():
             self.drawing_state['in_selection'] = False
 
     def get_fg_color_by_node(self, node):
-        if node.is_mathsymbol():
-            return ColorManager.get_ui_color('math')
-        elif node.link != None:
+        if node.link != None:
             if urlparse(node.link.target).scheme in ['http', 'https'] or \
                 self.model.workspace.get_by_title(node.link.target) != None:
                 return ColorManager.get_ui_color('links')
             else:
                 return ColorManager.get_ui_color('links_page_not_existing')
+        elif node.is_mathsymbol():
+            return ColorManager.get_ui_color('math')
         else:
             return ColorManager.get_ui_color('text')
 
