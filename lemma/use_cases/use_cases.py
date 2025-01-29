@@ -26,6 +26,7 @@ from lemma.widgets.image import Image
 from lemma.document.ast.node import Node
 from lemma.document.layout.layout_vbox import LayoutVBox
 from lemma.document.layout.layout_document import LayoutDocument
+from lemma.document.document import Document
 import lemma.helpers.helpers as helpers
 
 

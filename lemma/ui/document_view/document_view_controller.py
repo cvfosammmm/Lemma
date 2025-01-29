@@ -21,8 +21,6 @@ from gi.repository import Gtk, Gdk
 
 import time
 
-from lemma.document.document import Document
-from lemma.db.character_db import CharacterDB
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_parser as xml_parser
 
