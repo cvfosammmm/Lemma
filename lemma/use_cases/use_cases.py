@@ -51,7 +51,10 @@ class UseCases(object):
 
     def set_title(self, title):
         document = self.workspace.active_document
-        document.add_command('set_title', title)
+        document.title = title
+        document.update()
+        document.update_last_modified()
+        document.signal_changes()
 
     #@helpers.timer
     def insert_xml(self, xml):
