@@ -27,7 +27,7 @@ class XMLExporter(object):
     def export_xml(self, node):
         attributes = ' paragraph_style="' + node.paragraph_style + '"'
         if node.link != None:
-            attributes += ' link_target="' + node.link.target + '"'
+            attributes += ' link_target="' + xml_helpers.escape(node.link.target) + '"'
         if len(node.tags) > 0:
             attributes += ' tags="' + ' '.join(node.tags) + '"'
 
