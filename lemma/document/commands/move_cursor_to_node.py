@@ -29,7 +29,6 @@ class Command():
         self.state['cursor_state_before'] = document.cursor.get_state()
 
         document.cursor.set_insert_selection_nodes(self.insert, self.selection_bound)
-        document.ast.mark_changed()
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def run_after_layout(self, document):
@@ -38,6 +37,5 @@ class Command():
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])
-        document.ast.mark_changed()
 
 
