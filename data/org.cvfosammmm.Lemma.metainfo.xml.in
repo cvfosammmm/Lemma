@@ -38,12 +38,17 @@
     </supports>
 
     <releases>
-        ​<release version="25" date="2024-1-27">
+        ​<release version="26" date="2025-1-30">
+            <description translatable="no">
+                <p>Placeholder tabbing, cursor movement with ctrl+arrows, ...</p>
+            </description>
+        </release>
+        ​<release version="25" date="2025-1-27">
             <description translatable="no">
                 <p>Add roots, ...</p>
             </description>
         </release>
-        ​<release version="24" date="2024-1-15">
+        ​<release version="24" date="2025-1-15">
             <description translatable="no">
                 <p>Add math script (subscript and superscript), ...</p>
             </description>
