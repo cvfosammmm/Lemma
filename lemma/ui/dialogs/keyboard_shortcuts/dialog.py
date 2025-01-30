@@ -61,6 +61,8 @@ class Dialog():
         section['items'].append({'title': 'Go to parent node', 'shortcut': '&lt;ctrl&gt;Up'})
         section['items'].append({'title': 'Extend selection', 'shortcut': '&lt;ctrl&gt;&lt;shift&gt;Up'})
         section['items'].append({'title': 'Select all', 'shortcut': '&lt;ctrl&gt;A'})
+        section['items'].append({'title': 'Jump left', 'shortcut': '&lt;ctrl&gt;Left'})
+        section['items'].append({'title': 'Jump right', 'shortcut': '&lt;ctrl&gt;Right'})
         section['items'].append({'title': 'Select next placeholder', 'shortcut': 'Tab'})
         section['items'].append({'title': 'Select previous placeholder', 'shortcut': '&lt;shift&gt;Tab'})
         data.append(section)

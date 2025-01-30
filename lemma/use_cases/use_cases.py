@@ -230,6 +230,25 @@ class UseCases(object):
         else:
             document.add_command('move_cursor_to_node', document.cursor.prev(insert))
 
+    def jump_left(self, do_selection=False):
+        document = self.workspace.active_document
+
+        insert = document.cursor.get_insert_node()
+        selection = document.cursor.get_selection_node()
+
+        insert_prev = insert.prev_in_parent()
+        if insert_prev != None and insert_prev.is_char() and not insert_prev.is_whitespace():
+            insert_new = insert_prev.word_bounds()[0]
+        else:
+            insert_new = document.cursor.prev_no_descent(insert)
+
+        if do_selection:
+            document.add_command('move_cursor_to_node', insert_new, selection)
+        elif document.cursor.has_selection():
+            document.add_command('move_cursor_to_node', document.cursor.get_first_node())
+        else:
+            document.add_command('move_cursor_to_node', insert_new)
+
     def right(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -238,9 +257,27 @@ class UseCases(object):
         if do_selection:
             document.add_command('move_cursor_to_node', document.cursor.next_no_descent(insert), selection)
         elif document.cursor.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_first_node())
+            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
         else:
             document.add_command('move_cursor_to_node', document.cursor.next(insert))
+
+    def jump_right(self, do_selection=False):
+        document = self.workspace.active_document
+
+        insert = document.cursor.get_insert_node()
+        selection = document.cursor.get_selection_node()
+
+        if insert != None and insert.is_char() and not insert.is_whitespace():
+            insert_new = insert.word_bounds()[1]
+        else:
+            insert_new = document.cursor.next_no_descent(insert)
+
+        if do_selection:
+            document.add_command('move_cursor_to_node', insert_new, selection)
+        elif document.cursor.has_selection():
+            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+        else:
+            document.add_command('move_cursor_to_node', insert_new)
 
     def up(self, do_selection=False):
         document = self.workspace.active_document

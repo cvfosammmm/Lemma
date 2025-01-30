@@ -253,6 +253,10 @@ class DocumentViewController():
 
             case ('up', Gdk.ModifierType.CONTROL_MASK): self.use_cases.move_cursor_to_parent()
             case ('up', 5): self.use_cases.extend_selection()
+            case ('left', Gdk.ModifierType.CONTROL_MASK): self.use_cases.jump_left(False)
+            case ('left', 5): self.use_cases.jump_left(True)
+            case ('right', Gdk.ModifierType.CONTROL_MASK): self.use_cases.jump_right(False)
+            case ('right', 5): self.use_cases.jump_right(True)
 
             case ('tab', 0): self.use_cases.select_next_placeholder()
             case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK): self.use_cases.select_prev_placeholder()
