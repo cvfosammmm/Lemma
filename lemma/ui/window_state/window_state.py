@@ -20,7 +20,7 @@ import os.path
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
-class Panels(object):
+class WindowState(object):
 
     def __init__(self, workspace, main_window, app):
         self.workspace = workspace

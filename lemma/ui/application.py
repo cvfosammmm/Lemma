@@ -25,7 +25,7 @@ from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.infrastructure.timer import Timer
 
 import lemma.ui.colors.colors as colors
-import lemma.ui.panels.panels as panels
+import lemma.ui.window_state.window_state as window_state
 import lemma.ui.main_window.main_window as main_window
 import lemma.ui.document_history.document_history as document_history
 import lemma.ui.document_view.document_view as document_view
@@ -64,7 +64,7 @@ class Application(Adw.Application):
         self.backlinks = backlinks.Backlinks(self.workspace, self.main_window, self)
         self.actions = actions.Actions(self.workspace, self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
-        self.panels = panels.Panels(self.workspace, self.main_window, self)
+        self.window_state = window_state.WindowState(self.workspace, self.main_window, self)
 
         self.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)
@@ -77,7 +77,7 @@ class Application(Adw.Application):
         self.save_quit()
 
     def save_quit(self):
-        self.panels.save_window_state()
+        self.window_state.save_window_state()
         #Timer.print()
         self.quit()
 
