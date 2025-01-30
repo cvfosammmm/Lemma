@@ -26,7 +26,6 @@ import cairo
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
-import lemma.helpers.helpers as helpers
 
 
 class DocumentViewPresenter():
@@ -41,7 +40,6 @@ class DocumentViewPresenter():
 
         self.model.connect('changed', self.on_change)
 
-    #@helpers.timer
     def on_change(self, model):
         if self.model.document == None: return
 
@@ -190,7 +188,6 @@ class DocumentViewPresenter():
 
         return False
 
-    #@helpers.timer
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return
 

@@ -22,6 +22,7 @@ from gi.repository import Adw
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
+from lemma.infrastructure.timer import Timer
 
 import lemma.ui.colors.colors as colors
 import lemma.ui.panels.panels as panels
@@ -64,5 +65,20 @@ class Application(Adw.Application):
         self.actions = actions.Actions(self.workspace, self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.panels = panels.Panels(self.workspace, self.main_window, self)
+
+        self.actions.actions['quit'].connect('activate', self.on_quit_action)
+        self.main_window.connect('close-request', self.on_window_close)
+
+    def on_window_close(self, window=None, parameter=None):
+        self.save_quit()
+        return True
+
+    def on_quit_action(self, action=None, parameter=None):
+        self.save_quit()
+
+    def save_quit(self):
+        self.panels.save_window_state()
+        #Timer.print()
+        self.quit()
 
 

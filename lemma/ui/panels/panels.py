@@ -28,9 +28,6 @@ class Panels(object):
         self.app = app
         self.settings = ServiceLocator.get_settings()
 
-        self.app.actions.actions['quit'].connect('activate', self.on_quit_action)
-        self.main_window.connect('close-request', self.on_window_close)
-
         toggle_state = ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar')
         self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.set_active(toggle_state)
         self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
@@ -63,17 +60,6 @@ class Panels(object):
     def on_backlinks_toggle_toggled(self, toggle_button, parameter=None):
         self.main_window.navigation_sidebar.paned.set_show_widget(toggle_button.get_active())
         self.main_window.navigation_sidebar.paned.animate(True)
-
-    def on_window_close(self, window=None, parameter=None):
-        self.save_quit()
-        return True
-
-    def on_quit_action(self, action=None, parameter=None):
-        self.save_quit()
-
-    def save_quit(self):
-        self.save_window_state()
-        self.app.quit()
 
     def restore_window_state(self):
         if self.settings.get_value('window_state', 'is_maximized'): self.main_window.maximize()

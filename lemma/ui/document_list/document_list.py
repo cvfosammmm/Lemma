@@ -21,11 +21,9 @@ from gi.repository import Gtk, Gdk, Pango, PangoCairo
 
 import datetime
 
-import lemma.helpers.helpers as helpers
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
 from lemma.infrastructure.service_locator import ServiceLocator
-import lemma.helpers.helpers as helpers
 
 
 class DocumentList(object):
@@ -136,7 +134,6 @@ class DocumentList(object):
         self.main_window.headerbar.hb_left.search_entry.set_text('')
         self.main_window.document_view.content.grab_focus()
 
-    #@helpers.timer
     def draw(self, widget, ctx, width, height):
         sidebar_fg_1 = ColorManager.get_ui_color('sidebar_fg_1')
         sidebar_fg_2 = ColorManager.get_ui_color('sidebar_fg_2')

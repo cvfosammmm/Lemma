@@ -32,11 +32,15 @@ class Command():
                 self.state['affected_nodes'].append(node)
                 node.tags.add(self.tag_name)
 
+        document.ast.mark_changed()
+
     def run_after_layout(self, document):
         pass
 
     def undo(self, document):
         for node in self.state['affected_nodes']:
             node.tags.remove(self.tag_name)
+
+        document.ast.mark_changed()
 
 

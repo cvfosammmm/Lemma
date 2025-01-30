@@ -27,7 +27,6 @@ from lemma.document.ast.node import Node
 from lemma.document.layout.layout_vbox import LayoutVBox
 from lemma.document.layout.layout_document import LayoutDocument
 from lemma.document.document import Document
-import lemma.helpers.helpers as helpers
 
 
 class UseCases(object):
@@ -71,7 +70,6 @@ class UseCases(object):
         document.update_last_modified()
         document.signal_changes()
 
-    #@helpers.timer
     def insert_xml(self, xml):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()

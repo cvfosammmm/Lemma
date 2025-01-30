@@ -36,6 +36,8 @@ class Command():
             node.link = None if self.target == None else Link(self.target)
         self.state['nodes_and_prev_target'] = list(zip(self.nodes, prev_links))
 
+        document.ast.mark_changed()
+
     def run_after_layout(self, document):
         pass
 
@@ -44,5 +46,7 @@ class Command():
             item[0].link = item[1]
         document.cursor.set_state(self.state['cursor_state_before'])
         document.set_scroll_insert_on_screen_after_layout_update()
+
+        document.ast.mark_changed()
 
 

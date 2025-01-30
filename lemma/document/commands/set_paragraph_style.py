@@ -37,11 +37,15 @@ class Command():
         self.state['nodes_and_previous_paragraph_style'].append([last_node, last_node.paragraph_style])
         last_node.paragraph_style = self.paragraph_style
 
+        document.ast.mark_changed()
+
     def run_after_layout(self, document):
         pass
 
     def undo(self, document):
         for node, paragraph_style in self.state['nodes_and_previous_paragraph_style']:
             node.paragraph_style = paragraph_style
+
+        document.ast.mark_changed()
 
 

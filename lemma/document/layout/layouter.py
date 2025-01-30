@@ -27,7 +27,7 @@ from lemma.document.layout.layout_end import LayoutEnd
 from lemma.document.layout.layout_mathatom import LayoutMathAtom
 from lemma.document.layout.layout_mathroot import LayoutMathRoot
 from lemma.document.layout.layout_hbox import LayoutHBox
-import lemma.helpers.helpers as helpers
+from lemma.infrastructure.timer import Timer
 
 
 class Layouter(object):
@@ -35,11 +35,15 @@ class Layouter(object):
     def __init__(self, document):
         self.document = document
 
-    #@helpers.timer
     def update(self):
-        layout_tree = self.make_layout_tree(self.document.ast)
-        layout_tree.layout()
-        self.document.layout = layout_tree
+        if self.document.ast.has_changed(self):
+            Timer.start('layout step 1')
+            layout_tree = self.make_layout_tree(self.document.ast)
+            Timer.stop('layout step 1')
+            Timer.start('layout step 2')
+            layout_tree.layout()
+            Timer.stop('layout step 2')
+            self.document.layout = layout_tree
 
     def make_layout_tree(self, node, parent=None):
         if node.type == 'root': layout_tree = LayoutDocument(node, parent)
@@ -75,6 +79,7 @@ class Layouter(object):
         return layout_tree
 
     def group_words(self, parent_node):
+        Timer.start('group words')
         last_type = None
         last_tags = set()
         result = list()
@@ -90,6 +95,7 @@ class Layouter(object):
                 result[-1].append(node)
             else:
                 result[-1].append(node)
+        Timer.stop('group words')
         return result
 
 
