@@ -314,10 +314,13 @@ class DocumentViewController():
         self.use_cases.scroll_to_xy(offset_x, offset_y)
 
     def on_adjustment_value_changed(self, adjustment):
+        document = self.model.document
+
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
         self.model.last_cursor_or_scrolling_change = time.time()
-        self.use_cases.scroll_to_xy(offset_x, offset_y)
+        if offset_x != document.clipping.offset_x or offset_y != document.clipping.offset_y:
+            self.use_cases.scroll_to_xy(offset_x, offset_y)
 
     def get_link_at_xy(self, x, y):
         layout = self.model.document.layout.get_leaf_at_xy(x, y)
