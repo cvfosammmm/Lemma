@@ -124,9 +124,10 @@ class UseCases(object):
 
         if document.cursor.has_selection():
             self.delete_selection()
-        else:
-            if not insert.is_first_in_parent() or len(insert.parent) == 1:
-                document.add_composite_command(['move_cursor_by_offset', -1, True], ['delete_selection'])
+        elif not insert.is_first_in_parent():
+            document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert], ['delete_selection'])
+        elif len(insert.parent) == 1:
+            document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert])
 
     def delete(self):
         document = self.workspace.active_document
@@ -134,8 +135,10 @@ class UseCases(object):
 
         if document.cursor.has_selection():
             self.delete_selection()
-        elif not insert.is_last_in_parent() or len(insert.parent) == 1:
-            document.add_composite_command(['move_cursor_by_offset', 1, True], ['delete_selection'])
+        elif not insert.is_last_in_parent():
+            document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert], ['delete_selection'])
+        elif len(insert.parent) == 1:
+            document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert])
 
     def delete_selection(self):
         document = self.workspace.active_document
@@ -171,10 +174,12 @@ class UseCases(object):
                     xml = '<char tags="' + ' '.join(tags) + '">' + text + '</char>'
                     parser = xml_parser.XMLParser()
                     nodes = parser.parse(xml)
-                    commands = [['move_cursor_by_offset', -(length + 1)], ['move_cursor_by_offset', length, True]]
+
+                    commands = [['move_cursor_to_node', last_node.prev_in_parent(length), last_node]]
                     commands.append(['delete_selection'])
                     commands.append(['insert_nodes', nodes])
-                    commands.append(['move_cursor_by_offset', 1])
+                    commands.append(['move_cursor_to_node', last_node.next_in_parent()])
+
                     document.add_composite_command(*commands)
                     return True
         return False
@@ -216,22 +221,26 @@ class UseCases(object):
     def left(self, do_selection=False):
         document = self.workspace.active_document
 
+        insert = document.cursor.get_insert_node()
+        selection = document.cursor.get_selection_node()
         if do_selection:
-            document.add_command('move_cursor_by_offset', -1, True)
+            document.add_command('move_cursor_to_node', document.cursor.prev_no_descent(insert), selection)
         elif document.cursor.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_first_node())
         else:
-            document.add_command('move_cursor_by_offset', -1)
+            document.add_command('move_cursor_to_node', document.cursor.prev(insert))
 
     def right(self, do_selection=False):
         document = self.workspace.active_document
 
+        insert = document.cursor.get_insert_node()
+        selection = document.cursor.get_selection_node()
         if do_selection:
-            document.add_command('move_cursor_by_offset', 1, True)
+            document.add_command('move_cursor_to_node', document.cursor.next_no_descent(insert), selection)
         elif document.cursor.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+            document.add_command('move_cursor_to_node', document.cursor.get_first_node())
         else:
-            document.add_command('move_cursor_by_offset', 1)
+            document.add_command('move_cursor_to_node', document.cursor.next(insert))
 
     def up(self, do_selection=False):
         document = self.workspace.active_document

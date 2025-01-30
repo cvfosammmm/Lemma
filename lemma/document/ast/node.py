@@ -224,15 +224,15 @@ class Node():
     def line_bounds(self):
         return (self.line_start(), self.line_end())
 
-    def prev_in_parent(self):
+    def prev_in_parent(self, steps=1):
         if self != self.parent[0]:
-            index = self.parent.index(self) - 1
+            index = self.parent.index(self) - steps
             return self.parent[index]
         return None
 
-    def next_in_parent(self):
+    def next_in_parent(self, steps=1):
         if self != self.parent[-1]:
-            index = self.parent.index(self) + 1
+            index = self.parent.index(self) + steps
             return self.parent[index]
         return None
 
