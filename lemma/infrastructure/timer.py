@@ -44,7 +44,7 @@ class Timer():
         if not only_cumulative:
             print('\n-------------------\nCumulative Times\n-------------------\n')
 
-        for name, time in cumulative.items():
+        for name, time in sorted(cumulative.items(), key=lambda i: -i[1]):
             print(name + ': ' + ' '*(25 - len(name)) + '{:.6f}'.format(time) + ' seconds')
 
 
