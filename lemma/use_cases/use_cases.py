@@ -27,6 +27,7 @@ from lemma.document.ast.node import Node
 from lemma.document.layout.layout_vbox import LayoutVBox
 from lemma.document.layout.layout_document import LayoutDocument
 from lemma.document.document import Document
+import lemma.infrastructure.timer as timer
 
 
 class UseCases(object):
@@ -34,6 +35,7 @@ class UseCases(object):
     def __init__(self, workspace):
         self.workspace = workspace
 
+    @timer.timer
     def open_link(self, link_target):
         workspace = self.workspace
 
@@ -50,11 +52,13 @@ class UseCases(object):
                 workspace.add(document)
                 self.set_active_document(document)
 
+    @timer.timer
     def set_active_document(self, document, update_history=True, scroll_to_top=True):
         self.workspace.set_active_document(document, update_history)
         if scroll_to_top:
             self.scroll_to_xy(0, 0)
 
+    @timer.timer
     def set_title(self, title):
         document = self.workspace.active_document
 
@@ -70,6 +74,7 @@ class UseCases(object):
         document.update_last_modified()
         document.signal_changes()
 
+    @timer.timer
     def insert_xml(self, xml):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()
@@ -116,6 +121,7 @@ class UseCases(object):
         if nodes.validate():
             document.add_composite_command(*commands)
 
+    @timer.timer
     def backspace(self):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()
@@ -127,6 +133,7 @@ class UseCases(object):
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert])
 
+    @timer.timer
     def delete(self):
         document = self.workspace.active_document
         insert = document.cursor.get_insert_node()
@@ -138,10 +145,12 @@ class UseCases(object):
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert])
 
+    @timer.timer
     def delete_selection(self):
         document = self.workspace.active_document
         document.add_command('delete_selection')
 
+    @timer.timer
     def add_image_from_filename(self, filename):
         document = self.workspace.active_document
 
@@ -150,6 +159,7 @@ class UseCases(object):
             node = Node('widget', image)
             document.add_command('insert_nodes', [node])
 
+    @timer.timer
     def replace_max_string_before_cursor(self, tags):
         document = self.workspace.active_document
 
@@ -182,10 +192,12 @@ class UseCases(object):
                     return True
         return False
 
+    @timer.timer
     def resize_widget(self, new_width):
         document = self.workspace.active_document
         document.add_command('resize_widget', new_width)
 
+    @timer.timer
     def set_link(self, bounds, target):
         document = self.workspace.active_document
 
@@ -193,6 +205,7 @@ class UseCases(object):
         char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
         document.add_command('set_link', char_nodes, target)
 
+    @timer.timer
     def set_paragraph_style(self, style):
         document = self.workspace.active_document
 
@@ -202,6 +215,7 @@ class UseCases(object):
 
         document.add_command('set_paragraph_style', style)
 
+    @timer.timer
     def toggle_tag(self, tagname):
         document = self.workspace.active_document
 
@@ -216,6 +230,7 @@ class UseCases(object):
             else:
                 document.add_command('add_tag', tagname)
 
+    @timer.timer
     def left(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -228,6 +243,7 @@ class UseCases(object):
         else:
             document.add_command('move_cursor_to_node', document.cursor.prev(insert))
 
+    @timer.timer
     def jump_left(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -247,6 +263,7 @@ class UseCases(object):
         else:
             document.add_command('move_cursor_to_node', insert_new)
 
+    @timer.timer
     def right(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -259,6 +276,7 @@ class UseCases(object):
         else:
             document.add_command('move_cursor_to_node', document.cursor.next(insert))
 
+    @timer.timer
     def jump_right(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -277,6 +295,7 @@ class UseCases(object):
         else:
             document.add_command('move_cursor_to_node', insert_new)
 
+    @timer.timer
     def up(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -305,6 +324,7 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
 
+    @timer.timer
     def down(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -333,6 +353,7 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
 
+    @timer.timer
     def line_start(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -346,6 +367,7 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, True)
 
+    @timer.timer
     def line_end(self, do_selection=False):
         document = self.workspace.active_document
 
@@ -359,6 +381,7 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, True)
 
+    @timer.timer
     def select_next_placeholder(self):
         document = self.workspace.active_document
 
@@ -379,6 +402,7 @@ class UseCases(object):
         if node.is_placeholder():
             self.select_node(node)
 
+    @timer.timer
     def select_prev_placeholder(self):
         document = self.workspace.active_document
 
@@ -399,21 +423,25 @@ class UseCases(object):
         if node.is_placeholder():
             self.select_node(node)
 
+    @timer.timer
     def select_node(self, node):
         document = self.workspace.active_document
 
         next_node = node.next_in_parent()
         document.add_command('move_cursor_to_node', node, next_node, False)
 
+    @timer.timer
     def select_all(self):
         document = self.workspace.active_document
         document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
 
+    @timer.timer
     def remove_selection(self):
         document = self.workspace.active_document
         if document.cursor.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
 
+    @timer.timer
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
         document = self.workspace.active_document
 
@@ -424,10 +452,12 @@ class UseCases(object):
 
         document.add_command('move_cursor_to_xy', orig_x, new_y, do_selection, False)
 
+    @timer.timer
     def move_cursor_to_xy(self, x, y, do_selection=False):
         document = self.workspace.active_document
         document.add_command('move_cursor_to_xy', x, y, do_selection, True)
 
+    @timer.timer
     def move_cursor_to_parent(self):
         document = self.workspace.active_document
 
@@ -444,6 +474,7 @@ class UseCases(object):
         if new_insert != None:
             document.add_command('move_cursor_to_node', new_insert, new_insert, True)
 
+    @timer.timer
     def extend_selection(self):
         document = self.workspace.active_document
 
@@ -480,6 +511,7 @@ class UseCases(object):
 
         document.add_command('move_cursor_to_node', new_insert, new_selection, True)
 
+    @timer.timer
     def scroll_to_xy(self, x, y):
         document = self.workspace.active_document
         document.add_command('scroll_to_xy', x, y)

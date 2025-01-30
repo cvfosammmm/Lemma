@@ -21,6 +21,7 @@ from lemma.document.document import Document
 from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.html_parser import HTMLParser
 from lemma.infrastructure.service_locator import ServiceLocator
+import lemma.infrastructure.timer as timer
 
 
 class Storage(object):
@@ -95,6 +96,7 @@ class Storage(object):
     def on_document_change(self, document):
         self.save_document(document)
 
+    @timer.timer
     def save_document(self, document):
         pathname = os.path.join(self.pathname, str(document.id))
         exporter = HTMLExporter()

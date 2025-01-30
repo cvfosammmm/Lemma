@@ -19,6 +19,7 @@ from operator import attrgetter
 
 from lemma.helpers.observable import Observable
 from lemma.workspace.document_history import DocumentHistory
+import lemma.infrastructure.timer as timer
 
 
 class Workspace(Observable):
@@ -99,11 +100,13 @@ class Workspace(Observable):
     def get_new_document_id(self):
         return self.max_document_id + 1
 
+    @timer.timer
     def on_document_change(self, document):
         self.update_links()
         self.documents.sort(key=attrgetter('last_modified'), reverse=True)
         self.add_change_code('document_changed', document)
 
+    @timer.timer
     def update_links(self):
         links_by_target = dict()
         for document in self.documents:

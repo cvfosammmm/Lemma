@@ -23,7 +23,7 @@ from lemma.document.layout.layouter import Layouter
 from lemma.document.plaintext.plaintext_scanner import PlaintextScanner
 from lemma.document.clipping.clipping import Clipping
 from lemma.document.command_processor.command_processor import CommandProcessor
-from lemma.infrastructure.timer import Timer
+import lemma.infrastructure.timer as timer
 from lemma.helpers.observable import Observable
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:
@@ -71,24 +71,18 @@ class Document(Observable):
     def undo(self): self.command_processor.undo()
     def redo(self): self.command_processor.redo()
 
+    @timer.timer
     def update(self):
-        Timer.start('document update')
-        Timer.start('layout update')
         self.layouter.update()
-        Timer.stop('layout update')
         self.clipping.update()
-        Timer.start('plaintext update')
         self.plaintext_scanner.update()
-        Timer.stop('plaintext update')
-        Timer.stop('document update')
 
     def update_last_modified(self):
         self.last_modified = time.time()
 
+    @timer.timer
     def signal_changes(self):
-        Timer.start('document signal changes')
         self.add_change_code('changed')
-        Timer.stop('document signal changes')
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True

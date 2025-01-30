@@ -28,6 +28,7 @@ from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.infrastructure.layout_info import LayoutInfo
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_exporter as xml_exporter
+import lemma.infrastructure.timer as timer
 
 
 class Actions(object):
@@ -112,6 +113,7 @@ class Actions(object):
     def on_document_change(self, workspace, document): self.update()
     def on_mode_set(self, workspace): self.update()
 
+    @timer.timer
     def update(self):
         document = self.workspace.active_document
         has_active_doc = (self.workspace.mode == 'documents' and document != None)

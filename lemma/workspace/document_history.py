@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.helpers.observable import Observable
+import lemma.infrastructure.timer as timer
 
 
 class DocumentHistory(Observable):
@@ -84,6 +85,7 @@ class DocumentHistory(Observable):
         if index == (len(self.documents) - 1): return None
         else: return self.documents[index + 1]
 
+    @timer.timer
     def on_document_change(self, document):
         self.add_change_code('changed')
 

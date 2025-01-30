@@ -26,6 +26,7 @@ import cairo
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
+import lemma.infrastructure.timer as timer
 
 
 class DocumentViewPresenter():
@@ -188,6 +189,7 @@ class DocumentViewPresenter():
 
         return False
 
+    @timer.timer
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return
 

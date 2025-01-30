@@ -22,7 +22,6 @@ from gi.repository import Adw
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
-from lemma.infrastructure.timer import Timer
 
 import lemma.ui.colors.colors as colors
 import lemma.ui.window_state.window_state as window_state
@@ -78,7 +77,6 @@ class Application(Adw.Application):
 
     def save_quit(self):
         self.window_state.save_window_state()
-        #Timer.print()
         self.quit()
 
 

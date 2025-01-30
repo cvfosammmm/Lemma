@@ -16,35 +16,56 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import time
-import datetime
+
+
+def timer(original_function):
+
+    def new_function(*args, **kwargs):
+        Timer.start(original_function.__module__[6:] + '.' + original_function.__name__)
+        return_value = original_function(*args, **kwargs)
+        Timer.stop(original_function.__module__[6:] + '.' + original_function.__name__)
+        return return_value
+
+    return new_function
 
 
 class Timer():
 
-    in_progress = dict()
+    in_progress = []
     times = list()
+    times_by_name = dict()
+    hierarchy = {'count': 0, 'time': 0, 'children': dict()}
 
     def start(name):
-        Timer.in_progress[name] = time.time()
+        Timer.in_progress.append([name, time.time()])
 
     def stop(name):
-        Timer.times.append((name, time.time() - Timer.in_progress[name]))
+        node = Timer.hierarchy
+        for ancestor in Timer.in_progress:
+            if ancestor[0] not in node['children']:
+                node['children'][ancestor[0]] = {'count': 0, 'time': 0, 'children': dict()}
+            node = node['children'][ancestor[0]]
+
+        exectime = time.time() - Timer.in_progress.pop()[1]
+        node['count'] += 1
+        node['time'] += exectime
 
     def print(only_cumulative=True):
-        cumulative = dict()
-
         for (name, time) in Timer.times:
             if not only_cumulative:
                 print(name + ': ' + ' '*(25 - len(name)) + '{:.6f}'.format(time) + ' seconds')
 
-            if name not in cumulative:
-                cumulative[name] = 0
-            cumulative[name] += time
-
         if not only_cumulative:
             print('\n-------------------\nCumulative Times\n-------------------\n')
 
-        for name, time in sorted(cumulative.items(), key=lambda i: -i[1]):
-            print(name + ': ' + ' '*(25 - len(name)) + '{:.6f}'.format(time) + ' seconds')
+        Timer.print_hierarchy(Timer.hierarchy, 0)
+
+    def print_hierarchy(hierarchy, spaces):
+        for name in sorted(hierarchy['children'], key=lambda name: -hierarchy['children'][name]['time']):
+            count = hierarchy['children'][name]['count']
+            total = hierarchy['children'][name]['time']
+            avg = total / count
+            print(' '*spaces + name + ': ' + ' '*(60 - len(name) - spaces) + '{:.6f}{:7} {:.6f}'.format(total, count, avg))
+            Timer.print_hierarchy(hierarchy['children'][name], spaces + 2)
 
 
