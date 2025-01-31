@@ -94,7 +94,8 @@ class Storage(object):
         self.delete_document(document)
 
     def on_document_change(self, document):
-        self.save_document(document)
+        if document.ast.has_changed(self):
+            self.save_document(document)
 
     @timer.timer
     def save_document(self, document):
