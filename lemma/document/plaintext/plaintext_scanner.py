@@ -25,8 +25,12 @@ class PlaintextScanner(object):
 
         self.text = ''
 
-    @timer.timer
     def update(self):
+        if self.document.ast.has_changed(self):
+            self.update_text()
+
+    @timer.timer
+    def update_text(self):
         self.text = ''
 
         for child in self.document.ast:
