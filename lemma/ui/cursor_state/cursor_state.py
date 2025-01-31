@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.helpers.observable import Observable
+import lemma.infrastructure.timer as timer
 
 
 class CursorState(Observable):
@@ -46,6 +47,7 @@ class CursorState(Observable):
         if document != None:
             self.document.connect('changed', self.on_change)
 
+    @timer.timer
     def on_change(self, document):
         self.update()
 

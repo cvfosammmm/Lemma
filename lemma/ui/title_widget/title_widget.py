@@ -23,6 +23,7 @@ from gi.repository import Gdk
 import datetime
 
 import lemma.ui.title_widget.title_widget_viewgtk as title_widget_view
+import lemma.infrastructure.timer as timer
 
 
 class TitleWidget(object):
@@ -48,12 +49,6 @@ class TitleWidget(object):
         self.document = document
         if document != None:
             self.reset_title()
-            self.set_subtext_to_last_modified_date()
-            self.document.connect('changed', self.on_document_change)
-
-    def on_document_change(self, note):
-        if not self.is_active:
-            self.set_subtext_to_last_modified_date()
 
     def on_focus_in(self, controller):
         if not self.is_active:
@@ -110,7 +105,6 @@ class TitleWidget(object):
         self.is_active = False
         self.view.title_entry.set_position(0)
         self.view.button_revealer.set_reveal_child(False)
-        self.set_subtext_to_last_modified_date()
 
     def reset_title(self):
         if self.document == None:
@@ -123,13 +117,5 @@ class TitleWidget(object):
             self.view.title_entry.set_text(self.document.title)
             self.view.title_entry.set_enable_undo(True)
             self.title_changed = False
-
-    def set_subtext_to_last_modified_date(self):
-        if self.document == None:
-            self.view.subtext.set_text('')
-        else:
-            datetime_last_modified = datetime.datetime.fromtimestamp(self.document.last_modified)
-            self.view.subtext.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
-        self.view.subtext.remove_css_class('error')
 
 

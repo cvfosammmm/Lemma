@@ -26,6 +26,7 @@ from lemma.ui.document_view.document_view_controller import DocumentViewControll
 from lemma.ui.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.ui.title_widget.title_widget import TitleWidget
 from lemma.helpers.observable import Observable
+import lemma.infrastructure.timer as timer
 
 
 class DocumentView(Observable):
@@ -75,6 +76,7 @@ class DocumentView(Observable):
     def on_document_change(self, workspace, document): self.update()
     def on_mode_set(self, workspace): self.update()
 
+    @timer.timer
     def update(self):
         active_document = self.workspace.active_document
         has_active_doc = (self.workspace.mode == 'documents' and active_document != None)
