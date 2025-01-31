@@ -31,6 +31,7 @@ class Command():
         document.cursor.set_insert_selection_nodes(last_node, last_node)
 
         self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
+        document.ast.mark_changed()
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def run_after_layout(self, document):
@@ -42,6 +43,7 @@ class Command():
             insert.parent.insert_before(insert, node)
 
         document.cursor.set_state(self.state['cursor_state_before'])
+        document.ast.mark_changed()
         document.set_scroll_insert_on_screen_after_layout_update()
 
 
