@@ -525,10 +525,10 @@ window.preferences flowboxchild box.selected button.color-preview-wrapper {
 window.preferences flowboxchild checkbutton {
     margin-left: -1px;
 }
-window.preferences label.explainer {
-    margin-left: 18px;
-    margin-right: 18px;
-    margin-top: 18px;
+window.preferences label.explainer-bottom {
+    padding: 18px;
+    background: @shade_color;
+    border-top: 1px solid @dialog_list_border;
 }
 window.preferences checkbutton.single {
     margin-left: 14px;

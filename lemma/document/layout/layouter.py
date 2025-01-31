@@ -35,14 +35,16 @@ class Layouter(object):
     def __init__(self, document):
         self.document = document
 
-    @timer.timer
     def update(self):
         if self.document.ast.has_changed(self):
-            layout_tree = self.make_layout_tree(self.document.ast)
-            layout_tree.layout()
-            self.document.layout = layout_tree
+            self.update_layout()
 
     @timer.timer
+    def update_layout(self):
+        layout_tree = self.make_layout_tree(self.document.ast)
+        layout_tree.layout()
+        self.document.layout = layout_tree
+
     def make_layout_tree(self, node, parent=None):
         if node.type == 'root': layout_tree = LayoutDocument(node, parent)
         elif node.type == 'char': layout_tree = LayoutChar(node, parent)
