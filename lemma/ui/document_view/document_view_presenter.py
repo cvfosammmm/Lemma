@@ -204,20 +204,25 @@ class DocumentViewPresenter():
         offset_y = self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset_y
         self.first_selection_node = document.cursor.get_first_node()
         self.last_selection_node = document.cursor.get_last_node()
-        self.drawing_state = {'in_selection': False}
+        first_selection_line = self.first_selection_node.layout.get_ancestors()[-2]
+        last_selection_line = self.last_selection_node.layout.get_ancestors()[-2]
 
         self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
 
+        in_selection = False
         for line_layout in document.layout.children:
-            self.draw_layout(line_layout, ctx, offset_x, offset_y)
+            if offset_y + line_layout.y + line_layout.height >= 0 and offset_y + line_layout.y <= height:
+                self.draw_layout(line_layout, ctx, offset_x, offset_y, in_selection)
+            if offset_y + line_layout.y > height: break
+
+            if not in_selection and line_layout == first_selection_line: in_selection = True
+            if in_selection and line_layout == last_selection_line: in_selection = False
 
         self.draw_cursor(ctx, offset_x, offset_y)
 
-    def draw_layout(self, layout, ctx, offset_x, offset_y):
-        self.update_selection_state(layout)
-
+    def draw_layout(self, layout, ctx, offset_x, offset_y, in_selection):
         if isinstance(layout, LayoutChar):
-            self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
             fontname = FontManager.get_fontname_from_node(layout.node)
             fg_color = self.get_fg_color_by_node(layout.node)
@@ -233,7 +238,7 @@ class DocumentViewPresenter():
                 ctx.fill()
 
         if isinstance(layout, LayoutWidget):
-            self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
             surface = layout.node.value.get_cairo_surface()
             fontname = FontManager.get_fontname_from_node(layout.node)
@@ -243,7 +248,7 @@ class DocumentViewPresenter():
             ctx.fill()
 
         if isinstance(layout, LayoutPlaceholder):
-            self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
             fontname = FontManager.get_fontname_from_node(layout.node)
             baseline = FontManager.get_ascend(fontname=fontname)
@@ -261,13 +266,17 @@ class DocumentViewPresenter():
             ctx.fill()
 
         if isinstance(layout, LayoutMathRoot):
-            self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
         if isinstance(layout, LayoutMathAtom):
-            self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
         for child in layout.children:
-            self.draw_layout(child, ctx, offset_x + layout.x, offset_y + layout.y)
+            if not in_selection and child.node != None and child.node == self.first_selection_node:
+                in_selection = True
+            if in_selection and child.node != None and child.node == self.last_selection_node:
+                in_selection = False
+            self.draw_layout(child, ctx, offset_x + layout.x, offset_y + layout.y, in_selection)
 
         if isinstance(layout, LayoutMathRoot):
             fg_color = self.get_fg_color_by_node(layout.node)
@@ -287,17 +296,10 @@ class DocumentViewPresenter():
             ctx.line_to(offset_x + layout.x + line_offset + 10 + line_width, offset_y + 1)
             ctx.stroke()
 
-    def update_selection_state(self, layout):
-        if layout.node != None and layout.node == self.first_selection_node:
-            self.drawing_state['in_selection'] = True
-        if layout.node != None and layout.node == self.last_selection_node:
-            self.drawing_state['in_selection'] = False
-
     def draw_selection(self, layout, ctx, offset_x, offset_y):
-        if self.drawing_state['in_selection']:
-            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-            ctx.rectangle(offset_x + layout.x, offset_y, layout.width, layout.parent.height)
-            ctx.fill()
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
+        ctx.rectangle(offset_x + layout.x, offset_y, layout.width, layout.parent.height)
+        ctx.fill()
 
     def get_fg_color_by_node(self, node):
         if node.link != None:

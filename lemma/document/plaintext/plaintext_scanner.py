@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import lemma.infrastructure.timer as timer
+
 
 class PlaintextScanner(object):
 
@@ -23,6 +25,7 @@ class PlaintextScanner(object):
 
         self.text = ''
 
+    @timer.timer
     def update(self):
         self.text = ''
 
