@@ -45,7 +45,4 @@ class LayoutVBox(Layout):
         self.x = None
         self.y = None
 
-    def accept_presenter(self, presenter):
-        presenter.draw_layout(self)
-
 

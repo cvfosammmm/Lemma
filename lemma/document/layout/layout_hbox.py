@@ -65,7 +65,4 @@ class LayoutHBox(Layout):
             fontname = FontManager.get_fontname_from_node(child.node)
             child.y = self.height - child.height
 
-    def accept_presenter(self, presenter):
-        presenter.draw_layout(self)
-
 

@@ -79,9 +79,6 @@ class LayoutDocument(Layout):
         self.x = 0
         self.y = 0
 
-    def accept_presenter(self, presenter):
-        presenter.draw_layout(self)
-
     def get_leaf_at_xy(self, x, y):
         line = self.get_line_at_y(y)
 

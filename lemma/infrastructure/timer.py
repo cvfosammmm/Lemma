@@ -63,9 +63,9 @@ class Timer():
     def print_hierarchy(hierarchy, spaces):
         for name in sorted(hierarchy['children'], key=lambda name: -hierarchy['children'][name]['time']):
             count = hierarchy['children'][name]['count']
-            total = hierarchy['children'][name]['time']
+            total = hierarchy['children'][name]['time'] * 1000
             avg = total / count
-            print(' '*spaces + name + ': ' + ' '*(60 - len(name) - spaces) + '{:.6f}{:7} {:.6f}'.format(total, count, avg))
+            print(' '*spaces + name + ': ' + ' '*(60 - len(name) - spaces) + '{:8.3f}{:7} {:8.3f}'.format(total, count, avg))
             Timer.print_hierarchy(hierarchy['children'][name], spaces + 2)
 
 

@@ -26,6 +26,11 @@ import cairo
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
+from lemma.document.layout.layout_widget import LayoutWidget
+from lemma.document.layout.layout_char import LayoutChar
+from lemma.document.layout.layout_placeholder import LayoutPlaceholder
+from lemma.document.layout.layout_mathatom import LayoutMathAtom
+from lemma.document.layout.layout_mathroot import LayoutMathRoot
 import lemma.infrastructure.timer as timer
 
 
@@ -197,130 +202,102 @@ class DocumentViewPresenter():
         offset_x = self.view.padding_left
         scrolling_offset_y = document.clipping.offset_y
         offset_y = self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset_y
-
-        self.ctx = ctx
-        self.drawing_state = {'in_selection': False}
-        self.offset_x, self.offset_y = offset_x, offset_y
-
-        self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
-        document.layout.accept_presenter(self)
-        self.draw_cursor(ctx, self.offset_x, self.offset_y)
-
-    def draw_layout_block(self, layout):
-        self.update_selection_state(layout)
-        self.draw_children(layout)
-
-    def draw_layout_char(self, layout):
-        self.update_selection_state(layout)
-        self.draw_selection(layout)
-
-        fontname = FontManager.get_fontname_from_node(layout.node)
-        fg_color = self.get_fg_color_by_node(layout.node)
-        baseline = FontManager.get_ascend(fontname=fontname)
-
-        surface = FontManager.get_surface(layout.node.value, fontname=fontname)
-        if surface != None:
-            self.ctx.set_source_surface(surface, self.offset_x + layout.x + layout.left, self.offset_y + baseline + layout.y + layout.top)
-            pattern = self.ctx.get_source()
-            pattern.set_filter(cairo.Filter.BEST)
-            Gdk.cairo_set_source_rgba(self.ctx, fg_color)
-            self.ctx.mask(pattern)
-            self.ctx.fill()
-
-    def draw_layout_widget(self, layout):
-        self.update_selection_state(layout)
-        self.draw_selection(layout)
-
-        surface = layout.node.value.get_cairo_surface()
-        fontname = FontManager.get_fontname_from_node(layout.node)
-        top = -FontManager.get_descend(fontname=fontname)
-        self.ctx.set_source_surface(surface, self.offset_x + layout.x, self.offset_y + layout.y + top)
-        self.ctx.rectangle(self.offset_x + layout.x, self.offset_y + layout.y, layout.width, layout.height)
-        self.ctx.fill()
-
-    def draw_layout_placeholder(self, layout):
-        self.update_selection_state(layout)
-        self.draw_selection(layout)
-
-        fontname = FontManager.get_fontname_from_node(layout.node)
-        baseline = FontManager.get_ascend(fontname=fontname)
-
-        width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
-        fg_color = self.get_fg_color_by_node(layout.node)
-        top += baseline
-
-        surface = FontManager.get_surface('▯', fontname=fontname)
-        self.ctx.set_source_surface(surface, self.offset_x + layout.x + left, self.offset_y + layout.y + top)
-        pattern = self.ctx.get_source()
-        pattern.set_filter(cairo.Filter.BEST)
-        Gdk.cairo_set_source_rgba(self.ctx, fg_color)
-        self.ctx.mask(pattern)
-        self.ctx.fill()
-
-    def draw_layout_mathatom(self, layout):
-        self.update_selection_state(layout)
-
-        if self.drawing_state['in_selection']:
-            Gdk.cairo_set_source_rgba(self.ctx, ColorManager.get_ui_color('selection_bg'))
-            self.ctx.rectangle(self.offset_x + layout.x, self.offset_y, layout.width, layout.parent.height)
-            self.ctx.fill()
-
-        self.draw_children(layout)
-
-    def draw_layout_mathroot(self, layout):
-        self.update_selection_state(layout)
-
-        if self.drawing_state['in_selection']:
-            Gdk.cairo_set_source_rgba(self.ctx, ColorManager.get_ui_color('selection_bg'))
-            self.ctx.rectangle(self.offset_x + layout.x, self.offset_y, layout.width, layout.parent.height)
-            self.ctx.fill()
-
-        self.draw_children(layout)
-
-        fg_color = self.get_fg_color_by_node(layout.node)
-        Gdk.cairo_set_source_rgba(self.ctx, fg_color)
-
-        line_offset = max(7, layout.children[1].width)
-        line_width = layout.children[0].width
-        line_height = layout.children[0].height
-
-        self.ctx.set_line_width(2)
-        self.ctx.move_to(self.offset_x + layout.x + line_offset - 6, self.offset_y + line_height - 10)
-        self.ctx.line_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 2)
-        self.ctx.stroke()
-        self.ctx.set_line_width(1)
-        self.ctx.move_to(self.offset_x + layout.x + line_offset, self.offset_y + line_height - 2)
-        self.ctx.line_to(self.offset_x + layout.x + line_offset + 9, self.offset_y + 1)
-        self.ctx.line_to(self.offset_x + layout.x + line_offset + 10 + line_width, self.offset_y + 1)
-        self.ctx.stroke()
-
-    def draw_layout(self, layout):
-        self.update_selection_state(layout)
-        self.draw_children(layout)
-
-    def draw_selection(self, layout):
-        if self.drawing_state['in_selection']:
-            Gdk.cairo_set_source_rgba(self.ctx, ColorManager.get_ui_color('selection_bg'))
-            self.ctx.rectangle(self.offset_x + layout.x, self.offset_y, layout.width, layout.parent.height)
-            self.ctx.fill()
-
-    def draw_children(self, layout):
-        self.offset_x += layout.x
-        self.offset_y += layout.y
-        for child in layout.children:
-            child.accept_presenter(self)
-        self.offset_x -= layout.x
-        self.offset_y -= layout.y
-
-    def update_selection_state(self, layout):
-        document = self.model.document
         self.first_selection_node = document.cursor.get_first_node()
         self.last_selection_node = document.cursor.get_last_node()
+        self.drawing_state = {'in_selection': False}
 
+        self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
+
+        for line_layout in document.layout.children:
+            self.draw_layout(line_layout, ctx, offset_x, offset_y)
+
+        self.draw_cursor(ctx, offset_x, offset_y)
+
+    def draw_layout(self, layout, ctx, offset_x, offset_y):
+        self.update_selection_state(layout)
+
+        if isinstance(layout, LayoutChar):
+            self.draw_selection(layout, ctx, offset_x, offset_y)
+
+            fontname = FontManager.get_fontname_from_node(layout.node)
+            fg_color = self.get_fg_color_by_node(layout.node)
+            baseline = FontManager.get_ascend(fontname=fontname)
+
+            surface = FontManager.get_surface(layout.node.value, fontname=fontname)
+            if surface != None:
+                ctx.set_source_surface(surface, offset_x + layout.x + layout.left, offset_y + baseline + layout.y + layout.top)
+                pattern = ctx.get_source()
+                pattern.set_filter(cairo.Filter.BEST)
+                Gdk.cairo_set_source_rgba(ctx, fg_color)
+                ctx.mask(pattern)
+                ctx.fill()
+
+        if isinstance(layout, LayoutWidget):
+            self.draw_selection(layout, ctx, offset_x, offset_y)
+
+            surface = layout.node.value.get_cairo_surface()
+            fontname = FontManager.get_fontname_from_node(layout.node)
+            top = -FontManager.get_descend(fontname=fontname)
+            ctx.set_source_surface(surface, offset_x + layout.x, offset_y + layout.y + top)
+            ctx.rectangle(offset_x + layout.x, offset_y + layout.y, layout.width, layout.height)
+            ctx.fill()
+
+        if isinstance(layout, LayoutPlaceholder):
+            self.draw_selection(layout, ctx, offset_x, offset_y)
+
+            fontname = FontManager.get_fontname_from_node(layout.node)
+            baseline = FontManager.get_ascend(fontname=fontname)
+
+            width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
+            fg_color = self.get_fg_color_by_node(layout.node)
+            top += baseline
+
+            surface = FontManager.get_surface('▯', fontname=fontname)
+            ctx.set_source_surface(surface, offset_x + layout.x + left, offset_y + layout.y + top)
+            pattern = ctx.get_source()
+            pattern.set_filter(cairo.Filter.BEST)
+            Gdk.cairo_set_source_rgba(ctx, fg_color)
+            ctx.mask(pattern)
+            ctx.fill()
+
+        if isinstance(layout, LayoutMathRoot):
+            self.draw_selection(layout, ctx, offset_x, offset_y)
+
+        if isinstance(layout, LayoutMathAtom):
+            self.draw_selection(layout, ctx, offset_x, offset_y)
+
+        for child in layout.children:
+            self.draw_layout(child, ctx, offset_x + layout.x, offset_y + layout.y)
+
+        if isinstance(layout, LayoutMathRoot):
+            fg_color = self.get_fg_color_by_node(layout.node)
+            Gdk.cairo_set_source_rgba(ctx, fg_color)
+
+            line_offset = max(7, layout.children[1].width)
+            line_width = layout.children[0].width
+            line_height = layout.children[0].height
+
+            ctx.set_line_width(2)
+            ctx.move_to(offset_x + layout.x + line_offset - 6, offset_y + line_height - 10)
+            ctx.line_to(offset_x + layout.x + line_offset, offset_y + line_height - 2)
+            ctx.stroke()
+            ctx.set_line_width(1)
+            ctx.move_to(offset_x + layout.x + line_offset, offset_y + line_height - 2)
+            ctx.line_to(offset_x + layout.x + line_offset + 9, offset_y + 1)
+            ctx.line_to(offset_x + layout.x + line_offset + 10 + line_width, offset_y + 1)
+            ctx.stroke()
+
+    def update_selection_state(self, layout):
         if layout.node != None and layout.node == self.first_selection_node:
             self.drawing_state['in_selection'] = True
         if layout.node != None and layout.node == self.last_selection_node:
             self.drawing_state['in_selection'] = False
+
+    def draw_selection(self, layout, ctx, offset_x, offset_y):
+        if self.drawing_state['in_selection']:
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
+            ctx.rectangle(offset_x + layout.x, offset_y, layout.width, layout.parent.height)
+            ctx.fill()
 
     def get_fg_color_by_node(self, node):
         if node.link != None:
