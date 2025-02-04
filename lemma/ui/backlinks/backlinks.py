@@ -32,6 +32,7 @@ class Backlinks(object):
 
         self.workspace.connect('new_active_document', self.on_new_active_document)
         self.workspace.connect('document_removed', self.on_document_removed)
+        self.workspace.connect('document_changed', self.on_document_changed)
         self.workspace.connect('mode_set', self.on_mode_set)
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
@@ -40,6 +41,7 @@ class Backlinks(object):
 
     def on_new_active_document(self, workspace, document=None): self.update()
     def on_document_removed(self, workspace, document): self.update()
+    def on_document_changed(self, workspace, document): self.update()
     def on_mode_set(self, workspace): self.update()
 
     def update(self):

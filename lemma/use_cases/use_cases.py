@@ -144,20 +144,22 @@ class UseCases(object):
     def set_title(self, title):
         document = self.workspace.active_document
 
+        backlinks = []
         if ServiceLocator.get_settings().get_value('preferences', 'update_backlinks'):
             backlinks = DocumentRepo.list_by_link_target(document.title)
             for document_id in backlinks:
                 linking_doc = DocumentRepo.get_by_id(document_id)
                 nodes = [n for n in linking_doc.ast.flatten() if n.link != None and n.link.target == document.title]
                 linking_doc.add_command('set_link', nodes, title)
-
                 DocumentRepo.update(linking_doc)
-                self.workspace.add_change_code('document_changed', linking_doc)
 
         document.title = title
         document.update()
         document.update_last_modified()
         DocumentRepo.update(document)
+
+        for linking_doc in backlinks:
+            self.workspace.add_change_code('document_changed', linking_doc)
         self.workspace.add_change_code('document_changed', document)
 
     @timer.timer

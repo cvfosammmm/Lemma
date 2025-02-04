@@ -60,6 +60,7 @@ class DocumentRepo():
 
     def list_by_link_target(title):
         DocumentRepo.documents.sort(key=attrgetter('last_modified'), reverse=True)
+        DocumentRepo.update_links()
 
         if title in DocumentRepo.links_by_target:
             return [DocumentRepo.get_by_title(doc).id for doc in DocumentRepo.links_by_target[title]]
@@ -82,9 +83,7 @@ class DocumentRepo():
         DocumentRepo.max_document_id = max(DocumentRepo.max_document_id, document.id)
 
         DocumentRepo.documents.append(document)
-        DocumentRepo.documents.sort(key=attrgetter('last_modified'), reverse=True)
         DocumentRepo.documents_by_id[document.id] = document
-        DocumentRepo.update_links()
 
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
         exporter = HTMLExporter()
@@ -103,13 +102,9 @@ class DocumentRepo():
 
         DocumentRepo.documents.remove(document)
         del(DocumentRepo.documents_by_id[document.id])
-        DocumentRepo.update_links()
 
     def update(document):
         if not document.ast.has_changed(DocumentRepo): return
-
-        DocumentRepo.documents.sort(key=attrgetter('last_modified'), reverse=True)
-        DocumentRepo.update_links()
 
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
         exporter = HTMLExporter()
