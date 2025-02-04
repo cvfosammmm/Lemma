@@ -22,12 +22,12 @@ class DialogLocator(object):
 
     dialogs = dict()
 
-    def init_dialogs(main_window):
+    def init_dialogs(main_window, use_cases):
         for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
             if 'dialog.py' in files:
                 name = os.path.basename(path)
                 exec('import lemma.ui.dialogs.' + name + '.dialog as ' + name)
-                exec('DialogLocator.dialogs["' + name + '"] = ' + name + '.Dialog(main_window)')
+                exec('DialogLocator.dialogs["' + name + '"] = ' + name + '.Dialog(main_window, use_cases)')
 
     def get_dialog(dialog_type):
         return DialogLocator.dialogs[dialog_type]

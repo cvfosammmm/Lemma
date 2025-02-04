@@ -51,7 +51,6 @@ class CommandProcessor(object):
             self.last_command += len(self.commands_preedit)
             self.commands_preedit = list()
             self.document.update_last_modified()
-        self.document.signal_changes()
 
     def can_undo(self):
         return self.last_command >= 0
@@ -81,8 +80,6 @@ class CommandProcessor(object):
                 self.document.update_last_modified()
                 break
 
-        self.document.signal_changes()
-
     def redo(self):
         for command in self.commands[self.last_command + 1:]:
             command.run(self.document)
@@ -93,7 +90,5 @@ class CommandProcessor(object):
             if command.is_undo_checkpoint:
                 self.document.update_last_modified()
                 break
-
-        self.document.signal_changes()
 
 

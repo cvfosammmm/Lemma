@@ -17,6 +17,8 @@
 
 from urllib.parse import urlparse
 import webbrowser
+import os.path
+from markdown_it import MarkdownIt
 
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_parser as xml_parser
@@ -26,7 +28,9 @@ from lemma.widgets.image import Image
 from lemma.document.ast.node import Node
 from lemma.document.layout.layout_vbox import LayoutVBox
 from lemma.document.layout.layout_document import LayoutDocument
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.document.document import Document
+from lemma.infrastructure.html_parser import HTMLParser
 import lemma.infrastructure.timer as timer
 
 
@@ -35,44 +39,126 @@ class UseCases(object):
     def __init__(self, workspace):
         self.workspace = workspace
 
-    @timer.timer
-    def open_link(self, link_target):
-        workspace = self.workspace
+    def settings_set_value(self, section, item, value):
+        settings = ServiceLocator.get_settings()
+        settings.set_value(section, item, value)
+        settings.pickle()
+        self.workspace.add_change_code('settings_changed', (section, item, value))
 
+    def open_link(self, link_target):
         if urlparse(link_target).scheme in ['http', 'https']:
             webbrowser.open(link_target)
         else:
-            target_document = workspace.get_by_title(link_target)
+            target_document = DocumentRepo.get_by_title(link_target)
             if target_document != None:
                 self.set_active_document(target_document)
             else:
-                id = workspace.get_new_document_id()
-                document = Document(id)
-                document.title = link_target
-                workspace.add(document)
-                self.set_active_document(document)
+                self.new_document(link_target)
 
-    @timer.timer
+    def import_markdown(self, path):
+        document = Document()
+        document.last_modified = os.path.getmtime(path)
+        document.title = os.path.basename(path)[:-3]
+
+        with open(path, 'r') as file:
+            markdown = file.read()
+
+        if markdown.startswith('# ' + document.title):
+            markdown = markdown[len(document.title) + 3:]
+
+        markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
+        mdi = MarkdownIt()
+        html = mdi.render(markdown)
+
+        parser = HTMLParser(html, os.path.dirname(path))
+        parser.run()
+        document.ast = parser.composite
+        document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
+        document.set_scroll_insert_on_screen_after_layout_update()
+        document.update()
+
+        DocumentRepo.add(document)
+        self.workspace.add_change_code('new_document', document)
+
+    def enter_draft_mode(self):
+        self.workspace.set_mode('draft')
+        self.workspace.history.activate_document(None)
+
+        self.workspace.add_change_code('mode_set')
+        self.workspace.add_change_code('history_changed')
+
+    def leave_draft_mode(self):
+        self.workspace.set_mode('documents')
+        self.workspace.history.activate_document(self.workspace.active_document)
+
+        self.workspace.add_change_code('mode_set')
+        self.workspace.add_change_code('history_changed')
+
+    def new_document(self, title):
+        document = Document()
+        document.title = title
+        DocumentRepo.add(document)
+
+        self.workspace.add_change_code('new_document', document)
+
+        self.set_active_document(document)
+
+    def delete_document(self, document):
+        DocumentRepo.delete(document)
+        if document == self.workspace.active_document:
+            self.set_active_document(self.workspace.history.get_next_in_line(document))
+        self.workspace.history.delete(document)
+
+        self.workspace.add_change_code('history_changed')
+        self.workspace.add_change_code('document_removed', self.workspace.active_document)
+
     def set_active_document(self, document, update_history=True, scroll_to_top=True):
-        self.workspace.set_active_document(document, update_history)
+        self.workspace.set_mode('documents')
+        self.workspace.set_active_document(document)
+        if update_history and document != None:
+            self.workspace.history.add(document)
+        self.workspace.history.activate_document(document)
+
+        self.workspace.add_change_code('mode_set')
+        self.workspace.add_change_code('history_changed')
+        self.workspace.add_change_code('new_active_document', document)
+
         if scroll_to_top:
             self.scroll_to_xy(0, 0)
+
+    def undo(self):
+        document = self.workspace.active_document
+        document.undo()
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
+    def redo(self):
+        document = self.workspace.active_document
+        document.redo()
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def set_title(self, title):
         document = self.workspace.active_document
 
         if ServiceLocator.get_settings().get_value('preferences', 'update_backlinks'):
-            if document.title in self.workspace.links_by_target:
-                for link_source in self.workspace.links_by_target[document.title]:
-                    linking_doc = self.workspace.get_by_title(link_source)
-                    nodes = [n for n in linking_doc.ast.flatten() if n.link != None and n.link.target == document.title]
-                    linking_doc.add_command('set_link', nodes, title)
+            backlinks = DocumentRepo.list_by_link_target(document.title)
+            for document_id in backlinks:
+                linking_doc = DocumentRepo.get_by_id(document_id)
+                nodes = [n for n in linking_doc.ast.flatten() if n.link != None and n.link.target == document.title]
+                linking_doc.add_command('set_link', nodes, title)
+
+                DocumentRepo.update(linking_doc)
+                self.workspace.add_change_code('document_changed', linking_doc)
 
         document.title = title
         document.update()
         document.update_last_modified()
-        document.signal_changes()
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def insert_xml(self, xml):
@@ -121,6 +207,9 @@ class UseCases(object):
         if nodes.validate():
             document.add_composite_command(*commands)
 
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def backspace(self):
         document = self.workspace.active_document
@@ -130,8 +219,12 @@ class UseCases(object):
             self.delete_selection()
         elif not insert.is_first_in_parent():
             document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert], ['delete_selection'])
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert])
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def delete(self):
@@ -142,13 +235,19 @@ class UseCases(object):
             self.delete_selection()
         elif not insert.is_last_in_parent():
             document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert], ['delete_selection'])
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert])
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def delete_selection(self):
         document = self.workspace.active_document
         document.add_command('delete_selection')
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def add_image_from_filename(self, filename):
@@ -158,6 +257,8 @@ class UseCases(object):
         if document.cursor.get_insert_node().parent.is_root():
             node = Node('widget', image)
             document.add_command('insert_nodes', [node])
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def replace_max_string_before_cursor(self, tags):
@@ -189,6 +290,8 @@ class UseCases(object):
                     commands.append(['move_cursor_to_node', last_node.next_in_parent()])
 
                     document.add_composite_command(*commands)
+                    DocumentRepo.update(document)
+                    self.workspace.add_change_code('document_changed', document)
                     return True
         return False
 
@@ -196,6 +299,8 @@ class UseCases(object):
     def resize_widget(self, new_width):
         document = self.workspace.active_document
         document.add_command('resize_widget', new_width)
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def set_link(self, bounds, target):
@@ -204,6 +309,8 @@ class UseCases(object):
         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
         char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
         document.add_command('set_link', char_nodes, target)
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def set_paragraph_style(self, style):
@@ -214,6 +321,8 @@ class UseCases(object):
             style = 'p'
 
         document.add_command('set_paragraph_style', style)
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def toggle_tag(self, tagname):
@@ -230,6 +339,9 @@ class UseCases(object):
             else:
                 document.add_command('add_tag', tagname)
 
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def left(self, do_selection=False):
         document = self.workspace.active_document
@@ -242,6 +354,9 @@ class UseCases(object):
             document.add_command('move_cursor_to_node', document.cursor.get_first_node())
         else:
             document.add_command('move_cursor_to_node', document.cursor.prev(insert))
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def jump_left(self, do_selection=False):
@@ -263,6 +378,9 @@ class UseCases(object):
         else:
             document.add_command('move_cursor_to_node', insert_new)
 
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def right(self, do_selection=False):
         document = self.workspace.active_document
@@ -275,6 +393,9 @@ class UseCases(object):
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
         else:
             document.add_command('move_cursor_to_node', document.cursor.next(insert))
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def jump_right(self, do_selection=False):
@@ -294,6 +415,9 @@ class UseCases(object):
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
         else:
             document.add_command('move_cursor_to_node', insert_new)
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def up(self, do_selection=False):
@@ -324,6 +448,9 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
 
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def down(self, do_selection=False):
         document = self.workspace.active_document
@@ -353,6 +480,9 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, False)
 
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def line_start(self, do_selection=False):
         document = self.workspace.active_document
@@ -367,6 +497,9 @@ class UseCases(object):
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, True)
 
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def line_end(self, do_selection=False):
         document = self.workspace.active_document
@@ -380,6 +513,9 @@ class UseCases(object):
 
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node, True)
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def select_next_placeholder(self):
@@ -430,16 +566,25 @@ class UseCases(object):
         next_node = node.next_in_parent()
         document.add_command('move_cursor_to_node', node, next_node, False)
 
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def select_all(self):
         document = self.workspace.active_document
         document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def remove_selection(self):
         document = self.workspace.active_document
         if document.cursor.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
@@ -452,10 +597,16 @@ class UseCases(object):
 
         document.add_command('move_cursor_to_xy', orig_x, new_y, do_selection, False)
 
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def move_cursor_to_xy(self, x, y, do_selection=False):
         document = self.workspace.active_document
         document.add_command('move_cursor_to_xy', x, y, do_selection, True)
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def move_cursor_to_parent(self):
@@ -473,6 +624,9 @@ class UseCases(object):
 
         if new_insert != None:
             document.add_command('move_cursor_to_node', new_insert, new_insert, True)
+
+            DocumentRepo.update(document)
+            self.workspace.add_change_code('document_changed', document)
 
     @timer.timer
     def extend_selection(self):
@@ -511,9 +665,15 @@ class UseCases(object):
 
         document.add_command('move_cursor_to_node', new_insert, new_selection, True)
 
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
+
     @timer.timer
     def scroll_to_xy(self, x, y):
         document = self.workspace.active_document
         document.add_command('scroll_to_xy', x, y)
+
+        DocumentRepo.update(document)
+        self.workspace.add_change_code('document_changed', document)
 
 

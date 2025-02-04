@@ -30,8 +30,9 @@ from lemma.infrastructure.service_locator import ServiceLocator
 
 class Dialog(object):
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, use_cases):
         self.main_window = main_window
+        self.use_cases = use_cases
         self.document = None
         self.current_tags = set()
         self.current_link = None
@@ -66,7 +67,7 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                ServiceLocator.get_settings().set_value('app_state', 'last_export_folder', os.path.dirname(filename))
+                self.use_cases.settings_set_value('app_state', 'last_export_folder', os.path.dirname(filename))
 
                 if not filename.endswith('.md'):
                     filename += '.md'

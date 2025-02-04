@@ -51,7 +51,7 @@ class Application(Adw.Application):
         ColorManager.init(self.main_window)
         PopoverManager.init(self.main_window, self.workspace)
         self.main_window.add_widgets()
-        DialogLocator.init_dialogs(self.main_window)
+        DialogLocator.init_dialogs(self.main_window, self.use_cases)
 
         self.colors = colors.Colors(self.workspace, self.main_window)
         self.document_history = document_history.DocumentHistory(self.workspace, self.main_window, self)

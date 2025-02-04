@@ -26,12 +26,14 @@ import os.path, os
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
 from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.document_repo.document_repo import DocumentRepo
 
 
 class Dialog(object):
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, use_cases):
         self.main_window = main_window
+        self.use_cases = use_cases
         self.workspace = None
         self.current_values = dict()
 
@@ -48,7 +50,7 @@ class Dialog(object):
     def init_current_values(self):
         self.current_values['filename'] = None
         self.current_values['format'] = 'html'
-        self.current_values['documents'] = set(self.workspace.documents)
+        self.current_values['documents'] = [DocumentRepo.get_by_id(doc_id) for id in DocumentRepo.list()]
 
     def populate_view(self):
         last_export_folder = ServiceLocator.get_settings().get_value('app_state', 'last_bulk_export_folder')
@@ -59,7 +61,7 @@ class Dialog(object):
 
         self.view.file_format_buttons[self.current_values['format']].set_active(True)
 
-        for i, document in enumerate(self.workspace.documents):
+        for document in [DocumentRepo.get_by_id(doc_id) for id in DocumentRepo.list()]:
             row = view.Row(document)
             row.button.set_active(document in self.current_values['documents'])
             self.view.list.append(row)
@@ -82,7 +84,7 @@ class Dialog(object):
         is_valid = self.current_values['filename'] != None and len(self.current_values['documents']) > 0
         self.view.submit_button.set_sensitive(is_valid)
 
-        if len(self.current_values['documents']) == len(self.workspace.documents):
+        if len(self.current_values['documents']) == len(DocumentRepo.list()):
             self.view.select_all_button.set_active(True)
         elif len(self.current_values['documents']) == 0:
             self.view.select_all_button.set_active(False)
@@ -113,7 +115,7 @@ class Dialog(object):
 
     def on_submit_button_clicked(self, button):
         filename = self.current_values['filename']
-        ServiceLocator.get_settings().set_value('app_state', 'last_bulk_export_folder', os.path.dirname(filename))
+        self.use_cases.settings_set_value('app_state', 'last_bulk_export_folder', os.path.dirname(filename))
 
         with zipfile.ZipFile(filename, 'x') as file:
             for document in self.current_values['documents']:

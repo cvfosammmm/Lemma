@@ -30,11 +30,12 @@ from lemma.ui.helpers.cairo import rounded_rectangle
 
 class PageColors(object):
 
-    def __init__(self, preferences, settings, main_window):
+    def __init__(self, preferences, settings, main_window, use_cases):
         self.view = PageFontColorView()
         self.preferences = preferences
         self.settings = settings
         self.main_window = main_window
+        self.use_cases = use_cases
         self.style_previews = dict()
 
     def init(self):
@@ -80,7 +81,7 @@ class PageColors(object):
 
     def on_checkbutton_toggled(self, button, name):
         if button.get_active():
-            self.settings.set_value('preferences', 'color_scheme', name)
+            self.use_cases.settings_set_value('preferences', 'color_scheme', name)
             button.get_parent().add_css_class('selected')
         else:
             button.get_parent().remove_css_class('selected')

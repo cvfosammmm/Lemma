@@ -21,6 +21,7 @@ from lemma.document.document import Document
 from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.html_parser import HTMLParser
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.document_repo.document_repo import DocumentRepo
 import lemma.infrastructure.timer as timer
 
 
@@ -33,26 +34,6 @@ class Storage(object):
         if not os.path.exists(self.pathname):
             os.mkdir(self.pathname)
 
-    def populate_documents(self):
-        for direntry in os.scandir(self.pathname):
-            if direntry.is_file() and direntry.name.isdigit():
-                document = Document(int(direntry.name))
-                document.last_modified = os.path.getmtime(direntry.path)
-
-                with open(direntry.path, 'r') as file:
-                    html = file.read()
-
-                parser = HTMLParser(html, self.pathname)
-                parser.run()
-                document.title = parser.title
-                document.ast = parser.composite
-                document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
-                document.set_scroll_insert_on_screen_after_layout_update()
-                document.update()
-                document.signal_changes()
-
-                self.workspace.add(document)
-
     def populate_workspace(self):
         pathname = os.path.join(self.pathname, 'workspace')
         if not os.path.isfile(pathname): return
@@ -60,57 +41,19 @@ class Storage(object):
         with open(pathname, 'rb') as file:
             data = pickle.loads(file.read())
 
-            self.workspace.active_document = self.workspace.get_by_id(data['active_document_id'])
-            if self.workspace.active_document != None: self.workspace.active_document.connect('changed', self.workspace.on_document_change)
-
+            self.workspace.active_document = DocumentRepo.get_by_id(data['active_document_id'])
             for document_id in data['history']:
-                document = self.workspace.get_by_id(document_id)
+                document = DocumentRepo.get_by_id(document_id)
                 if document != None:
                     self.workspace.history.add(document, remove_tail_after_last_active=False)
                     if document == self.workspace.active_document:
                         self.workspace.history.activate_document(document)
-            self.workspace.history.add_change_code('active_document_changed')
 
     def init_writer(self):
-        for document in self.workspace.documents:
-            document.connect('changed', self.on_document_change)
-        self.workspace.connect('new_document', self.on_new_document)
-        self.workspace.connect('document_removed', self.on_document_removed)
-        self.workspace.connect('changed', self.on_workspace_changed)
-        self.workspace.history.connect('changed', self.on_history_change)
-
-    def on_workspace_changed(self, workspace):
-        self.save_workspace()
+        self.workspace.connect('history_changed', self.on_history_change)
 
     def on_history_change(self, history):
         self.save_workspace()
-
-    def on_new_document(self, workspace, document):
-        self.save_document(document)
-        document.connect('changed', self.on_document_change)
-
-    def on_document_removed(self, workspace, document):
-        document.disconnect('changed', self.on_document_change)
-        self.delete_document(document)
-
-    def on_document_change(self, document):
-        if document.ast.has_changed(self):
-            self.save_document(document)
-
-    @timer.timer
-    def save_document(self, document):
-        pathname = os.path.join(self.pathname, str(document.id))
-        exporter = HTMLExporter()
-        html = exporter.export_html(document)
-
-        try: filehandle = open(pathname, 'w')
-        except IOError: pass
-        else:
-            filehandle.write(html)
-
-    def delete_document(self, document):
-        pathname = os.path.join(self.pathname, str(document.id))
-        os.remove(pathname)
 
     def save_workspace(self):
         pathname = os.path.join(self.pathname, 'workspace')

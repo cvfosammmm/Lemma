@@ -24,6 +24,7 @@ import os
 from lemma.ui.helpers.dialog_view import DialogView
 from lemma.document.document import Document
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.document.ast.node import Node
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_parser as xml_parser
@@ -31,8 +32,9 @@ import lemma.infrastructure.xml_parser as xml_parser
 
 class Dialog(object):
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, use_cases):
         self.main_window = main_window
+        self.use_cases = use_cases
         self.application = None
         self.workspace = None
         self.document = None
@@ -44,7 +46,6 @@ class Dialog(object):
         self.application = application
         self.workspace = workspace
         self.document = document
-        self.use_cases = application.use_cases
         self.init_current_values()
         self.view = InsertLinkView(self.main_window)
         self.setup()
@@ -105,7 +106,9 @@ class Dialog(object):
         count = 0
 
         self.view.listbox.remove_all()
-        for document in self.workspace.documents:
+        for document_id in DocumentRepo.list():
+            document = DocumentRepo.get_by_id(document_id)
+
             if self.is_match(document):
                 self.view.listbox.append(ACItem(document.title))
                 count += 1

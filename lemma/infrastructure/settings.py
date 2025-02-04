@@ -79,7 +79,6 @@ class Settings(Observable):
             section_dict = dict()
             self.data[section] = section_dict
         section_dict[item] = value
-        self.add_change_code('settings_changed', (section, item, value))
 
     def unpickle(self):
         ''' Load settings from home folder. '''

@@ -21,7 +21,7 @@ from gi.repository import Gtk, Gdk
 
 import datetime
 
-from lemma.document.document import Document
+from lemma.document_repo.document_repo import DocumentRepo
 
 
 class DocumentDraft():
@@ -29,7 +29,7 @@ class DocumentDraft():
     def __init__(self, workspace, main_window, application):
         self.workspace = workspace
         self.view = main_window.draft_view
-        self.application = application
+        self.use_cases = application.use_cases
 
         self.title = ''
         self.title_changed = False
@@ -71,7 +71,7 @@ class DocumentDraft():
             self.view.subtext.set_text('Name cannot be empty.')
             self.view.subtext.add_css_class('error')
             self.view.title_entry.add_css_class('error')
-        elif self.workspace.get_by_title(self.title):
+        elif DocumentRepo.get_by_title(self.title):
             self.validation_state = False
             self.view.subtext.set_text('A document with this name already exists.')
             self.view.subtext.add_css_class('error')
@@ -112,22 +112,19 @@ class DocumentDraft():
             self.submit()
 
     def submit(self):
-        id = self.workspace.get_new_document_id()
-        document = Document(id)
-        document.title = self.title
+        title = self.title
         self.deactivate()
-        self.workspace.add(document)
-        self.application.use_cases.set_active_document(document)
+        self.use_cases.new_document(title)
 
     def on_entry_keypress(self, controller, keyval, keycode, state):
         if keyval == Gdk.keyval_from_name('Escape'):
             if state & Gtk.accelerator_get_default_mod_mask() == 0:
-                self.workspace.leave_draft_mode()
+                self.use_cases.leave_draft_mode()
                 return True
         return False
 
     def on_cancel_button_clicked(self, widget=None):
-        self.workspace.leave_draft_mode()
+        self.use_cases.leave_draft_mode()
 
     def init(self):
         self.reset_title()

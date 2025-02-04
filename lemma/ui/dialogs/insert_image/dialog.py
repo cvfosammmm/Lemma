@@ -24,11 +24,11 @@ from PIL import Image as PIL_Image
 
 class Dialog(object):
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, use_cases):
         self.main_window = main_window
-
-    def run(self, use_cases):
         self.use_cases = use_cases
+
+    def run(self):
         self.setup()
         self.view.open(self.main_window, None, self.dialog_process_response)
 

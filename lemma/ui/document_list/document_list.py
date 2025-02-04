@@ -21,6 +21,7 @@ from gi.repository import Gtk, Gdk, Pango, PangoCairo
 
 import datetime
 
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
 from lemma.infrastructure.service_locator import ServiceLocator
@@ -31,10 +32,10 @@ class DocumentList(object):
     def __init__(self, workspace, main_window, application):
         self.workspace = workspace
         self.main_window = main_window
-        self.application = application
+        self.use_cases = application.use_cases
         self.view = main_window.document_list
 
-        self.documents = self.workspace.documents
+        self.document_ids = DocumentRepo.list()
         self.search_terms = []
         self.selected_index = None
 
@@ -64,12 +65,8 @@ class DocumentList(object):
     def on_new_active_document(self, workspace, document=None): self.update()
 
     def update(self):
-        self.documents = []
-        for document in self.workspace.documents:
-            if self.search_terms_in_document(document):
-                self.documents.append(document)
-
-        self.view.scrolling_widget.set_size(1, max(len(self.documents) * self.view.line_height, 1))
+        self.document_ids = [doc_id for doc_id in DocumentRepo.list() if self.search_terms_in_document(DocumentRepo.get_by_id(doc_id))]
+        self.view.scrolling_widget.set_size(1, max(len(self.document_ids) * self.view.line_height, 1))
         self.view.scrolling_widget.queue_draw()
 
     def set_selected_index(self, index):
@@ -78,14 +75,15 @@ class DocumentList(object):
             self.view.content.queue_draw()
 
     def activate_item(self, index):
-        self.application.use_cases.set_active_document(self.documents[index])
+        document = DocumentRepo.get_by_id(self.document_ids[index])
+        self.use_cases.set_active_document(document)
 
     def on_primary_button_press(self, scrolling_widget, data):
         x_offset, y_offset, state = data
 
         if state == 0:
             item_num = self.get_item_at_cursor()
-            if item_num != None and item_num < len(self.documents):
+            if item_num != None and item_num < len(self.document_ids):
                 self.set_selected_index(item_num)
 
     def on_primary_button_release(self, scrolling_widget, data):
@@ -101,7 +99,7 @@ class DocumentList(object):
 
         if state == 0:
             item_num = self.get_item_at_cursor()
-            if item_num != None and item_num < len(self.workspace.documents):
+            if item_num != None and item_num < len(self.document_ids):
                 self.set_selected_index(item_num)
                 self.view.context_menu.popup_at_cursor(x - content.scrolling_offset_x, y - content.scrolling_offset_y)
 
@@ -111,8 +109,8 @@ class DocumentList(object):
         self.set_selected_index(None)
 
     def on_delete_document_clicked(self, button):
-        index = self.selected_index
-        self.workspace.delete_document(self.workspace.documents[index])
+        document = DocumentRepo.get_by_id(self.document_ids[self.selected_index])
+        self.use_cases.delete_document(document)
         self.view.context_menu.popover.popdown()
 
     def on_search_entry_changed(self, entry, data=None):
@@ -154,7 +152,8 @@ class DocumentList(object):
         ctx.fill()
         Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
 
-        for i, document in enumerate(self.documents):
+        for i, document_id in enumerate(self.document_ids):
+            document = DocumentRepo.get_by_id(document_id)
             highlight_active = (document == self.workspace.active_document and self.workspace.mode == 'documents')
             if highlight_active:
                 title_color = active_fg_color

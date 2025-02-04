@@ -22,8 +22,9 @@ from gi.repository import Gtk
 
 class Dialog():
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, use_cases):
         self.main_window = main_window
+        self.use_cases = use_cases
 
         data = list()
 

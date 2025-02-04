@@ -20,25 +20,20 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
 
-import os.path, pickle, re
-from markdown_it import MarkdownIt
+import os.path
 
 import lemma.ui.dialogs.import_documents.import_documents_viewgtk as view
-from lemma.document.document import Document
-from lemma.infrastructure.html_parser import HTMLParser
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class Dialog(object):
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, use_cases):
         self.main_window = main_window
-        self.workspace = None
+        self.use_cases = use_cases
         self.current_values = dict()
 
-    def run(self, workspace):
-        self.workspace = workspace
-
+    def run(self):
         self.init_current_values()
         self.view = view.ImportDocumentsView(self.main_window)
         self.setup()
@@ -88,7 +83,7 @@ class Dialog(object):
         else:
             if files != None and len(files) > 0:
                 import_folder = os.path.dirname(files[0].get_path())
-                ServiceLocator.get_settings().set_value('app_state', 'last_import_folder', import_folder)
+                self.use_cases.settings_set_value('app_state', 'last_import_folder', import_folder)
                 for file in files:
                     self.add_file_to_list(file.get_path())
                 self.view.list.invalidate_sort()
@@ -117,30 +112,7 @@ class Dialog(object):
         self.view.drop_stack.set_visible_child_name(('files' if len(self.current_values['files']) > 0 else 'message'))
 
     def import_files(self):
-        mdi = MarkdownIt()
-
         for path in self.current_values['files']:
-            document = Document(self.workspace.get_new_document_id())
-            document.last_modified = os.path.getmtime(path)
-            document.title = os.path.basename(path)[:-3]
-
-            with open(path, 'r') as file:
-                markdown = file.read()
-
-            if markdown.startswith('# ' + document.title):
-                markdown = markdown[len(document.title) + 3:]
-
-            markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
-            html = mdi.render(markdown)
-
-            parser = HTMLParser(html, os.path.dirname(path))
-            parser.run()
-            document.ast = parser.composite
-            document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
-            document.set_scroll_insert_on_screen_after_layout_update()
-            document.update()
-            document.signal_changes()
-
-            self.workspace.add(document)
+            self.use_cases.import_markdown(path)
 
 

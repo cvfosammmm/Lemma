@@ -26,6 +26,7 @@ import cairo
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.document.layout.layout_widget import LayoutWidget
 from lemma.document.layout.layout_char import LayoutChar
 from lemma.document.layout.layout_placeholder import LayoutPlaceholder
@@ -304,7 +305,7 @@ class DocumentViewPresenter():
     def get_fg_color_by_node(self, node):
         if node.link != None:
             if urlparse(node.link.target).scheme in ['http', 'https'] or \
-                self.model.workspace.get_by_title(node.link.target) != None:
+                DocumentRepo.get_by_title(node.link.target) != None:
                 return ColorManager.get_ui_color('links')
             else:
                 return ColorManager.get_ui_color('links_page_not_existing')

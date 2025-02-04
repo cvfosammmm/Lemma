@@ -27,8 +27,9 @@ from lemma.infrastructure.service_locator import ServiceLocator
 
 class Dialog(object):
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, use_cases):
         self.main_window = main_window
+        self.use_cases = use_cases
         self.settings = ServiceLocator.get_settings()
 
     def run(self):
@@ -38,8 +39,8 @@ class Dialog(object):
     def setup(self):
         self.view = view.Preferences(self.main_window)
 
-        self.page_colors = page_colors.PageColors(self, self.settings, self.main_window)
-        self.page_workspace = page_workspace.PageWorkspace(self, self.settings, self.main_window)
+        self.page_colors = page_colors.PageColors(self, self.settings, self.main_window, self.use_cases)
+        self.page_workspace = page_workspace.PageWorkspace(self, self.settings, self.main_window, self.use_cases)
 
         self.view.notebook.append_page(self.page_colors.view, Gtk.Label.new(_('Colors')))
         self.view.notebook.append_page(self.page_workspace.view, Gtk.Label.new(_('Workspace')))
@@ -48,21 +49,21 @@ class Dialog(object):
         self.page_workspace.init()
 
     def on_check_button_toggle(self, button, preference_name):
-        self.settings.set_value('preferences', preference_name, button.get_active())
+        self.use_cases.settings_set_value('preferences', preference_name, button.get_active())
         
     def on_radio_button_toggle(self, button, preference_name, value):
-        self.settings.set_value('preferences', preference_name, value)
+        self.use_cases.settings_set_value('preferences', preference_name, value)
 
     def spin_button_changed(self, button, preference_name):
-        self.settings.set_value('preferences', preference_name, button.get_value_as_int())
+        self.use_cases.settings_set_value('preferences', preference_name, button.get_value_as_int())
 
     def text_deleted(self, buffer, position, n_chars, preference_name):
-        self.settings.set_value('preferences', preference_name, buffer.get_text())
+        self.use_cases.settings_set_value('preferences', preference_name, buffer.get_text())
 
     def text_inserted(self, buffer, position, chars, n_chars, preference_name):
-        self.settings.set_value('preferences', preference_name, buffer.get_text())
+        self.use_cases.settings_set_value('preferences', preference_name, buffer.get_text())
 
     def on_interpreter_changed(self, button, preference_name, value):
-        self.settings.set_value('preferences', preference_name, value)
+        self.use_cases.settings_set_value('preferences', preference_name, value)
 
 

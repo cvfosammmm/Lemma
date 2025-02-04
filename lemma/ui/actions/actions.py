@@ -92,7 +92,7 @@ class Actions(object):
         self.main_window.add_action(self.actions['quit'])
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
-        self.workspace.history.connect('changed', self.on_history_change)
+        self.workspace.connect('history_changed', self.on_history_change)
         self.workspace.connect('new_document', self.on_new_document)
         self.workspace.connect('document_removed', self.on_document_removed)
         self.workspace.connect('new_active_document', self.on_new_active_document)
@@ -173,16 +173,16 @@ class Actions(object):
         self.actions['show-about-dialog'].set_enabled(True)
 
     def add_document(self, action=None, paramenter=''):
-        self.workspace.enter_draft_mode()
+        self.use_cases.enter_draft_mode()
 
     def import_markdown_files(self, action=None, paramenter=''):
-        DialogLocator.get_dialog('import_documents').run(self.workspace)
+        DialogLocator.get_dialog('import_documents').run()
 
     def export_bulk(self, action=None, paramenter=''):
         DialogLocator.get_dialog('export_bulk').run(self.workspace)
 
     def delete_document(self, action=None, parameter=''):
-        self.workspace.delete_document(self.workspace.active_document)
+        self.use_cases.delete_document(self.workspace.active_document)
 
     def rename_document(self, action=None, parameter=''):
         self.application.document_view.init_renaming()
@@ -195,7 +195,7 @@ class Actions(object):
 
     def go_back(self, action=None, parameter=''):
         if self.workspace.mode == 'draft':
-            self.workspace.leave_draft_mode()
+            self.use_cases.leave_draft_mode()
         else:
             prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
             if prev_doc != None:
@@ -207,10 +207,10 @@ class Actions(object):
             self.use_cases.set_active_document(next_doc, update_history=False, scroll_to_top=False)
 
     def undo(self, action=None, parameter=''):
-        self.workspace.active_document.undo()
+        self.use_cases.undo()
 
     def redo(self, action=None, parameter=''):
-        self.workspace.active_document.redo()
+        self.use_cases.redo()
 
     def cut(self, action=None, parameter=''):
         self.copy()
@@ -297,7 +297,7 @@ class Actions(object):
             self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {'italic'})
 
     def show_insert_image_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_image').run(self.use_cases)
+        DialogLocator.get_dialog('insert_image').run()
 
     def widget_shrink(self, action=None, parameter=None):
         document = self.workspace.active_document

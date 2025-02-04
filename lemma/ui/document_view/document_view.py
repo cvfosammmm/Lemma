@@ -24,6 +24,7 @@ from urllib.parse import urlparse
 
 from lemma.ui.document_view.document_view_controller import DocumentViewController
 from lemma.ui.document_view.document_view_presenter import DocumentViewPresenter
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.ui.title_widget.title_widget import TitleWidget
 from lemma.helpers.observable import Observable
 import lemma.infrastructure.timer as timer
@@ -73,8 +74,13 @@ class DocumentView(Observable):
         self.set_document(document)
         self.update()
 
-    def on_document_change(self, workspace, document): self.update()
-    def on_mode_set(self, workspace): self.update()
+    def on_document_change(self, workspace, document):
+        if document == self.document:
+            self.update_link_at_cursor()
+        self.update()
+
+    def on_mode_set(self, workspace):
+        self.update()
 
     @timer.timer
     def update(self):
@@ -110,22 +116,12 @@ class DocumentView(Observable):
             self.add_change_code('changed')
 
     def set_document(self, document):
-        if self.document != None:
-            self.document.disconnect('changed', self.on_change)
-
         self.document = document
         self.update_link_at_cursor()
         self.view.content.queue_draw()
         self.stop_renaming()
         self.title_widget.set_document(document)
         self.view.content.grab_focus()
-
-        if document != None:
-            self.document.connect('changed', self.on_change)
-
-    def on_change(self, document):
-        self.update_link_at_cursor()
-        self.add_change_code('changed')
 
     def init_renaming(self):
         if self.document != None:
@@ -192,7 +188,7 @@ class DocumentView(Observable):
 
         if text != None:
             if not urlparse(text).scheme in ['http', 'https']:
-                target_document = self.workspace.get_by_title(text)
+                target_document = DocumentRepo.get_by_title(text)
                 if target_document == None:
                     text = 'Create "' + text + '"'
 

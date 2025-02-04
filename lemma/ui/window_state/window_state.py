@@ -25,7 +25,7 @@ class WindowState(object):
     def __init__(self, workspace, main_window, app):
         self.workspace = workspace
         self.main_window = main_window
-        self.app = app
+        self.use_cases = app.use_cases
         self.settings = ServiceLocator.get_settings()
 
         toggle_state = ServiceLocator.get_settings().get_value('window_state', 'show_tools_sidebar')
@@ -87,14 +87,13 @@ class WindowState(object):
         self.main_window.navigation_sidebar.paned.set_target_position(navbar_paned_position)
 
     def save_window_state(self):
-        self.settings.set_value('window_state', 'width', self.main_window.get_property('default-width'))
-        self.settings.set_value('window_state', 'height', self.main_window.get_property('default-height'))
-        self.settings.set_value('window_state', 'is_maximized', self.main_window.get_property('maximized'))
-        self.settings.set_value('window_state', 'sidebar_position', self.main_window.headerbar.get_property('position'))
-        self.settings.set_value('window_state', 'show_tools_sidebar', self.main_window.document_view_paned.show_widget)
-        self.settings.set_value('window_state', 'tools_sidebar_position', self.main_window.document_view_paned.target_position)
-        self.settings.set_value('window_state', 'show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
-        self.settings.set_value('window_state', 'navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)
-        self.settings.pickle()
+        self.use_cases.settings_set_value('window_state', 'width', self.main_window.get_property('default-width'))
+        self.use_cases.settings_set_value('window_state', 'height', self.main_window.get_property('default-height'))
+        self.use_cases.settings_set_value('window_state', 'is_maximized', self.main_window.get_property('maximized'))
+        self.use_cases.settings_set_value('window_state', 'sidebar_position', self.main_window.headerbar.get_property('position'))
+        self.use_cases.settings_set_value('window_state', 'show_tools_sidebar', self.main_window.document_view_paned.show_widget)
+        self.use_cases.settings_set_value('window_state', 'tools_sidebar_position', self.main_window.document_view_paned.target_position)
+        self.use_cases.settings_set_value('window_state', 'show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
+        self.use_cases.settings_set_value('window_state', 'navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)
 
 

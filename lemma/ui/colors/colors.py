@@ -27,9 +27,9 @@ class Colors(object):
         self.main_window = main_window
 
         self.update()
-        ServiceLocator.get_settings().connect('settings_changed', self.on_settings_changed)
+        self.workspace.connect('settings_changed', self.on_settings_changed)
 
-    def on_settings_changed(self, settings, parameter):
+    def on_settings_changed(self, workspace, parameter):
         section, item, value = parameter
         if item == 'color_scheme':
             self.update()

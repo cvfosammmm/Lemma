@@ -19,6 +19,7 @@ import sys, os.path, gettext
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.infrastructure.timer import Timer
 import lemma.workspace.workspace as workspace
 import lemma.use_cases.use_cases as use_cases
@@ -60,8 +61,12 @@ ServiceLocator.set_workspace(workspace)
 
 use_cases = use_cases.UseCases(workspace)
 
+pathname = ServiceLocator.get_notes_folder()
+if not os.path.exists(pathname):
+    os.mkdir(pathname)
+
+DocumentRepo.init(pathname)
 storage = storage.Storage(workspace)
-storage.populate_documents()
 storage.populate_workspace()
 storage.init_writer()
 

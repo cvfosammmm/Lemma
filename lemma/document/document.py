@@ -24,7 +24,6 @@ from lemma.document.plaintext.plaintext_scanner import PlaintextScanner
 from lemma.document.clipping.clipping import Clipping
 from lemma.document.command_processor.command_processor import CommandProcessor
 import lemma.infrastructure.timer as timer
-from lemma.helpers.observable import Observable
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:
         if file.endswith('.py'):
@@ -32,11 +31,9 @@ for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.r
             exec('import lemma.document.commands.' + name + ' as ' + name)
 
 
-class Document(Observable):
+class Document():
 
-    def __init__(self, id):
-        Observable.__init__(self)
-
+    def __init__(self, id=None):
         self.last_modified = time.time()
         self.command_processor = CommandProcessor(self)
 
@@ -79,10 +76,6 @@ class Document(Observable):
 
     def update_last_modified(self):
         self.last_modified = time.time()
-
-    @timer.timer
-    def signal_changes(self):
-        self.add_change_code('changed')
 
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True

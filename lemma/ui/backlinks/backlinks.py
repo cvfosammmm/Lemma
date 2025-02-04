@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+from lemma.document_repo.document_repo import DocumentRepo
+
 
 class Backlinks(object):
 
@@ -48,10 +50,10 @@ class Backlinks(object):
         if not has_active_doc:
             pass
         else:
-            if active_document.title in self.workspace.links_by_target:
-                for link_source in self.workspace.links_by_target[active_document.title]:
-                    document = self.workspace.get_by_title(link_source)
-                    self.view.add_item(document)
+            backlinks = DocumentRepo.list_by_link_target(active_document.title)
+            for document_id in backlinks:
+                linking_doc = DocumentRepo.get_by_id(document_id)
+                self.view.add_item(linking_doc)
 
     def on_row_activated(self, listbox, row):
         self.application.use_cases.set_active_document(row.get_child().document)

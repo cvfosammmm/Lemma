@@ -32,23 +32,18 @@ class CursorState(Observable):
 
         self.set_document(workspace.get_active_document())
         self.workspace.connect('new_active_document', self.on_new_active_document)
+        self.workspace.connect('document_changed', self.on_document_change)
 
     def on_new_active_document(self, workspace, document=None):
         self.set_document(document)
         self.update()
 
     def set_document(self, document):
-        if self.document != None:
-            self.document.disconnect('changed', self.on_change)
-
         self.document = document
         self.update()
 
-        if document != None:
-            self.document.connect('changed', self.on_change)
-
     @timer.timer
-    def on_change(self, document):
+    def on_document_change(self, workspace, document):
         self.update()
 
     def update(self):

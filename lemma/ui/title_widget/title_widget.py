@@ -22,6 +22,7 @@ from gi.repository import Gdk
 
 import datetime
 
+from lemma.document_repo.document_repo import DocumentRepo
 import lemma.ui.title_widget.title_widget_viewgtk as title_widget_view
 import lemma.infrastructure.timer as timer
 
@@ -70,14 +71,14 @@ class TitleWidget(object):
         validation_state = True
         if self.title == '':
             validation_state = False
-        elif self.title != self.document.title and self.document_view.workspace.get_by_title(self.title):
+        elif self.title != self.document.title and DocumentRepo.get_by_title(self.title):
             validation_state = False
 
         if self.title != self.document.title and self.title == '':
             self.view.subtext.set_text('Name cannot be empty.')
             self.view.subtext.add_css_class('error')
             self.view.title_entry.add_css_class('error')
-        elif self.title != self.document.title and self.document_view.workspace.get_by_title(self.title):
+        elif self.title != self.document.title and DocumentRepo.get_by_title(self.title):
             self.view.subtext.set_text('A document with this name already exists.')
             self.view.subtext.add_css_class('error')
             self.view.title_entry.add_css_class('error')
