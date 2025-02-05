@@ -15,46 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.helpers.observable import Observable
+from lemma.history.history import History
+from lemma.message_bus.message_bus import MessageBus
 import lemma.infrastructure.timer as timer
 
 
-class CursorState(Observable):
+class CursorState():
 
-    def __init__(self, workspace, main_window):
-        Observable.__init__(self)
+    def __init__(self, main_window):
         self.toolbar = main_window.toolbar
 
         self.tags_at_cursor = set()
 
-        self.workspace = workspace
-        self.document = None
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('document_changed', self.on_document_change)
 
-        self.set_document(workspace.get_active_document())
-        self.workspace.connect('new_active_document', self.on_new_active_document)
-        self.workspace.connect('document_changed', self.on_document_change)
-
-    def on_new_active_document(self, workspace, document=None):
-        self.set_document(document)
-        self.update()
-
-    def set_document(self, document):
-        self.document = document
-        self.update()
-
-    @timer.timer
-    def on_document_change(self, workspace, document):
-        self.update()
+    def on_history_changed(self): self.update()
+    def on_document_change(self): self.update()
 
     def update(self):
         self.update_tags_at_cursor()
         self.update_paragraph_style_at_cursor()
 
     def update_tags_at_cursor(self):
-        if self.document == None:
+        document = History.get_active_document()
+
+        if document == None:
             self.set_tags_at_cursor(set())
         else:
-            node = self.document.ast.get_node_at_position(self.document.cursor.get_first_cursor_pos())
+            node = document.cursor.get_first_node()
             node = node.prev_in_parent()
             if node == None:
                 self.set_tags_at_cursor(set())
@@ -67,8 +56,8 @@ class CursorState(Observable):
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
 
     def update_tag_toggle(self, button, tagname):
-        document = self.workspace.active_document
-        if self.workspace.mode != 'documents' or document == None: return
+        document = History.get_active_document()
+        if document == None: return
 
         char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
         all_tagged = True
@@ -87,10 +76,10 @@ class CursorState(Observable):
                 button.remove_css_class('checked')
 
     def update_paragraph_style_at_cursor(self):
-        document = self.workspace.active_document
-        if self.workspace.mode != 'documents' or document == None: return
+        document = History.get_active_document()
+        if document == None: return
 
-        current_node = document.ast.get_node_at_position(document.cursor.get_first_cursor_pos())
+        current_node = document.cursor.get_first_node()
         paragraph_style_at_cursor = current_node.get_paragraph_style()
 
         labels_dict = {'p': _('Paragraph'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6')}

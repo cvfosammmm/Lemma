@@ -20,13 +20,15 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gdk, Pango, PangoCairo
 
 from lemma.infrastructure.color_manager import ColorManager
+from lemma.settings.settings import Settings
+from lemma.history.history import History
+from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.helpers.cairo import rounded_rectangle
 
 
 class DocumentHistory(object):
 
-    def __init__(self, workspace, main_window, application):
-        self.workspace = workspace
+    def __init__(self, main_window, application):
         self.view = main_window.history_view
         self.application = application
 
@@ -44,14 +46,12 @@ class DocumentHistory(object):
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
 
-        self.workspace.connect('history_changed', self.on_history_change)
-        self.workspace.connect('new_active_document', self.on_new_active_document)
-        self.workspace.connect('document_changed', self.on_document_change)
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('document_changed', self.on_document_change)
         self.update()
 
-    def on_history_change(self, history): self.update()
-    def on_new_active_document(self, workspace, document=None): self.update()
-    def on_document_change(self, workspace, document): self.update()
+    def on_history_changed(self): self.update()
+    def on_document_change(self): self.update()
 
     def update(self):
         self.update_size()
@@ -59,32 +59,33 @@ class DocumentHistory(object):
         self.view.content.queue_draw()
 
     def update_size(self):
+        mode = Settings.get_value('window_state', 'mode')
         width = 0
         self.items = list()
-        for i, document in enumerate(self.workspace.history.documents):
+        for i, document in enumerate(History.documents):
             self.items.append((i, document, width))
             width += self.get_item_extents(document.title).width / Pango.SCALE
             width += 37
-            if i == self.workspace.history.active_document_index and self.workspace.mode == 'draft':
+            if i == History.active_document_index and mode == 'draft':
                 break
-        if self.workspace.mode == 'draft':
+        if mode == 'draft':
             width += self.get_item_extents('New Document').width / Pango.SCALE
             width += 37
         width += 72
         self.view.scrolling_widget.set_size(width, 1)
 
     def scroll_active_document_on_screen(self):
-        if self.view.scrolling_widget.adjustment_x.get_upper() < self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width or self.workspace.history.active_document_index == len(self.items) - 1:
+        if self.view.scrolling_widget.adjustment_x.get_upper() < self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width or History.active_document_index == len(self.items) - 1:
             self.view.scrolling_widget.scroll_to_position((self.view.scrolling_widget.adjustment_x.get_upper(), 0))
             return
 
-        if self.workspace.history.active_document_index != None:
-            i, document, document_offset = self.items[self.workspace.history.active_document_index]
+        if History.active_document_index != None:
+            i, document, document_offset = self.items[History.active_document_index]
             if document_offset < self.view.scrolling_widget.scrolling_offset_x:
                 self.view.scrolling_widget.scroll_to_position((document_offset, 0))
                 return
 
-            i, document, document_offset = self.items[self.workspace.history.active_document_index + 1]
+            i, document, document_offset = self.items[History.active_document_index + 1]
             if document_offset > self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width:
                 self.view.scrolling_widget.scroll_to_position((document_offset - self.view.scrolling_widget.width - 1, 0))
                 return
@@ -102,7 +103,7 @@ class DocumentHistory(object):
 
         document = self.get_document_at_cursor()
         if document != None and document == self.selected_document:
-            self.activate_document(document)
+            self.application.use_cases.set_active_document(document, update_history=False, scroll_to_top=False)
         self.set_selected_document(None)
 
     def set_selected_document(self, document):
@@ -110,10 +111,8 @@ class DocumentHistory(object):
             self.selected_document = document
             self.view.content.queue_draw()
 
-    def activate_document(self, document):
-        self.application.use_cases.set_active_document(document, update_history=False, scroll_to_top=False)
-
     def draw(self, widget, ctx, width, height):
+        mode = Settings.get_value('window_state', 'mode')
         document_at_cursor = self.get_document_at_cursor()
         offset = -1 - int(self.view.scrolling_widget.scrolling_offset_x)
         hover_color = ColorManager.get_ui_color('history_hover')
@@ -121,10 +120,10 @@ class DocumentHistory(object):
         fg_color = ColorManager.get_ui_color('history_fg')
 
         for i, document, document_offset in self.items:
-            is_active = (i == self.workspace.history.active_document_index)
+            is_active = (i == History.active_document_index)
             extents = self.get_item_extents(document.title)
             px_width = extents.width / Pango.SCALE + 37
-            font_desc = self.font_desc_bold if (is_active and self.workspace.mode != 'draft') else self.font_desc_normal
+            font_desc = self.font_desc_bold if (is_active and mode != 'draft') else self.font_desc_normal
 
             if document == document_at_cursor:
                 if document == self.selected_document:
@@ -144,10 +143,10 @@ class DocumentHistory(object):
 
             offset += px_width
 
-            if is_active and self.workspace.mode == 'draft':
+            if is_active and mode == 'draft':
                 break
 
-        if self.workspace.mode == 'draft':
+        if mode == 'draft':
             extents = self.get_item_extents('New Document')
             ctx.move_to(offset + 18, int((height - extents.height / Pango.SCALE) / 2) - 1)
             self.layout.set_font_description(self.font_desc_bold)

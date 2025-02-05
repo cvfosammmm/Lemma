@@ -22,10 +22,12 @@ from gi.repository import Gio, GLib, GObject, Gdk
 from urllib.parse import urlparse
 import pickle, base64
 
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.settings.settings import Settings
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.message_bus.message_bus import MessageBus
+from lemma.history.history import History
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_exporter as xml_exporter
 import lemma.infrastructure.timer as timer
@@ -33,12 +35,10 @@ import lemma.infrastructure.timer as timer
 
 class Actions(object):
 
-    def __init__(self, workspace, main_window, application):
-        self.workspace = workspace
+    def __init__(self, main_window, application):
         self.main_window = main_window
         self.application = application
         self.use_cases = application.use_cases
-        self.settings = ServiceLocator.get_settings()
 
         self.actions = dict()
         self.add_simple_action('add-document', self.add_document)
@@ -92,12 +92,11 @@ class Actions(object):
         self.main_window.add_action(self.actions['quit'])
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
-        self.workspace.connect('history_changed', self.on_history_change)
-        self.workspace.connect('new_document', self.on_new_document)
-        self.workspace.connect('document_removed', self.on_document_removed)
-        self.workspace.connect('new_active_document', self.on_new_active_document)
-        self.workspace.connect('document_changed', self.on_document_change)
-        self.workspace.connect('mode_set', self.on_mode_set)
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('new_document', self.on_new_document)
+        MessageBus.connect('document_removed', self.on_document_removed)
+        MessageBus.connect('document_changed', self.on_document_change)
+        MessageBus.connect('mode_set', self.on_mode_set)
         self.update()
 
     def add_simple_action(self, name, callback, parameter=None):
@@ -106,21 +105,21 @@ class Actions(object):
         self.actions[name].connect('activate', callback)
 
     def on_clipboard_changed(self, clipboard): self.update()
-    def on_history_change(self, history): self.update()
-    def on_new_document(self, workspace, document=None): self.update()
-    def on_document_removed(self, workspace, document=None): self.update()
-    def on_new_active_document(self, workspace, document=None): self.update()
-    def on_document_change(self, workspace, document): self.update()
-    def on_mode_set(self, workspace): self.update()
+    def on_history_changed(self): self.update()
+    def on_new_document(self): self.update()
+    def on_document_removed(self): self.update()
+    def on_document_change(self): self.update()
+    def on_mode_set(self): self.update()
 
     @timer.timer
     def update(self):
-        document = self.workspace.active_document
-        has_active_doc = (self.workspace.mode == 'documents' and document != None)
+        document = History.get_active_document()
+        mode = Settings.get_value('window_state', 'mode')
+        has_active_doc = (mode == 'documents' and document != None)
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
 
-        prev_doc = self.workspace.history.get_previous_if_any(document)
-        next_doc = self.workspace.history.get_next_if_any(document)
+        prev_doc = History.get_previous_if_any(document)
+        next_doc = History.get_next_if_any(document)
         can_undo = has_active_doc and document.can_undo()
         can_redo = has_active_doc and document.can_redo()
         insert_in_line = has_active_doc and document.cursor.get_insert_node().parent.is_root()
@@ -141,14 +140,14 @@ class Actions(object):
         self.actions['rename-document'].set_enabled(has_active_doc)
         self.actions['export-markdown'].set_enabled(has_active_doc)
         self.actions['export-html'].set_enabled(has_active_doc)
-        self.actions['go-back'].set_enabled(self.workspace.mode == 'draft' or prev_doc != None)
+        self.actions['go-back'].set_enabled(mode == 'draft' or prev_doc != None)
         self.actions['go-forward'].set_enabled(next_doc != None)
         self.actions['undo'].set_enabled(has_active_doc and can_undo)
         self.actions['redo'].set_enabled(has_active_doc and can_redo)
         self.actions['cut'].set_enabled(has_active_doc and has_selection)
         self.actions['copy'].set_enabled(has_active_doc and has_selection)
         self.actions['paste'].set_enabled(has_active_doc and (text_in_clipboard or subtree_in_clipboard))
-        self.actions['delete'].set_enabled(self.workspace.mode == 'documents' and has_selection)
+        self.actions['delete'].set_enabled(mode == 'documents' and has_selection)
         self.actions['select-all'].set_enabled(has_active_doc)
         self.actions['remove-selection'].set_enabled(has_active_doc and has_selection)
         self.actions['insert-link'].set_enabled(has_active_doc and insert_in_line)
@@ -179,30 +178,31 @@ class Actions(object):
         DialogLocator.get_dialog('import_documents').run()
 
     def export_bulk(self, action=None, paramenter=''):
-        DialogLocator.get_dialog('export_bulk').run(self.workspace)
+        DialogLocator.get_dialog('export_bulk').run()
 
     def delete_document(self, action=None, parameter=''):
-        self.use_cases.delete_document(self.workspace.active_document)
+        self.use_cases.delete_document(History.get_active_document())
 
     def rename_document(self, action=None, parameter=''):
         self.application.document_view.init_renaming()
 
     def export_markdown(self, action=None, parameter=''):
-        DialogLocator.get_dialog('export_markdown').run(self.workspace.active_document)
+        DialogLocator.get_dialog('export_markdown').run(History.get_active_document())
 
     def export_html(self, action=None, parameter=''):
-        DialogLocator.get_dialog('export_html').run(self.workspace.active_document)
+        DialogLocator.get_dialog('export_html').run(History.get_active_document())
 
     def go_back(self, action=None, parameter=''):
-        if self.workspace.mode == 'draft':
+        mode = Settings.get_value('window_state', 'mode')
+        if mode == 'draft':
             self.use_cases.leave_draft_mode()
         else:
-            prev_doc = self.workspace.history.get_previous_if_any(self.workspace.active_document)
+            prev_doc = History.get_previous_if_any(History.get_active_document())
             if prev_doc != None:
                 self.use_cases.set_active_document(prev_doc, update_history=False, scroll_to_top=False)
 
     def go_forward(self, action=None, parameter=''):
-        next_doc = self.workspace.history.get_next_if_any(self.workspace.active_document)
+        next_doc = History.get_next_if_any(History.get_active_document())
         if next_doc != None:
             self.use_cases.set_active_document(next_doc, update_history=False, scroll_to_top=False)
 
@@ -218,8 +218,8 @@ class Actions(object):
 
     def copy(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
-        ast = self.workspace.active_document.ast
-        cursor = self.workspace.active_document.cursor
+        ast = History.get_active_document().ast
+        cursor = History.get_active_document().cursor
         subtree = ast.get_subtree(*cursor.get_state())
         chars = ''.join([node.value for node in subtree if node.is_char()])
         exporter = xml_exporter.XMLExporter()
@@ -236,7 +236,7 @@ class Actions(object):
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
-        document = self.workspace.active_document
+        document = History.get_active_document()
 
         if result[1].startswith('lemma/ast'):
             xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
@@ -283,14 +283,14 @@ class Actions(object):
         self.use_cases.set_paragraph_style(parameter.get_string())
 
     def toggle_bold(self, action=None, parameter=''):
-        document = self.workspace.active_document
+        document = History.get_active_document()
         if document.cursor.has_selection():
             self.use_cases.toggle_tag('bold')
         else:
             self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {'bold'})
 
     def toggle_italic(self, action=None, parameter=''):
-        document = self.workspace.active_document
+        document = History.get_active_document()
         if document.cursor.has_selection():
             self.use_cases.toggle_tag('italic')
         else:
@@ -300,22 +300,22 @@ class Actions(object):
         DialogLocator.get_dialog('insert_image').run()
 
     def widget_shrink(self, action=None, parameter=None):
-        document = self.workspace.active_document
+        document = History.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         self.use_cases.resize_widget(selected_nodes[0].value.get_width() - 1)
 
     def widget_enlarge(self, action=None, parameter=None):
-        document = self.workspace.active_document
+        document = History.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         self.use_cases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
     def insert_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
+        DialogLocator.get_dialog('insert_link').run(self.application, History.get_active_document())
 
     def remove_link(self, action=None, parameter=''):
-        document = self.workspace.active_document
+        document = History.get_active_document()
 
         if document.cursor.has_selection():
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
@@ -326,7 +326,7 @@ class Actions(object):
         self.use_cases.set_link(bounds, None)
 
     def edit_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.application, self.workspace, self.workspace.active_document)
+        DialogLocator.get_dialog('insert_link').run(self.application, History.get_active_document())
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry

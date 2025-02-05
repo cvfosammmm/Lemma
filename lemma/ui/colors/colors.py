@@ -18,29 +18,32 @@
 import os.path
 
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.settings.settings import Settings
+from lemma.message_bus.message_bus import MessageBus
 
 
 class Colors(object):
 
-    def __init__(self, workspace, main_window):
-        self.workspace = workspace
+    def __init__(self, main_window):
         self.main_window = main_window
 
-        self.update()
-        self.workspace.connect('settings_changed', self.on_settings_changed)
+        self.color_scheme = None
 
-    def on_settings_changed(self, workspace, parameter):
-        section, item, value = parameter
-        if item == 'color_scheme':
-            self.update()
+        self.update()
+        MessageBus.connect('settings_changed', self.on_settings_changed)
+
+    def on_settings_changed(self):
+        self.update()
 
     def update(self):
-        color_scheme = ServiceLocator.get_settings().get_value('preferences', 'color_scheme')
+        color_scheme = Settings.get_value('preferences', 'color_scheme')
+        if color_scheme == self.color_scheme: return
 
-        if color_scheme == 'default':
+        self.color_scheme = Settings.get_value('preferences', 'color_scheme')
+        if self.color_scheme == 'default':
             path = os.path.join(ServiceLocator.get_resources_path(), 'themes', 'default.css')
         else:
-            path = ServiceLocator.get_settings().get_value('preferences', 'color_scheme')
+            path = Settings.get_value('preferences', 'color_scheme')
 
         self.main_window.css_provider_colors.load_from_path(path)
         self.main_window.main_box.queue_draw()

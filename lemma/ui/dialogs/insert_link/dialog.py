@@ -23,7 +23,6 @@ import os
 
 from lemma.ui.helpers.dialog_view import DialogView
 from lemma.document.document import Document
-from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.document.ast.node import Node
 import lemma.infrastructure.xml_helpers as xml_helpers
@@ -36,15 +35,13 @@ class Dialog(object):
         self.main_window = main_window
         self.use_cases = use_cases
         self.application = None
-        self.workspace = None
         self.document = None
         self.bounds = None
         self.current_values = dict()
         self.search_terms = []
 
-    def run(self, application, workspace, document):
+    def run(self, application, document):
         self.application = application
-        self.workspace = workspace
         self.document = document
         self.init_current_values()
         self.view = InsertLinkView(self.main_window)

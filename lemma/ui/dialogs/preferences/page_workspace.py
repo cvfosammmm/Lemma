@@ -19,18 +19,19 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
+from lemma.settings.settings import Settings
+
 
 class PageWorkspace(object):
 
-    def __init__(self, preferences, settings, main_window, use_cases):
+    def __init__(self, preferences, main_window, use_cases):
         self.view = PageWorkspaceView()
         self.preferences = preferences
-        self.settings = settings
         self.main_window = main_window
         self.use_cases = use_cases
 
     def init(self):
-        self.view.checkbox_backlinks.set_active(self.settings.get_value('preferences', 'update_backlinks'))
+        self.view.checkbox_backlinks.set_active(Settings.get_value('preferences', 'update_backlinks'))
         self.view.checkbox_backlinks.connect('toggled', self.on_checkbutton_toggled, 'update_backlinks')
 
     def on_checkbutton_toggled(self, button, key):

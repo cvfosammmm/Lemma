@@ -39,9 +39,8 @@ import lemma.ui.keyboard_shortcuts.shortcuts as shortcuts
 
 class Application(Adw.Application):
 
-    def __init__(self, workspace, use_cases):
+    def __init__(self, use_cases):
         Adw.Application.__init__(self, application_id='org.cvfosammmm.Lemma')
-        self.workspace = workspace
         self.use_cases = use_cases
 
     def do_activate(self):
@@ -49,21 +48,21 @@ class Application(Adw.Application):
 
         self.main_window = main_window.MainWindow(self)
         ColorManager.init(self.main_window)
-        PopoverManager.init(self.main_window, self.workspace)
+        PopoverManager.init(self.main_window)
         self.main_window.add_widgets()
         DialogLocator.init_dialogs(self.main_window, self.use_cases)
 
-        self.colors = colors.Colors(self.workspace, self.main_window)
-        self.document_history = document_history.DocumentHistory(self.workspace, self.main_window, self)
-        self.document_view = document_view.DocumentView(self.workspace, self.main_window, self)
-        self.cursor_state = cursor_state.CursorState(self.workspace, self.main_window)
-        self.toolbar = toolbar.ToolBar(self.workspace, self.main_window, self)
-        self.document_draft = document_draft.DocumentDraft(self.workspace, self.main_window, self)
-        self.document_list = document_list.DocumentList(self.workspace, self.main_window, self)
-        self.backlinks = backlinks.Backlinks(self.workspace, self.main_window, self)
-        self.actions = actions.Actions(self.workspace, self.main_window, self)
+        self.colors = colors.Colors(self.main_window)
+        self.document_history = document_history.DocumentHistory(self.main_window, self)
+        self.document_view = document_view.DocumentView(self.main_window, self)
+        self.cursor_state = cursor_state.CursorState(self.main_window)
+        self.toolbar = toolbar.ToolBar(self.main_window, self)
+        self.document_draft = document_draft.DocumentDraft(self.main_window, self)
+        self.document_list = document_list.DocumentList(self.main_window, self)
+        self.backlinks = backlinks.Backlinks(self.main_window, self)
+        self.actions = actions.Actions(self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
-        self.window_state = window_state.WindowState(self.workspace, self.main_window, self)
+        self.window_state = window_state.WindowState(self.main_window, self)
 
         self.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)

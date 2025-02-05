@@ -17,62 +17,60 @@
 
 import os, os.path, pickle
 
-from lemma.document.document import Document
-from lemma.infrastructure.html_exporter import HTMLExporter
-from lemma.infrastructure.html_parser import HTMLParser
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
-import lemma.infrastructure.timer as timer
+from lemma.history.history import History
+from lemma.settings.settings import Settings
 
 
 class Storage(object):
 
-    def __init__(self, workspace):
-        self.workspace = workspace
+    def populate_settings():
+        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'settings.pickle'), 'rb')
+        except IOError: return False
+        else:
+            try: Settings.data = pickle.load(filehandle)
+            except EOFError: return False
+        return True
 
-        self.pathname = ServiceLocator.get_notes_folder()
-        if not os.path.exists(self.pathname):
-            os.mkdir(self.pathname)
-
-    def populate_workspace(self):
-        pathname = os.path.join(self.pathname, 'workspace')
+    def populate_history():
+        pathname = os.path.join(ServiceLocator.get_notes_folder(), 'workspace')
         if not os.path.isfile(pathname): return
 
         with open(pathname, 'rb') as file:
             data = pickle.loads(file.read())
 
-            self.workspace.active_document = DocumentRepo.get_by_id(data['active_document_id'])
             for document_id in data['history']:
                 document = DocumentRepo.get_by_id(document_id)
                 if document != None:
-                    self.workspace.history.add(document, remove_tail_after_last_active=False)
-                    if document == self.workspace.active_document:
-                        self.workspace.history.activate_document(document)
+                    History.add(document, remove_tail_after_last_active=False)
+                    if document_id == data['active_document_id']:
+                        History.activate_document(document)
 
-    def init_writer(self):
-        self.workspace.connect('history_changed', self.on_history_change)
+    def save_settings():
+        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'settings.pickle'), 'wb')
+        except IOError: return False
+        else: pickle.dump(Settings.data, filehandle)
 
-    def on_history_change(self, history):
-        self.save_workspace()
-
-    def save_workspace(self):
-        pathname = os.path.join(self.pathname, 'workspace')
+    def save_history():
+        pathname = os.path.join(ServiceLocator.get_notes_folder(), 'workspace')
 
         try: filehandle = open(pathname, 'wb')
         except IOError: pass
         else:
-            if self.workspace.active_document != None:
-                active_document_id = self.workspace.active_document.id
+            active_document = History.get_active_document()
+            if active_document != None:
+                active_document_id = active_document.id
             else:
                 active_document_id = None
 
             data = {'active_document_id': active_document_id,
-                    'history': self.get_history_list()}
+                    'history': Storage.get_history_list()}
             filehandle.write(pickle.dumps(data))
 
-    def get_history_list(self):
+    def get_history_list():
         history_list = []
-        for i, document in enumerate(self.workspace.history.documents):
+        for i, document in enumerate(History.documents):
             if document != None:
                 history_list.append(document.id)
         return history_list

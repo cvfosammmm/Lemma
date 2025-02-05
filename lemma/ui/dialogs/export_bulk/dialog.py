@@ -25,6 +25,7 @@ import os.path, os
 
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
 from lemma.infrastructure.html_exporter import HTMLExporter
+from lemma.settings.settings import Settings
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
 
@@ -34,12 +35,9 @@ class Dialog(object):
     def __init__(self, main_window, use_cases):
         self.main_window = main_window
         self.use_cases = use_cases
-        self.workspace = None
         self.current_values = dict()
 
-    def run(self, workspace):
-        self.workspace = workspace
-
+    def run(self):
         self.init_current_values()
         self.view = view.ExportBulkView(self.main_window)
         self.populate_view()
@@ -53,7 +51,7 @@ class Dialog(object):
         self.current_values['documents'] = [DocumentRepo.get_by_id(doc_id) for id in DocumentRepo.list()]
 
     def populate_view(self):
-        last_export_folder = ServiceLocator.get_settings().get_value('app_state', 'last_bulk_export_folder')
+        last_export_folder = Settings.get_value('app_state', 'last_bulk_export_folder')
         if last_export_folder == None or not os.path.exists(last_export_folder) or not os.path.isdir(last_export_folder):
             last_export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
         if last_export_folder != None:

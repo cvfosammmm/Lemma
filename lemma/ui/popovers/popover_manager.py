@@ -22,7 +22,6 @@ from gi.repository import Gtk
 import os.path
 
 from lemma.ui.popovers.popover_button import PopoverButton
-from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class PopoverManager():
@@ -32,15 +31,13 @@ class PopoverManager():
     current_popover_name = None
     prev_focus_widget = None
     main_window = None
-    workspace = None
     popoverlay = None
     inbetween = Gtk.DrawingArea()
 
     connected_functions = dict() # observers' functions to be called when change codes are emitted
 
-    def init(main_window, workspace):
+    def init(main_window):
         PopoverManager.main_window = main_window
-        PopoverManager.workspace = workspace
         PopoverManager.popoverlay = main_window.popoverlay
         PopoverManager.popoverlay.add_overlay(PopoverManager.inbetween)
 

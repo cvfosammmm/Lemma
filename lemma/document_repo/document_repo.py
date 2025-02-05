@@ -21,6 +21,7 @@ from operator import attrgetter
 from lemma.document.document import Document
 from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.html_parser import HTMLParser
+from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class DocumentRepo():
@@ -33,10 +34,10 @@ class DocumentRepo():
 
     pathname = None
 
-    def init(pathname):
-        DocumentRepo.pathname = pathname
+    def init():
+        DocumentRepo.pathname = ServiceLocator.get_notes_folder()
 
-        for direntry in os.scandir(pathname):
+        for direntry in os.scandir(DocumentRepo.pathname):
             if direntry.is_file() and direntry.name.isdigit():
                 document = Document(int(direntry.name))
                 document.last_modified = os.path.getmtime(direntry.path)
@@ -44,7 +45,7 @@ class DocumentRepo():
                 with open(direntry.path, 'r') as file:
                     html = file.read()
 
-                parser = HTMLParser(html, pathname)
+                parser = HTMLParser(html, DocumentRepo.pathname)
                 parser.run()
                 document.title = parser.title
                 document.ast = parser.composite

@@ -21,6 +21,7 @@ from gi.repository import Gtk, Gdk
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverTop
+from lemma.history.history import History
 
 
 class Popover(object):
@@ -28,14 +29,13 @@ class Popover(object):
     def __init__(self, popover_manager):
         self.popover_manager = popover_manager
         self.view = View(popover_manager)
-        self.workspace = popover_manager.workspace
 
         self.popover_manager.connect('popup', self.on_popover_popup)
 
     def on_popover_popup(self, name):
         if name != 'edit_menu': return
 
-        document = self.workspace.get_active_document()
+        document = History.get_active_document()
         if document == None: return
 
 

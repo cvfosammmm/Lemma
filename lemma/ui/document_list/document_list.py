@@ -19,18 +19,19 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, Pango, PangoCairo
 
-import datetime
+import time, datetime
 
 from lemma.document_repo.document_repo import DocumentRepo
+from lemma.history.history import History
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.settings.settings import Settings
+from lemma.message_bus.message_bus import MessageBus
 
 
 class DocumentList(object):
 
-    def __init__(self, workspace, main_window, application):
-        self.workspace = workspace
+    def __init__(self, main_window, application):
         self.main_window = main_window
         self.use_cases = application.use_cases
         self.view = main_window.document_list
@@ -53,16 +54,18 @@ class DocumentList(object):
         self.view.context_menu.delete_document_button.connect('clicked', self.on_delete_document_clicked)
         self.view.context_menu.popover.connect('closed', self.on_context_menu_close)
 
-        self.workspace.connect('new_document', self.on_new_document)
-        self.workspace.connect('document_removed', self.on_document_removed)
-        self.workspace.connect('document_changed', self.on_document_change)
-        self.workspace.connect('new_active_document', self.on_new_active_document)
+        MessageBus.connect('new_document', self.on_new_document)
+        MessageBus.connect('document_removed', self.on_document_removed)
+        MessageBus.connect('document_changed', self.on_document_change)
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('mode_set', self.on_mode_set)
         self.update()
 
-    def on_new_document(self, workspace, document=None): self.update()
-    def on_document_removed(self, workspace, document=None): self.update()
-    def on_document_change(self, workspace, document): self.update()
-    def on_new_active_document(self, workspace, document=None): self.update()
+    def on_new_document(self): self.update()
+    def on_document_removed(self): self.update()
+    def on_document_change(self): self.update()
+    def on_history_changed(self): self.update()
+    def on_mode_set(self): self.update()
 
     def update(self):
         self.document_ids = [doc_id for doc_id in DocumentRepo.list() if self.search_terms_in_document(DocumentRepo.get_by_id(doc_id))]
@@ -154,7 +157,8 @@ class DocumentList(object):
 
         for i, document_id in enumerate(self.document_ids):
             document = DocumentRepo.get_by_id(document_id)
-            highlight_active = (document == self.workspace.active_document and self.workspace.mode == 'documents')
+            mode = Settings.get_value('window_state', 'mode')
+            highlight_active = (document == History.get_active_document() and mode == 'documents')
             if highlight_active:
                 title_color = active_fg_color
                 teaser_color = active_fg_color
@@ -201,7 +205,7 @@ class DocumentList(object):
             PangoCairo.show_layout(ctx, self.view.layout_teaser)
 
     def get_last_modified_string(self, document):
-        datetime_today, datetime_this_week, datetime_this_year = ServiceLocator.get_datetimes_today_week_year()
+        datetime_today, datetime_this_week, datetime_this_year = self.get_datetimes_today_week_year()
         datetime_last_modified = datetime.datetime.fromtimestamp(document.last_modified)
         if document.last_modified >= datetime_today.timestamp():
             return '{datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified)
@@ -211,6 +215,15 @@ class DocumentList(object):
             return '{datetime.day} {datetime:%b}'.format(datetime=datetime_last_modified)
         else:
             return '{datetime.day} {datetime:%b} {datetime.year}'.format(datetime=datetime_last_modified)
+
+    def get_datetimes_today_week_year(self):
+        date_today = datetime.date.today()
+        datetime_today = datetime.datetime.combine(date_today, datetime.time(0, 0))
+        date_this_week = datetime.date.fromtimestamp(time.time() - date_today.weekday() * 86400)
+        datetime_this_week = datetime.datetime.combine(date_this_week, datetime.time(0, 0))
+        date_this_year = datetime.date(date_today.year, 1, 1)
+        datetime_this_year = datetime.datetime.combine(date_this_year, datetime.time(0, 0))
+        return (datetime_today, datetime_this_week, datetime_this_year)
 
     def search_terms_in_document(self, document):
         if len(self.search_terms) == 0: return True

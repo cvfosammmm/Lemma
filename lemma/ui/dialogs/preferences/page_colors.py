@@ -24,16 +24,16 @@ import xml.etree.ElementTree as ET
 from random import randrange
 
 from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.settings.settings import Settings
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.helpers.cairo import rounded_rectangle
 
 
 class PageColors(object):
 
-    def __init__(self, preferences, settings, main_window, use_cases):
+    def __init__(self, preferences, main_window, use_cases):
         self.view = PageFontColorView()
         self.preferences = preferences
-        self.settings = settings
         self.main_window = main_window
         self.use_cases = use_cases
         self.style_previews = dict()
@@ -59,7 +59,7 @@ class PageColors(object):
             self.add_chooser(os.path.join(ServiceLocator.get_user_themes_folder(), name + '.css'), name, count, True)
             count += 1
 
-        active_id = self.settings.get_value('preferences', 'color_scheme')
+        active_id = Settings.get_value('preferences', 'color_scheme')
         if active_id in self.style_previews: self.style_previews[active_id].checkbutton.set_active(True)
         else: self.style_previews['default'].checkbutton.set_active(True)
 

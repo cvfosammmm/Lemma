@@ -22,12 +22,13 @@ from gi.repository import Gtk, Gdk
 import datetime
 
 from lemma.document_repo.document_repo import DocumentRepo
+from lemma.message_bus.message_bus import MessageBus
+from lemma.settings.settings import Settings
 
 
 class DocumentDraft():
 
-    def __init__(self, workspace, main_window, application):
-        self.workspace = workspace
+    def __init__(self, main_window, application):
         self.view = main_window.draft_view
         self.use_cases = application.use_cases
 
@@ -45,13 +46,14 @@ class DocumentDraft():
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
         self.view.title_entry.add_controller(self.key_controller_window)
 
-        self.workspace.connect('mode_set', self.on_mode_set)
+        MessageBus.connect('mode_set', self.on_mode_set)
         self.update()
 
-    def on_mode_set(self, workspace): self.update()
+    def on_mode_set(self): self.update()
 
     def update(self):
-        if self.workspace.mode == 'draft':
+        mode = Settings.get_value('window_state', 'mode')
+        if mode == 'draft':
             self.init()
         else:
             self.deactivate()

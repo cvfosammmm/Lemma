@@ -21,7 +21,7 @@ from gi.repository import GObject, Gdk, Gtk
 
 import time
 
-from lemma.helpers.observable import Observable
+from lemma.ui.helpers.observable import Observable
 
 
 class ScrollingWidget(Observable):

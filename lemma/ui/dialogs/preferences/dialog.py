@@ -22,7 +22,6 @@ from gi.repository import Gtk
 import lemma.ui.dialogs.preferences.preferences_viewgtk as view
 import lemma.ui.dialogs.preferences.page_colors as page_colors
 import lemma.ui.dialogs.preferences.page_workspace as page_workspace
-from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class Dialog(object):
@@ -30,7 +29,6 @@ class Dialog(object):
     def __init__(self, main_window, use_cases):
         self.main_window = main_window
         self.use_cases = use_cases
-        self.settings = ServiceLocator.get_settings()
 
     def run(self):
         self.setup()
@@ -39,8 +37,8 @@ class Dialog(object):
     def setup(self):
         self.view = view.Preferences(self.main_window)
 
-        self.page_colors = page_colors.PageColors(self, self.settings, self.main_window, self.use_cases)
-        self.page_workspace = page_workspace.PageWorkspace(self, self.settings, self.main_window, self.use_cases)
+        self.page_colors = page_colors.PageColors(self, self.main_window, self.use_cases)
+        self.page_workspace = page_workspace.PageWorkspace(self, self.main_window, self.use_cases)
 
         self.view.notebook.append_page(self.page_colors.view, Gtk.Label.new(_('Colors')))
         self.view.notebook.append_page(self.page_workspace.view, Gtk.Label.new(_('Workspace')))

@@ -20,38 +20,39 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.document_repo.document_repo import DocumentRepo
+from lemma.settings.settings import Settings
+from lemma.history.history import History
+from lemma.message_bus.message_bus import MessageBus
 
 
 class Backlinks(object):
 
-    def __init__(self, workspace, main_window, application):
+    def __init__(self, main_window, application):
         self.main_window = main_window
         self.view = self.main_window.backlinks
         self.application = application
-        self.workspace = workspace
 
-        self.workspace.connect('new_active_document', self.on_new_active_document)
-        self.workspace.connect('document_removed', self.on_document_removed)
-        self.workspace.connect('document_changed', self.on_document_changed)
-        self.workspace.connect('mode_set', self.on_mode_set)
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('document_removed', self.on_document_removed)
+        MessageBus.connect('document_changed', self.on_document_changed)
+        MessageBus.connect('mode_set', self.on_mode_set)
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
 
         self.update()
 
-    def on_new_active_document(self, workspace, document=None): self.update()
-    def on_document_removed(self, workspace, document): self.update()
-    def on_document_changed(self, workspace, document): self.update()
-    def on_mode_set(self, workspace): self.update()
+    def on_history_changed(self): self.update()
+    def on_document_removed(self): self.update()
+    def on_document_changed(self): self.update()
+    def on_mode_set(self): self.update()
 
     def update(self):
-        active_document = self.workspace.active_document
-        has_active_doc = (self.workspace.mode == 'documents' and active_document != None)
+        active_document = History.get_active_document()
+        mode = Settings.get_value('window_state', 'mode')
+        has_active_doc = (mode == 'documents' and active_document != None)
 
         self.view.reset()
-        if not has_active_doc:
-            pass
-        else:
+        if has_active_doc:
             backlinks = DocumentRepo.list_by_link_target(active_document.title)
             for document_id in backlinks:
                 linking_doc = DocumentRepo.get_by_id(document_id)

@@ -19,32 +19,31 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Pango
 
-from lemma.helpers.observable import Observable
 from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.history.history import History
+from lemma.message_bus.message_bus import MessageBus
 
 
-class ToolBar(Observable):
+class ToolBar():
 
-    def __init__(self, workspace, main_window, application):
-        Observable.__init__(self)
+    def __init__(self, main_window, application):
         self.toolbar = main_window.toolbar
-        self.workspace = workspace
         self.application = application
 
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
 
-        self.workspace.connect('new_active_document', self.on_new_active_document)
-        self.workspace.connect('document_changed', self.on_document_change)
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('document_changed', self.on_document_change)
 
-    def on_new_active_document(self, workspace, document=None): self.update()
-    def on_document_change(self, workspace, document): self.update()
+    def on_history_changed(self): self.update()
+    def on_document_change(self): self.update()
 
     def update(self):
         self.update_toolbar()
 
     def update_toolbar(self):
-        document = self.workspace.active_document
-        if self.workspace.mode != 'documents' or document == None: return
+        document = History.get_active_document()
+        if document == None: return
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         if len(selected_nodes) == 1 and selected_nodes[0].is_widget() and selected_nodes[0].value.is_resizable():

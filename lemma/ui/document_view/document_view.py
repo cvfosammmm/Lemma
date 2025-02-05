@@ -25,14 +25,16 @@ from urllib.parse import urlparse
 from lemma.ui.document_view.document_view_controller import DocumentViewController
 from lemma.ui.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.document_repo.document_repo import DocumentRepo
+from lemma.history.history import History
+from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.title_widget.title_widget import TitleWidget
-from lemma.helpers.observable import Observable
+from lemma.ui.helpers.observable import Observable
 import lemma.infrastructure.timer as timer
 
 
 class DocumentView(Observable):
 
-    def __init__(self, workspace, main_window, application):
+    def __init__(self, main_window, application):
         Observable.__init__(self)
         self.main_window = main_window
         self.view = main_window.document_view
@@ -47,7 +49,6 @@ class DocumentView(Observable):
         self.link_target_at_pointer = None
         self.last_cursor_or_scrolling_change = time.time()
 
-        self.workspace = workspace
         self.document = None
 
         self.controller = DocumentViewController(self, self.application.use_cases)
@@ -63,29 +64,28 @@ class DocumentView(Observable):
         self.title_widget.view.title_entry.add_controller(self.key_controller_window)
         self.view.add_overlay(self.title_widget.view)
 
-        self.set_document(workspace.get_active_document())
-        self.workspace.connect('new_active_document', self.on_new_active_document)
-        self.workspace.connect('document_changed', self.on_document_change)
-        self.workspace.connect('mode_set', self.on_mode_set)
+        self.set_document(History.get_active_document())
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('document_changed', self.on_document_change)
+        MessageBus.connect('mode_set', self.on_mode_set)
 
         self.add_change_code('changed')
 
-    def on_new_active_document(self, workspace, document=None):
-        self.set_document(document)
+    def on_history_changed(self):
+        self.set_document(History.get_active_document())
         self.update()
 
-    def on_document_change(self, workspace, document):
-        if document == self.document:
-            self.update_link_at_cursor()
+    def on_document_change(self):
+        self.update_link_at_cursor()
         self.update()
 
-    def on_mode_set(self, workspace):
+    def on_mode_set(self):
         self.update()
 
     @timer.timer
     def update(self):
-        active_document = self.workspace.active_document
-        has_active_doc = (self.workspace.mode == 'documents' and active_document != None)
+        active_document = History.get_active_document()
+        has_active_doc = active_document != None
         has_selection = has_active_doc and active_document.cursor.has_selection()
         links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.cursor.get_state()) if node.link != None]) > 0
         cursor_inside_link = has_active_doc and active_document.cursor.get_insert_node().is_inside_link()
@@ -165,15 +165,13 @@ class DocumentView(Observable):
         self.stop_renaming()
 
     def update_link_at_cursor(self):
-        if self.document == None:
-            self.link_target_at_cursor = None
-        else:
-            current_node = self.document.ast.get_node_at_position(self.document.cursor.get_first_cursor_pos())
+        self.link_target_at_cursor = None
+        if self.document != None and not self.document.cursor.has_selection():
+            current_node = self.document.cursor.get_insert_node()
             prev_node = current_node.prev_in_parent()
             if prev_node != None and prev_node.link != None and current_node.link != None and current_node.link.target == prev_node.link.target:
                 self.link_target_at_cursor = current_node.link.target
-            else:
-                self.link_target_at_cursor = None
+
         self.update_link_overlay_text()
 
     def set_link_target_at_pointer(self, link):

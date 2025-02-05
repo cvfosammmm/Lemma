@@ -17,32 +17,15 @@
 
 import re
 import os.path
-import time
-import datetime
 from xdg.BaseDirectory import xdg_config_home
-
-import lemma.infrastructure.settings as settingscontroller
 
 
 class ServiceLocator():
 
-    settings = None
-    workspace = None
     lemma_version = None
     resources_path = None
     app_icons_path = None
     regexes = dict()
-
-    def get_settings():
-        if ServiceLocator.settings == None:
-            ServiceLocator.settings = settingscontroller.Settings(ServiceLocator.get_config_folder())
-        return ServiceLocator.settings
-
-    def set_workspace(workspace):
-        ServiceLocator.workspace = workspace
-
-    def get_workspace():
-        return ServiceLocator.workspace
 
     def get_regex_matcher(pattern):
         try:
@@ -72,14 +55,5 @@ class ServiceLocator():
 
     def get_resources_path():
         return ServiceLocator.resources_path
-
-    def get_datetimes_today_week_year():
-        date_today = datetime.date.today()
-        datetime_today = datetime.datetime.combine(date_today, datetime.time(0, 0))
-        date_this_week = datetime.date.fromtimestamp(time.time() - date_today.weekday() * 86400)
-        datetime_this_week = datetime.datetime.combine(date_this_week, datetime.time(0, 0))
-        date_this_year = datetime.date(date_today.year, 1, 1)
-        datetime_this_year = datetime.datetime.combine(date_this_year, datetime.time(0, 0))
-        return (datetime_today, datetime_this_week, datetime_this_year)
 
 
