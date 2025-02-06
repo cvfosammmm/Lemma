@@ -59,6 +59,7 @@ class UseCases(object):
 
     def import_markdown(self, path):
         document = Document()
+        document.id = DocumentRepo.get_max_document_id() + 1
         document.last_modified = os.path.getmtime(path)
         document.title = os.path.basename(path)[:-3]
 
@@ -84,24 +85,19 @@ class UseCases(object):
 
     def enter_draft_mode(self):
         Settings.set_value('window_state', 'mode', 'draft')
-        History.activate_document(None)
         Storage.save_settings()
-        Storage.save_history()
 
         MessageBus.add_change_code('mode_set')
-        MessageBus.add_change_code('history_changed')
 
     def leave_draft_mode(self):
         Settings.set_value('window_state', 'mode', 'documents')
-        History.activate_document(History.get_active_document())
         Storage.save_settings()
-        Storage.save_history()
 
         MessageBus.add_change_code('mode_set')
-        MessageBus.add_change_code('history_changed')
 
     def new_document(self, title):
         document = Document()
+        document.id = DocumentRepo.get_max_document_id() + 1
         document.title = title
         DocumentRepo.add(document)
 
@@ -154,7 +150,7 @@ class UseCases(object):
         backlinks = []
         if Settings.get_value('preferences', 'update_backlinks'):
             backlinks = DocumentRepo.list_by_link_target(document.title)
-            for document_id in backlinks:
+            for document_id in reversed(backlinks):
                 linking_doc = DocumentRepo.get_by_id(document_id)
                 nodes = [n for n in linking_doc.ast.flatten() if n.link != None and n.link.target == document.title]
                 linking_doc.add_command('set_link', nodes, title)

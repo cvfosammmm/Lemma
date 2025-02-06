@@ -48,10 +48,12 @@ class DocumentHistory(object):
 
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('document_changed', self.on_document_change)
+        MessageBus.connect('mode_set', self.on_mode_set)
         self.update()
 
     def on_history_changed(self): self.update()
     def on_document_change(self): self.update()
+    def on_mode_set(self): self.update()
 
     def update(self):
         self.update_size()

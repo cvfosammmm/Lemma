@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os.path
+import sqlite3, os.path
 from operator import attrgetter
 
 from lemma.document.document import Document
 from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.html_parser import HTMLParser
 from lemma.infrastructure.service_locator import ServiceLocator
+import lemma.infrastructure.timer as timer
 
 
 class DocumentRepo():
@@ -29,12 +30,21 @@ class DocumentRepo():
     documents = list()
     documents_by_id = dict()
 
-    max_document_id = 0
-    links_by_target = dict()
-
     pathname = None
+    db_pathname = None
+    db_connection = None
 
+    @timer.timer
     def init():
+        DocumentRepo.db_pathname = os.path.join(ServiceLocator.get_config_folder(), 'lemma.db')
+        DocumentRepo.db_connection = sqlite3.connect(DocumentRepo.db_pathname)
+
+        cursor = DocumentRepo.db_connection.cursor()
+        cursor.execute("CREATE TABLE IF NOT EXISTS document(id INT PRIMARY KEY, last_modified BIGINT)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS link_graph(document_id INT, link_target VARCHAR(2048))")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_date ON document (last_modified)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_backlinks ON link_graph (link_target)")
+
         DocumentRepo.pathname = ServiceLocator.get_notes_folder()
 
         for direntry in os.scandir(DocumentRepo.pathname):
@@ -54,35 +64,39 @@ class DocumentRepo():
 
                 DocumentRepo.add(document)
 
+    @timer.timer
     def list():
-        DocumentRepo.documents.sort(key=attrgetter('last_modified'), reverse=True)
+        cursor = DocumentRepo.db_connection.cursor()
+        result = cursor.execute("SELECT id FROM document ORDER BY last_modified DESC")
+        return [doc[0] for doc in result]
 
-        return list(DocumentRepo.documents_by_id)
-
+    @timer.timer
     def list_by_link_target(title):
-        DocumentRepo.documents.sort(key=attrgetter('last_modified'), reverse=True)
-        DocumentRepo.update_links()
+        cursor = DocumentRepo.db_connection.cursor()
+        result = cursor.execute("SELECT document.id FROM document INNER JOIN link_graph ON document.id=link_graph.document_id WHERE link_graph.link_target='" + title + "' ORDER BY document.last_modified DESC")
+        return [doc[0] for doc in result]
 
-        if title in DocumentRepo.links_by_target:
-            return [DocumentRepo.get_by_title(doc).id for doc in DocumentRepo.links_by_target[title]]
-        else: return []
-
+    @timer.timer
     def get_by_id(document_id):
         if document_id in DocumentRepo.documents_by_id:
             return DocumentRepo.documents_by_id[document_id]
         return None
 
+    @timer.timer
     def get_by_title(title):
         for document in DocumentRepo.documents:
             if title == document.title:
                 return document
         return None
 
-    def add(document):
-        if document.id == None:
-            document.id = DocumentRepo.max_document_id + 1
-        DocumentRepo.max_document_id = max(DocumentRepo.max_document_id, document.id)
+    @timer.timer
+    def get_max_document_id():
+        cursor = DocumentRepo.db_connection.cursor()
+        for result in cursor.execute("SELECT MAX(id) FROM document"):
+            return result[0]
+        return 0
 
+    def add(document):
         DocumentRepo.documents.append(document)
         DocumentRepo.documents_by_id[document.id] = document
 
@@ -95,6 +109,8 @@ class DocumentRepo():
         else:
             filehandle.write(html)
 
+        DocumentRepo.update_db(document)
+
     def delete(document):
         if document.id not in DocumentRepo.documents_by_id: return
 
@@ -104,9 +120,9 @@ class DocumentRepo():
         DocumentRepo.documents.remove(document)
         del(DocumentRepo.documents_by_id[document.id])
 
-    def update(document):
-        if not document.ast.has_changed(DocumentRepo): return
+        DocumentRepo.update_db(document)
 
+    def update(document):
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
         exporter = HTMLExporter()
         html = exporter.export_html(document)
@@ -116,16 +132,21 @@ class DocumentRepo():
         else:
             filehandle.write(html)
 
-    def update_links():
-        links_by_target = dict()
-        for document in DocumentRepo.documents:
-            links = DocumentRepo.find_links(document.ast)
-            for link in links:
-                if link.target not in links_by_target:
-                    links_by_target[link.target] = set()
-                links_by_target[link.target].add(document.title)
+        DocumentRepo.update_db(document)
 
-        DocumentRepo.links_by_target = links_by_target
+    def update_db(document):
+        cursor = DocumentRepo.db_connection.cursor()
+        cursor.execute("DELETE FROM document WHERE id=" + str(document.id))
+        cursor.execute("DELETE FROM link_graph WHERE document_id=" + str(document.id))
+
+        if document.id in DocumentRepo.documents_by_id:
+            links = DocumentRepo.find_links(document.ast)
+            data = set()
+            for link in links:
+                data.add((document.id, link.target))
+
+            cursor.execute("INSERT INTO document VALUES (" + str(document.id) + ", " + str(int(document.last_modified * 10000000)) + ")")
+            cursor.executemany("INSERT INTO link_graph VALUES (?, ?)", list(data))
 
     def find_links(node):
         links = []

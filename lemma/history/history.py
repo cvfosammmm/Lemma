@@ -31,7 +31,9 @@ class History():
         History.documents.append(document)
 
     def activate_document(document):
-        if document != None and document in History.documents:
+        if document == None:
+            History.active_document_index = None
+        elif document in History.documents:
             History.active_document_index = History.documents.index(document)
 
     def delete(document):

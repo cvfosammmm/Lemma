@@ -94,7 +94,6 @@ class DocumentViewPresenter():
                 self.view.scrollbar_x.remove_css_class('hidden')
                 self.view.scrollbar_y.remove_css_class('hidden')
 
-        GObject.timeout_add(1750, self.update_scrollbars)
         return False
 
     def update_pointer(self):
