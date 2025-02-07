@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="28" date="2025-2-7">
+            <description translatable="no">
+                <p>More ligatures, bug fixes, ...</p>
+            </description>
+        </release>
         ​<release version="27" date="2025-2-6">
             <description translatable="no">
                 <p>Performance improvements, ...</p>
