@@ -76,6 +76,8 @@ class CommandProcessor(object):
             self.document.update()
             self.last_command -= 1
 
+            if command.is_undo_checkpoint: break
+
     def redo(self):
         for command in self.commands[self.last_command + 1:]:
             command.run(self.document)
@@ -83,5 +85,7 @@ class CommandProcessor(object):
             command.run_after_layout(self.document)
 
             self.last_command += 1
+
+            if command.is_undo_checkpoint: break
 
 

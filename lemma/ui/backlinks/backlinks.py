@@ -34,7 +34,7 @@ class Backlinks(object):
 
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('document_removed', self.on_document_removed)
-        MessageBus.connect('document_changed', self.on_document_changed)
+        MessageBus.connect('document_changed_substantially', self.on_document_changed_substantially)
         MessageBus.connect('mode_set', self.on_mode_set)
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
@@ -43,7 +43,7 @@ class Backlinks(object):
 
     def on_history_changed(self): self.update()
     def on_document_removed(self): self.update()
-    def on_document_changed(self): self.update()
+    def on_document_changed_substantially(self): self.update()
     def on_mode_set(self): self.update()
 
     def update(self):
