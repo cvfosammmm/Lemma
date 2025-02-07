@@ -44,6 +44,7 @@ class DocumentRepo():
         cursor.execute("CREATE TABLE IF NOT EXISTS link_graph(document_id INT, link_target VARCHAR(2048))")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_date ON document (last_modified)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_backlinks ON link_graph (link_target)")
+        DocumentRepo.db_connection.commit()
 
         DocumentRepo.pathname = ServiceLocator.get_notes_folder()
 
@@ -144,6 +145,7 @@ class DocumentRepo():
 
     def update_db(document):
         cursor = DocumentRepo.db_connection.cursor()
+
         cursor.execute("DELETE FROM document WHERE id=" + str(document.id))
         cursor.execute("DELETE FROM link_graph WHERE document_id=" + str(document.id))
 
@@ -155,6 +157,8 @@ class DocumentRepo():
 
             cursor.execute("INSERT INTO document VALUES (" + str(document.id) + ", " + str(int(document.last_modified * 10000000)) + ")")
             cursor.executemany("INSERT INTO link_graph VALUES (?, ?)", list(data))
+
+        DocumentRepo.db_connection.commit()
 
     def find_links(node):
         links = []
