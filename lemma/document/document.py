@@ -45,13 +45,12 @@ class Document():
         self.layout = None
         self.plaintext = None
 
+        self.change_flag = dict()
         self.scroll_insert_on_screen_after_layout_update = False
 
         self.layouter = Layouter(self)
         self.clipping = Clipping(self)
         self.plaintext_scanner = PlaintextScanner(self)
-
-        self.update()
 
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
@@ -68,16 +67,26 @@ class Document():
     def undo(self): self.command_processor.undo()
     def redo(self): self.command_processor.redo()
 
+    def update_last_modified(self):
+        for client in self.change_flag:
+            self.change_flag[client] = True
+        self.last_modified = time.time()
+
     @timer.timer
     def update(self):
         self.layouter.update()
         self.clipping.update()
         self.plaintext_scanner.update()
 
-    def update_last_modified(self):
-        self.last_modified = time.time()
-
     def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
         self.scroll_insert_on_screen_after_layout_update = True
+
+    def has_changed(self, client):
+        if client not in self.change_flag:
+            self.change_flag[client] = True
+
+        result = self.change_flag[client]
+        self.change_flag[client] = False
+        return result
 
 

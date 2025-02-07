@@ -32,7 +32,6 @@ class Node():
         self.link = None
         self.paragraph_style = 'p'
         self.layout = None
-        self.change_flag = dict()
 
     def set_parent(self, parent):
         self.parent = parent
@@ -274,18 +273,6 @@ class Node():
     def __str__(self):
         string = self.type + ':' + str(self.value)
         return string
-
-    def mark_changed(self):
-        for client in self.change_flag:
-            self.change_flag[client] = True
-
-    def has_changed(self, client):
-        if client not in self.change_flag:
-            self.change_flag[client] = True
-
-        result = self.change_flag[client]
-        self.change_flag[client] = False
-        return result
 
     def validate(self):
         if self.type == 'root':

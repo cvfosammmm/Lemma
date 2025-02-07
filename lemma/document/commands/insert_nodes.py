@@ -35,7 +35,7 @@ class Command():
             self.state['nodes_added'].append(node)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
-        document.ast.mark_changed()
+        document.update_last_modified()
         document.set_scroll_insert_on_screen_after_layout_update()
 
     def run_after_layout(self, document):
@@ -45,7 +45,7 @@ class Command():
         for node in self.state['nodes_added']:
             node.remove_from_parent()
         document.cursor.set_state(self.state['cursor_state_before'])
-        document.ast.mark_changed()
+        document.update_last_modified()
         document.set_scroll_insert_on_screen_after_layout_update()
 
 

@@ -60,7 +60,6 @@ class UseCases(object):
     def import_markdown(self, path):
         document = Document()
         document.id = DocumentRepo.get_max_document_id() + 1
-        document.last_modified = os.path.getmtime(path)
         document.title = os.path.basename(path)[:-3]
 
         with open(path, 'r') as file:
@@ -78,6 +77,7 @@ class UseCases(object):
         document.ast = parser.composite
         document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
         document.set_scroll_insert_on_screen_after_layout_update()
+        document.update_last_modified()
         document.update()
 
         DocumentRepo.add(document)
@@ -99,6 +99,8 @@ class UseCases(object):
         document = Document()
         document.id = DocumentRepo.get_max_document_id() + 1
         document.title = title
+        document.update_last_modified()
+        document.update()
         DocumentRepo.add(document)
 
         MessageBus.add_change_code('new_document')
@@ -157,8 +159,8 @@ class UseCases(object):
                 DocumentRepo.update(linking_doc)
 
         document.title = title
-        document.update()
         document.update_last_modified()
+        document.update()
         DocumentRepo.update(document)
 
         MessageBus.add_change_code('document_changed')

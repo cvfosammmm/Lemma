@@ -61,8 +61,12 @@ class DocumentRepo():
                 document.ast = parser.composite
                 document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
                 document.update()
+                document.change_flag[DocumentRepo] = False
 
-                DocumentRepo.add(document)
+                DocumentRepo.documents.append(document)
+                DocumentRepo.documents_by_id[document.id] = document
+                DocumentRepo.update_db(document)
+
 
     @timer.timer
     def list():
@@ -97,6 +101,8 @@ class DocumentRepo():
         return 0
 
     def add(document):
+        if document.id in DocumentRepo.documents_by_id: return
+
         DocumentRepo.documents.append(document)
         DocumentRepo.documents_by_id[document.id] = document
 
@@ -123,6 +129,8 @@ class DocumentRepo():
         DocumentRepo.update_db(document)
 
     def update(document):
+        if not document.has_changed(DocumentRepo): return
+
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
         exporter = HTMLExporter()
         html = exporter.export_html(document)

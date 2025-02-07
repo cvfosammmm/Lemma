@@ -32,7 +32,7 @@ class Command():
                 self.state['affected_nodes'].append(node)
                 node.tags.remove(self.tag_name)
 
-        document.ast.mark_changed()
+        document.update_last_modified()
 
     def run_after_layout(self, document):
         pass
@@ -41,6 +41,6 @@ class Command():
         for node in self.state['affected_nodes']:
             node.tags.add(self.tag_name)
 
-        document.ast.mark_changed()
+        document.update_last_modified()
 
 
