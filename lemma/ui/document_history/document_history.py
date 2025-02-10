@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gdk, Pango, PangoCairo
 
 from lemma.infrastructure.color_manager import ColorManager
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.helpers.cairo import rounded_rectangle
@@ -61,7 +61,7 @@ class DocumentHistory(object):
         self.view.content.queue_draw()
 
     def update_size(self):
-        mode = Settings.get_value('window_state', 'mode')
+        mode = ApplicationState.get_value('mode')
         width = 0
         self.items = list()
         for i, document in enumerate(History.documents):
@@ -114,7 +114,7 @@ class DocumentHistory(object):
             self.view.content.queue_draw()
 
     def draw(self, widget, ctx, width, height):
-        mode = Settings.get_value('window_state', 'mode')
+        mode = ApplicationState.get_value('mode')
         document_at_cursor = self.get_document_at_cursor()
         offset = -1 - int(self.view.scrolling_widget.scrolling_offset_x)
         hover_color = ColorManager.get_ui_color('history_hover')

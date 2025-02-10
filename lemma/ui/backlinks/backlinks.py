@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 
@@ -48,7 +48,7 @@ class Backlinks(object):
 
     def update(self):
         active_document = History.get_active_document()
-        mode = Settings.get_value('window_state', 'mode')
+        mode = ApplicationState.get_value('mode')
         has_active_doc = (mode == 'documents' and active_document != None)
 
         self.view.reset()

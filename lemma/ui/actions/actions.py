@@ -22,7 +22,7 @@ from gi.repository import Gio, GLib, GObject, Gdk
 from urllib.parse import urlparse
 import pickle, base64
 
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.infrastructure.layout_info import LayoutInfo
@@ -114,7 +114,7 @@ class Actions(object):
     @timer.timer
     def update(self):
         document = History.get_active_document()
-        mode = Settings.get_value('window_state', 'mode')
+        mode = ApplicationState.get_value('mode')
         has_active_doc = (mode == 'documents' and document != None)
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
 
@@ -193,7 +193,7 @@ class Actions(object):
         DialogLocator.get_dialog('export_html').run(History.get_active_document())
 
     def go_back(self, action=None, parameter=''):
-        mode = Settings.get_value('window_state', 'mode')
+        mode = ApplicationState.get_value('mode')
         if mode == 'draft':
             self.use_cases.leave_draft_mode()
         else:
@@ -244,7 +244,7 @@ class Actions(object):
 
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
-            tags_at_cursor = self.application.cursor_state.tags_at_cursor
+            tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
 
             if len(text) < 2000:
                 stext = text.strip()
@@ -287,14 +287,14 @@ class Actions(object):
         if document.cursor.has_selection():
             self.use_cases.toggle_tag('bold')
         else:
-            self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {'bold'})
+            self.use_cases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'bold'})
 
     def toggle_italic(self, action=None, parameter=''):
         document = History.get_active_document()
         if document.cursor.has_selection():
             self.use_cases.toggle_tag('italic')
         else:
-            self.application.cursor_state.set_tags_at_cursor(self.application.cursor_state.tags_at_cursor ^ {'italic'})
+            self.use_cases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
 
     def show_insert_image_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_image').run()

@@ -46,7 +46,6 @@ class Document():
         self.plaintext = None
 
         self.change_flag = dict()
-        self.scroll_insert_on_screen_after_layout_update = False
 
         self.layouter = Layouter(self)
         self.clipping = Clipping(self)
@@ -77,9 +76,6 @@ class Document():
         self.layouter.update()
         self.clipping.update()
         self.plaintext_scanner.update()
-
-    def set_scroll_insert_on_screen_after_layout_update(self, animate=False):
-        self.scroll_insert_on_screen_after_layout_update = True
 
     def has_changed(self, client):
         if client not in self.change_flag:

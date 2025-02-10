@@ -21,6 +21,7 @@ from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 
 
 class Storage(object):
@@ -30,6 +31,14 @@ class Storage(object):
         except IOError: return False
         else:
             try: Settings.data = pickle.load(filehandle)
+            except EOFError: return False
+        return True
+
+    def populate_app_state():
+        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'app_state.pickle'), 'rb')
+        except IOError: return False
+        else:
+            try: ApplicationState.data = pickle.load(filehandle)
             except EOFError: return False
         return True
 
@@ -51,6 +60,11 @@ class Storage(object):
         try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'settings.pickle'), 'wb')
         except IOError: return False
         else: pickle.dump(Settings.data, filehandle)
+
+    def save_app_state():
+        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'app_state.pickle'), 'wb')
+        except IOError: return False
+        else: pickle.dump(ApplicationState.data, filehandle)
 
     def save_history():
         pathname = os.path.join(ServiceLocator.get_notes_folder(), 'workspace')

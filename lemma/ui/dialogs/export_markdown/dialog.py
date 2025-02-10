@@ -26,7 +26,7 @@ import html2text
 
 from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 
 
 class Dialog(object):
@@ -53,7 +53,7 @@ class Dialog(object):
         file_filter.set_name(_('Markdown Files'))
         self.view.set_default_filter(file_filter)
 
-        export_folder = Settings.get_value('app_state', 'last_export_folder')
+        export_folder = ApplicationState.get_value('last_export_folder')
         if export_folder == None or not os.path.exists(export_folder) or not os.path.isdir(export_folder):
             export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
         if export_folder != None:
@@ -68,7 +68,7 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                self.use_cases.settings_set_value('app_state', 'last_export_folder', os.path.dirname(filename))
+                self.use_cases.app_state_set_value('last_export_folder', os.path.dirname(filename))
 
                 if not filename.endswith('.md'):
                     filename += '.md'

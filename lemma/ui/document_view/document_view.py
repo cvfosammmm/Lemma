@@ -38,9 +38,8 @@ class DocumentView(Observable):
         Observable.__init__(self)
         self.main_window = main_window
         self.view = main_window.document_view
-        self.application = application
+        self.use_cases = application.use_cases
 
-        self.width, self.height = 0, 0
         self.cursor_x, self.cursor_y = None, None
         self.keyboard_modifiers_state = 0
         self.scrolling_multiplier = 2.5
@@ -51,7 +50,7 @@ class DocumentView(Observable):
 
         self.document = None
 
-        self.controller = DocumentViewController(self, self.application.use_cases)
+        self.controller = DocumentViewController(self, self.use_cases)
         self.presenter = DocumentViewPresenter(self)
 
         self.title_widget = TitleWidget(self)
@@ -99,8 +98,12 @@ class DocumentView(Observable):
         self.add_change_code('changed')
 
     def set_size(self, width, height):
-        self.width, self.height = width, height
         self.last_cursor_or_scrolling_change = time.time()
+        self.use_cases.app_state_set_value('document_view_width', width)
+        self.use_cases.app_state_set_value('document_view_height', height)
+        offset_x = self.view.adjustment_x.get_value()
+        offset_y = self.view.adjustment_y.get_value()
+        self.use_cases.scroll_to_xy(offset_x, offset_y)
         self.add_change_code('changed')
 
     def set_cursor_position(self, x, y):
@@ -128,14 +131,14 @@ class DocumentView(Observable):
             self.title_widget.activate()
             self.presenter.scroll_to_position([0, 0])
             self.title_widget.view.set_visible(True)
-            self.view.title_buttons_height = 50
+            self.use_cases.app_state_set_value('title_buttons_height', 50)
             self.view.content.queue_draw()
             self.title_widget.grab_focus()
 
     def stop_renaming(self):
         self.title_widget.deactivate()
         self.title_widget.view.set_visible(False)
-        self.view.title_buttons_height = 0
+        self.use_cases.app_state_set_value('title_buttons_height', 0)
         self.view.content.grab_focus()
 
     def on_entry_activate(self, entry=None):
@@ -147,7 +150,7 @@ class DocumentView(Observable):
             self.submit()
 
     def submit(self):
-        self.application.use_cases.set_title(self.title_widget.title)
+        self.use_cases.set_title(self.title_widget.title)
         self.stop_renaming()
 
     def on_entry_keypress(self, controller, keyval, keycode, state):

@@ -23,7 +23,7 @@ import datetime
 
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.message_bus.message_bus import MessageBus
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 
 
 class DocumentDraft():
@@ -52,7 +52,7 @@ class DocumentDraft():
     def on_mode_set(self): self.update()
 
     def update(self):
-        mode = Settings.get_value('window_state', 'mode')
+        mode = ApplicationState.get_value('mode')
         if mode == 'draft':
             self.init()
         else:

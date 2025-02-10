@@ -25,7 +25,7 @@ from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.keyboard_shortcuts.shortcut_controller import ShortcutController
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 from lemma.message_bus.message_bus import MessageBus
 
 
@@ -157,7 +157,7 @@ class DocumentList(object):
 
         for i, document_id in enumerate(self.document_ids):
             document = DocumentRepo.get_by_id(document_id)
-            mode = Settings.get_value('window_state', 'mode')
+            mode = ApplicationState.get_value('mode')
             highlight_active = (document == History.get_active_document() and mode == 'documents')
             if highlight_active:
                 title_color = active_fg_color

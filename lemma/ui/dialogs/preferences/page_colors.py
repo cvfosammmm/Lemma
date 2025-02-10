@@ -59,7 +59,7 @@ class PageColors(object):
             self.add_chooser(os.path.join(ServiceLocator.get_user_themes_folder(), name + '.css'), name, count, True)
             count += 1
 
-        active_id = Settings.get_value('preferences', 'color_scheme')
+        active_id = Settings.get_value('color_scheme')
         if active_id in self.style_previews: self.style_previews[active_id].checkbutton.set_active(True)
         else: self.style_previews['default'].checkbutton.set_active(True)
 
@@ -81,7 +81,7 @@ class PageColors(object):
 
     def on_checkbutton_toggled(self, button, name):
         if button.get_active():
-            self.use_cases.settings_set_value('preferences', 'color_scheme', name)
+            self.use_cases.settings_set_value('color_scheme', name)
             button.get_parent().add_css_class('selected')
         else:
             button.get_parent().remove_css_class('selected')

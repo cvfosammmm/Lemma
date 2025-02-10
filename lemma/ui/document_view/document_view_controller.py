@@ -22,7 +22,7 @@ from gi.repository import Gtk, Gdk
 import time
 
 import lemma.infrastructure.xml_helpers as xml_helpers
-import lemma.infrastructure.xml_parser as xml_parser
+from lemma.application_state.application_state import ApplicationState
 
 
 class DocumentViewController():
@@ -91,10 +91,10 @@ class DocumentViewController():
 
         self.model.selected_link_target = None
 
-        x -= self.view.padding_left
-        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        x -= ApplicationState.get_value('document_padding_left')
+        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
 
-        if y < -self.view.subtitle_height and n_press % 3 == 1:
+        if y < -ApplicationState.get_value('subtitle_height') and n_press % 3 == 1:
             self.model.init_renaming()
 
         elif y > 0:
@@ -141,10 +141,10 @@ class DocumentViewController():
         state = controller.get_current_event_state() & modifiers
 
         if state == 0:
-            x -= self.view.padding_left
-            y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+            x -= ApplicationState.get_value('document_padding_left')
+            y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
 
-            if y >= -self.view.subtitle_height:
+            if y >= -ApplicationState.get_value('subtitle_height'):
                 document = self.model.document
 
                 link = self.get_link_at_xy(x, y)
@@ -155,8 +155,8 @@ class DocumentViewController():
         if n_press % 3 != 1: return
 
         document = self.model.document
-        x_offset = document.clipping.offset_x + x - self.view.padding_left
-        y_offset = document.clipping.offset_y + y - self.view.padding_top - self.view.title_height - self.view.subtitle_height
+        x_offset = document.clipping.offset_x + x - ApplicationState.get_value('document_padding_left')
+        y_offset = document.clipping.offset_y + y - ApplicationState.get_value('document_padding_top') - ApplicationState.get_value('title_height') - ApplicationState.get_value('subtitle_height')
 
         if y > 0:
             if not document.cursor.has_selection():
@@ -164,8 +164,8 @@ class DocumentViewController():
             self.view.context_menu.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
-        x -= self.view.padding_left
-        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        x -= ApplicationState.get_value('document_padding_left')
+        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         y += self.model.document.clipping.offset_y
 
         if y <= 0:
@@ -182,14 +182,14 @@ class DocumentViewController():
             new_y = max(0, self.model.document.clipping.offset_y + y)
             self.use_cases.scroll_to_xy(new_x, new_y)
 
-        if y - self.model.height > 0:
-            height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
+        if y - ApplicationState.get_value('document_view_height') > 0:
+            height = self.model.document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
             new_x = self.model.document.clipping.offset_x
-            new_y = min(max(0, height - self.model.height), self.model.document.clipping.offset_y + y - self.model.height)
+            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height'))
             self.use_cases.scroll_to_xy(new_x, new_y)
 
-        x -= self.view.padding_left
-        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        x -= ApplicationState.get_value('document_padding_left')
+        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         y += self.model.document.clipping.offset_y
 
         self.use_cases.move_cursor_to_xy(x, y, True)
@@ -205,16 +205,16 @@ class DocumentViewController():
 
         if controller.get_current_event_state() & modifiers == 0:
             document = self.model.document
-            height = document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
+            height = document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
             if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
-                dx *= self.model.width ** (2/3)
-                dy *= self.model.height ** (2/3)
+                dx *= ApplicationState.get_value('document_view_width') ** (2/3)
+                dy *= ApplicationState.get_value('document_view_height') ** (2/3)
             else:
                 dy *= self.model.scrolling_multiplier
                 dx *= self.model.scrolling_multiplier
             x = min(0, max(0, document.clipping.offset_x + dx))
-            y = min(max(0, height - self.model.height), max(0, document.clipping.offset_y + dy))
+            y = min(max(0, height - ApplicationState.get_value('document_view_height')), max(0, document.clipping.offset_y + dy))
 
             self.use_cases.scroll_to_xy(x, y)
         return
@@ -229,7 +229,6 @@ class DocumentViewController():
         ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
 
         document = self.model.document
-        cursor_state = self.model.application.cursor_state
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
             case ('left', 0): self.use_cases.left()
             case ('right', 0): self.use_cases.right()
@@ -237,8 +236,8 @@ class DocumentViewController():
             case ('down', 0): self.use_cases.down()
             case ('home', 0): self.use_cases.line_start()
             case ('end', 0): self.use_cases.line_end()
-            case ('page_up', 0): self.use_cases.move_cursor_by_xy_offset(0, -self.model.height + 100)
-            case ('page_down', 0): self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100)
+            case ('page_up', 0): self.use_cases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100)
+            case ('page_down', 0): self.use_cases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100)
 
             case ('left', Gdk.ModifierType.SHIFT_MASK): self.use_cases.left(True)
             case ('right', Gdk.ModifierType.SHIFT_MASK): self.use_cases.right(True)
@@ -247,9 +246,9 @@ class DocumentViewController():
             case ('home', Gdk.ModifierType.SHIFT_MASK): self.use_cases.line_start(True)
             case ('end', Gdk.ModifierType.SHIFT_MASK): self.use_cases.line_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
-                self.use_cases.move_cursor_by_xy_offset(0, -self.model.height + 100, True)
+                self.use_cases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
-                self.use_cases.move_cursor_by_xy_offset(0, self.model.height - 100, True)
+                self.use_cases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100, True)
 
             case ('up', Gdk.ModifierType.CONTROL_MASK): self.use_cases.move_cursor_to_parent()
             case ('up', 5): self.use_cases.extend_selection()
@@ -269,10 +268,9 @@ class DocumentViewController():
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
                     self.use_cases.open_link(document.cursor.get_insert_node().link.target)
                 else:
-                    parser = xml_parser.XMLParser()
                     self.use_cases.insert_xml('\n')
                     if not document.cursor.has_selection():
-                        self.use_cases.replace_max_string_before_cursor(cursor_state.tags_at_cursor)
+                        self.use_cases.replace_max_string_before_cursor(ApplicationState.get_value('tags_at_cursor'))
             case ('backspace', _): self.use_cases.backspace()
             case ('delete', _): self.use_cases.delete()
 
@@ -282,11 +280,11 @@ class DocumentViewController():
     def on_im_commit(self, im_context, text):
         if self.model.document == None: return False
         document = self.model.document
-        cursor_state = self.model.application.cursor_state
 
-        self.use_cases.insert_xml('<char tags="' + ' '.join(cursor_state.tags_at_cursor) + '">' + xml_helpers.escape(text) + '</char>')
+        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+        self.use_cases.insert_xml('<char tags="' + ' '.join(tags_at_cursor) + '">' + xml_helpers.escape(text) + '</char>')
         if not document.cursor.has_selection() and text.isspace():
-            self.use_cases.replace_max_string_before_cursor(cursor_state.tags_at_cursor)
+            self.use_cases.replace_max_string_before_cursor(tags_at_cursor)
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()
@@ -307,11 +305,6 @@ class DocumentViewController():
 
     def on_resize(self, drawing_area, width, height):
         self.model.set_size(width, height)
-
-        offset_x = self.view.adjustment_x.get_value()
-        offset_y = self.view.adjustment_y.get_value()
-        self.model.last_cursor_or_scrolling_change = time.time()
-        self.use_cases.scroll_to_xy(offset_x, offset_y)
 
     def on_adjustment_value_changed(self, adjustment):
         document = self.model.document

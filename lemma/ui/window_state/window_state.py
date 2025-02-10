@@ -17,7 +17,7 @@
 
 import os.path
 
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 
@@ -28,11 +28,11 @@ class WindowState(object):
         self.main_window = main_window
         self.use_cases = app.use_cases
 
-        toggle_state = Settings.get_value('window_state', 'show_tools_sidebar')
+        toggle_state = ApplicationState.get_value('show_tools_sidebar')
         self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.set_active(toggle_state)
         self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
 
-        toggle_state = Settings.get_value('window_state', 'show_backlinks')
+        toggle_state = ApplicationState.get_value('show_backlinks')
         self.main_window.navigation_sidebar.backlinks_toggle.set_active(toggle_state)
         self.main_window.navigation_sidebar.backlinks_toggle.connect('toggled', self.on_backlinks_toggle_toggled)
 
@@ -46,7 +46,7 @@ class WindowState(object):
     def on_mode_set(self): self.update()
 
     def update(self):
-        mode = Settings.get_value('window_state', 'mode')
+        mode = ApplicationState.get_value('mode')
 
         if mode == 'documents' and History.get_active_document() != None:
             self.main_window.content_stack.set_visible_child_name('document_view')
@@ -64,24 +64,24 @@ class WindowState(object):
         self.main_window.navigation_sidebar.paned.animate(True)
 
     def restore_window_state(self):
-        if Settings.get_value('window_state', 'is_maximized'): self.main_window.maximize()
+        if ApplicationState.get_value('is_maximized'): self.main_window.maximize()
         else: self.main_window.unmaximize()
-        window_width = Settings.get_value('window_state', 'width')
-        window_height = Settings.get_value('window_state', 'height')
+        window_width = ApplicationState.get_value('width')
+        window_height = ApplicationState.get_value('height')
         self.main_window.set_default_size(window_width, window_height)
-        self.main_window.headerbar.set_position(Settings.get_value('window_state', 'sidebar_position'))
+        self.main_window.headerbar.set_position(ApplicationState.get_value('sidebar_position'))
         self.main_window.present()
 
-        show_tools_sidebar = Settings.get_value('window_state', 'show_tools_sidebar')
-        tools_sidebar_position = Settings.get_value('window_state', 'tools_sidebar_position')
+        show_tools_sidebar = ApplicationState.get_value('show_tools_sidebar')
+        tools_sidebar_position = ApplicationState.get_value('tools_sidebar_position')
 
         if tools_sidebar_position in [None, -1]: self.main_window.document_view_paned.set_end_on_first_show()
 
         self.main_window.document_view_paned.first_set_show_widget(show_tools_sidebar)
         self.main_window.document_view_paned.set_target_position(tools_sidebar_position)
 
-        show_backlinks = Settings.get_value('window_state', 'show_backlinks')
-        navbar_paned_position = Settings.get_value('window_state', 'navbar_paned_position')
+        show_backlinks = ApplicationState.get_value('show_backlinks')
+        navbar_paned_position = ApplicationState.get_value('navbar_paned_position')
 
         if navbar_paned_position in [None, -1]: self.main_window.navigation_sidebar.paned.set_end_on_first_show()
 
@@ -89,13 +89,13 @@ class WindowState(object):
         self.main_window.navigation_sidebar.paned.set_target_position(navbar_paned_position)
 
     def save_window_state(self):
-        self.use_cases.settings_set_value('window_state', 'width', self.main_window.get_property('default-width'))
-        self.use_cases.settings_set_value('window_state', 'height', self.main_window.get_property('default-height'))
-        self.use_cases.settings_set_value('window_state', 'is_maximized', self.main_window.get_property('maximized'))
-        self.use_cases.settings_set_value('window_state', 'sidebar_position', self.main_window.headerbar.get_property('position'))
-        self.use_cases.settings_set_value('window_state', 'show_tools_sidebar', self.main_window.document_view_paned.show_widget)
-        self.use_cases.settings_set_value('window_state', 'tools_sidebar_position', self.main_window.document_view_paned.target_position)
-        self.use_cases.settings_set_value('window_state', 'show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
-        self.use_cases.settings_set_value('window_state', 'navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)
+        self.use_cases.app_state_set_value('width', self.main_window.get_property('default-width'))
+        self.use_cases.app_state_set_value('height', self.main_window.get_property('default-height'))
+        self.use_cases.app_state_set_value('is_maximized', self.main_window.get_property('maximized'))
+        self.use_cases.app_state_set_value('sidebar_position', self.main_window.headerbar.get_property('position'))
+        self.use_cases.app_state_set_value('show_tools_sidebar', self.main_window.document_view_paned.show_widget)
+        self.use_cases.app_state_set_value('tools_sidebar_position', self.main_window.document_view_paned.target_position)
+        self.use_cases.app_state_set_value('show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
+        self.use_cases.app_state_set_value('navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)
 
 

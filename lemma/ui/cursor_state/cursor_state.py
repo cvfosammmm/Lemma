@@ -16,44 +16,45 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.history.history import History
+from lemma.application_state.application_state import ApplicationState
 from lemma.message_bus.message_bus import MessageBus
 import lemma.infrastructure.timer as timer
 
 
 class CursorState():
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, application):
         self.toolbar = main_window.toolbar
-
-        self.tags_at_cursor = set()
+        self.use_cases = application.use_cases
 
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('document_changed', self.on_document_change)
+        MessageBus.connect('app_state_changed', self.on_app_state_changed)
 
     def on_history_changed(self): self.update()
     def on_document_change(self): self.update()
+    def on_app_state_changed(self):
+        self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
+        self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
 
     def update(self):
         self.update_tags_at_cursor()
         self.update_paragraph_style_at_cursor()
+        self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
+        self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
 
     def update_tags_at_cursor(self):
         document = History.get_active_document()
 
         if document == None:
-            self.set_tags_at_cursor(set())
+            self.use_cases.app_state_set_value('tags_at_cursor', set())
         else:
             node = document.cursor.get_first_node()
             node = node.prev_in_parent()
             if node == None:
-                self.set_tags_at_cursor(set())
+                self.use_cases.app_state_set_value('tags_at_cursor', set())
             else:
-                self.set_tags_at_cursor(node.tags.copy())
-
-    def set_tags_at_cursor(self, tags):
-        self.tags_at_cursor = tags
-        self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
-        self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
+                self.use_cases.app_state_set_value('tags_at_cursor', node.tags.copy())
 
     def update_tag_toggle(self, button, tagname):
         document = History.get_active_document()
@@ -70,7 +71,7 @@ class CursorState():
             else:
                 button.remove_css_class('checked')
         else:
-            if tagname in self.tags_at_cursor:
+            if tagname in ApplicationState.get_value('tags_at_cursor'):
                 button.add_css_class('checked')
             else:
                 button.remove_css_class('checked')

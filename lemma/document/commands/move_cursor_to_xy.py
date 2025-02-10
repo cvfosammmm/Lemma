@@ -36,8 +36,6 @@ class Command():
         else:
             document.cursor.move_insert_to_node(layout.node)
 
-        document.set_scroll_insert_on_screen_after_layout_update()
-
     def run_after_layout(self, document):
         if self.update_implicit_x:
             document.cursor.update_implicit_x_position()

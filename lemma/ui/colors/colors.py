@@ -32,18 +32,17 @@ class Colors(object):
         self.update()
         MessageBus.connect('settings_changed', self.on_settings_changed)
 
-    def on_settings_changed(self):
-        self.update()
+    def on_settings_changed(self): self.update()
 
     def update(self):
-        color_scheme = Settings.get_value('preferences', 'color_scheme')
+        color_scheme = Settings.get_value('color_scheme')
         if color_scheme == self.color_scheme: return
 
-        self.color_scheme = Settings.get_value('preferences', 'color_scheme')
+        self.color_scheme = Settings.get_value('color_scheme')
         if self.color_scheme == 'default':
             path = os.path.join(ServiceLocator.get_resources_path(), 'themes', 'default.css')
         else:
-            path = Settings.get_value('preferences', 'color_scheme')
+            path = Settings.get_value('color_scheme')
 
         self.main_window.css_provider_colors.load_from_path(path)
         self.main_window.main_box.queue_draw()

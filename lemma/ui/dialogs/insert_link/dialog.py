@@ -25,8 +25,8 @@ from lemma.ui.helpers.dialog_view import DialogView
 from lemma.document.document import Document
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.document.ast.node import Node
+from lemma.application_state.application_state import ApplicationState
 import lemma.infrastructure.xml_helpers as xml_helpers
-import lemma.infrastructure.xml_parser as xml_parser
 
 
 class Dialog(object):
@@ -130,7 +130,7 @@ class Dialog(object):
     def submit(self):
         if self.is_valid():
             if self.bounds == None:
-                tags_at_cursor = self.application.cursor_state.tags_at_cursor
+                tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
                 self.use_cases.insert_xml(xml)

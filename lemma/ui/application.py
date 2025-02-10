@@ -55,7 +55,7 @@ class Application(Adw.Application):
         self.colors = colors.Colors(self.main_window)
         self.document_history = document_history.DocumentHistory(self.main_window, self)
         self.document_view = document_view.DocumentView(self.main_window, self)
-        self.cursor_state = cursor_state.CursorState(self.main_window)
+        self.cursor_state = cursor_state.CursorState(self.main_window, self)
         self.toolbar = toolbar.ToolBar(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window, self)
         self.document_list = document_list.DocumentList(self.main_window, self)

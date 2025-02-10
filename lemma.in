@@ -25,6 +25,7 @@ import lemma.use_cases.use_cases as use_cases
 import lemma.ui.application as application
 from lemma.storage.storage import Storage
 from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 
 # setup gettext
 gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
@@ -62,8 +63,10 @@ pathname = ServiceLocator.get_config_folder()
 if not os.path.isdir(pathname): os.makedirs(pathname)
 
 Settings.init()
+ApplicationState.init()
 DocumentRepo.init()
 Storage.populate_settings()
+Storage.populate_app_state()
 Storage.populate_history()
 
 do_time = '--time' in sys.argv

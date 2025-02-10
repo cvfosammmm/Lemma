@@ -23,7 +23,7 @@ from gi.repository import Gtk, GLib, Gio
 import os.path
 
 import lemma.ui.dialogs.import_documents.import_documents_viewgtk as view
-from lemma.settings.settings import Settings
+from lemma.application_state.application_state import ApplicationState
 
 
 class Dialog(object):
@@ -68,7 +68,7 @@ class Dialog(object):
         file_filter.set_name(_('Markdown Files'))
         dialog.set_default_filter(file_filter)
 
-        import_folder = Settings.get_value('app_state', 'last_import_folder')
+        import_folder = ApplicationState.get_value('last_import_folder')
         if import_folder == None or not os.path.exists(import_folder) or not os.path.isdir(import_folder):
             import_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
         if import_folder != None:
@@ -83,7 +83,7 @@ class Dialog(object):
         else:
             if files != None and len(files) > 0:
                 import_folder = os.path.dirname(files[0].get_path())
-                self.use_cases.settings_set_value('app_state', 'last_import_folder', import_folder)
+                self.use_cases.app_state_set_value('last_import_folder', import_folder)
                 for file in files:
                     self.add_file_to_list(file.get_path())
                 self.view.list.invalidate_sort()

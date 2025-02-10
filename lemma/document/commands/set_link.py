@@ -45,7 +45,6 @@ class Command():
         for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]
         document.cursor.set_state(self.state['cursor_state_before'])
-        document.set_scroll_insert_on_screen_after_layout_update()
 
         document.update_last_modified()
 

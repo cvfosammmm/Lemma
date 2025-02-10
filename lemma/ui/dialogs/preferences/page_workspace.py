@@ -31,11 +31,11 @@ class PageWorkspace(object):
         self.use_cases = use_cases
 
     def init(self):
-        self.view.checkbox_backlinks.set_active(Settings.get_value('preferences', 'update_backlinks'))
+        self.view.checkbox_backlinks.set_active(Settings.get_value('update_backlinks'))
         self.view.checkbox_backlinks.connect('toggled', self.on_checkbutton_toggled, 'update_backlinks')
 
     def on_checkbutton_toggled(self, button, key):
-        self.use_cases.settings_set_value('preferences', key, button.get_active())
+        self.use_cases.settings_set_value(key, button.get_active())
 
 
 class PageWorkspaceView(Gtk.Box):

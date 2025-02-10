@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, GObject, Gdk, PangoCairo
+from gi.repository import Gtk, GObject, Gdk, PangoCairo, Pango
 
 from urllib.parse import urlparse
 import datetime
@@ -32,6 +32,7 @@ from lemma.document.layout.layout_char import LayoutChar
 from lemma.document.layout.layout_placeholder import LayoutPlaceholder
 from lemma.document.layout.layout_mathatom import LayoutMathAtom
 from lemma.document.layout.layout_mathroot import LayoutMathRoot
+from lemma.application_state.application_state import ApplicationState
 import lemma.infrastructure.timer as timer
 
 
@@ -51,35 +52,29 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         self.update_size()
-        self.update_scrolling_destination()
         self.update_scrollbars()
         self.update_pointer()
         self.view.content.queue_draw()
 
     def update_size(self):
         document = self.model.document
-        height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
+        height = self.model.document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
         scrolling_offset_y = document.clipping.offset_y
 
         self.view.adjustment_x.set_page_size(1)
-        self.view.adjustment_y.set_page_size(self.model.height)
+        self.view.adjustment_y.set_page_size(ApplicationState.get_value('document_view_height'))
         self.view.adjustment_x.set_upper(1)
         self.view.adjustment_y.set_upper(height)
 
-        if scrolling_offset_y > self.view.adjustment_y.get_upper() - self.model.height:
+        if scrolling_offset_y > self.view.adjustment_y.get_upper() - ApplicationState.get_value('document_view_height'):
             self.view.adjustment_y.set_value(self.view.adjustment_y.get_upper())
-
-    def update_scrolling_destination(self):
-        if self.model.document.scroll_insert_on_screen_after_layout_update:
-            self.model.document.scroll_insert_on_screen_after_layout_update = False
-            self.scroll_insert_on_screen()
 
     def update_scrollbars(self):
         document = self.model.document
-        height = self.model.document.layout.height + self.view.padding_bottom + self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height
+        height = self.model.document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
         self.view.scrollbar_x.set_visible(False)
-        self.view.scrollbar_y.set_visible(height > self.model.height)
+        self.view.scrollbar_y.set_visible(height > ApplicationState.get_value('document_view_height'))
         self.view.adjustment_x.set_value(document.clipping.offset_x)
         self.view.adjustment_y.set_value(document.clipping.offset_y)
 
@@ -104,11 +99,11 @@ class DocumentViewPresenter():
 
         x = document.clipping.offset_x + (self.model.cursor_x if self.model.cursor_x != None else 0)
         y = document.clipping.offset_y + (self.model.cursor_y if self.model.cursor_y != None else 0)
-        x -= self.view.padding_left
-        y -= self.view.padding_top + self.view.title_height + self.view.subtitle_height
+        x -= ApplicationState.get_value('document_padding_left')
+        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         link = None
 
-        if y < -self.view.subtitle_height:
+        if y < -ApplicationState.get_value('subtitle_height'):
             self.content.set_cursor_from_name('text')
         elif y > 0:
             self.content.set_cursor_from_name('text')
@@ -133,33 +128,9 @@ class DocumentViewPresenter():
         else:
             self.model.set_link_target_at_pointer(None)
 
-    def scroll_insert_on_screen(self, animate=False):
-        document = self.model.document
-        insert_node = document.cursor.get_insert_node()
-        insert_position = insert_node.layout.get_absolute_xy()
-        content_offset = self.view.padding_top + self.view.title_height + self.view.subtitle_height
-        insert_y = insert_position[1] + content_offset
-        insert_height = insert_node.layout.height
-        window_height = self.model.height
-        scrolling_offset_y = document.clipping.offset_y
-
-        if window_height <= 0: return
-
-        if insert_y == content_offset:
-            self.scroll_to_position((0, 0), animate)
-        elif insert_y < scrolling_offset_y:
-            if insert_height > window_height:
-                self.scroll_to_position((0, insert_y - window_height + insert_height), animate)
-            else:
-                self.scroll_to_position((0, insert_y), animate)
-        elif insert_position[1] == self.model.document.layout.height - self.model.document.layout.children[-1].height:
-            self.scroll_to_position((0, self.model.document.layout.height + content_offset + self.view.padding_bottom - window_height), animate)
-        elif insert_y > scrolling_offset_y - insert_height + window_height:
-            self.scroll_to_position((0, insert_y - window_height + insert_height), animate)
-
     def scroll_to_position(self, position, animate=False):
         document = self.model.document
-        window_width = self.model.width
+        window_width = ApplicationState.get_value('document_view_width')
         yoffset = max(position[1], 0)
         xoffset = max(position[0], 0)
         scrolling_offset_x = document.clipping.offset_x
@@ -199,15 +170,15 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         document = self.model.document
-        offset_x = self.view.padding_left
+        offset_x = ApplicationState.get_value('document_padding_left')
         scrolling_offset_y = document.clipping.offset_y
-        offset_y = self.view.padding_top + self.view.title_height + self.view.subtitle_height + self.view.title_buttons_height - scrolling_offset_y
+        offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - scrolling_offset_y
         self.first_selection_node = document.cursor.get_first_node()
         self.last_selection_node = document.cursor.get_last_node()
         first_selection_line = self.first_selection_node.layout.get_ancestors()[-2]
         last_selection_line = self.last_selection_node.layout.get_ancestors()[-2]
 
-        self.draw_title(ctx, self.view.padding_left, self.view.padding_top - scrolling_offset_y)
+        self.draw_title(ctx, ApplicationState.get_value('document_padding_left'), ApplicationState.get_value('document_padding_top') - scrolling_offset_y)
 
         in_selection = False
         for line_layout in document.layout.children:
@@ -314,20 +285,21 @@ class DocumentViewPresenter():
             return ColorManager.get_ui_color('text')
 
     def draw_title(self, ctx, offset_x, offset_y):
+        self.view.layout_title.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
+        self.view.layout_title.set_text(self.model.document.title)
         ctx.move_to(offset_x, offset_y)
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('title_color'))
-        self.view.layout_title.set_text(self.model.document.title)
         PangoCairo.show_layout(ctx, self.view.layout_title)
 
-        ctx.move_to(offset_x, offset_y + self.view.title_height + 8)
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('description_color'))
-
+        self.view.layout_subtitle.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
         datetime_last_modified = datetime.datetime.fromtimestamp(self.model.document.last_modified)
         self.view.layout_subtitle.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
+        ctx.move_to(offset_x, offset_y + ApplicationState.get_value('title_height') + 8)
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('description_color'))
         PangoCairo.show_layout(ctx, self.view.layout_subtitle)
 
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('border_1'))
-        ctx.rectangle(offset_x, offset_y + self.view.title_height, self.view.title_width, 1)
+        ctx.rectangle(offset_x, offset_y + ApplicationState.get_value('title_height'), ApplicationState.get_value('title_width'), 1)
         ctx.fill()
 
     def draw_cursor(self, ctx, offset_x, offset_y):

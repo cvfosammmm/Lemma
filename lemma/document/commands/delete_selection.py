@@ -32,7 +32,6 @@ class Command():
 
         self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
         document.update_last_modified()
-        document.set_scroll_insert_on_screen_after_layout_update()
 
     def run_after_layout(self, document):
         document.cursor.update_implicit_x_position()
@@ -44,6 +43,5 @@ class Command():
 
         document.cursor.set_state(self.state['cursor_state_before'])
         document.update_last_modified()
-        document.set_scroll_insert_on_screen_after_layout_update()
 
 

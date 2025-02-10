@@ -30,24 +30,12 @@ class DocumentView(Gtk.Overlay):
 
         self.set_size_request(770, -1)
 
-        self.padding_left = 48
-        self.padding_bottom = 120
-        self.padding_top = 48
-        self.title_height = 54
-        self.subtitle_height = 51
-        self.title_buttons_height = 0
-        self.title_width = 500
-        self.insert_height = 25
-        self.insert_drawing_offset = 9
-
         self.layout_title = Pango.Layout(self.get_pango_context())
         self.layout_title.set_ellipsize(Pango.EllipsizeMode.END)
-        self.layout_title.set_width(self.title_width * Pango.SCALE)
         self.layout_title.set_font_description(Pango.FontDescription.from_string('NewComputerModernSans10 Regular 36px'))
 
         self.layout_subtitle = Pango.Layout(self.get_pango_context())
         self.layout_subtitle.set_ellipsize(Pango.EllipsizeMode.END)
-        self.layout_subtitle.set_width(self.title_width * Pango.SCALE)
         self.layout_subtitle.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
 
         self.content = Gtk.DrawingArea()

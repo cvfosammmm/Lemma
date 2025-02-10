@@ -47,21 +47,21 @@ class Dialog(object):
         self.page_workspace.init()
 
     def on_check_button_toggle(self, button, preference_name):
-        self.use_cases.settings_set_value('preferences', preference_name, button.get_active())
+        self.use_cases.settings_set_value(preference_name, button.get_active())
         
     def on_radio_button_toggle(self, button, preference_name, value):
-        self.use_cases.settings_set_value('preferences', preference_name, value)
+        self.use_cases.settings_set_value(preference_name, value)
 
     def spin_button_changed(self, button, preference_name):
-        self.use_cases.settings_set_value('preferences', preference_name, button.get_value_as_int())
+        self.use_cases.settings_set_value(preference_name, button.get_value_as_int())
 
     def text_deleted(self, buffer, position, n_chars, preference_name):
-        self.use_cases.settings_set_value('preferences', preference_name, buffer.get_text())
+        self.use_cases.settings_set_value(preference_name, buffer.get_text())
 
     def text_inserted(self, buffer, position, chars, n_chars, preference_name):
-        self.use_cases.settings_set_value('preferences', preference_name, buffer.get_text())
+        self.use_cases.settings_set_value(preference_name, buffer.get_text())
 
     def on_interpreter_changed(self, button, preference_name, value):
-        self.use_cases.settings_set_value('preferences', preference_name, value)
+        self.use_cases.settings_set_value(preference_name, value)
 
 
