@@ -56,14 +56,14 @@ class DocumentList(object):
 
         MessageBus.connect('new_document', self.on_new_document)
         MessageBus.connect('document_removed', self.on_document_removed)
-        MessageBus.connect('document_changed_substantially', self.on_document_changed_substantially)
+        MessageBus.connect('document_ast_changed', self.on_document_ast_changed)
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('mode_set', self.on_mode_set)
         self.update()
 
     def on_new_document(self): self.update()
     def on_document_removed(self): self.update()
-    def on_document_changed_substantially(self): self.update()
+    def on_document_ast_changed(self): self.update()
     def on_history_changed(self): self.update()
     def on_mode_set(self): self.update()
 

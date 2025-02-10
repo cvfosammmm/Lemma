@@ -137,7 +137,7 @@ class UseCases(object):
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_changed_substantially')
+        MessageBus.add_change_code('document_ast_changed')
 
     def redo(self):
         document = History.get_active_document()
@@ -145,7 +145,7 @@ class UseCases(object):
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_changed_substantially')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def set_title(self, title):
@@ -166,7 +166,7 @@ class UseCases(object):
         DocumentRepo.update(document)
 
         MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_changed_substantially')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def insert_xml(self, xml):
@@ -217,7 +217,7 @@ class UseCases(object):
 
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_changed_substantially')
+            MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def backspace(self):
@@ -230,12 +230,12 @@ class UseCases(object):
             document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert], ['delete_selection'])
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_changed_substantially')
+            MessageBus.add_change_code('document_ast_changed')
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert])
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_changed_substantially')
+            MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def delete(self):
@@ -248,12 +248,12 @@ class UseCases(object):
             document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert], ['delete_selection'])
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_changed_substantially')
+            MessageBus.add_change_code('document_ast_changed')
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert])
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_changed_substantially')
+            MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def delete_selection(self):
@@ -261,7 +261,7 @@ class UseCases(object):
         document.add_command('delete_selection')
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_changed_substantially')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def add_image_from_filename(self, filename):
@@ -273,7 +273,7 @@ class UseCases(object):
             document.add_command('insert_nodes', [node])
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_changed_substantially')
+            MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def replace_max_string_before_cursor(self, tags):
@@ -307,7 +307,7 @@ class UseCases(object):
                     document.add_composite_command(*commands)
                     DocumentRepo.update(document)
                     MessageBus.add_change_code('document_changed')
-                    MessageBus.add_change_code('document_changed_substantially')
+                    MessageBus.add_change_code('document_ast_changed')
                     return True
         return False
 
@@ -317,7 +317,7 @@ class UseCases(object):
         document.add_command('resize_widget', new_width)
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_changed_substantially')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def set_link(self, bounds, target):
@@ -328,7 +328,7 @@ class UseCases(object):
         document.add_command('set_link', char_nodes, target)
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_changed_substantially')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def set_paragraph_style(self, style):
@@ -341,7 +341,7 @@ class UseCases(object):
         document.add_command('set_paragraph_style', style)
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_changed_substantially')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def toggle_tag(self, tagname):
@@ -360,7 +360,7 @@ class UseCases(object):
 
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_changed_substantially')
+            MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def left(self, do_selection=False):
