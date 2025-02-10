@@ -29,9 +29,6 @@ class Command():
 
         document.clipping.set_scrolling_offset(self.x, self.y)
 
-    def run_after_layout(self, document):
-        pass
-
     def undo(self, document):
         document.clipping.set_state(self.state['clipping_state_before'])
 

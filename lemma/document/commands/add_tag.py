@@ -34,9 +34,6 @@ class Command():
 
         document.update_last_modified()
 
-    def run_after_layout(self, document):
-        pass
-
     def undo(self, document):
         for node in self.state['affected_nodes']:
             node.tags.remove(self.tag_name)

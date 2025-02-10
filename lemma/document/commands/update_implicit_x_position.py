@@ -18,24 +18,16 @@
 
 class Command():
 
-    def __init__(self, x, y, do_selection=False):
-        self.x = x
-        self.y = y
-        self.do_selection = do_selection
+    def __init__(self):
         self.is_undo_checkpoint = False
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
+        self.state['implicit_x_before'] = document.cursor.implicit_x_position
 
-        layout = document.layout.get_cursor_holding_layout_close_to_xy(self.x, self.y)
-
-        if self.do_selection:
-            document.cursor.move_insert_to_node_with_selection(layout.node)
-        else:
-            document.cursor.move_insert_to_node(layout.node)
+        document.cursor.update_implicit_x_position()
 
     def undo(self, document):
-        document.cursor.set_state(self.state['cursor_state_before'])
+        document.cursor.implicit_x_position = self.state['implicit_x_before']
 
 

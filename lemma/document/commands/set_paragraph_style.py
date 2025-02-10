@@ -39,9 +39,6 @@ class Command():
 
         document.update_last_modified()
 
-    def run_after_layout(self, document):
-        pass
-
     def undo(self, document):
         for node, paragraph_style in self.state['nodes_and_previous_paragraph_style']:
             node.paragraph_style = paragraph_style

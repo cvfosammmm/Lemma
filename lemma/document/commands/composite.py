@@ -27,10 +27,6 @@ class Command():
         for child in self.children:
             child.run(document)
 
-    def run_after_layout(self, document):
-        for child in self.children:
-            child.run_after_layout(document)
-
     def undo(self, document):
         for child in reversed(self.children):
             child.undo(document)

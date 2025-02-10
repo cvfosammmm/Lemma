@@ -38,9 +38,6 @@ class Command():
 
         document.update_last_modified()
 
-    def run_after_layout(self, document):
-        pass
-
     def undo(self, document):
         if self.state['width_before'] != None:
             widget = self.state['widget']

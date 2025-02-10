@@ -37,9 +37,6 @@ class Command():
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
         document.update_last_modified()
 
-    def run_after_layout(self, document):
-        document.cursor.update_implicit_x_position()
-
     def undo(self, document):
         for node in self.state['nodes_added']:
             node.remove_from_parent()

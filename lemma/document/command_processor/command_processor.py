@@ -42,7 +42,6 @@ class CommandProcessor(object):
 
         command.run(self.document)
         self.document.update()
-        command.run_after_layout(self.document)
 
         self.commands_preedit.append(command)
 
@@ -82,7 +81,6 @@ class CommandProcessor(object):
         for command in self.commands[self.last_command + 1:]:
             command.run(self.document)
             self.document.update()
-            command.run_after_layout(self.document)
 
             self.last_command += 1
 

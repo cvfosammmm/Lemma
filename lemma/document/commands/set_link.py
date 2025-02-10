@@ -38,9 +38,6 @@ class Command():
 
         document.update_last_modified()
 
-    def run_after_layout(self, document):
-        pass
-
     def undo(self, document):
         for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]
