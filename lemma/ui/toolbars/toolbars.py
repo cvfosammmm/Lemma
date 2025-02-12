@@ -22,11 +22,13 @@ from gi.repository import Gtk, Pango
 from lemma.infrastructure.layout_info import LayoutInfo
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
+from lemma.application_state.application_state import ApplicationState
 
 
-class ToolBar():
+class ToolBars():
 
     def __init__(self, main_window, application):
+        self.headerbar = main_window.headerbar
         self.toolbar = main_window.toolbar
         self.application = application
 
@@ -34,9 +36,11 @@ class ToolBar():
 
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('document_changed', self.on_document_change)
+        MessageBus.connect('app_state_changed', self.on_app_state_changed)
 
     def on_history_changed(self): self.update()
     def on_document_change(self): self.update()
+    def on_app_state_changed(self): self.update()
 
     def update(self):
         self.update_toolbar()
@@ -66,6 +70,18 @@ class ToolBar():
                 self.toolbar.toolbar_widget_resizable.scale.add_mark(orig_width, Gtk.PositionType.TOP)
         else:
             self.toolbar.mode_stack.set_visible_child_name('main')
+
+        button_popover_rel = list()
+        button_popover_rel.append([self.headerbar.hb_left.hamburger_menu_button, 'hamburger_menu'])
+        button_popover_rel.append([self.headerbar.hb_right.document_menu_button, 'document_menu'])
+        button_popover_rel.append([self.toolbar.toolbar_main.paragraph_style_menu_button, 'paragraph_style'])
+        button_popover_rel.append([self.toolbar.toolbar_right.edit_menu_button, 'edit_menu'])
+
+        for button, popover_name in button_popover_rel:
+            if ApplicationState.get_value('active_popover') == popover_name:
+                button.add_css_class('active')
+            else:
+                button.remove_css_class('active')
 
     def on_widget_scale_change_value(self, scale, scroll, value):
         self.application.use_cases.resize_widget(value)

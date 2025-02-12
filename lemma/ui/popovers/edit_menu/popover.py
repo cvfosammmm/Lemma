@@ -20,29 +20,26 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
-from lemma.ui.popovers.popover_templates import PopoverTop
-from lemma.history.history import History
+from lemma.ui.popovers.popover_templates import PopoverView
 
 
 class Popover(object):
 
-    def __init__(self, popover_manager):
-        self.popover_manager = popover_manager
-        self.view = View(popover_manager)
+    def __init__(self, use_cases):
+        self.use_cases = use_cases
+        self.view = View(use_cases)
 
-        self.popover_manager.connect('popup', self.on_popover_popup)
+    def on_popup(self):
+        pass
 
-    def on_popover_popup(self, name):
-        if name != 'edit_menu': return
-
-        document = History.get_active_document()
-        if document == None: return
+    def on_popdown(self):
+        pass
 
 
-class View(PopoverTop):
+class View(PopoverView):
 
-    def __init__(self, popover_manager):
-        PopoverTop.__init__(self, popover_manager)
+    def __init__(self, use_cases):
+        PopoverView.__init__(self, use_cases)
 
         self.set_width(306)
 

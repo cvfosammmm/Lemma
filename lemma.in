@@ -21,7 +21,6 @@ from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.infrastructure.timer import Timer
-import lemma.use_cases.use_cases as use_cases
 import lemma.ui.application as application
 from lemma.storage.storage import Storage
 from lemma.settings.settings import Settings
@@ -72,9 +71,7 @@ Storage.populate_history()
 do_time = '--time' in sys.argv
 if do_time: sys.argv.remove('--time')
 
-use_cases = use_cases.UseCases()
-
-view = application.Application(use_cases)
+view = application.Application()
 view.run(sys.argv)
 
 if do_time: Timer.print()

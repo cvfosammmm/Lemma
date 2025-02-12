@@ -48,8 +48,7 @@ class ToolBarRight(Gtk.Box):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
-        self.edit_menu_button = PopoverManager.create_popover_button('edit_menu')
-        self.edit_menu_button.set_child(Gtk.Image.new_from_icon_name('document-edit-symbolic'))
+        self.edit_menu_button = Gtk.Button.new_from_icon_name('document-edit-symbolic')
         self.edit_menu_button.set_can_focus(False)
         self.edit_menu_button.set_tooltip_text(_('Edit Menu'))
         self.edit_menu_button.add_css_class('flat')
@@ -96,7 +95,7 @@ class ToolBarMain(Gtk.Box):
         box.append(self.paragraph_style_menu_button_label)
         box.append(Gtk.Image.new_from_icon_name('pan-down-symbolic'))
 
-        self.paragraph_style_menu_button = PopoverManager.create_popover_button('paragraph_style')
+        self.paragraph_style_menu_button = Gtk.Button()
         self.paragraph_style_menu_button.set_child(box)
         self.paragraph_style_menu_button.set_can_focus(False)
         self.paragraph_style_menu_button.set_tooltip_text(_('Paragraph Style'))

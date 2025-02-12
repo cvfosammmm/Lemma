@@ -24,7 +24,6 @@ import pickle, base64
 
 from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
-from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.infrastructure.layout_info import LayoutInfo
 from lemma.message_bus.message_bus import MessageBus
 from lemma.history.history import History
@@ -312,7 +311,10 @@ class Actions(object):
         self.use_cases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
     def insert_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.application, History.get_active_document())
+        self.use_cases.show_insert_link_popover()
+
+    def edit_link(self, action=None, parameter=''):
+        self.use_cases.show_insert_link_popover()
 
     def remove_link(self, action=None, parameter=''):
         document = History.get_active_document()
@@ -325,9 +327,6 @@ class Actions(object):
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
         self.use_cases.set_link(bounds, None)
 
-    def edit_link(self, action=None, parameter=''):
-        DialogLocator.get_dialog('insert_link').run(self.application, History.get_active_document())
-
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry
         search_entry.grab_focus()
@@ -337,17 +336,36 @@ class Actions(object):
         toggle.set_active(not toggle.get_active())
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
-        PopoverManager.popup_at_button('paragraph_style')
+        button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y
+        self.use_cases.show_popover('paragraph_style', x, y, 'top')
 
     def show_edit_menu(self, action=None, parameter=''):
-        PopoverManager.popup_at_button('edit_menu')
+        button = self.main_window.toolbar.toolbar_right.edit_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y
+        self.use_cases.show_popover('edit_menu', x, y, 'top')
 
     def show_document_menu(self, action=None, parameter=''):
-        PopoverManager.popup_at_button('document_menu')
+        button = self.main_window.headerbar.hb_right.document_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y + allocation.size.height
+        self.use_cases.show_popover('document_menu', x, y, 'bottom')
 
     def show_hamburger_menu(self, action=None, parameter=''):
-        PopoverManager.popup_at_button('hamburger_menu')
-        return True
+        button = self.main_window.headerbar.hb_left.hamburger_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y + allocation.size.height
+        self.use_cases.show_popover('hamburger_menu', x, y, 'bottom')
 
     def show_preferences_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('preferences').run()

@@ -20,34 +20,41 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
-from lemma.ui.popovers.popover_templates import PopoverBottom
+from lemma.ui.popovers.popover_templates import PopoverView
 
 
 class Popover(object):
 
-    def __init__(self, popover_manager):
-        self.popover_manager = popover_manager
-        self.view = View(popover_manager)
+    def __init__(self, use_cases):
+        self.use_cases = use_cases
+        self.view = View(use_cases)
 
         self.key_controller = Gtk.EventControllerKey()
         self.key_controller.connect('key-pressed', self.on_keypress)
         self.view.add_controller(self.key_controller)
+
+    def on_popup(self):
+        pass
+
+    def on_popdown(self):
+        pass
 
     def on_keypress(self, controller, keyval, keycode, state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
         if keyval == Gdk.keyval_from_name('F12'):
             if state & modifiers == 0:
-                self.popover_manager.popdown()
+                self.use_cases.hide_popovers()
+
                 return True
 
         return False
 
 
-class View(PopoverBottom):
+class View(PopoverView):
 
-    def __init__(self, popover_manager):
-        PopoverBottom.__init__(self, popover_manager)
+    def __init__(self, use_cases):
+        PopoverView.__init__(self, use_cases)
 
         self.set_width(306)
 

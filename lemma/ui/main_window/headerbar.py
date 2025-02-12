@@ -60,12 +60,12 @@ class HeaderBarLeft(Gtk.WindowHandle):
         self.box.append(self.search_entry)
 
         # workspace menu
-        self.hamburger_menu_button = PopoverManager.create_popover_button('hamburger_menu')
-        self.hamburger_menu_button.set_child(Gtk.Image.new_from_icon_name('open-menu-symbolic'))
+        self.hamburger_menu_button = Gtk.Button.new_from_icon_name('open-menu-symbolic')
         self.hamburger_menu_button.set_can_focus(False)
         self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (F10)')
         self.hamburger_menu_button.add_css_class('flat')
         self.hamburger_menu_button.add_css_class('sidebar')
+        self.hamburger_menu_button.set_action_name('win.show-hamburger-menu')
         self.box.append(self.hamburger_menu_button)
 
 
@@ -106,8 +106,7 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.add_document_button.set_tooltip_text(_('New Document') + ' (' + _('Ctrl') + '+N)')
         self.add_document_button.add_css_class('flat')
 
-        self.document_menu_button = PopoverManager.create_popover_button('document_menu')
-        self.document_menu_button.set_child(Gtk.Image.new_from_icon_name('view-more-symbolic'))
+        self.document_menu_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
         self.document_menu_button.set_can_focus(False)
         self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (F12)')
         self.document_menu_button.add_css_class('flat')

@@ -21,62 +21,56 @@ from gi.repository import Gtk
 
 import os.path
 
-from lemma.ui.popovers.popover_button import PopoverButton
+from lemma.application_state.application_state import ApplicationState
+from lemma.message_bus.message_bus import MessageBus
 
 
 class PopoverManager():
 
-    popovers = dict()
-    popover_buttons = dict()
-    current_popover_name = None
-    prev_focus_widget = None
-    main_window = None
-    popoverlay = None
-    inbetween = Gtk.DrawingArea()
-
-    connected_functions = dict() # observers' functions to be called when change codes are emitted
-
-    def init(main_window):
-        PopoverManager.main_window = main_window
-        PopoverManager.popoverlay = main_window.popoverlay
-        PopoverManager.popoverlay.add_overlay(PopoverManager.inbetween)
+    def __init__(self, main_window, application):
+        self.popovers = dict()
+        self.current_popover_name = None
+        self.prev_focus_widget = None
+        self.use_cases = application.use_cases
+        self.main_window = main_window
+        self.popoverlay = main_window.popoverlay
+        self.inbetween = main_window.inbetween
 
         controller_click = Gtk.GestureClick()
-        controller_click.connect('pressed', PopoverManager.on_click_inbetween)
+        controller_click.connect('pressed', self.on_click_inbetween)
         controller_click.set_button(1)
-        PopoverManager.inbetween.add_controller(controller_click)
-
-        PopoverManager.inbetween.set_can_target(False)
+        self.inbetween.add_controller(controller_click)
+        self.inbetween.set_can_target(False)
 
         for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
             if 'popover.py' in files:
                 name = os.path.basename(path)
                 exec('import lemma.ui.popovers.' + name + '.popover as ' + name)
-                exec('PopoverManager.popovers["' + name + '"] = ' + name + '.Popover(PopoverManager)')
+                exec('self.popovers["' + name + '"] = ' + name + '.Popover(self.use_cases)')
 
-    def create_popover_button(name):
-        popover_button = PopoverButton(name, PopoverManager)
-        PopoverManager.popover_buttons[name] = popover_button
-        return popover_button
+        MessageBus.connect('app_state_changed', self.on_app_state_changed)
 
-    def get_popover(name):
-        if name in PopoverManager.popovers: return PopoverManager.popovers[name]
-        else: return None
+        self.update()
 
-    def popup_at_button(name):
-        popover = PopoverManager.get_popover(name)
+    def on_app_state_changed(self): self.update()
 
-        if popover == None: return
-        if PopoverManager.current_popover_name == name: return
-        if PopoverManager.current_popover_name != None: PopoverManager.popdown()
+    def update(self):
+        name = ApplicationState.get_value('active_popover')
 
-        button = PopoverManager.popover_buttons[name]
-        allocation = button.compute_bounds(PopoverManager.main_window).out_bounds
+        if self.current_popover_name == name: return
+        if self.current_popover_name != None: self.popdown()
+        if name == None: return
 
-        x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y + allocation.size.height
+        x, y = ApplicationState.get_value('popover_position')
+        orientation = ApplicationState.get_value('popover_orientation')
+        self.popup(name, x, y, orientation)
 
-        window_width = PopoverManager.main_window.get_width()
+    def popup(self, name, x, y, orientation):
+        popover = self.popovers[name]
+        popover.view.show_page(None, 'main', Gtk.StackTransitionType.NONE)
+
+        window_width = self.main_window.get_width()
+        window_height = self.main_window.get_height()
         arrow_width = 20
         if x - popover.view.width / 2 < 0:
             popover.view.set_margin_start(0)
@@ -87,64 +81,66 @@ class PopoverManager():
         else:
             popover.view.set_margin_start(x - popover.view.width / 2)
             popover.view.arrow.set_margin_start(popover.view.width / 2 - arrow_width / 2)
-        popover.view.set_margin_top(max(0, y))
 
-        PopoverManager.remember_focus_widget()
-        PopoverManager.current_popover_name = name
-        PopoverManager.popoverlay.add_overlay(popover.view)
-        PopoverManager.inbetween.set_can_target(True)
+        if orientation == 'bottom':
+            popover.view.set_margin_bottom(0)
+            popover.view.set_margin_top(max(0, y))
+
+            popover.view.set_halign(Gtk.Align.START)
+            popover.view.set_valign(Gtk.Align.START)
+
+            popover.view.remove_css_class('popover-top')
+            popover.view.add_css_class('popover-bottom')
+
+            popover.view.arrow_box.set_valign(Gtk.Align.START)
+            popover.view.arrow_box.set_halign(Gtk.Align.START)
+            popover.view.add_overlay(popover.view.arrow_box)
+
+        else:
+            popover.view.set_margin_bottom(window_height - y)
+            popover.view.set_margin_top(0)
+
+            popover.view.set_halign(Gtk.Align.START)
+            popover.view.set_valign(Gtk.Align.END)
+
+            popover.view.remove_css_class('popover-bottom')
+            popover.view.add_css_class('popover-top')
+
+            popover.view.arrow_box.set_valign(Gtk.Align.END)
+            popover.view.arrow_box.set_halign(Gtk.Align.START)
+            popover.view.add_overlay(popover.view.arrow_box)
+
+        self.remember_focus_widget()
+        self.current_popover_name = name
+        self.popoverlay.add_overlay(popover.view)
+        self.inbetween.set_can_target(True)
 
         popover.view.grab_focus()
-        button.set_active(True)
+        popover.on_popup()
 
-        PopoverManager.add_change_code('popup', name)
+    def popdown(self):
+        if self.current_popover_name == None: return
 
-    def popdown():
-        if PopoverManager.current_popover_name == None: return
+        name = self.current_popover_name
+        popover = self.popovers[name]
 
-        name = PopoverManager.current_popover_name
-        popover = PopoverManager.popovers[name]
+        self.popoverlay.remove_overlay(popover.view)
+        self.current_popover_name = None
+        self.inbetween.set_can_target(False)
 
-        PopoverManager.popoverlay.remove_overlay(popover.view)
-        PopoverManager.current_popover_name = None
-        PopoverManager.inbetween.set_can_target(False)
+        popover.on_popdown()
 
-        popover.view.show_page(None, 'main', Gtk.StackTransitionType.NONE)
-        if name in PopoverManager.popover_buttons:
-            PopoverManager.popover_buttons[name].set_active(False)
+        if self.prev_focus_widget != None:
+            self.prev_focus_widget.grab_focus()
+            self.prev_focus_widget = None
 
-        PopoverManager.add_change_code('popdown', name)
-        if PopoverManager.prev_focus_widget != None:
-            PopoverManager.prev_focus_widget.grab_focus()
-            PopoverManager.prev_focus_widget = None
-
-    def remember_focus_widget():
-        widget = PopoverManager.main_window
+    def remember_focus_widget(self):
+        widget = self.main_window
         while widget.get_focus_child() != None:
             widget = widget.get_focus_child()
-        PopoverManager.prev_focus_widget = widget
+        self.prev_focus_widget = widget
 
-    def on_click_inbetween(controller, n_press, x, y):
-        PopoverManager.popdown()
-
-    def add_change_code(change_code, parameter=None):
-        if change_code in PopoverManager.connected_functions:
-            for callback in PopoverManager.connected_functions[change_code]:
-                if parameter != None:
-                    callback(parameter)
-                else:
-                    callback()
-
-    def connect(change_code, callback):
-        if change_code in PopoverManager.connected_functions:
-            PopoverManager.connected_functions[change_code].add(callback)
-        else:
-            PopoverManager.connected_functions[change_code] = {callback}
-
-    def disconnect(change_code, callback):
-        if change_code in PopoverManager.connected_functions:
-            PopoverManager.connected_functions[change_code].discard(callback)
-            if len(PopoverManager.connected_functions[change_code]) == 0:
-                del(PopoverManager.connected_functions[change_code])
+    def on_click_inbetween(self, controller, n_press, x, y):
+        self.use_cases.hide_popovers()
 
 

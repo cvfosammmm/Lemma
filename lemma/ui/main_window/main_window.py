@@ -93,6 +93,8 @@ class MainWindow(Adw.ApplicationWindow):
         self.main_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.main_box.append(self.headerbar)
         self.main_box.append(self.content_paned)
+        self.inbetween = Gtk.DrawingArea()
+        self.popoverlay.add_overlay(self.inbetween)
         self.popoverlay.set_child(self.main_box)
 
         resources_path = ServiceLocator.get_resources_path()

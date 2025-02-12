@@ -272,18 +272,18 @@ overlay.popover-bottom {
 @keyframes popover-animation-top {
     from {
         opacity: 0;
-        transform: translateY(-30px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(-43px);
+        transform: translateY(-3px);
     }
 }
 overlay.popover-top {
     animation-name: popover-animation-top;
     animation-duration: 0.2s;
     animation-timing-function: ease;
-    transform: translateY(-43px);
+    transform: translateY(-3px);
 }
 overlay.popover .content {
     background: @popover_bg_color;
@@ -350,10 +350,10 @@ overlay.popover label.explaination-header {
     margin: 0px 10px;
     font-weight: bold;
 }
-button.popover.active {
+button.active {
     background: @view_active_color;
 }
-button.popover.active.sidebar {
+button.active.sidebar {
     background: @sidebar_selection;
 }
 button.sidebar:hover {
@@ -540,23 +540,38 @@ window.preferences checkbutton.single check {
 
 /* insert link dialog */
 
-window.insert-link-dialog entry {
+overlay.insert-link-popover .content {
+    background: @link_ac_bg;
+    padding: 0px;
+}
+overlay.insert-link-popover entry {
     border: none;
     outline: none;
     border-radius: 0px;
+    background: none;
+    padding: 0px;
+}
+overlay.insert-link-popover entry text {
     padding: 12px;
-    padding-top: 7px;
-    padding-bottom: 7px;
-    background: @link_entry_bg;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    margin: 0px;
 }
-window.insert-link-dialog list {
+overlay.insert-link-popover button {
+    border-radius: 0px;
+    border-top-right-radius: 5px;
+    padding: 0px 9px;
+}
+overlay.insert-link-popover scrolledwindow {
     border-top: 1px solid @link_entry_border;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    background: @link_ac_bg;
 }
-window.insert-link-dialog row {
-    padding: 0px 12px;
+overlay.insert-link-popover list {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    background: none;
+}
+overlay.insert-link-popover row {
+    padding: 8px 12px 8px 12px;
 }
 
 /* import markdown dialog */

@@ -31,7 +31,11 @@ class ApplicationState():
         ApplicationState.defaults['tools_sidebar_position'] = -1
         ApplicationState.defaults['show_backlinks'] = False
         ApplicationState.defaults['navbar_paned_position'] = -1
+
         ApplicationState.defaults['mode'] = 'documents'
+        ApplicationState.defaults['active_popover'] = None
+        ApplicationState.defaults['popover_position'] = (0, 0)
+        ApplicationState.defaults['popover_orientation'] = 'bottom'
 
         ApplicationState.defaults['document_view_width'] = 0
         ApplicationState.defaults['document_view_height'] = 0

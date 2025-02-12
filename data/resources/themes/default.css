@@ -103,7 +103,7 @@
 @define-color welcome_logo_node #d2b9d8;
 
 /* Link Dialog */
-@define-color link_ac_bg #e4dfc5;
+@define-color link_ac_bg @view_bg_color;
 @define-color link_ac_border #898361;
 @define-color link_entry_bg #fff;
 @define-color link_entry_border #ddd;

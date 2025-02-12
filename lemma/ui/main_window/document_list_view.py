@@ -55,7 +55,7 @@ class DocumentListView(Gtk.Overlay):
 
 
 class ContextMenuDocumentList(ContextMenu):
-    
+
     def __init__(self, parent):
         ContextMenu.__init__(self)
 

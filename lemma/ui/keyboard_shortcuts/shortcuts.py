@@ -22,6 +22,8 @@ from gi.repository import Gtk
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.ui.keyboard_shortcuts.shortcut_controller_app import ShortcutControllerApp
 from lemma.ui.keyboard_shortcuts.shortcut_controller_document import ShortcutControllerDocument
+from lemma.application_state.application_state import ApplicationState
+from lemma.message_bus.message_bus import MessageBus
 
 
 class Shortcuts(object):
@@ -36,13 +38,14 @@ class Shortcuts(object):
         self.main_window.add_controller(self.shortcut_controller_app)
         self.main_window.document_view.content.add_controller(self.shortcut_controller_document)
 
-        PopoverManager.connect('popup', self.on_popover_popup)
-        PopoverManager.connect('popdown', self.on_popover_popdown)
+        MessageBus.connect('app_state_changed', self.on_app_state_changed)
 
-    def on_popover_popup(self, name):
-        self.main_window.remove_controller(self.shortcut_controller_app)
+    def on_app_state_changed(self): self.update()
 
-    def on_popover_popdown(self, name):
-        self.main_window.add_controller(self.shortcut_controller_app)
+    def update(self):
+        if ApplicationState.get_value('active_popover') != None and self.shortcut_controller_app.get_widget() == self.main_window:
+            self.main_window.remove_controller(self.shortcut_controller_app)
+        elif self.shortcut_controller_app.get_widget() == None:
+            self.main_window.add_controller(self.shortcut_controller_app)
 
 

@@ -35,13 +35,14 @@ from lemma.storage.storage import Storage
 from lemma.document.document import Document
 from lemma.message_bus.message_bus import MessageBus
 from lemma.infrastructure.html_parser import HTMLParser
+from lemma.infrastructure.font_manager import FontManager
 import lemma.infrastructure.timer as timer
 
 
 class UseCases(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, main_window):
+        self.main_window = main_window
 
     def settings_set_value(self, item, value):
         Settings.set_value(item, value)
@@ -50,6 +51,48 @@ class UseCases(object):
 
     def app_state_set_value(self, item, value):
         ApplicationState.set_value(item, value)
+        Storage.save_app_state()
+        MessageBus.add_change_code('app_state_changed')
+
+    def show_insert_link_popover(self):
+        document = History.get_active_document()
+
+        document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+
+        insert = document.cursor.get_insert_node()
+        x, y = insert.layout.get_absolute_xy()
+        x -= document.clipping.offset_x
+        y -= document.clipping.offset_y
+        document_view = self.main_window.document_view
+        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
+        x += document_view_allocation.origin.x
+        y += document_view_allocation.origin.y
+        x += ApplicationState.get_value('document_padding_left')
+        y += ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        fontname = FontManager.get_fontname_from_node(insert)
+        padding_top = FontManager.get_padding_top(fontname)
+        padding_bottom = FontManager.get_padding_bottom(fontname)
+        y += insert.layout.height - padding_top - padding_bottom
+
+        orientation = 'bottom'
+        if y + 260 > document_view_allocation.size.height:
+            orientation = 'top'
+            y -= insert.layout.height - padding_top - padding_bottom
+
+        self.show_popover('link_ac', x, y, orientation)
+
+    def show_popover(self, name, x, y, orientation='bottom'):
+        ApplicationState.set_value('active_popover', name)
+        ApplicationState.set_value('popover_position', (x, y))
+        ApplicationState.set_value('popover_orientation', orientation)
+        Storage.save_app_state()
+        MessageBus.add_change_code('app_state_changed')
+
+    def hide_popovers(self):
+        ApplicationState.set_value('active_popover', None)
+        ApplicationState.set_value('popover_position', (0, 0))
         Storage.save_app_state()
         MessageBus.add_change_code('app_state_changed')
 

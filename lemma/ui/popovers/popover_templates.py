@@ -22,14 +22,14 @@ from gi.repository import Gtk, Gdk, GLib
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 
 
-class Popover(Gtk.Overlay):
+class PopoverView(Gtk.Overlay):
 
-    def __init__(self, popover_manager):
+    def __init__(self, use_cases):
         Gtk.Overlay.__init__(self)
         self.set_focusable(True)
         self.add_css_class('popover')
 
-        self.popover_manager = popover_manager
+        self.use_cases = use_cases
 
         self.key_controller = Gtk.EventControllerKey()
         self.key_controller.connect('key-pressed', self.on_keypress)
@@ -60,7 +60,7 @@ class Popover(Gtk.Overlay):
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
         if (state & modifiers, keyval) == (0, Gdk.keyval_from_name('Escape')):
-            self.popover_manager.popdown()
+            self.use_cases.hide_popovers()
 
         if (state & modifiers, keyval) == (0, Gdk.keyval_from_name('Return')):
             self.activate_selected_button()
@@ -124,7 +124,7 @@ class Popover(Gtk.Overlay):
         button.connect('clicked', self.on_closing_button_click)
 
     def on_closing_button_click(self, button):
-        self.popover_manager.popdown()
+        self.use_cases.hide_popovers()
 
     def add_widget(self, widget, pagename='main'):
         box = self.stack.get_child_by_name(pagename)
@@ -216,35 +216,5 @@ class Popover(Gtk.Overlay):
         self.selected_button_id[pagename] = button_id
         if button_id != None:
             self.buttons_by_id[pagename][button_id].add_css_class('highlight')
-
-
-class PopoverTop(Popover):
-
-    def __init__(self, popover_manager):
-        Popover.__init__(self, popover_manager)
-
-        self.set_halign(Gtk.Align.START)
-        self.set_valign(Gtk.Align.END)
-
-        self.add_css_class('popover-top')
-
-        self.arrow_box.set_valign(Gtk.Align.END)
-        self.arrow_box.set_halign(Gtk.Align.START)
-        self.add_overlay(self.arrow_box)
-
-
-class PopoverBottom(Popover):
-
-    def __init__(self, popover_manager):
-        Popover.__init__(self, popover_manager)
-
-        self.set_halign(Gtk.Align.START)
-        self.set_valign(Gtk.Align.START)
-
-        self.add_css_class('popover-bottom')
-
-        self.arrow_box.set_valign(Gtk.Align.START)
-        self.arrow_box.set_halign(Gtk.Align.START)
-        self.add_overlay(self.arrow_box)
 
 
