@@ -71,7 +71,6 @@ class Popover():
             self.view.add_button.set_tooltip_text(_('Insert Link'))
 
         self.view.entry_link_target.grab_focus()
-        self.validate()
         self.update_list()
 
     def on_popdown(self):
@@ -137,7 +136,6 @@ class Popover():
 
     def on_entry_link_target_changed(self, entry):
         self.current_values['link_target'] = entry.get_text()
-        self.validate()
         if self.view.listbox.get_selected_row() == None or (entry.get_text() != self.view.listbox.get_selected_row().title):
             self.update_list()
 
@@ -149,9 +147,6 @@ class Popover():
         self.view.entry_link_target.set_position(-1)
         self.submit()
 
-    def validate(self):
-        self.view.add_button.set_sensitive(self.is_valid())
-
     def update_list(self):
         search_terms = self.view.entry_link_target.get_text().split()
 
@@ -159,14 +154,11 @@ class Popover():
         for document in DocumentRepo.get_by_terms_in_title(search_terms, limit=20):
             self.view.listbox.append(ACItem(document.title))
 
-    def is_valid(self):
-        return self.current_values['link_target'] != ''
-
     def on_add_button_clicked(self, button):
         self.submit()
 
     def submit(self):
-        if self.is_valid():
+        if self.current_values['link_target'] != '':
             if self.bounds == None:
                 tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
                 text = xml_helpers.escape(self.current_values['link_target'])
@@ -174,7 +166,10 @@ class Popover():
                 self.use_cases.insert_xml(xml)
             else:
                 self.use_cases.set_link(self.bounds, self.current_values['link_target'])
-            self.use_cases.hide_popovers()
+        elif self.bounds != None:
+            self.use_cases.set_link(self.bounds, None)
+
+        self.use_cases.hide_popovers()
 
 
 class View(PopoverView):
