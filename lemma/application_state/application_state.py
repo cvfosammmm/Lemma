@@ -37,6 +37,7 @@ class ApplicationState():
         ApplicationState.defaults['document_padding_left'] = 48
         ApplicationState.defaults['document_padding_bottom'] = 120
         ApplicationState.defaults['document_padding_top'] = 48
+        ApplicationState.defaults['document_view_hide_cursor_on_unfocus'] = True
 
         ApplicationState.defaults['tags_at_cursor'] = set()
 

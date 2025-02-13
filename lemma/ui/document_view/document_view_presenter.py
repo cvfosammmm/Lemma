@@ -304,7 +304,7 @@ class DocumentViewPresenter():
         ctx.fill()
 
     def draw_cursor(self, ctx, offset_x, offset_y):
-        if not self.content.has_focus(): return
+        if not self.content.has_focus() and ApplicationState.get_value('document_view_hide_cursor_on_unfocus'): return
         if self.model.document.cursor.has_selection(): return
 
         insert = self.model.document.cursor.get_insert_node()

@@ -50,6 +50,8 @@ class Popover():
         self.view.listbox.connect('selected-rows-changed', self.on_selected_rows_changed)
 
     def on_popup(self):
+        self.use_cases.app_state_set_value('document_view_hide_cursor_on_unfocus', False)
+
         self.init_current_values()
 
         document = History.get_active_document()
@@ -74,7 +76,7 @@ class Popover():
         self.update_list()
 
     def on_popdown(self):
-        pass
+        self.use_cases.app_state_set_value('document_view_hide_cursor_on_unfocus', True)
 
     def init_current_values(self):
         self.current_values['link_target'] = ''
