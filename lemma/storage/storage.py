@@ -34,14 +34,6 @@ class Storage(object):
             except EOFError: return False
         return True
 
-    def populate_app_state():
-        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'app_state.pickle'), 'rb')
-        except IOError: return False
-        else:
-            try: ApplicationState.data = pickle.load(filehandle)
-            except EOFError: return False
-        return True
-
     def populate_history():
         pathname = os.path.join(ServiceLocator.get_notes_folder(), 'workspace')
         if not os.path.isfile(pathname): return
@@ -60,11 +52,6 @@ class Storage(object):
         try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'settings.pickle'), 'wb')
         except IOError: return False
         else: pickle.dump(Settings.data, filehandle)
-
-    def save_app_state():
-        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'app_state.pickle'), 'wb')
-        except IOError: return False
-        else: pickle.dump(ApplicationState.data, filehandle)
 
     def save_history():
         pathname = os.path.join(ServiceLocator.get_notes_folder(), 'workspace')

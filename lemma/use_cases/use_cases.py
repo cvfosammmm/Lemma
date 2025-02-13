@@ -51,7 +51,6 @@ class UseCases(object):
 
     def app_state_set_value(self, item, value):
         ApplicationState.set_value(item, value)
-        Storage.save_app_state()
         MessageBus.add_change_code('app_state_changed')
 
     def show_insert_link_popover(self):
@@ -90,13 +89,11 @@ class UseCases(object):
         ApplicationState.set_value('active_popover', name)
         ApplicationState.set_value('popover_position', (x, y))
         ApplicationState.set_value('popover_orientation', orientation)
-        Storage.save_app_state()
         MessageBus.add_change_code('app_state_changed')
 
     def hide_popovers(self):
         ApplicationState.set_value('active_popover', None)
         ApplicationState.set_value('popover_position', (0, 0))
-        Storage.save_app_state()
         MessageBus.add_change_code('app_state_changed')
 
     def open_link(self, link_target):
@@ -136,13 +133,11 @@ class UseCases(object):
 
     def enter_draft_mode(self):
         ApplicationState.set_value('mode', 'draft')
-        Storage.save_app_state()
 
         MessageBus.add_change_code('mode_set')
 
     def leave_draft_mode(self):
         ApplicationState.set_value('mode', 'documents')
-        Storage.save_app_state()
 
         MessageBus.add_change_code('mode_set')
 
@@ -173,7 +168,6 @@ class UseCases(object):
         if update_history and document != None:
             History.add(document)
         History.activate_document(document)
-        Storage.save_app_state()
         Storage.save_history()
 
         MessageBus.add_change_code('mode_set')

@@ -25,7 +25,7 @@ import os.path, os
 
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
 from lemma.infrastructure.html_exporter import HTMLExporter
-from lemma.application_state.application_state import ApplicationState
+from lemma.settings.settings import Settings
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
 
@@ -51,7 +51,7 @@ class Dialog(object):
         self.current_values['documents'] = [DocumentRepo.get_by_id(doc_id) for doc_id in DocumentRepo.list()]
 
     def populate_view(self):
-        last_export_folder = ApplicationState.get_value('last_bulk_export_folder')
+        last_export_folder = Settings.get_value('last_bulk_export_folder')
         if last_export_folder == None or not os.path.exists(last_export_folder) or not os.path.isdir(last_export_folder):
             last_export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
         if last_export_folder != None:
@@ -113,7 +113,7 @@ class Dialog(object):
 
     def on_submit_button_clicked(self, button):
         filename = self.current_values['filename']
-        self.use_cases.app_state_set_value('last_bulk_export_folder', os.path.dirname(filename))
+        self.use_cases.settings_set_value('last_bulk_export_folder', os.path.dirname(filename))
 
         with zipfile.ZipFile(filename, 'x') as file:
             for document in self.current_values['documents']:

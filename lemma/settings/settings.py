@@ -26,6 +26,19 @@ class Settings():
         Settings.defaults['color_scheme'] = 'default'
         Settings.defaults['update_backlinks'] = True
 
+        Settings.defaults['width'] = 1020
+        Settings.defaults['height'] = 550
+        Settings.defaults['is_maximized'] = False
+        Settings.defaults['sidebar_position'] = 250
+        Settings.defaults['show_tools_sidebar'] = False
+        Settings.defaults['tools_sidebar_position'] = -1
+        Settings.defaults['show_backlinks'] = False
+        Settings.defaults['navbar_paned_position'] = -1
+
+        Settings.defaults['last_export_folder'] = None
+        Settings.defaults['last_bulk_export_folder'] = None
+        Settings.defaults['last_import_folder'] = None
+
         Settings.data = Settings.defaults
 
     def get_value(item):

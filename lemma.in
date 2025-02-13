@@ -65,7 +65,6 @@ Settings.init()
 ApplicationState.init()
 DocumentRepo.init()
 Storage.populate_settings()
-Storage.populate_app_state()
 Storage.populate_history()
 
 do_time = '--time' in sys.argv

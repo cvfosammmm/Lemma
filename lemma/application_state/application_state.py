@@ -23,14 +23,6 @@ class ApplicationState():
 
     def init():
         ApplicationState.defaults = dict()
-        ApplicationState.defaults['width'] = 1020
-        ApplicationState.defaults['height'] = 550
-        ApplicationState.defaults['is_maximized'] = False
-        ApplicationState.defaults['sidebar_position'] = 250
-        ApplicationState.defaults['show_tools_sidebar'] = False
-        ApplicationState.defaults['tools_sidebar_position'] = -1
-        ApplicationState.defaults['show_backlinks'] = False
-        ApplicationState.defaults['navbar_paned_position'] = -1
 
         ApplicationState.defaults['mode'] = 'documents'
         ApplicationState.defaults['active_popover'] = None
@@ -47,10 +39,6 @@ class ApplicationState():
         ApplicationState.defaults['document_padding_top'] = 48
 
         ApplicationState.defaults['tags_at_cursor'] = set()
-
-        ApplicationState.defaults['last_export_folder'] = None
-        ApplicationState.defaults['last_bulk_export_folder'] = None
-        ApplicationState.defaults['last_import_folder'] = None
 
         ApplicationState.data = ApplicationState.defaults
 

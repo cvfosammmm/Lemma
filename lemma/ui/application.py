@@ -52,7 +52,6 @@ class Application(Adw.Application):
         ColorManager.init(self.main_window)
         self.main_window.add_widgets()
         DialogLocator.init_dialogs(self.main_window, self.use_cases)
-        self.use_cases.hide_popovers()
 
         self.colors = colors.Colors(self.main_window)
         self.document_history = document_history.DocumentHistory(self.main_window, self)

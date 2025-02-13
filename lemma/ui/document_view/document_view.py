@@ -98,7 +98,6 @@ class DocumentView(Observable):
         self.add_change_code('changed')
 
     def set_size(self, width, height):
-        self.last_cursor_or_scrolling_change = time.time()
         self.use_cases.app_state_set_value('document_view_width', width)
         self.use_cases.app_state_set_value('document_view_height', height)
         offset_x = self.view.adjustment_x.get_value()
