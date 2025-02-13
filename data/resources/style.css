@@ -305,10 +305,10 @@ overlay.popover-top .arrow {
     background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
 }
 overlay.popover-bottom .content {
-    margin-top: 10px;
+    margin-top: 8px;
 }
 overlay.popover-top .content {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 overlay.popover button.action, overlay.popover button.menu, overlay.popover button.header {
     background: none;
