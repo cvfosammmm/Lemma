@@ -58,8 +58,6 @@ class UseCases(object):
         document = History.get_active_document()
 
         document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
-        DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
 
         insert = document.cursor.get_insert_node()
         x, y = insert.layout.get_absolute_xy()
@@ -80,6 +78,11 @@ class UseCases(object):
         if y + 260 > document_view_allocation.size.height:
             orientation = 'top'
             y -= insert.layout.height - padding_top - padding_bottom
+
+        if not document.cursor.has_selection() and insert.is_inside_link():
+            document.add_command('move_cursor_to_node', *insert.link_bounds())
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
 
         self.show_popover('link_ac', x, y, orientation)
 
@@ -390,6 +393,7 @@ class UseCases(object):
         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
         char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
         document.add_command('set_link', char_nodes, target)
+        document.add_command('move_cursor_to_node', bounds[1])
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
         MessageBus.add_change_code('document_ast_changed')

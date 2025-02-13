@@ -553,8 +553,8 @@ overlay.insert-link-popover entry {
 }
 overlay.insert-link-popover entry text {
     padding: 12px;
-    padding-top: 11px;
-    padding-bottom: 11px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     margin: 0px;
 }
 overlay.insert-link-popover button {
@@ -572,6 +572,12 @@ overlay.insert-link-popover list {
 }
 overlay.insert-link-popover row {
     padding: 8px 12px 8px 12px;
+}
+overlay.insert-link-popover row:selected, overlay.insert-link-popover row:hover {
+    background: @view_hover_color;
+}
+overlay.insert-link-popover row:active {
+    background: @borders;
 }
 
 /* import markdown dialog */
