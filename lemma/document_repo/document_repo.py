@@ -70,15 +70,17 @@ class DocumentRepo():
 
 
     @timer.timer
-    def list():
+    def list(limit=None):
         cursor = DocumentRepo.db_connection.cursor()
-        result = cursor.execute("SELECT id FROM document ORDER BY last_modified DESC")
+        limit_clause = 'LIMIT ' + str(limit) if limit != None else ''
+        result = cursor.execute("SELECT id FROM document ORDER BY last_modified DESC" + limit_clause)
         return [doc[0] for doc in result]
 
     @timer.timer
-    def list_by_link_target(title):
+    def list_by_link_target(title, limit=None):
         cursor = DocumentRepo.db_connection.cursor()
-        result = cursor.execute("SELECT document.id FROM document INNER JOIN link_graph ON document.id=link_graph.document_id WHERE link_graph.link_target='" + title + "' ORDER BY document.last_modified DESC")
+        limit_clause = 'LIMIT ' + str(limit) if limit != None else ''
+        result = cursor.execute("SELECT document.id FROM document INNER JOIN link_graph ON document.id=link_graph.document_id WHERE link_graph.link_target='" + title + "' ORDER BY document.last_modified DESC" + limit_clause)
         return [doc[0] for doc in result]
 
     @timer.timer
@@ -93,6 +95,23 @@ class DocumentRepo():
             if title == document.title:
                 return document
         return None
+
+    @timer.timer
+    def get_by_terms_in_title(terms, limit=None):
+        cursor = DocumentRepo.db_connection.cursor()
+        query_result = cursor.execute("SELECT id FROM document ORDER BY last_modified DESC")
+
+        def is_match(document):
+            if len(terms) == 0: return True
+            return min(map(lambda x: x.lower() in document.title.lower(), terms))
+
+        result = []
+        for doc in query_result:
+            doc = DocumentRepo.get_by_id(doc[0])
+            if is_match(doc):
+                result.append(doc)
+            if len(result) == limit: break
+        return result
 
     @timer.timer
     def get_max_document_id():

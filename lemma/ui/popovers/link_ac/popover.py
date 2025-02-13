@@ -48,7 +48,6 @@ class Popover():
 
         self.view.listbox.connect('row-activated', self.on_suggestion_row_activated)
         self.view.listbox.connect('selected-rows-changed', self.on_selected_rows_changed)
-        self.search_terms = []
 
     def on_popup(self):
         self.init_current_values()
@@ -160,21 +159,14 @@ class Popover():
         self.view.add_button.set_sensitive(self.is_valid())
 
     def update_list(self):
-        self.search_terms = self.view.entry_link_target.get_text().split()
+        search_terms = self.view.entry_link_target.get_text().split()
 
         self.view.listbox.remove_all()
-        for document_id in DocumentRepo.list():
-            document = DocumentRepo.get_by_id(document_id)
-
-            if self.is_match(document):
-                self.view.listbox.append(ACItem(document.title))
+        for document in DocumentRepo.get_by_terms_in_title(search_terms, limit=20):
+            self.view.listbox.append(ACItem(document.title))
 
     def is_valid(self):
         return self.current_values['link_target'] != ''
-
-    def is_match(self, document):
-        if len(self.search_terms) == 0: return True
-        return min(map(lambda x: x.lower() in document.title.lower(), self.search_terms))
 
     def on_add_button_clicked(self, button):
         self.submit()
