@@ -109,7 +109,7 @@ class DocumentView(Observable):
         if x != self.cursor_x or y != self.cursor_y:
             self.cursor_x, self.cursor_y = x, y
             self.last_cursor_or_scrolling_change = time.time()
-            self.add_change_code('changed')
+            self.add_change_code('pointer_changed')
 
     def set_keyboard_modifiers_state(self, state):
         if state != self.keyboard_modifiers_state:

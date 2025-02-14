@@ -47,6 +47,7 @@ class DocumentViewPresenter():
         self.content.set_draw_func(self.draw)
 
         self.model.connect('changed', self.on_change)
+        self.model.connect('pointer_changed', self.on_pointer_change)
 
     def on_change(self, model):
         if self.model.document == None: return
@@ -55,6 +56,9 @@ class DocumentViewPresenter():
         self.update_scrollbars()
         self.update_pointer()
         self.view.content.queue_draw()
+
+    def on_pointer_change(self, model):
+        self.update_pointer()
 
     def update_size(self):
         document = self.model.document
