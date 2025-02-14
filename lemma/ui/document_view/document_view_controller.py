@@ -58,6 +58,7 @@ class DocumentViewController():
         self.focus_controller = Gtk.EventControllerFocus()
         self.focus_controller.connect('enter', self.on_focus_in)
         self.focus_controller.connect('leave', self.on_focus_out)
+        self.focus_controller.connect('notify::is-focus', self.on_focus_change)
         self.content.add_controller(self.focus_controller)
 
         self.drag_controller = Gtk.GestureDrag()
@@ -292,6 +293,9 @@ class DocumentViewController():
 
     def on_focus_out(self, controller):
         self.im_context.focus_out()
+        self.view.content.queue_draw()
+
+    def on_focus_change(self, controller, pspec):
         self.view.content.queue_draw()
 
     def on_enter(self, controller, x, y):
