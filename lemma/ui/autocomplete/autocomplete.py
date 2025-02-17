@@ -53,9 +53,9 @@ class Autocomplete():
 
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('document_changed', self.on_document_changed)
-        MessageBus.connect('nodes_inserted', self.on_nodes_inserted)
+        MessageBus.connect('keyboard_input', self.on_keyboard_input)
 
-    def on_nodes_inserted(self):
+    def on_keyboard_input(self):
         self.update_command_at_cursor()
         if not self.is_active:
             self.activate_if_possible()

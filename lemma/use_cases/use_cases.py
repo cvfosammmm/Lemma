@@ -213,6 +213,17 @@ class UseCases(object):
         MessageBus.add_change_code('document_changed')
         MessageBus.add_change_code('document_ast_changed')
 
+    def im_commit(self, text):
+        document = History.get_active_document()
+        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+
+        self.insert_xml('<char tags="' + ' '.join(tags_at_cursor) + '">' + xml_helpers.escape(text) + '</char>')
+
+        if not document.cursor.has_selection() and text.isspace():
+            self.replace_max_string_before_cursor(tags_at_cursor)
+
+        MessageBus.add_change_code('keyboard_input')
+
     def replace_section(self, node_from, node_to, xml):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
@@ -281,7 +292,6 @@ class UseCases(object):
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
 
             DocumentRepo.update(document)
-            MessageBus.add_change_code('nodes_inserted')
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
 
@@ -350,7 +360,6 @@ class UseCases(object):
             document.add_command('update_implicit_x_position')
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
-            MessageBus.add_change_code('nodes_inserted')
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
 
@@ -387,7 +396,6 @@ class UseCases(object):
                     document.add_command('update_implicit_x_position')
                     document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
                     DocumentRepo.update(document)
-                    MessageBus.add_change_code('nodes_inserted')
                     MessageBus.add_change_code('document_changed')
                     MessageBus.add_change_code('document_ast_changed')
                     return True

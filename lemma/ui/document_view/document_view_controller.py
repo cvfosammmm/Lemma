@@ -279,13 +279,7 @@ class DocumentViewController():
         return True
 
     def on_im_commit(self, im_context, text):
-        if self.model.document == None: return False
-        document = self.model.document
-
-        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
-        self.use_cases.insert_xml('<char tags="' + ' '.join(tags_at_cursor) + '">' + xml_helpers.escape(text) + '</char>')
-        if not document.cursor.has_selection() and text.isspace():
-            self.use_cases.replace_max_string_before_cursor(tags_at_cursor)
+        self.use_cases.im_commit(text)
 
     def on_focus_in(self, controller):
         self.im_context.focus_in()
