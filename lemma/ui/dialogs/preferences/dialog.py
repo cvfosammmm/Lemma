@@ -22,6 +22,7 @@ from gi.repository import Gtk
 import lemma.ui.dialogs.preferences.preferences_viewgtk as view
 import lemma.ui.dialogs.preferences.page_colors as page_colors
 import lemma.ui.dialogs.preferences.page_workspace as page_workspace
+import lemma.ui.dialogs.preferences.page_autocomplete as page_autocomplete
 
 
 class Dialog(object):
@@ -39,12 +40,15 @@ class Dialog(object):
 
         self.page_colors = page_colors.PageColors(self, self.main_window, self.use_cases)
         self.page_workspace = page_workspace.PageWorkspace(self, self.main_window, self.use_cases)
+        self.page_autocomplete = page_autocomplete.PageAutocomplete(self, self.main_window, self.use_cases)
 
         self.view.notebook.append_page(self.page_colors.view, Gtk.Label.new(_('Colors')))
         self.view.notebook.append_page(self.page_workspace.view, Gtk.Label.new(_('Workspace')))
+        self.view.notebook.append_page(self.page_autocomplete.view, Gtk.Label.new(_('Autocomplete')))
 
         self.page_colors.init()
         self.page_workspace.init()
+        self.page_autocomplete.init()
 
     def on_check_button_toggle(self, button, preference_name):
         self.use_cases.settings_set_value(preference_name, button.get_active())

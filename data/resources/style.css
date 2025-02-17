@@ -579,6 +579,36 @@ overlay.insert-link-popover row:selected, overlay.insert-link-popover row:hover 
 overlay.insert-link-popover row:active {
     background: @borders;
 }
+overlay.insert-link-popover scrollbar slider {
+    min-height: 18px;
+}
+
+/* insert link dialog */
+
+scrolledwindow.autocomplete {
+    background: @link_ac_bg;
+    padding: 0px;
+    border-radius: 10px;
+    border: 1px solid @borders;
+    box-shadow: 0 1px 5px 1px @popover_shadow_1, 0 2px 14px 3px @popover_shadow_2;
+}
+scrolledwindow.autocomplete list {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    background: none;
+}
+scrolledwindow.autocomplete row {
+    padding: 8px 12px 8px 12px;
+}
+scrolledwindow.autocomplete row:selected, scrolledwindow.autocomplete row:hover {
+    background: @view_hover_color;
+}
+scrolledwindow.autocomplete row:active {
+    background: @borders;
+}
+scrolledwindow.autocomplete scrollbar slider {
+    min-height: 18px;
+}
 
 /* import markdown dialog */
 

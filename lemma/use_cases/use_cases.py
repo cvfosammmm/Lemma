@@ -213,6 +213,24 @@ class UseCases(object):
         MessageBus.add_change_code('document_changed')
         MessageBus.add_change_code('document_ast_changed')
 
+    def replace_section(self, node_from, node_to, xml):
+        document = History.get_active_document()
+        insert = document.cursor.get_insert_node()
+        parser = xml_parser.XMLParser()
+        nodes = parser.parse(xml, insert.parent.type)
+
+        commands = []
+        commands.append(['move_cursor_to_node', node_to, node_from])
+        commands.append(['delete_selection'])
+        commands.append(['insert_nodes', nodes])
+        document.add_composite_command(*commands)
+
+        document.add_command('update_implicit_x_position')
+        document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+        MessageBus.add_change_code('document_ast_changed')
+
     @timer.timer
     def insert_xml(self, xml):
         document = History.get_active_document()
@@ -263,6 +281,7 @@ class UseCases(object):
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
 
             DocumentRepo.update(document)
+            MessageBus.add_change_code('nodes_inserted')
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
 
@@ -331,6 +350,7 @@ class UseCases(object):
             document.add_command('update_implicit_x_position')
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
+            MessageBus.add_change_code('nodes_inserted')
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
 
@@ -367,6 +387,7 @@ class UseCases(object):
                     document.add_command('update_implicit_x_position')
                     document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
                     DocumentRepo.update(document)
+                    MessageBus.add_change_code('nodes_inserted')
                     MessageBus.add_change_code('document_changed')
                     MessageBus.add_change_code('document_ast_changed')
                     return True

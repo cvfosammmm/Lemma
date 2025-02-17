@@ -25,6 +25,7 @@ class Settings():
         Settings.defaults = dict()
         Settings.defaults['color_scheme'] = 'default'
         Settings.defaults['update_backlinks'] = True
+        Settings.defaults['stylized_latex_autocomplete'] = True
 
         Settings.defaults['width'] = 1020
         Settings.defaults['height'] = 550

@@ -34,6 +34,7 @@ import lemma.ui.document_list.document_list as document_list
 import lemma.ui.document_draft.document_draft as document_draft
 import lemma.ui.backlinks.backlinks as backlinks
 import lemma.ui.actions.actions as actions
+import lemma.ui.autocomplete.autocomplete as autocomplete
 import lemma.use_cases.use_cases as use_cases
 import lemma.ui.keyboard_shortcuts.shortcuts as shortcuts
 
@@ -62,6 +63,7 @@ class Application(Adw.Application):
         self.document_list = document_list.DocumentList(self.main_window, self)
         self.backlinks = backlinks.Backlinks(self.main_window, self)
         self.actions = actions.Actions(self.main_window, self)
+        self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window, self)
         self.popover_manager = PopoverManager(self.main_window, self)
