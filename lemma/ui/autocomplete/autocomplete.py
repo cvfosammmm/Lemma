@@ -186,7 +186,7 @@ class Autocomplete():
 
         if not self.is_active: return
 
-        self.suggestions = AutocompleteDB.get_suggestions(self.command_at_cursor[1:])
+        self.suggestions = AutocompleteDB.get_suggestions(self.command_at_cursor[1:], limit=20)
 
         if len(self.suggestions) > 0:
             self.widget.set_items(self.suggestions)

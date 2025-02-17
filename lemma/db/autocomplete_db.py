@@ -160,11 +160,19 @@ class AutocompleteDB(object):
         'nexists': '∄',
         'complement': '∁',
         'mathbbN': 'ℕ',
+        'N': 'ℕ',
         'mathbbZ': 'ℤ',
+        'Z': 'ℤ',
         'mathbbQ': 'ℚ',
+        'Q': 'ℚ',
         'mathbbI': '𝕀',
+        'I': '𝕀',
         'mathbbR': 'ℝ',
+        'R': 'ℝ',
         'mathbbC': 'ℂ',
+        'C': 'ℂ',
+        'Bbbk': '𝕂',
+        'K': '𝕂',
         'Im': 'ℑ',
         'Re': 'ℜ',
         'aleph': 'ℵ',
@@ -172,7 +180,6 @@ class AutocompleteDB(object):
         'hbar': 'ℏ',
         'imath': '𝚤',
         'jmath': '𝚥',
-        'Bbbk': '𝕂',
         'ell': 'ℓ',
         'bot': '⊥',
         'top': '⊤',
@@ -258,7 +265,9 @@ class AutocompleteDB(object):
         'll': '≪',
         'gg': '≫',
         'leq': '≤',
+        'le': '≤',
         'geq': '≥',
+        'ge': '≥',
         'lneq': '⪇',
         'gneq': '⪈',
         'nleq': '≰',
@@ -330,14 +339,17 @@ class AutocompleteDB(object):
         'mathcalW': '𝒲',
         'mathcalX': '𝒳',
         'mathcalY': '𝒴',
-        'mathcalZ': '𝒵'
+        'mathcalZ': '𝒵',
+        'qed': '∎'
     }
 
-    def get_suggestions(term):
+    def get_suggestions(term, limit=None):
         result = []
         for command in AutocompleteDB.stylized_latex_to_xml:
             if command.lower().startswith(term.lower()):
                 result.append(command)
+            if len(result) == limit:
+                break
         return result
 
     def get_xml(command):
