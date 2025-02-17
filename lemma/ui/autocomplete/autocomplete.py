@@ -149,8 +149,13 @@ class Autocomplete():
                 break
             else:
                 break
-        self.command_at_cursor = command_at_cursor
-        self.command_at_cursor_first_node = first_command_node
+
+        if first_command_node != None:
+            self.command_at_cursor = command_at_cursor
+            self.command_at_cursor_first_node = first_command_node
+        else:
+            self.command_at_cursor = ''
+            self.command_at_cursor_first_node = None
 
     def activate_if_possible(self):
         # No activation if autocomplete is disabled.
