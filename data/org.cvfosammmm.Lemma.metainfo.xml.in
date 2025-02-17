@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="29" date="2025-2-17">
+            <description translatable="no">
+                <p>Better links autocomplete, backslash autocomplete, ...</p>
+            </description>
+        </release>
         ​<release version="28" date="2025-2-7">
             <description translatable="no">
                 <p>More ligatures, bug fixes, ...</p>

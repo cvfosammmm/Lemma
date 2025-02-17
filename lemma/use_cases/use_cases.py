@@ -814,13 +814,14 @@ class UseCases(object):
         insert_height = insert_node.layout.height
         window_height = ApplicationState.get_value('document_view_height')
         scrolling_offset_y = document.clipping.offset_y
+        content_height = document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
         if window_height <= 0: return (0, 0)
         if insert_y == content_offset: return (0, 0)
         if insert_y < scrolling_offset_y:
             if insert_height > window_height: return (0, insert_y - window_height + insert_height)
             else: return (0, insert_y)
-        if insert_position[1] == document.layout.height - document.layout.children[-1].height:
+        if insert_position[1] == document.layout.height - document.layout.children[-1].height and content_height >= window_height:
             return (0, document.layout.height + content_offset + ApplicationState.get_value('document_padding_bottom') - window_height)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
             return (0, insert_y - window_height + insert_height)
