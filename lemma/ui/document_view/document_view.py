@@ -171,8 +171,8 @@ class DocumentView(Observable):
         if self.document != None and not self.document.cursor.has_selection():
             current_node = self.document.cursor.get_insert_node()
             prev_node = current_node.prev_in_parent()
-            if prev_node != None and prev_node.link != None and current_node.link != None and current_node.link.target == prev_node.link.target:
-                self.link_target_at_cursor = current_node.link.target
+            if prev_node != None and current_node.link == prev_node.link:
+                self.link_target_at_cursor = current_node.link
 
         self.update_link_overlay_text()
 

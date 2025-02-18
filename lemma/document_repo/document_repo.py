@@ -172,7 +172,7 @@ class DocumentRepo():
             links = DocumentRepo.find_links(document.ast)
             data = set()
             for link in links:
-                data.add((document.id, link.target))
+                data.add((document.id, link))
 
             cursor.execute("INSERT INTO document VALUES (" + str(document.id) + ", " + str(int(document.last_modified * 10000000)) + ")")
             cursor.executemany("INSERT INTO link_graph VALUES (?, ?)", list(data))

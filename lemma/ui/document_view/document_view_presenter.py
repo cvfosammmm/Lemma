@@ -27,11 +27,11 @@ import cairo
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.document.layout.layout_widget import LayoutWidget
-from lemma.document.layout.layout_char import LayoutChar
-from lemma.document.layout.layout_placeholder import LayoutPlaceholder
-from lemma.document.layout.layout_mathatom import LayoutMathAtom
-from lemma.document.layout.layout_mathroot import LayoutMathRoot
+from lemma.document.layout import LayoutWidget
+from lemma.document.layout import LayoutChar
+from lemma.document.layout import LayoutPlaceholder
+from lemma.document.layout import LayoutMathAtom
+from lemma.document.layout import LayoutMathRoot
 from lemma.application_state.application_state import ApplicationState
 import lemma.infrastructure.timer as timer
 
@@ -128,10 +128,7 @@ class DocumentViewPresenter():
         else:
             self.content.set_cursor_from_name('default')
 
-        if link != None:
-            self.model.set_link_target_at_pointer(link.target)
-        else:
-            self.model.set_link_target_at_pointer(None)
+        self.model.set_link_target_at_pointer(link)
 
     def scroll_to_position(self, position, animate=False):
         document = self.model.document
@@ -279,8 +276,8 @@ class DocumentViewPresenter():
 
     def get_fg_color_by_node(self, node):
         if node.link != None:
-            if urlparse(node.link.target).scheme in ['http', 'https'] or \
-                DocumentRepo.get_by_title(node.link.target) != None:
+            if urlparse(node.link).scheme in ['http', 'https'] or \
+                DocumentRepo.get_by_title(node.link) != None:
                 return ColorManager.get_ui_color('links')
             else:
                 return ColorManager.get_ui_color('links_page_not_existing')

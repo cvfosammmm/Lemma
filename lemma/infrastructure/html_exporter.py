@@ -102,7 +102,7 @@ class HTMLExporter(object):
         if 'bold' in node.tags:
             text = '<strong>' + text + '</strong>'
         if node.link != None:
-            text = '<a href="' + urllib.parse.quote_plus(node.link.target) + '">' + text + '</a>'
+            text = '<a href="' + urllib.parse.quote_plus(node.link) + '">' + text + '</a>'
 
         self.html += text
 

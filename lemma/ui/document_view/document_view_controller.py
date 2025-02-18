@@ -111,7 +111,7 @@ class DocumentViewController():
 
                 else:
                     if link != None:
-                        self.model.selected_link_target = link.target
+                        self.model.selected_link_target = link
                     elif leaf_box != None and leaf_box.node.focus_on_click():
                         self.use_cases.select_node(leaf_box.node)
                     else:
@@ -119,7 +119,7 @@ class DocumentViewController():
 
             else:
                 if link != None and int(state & modifiers) == 0:
-                    self.model.selected_link_target = link.target
+                    self.model.selected_link_target = link
 
                 else:
                     insert = document.cursor.get_insert_node()
@@ -149,8 +149,8 @@ class DocumentViewController():
                 document = self.model.document
 
                 link = self.get_link_at_xy(x, y)
-                if link != None and link.target == self.model.selected_link_target:
-                    self.use_cases.open_link(link.target)
+                if link == self.model.selected_link_target:
+                    self.use_cases.open_link(link)
 
     def on_secondary_button_press(self, controller, n_press, x, y):
         if n_press % 3 != 1: return
@@ -267,7 +267,7 @@ class DocumentViewController():
                         self.use_cases.remove_selection()
             case ('return', _):
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
-                    self.use_cases.open_link(document.cursor.get_insert_node().link.target)
+                    self.use_cases.open_link(document.cursor.get_insert_node().link)
                 else:
                     self.use_cases.insert_xml('\n')
                     if not document.cursor.has_selection():

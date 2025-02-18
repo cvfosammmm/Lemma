@@ -18,8 +18,7 @@
 import xml.parsers.expat
 import pickle
 
-from lemma.document.ast.node import Node
-from lemma.document.ast.link import Link
+from lemma.document.ast import Node
 
 
 class XMLParser(object):
@@ -48,7 +47,7 @@ class XMLParser(object):
         self.open_tags.append(tag)
 
         if 'link_target' in attrs:
-            self.current_link = Link(attrs['link_target'])
+            self.current_link = attrs['link_target']
         else:
             self.current_link = None
         if 'tags' in attrs:

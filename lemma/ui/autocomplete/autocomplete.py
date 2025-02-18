@@ -56,20 +56,40 @@ class Autocomplete():
         MessageBus.connect('keyboard_input', self.on_keyboard_input)
 
     def on_keyboard_input(self):
+        document = History.get_active_document()
+        if document == None:
+            self.deactivate()
+            return
+
         self.update_command_at_cursor()
         if not self.is_active:
             self.activate_if_possible()
         self.update()
 
     def on_document_changed(self):
+        document = History.get_active_document()
+        if document == None:
+            self.deactivate()
+            return
+
         self.update_command_at_cursor()
         self.update()
 
     def on_history_changed(self):
+        document = History.get_active_document()
+        if document == None:
+            self.deactivate()
+            return
+
         self.update_command_at_cursor()
         self.update()
 
     def on_keypress(self, controller, keyval, keycode, state):
+        document = History.get_active_document()
+        if document == None:
+            self.deactivate()
+            return
+
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
         if keyval in [Gdk.keyval_from_name('Tab'), Gdk.keyval_from_name('ISO_Left_Tab')]:
@@ -112,10 +132,20 @@ class Autocomplete():
         self.update()
 
     def on_focus_out(self, controller):
+        document = History.get_active_document()
+        if document == None:
+            self.deactivate()
+            return
+
         self.widget.focus_hide = True
         self.update()
 
     def on_focus_in(self, controller):
+        document = History.get_active_document()
+        if document == None:
+            self.deactivate()
+            return
+
         self.widget.focus_hide = False
         self.update()
 

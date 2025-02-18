@@ -18,9 +18,8 @@
 import urllib.parse, os.path
 from html.parser import HTMLParser as HTMLParserLib
 
-from lemma.document.ast.node import Node
+from lemma.document.ast import Node
 from lemma.widgets.image import Image
-from lemma.document.ast.link import Link
 from lemma.infrastructure.layout_info import LayoutInfo
 
 
@@ -145,7 +144,7 @@ class HTMLParser(HTMLParserLib):
                     node.tags = self.tags.copy()
                     node.paragraph_style = self.paragraph_style
                     if self.link_target != None:
-                        node.link = Link(self.link_target)
+                        node.link = self.link_target
                     self.composite.append(node)
 
 

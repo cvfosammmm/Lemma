@@ -26,9 +26,9 @@ from lemma.settings.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.db.character_db import CharacterDB
 from lemma.widgets.image import Image
-from lemma.document.ast.node import Node
-from lemma.document.layout.layout_vbox import LayoutVBox
-from lemma.document.layout.layout_document import LayoutDocument
+from lemma.document.ast import Node
+from lemma.document.layout import LayoutVBox
+from lemma.document.layout import LayoutDocument
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.storage.storage import Storage
@@ -99,7 +99,7 @@ class UseCases(object):
     def open_link(self, link_target):
         if urlparse(link_target).scheme in ['http', 'https']:
             webbrowser.open(link_target)
-        else:
+        elif link_target != None:
             target_document = DocumentRepo.get_by_title(link_target)
             if target_document != None:
                 self.set_active_document(target_document)
@@ -201,7 +201,7 @@ class UseCases(object):
             backlinks = DocumentRepo.list_by_link_target(document.title)
             for document_id in reversed(backlinks):
                 linking_doc = DocumentRepo.get_by_id(document_id)
-                nodes = [n for n in linking_doc.ast.flatten() if n.link != None and n.link.target == document.title]
+                nodes = [n for n in linking_doc.ast.flatten() if n.link == document.title]
                 linking_doc.add_command('set_link', nodes, title)
                 DocumentRepo.update(linking_doc)
 

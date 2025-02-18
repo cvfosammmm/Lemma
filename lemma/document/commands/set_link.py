@@ -15,9 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.document.ast.node import Node
-from lemma.document.ast.link import Link
-
 
 class Command():
 
@@ -33,7 +30,7 @@ class Command():
         prev_links = []
         for node in self.nodes:
             prev_links.append(node.link)
-            node.link = None if self.target == None else Link(self.target)
+            node.link = self.target
         self.state['nodes_and_prev_target'] = list(zip(self.nodes, prev_links))
 
         document.update_last_modified()

@@ -17,13 +17,12 @@
 
 import time, os.path
 
-from lemma.document.ast.node import Node
-from lemma.document.ast.cursor import Cursor
-from lemma.document.layout.layouter import Layouter
-from lemma.document.plaintext.plaintext_scanner import PlaintextScanner
-from lemma.document.clipping.clipping import Clipping
-from lemma.document.command_processor.command_processor import CommandProcessor
+from lemma.document.ast import Node, Cursor
+from lemma.document.layout import Layouter
+from lemma.document.plaintext_scanner import PlaintextScanner
+from lemma.document.clipping import Clipping
 import lemma.infrastructure.timer as timer
+
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:
         if file.endswith('.py'):
@@ -35,7 +34,9 @@ class Document():
 
     def __init__(self, id=None):
         self.last_modified = time.time()
-        self.command_processor = CommandProcessor(self)
+        self.commands = list()
+        self.commands_preedit = list()
+        self.last_command = -1
 
         self.id = id
         self.title = ''
@@ -53,18 +54,50 @@ class Document():
 
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
-        self.command_processor.add_command(command)
+        self.run_command(command)
 
-    def add_composite_command(self, *commands):
-        self.command_processor.begin_chain_of_commands()
-        for command in commands:
-            self.add_command(*command)
-        self.command_processor.end_chain_of_commands()
+    def add_composite_command(self, *command_specs):
+        commands = [eval(command_spec[0] + '.Command')(*command_spec[1:]) for command_spec in command_specs]
+        self.run_command(composite.Command(commands))
 
-    def can_undo(self): return self.command_processor.can_undo()
-    def can_redo(self): return self.command_processor.can_redo()
-    def undo(self): self.command_processor.undo()
-    def redo(self): self.command_processor.redo()
+    def run_command(self, command):
+        command.run(self)
+        self.update()
+
+        self.commands_preedit.append(command)
+
+        if command.is_undo_checkpoint:
+            self.commands = self.commands[:self.last_command + 1] + self.commands_preedit
+            self.last_command += len(self.commands_preedit)
+            self.commands_preedit = list()
+
+    def can_undo(self):
+        return self.last_command >= 0
+
+    def can_redo(self):
+        return self.last_command < len(self.commands) - 1
+
+    def undo(self):
+        for command in reversed(self.commands_preedit):
+            command.undo(self)
+            self.update()
+        self.commands_preedit = list()
+
+        for command in reversed(self.commands[:self.last_command + 1]):
+            command.undo(self)
+            self.update()
+            self.last_command -= 1
+
+            if command.is_undo_checkpoint: break
+
+    def redo(self):
+        for command in self.commands[self.last_command + 1:]:
+            command.run(self)
+            self.update()
+
+            self.last_command += 1
+
+            if command.is_undo_checkpoint: break
 
     def update_last_modified(self):
         for client in self.change_flag:

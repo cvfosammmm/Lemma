@@ -65,7 +65,7 @@ class Popover():
                 self.view.add_button.set_tooltip_text(_('Insert Link'))
             else:
                 self.bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
-                self.view.entry_link_target.set_text(first_node.link.target)
+                self.view.entry_link_target.set_text(first_node.link)
                 self.view.add_button.set_tooltip_text(_('Edit Link'))
         else:
             self.bounds = None
