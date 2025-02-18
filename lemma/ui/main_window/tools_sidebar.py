@@ -19,6 +19,9 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib
 
+import os.path
+
+from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.db.character_db import CharacterDB
 
@@ -29,18 +32,29 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         Gtk.ScrolledWindow.__init__(self)
         self.set_size_request(262, 280)
 
+        self.resources_path = ServiceLocator.get_resources_path()
+
         self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.box.add_css_class('tools-sidebar')
 
-        self.symbols = list()
-        self.math_sym = []
-        self.math_sym.append(['sqrt', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection_start"/><end marks="new_insert prev_selection_end"/></mathlist><mathlist></mathlist></mathroot>\')'])
-        self.math_sym.append(['nthroot', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection_start"/><end marks="new_insert prev_selection_end"/></mathlist><mathlist><placeholder/><end/></mathlist></mathroot>\')'])
-        self.math_sym.append(['subscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>\')'])
-        self.math_sym.append(['superscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>\')'])
-        self.math_sym.append(['subsuperscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection_start"/><end marks="prev_selection_end"/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
-        self.symbols.append({'id': 'punctuation', 'name': 'Math Typesetting', 'symbols': self.math_sym})
+        self.add_headline('Math Typesetting', 'first')
 
+        symbols = []
+        symbols.append(['sqrt', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathroot>\')'])
+        symbols.append(['nthroot', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathroot>\')'])
+        symbols.append(['subscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>\')'])
+        symbols.append(['superscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>\')'])
+        symbols.append(['subsuperscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
+        self.add_flowbox(symbols)
+
+        symbols = []
+        symbols.append(['sumwithindex', 'win.insert-xml(\'<mathatom><mathlist>∑<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
+        symbols.append(['prodwithindex', 'win.insert-xml(\'<mathatom><mathlist>∏<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
+        symbols.append(['indefint', 'win.insert-xml(\'<mathatom><mathlist>∫<end/></mathlist><mathlist></mathlist><mathlist></mathlist></mathatom> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
+        symbols.append(['defint', 'win.insert-xml(\'<mathatom><mathlist>∫<end/></mathlist><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
+        self.add_flowbox_for_pictures(symbols)
+
+        self.symbols = list()
         self.punctuation_sym = []
         self.punctuation_sym.append(['textendash', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textendash')])
         self.punctuation_sym.append(['textemdash', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textemdash')])
@@ -342,24 +356,55 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         self.symbols.append({'id': 'mathcal', 'name': 'Calligraphic Capitals', 'symbols': self.mathcal_sym})
 
         for section in self.symbols:
-            header = Gtk.Label.new(section['name'])
-            header.set_xalign(Gtk.Align.FILL)
-            header.add_css_class('header')
-            self.box.append(header)
-
-            flowbox = Gtk.FlowBox()
-            flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
-            flowbox.set_can_focus(False)
-            flowbox.add_css_class(section['id'])
-            flowbox.set_max_children_per_line(20)
-            for data in section['symbols']:
-                button = Gtk.Button.new_from_icon_name('sidebar-' + data[0] + '-symbolic')
-                button.set_detailed_action_name(data[1])
-                button.set_can_focus(False)
-                button.add_css_class('flat')
-                flowbox.append(button)
-            self.box.append(flowbox)
+            self.add_headline(section['name'], section['id'])
+            self.add_flowbox(section['symbols'], section['id'])
 
         self.set_child(self.box)
+
+    def add_headline(self, name, css_class=None):
+        header = Gtk.Label.new(name)
+        header.set_xalign(Gtk.Align.FILL)
+        header.add_css_class('header')
+        if css_class:
+            header.add_css_class(css_class)
+        self.box.append(header)
+
+    def add_flowbox(self, symbols, css_class=None):
+        flowbox = Gtk.FlowBox()
+        flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        flowbox.set_can_focus(False)
+        flowbox.set_max_children_per_line(20)
+        if css_class:
+            flowbox.add_css_class(css_class)
+        for data in symbols:
+            image = Gtk.Image.new_from_icon_name('sidebar-' + data[0] + '-symbolic')
+            image.set_valign(Gtk.Align.CENTER)
+            image.set_halign(Gtk.Align.CENTER)
+            button = Gtk.Button()
+            button.set_child(image)
+            button.set_detailed_action_name(data[1])
+            button.set_can_focus(False)
+            button.add_css_class('flat')
+            flowbox.append(button)
+        self.box.append(flowbox)
+
+    def add_flowbox_for_pictures(self, symbols, css_class=None):
+        flowbox = Gtk.FlowBox()
+        flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        flowbox.set_can_focus(False)
+        flowbox.set_max_children_per_line(20)
+        if css_class:
+            flowbox.add_css_class(css_class)
+        for data in symbols:
+            pic = Gtk.Picture.new_for_filename(os.path.join(self.resources_path, 'icons_extra', 'sidebar-' + data[0] + '-symbolic.svg'))
+            pic.set_valign(Gtk.Align.CENTER)
+            pic.set_halign(Gtk.Align.CENTER)
+            button = Gtk.Button()
+            button.set_child(pic)
+            button.set_detailed_action_name(data[1])
+            button.set_can_focus(False)
+            button.add_css_class('flat')
+            flowbox.append(button)
+        self.box.append(flowbox)
 
 

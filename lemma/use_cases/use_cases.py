@@ -266,9 +266,9 @@ class UseCases(object):
                 if node.is_eol(): break
                 node.paragraph_style = insert.paragraph_style
 
-        if 'prev_selection_start' in parser.marks and 'prev_selection_end' in parser.marks:
-            prev_selection_start = parser.marks['prev_selection_start']
-            prev_selection_end = parser.marks['prev_selection_end']
+        if 'prev_selection' in parser.marks:
+            prev_selection_start = parser.marks['prev_selection']
+            prev_selection_end = prev_selection_start.next_in_parent()
 
             if document.cursor.has_selection() and prev_selection_start.parent == prev_selection_end.parent:
                 subtree = document.ast.get_subtree(*document.cursor.get_state())
