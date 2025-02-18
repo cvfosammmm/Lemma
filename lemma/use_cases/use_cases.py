@@ -423,7 +423,7 @@ class UseCases(object):
     def set_paragraph_style(self, style):
         document = History.get_active_document()
 
-        current_style = document.cursor.get_insert_node().get_paragraph_style()
+        current_style = document.cursor.get_first_node().get_paragraph_style()
         if current_style == style:
             style = 'p'
 
