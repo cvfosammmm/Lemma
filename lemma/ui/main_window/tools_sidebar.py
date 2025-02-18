@@ -48,26 +48,29 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         self.add_flowbox(symbols)
 
         symbols = []
-        symbols.append(['sumwithindex', 'win.insert-xml(\'<mathatom><mathlist>∑<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
-        symbols.append(['prodwithindex', 'win.insert-xml(\'<mathatom><mathlist>∏<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
+        symbols.append(['sumwithindex', 'win.insert-xml(\'<mathatom><mathlist>∑<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom> <placeholder marks="prev_selection"/>\')'])
+        symbols.append(['prodwithindex', 'win.insert-xml(\'<mathatom><mathlist>∏<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom> <placeholder marks="prev_selection"/>\')'])
         symbols.append(['indefint', 'win.insert-xml(\'<mathatom><mathlist>∫<end/></mathlist><mathlist></mathlist><mathlist></mathlist></mathatom> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
         symbols.append(['defint', 'win.insert-xml(\'<mathatom><mathlist>∫<end/></mathlist><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
         self.add_flowbox_for_pictures(symbols)
 
+        self.add_headline('Punctuation')
+
+        symbols = []
+        symbols.append(['textendash', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textendash')])
+        symbols.append(['textemdash', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textemdash')])
+        symbols.append(['guillemetleft', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('guillemetleft')])
+        symbols.append(['guillemetright', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('guillemetright')])
+        symbols.append(['quotedblbase', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('quotedblbase')])
+        symbols.append(['textquotedblleft', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textquotedblleft')])
+        symbols.append(['textquotedblright', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textquotedblright')])
+        symbols.append(['cdotp', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('cdotp')])
+        symbols.append(['colon', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('colon')])
+        symbols.append(['vdots', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('vdots')])
+        symbols.append(['cdots', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('cdots')])
+        self.add_flowbox(symbols)
+
         self.symbols = list()
-        self.punctuation_sym = []
-        self.punctuation_sym.append(['textendash', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textendash')])
-        self.punctuation_sym.append(['textemdash', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textemdash')])
-        self.punctuation_sym.append(['guillemetleft', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('guillemetleft')])
-        self.punctuation_sym.append(['guillemetright', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('guillemetright')])
-        self.punctuation_sym.append(['quotedblbase', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('quotedblbase')])
-        self.punctuation_sym.append(['textquotedblleft', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textquotedblleft')])
-        self.punctuation_sym.append(['textquotedblright', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('textquotedblright')])
-        self.punctuation_sym.append(['cdotp', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('cdotp')])
-        self.punctuation_sym.append(['colon', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('colon')])
-        self.punctuation_sym.append(['vdots', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('vdots')])
-        self.punctuation_sym.append(['cdots', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('cdots')])
-        self.symbols.append({'id': 'punctuation', 'name': 'Punctuation', 'symbols': self.punctuation_sym})
 
         self.greek_sym = []
         self.greek_sym.append(['alpha', 'win.insert-xml::' + CharacterDB.get_unicode_from_latex_name('alpha')])

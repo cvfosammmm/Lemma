@@ -266,15 +266,13 @@ class UseCases(object):
                 if node.is_eol(): break
                 node.paragraph_style = insert.paragraph_style
 
-        if 'prev_selection' in parser.marks:
-            prev_selection_start = parser.marks['prev_selection']
-            prev_selection_end = prev_selection_start.next_in_parent()
+        if 'prev_selection' in parser.marks and document.cursor.has_selection():
+            prev_selection = parser.marks['prev_selection']
 
-            if document.cursor.has_selection() and prev_selection_start.parent == prev_selection_end.parent:
-                subtree = document.ast.get_subtree(*document.cursor.get_state())
-                prev_selection_start.parent.remove_range(prev_selection_start, prev_selection_end)
-                for node in subtree:
-                    prev_selection_end.parent.insert_before(prev_selection_end, node.copy())
+            subtree = document.ast.get_subtree(*document.cursor.get_state())
+            for node in subtree:
+                prev_selection.parent.insert_before(prev_selection, node.copy())
+            prev_selection.parent.remove(prev_selection)
 
         placeholders = [n for n in nodes.flatten() if n.is_placeholder()]
         if len(placeholders) > 0:
