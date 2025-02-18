@@ -152,5 +152,7 @@ class HTMLExporter(object):
         elif node.is_widget():
             self.html += node.value.to_html(os.path.join(self.pathname, str(self.document_id) + '-' + str(self.file_no)))
             self.file_no += 1
+        elif node.is_end():
+            self.html += '<end/>'
 
 

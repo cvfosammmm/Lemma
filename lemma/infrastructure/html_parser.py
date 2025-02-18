@@ -99,13 +99,16 @@ class HTMLParser(HTMLParserLib):
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
-
         if tag == 'placeholder':
             for name, value in attrs:
                 if name == 'value':
                     node = Node('placeholder', value)
                     node.paragraph_style = self.paragraph_style
                     self.composite.append(node)
+        if tag == 'end':
+            node = Node('end')
+            node.paragraph_style = self.paragraph_style
+            self.composite.append(node)
 
     def handle_endtag(self, tag):
         self.open_tags.pop()
@@ -123,8 +126,6 @@ class HTMLParser(HTMLParserLib):
         if tag == 'mroot':
             self.composite = self.composite.parent
         if tag in ['mtext', 'mo', 'mn']:
-            if len(self.composite) > 0:
-                self.composite.append(Node('end'))
             self.composite = self.composite.parent
 
     def handle_data(self, data):
