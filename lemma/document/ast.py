@@ -127,7 +127,7 @@ class Node():
     def is_char(self): return self.type == 'char'
     def is_placeholder(self): return self.type == 'placeholder'
     def is_widget(self): return self.type == 'widget'
-    def is_mathatom(self): return self.type == 'mathatom'
+    def is_mathscript(self): return self.type == 'mathscript'
     def is_mathroot(self): return self.type == 'mathroot'
     def is_mathlist(self): return self.type == 'mathlist'
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
@@ -142,14 +142,14 @@ class Node():
     def is_subscript(self):
         if self.parent.is_root(): return False
 
-        if self.parent.parent.is_mathatom():
-            return self.parent == self.parent.parent[1]
+        if self.parent.parent.is_mathscript():
+            return self.parent == self.parent.parent[0]
         return False
     def is_superscript(self):
         if self.parent.is_root(): return False
 
-        if self.parent.parent.is_mathatom():
-            return self.parent == self.parent.parent[2]
+        if self.parent.parent.is_mathscript():
+            return self.parent == self.parent.parent[1]
         if self.parent.parent.is_mathroot():
             return self.parent == self.parent.parent[1]
         return False
@@ -274,11 +274,11 @@ class Node():
 
     def validate(self):
         if self.type == 'root':
-            return all([child.type in {'char', 'placeholder', 'eol', 'widget', 'mathatom', 'mathroot'} for child in self.children]) \
+            return all([child.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathroot'} for child in self.children]) \
                 and all([child.validate() for child in self.children])
 
-        if self.type == 'mathatom':
-            return len(self.children) == 3 \
+        if self.type == 'mathscript':
+            return len(self.children) == 2 \
                 and all([child.type == 'mathlist' for child in self.children]) \
                 and all([child.validate() for child in self.children])
 

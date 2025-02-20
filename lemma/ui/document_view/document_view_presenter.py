@@ -30,7 +30,7 @@ from lemma.document_repo.document_repo import DocumentRepo
 from lemma.document.layout import LayoutWidget
 from lemma.document.layout import LayoutChar
 from lemma.document.layout import LayoutPlaceholder
-from lemma.document.layout import LayoutMathAtom
+from lemma.document.layout import LayoutMathScript
 from lemma.document.layout import LayoutMathRoot
 from lemma.application_state.application_state import ApplicationState
 import lemma.infrastructure.timer as timer
@@ -241,7 +241,7 @@ class DocumentViewPresenter():
         if isinstance(layout, LayoutMathRoot):
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-        if isinstance(layout, LayoutMathAtom):
+        if isinstance(layout, LayoutMathScript):
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
         for child in layout.children:

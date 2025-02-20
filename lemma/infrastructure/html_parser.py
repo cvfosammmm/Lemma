@@ -38,6 +38,7 @@ class HTMLParser(HTMLParserLib):
 
         self.title = None
         self.composite = None
+        self.composite_prev = None
 
     def run(self):
         self.composite = Node('root')
@@ -86,7 +87,7 @@ class HTMLParser(HTMLParserLib):
                 node.paragraph_style = self.paragraph_style
                 self.composite.append(node)
         if tag == 'msubsup':
-            node = Node('mathatom')
+            node = Node('mathscript')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
@@ -95,11 +96,14 @@ class HTMLParser(HTMLParserLib):
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
-        if tag in ['mtext', 'mo', 'mn']:
+        if tag in ['mtext', 'mn']:
             node = Node('mathlist')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
+        if tag in ['mo']:
+            self.composite_prev = self.composite
+            self.composite = self.composite.parent
         if tag == 'placeholder':
             for name, value in attrs:
                 if name == 'value':
@@ -126,8 +130,11 @@ class HTMLParser(HTMLParserLib):
             self.composite = self.composite.parent
         if tag == 'mroot':
             self.composite = self.composite.parent
-        if tag in ['mtext', 'mo', 'mn']:
+        if tag in ['mtext', 'mn']:
             self.composite = self.composite.parent
+        if tag in ['mo']:
+            self.composite = self.composite_prev
+            self.composite_prev = None
 
     def handle_data(self, data):
         if 'title' in self.open_tags:

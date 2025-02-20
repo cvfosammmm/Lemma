@@ -113,18 +113,15 @@ class HTMLExporter(object):
             self.html += node.value
             if node.parent.is_root():
                 self.html += '</math>'
-        elif node.is_mathatom():
+        elif node.is_mathscript():
             if node.parent.is_root():
                 self.html += '<math>'
             self.html += '<msubsup>'
-            self.html += '<mo>'
-            self.process_node(node[0])
-            self.html += '</mo>'
             self.html += '<mn>'
-            self.process_node(node[1])
+            self.process_node(node[0])
             self.html += '</mn>'
             self.html += '<mn>'
-            self.process_node(node[2])
+            self.process_node(node[1])
             self.html += '</mn>'
             self.html += '</msubsup>'
             if node.parent.is_root():

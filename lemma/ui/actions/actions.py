@@ -271,11 +271,11 @@ class Actions(object):
         self.use_cases.insert_xml(parameter.get_string())
 
     def subscript(self, action=None, parameter=''):
-        xml = '<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>'
+        xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
         self.use_cases.insert_xml(xml)
 
     def superscript(self, action=None, parameter=''):
-        xml = '<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>'
+        xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'
         self.use_cases.insert_xml(xml)
 
     def set_paragraph_style(self, action=None, parameter=None):

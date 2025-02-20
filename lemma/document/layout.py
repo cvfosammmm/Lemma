@@ -42,7 +42,7 @@ class Layouter(object):
         elif node.type == 'eol': layout_tree = LayoutEOL(node, parent)
         elif node.type == 'end': layout_tree = LayoutEnd(node, parent)
         elif node.type == 'widget': layout_tree = LayoutWidget(node, parent)
-        elif node.type == 'mathatom': layout_tree = LayoutMathAtom(node, parent)
+        elif node.type == 'mathscript': layout_tree = LayoutMathScript(node, parent)
         elif node.type == 'mathroot': layout_tree = LayoutMathRoot(node, parent)
         elif node.type == 'mathlist': layout_tree = LayoutHBox(parent)
         else: layout_tree = None
@@ -293,7 +293,7 @@ class LayoutHBox(Layout):
             child.y = self.height - child.height
 
 
-class LayoutMathAtom(Layout):
+class LayoutMathScript(Layout):
 
     def __init__(self, node, parent):
         Layout.__init__(self)
@@ -305,40 +305,41 @@ class LayoutMathAtom(Layout):
         self.children = list()
 
     def layout(self):
-        if len(self.children) == 3:
-            for child in self.children[1:]:
+        if len(self.children) == 2:
+            for child in self.children:
                 child.layout()
 
             vbox = LayoutVBox(self)
             height = 0
-            for child in self.children[1:]:
+            for child in self.children:
                 child.parent = vbox
                 child.x = 0
                 child.y = height
                 height += child.height
                 vbox.children.insert(0, child)
 
-            self.children = [self.children[0], vbox]
+            self.children = [vbox]
 
         for child in self.children:
             child.layout()
 
-        if self.children[1].children[0].height == 0:
-            self.children[1].children[0].height = self.children[1].children[1].height
-            self.children[1].children[1].y = self.children[1].children[1].height
-            self.children[1].height += self.children[1].children[0].height
+        if self.children[0].children[0].height == 0:
+            self.children[0].children[0].height = self.children[0].children[1].height
+            self.children[0].children[1].y = self.children[0].children[1].height
+            self.children[0].height += self.children[0].children[0].height
 
-        if self.children[1].children[1].height == 0:
-            self.children[1].children[1].height = self.children[1].children[0].height
-            self.children[1].height += self.children[1].children[1].height
+        if self.children[0].children[1].height == 0:
+            self.children[0].children[1].height = self.children[0].children[0].height
+            self.children[0].height += self.children[0].children[1].height
+
+        fontname = FontManager.get_fontname_from_node(self.node)
+        extents = FontManager.measure_single(' ', fontname=fontname)
 
         self.children[0].x = 1
-        self.children[0].y = 0
-        self.children[1].x = self.children[0].width + 1
-        self.children[1].y = self.children[0].height / 2 - self.children[1].height / 2
+        self.children[0].y = extents[1] / 2 - self.children[0].height / 2
 
-        self.width = self.children[0].width + self.children[1].width + 1
-        self.height = max(self.children[0].height, self.children[1].height)
+        self.width = self.children[0].width + 1
+        self.height = self.children[0].height
         self.x = None
         self.y = None
 

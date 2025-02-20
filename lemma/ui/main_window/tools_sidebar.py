@@ -42,16 +42,16 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         symbols = []
         symbols.append(['sqrt', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathroot>\')'])
         symbols.append(['nthroot', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathroot>\')'])
-        symbols.append(['subscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathatom>\')'])
-        symbols.append(['superscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathatom>\')'])
-        symbols.append(['subsuperscript', 'win.insert-xml(\'<mathatom><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom>\')'])
+        symbols.append(['subscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>\')'])
+        symbols.append(['superscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>\')'])
+        symbols.append(['subsuperscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>\')'])
         self.add_flowbox(symbols)
 
         symbols = []
-        symbols.append(['sumwithindex', 'win.insert-xml(\'<mathatom><mathlist>∑<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom> <placeholder marks="prev_selection"/>\')'])
-        symbols.append(['prodwithindex', 'win.insert-xml(\'<mathatom><mathlist>∏<end/></mathlist><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom> <placeholder marks="prev_selection"/>\')'])
-        symbols.append(['indefint', 'win.insert-xml(\'<mathatom><mathlist>∫<end/></mathlist><mathlist></mathlist><mathlist></mathlist></mathatom> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
-        symbols.append(['defint', 'win.insert-xml(\'<mathatom><mathlist>∫<end/></mathlist><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathatom> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
+        symbols.append(['sumwithindex', 'win.insert-xml(\'∑<mathscript><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/>\')'])
+        symbols.append(['prodwithindex', 'win.insert-xml(\'∏<mathscript><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/>\')'])
+        symbols.append(['indefint', 'win.insert-xml(\'∫ <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
+        symbols.append(['defint', 'win.insert-xml(\'∫<mathscript><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
         self.add_flowbox_for_pictures(symbols)
 
         self.add_headline('Punctuation')

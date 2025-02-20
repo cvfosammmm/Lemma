@@ -60,8 +60,8 @@ class XMLParser(object):
             self.current_paragraph_style = 'p'
 
         node = None
-        if tag == 'mathatom':
-            node = Node('mathatom')
+        if tag == 'mathscript':
+            node = Node('mathscript')
             self.current_node.append(node)
             self.current_node = node
         if tag == 'mathroot':
@@ -94,7 +94,7 @@ class XMLParser(object):
     def handle_endtag(self, tag):
         self.open_tags.pop()
 
-        if tag == 'mathatom':
+        if tag == 'mathscript':
             self.current_node = self.current_node.parent
         if tag == 'mathroot':
             self.current_node = self.current_node.parent
