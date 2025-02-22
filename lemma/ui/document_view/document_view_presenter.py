@@ -270,8 +270,9 @@ class DocumentViewPresenter():
             ctx.set_line_width(1)
             ctx.move_to(offset_x + layout.x + line_offset, offset_y + line_height - 2)
             ctx.line_to(offset_x + layout.x + line_offset + 9, offset_y + 1)
-            ctx.line_to(offset_x + layout.x + line_offset + 10 + line_width, offset_y + 1)
             ctx.stroke()
+            ctx.rectangle(offset_x + layout.x + line_offset + 9, offset_y, line_width, 1)
+            ctx.fill()
 
         if isinstance(layout, LayoutMathFraction):
             fg_color = self.get_fg_color_by_node(layout.node)
