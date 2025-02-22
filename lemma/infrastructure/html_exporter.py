@@ -126,6 +126,19 @@ class HTMLExporter(object):
             self.html += '</msubsup>'
             if node.parent.is_root():
                 self.html += '</math>'
+        elif node.is_mathfraction():
+            if node.parent.is_root():
+                self.html += '<math>'
+            self.html += '<mfrac>'
+            self.html += '<mn>'
+            self.process_node(node[0])
+            self.html += '</mn>'
+            self.html += '<mn>'
+            self.process_node(node[1])
+            self.html += '</mn>'
+            self.html += '</mfrac>'
+            if node.parent.is_root():
+                self.html += '</math>'
         elif node.is_mathroot():
             if node.parent.is_root():
                 self.html += '<math>'

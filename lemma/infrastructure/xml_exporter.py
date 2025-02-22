@@ -39,6 +39,10 @@ class XMLExporter(object):
             return '<mathscript' + attributes + '>'\
                 + ''.join([self.export_xml(child) for child in node.children]) + '</mathscript>'
 
+        if node.type == 'mathfraction':
+            return '<mathfraction' + attributes + '>'\
+                + ''.join([self.export_xml(child) for child in node.children]) + '</mathfraction>'
+
         if node.type == 'mathroot':
             return '<mathroot' + attributes + '>'\
                 + ''.join([self.export_xml(child) for child in node.children]) + '</mathroot>'

@@ -46,10 +46,14 @@ class FontManager():
 
         if node.is_subscript() or node.is_superscript():
             return 'math_small'
+        if node.in_fraction():
+            return 'math_small'
         if node.is_nucleus():
             return 'math'
 
         if node.is_mathsymbol():
+            return 'math'
+        if node.value != None and node.is_char() and node.value.isnumeric():
             return 'math'
 
         if node.get_paragraph_style().startswith('h'):

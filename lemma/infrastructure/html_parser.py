@@ -91,6 +91,11 @@ class HTMLParser(HTMLParserLib):
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
+        if tag == 'mfrac':
+            node = Node('mathfraction')
+            node.paragraph_style = self.paragraph_style
+            self.composite.append(node)
+            self.composite = node
         if tag == 'mroot':
             node = Node('mathroot')
             node.paragraph_style = self.paragraph_style
@@ -127,6 +132,8 @@ class HTMLParser(HTMLParserLib):
         if tag == 'em': self.tags.remove('italic')
         if tag == 'a': self.link_target = None
         if tag == 'msubsup':
+            self.composite = self.composite.parent
+        if tag == 'mfrac':
             self.composite = self.composite.parent
         if tag == 'mroot':
             self.composite = self.composite.parent

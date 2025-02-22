@@ -64,6 +64,10 @@ class XMLParser(object):
             node = Node('mathscript')
             self.current_node.append(node)
             self.current_node = node
+        if tag == 'mathfraction':
+            node = Node('mathfraction')
+            self.current_node.append(node)
+            self.current_node = node
         if tag == 'mathroot':
             node = Node('mathroot')
             self.current_node.append(node)
@@ -95,6 +99,8 @@ class XMLParser(object):
         self.open_tags.pop()
 
         if tag == 'mathscript':
+            self.current_node = self.current_node.parent
+        if tag == 'mathfraction':
             self.current_node = self.current_node.parent
         if tag == 'mathroot':
             self.current_node = self.current_node.parent

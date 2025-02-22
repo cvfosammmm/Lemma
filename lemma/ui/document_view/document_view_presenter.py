@@ -31,6 +31,7 @@ from lemma.document.layout import LayoutWidget
 from lemma.document.layout import LayoutChar
 from lemma.document.layout import LayoutPlaceholder
 from lemma.document.layout import LayoutMathScript
+from lemma.document.layout import LayoutMathFraction
 from lemma.document.layout import LayoutMathRoot
 from lemma.application_state.application_state import ApplicationState
 import lemma.infrastructure.timer as timer
@@ -241,6 +242,9 @@ class DocumentViewPresenter():
         if isinstance(layout, LayoutMathRoot):
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
+        if isinstance(layout, LayoutMathFraction):
+            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
+
         if isinstance(layout, LayoutMathScript):
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
@@ -268,6 +272,16 @@ class DocumentViewPresenter():
             ctx.line_to(offset_x + layout.x + line_offset + 9, offset_y + 1)
             ctx.line_to(offset_x + layout.x + line_offset + 10 + line_width, offset_y + 1)
             ctx.stroke()
+
+        if isinstance(layout, LayoutMathFraction):
+            fg_color = self.get_fg_color_by_node(layout.node)
+            Gdk.cairo_set_source_rgba(ctx, fg_color)
+
+            line_offset = layout.children[0].children[1].height
+            line_width = layout.width
+
+            ctx.rectangle(offset_x + layout.x + 1, offset_y + line_offset + 1, line_width - 2, 1)
+            ctx.fill()
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))

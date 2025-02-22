@@ -43,6 +43,7 @@ class Layouter(object):
         elif node.type == 'end': layout_tree = LayoutEnd(node, parent)
         elif node.type == 'widget': layout_tree = LayoutWidget(node, parent)
         elif node.type == 'mathscript': layout_tree = LayoutMathScript(node, parent)
+        elif node.type == 'mathfraction': layout_tree = LayoutMathFraction(node, parent)
         elif node.type == 'mathroot': layout_tree = LayoutMathRoot(node, parent)
         elif node.type == 'mathlist': layout_tree = LayoutHBox(parent)
         else: layout_tree = None
@@ -339,6 +340,64 @@ class LayoutMathScript(Layout):
         self.children[0].y = extents[1] / 2 - self.children[0].height / 2
 
         self.width = self.children[0].width + 1
+        self.height = self.children[0].height
+        self.x = None
+        self.y = None
+
+
+class LayoutMathFraction(Layout):
+
+    def __init__(self, node, parent):
+        Layout.__init__(self)
+
+        self.node = node
+        node.layout = self
+
+        self.parent = parent
+        self.children = list()
+
+    def layout(self):
+        if len(self.children) == 2:
+            for child in self.children:
+                child.layout()
+
+            vbox = LayoutVBox(self)
+            height = 0
+            for child in self.children:
+                child.parent = vbox
+                child.x = 0
+                child.y = height
+                height += child.height
+                vbox.children.append(child)
+
+            self.children = [vbox]
+
+        for child in self.children:
+            child.layout()
+
+        # centering
+        if self.children[0].children[0].width < self.children[0].children[1].width:
+            min_child = self.children[0].children[0]
+            padding = (self.children[0].width - self.children[0].children[0].width) / 2
+            print(padding)
+        else:
+            min_child = self.children[0].children[1]
+            padding = (self.children[0].width - self.children[0].children[1].width) / 2
+        for child in min_child.children:
+            child.x += padding
+        self.children[0].children[0].width = self.children[0].width
+        self.children[0].children[1].width = self.children[0].width
+
+        for child in self.children[0].children[1].children:
+            child.y += 2
+
+        fontname = FontManager.get_fontname_from_node(self.node)
+        extents = FontManager.measure_single(' ', fontname=fontname)
+
+        self.children[0].x = 1
+        self.children[0].y = extents[1] / 2 - self.children[0].height / 2
+
+        self.width = self.children[0].width + 2
         self.height = self.children[0].height
         self.x = None
         self.y = None
