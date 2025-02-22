@@ -340,7 +340,22 @@ class AutocompleteDB(object):
         'mathcalX': '𝒳',
         'mathcalY': '𝒴',
         'mathcalZ': '𝒵',
-        'qed': '∎'
+        'qed': '∎',
+        'prod': '∏',
+        'coprod': '∐',
+        'sum': '∑',
+        'int': '∫',
+        'iint': '∬',
+        'iiint': '∭',
+        'bigcap': '⋂',
+        'bigcup': '⋃',
+        'bigwedge': '⋀',
+        'bigvee': '⋁',
+        'bigtimes': '⨉',
+        'bigodot': '⨀',
+        'bigoplus': '⨁',
+        'bigotimes': '⨂', 
+        'bigcupdot': '⨃'
     }
 
     def get_suggestions(term, limit=None):

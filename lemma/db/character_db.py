@@ -340,7 +340,22 @@ class CharacterDB(object):
         'mathcalW': '𝒲',
         'mathcalX': '𝒳',
         'mathcalY': '𝒴',
-        'mathcalZ': '𝒵'
+        'mathcalZ': '𝒵',
+        'prod': '∏',
+        'coprod': '∐',
+        'sum': '∑',
+        'int': '∫',
+        'iint': '∬',
+        'iiint': '∭',
+        'bigcap': '⋂',
+        'bigcup': '⋃',
+        'bigwedge': '⋀',
+        'bigvee': '⋁',
+        'bigtimes': '⨉',
+        'bigodot': '⨀',
+        'bigoplus': '⨁',
+        'bigotimes': '⨂', 
+        'bigcupdot': '⨃'
     }
     replacements = {
         '--': '–',
