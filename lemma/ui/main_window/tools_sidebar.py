@@ -53,6 +53,7 @@ class ToolsSidebar(Gtk.ScrolledWindow):
         symbols.append(['prodwithindex', 'win.insert-xml(\'∏<mathscript><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/>\')'])
         symbols.append(['indefint', 'win.insert-xml(\'∫ <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
         symbols.append(['defint', 'win.insert-xml(\'∫<mathscript><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/> 𝑑<placeholder/>\')'])
+        symbols.append(['limitwithindex', 'win.insert-xml(\'lim<mathscript><mathlist><placeholder/> → <placeholder/><end/></mathlist><mathlist></mathlist></mathscript> <placeholder marks="prev_selection"/>\')'])
         self.add_flowbox_for_pictures(symbols)
 
         self.add_headline('Punctuation')

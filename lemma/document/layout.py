@@ -379,7 +379,6 @@ class LayoutMathFraction(Layout):
         if self.children[0].children[0].width < self.children[0].children[1].width:
             min_child = self.children[0].children[0]
             padding = (self.children[0].width - self.children[0].children[0].width) / 2
-            print(padding)
         else:
             min_child = self.children[0].children[1]
             padding = (self.children[0].width - self.children[0].children[1].width) / 2
