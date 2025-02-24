@@ -110,18 +110,15 @@ class DocumentViewController():
                     self.use_cases.move_cursor_to_xy(x, y, False)
 
                 else:
-                    if link != None:
-                        self.model.selected_link_target = link
-                    elif leaf_box != None and leaf_box.node.focus_on_click():
+                    if leaf_box != None and leaf_box.node.focus_on_click():
                         self.use_cases.select_node(leaf_box.node)
                     else:
                         self.use_cases.move_cursor_to_xy(x, y, False)
+                    if link != None:
+                        self.model.selected_link_target = link
 
             else:
-                if link != None and int(state & modifiers) == 0:
-                    self.model.selected_link_target = link
-
-                else:
+                if link == None or int(state & modifiers) != 0:
                     insert = document.cursor.get_insert_node()
                     selection = document.cursor.get_selection_node()
                     line_start, line_end = insert.line_bounds()
