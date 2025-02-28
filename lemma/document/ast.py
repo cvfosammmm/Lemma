@@ -121,6 +121,7 @@ class Node():
     def is_eol(self): return self.type == 'eol'
     def is_end(self): return self.type == 'end'
     def is_mathsymbol(self): return self.type == 'char' and CharacterDB.is_mathsymbol(self.value)
+    def is_emoji(self): return self.type == 'char' and CharacterDB.is_emoji(self.value)
     def is_whitespace(self): return self.type == 'eol' or (self.is_char() and self.value.isspace())
     def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
     def is_text(self): return self.type == 'char' and not self.is_mathsymbol() and not self.is_whitespace()
@@ -138,8 +139,6 @@ class Node():
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
-    def is_nucleus(self):
-        return not self.parent.is_root() and self.parent.is_mathlist() and self.parent == self.parent.parent[0]
     def is_subscript(self):
         if self.parent.is_root(): return False
 

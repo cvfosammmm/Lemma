@@ -15,9 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import gi
+gi.require_version('Rsvg', '2.0')
+from gi.repository import Rsvg
+
+import cairo
+import os.path
+
 import lib.freetype2.freetype2 as freetype2
 import lib.harfpy.harfbuzz as harfbuzz
 import lib.fontconfig.fontconfig as fontconfig
+
+from lemma.infrastructure.service_locator import ServiceLocator
 
 
 class FontManager():
@@ -48,13 +57,13 @@ class FontManager():
             return 'math_small'
         if node.in_fraction():
             return 'math_small'
-        if node.is_nucleus():
-            return 'math'
-
         if node.is_mathsymbol():
             return 'math'
         if node.value != None and node.is_char() and node.value.isnumeric():
             return 'math'
+
+        if node.is_emoji():
+            return 'emoji'
 
         if node.get_paragraph_style().startswith('h'):
             return node.get_paragraph_style()
@@ -108,6 +117,39 @@ class FontManager():
         return FontManager.fonts[fontname]['surface_cache'][char]
 
     def load_glyph(char, fontname='book'):
+        if fontname == 'emoji':
+            FontManager.load_emoji(char)
+        else:
+            FontManager.load_glyph_from_font(char, fontname)
+
+    def load_emoji(char):
+        if char not in FontManager.fonts['emoji']['char_extents']:
+            FontManager.fonts['emoji']['face'].load_char(ord(char), freetype2.FT.LOAD_DEFAULT)
+            FontManager.fonts['emoji']['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
+
+            width = FontManager.fonts['emoji']['face'].glyph.advance.x
+            height = FontManager.fonts['emoji']['line_height']
+            left = 0
+            top = -FontManager.fonts['emoji']['ascend']
+
+            viewport = Rsvg.Rectangle()
+            viewport.x = 0
+            viewport.y = 0
+            viewport.width = width
+            viewport.height = height
+
+            surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width), int(height))
+            ctx = cairo.Context(surface)
+
+            res_path = ServiceLocator.get_resources_path()
+            filename = 'emoji_u' + hex(ord(char))[2:] + '.svg'
+            rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/svg', filename))
+            rsvg_handle.render_document(ctx, viewport)
+
+            FontManager.fonts['emoji']['char_extents'][char] = [width, height, left, top]
+            FontManager.fonts['emoji']['surface_cache'][char] = surface
+
+    def load_glyph_from_font(char, fontname='book'):
         if char not in FontManager.fonts[fontname]['char_extents']:
             FontManager.fonts[fontname]['face'].load_char(ord(char), freetype2.FT.LOAD_DEFAULT)
             FontManager.fonts[fontname]['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
@@ -115,7 +157,7 @@ class FontManager():
             width = FontManager.fonts[fontname]['face'].glyph.advance.x
             height = FontManager.fonts[fontname]['line_height']
             left = FontManager.fonts[fontname]['face'].glyph.bitmap_left
-            top = - FontManager.fonts[fontname]['face'].glyph.bitmap_top
+            top = -FontManager.fonts[fontname]['face'].glyph.bitmap_top
 
             FontManager.fonts[fontname]['char_extents'][char] = [width, height, left, top]
             if FontManager.fonts[fontname]['face'].glyph.bitmap.width > 0:

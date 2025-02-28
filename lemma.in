@@ -48,6 +48,7 @@ FontManager.add_font('h3', os.path.join(font_path, 'newcomputermodern/otf/NewCMS
 FontManager.add_font('h4', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), 24, 27, 8, 3, 2)
 FontManager.add_font('h5', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-BookOblique.otf'), 24, 27, 8, 3, 2)
 FontManager.add_font('h6', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), 19.407, 21, 7, 0, 1)
+FontManager.add_font('emoji', os.path.join(font_path, 'Noto_Color_Emoji/NotoColorEmoji-Regular.ttf'), 19.407, 21, 7, 0, 1)
 
 # setup folder for user themes
 pathname = ServiceLocator.get_user_themes_folder()

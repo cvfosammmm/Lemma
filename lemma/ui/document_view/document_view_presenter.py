@@ -203,13 +203,19 @@ class DocumentViewPresenter():
             baseline = FontManager.get_ascend(fontname=fontname)
 
             surface = FontManager.get_surface(layout.node.value, fontname=fontname)
+
             if surface != None:
-                ctx.set_source_surface(surface, offset_x + layout.x + layout.left, offset_y + baseline + layout.y + layout.top)
-                pattern = ctx.get_source()
-                pattern.set_filter(cairo.Filter.BEST)
-                Gdk.cairo_set_source_rgba(ctx, fg_color)
-                ctx.mask(pattern)
-                ctx.fill()
+                if fontname != 'emoji':
+                    ctx.set_source_surface(surface, offset_x + layout.x + layout.left, offset_y + baseline + layout.y + layout.top)
+                    pattern = ctx.get_source()
+                    pattern.set_filter(cairo.Filter.BEST)
+                    Gdk.cairo_set_source_rgba(ctx, fg_color)
+                    ctx.mask(pattern)
+                    ctx.fill()
+                else:
+                    ctx.set_source_surface(surface, offset_x + layout.x + layout.left, offset_y + baseline + layout.y + layout.top)
+                    ctx.mask(ctx.get_source())
+                    ctx.fill()
 
         if isinstance(layout, LayoutWidget):
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)

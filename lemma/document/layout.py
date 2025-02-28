@@ -75,7 +75,7 @@ class Layouter(object):
         last_tags = set()
         result = list()
         for node in parent_node:
-            if node.is_whitespace() or not node.is_text():
+            if node.is_whitespace() or not node.is_text() or node.is_emoji():
                 result.append(node)
                 last_type = None
                 last_tags = set()
