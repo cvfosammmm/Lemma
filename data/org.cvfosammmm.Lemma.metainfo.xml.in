@@ -38,9 +38,14 @@
     </supports>
 
     <releases>
+        ​<release version="32" date="2025-3-3">
+            <description translatable="no">
+                <p>Initial emoji support, ...</p>
+            </description>
+        </release>
         ​<release version="31" date="2025-2-22">
             <description translatable="no">
-                <p>Math Fractions support, ...</p>
+                <p>Math fractions support, ...</p>
             </description>
         </release>
         ​<release version="30" date="2025-2-18">
