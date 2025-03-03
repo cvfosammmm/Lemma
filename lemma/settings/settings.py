@@ -32,6 +32,7 @@ class Settings():
         Settings.defaults['is_maximized'] = False
         Settings.defaults['sidebar_position'] = 250
         Settings.defaults['show_tools_sidebar'] = False
+        Settings.defaults['tools_sidebar_active_tab'] = 'math'
         Settings.defaults['tools_sidebar_position'] = -1
         Settings.defaults['show_backlinks'] = False
         Settings.defaults['navbar_paned_position'] = -1

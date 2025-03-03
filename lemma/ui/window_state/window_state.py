@@ -28,10 +28,10 @@ class WindowState(object):
     def __init__(self, main_window, app):
         self.main_window = main_window
         self.use_cases = app.use_cases
+        self.toolbar_right = self.main_window.toolbar.toolbar_right
 
-        toggle_state = Settings.get_value('show_tools_sidebar')
-        self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.set_active(toggle_state)
-        self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle.connect('toggled', self.on_tools_sidebar_toggle_toggled)
+        self.toolbar_right.symbols_sidebar_toggle.connect('clicked', self.on_tools_sidebar_toggle_clicked, 'math')
+        self.toolbar_right.emoji_sidebar_toggle.connect('clicked', self.on_tools_sidebar_toggle_clicked, 'emojis')
 
         toggle_state = Settings.get_value('show_backlinks')
         self.main_window.navigation_sidebar.backlinks_toggle.set_active(toggle_state)
@@ -39,10 +39,12 @@ class WindowState(object):
 
         self.restore_window_state()
 
+        MessageBus.connect('settings_changed', self.on_settings_changed)
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('mode_set', self.on_mode_set)
         self.update()
 
+    def on_settings_changed(self): self.update()
     def on_history_changed(self): self.update()
     def on_mode_set(self): self.update()
 
@@ -56,9 +58,19 @@ class WindowState(object):
         else:
             self.main_window.content_stack.set_visible_child_name('welcome')
 
-    def on_tools_sidebar_toggle_toggled(self, toggle_button, parameter=None):
-        self.main_window.document_view_paned.set_show_widget(toggle_button.get_active())
+        sidebar_visible = Settings.get_value('show_tools_sidebar')
+        active_tab = Settings.get_value('tools_sidebar_active_tab')
+        self.toolbar_right.symbols_sidebar_toggle.set_active(sidebar_visible and active_tab == 'math')
+        self.toolbar_right.emoji_sidebar_toggle.set_active(sidebar_visible and active_tab == 'emojis')
+        self.main_window.tools_sidebar.set_visible_child_name(active_tab)
+        self.main_window.document_view_paned.set_show_widget(sidebar_visible)
         self.main_window.document_view_paned.animate(True)
+
+    def on_tools_sidebar_toggle_clicked(self, toggle_button, name):
+        if not toggle_button.get_active():
+            self.use_cases.hide_tools_sidebar()
+        else:
+            self.use_cases.show_tools_sidebar(name)
 
     def on_backlinks_toggle_toggled(self, toggle_button, parameter=None):
         self.main_window.navigation_sidebar.paned.set_show_widget(toggle_button.get_active())
@@ -94,7 +106,6 @@ class WindowState(object):
         self.use_cases.settings_set_value('height', self.main_window.get_property('default-height'))
         self.use_cases.settings_set_value('is_maximized', self.main_window.get_property('maximized'))
         self.use_cases.settings_set_value('sidebar_position', self.main_window.headerbar.get_property('position'))
-        self.use_cases.settings_set_value('show_tools_sidebar', self.main_window.document_view_paned.show_widget)
         self.use_cases.settings_set_value('tools_sidebar_position', self.main_window.document_view_paned.target_position)
         self.use_cases.settings_set_value('show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
         self.use_cases.settings_set_value('navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)

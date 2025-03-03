@@ -79,6 +79,7 @@ class Actions(object):
 
         self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-symbols-sidebar', self.toggle_symbols_sidebar)
+        self.add_simple_action('toggle-emojis-sidebar', self.toggle_emojis_sidebar)
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
@@ -343,9 +344,19 @@ class Actions(object):
         search_entry = self.main_window.headerbar.hb_left.search_entry
         search_entry.grab_focus()
 
-    def toggle_symbols_sidebar(self, action=None, parameter=''):
-        toggle = self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle
-        toggle.set_active(not toggle.get_active())
+    def toggle_symbols_sidebar(self, action=None, parameter=None):
+        toggle_button = self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle
+        if toggle_button.get_active():
+            self.use_cases.hide_tools_sidebar()
+        else:
+            self.use_cases.show_tools_sidebar('math')
+
+    def toggle_emojis_sidebar(self, action=None, parameter=None):
+        toggle_button = self.main_window.toolbar.toolbar_right.emoji_sidebar_toggle
+        if toggle_button.get_active():
+            self.use_cases.hide_tools_sidebar()
+        else:
+            self.use_cases.show_tools_sidebar('emojis')
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button

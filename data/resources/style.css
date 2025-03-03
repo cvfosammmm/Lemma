@@ -245,9 +245,6 @@ box.tools-sidebar flowbox {
     margin-top: 0px;
     margin-bottom: 0px;
 }
-box.tools-sidebar flowbox.mathcal {
-    margin-bottom: 18px;
-}
 box.tools-sidebar flowboxchild {
     padding: 0px;
     border-radius: 0px;
@@ -258,6 +255,9 @@ box.tools-sidebar button {
     padding-bottom: 10px;
     min-height: 16px;
     min-width: 16px;
+}
+box.tools-sidebar {
+    margin-bottom: 9px;
 }
 
 /* popover */

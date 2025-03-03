@@ -205,7 +205,7 @@ class DocumentViewPresenter():
             surface = FontManager.get_surface(layout.node.value, fontname=fontname)
 
             if surface != None:
-                if fontname != 'emoji':
+                if fontname != 'emojis':
                     ctx.set_source_surface(surface, offset_x + layout.x + layout.left, offset_y + baseline + layout.y + layout.top)
                     pattern = ctx.get_source()
                     pattern.set_filter(cairo.Filter.BEST)

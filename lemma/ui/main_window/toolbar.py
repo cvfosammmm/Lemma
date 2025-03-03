@@ -77,8 +77,15 @@ class ToolBarRight(Gtk.Box):
         self.symbols_sidebar_toggle.set_can_focus(False)
         self.symbols_sidebar_toggle.add_css_class('flat')
 
+        self.emoji_sidebar_toggle = Gtk.ToggleButton()
+        self.emoji_sidebar_toggle.set_tooltip_text(_('Emoji Sidebar') + ' (Alt+2)')
+        self.emoji_sidebar_toggle.set_icon_name('sentiment-very-satisfied-symbolic')
+        self.emoji_sidebar_toggle.set_can_focus(False)
+        self.emoji_sidebar_toggle.add_css_class('flat')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.symbols_sidebar_toggle)
+        box.append(self.emoji_sidebar_toggle)
         self.append(box)
 
 

@@ -63,7 +63,7 @@ class FontManager():
             return 'math'
 
         if node.is_emoji():
-            return 'emoji'
+            return 'emojis'
 
         if node.get_paragraph_style().startswith('h'):
             return node.get_paragraph_style()
@@ -117,20 +117,20 @@ class FontManager():
         return FontManager.fonts[fontname]['surface_cache'][char]
 
     def load_glyph(char, fontname='book'):
-        if fontname == 'emoji':
+        if fontname == 'emojis':
             FontManager.load_emoji(char)
         else:
             FontManager.load_glyph_from_font(char, fontname)
 
     def load_emoji(char):
-        if char not in FontManager.fonts['emoji']['char_extents']:
-            FontManager.fonts['emoji']['face'].load_char(ord(char), freetype2.FT.LOAD_DEFAULT)
-            FontManager.fonts['emoji']['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
+        if char not in FontManager.fonts['emojis']['char_extents']:
+            FontManager.fonts['emojis']['face'].load_char(ord(char), freetype2.FT.LOAD_DEFAULT)
+            FontManager.fonts['emojis']['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
 
-            width = FontManager.fonts['emoji']['face'].glyph.advance.x
-            height = FontManager.fonts['emoji']['line_height']
+            width = FontManager.fonts['emojis']['face'].glyph.advance.x
+            height = FontManager.fonts['emojis']['line_height']
             left = 0
-            top = -FontManager.fonts['emoji']['ascend']
+            top = -FontManager.fonts['emojis']['ascend']
 
             viewport = Rsvg.Rectangle()
             viewport.x = 0
@@ -146,8 +146,8 @@ class FontManager():
             rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/svg', filename))
             rsvg_handle.render_document(ctx, viewport)
 
-            FontManager.fonts['emoji']['char_extents'][char] = [width, height, left, top]
-            FontManager.fonts['emoji']['surface_cache'][char] = surface
+            FontManager.fonts['emojis']['char_extents'][char] = [width, height, left, top]
+            FontManager.fonts['emojis']['surface_cache'][char] = surface
 
     def load_glyph_from_font(char, fontname='book'):
         if char not in FontManager.fonts[fontname]['char_extents']:

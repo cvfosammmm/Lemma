@@ -45,8 +45,7 @@ class PopoverManager():
         for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
             if 'popover.py' in files:
                 name = os.path.basename(path)
-                exec('import lemma.ui.popovers.' + name + '.popover as ' + name)
-                exec('self.popovers["' + name + '"] = ' + name + '.Popover(self.use_cases)')
+                exec('import lemma.ui.popovers.' + name + '.popover as ' + name + '\nself.popovers["' + name + '"] = ' + name + '.Popover(self.use_cases)')
 
         MessageBus.connect('app_state_changed', self.on_app_state_changed)
 

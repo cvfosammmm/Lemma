@@ -38,6 +38,7 @@ class ShortcutControllerApp(ShortcutController):
         self.add_with_callback('F2', self.actions.actions['rename-document'].activate)
         self.add_with_callback('<Control>question', self.actions.actions['show-shortcuts-dialog'].activate)
         self.add_with_callback('<Alt>1', self.actions.actions['toggle-symbols-sidebar'].activate)
+        self.add_with_callback('<Alt>2', self.actions.actions['toggle-emojis-sidebar'].activate)
         self.add_with_callback('F10', self.actions.actions['show-hamburger-menu'].activate)
         self.add_with_callback('F12', self.actions.actions['show-document-menu'].activate)
 

@@ -96,6 +96,17 @@ class UseCases(object):
         ApplicationState.set_value('popover_position', (0, 0))
         MessageBus.add_change_code('app_state_changed')
 
+    def show_tools_sidebar(self, name):
+        Settings.set_value('show_tools_sidebar', True)
+        Settings.set_value('tools_sidebar_active_tab', name)
+        Storage.save_settings()
+        MessageBus.add_change_code('settings_changed')
+
+    def hide_tools_sidebar(self):
+        Settings.set_value('show_tools_sidebar', False)
+        Storage.save_settings()
+        MessageBus.add_change_code('settings_changed')
+
     def open_link(self, link_target):
         if urlparse(link_target).scheme in ['http', 'https']:
             webbrowser.open(link_target)
