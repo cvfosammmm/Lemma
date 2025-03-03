@@ -24,6 +24,7 @@ import os.path
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.db.character_db import CharacterDB
+import lemma.infrastructure.timer as timer
 
 
 class ToolsSidebar(Gtk.Stack):
@@ -37,6 +38,7 @@ class ToolsSidebar(Gtk.Stack):
         self.populate_symbols()
         self.populate_emojis()
 
+    @timer.timer
     def populate_emojis(self):
         self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.box.add_css_class('tools-sidebar')
@@ -200,8 +202,8 @@ class ToolsSidebar(Gtk.Stack):
 
         res_path = ServiceLocator.get_resources_path()
         for symbol in symbols:
-            filename = 'emoji_u' + hex(ord(symbol))[2:] + '.svg'
-            pic = Gtk.Image.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/svg', filename))
+            filename = 'emoji_u' + hex(ord(symbol))[2:] + '.png'
+            pic = Gtk.Image.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/png', filename))
             pic.set_valign(Gtk.Align.CENTER)
             pic.set_halign(Gtk.Align.CENTER)
             pic.set_pixel_size(22)
