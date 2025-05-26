@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import sys, os.path, gettext
+import shutil
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.service_locator import ServiceLocator
@@ -52,11 +53,28 @@ FontManager.add_font('emojis', os.path.join(font_path, 'Noto_Color_Emoji/NotoCol
 
 # setup folder for user themes
 pathname = ServiceLocator.get_user_themes_folder()
-if not os.path.exists(pathname): os.mkdir(pathname)
+if not os.path.exists(pathname): os.makedirs(pathname, exist_ok=True)
+
+# ensure default CSS files exist in the user themes folder
+def ensure_css_files():
+    """
+    Ensures that default CSS files from the resources folder are copied to the user themes folder.
+    If a CSS file already exists in the user themes folder, it will not be overwritten.
+    """
+    user_themes = ServiceLocator.get_user_themes_folder()
+    default_themes = os.path.join(ServiceLocator.get_resources_path(), 'themes')
+    if os.path.isdir(default_themes):
+        for fname in os.listdir(default_themes):
+            if fname.endswith('.css'):
+                src = os.path.join(default_themes, fname)
+                dst = os.path.join(user_themes, fname)
+                if not os.path.exists(dst):
+                    shutil.copy2(src, dst)
+ensure_css_files()
 
 # setup folder for notes
 pathname = ServiceLocator.get_notes_folder()
-if not os.path.exists(pathname): os.mkdir(pathname)
+if not os.path.exists(pathname): os.makedirs(pathname, exist_ok=True)
 
 # setup config folder
 pathname = ServiceLocator.get_config_folder()
