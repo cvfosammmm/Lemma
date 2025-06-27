@@ -444,7 +444,7 @@ window.action-dialog actionbar box {
     box-shadow: none;
 }
 window.action-dialog label.title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
     padding-left: 11px;
     padding-top: 11px;
@@ -505,7 +505,7 @@ window.preferences headerbar box.start {
     margin-bottom: 0px;
 }
 window.preferences headerbar label {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
     padding-left: 11px;
     padding-top: 11px;
