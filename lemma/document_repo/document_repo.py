@@ -117,8 +117,9 @@ class DocumentRepo():
     def get_max_document_id():
         cursor = DocumentRepo.db_connection.cursor()
         for result in cursor.execute("SELECT MAX(id) FROM document"):
-            return result[0]
-        return 0
+            if result[0] != None:
+                return result[0]
+            return 0
 
     def add(document):
         if document.id in DocumentRepo.documents_by_id: return
