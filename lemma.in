@@ -52,11 +52,11 @@ FontManager.add_font('emojis', os.path.join(font_path, 'Noto_Color_Emoji/NotoCol
 
 # setup folder for user themes
 pathname = ServiceLocator.get_user_themes_folder()
-if not os.path.exists(pathname): os.mkdir(pathname)
+if not os.path.exists(pathname): os.makedirs(pathname)
 
 # setup folder for notes
 pathname = ServiceLocator.get_notes_folder()
-if not os.path.exists(pathname): os.mkdir(pathname)
+if not os.path.exists(pathname): os.makedirs(pathname)
 
 # setup config folder
 pathname = ServiceLocator.get_config_folder()
