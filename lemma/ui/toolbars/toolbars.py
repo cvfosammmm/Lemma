@@ -43,13 +43,15 @@ class ToolBars():
     def on_app_state_changed(self): self.update()
 
     def update(self):
-        self.update_toolbar()
+        active_document = History.get_active_document()
+        if active_document == None: return
 
-    def update_toolbar(self):
-        document = History.get_active_document()
-        if document == None: return
+        has_active_doc = active_document != None
+        has_selection = has_active_doc and active_document.cursor.has_selection()
+        cursor_inside_link = has_active_doc and active_document.cursor.get_insert_node().is_inside_link()
+        edit_link_visible = has_active_doc and ((not has_selection) and cursor_inside_link)
 
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        selected_nodes = active_document.ast.get_subtree(*active_document.cursor.get_state())
         if len(selected_nodes) == 1 and selected_nodes[0].is_widget() and selected_nodes[0].value.is_resizable():
             widget = selected_nodes[0].value
 
@@ -69,6 +71,11 @@ class ToolBars():
             if orig_width > widget.get_minimum_width() and orig_width < LayoutInfo.get_layout_width():
                 self.toolbar.toolbar_widget_resizable.scale.add_mark(orig_width, Gtk.PositionType.TOP)
         else:
+            if edit_link_visible:
+                self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Edit Link') + ' (Ctrl+L)')
+            else:
+                self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
+
             self.toolbar.mode_stack.set_visible_child_name('main')
 
         button_popover_rel = list()
