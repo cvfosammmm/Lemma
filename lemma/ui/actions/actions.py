@@ -251,7 +251,7 @@ class Actions(object):
                 parsed_url = urlparse(stext)
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
                     text = xml_helpers.escape(stext)
-                    xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + stext + '">' + text + '</char>'
+                    xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
                     self.use_cases.insert_xml(xml)
                     return
 
