@@ -69,4 +69,8 @@ class View(PopoverView):
         self.remove_link_button.set_action_name('win.remove-link')
         self.add_closing_button(self.remove_link_button)
 
+        self.edit_link_button = MenuBuilder.create_button(_('Edit Link'))
+        self.edit_link_button.set_action_name('win.edit-link')
+        self.add_closing_button(self.edit_link_button)
+
 
