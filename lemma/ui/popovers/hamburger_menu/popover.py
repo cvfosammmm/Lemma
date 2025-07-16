@@ -71,9 +71,9 @@ class View(PopoverView):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.button_preferences = MenuBuilder.create_button(_('Settings'))
-        self.button_preferences.set_action_name('win.show-preferences-dialog')
-        self.add_closing_button(self.button_preferences)
+        self.button_settings = MenuBuilder.create_button(_('Settings'))
+        self.button_settings.set_action_name('win.show-settings-dialog')
+        self.add_closing_button(self.button_settings)
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 

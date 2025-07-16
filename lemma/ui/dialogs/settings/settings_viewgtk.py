@@ -22,11 +22,11 @@ from gi.repository import Gtk
 from lemma.ui.helpers.dialog_view import DialogView
 
 
-class Preferences(DialogView):
+class Settings(DialogView):
 
     def __init__(self, main_window):
         DialogView.__init__(self, main_window)
-        self.add_css_class('preferences')
+        self.add_css_class('settings')
 
         self.set_can_focus(False)
         self.set_default_size(500, 600)

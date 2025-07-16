@@ -40,6 +40,7 @@ class ApplicationState():
         ApplicationState.defaults['document_view_hide_cursor_on_unfocus'] = True
 
         ApplicationState.defaults['tags_at_cursor'] = set()
+        ApplicationState.defaults['link_at_cursor'] = None
 
         ApplicationState.data = ApplicationState.defaults
 

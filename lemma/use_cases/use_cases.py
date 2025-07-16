@@ -227,11 +227,16 @@ class UseCases(object):
     def im_commit(self, text):
         document = History.get_active_document()
         tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+        link_at_cursor = ApplicationState.get_value('link_at_cursor')
 
-        self.insert_xml('<char tags="' + ' '.join(tags_at_cursor) + '">' + xml_helpers.escape(text) + '</char>')
+        link_attr = ''
+        if link_at_cursor != None:
+            link_attr = ' link_target="' + link_at_cursor + '"'
+
+        self.insert_xml('<char tags="' + ' '.join(tags_at_cursor) + '"' + link_attr + '>' + xml_helpers.escape(text) + '</char>')
 
         if not document.cursor.has_selection() and text.isspace():
-            self.replace_max_string_before_cursor(tags_at_cursor)
+            self.replace_max_string_before_cursor()
 
         MessageBus.add_change_code('keyboard_input')
 
@@ -373,7 +378,7 @@ class UseCases(object):
             MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
-    def replace_max_string_before_cursor(self, tags):
+    def replace_max_string_before_cursor(self):
         document = History.get_active_document()
 
         last_node = document.cursor.get_insert_node().prev_in_parent()

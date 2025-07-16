@@ -31,9 +31,9 @@ from lemma.ui.helpers.cairo import rounded_rectangle
 
 class PageColors(object):
 
-    def __init__(self, preferences, main_window, use_cases):
+    def __init__(self, settings, main_window, use_cases):
         self.view = PageFontColorView()
-        self.preferences = preferences
+        self.settings = settings
         self.main_window = main_window
         self.use_cases = use_cases
         self.style_previews = dict()
@@ -95,7 +95,7 @@ class PageFontColorView(Gtk.Box):
     def __init__(self):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
-        self.get_style_context().add_class('preferences-page')
+        self.get_style_context().add_class('settings-page')
 
         self.explainer = Gtk.Label()
         self.explainer.set_markup('<b>Note:</b>  If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming/">https://www.cvfosammmm.org/lemma/book/theming/</a>.')

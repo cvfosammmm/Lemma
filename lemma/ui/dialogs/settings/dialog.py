@@ -19,10 +19,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-import lemma.ui.dialogs.preferences.preferences_viewgtk as view
-import lemma.ui.dialogs.preferences.page_colors as page_colors
-import lemma.ui.dialogs.preferences.page_workspace as page_workspace
-import lemma.ui.dialogs.preferences.page_autocomplete as page_autocomplete
+import lemma.ui.dialogs.settings.settings_viewgtk as view
+import lemma.ui.dialogs.settings.page_colors as page_colors
+import lemma.ui.dialogs.settings.page_workspace as page_workspace
+import lemma.ui.dialogs.settings.page_autocomplete as page_autocomplete
 
 
 class Dialog(object):
@@ -36,7 +36,7 @@ class Dialog(object):
         self.view.present()
 
     def setup(self):
-        self.view = view.Preferences(self.main_window)
+        self.view = view.Settings(self.main_window)
 
         self.page_colors = page_colors.PageColors(self, self.main_window, self.use_cases)
         self.page_workspace = page_workspace.PageWorkspace(self, self.main_window, self.use_cases)
@@ -50,22 +50,22 @@ class Dialog(object):
         self.page_workspace.init()
         self.page_autocomplete.init()
 
-    def on_check_button_toggle(self, button, preference_name):
-        self.use_cases.settings_set_value(preference_name, button.get_active())
+    def on_check_button_toggle(self, button, setting_name):
+        self.use_cases.settings_set_value(setting_name, button.get_active())
         
-    def on_radio_button_toggle(self, button, preference_name, value):
-        self.use_cases.settings_set_value(preference_name, value)
+    def on_radio_button_toggle(self, button, setting_name, value):
+        self.use_cases.settings_set_value(setting_name, value)
 
-    def spin_button_changed(self, button, preference_name):
-        self.use_cases.settings_set_value(preference_name, button.get_value_as_int())
+    def spin_button_changed(self, button, setting_name):
+        self.use_cases.settings_set_value(setting_name, button.get_value_as_int())
 
-    def text_deleted(self, buffer, position, n_chars, preference_name):
-        self.use_cases.settings_set_value(preference_name, buffer.get_text())
+    def text_deleted(self, buffer, position, n_chars, setting_name):
+        self.use_cases.settings_set_value(setting_name, buffer.get_text())
 
-    def text_inserted(self, buffer, position, chars, n_chars, preference_name):
-        self.use_cases.settings_set_value(preference_name, buffer.get_text())
+    def text_inserted(self, buffer, position, chars, n_chars, setting_name):
+        self.use_cases.settings_set_value(setting_name, buffer.get_text())
 
-    def on_interpreter_changed(self, button, preference_name, value):
-        self.use_cases.settings_set_value(preference_name, value)
+    def on_interpreter_changed(self, button, setting_name, value):
+        self.use_cases.settings_set_value(setting_name, value)
 
 

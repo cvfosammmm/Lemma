@@ -469,81 +469,81 @@ window.action-dialog checkbutton.radio-group label {
     margin-left: 6px;
 }
 
-/* preferences dialog */
+/* settings dialog */
 
-window.preferences notebook {
+window.settings notebook {
     border: none;
     background: @dialog_bg_color;
 }
-window.preferences notebook stack {
+window.settings notebook stack {
     background: @dialog_bg_color;
 }
-window.preferences notebook header {
+window.settings notebook header {
     padding-left: 0px;
 }
-window.preferences notebook tabs {
+window.settings notebook tabs {
     background: @dialog_bg_color;
     border-bottom: 1px solid @borders;
     padding-top: 6px;
     padding-left: 0px;
 }
-window.preferences notebook tab {
+window.settings notebook tab {
     min-height: 45px;
     margin: 0px;
     padding-left: 18px;
     padding-right: 18px;
 }
-window.preferences headerbar {
+window.settings headerbar {
     background: @dialog_bg_color;
     border-bottom: none;
     box-shadow: none;
     padding-bottom: 0px;
     margin-bottom: 0px;
 }
-window.preferences headerbar box.start {
+window.settings headerbar box.start {
     padding-bottom: 0px;
     margin-bottom: 0px;
 }
-window.preferences headerbar label {
+window.settings headerbar label {
     font-size: 22px;
     font-weight: bold;
     padding-left: 11px;
     padding-top: 11px;
     padding-bottom: 0px;
 }
-window.preferences flowbox {
+window.settings flowbox {
     background: @dialog_bg_color;
     padding-bottom: 18px;
     padding-left: 16px;
 }
-window.preferences flowboxchild {
+window.settings flowboxchild {
     padding: 0px;
     padding-top: 18px;
     padding-right: 16px;
 }
-window.preferences flowboxchild button.color-preview-wrapper {
+window.settings flowboxchild button.color-preview-wrapper {
     border: 1px solid @borders;
     border-radius: 4px;
     margin-bottom: 3px;
     padding: 2px;
     background: none;
 }
-window.preferences flowboxchild box.selected button.color-preview-wrapper {
+window.settings flowboxchild box.selected button.color-preview-wrapper {
     border: 1px solid @accent_color;
 }
-window.preferences flowboxchild checkbutton {
+window.settings flowboxchild checkbutton {
     margin-left: -1px;
 }
-window.preferences label.explainer-bottom {
+window.settings label.explainer-bottom {
     padding: 18px;
     background: @shade_color;
     border-top: 1px solid @dialog_list_border;
 }
-window.preferences checkbutton.single {
+window.settings checkbutton.single {
     margin-left: 14px;
     margin-right: 14px;
 }
-window.preferences checkbutton.single check {
+window.settings checkbutton.single check {
     margin-right: 6px;
 }
 

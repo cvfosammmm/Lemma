@@ -268,7 +268,7 @@ class DocumentViewController():
                 else:
                     self.use_cases.insert_xml('\n')
                     if not document.cursor.has_selection():
-                        self.use_cases.replace_max_string_before_cursor(ApplicationState.get_value('tags_at_cursor'))
+                        self.use_cases.replace_max_string_before_cursor()
             case ('backspace', _): self.use_cases.backspace()
             case ('delete', _): self.use_cases.delete()
 

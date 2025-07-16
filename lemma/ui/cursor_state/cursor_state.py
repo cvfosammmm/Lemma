@@ -39,6 +39,7 @@ class CursorState():
 
     def update(self):
         self.update_tags_at_cursor()
+        self.update_link_at_cursor()
         self.update_paragraph_style_at_cursor()
         self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
@@ -55,6 +56,21 @@ class CursorState():
                 self.use_cases.app_state_set_value('tags_at_cursor', set())
             else:
                 self.use_cases.app_state_set_value('tags_at_cursor', node.tags.copy())
+
+    def update_link_at_cursor(self):
+        document = History.get_active_document()
+
+        if document == None:
+            self.use_cases.app_state_set_value('link_at_cursor', None)
+        else:
+            node = document.cursor.get_first_node()
+            prev_node = node.prev_in_parent()
+            if node == None or prev_node == None:
+                self.use_cases.app_state_set_value('link_at_cursor', None)
+            elif node.link == prev_node.link:
+                self.use_cases.app_state_set_value('link_at_cursor', node.link)
+            else:
+                self.use_cases.app_state_set_value('link_at_cursor', None)
 
     def update_tag_toggle(self, button, tagname):
         document = History.get_active_document()

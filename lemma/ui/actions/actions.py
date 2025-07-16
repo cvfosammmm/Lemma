@@ -84,7 +84,7 @@ class Actions(object):
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
         self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
-        self.add_simple_action('show-preferences-dialog', self.show_preferences_dialog)
+        self.add_simple_action('show-settings-dialog', self.show_settings_dialog)
         self.add_simple_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
         self.add_simple_action('show-about-dialog', self.show_about_dialog)
 
@@ -167,7 +167,7 @@ class Actions(object):
         self.actions['show-edit-menu'].set_enabled(has_active_doc)
         self.actions['show-document-menu'].set_enabled(has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
-        self.actions['show-preferences-dialog'].set_enabled(True)
+        self.actions['show-settings-dialog'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
         self.actions['show-about-dialog'].set_enabled(True)
 
@@ -245,6 +245,11 @@ class Actions(object):
         elif result[1] == 'text/plain':
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
             tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+            link_at_cursor = ApplicationState.get_value('link_at_cursor')
+
+            link_attr = ''
+            if link_at_cursor != None:
+                link_attr = ' link_target="' + link_at_cursor + '"'
 
             if len(text) < 2000:
                 stext = text.strip()
@@ -256,8 +261,8 @@ class Actions(object):
                     return
 
             text = xml_helpers.escape(text)
-            xml = '<char tags="' + ' '.join(tags_at_cursor) + '">' + text + '</char>'
-            self.use_cases.insert_xml(text)
+            xml = '<char tags="' + ' '.join(tags_at_cursor) + '"' + link_attr + '>' + text + '</char>'
+            self.use_cases.insert_xml(xml)
 
     def delete(self, action=None, parameter=''):
         self.use_cases.delete()
@@ -390,8 +395,8 @@ class Actions(object):
         y = allocation.origin.y + allocation.size.height
         self.use_cases.show_popover('hamburger_menu', x, y, 'bottom')
 
-    def show_preferences_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('preferences').run()
+    def show_settings_dialog(self, action=None, parameter=''):
+        DialogLocator.get_dialog('settings').run()
 
     def show_shortcuts_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('keyboard_shortcuts').run()
