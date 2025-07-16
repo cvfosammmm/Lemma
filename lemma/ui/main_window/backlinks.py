@@ -21,16 +21,28 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, Pango
 
 
-class BacklinksView(Gtk.ScrolledWindow):
+class BacklinksView(Gtk.Box):
 
     def __init__(self):
-        Gtk.ScrolledWindow.__init__(self)
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.VERTICAL)
         self.add_css_class('backlinks')
         self.set_size_request(262, 280)
 
+        self.headline = Gtk.Label.new('Backlinks')
+        self.headline.add_css_class('headline')
+        self.headline.set_xalign(0)
+        self.append(self.headline)
+
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
-        self.set_child(self.listbox)
+
+        self.scrolled_window = Gtk.ScrolledWindow()
+        self.scrolled_window.set_hexpand(True)
+        self.scrolled_window.set_vexpand(True)
+        self.scrolled_window.set_child(self.listbox)
+
+        self.append(self.scrolled_window)
 
     def reset(self):
         self.listbox.remove_all()

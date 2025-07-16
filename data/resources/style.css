@@ -175,9 +175,17 @@ paned.document-view separator.wide {
 
 /* backlinks */
 
-.backlinks list {
+.backlinks {
     background: @sidebar_bg_1;
+}
+.backlinks label.headline {
     color: @sidebar_fg_1;
+    padding: 15px 0px 15px 15px;
+    background: @sidebar_bg_1;
+}
+.backlinks list {
+    color: @sidebar_fg_1;
+    background: @sidebar_bg_1;
 }
 .backlinks list label.header {
     line-height: 23px;
