@@ -34,7 +34,7 @@ class NavigationSidebar(Gtk.Box):
         self.paned.set_wide_handle(True)
 
         self.backlinks_toggle = Gtk.ToggleButton()
-        self.backlinks_toggle.set_tooltip_text(_('Show Backlinks'))
+        self.backlinks_toggle.set_tooltip_text(_('Backlinks'))
         self.backlinks_toggle.set_icon_name('backlinks-symbolic')
         self.backlinks_toggle.set_can_focus(False)
         self.backlinks_toggle.add_css_class('flat')
