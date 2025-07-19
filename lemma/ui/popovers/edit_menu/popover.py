@@ -43,6 +43,28 @@ class View(PopoverView):
 
         self.set_width(306)
 
+        self.open_link_button = MenuBuilder.create_button(_('Open Link'))
+        self.open_link_button.set_action_name('win.open-link')
+        self.add_closing_button(self.open_link_button)
+
+        self.open_link_separator = Gtk.Separator()
+        self.add_widget(self.open_link_separator)
+
+        self.copy_link_button = MenuBuilder.create_button(_('Copy Link Target'))
+        self.copy_link_button.set_action_name('win.copy-link')
+        self.add_closing_button(self.copy_link_button)
+
+        self.remove_link_button = MenuBuilder.create_button(_('Remove Link'))
+        self.remove_link_button.set_action_name('win.remove-link')
+        self.add_closing_button(self.remove_link_button)
+
+        self.edit_link_button = MenuBuilder.create_button(_('Edit Link'))
+        self.edit_link_button.set_action_name('win.edit-link')
+        self.add_closing_button(self.edit_link_button)
+
+        self.link_buttons_separator = Gtk.Separator()
+        self.add_widget(self.link_buttons_separator)
+
         self.cut_button = MenuBuilder.create_button(_('Cut'), shortcut=_('Ctrl') + '+X')
         self.cut_button.set_action_name('win.cut')
         self.add_closing_button(self.cut_button)
@@ -61,16 +83,5 @@ class View(PopoverView):
         self.select_all_button = MenuBuilder.create_button(_('Select All'), shortcut=_('Ctrl') + '+A')
         self.select_all_button.set_action_name('win.select-all')
         self.add_closing_button(self.select_all_button)
-
-        self.link_buttons_separator = Gtk.Separator()
-        self.add_widget(self.link_buttons_separator)
-
-        self.remove_link_button = MenuBuilder.create_button(_('Remove Link'))
-        self.remove_link_button.set_action_name('win.remove-link')
-        self.add_closing_button(self.remove_link_button)
-
-        self.edit_link_button = MenuBuilder.create_button(_('Edit Link'))
-        self.edit_link_button.set_action_name('win.edit-link')
-        self.add_closing_button(self.edit_link_button)
 
 

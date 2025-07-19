@@ -77,5 +77,7 @@ class ModelState(object):
 
         self.remove_link_active = (self.has_active_doc and (self.links_inside_selection or ((not self.has_selection) and self.cursor_inside_link)))
         self.edit_link_active = (self.has_active_doc and (self.whole_selection_is_one_link or (not self.has_selection) and self.cursor_inside_link))
+        self.copy_link_active = self.edit_link_active
+        self.open_link_active = (self.has_active_doc and not self.has_selection and self.document.cursor.get_insert_node().is_inside_link())
 
 

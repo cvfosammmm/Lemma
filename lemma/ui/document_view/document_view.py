@@ -29,15 +29,14 @@ from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.title_widget.title_widget import TitleWidget
-from lemma.ui.helpers.observable import Observable
+from lemma.application_state.application_state import ApplicationState
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.timer as timer
 
 
-class DocumentView(Observable):
+class DocumentView():
 
     def __init__(self, main_window, application, model_state):
-        Observable.__init__(self)
         self.main_window = main_window
         self.view = main_window.document_view
         self.use_cases = application.use_cases
@@ -67,17 +66,25 @@ class DocumentView(Observable):
         self.view.add_overlay(self.title_widget.view)
 
         self.set_document(History.get_active_document())
-        self.add_change_code('changed')
+        self.presenter.update()
 
     @timer.timer
     def update(self):
         self.set_document(History.get_active_document())
 
+        self.view.context_menu.open_link_button.set_visible(self.model_state.open_link_active)
+        self.view.context_menu.open_link_separator.set_visible(self.model_state.open_link_active)
+        self.view.context_menu.copy_link_button.set_visible(self.model_state.copy_link_active)
         self.view.context_menu.remove_link_button.set_visible(self.model_state.remove_link_active)
         self.view.context_menu.edit_link_button.set_visible(self.model_state.edit_link_active)
         self.view.context_menu.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
+        hide_back_and_forward = self.model_state.remove_link_active or self.model_state.edit_link_active or self.model_state.open_link_active
+        self.view.context_menu.back_button.set_visible(not hide_back_and_forward)
+        self.view.context_menu.forward_button.set_visible(not hide_back_and_forward)
+        self.view.context_menu.back_forward_separator.set_visible(not hide_back_and_forward)
 
-        self.add_change_code('changed')
+        self.update_link_at_cursor()
+        self.presenter.update()
 
     def set_size(self, width, height):
         self.use_cases.app_state_set_value('document_view_width', width)
@@ -85,24 +92,39 @@ class DocumentView(Observable):
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
         self.use_cases.scroll_to_xy(offset_x, offset_y)
-        self.add_change_code('changed')
+        self.presenter.update()
 
     def set_cursor_position(self, x, y):
         if x != self.cursor_x or y != self.cursor_y:
             self.cursor_x, self.cursor_y = x, y
             self.last_cursor_or_scrolling_change = time.time()
-            self.add_change_code('pointer_changed')
+
+            document = History.get_active_document()
+            if document == None: return
+
+            x = document.clipping.offset_x + (self.cursor_x if self.cursor_x != None else 0)
+            y = document.clipping.offset_y + (self.cursor_y if self.cursor_y != None else 0)
+            x -= ApplicationState.get_value('document_padding_left')
+            y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+            link = None
+
+            if y > 0:
+                leaf_box = document.layout.get_leaf_at_xy(x, y)
+                if leaf_box != None and leaf_box.node != None and leaf_box.node.link != None:
+                    link = leaf_box.node.link
+
+            self.set_link_target_at_pointer(link)
+            self.presenter.update_pointer()
 
     def set_keyboard_modifiers_state(self, state):
         if state != self.keyboard_modifiers_state:
             self.keyboard_modifiers_state = state
             self.last_cursor_or_scrolling_change = time.time()
-            self.add_change_code('changed')
+            self.presenter.update()
 
     def set_document(self, document):
         if document != self.document:
             self.document = document
-            self.update_link_at_cursor()
             self.view.content.queue_draw()
             self.stop_renaming()
             self.title_widget.set_document(document)

@@ -47,19 +47,13 @@ class DocumentViewPresenter():
 
         self.content.set_draw_func(self.draw)
 
-        self.model.connect('changed', self.on_change)
-        self.model.connect('pointer_changed', self.on_pointer_change)
-
-    def on_change(self, model):
+    def update(self):
         if self.model.document == None: return
 
         self.update_size()
         self.update_scrollbars()
         self.update_pointer()
         self.view.content.queue_draw()
-
-    def on_pointer_change(self, model):
-        self.update_pointer()
 
     def update_size(self):
         document = self.model.document
@@ -107,29 +101,28 @@ class DocumentViewPresenter():
         y = document.clipping.offset_y + (self.model.cursor_y if self.model.cursor_y != None else 0)
         x -= ApplicationState.get_value('document_padding_left')
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
-        link = None
 
         if y < -ApplicationState.get_value('subtitle_height'):
             self.content.set_cursor_from_name('text')
         elif y > 0:
-            self.content.set_cursor_from_name('text')
             leaf_box = document.layout.get_leaf_at_xy(x, y)
             if leaf_box != None:
                 node = leaf_box.node
                 if node != None:
                     if node.link != None:
                         self.content.set_cursor_from_name('pointer')
-                        link = node.link
                     elif node.is_widget():
                         self.content.set_cursor_from_name(node.value.get_cursor_name())
                     elif node.is_placeholder():
                         self.content.set_cursor_from_name('default')
                     else:
                         self.content.set_cursor_from_name('text')
+                else:
+                    self.content.set_cursor_from_name('text')
+            else:
+                self.content.set_cursor_from_name('text')
         else:
             self.content.set_cursor_from_name('default')
-
-        self.model.set_link_target_at_pointer(link)
 
     def scroll_to_position(self, position, animate=False):
         document = self.model.document

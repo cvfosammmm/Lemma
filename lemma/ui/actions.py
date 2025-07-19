@@ -61,9 +61,11 @@ class Actions(object):
         self.add_simple_action('select-all', self.select_all)
         self.add_simple_action('remove-selection', self.remove_selection)
 
+        self.add_simple_action('open-link', self.open_link)
         self.add_simple_action('insert-link', self.insert_link)
         self.add_simple_action('remove-link', self.remove_link)
         self.add_simple_action('edit-link', self.edit_link)
+        self.add_simple_action('copy-link', self.copy_link)
         self.add_simple_action('insert-xml', self.insert_xml, GLib.VariantType('s'))
 
         self.add_simple_action('set-paragraph-style', self.set_paragraph_style, GLib.VariantType('s'))
@@ -120,8 +122,10 @@ class Actions(object):
         self.actions['show-insert-image-dialog'].set_enabled(self.model_state.has_active_doc and self.model_state.insert_in_line)
         self.actions['widget-shrink'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_min)
         self.actions['widget-enlarge'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_max)
+        self.actions['open-link'].set_enabled(self.model_state.open_link_active)
         self.actions['remove-link'].set_enabled(self.model_state.remove_link_active)
         self.actions['edit-link'].set_enabled(self.model_state.edit_link_active)
+        self.actions['copy-link'].set_enabled(self.model_state.copy_link_active)
         self.actions['subscript'].set_enabled(self.model_state.has_active_doc)
         self.actions['superscript'].set_enabled(self.model_state.has_active_doc)
         self.actions['insert-xml'].set_enabled(self.model_state.has_active_doc)
@@ -198,7 +202,8 @@ class Actions(object):
         clipboard.set_content(cp_union)
 
     def paste(self, action=None, parameter=''):
-        Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'lemma/ast'], 0, None, self.on_paste)
+        print(Gdk.Display.get_default().get_clipboard().get_formats().to_string())
+        Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'text/plain;charset=utf-8', 'lemma/ast'], 0, None, self.on_paste)
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
@@ -208,8 +213,9 @@ class Actions(object):
             xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
             self.use_cases.insert_xml(xml)
 
-        elif result[1] == 'text/plain':
+        elif result[1].startswith('text/plain'):
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
+
             tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
             link_at_cursor = ApplicationState.get_value('link_at_cursor')
 
@@ -294,11 +300,28 @@ class Actions(object):
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         self.use_cases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
+    def open_link(self, action=None, parameter=''):
+        document = History.get_active_document()
+
+        self.use_cases.open_link(document.cursor.get_insert_node().link)
+
     def insert_link(self, action=None, parameter=''):
         self.use_cases.show_insert_link_popover()
 
     def edit_link(self, action=None, parameter=''):
         self.use_cases.show_insert_link_popover()
+
+    def copy_link(self, action=None, parameter=''):
+        clipboard = Gdk.Display.get_default().get_clipboard()
+        ast = History.get_active_document().ast
+        cursor = History.get_active_document().cursor
+        node = cursor.get_insert_node()
+
+        if node.link != None:
+            cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(node.link.encode()))
+            cp_union = Gdk.ContentProvider.new_union([cp_text])
+
+            clipboard.set_content(cp_union)
 
     def remove_link(self, action=None, parameter=''):
         document = History.get_active_document()

@@ -76,6 +76,28 @@ class ContextMenuDocumentView(ContextMenu):
         self.popover.set_size_request(260, -1)
         self.popover.set_offset(130, 0)
 
+        self.open_link_button = self.create_button(_('Open Link'))
+        self.open_link_button.set_action_name('win.open-link')
+        self.box.append(self.open_link_button)
+
+        self.open_link_separator = Gtk.Separator()
+        self.box.append(self.open_link_separator)
+
+        self.copy_link_button = self.create_button('Copy Link Target')
+        self.copy_link_button.set_action_name('win.copy-link')
+        self.box.append(self.copy_link_button)
+
+        self.remove_link_button = self.create_button('Remove Link')
+        self.remove_link_button.set_action_name('win.remove-link')
+        self.box.append(self.remove_link_button)
+
+        self.edit_link_button = self.create_button('Edit Link')
+        self.edit_link_button.set_action_name('win.edit-link')
+        self.box.append(self.edit_link_button)
+
+        self.link_buttons_separator = Gtk.Separator()
+        self.box.append(self.link_buttons_separator)
+
         self.back_button = self.create_button('Back', _('Alt') + '+Left Arrow')
         self.back_button.set_action_name('win.go-back')
         self.box.append(self.back_button)
@@ -84,17 +106,8 @@ class ContextMenuDocumentView(ContextMenu):
         self.forward_button.set_action_name('win.go-forward')
         self.box.append(self.forward_button)
 
-        self.box.append(Gtk.Separator())
-
-        self.undo_button = self.create_button('Undo', _('Ctrl') + '+Z')
-        self.undo_button.set_action_name('win.undo')
-        self.box.append(self.undo_button)
-
-        self.redo_button = self.create_button('Redo', _('Shift') + '+' + _('Ctrl') + '+Z')
-        self.redo_button.set_action_name('win.redo')
-        self.box.append(self.redo_button)
-
-        self.box.append(Gtk.Separator())
+        self.back_forward_separator = Gtk.Separator()
+        self.box.append(self.back_forward_separator)
 
         self.cut_button = self.create_button('Cut', _('Ctrl') + '+X')
         self.cut_button.set_action_name('win.cut')
@@ -117,16 +130,5 @@ class ContextMenuDocumentView(ContextMenu):
         self.select_all_button = self.create_button('Select All', _('Ctrl') + '+A')
         self.select_all_button.set_action_name('win.select-all')
         self.box.append(self.select_all_button)
-
-        self.link_buttons_separator = Gtk.Separator()
-        self.box.append(self.link_buttons_separator)
-
-        self.remove_link_button = self.create_button('Remove Link')
-        self.remove_link_button.set_action_name('win.remove-link')
-        self.box.append(self.remove_link_button)
-
-        self.edit_link_button = self.create_button('Edit Link')
-        self.edit_link_button.set_action_name('win.edit-link')
-        self.box.append(self.edit_link_button)
 
 
