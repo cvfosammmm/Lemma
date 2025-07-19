@@ -40,7 +40,7 @@ import lemma.ui.actions as actions
 import lemma.ui.autocomplete as autocomplete
 import lemma.ui.model_state as model_state
 import lemma.use_cases.use_cases as use_cases
-import lemma.ui.keyboard_shortcuts.shortcuts as shortcuts
+import lemma.ui.shortcuts as shortcuts
 
 
 class Application(Adw.Application):
