@@ -16,25 +16,29 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import gi
+gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Adw
+from gi.repository import Gdk
 
+from lemma.message_bus.message_bus import MessageBus
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 
-import lemma.ui.colors.colors as colors
-import lemma.ui.window_state.window_state as window_state
+import lemma.ui.colors as colors
+import lemma.ui.window_state as window_state
 import lemma.ui.main_window.main_window as main_window
-import lemma.ui.document_history.document_history as document_history
+import lemma.ui.document_history as document_history
 import lemma.ui.document_view.document_view as document_view
-import lemma.ui.cursor_state.cursor_state as cursor_state
-import lemma.ui.toolbars.toolbars as toolbars
-import lemma.ui.document_list.document_list as document_list
-import lemma.ui.document_draft.document_draft as document_draft
-import lemma.ui.backlinks.backlinks as backlinks
-import lemma.ui.actions.actions as actions
-import lemma.ui.autocomplete.autocomplete as autocomplete
+import lemma.ui.cursor_state as cursor_state
+import lemma.ui.toolbars as toolbars
+import lemma.ui.document_list as document_list
+import lemma.ui.document_draft as document_draft
+import lemma.ui.backlinks as backlinks
+import lemma.ui.actions as actions
+import lemma.ui.autocomplete as autocomplete
+import lemma.ui.model_state as model_state
 import lemma.use_cases.use_cases as use_cases
 import lemma.ui.keyboard_shortcuts.shortcuts as shortcuts
 
@@ -48,6 +52,7 @@ class Application(Adw.Application):
         Adw.Application.do_activate(self)
 
         self.main_window = main_window.MainWindow(self)
+        self.model_state = model_state.ModelState(self.main_window, self)
 
         self.use_cases = use_cases.UseCases(self.main_window)
         ColorManager.init(self.main_window)
@@ -56,20 +61,100 @@ class Application(Adw.Application):
 
         self.colors = colors.Colors(self.main_window)
         self.document_history = document_history.DocumentHistory(self.main_window, self)
-        self.document_view = document_view.DocumentView(self.main_window, self)
+        self.document_view = document_view.DocumentView(self.main_window, self, self.model_state)
         self.cursor_state = cursor_state.CursorState(self.main_window, self)
         self.toolbars = toolbars.ToolBars(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window, self)
         self.document_list = document_list.DocumentList(self.main_window, self)
-        self.backlinks = backlinks.Backlinks(self.main_window, self)
-        self.actions = actions.Actions(self.main_window, self)
+        self.backlinks = backlinks.Backlinks(self.main_window, self, self.model_state)
+        self.actions = actions.Actions(self.main_window, self, self.model_state)
         self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window, self)
         self.popover_manager = PopoverManager(self.main_window, self)
 
+        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
+        MessageBus.connect('history_changed', self.on_history_changed)
+        MessageBus.connect('new_document', self.on_new_document)
+        MessageBus.connect('document_removed', self.on_document_removed)
+        MessageBus.connect('document_changed', self.on_document_changed)
+        MessageBus.connect('document_ast_changed', self.on_document_ast_changed)
+        MessageBus.connect('mode_set', self.on_mode_set)
+        MessageBus.connect('app_state_changed', self.on_app_state_changed)
+        MessageBus.connect('settings_changed', self.on_settings_changed)
+
+        self.model_state.update()
+        self.actions.update()
+        self.backlinks.update()
+        self.document_history.update()
+        self.document_list.update()
+        self.document_draft.update()
+        self.window_state.update()
+        self.colors.update()
+        self.popover_manager.update()
+
         self.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)
+
+    def on_clipboard_changed(self, clipboard):
+        self.model_state.update()
+        self.actions.update()
+
+    def on_history_changed(self):
+        self.model_state.update()
+        self.actions.update()
+        self.backlinks.update()
+        self.document_history.update()
+        self.cursor_state.update()
+        self.document_list.update()
+        self.document_view.update()
+        self.toolbars.update()
+        self.window_state.update()
+
+    def on_new_document(self):
+        self.model_state.update()
+        self.actions.update()
+        self.document_list.update()
+
+    def on_document_removed(self):
+        self.model_state.update()
+        self.actions.update()
+        self.backlinks.update()
+        self.document_list.update()
+
+    def on_document_changed(self):
+        self.model_state.update()
+        self.actions.update()
+        self.document_history.update()
+        self.cursor_state.update()
+        self.document_view.update()
+        self.toolbars.update()
+
+    def on_document_ast_changed(self):
+        self.model_state.update()
+        self.backlinks.update()
+        self.document_list.update()
+
+    def on_mode_set(self):
+        self.model_state.update()
+        self.actions.update()
+        self.backlinks.update()
+        self.document_history.update()
+        self.document_list.update()
+        self.document_view.update()
+        self.document_draft.update()
+        self.window_state.update()
+
+    def on_app_state_changed(self):
+        self.toolbars.update()
+        self.shortcuts.update()
+        self.popover_manager.update()
+        self.cursor_state.update_tag_toggle(self.cursor_state.toolbar.toolbar_main.bold_button, 'bold')
+        self.cursor_state.update_tag_toggle(self.cursor_state.toolbar.toolbar_main.italic_button, 'italic')
+
+    def on_settings_changed(self):
+        self.window_state.update()
+        self.colors.update()
 
     def on_window_close(self, window=None, parameter=None):
         self.save_quit()

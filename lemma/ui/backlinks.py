@@ -27,33 +27,18 @@ from lemma.message_bus.message_bus import MessageBus
 
 class Backlinks(object):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window, application, model_state):
         self.main_window = main_window
         self.view = self.main_window.backlinks
         self.application = application
-
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('document_removed', self.on_document_removed)
-        MessageBus.connect('document_ast_changed', self.on_document_ast_changed)
-        MessageBus.connect('mode_set', self.on_mode_set)
+        self.model_state = model_state
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
 
-        self.update()
-
-    def on_history_changed(self): self.update()
-    def on_document_removed(self): self.update()
-    def on_document_ast_changed(self): self.update()
-    def on_mode_set(self): self.update()
-
     def update(self):
-        active_document = History.get_active_document()
-        mode = ApplicationState.get_value('mode')
-        has_active_doc = (mode == 'documents' and active_document != None)
-
         self.view.reset()
-        if has_active_doc:
-            backlinks = DocumentRepo.list_by_link_target(active_document.title)
+        if self.model_state.has_active_doc:
+            backlinks = DocumentRepo.list_by_link_target(self.model_state.document.title)
             for document_id in backlinks:
                 linking_doc = DocumentRepo.get_by_id(document_id)
                 self.view.add_item(linking_doc)

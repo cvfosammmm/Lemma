@@ -39,15 +39,6 @@ class WindowState(object):
 
         self.restore_window_state()
 
-        MessageBus.connect('settings_changed', self.on_settings_changed)
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('mode_set', self.on_mode_set)
-        self.update()
-
-    def on_settings_changed(self): self.update()
-    def on_history_changed(self): self.update()
-    def on_mode_set(self): self.update()
-
     def update(self):
         mode = ApplicationState.get_value('mode')
 

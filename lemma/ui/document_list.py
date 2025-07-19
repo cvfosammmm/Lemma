@@ -54,19 +54,6 @@ class DocumentList(object):
         self.view.context_menu.delete_document_button.connect('clicked', self.on_delete_document_clicked)
         self.view.context_menu.popover.connect('closed', self.on_context_menu_close)
 
-        MessageBus.connect('new_document', self.on_new_document)
-        MessageBus.connect('document_removed', self.on_document_removed)
-        MessageBus.connect('document_ast_changed', self.on_document_ast_changed)
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('mode_set', self.on_mode_set)
-        self.update()
-
-    def on_new_document(self): self.update()
-    def on_document_removed(self): self.update()
-    def on_document_ast_changed(self): self.update()
-    def on_history_changed(self): self.update()
-    def on_mode_set(self): self.update()
-
     def update(self):
         self.document_ids = [doc_id for doc_id in DocumentRepo.list() if self.search_terms_in_document(DocumentRepo.get_by_id(doc_id))]
         self.view.scrolling_widget.set_size(1, max(len(self.document_ids) * self.view.line_height, 1))

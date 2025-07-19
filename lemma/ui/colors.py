@@ -29,11 +29,6 @@ class Colors(object):
 
         self.color_scheme = None
 
-        self.update()
-        MessageBus.connect('settings_changed', self.on_settings_changed)
-
-    def on_settings_changed(self): self.update()
-
     def update(self):
         color_scheme = Settings.get_value('color_scheme')
         if color_scheme == self.color_scheme: return

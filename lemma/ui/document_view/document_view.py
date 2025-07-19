@@ -36,11 +36,12 @@ import lemma.infrastructure.timer as timer
 
 class DocumentView(Observable):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window, application, model_state):
         Observable.__init__(self)
         self.main_window = main_window
         self.view = main_window.document_view
         self.use_cases = application.use_cases
+        self.model_state = model_state
 
         self.cursor_x, self.cursor_y = None, None
         self.keyboard_modifiers_state = 0
@@ -66,36 +67,15 @@ class DocumentView(Observable):
         self.view.add_overlay(self.title_widget.view)
 
         self.set_document(History.get_active_document())
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('document_changed', self.on_document_change)
-        MessageBus.connect('mode_set', self.on_mode_set)
-
         self.add_change_code('changed')
-
-    def on_history_changed(self):
-        self.set_document(History.get_active_document())
-        self.update()
-
-    def on_document_change(self):
-        self.update_link_at_cursor()
-        self.update()
-
-    def on_mode_set(self):
-        self.update()
 
     @timer.timer
     def update(self):
-        active_document = History.get_active_document()
-        has_active_doc = active_document != None
-        has_selection = has_active_doc and active_document.cursor.has_selection()
-        links_inside_selection = has_active_doc and len([node for node in active_document.ast.get_subtree(*active_document.cursor.get_state()) if node.link != None]) > 0
-        cursor_inside_link = has_active_doc and active_document.cursor.get_insert_node().is_inside_link()
-        delete_link_visible = has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link))
-        edit_link_visible = has_active_doc and ((not has_selection) and cursor_inside_link)
+        self.set_document(History.get_active_document())
 
-        self.view.context_menu.remove_link_button.set_visible(delete_link_visible)
-        self.view.context_menu.edit_link_button.set_visible(edit_link_visible)
-        self.view.context_menu.link_buttons_separator.set_visible(delete_link_visible or edit_link_visible)
+        self.view.context_menu.remove_link_button.set_visible(self.model_state.remove_link_active)
+        self.view.context_menu.edit_link_button.set_visible(self.model_state.edit_link_active)
+        self.view.context_menu.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
 
         self.add_change_code('changed')
 
@@ -120,12 +100,13 @@ class DocumentView(Observable):
             self.add_change_code('changed')
 
     def set_document(self, document):
-        self.document = document
-        self.update_link_at_cursor()
-        self.view.content.queue_draw()
-        self.stop_renaming()
-        self.title_widget.set_document(document)
-        self.view.content.grab_focus()
+        if document != self.document:
+            self.document = document
+            self.update_link_at_cursor()
+            self.view.content.queue_draw()
+            self.stop_renaming()
+            self.title_widget.set_document(document)
+            self.view.content.grab_focus()
 
     def init_renaming(self):
         if self.document != None:

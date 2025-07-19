@@ -27,16 +27,6 @@ class CursorState():
         self.toolbar = main_window.toolbar
         self.use_cases = application.use_cases
 
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('document_changed', self.on_document_change)
-        MessageBus.connect('app_state_changed', self.on_app_state_changed)
-
-    def on_history_changed(self): self.update()
-    def on_document_change(self): self.update()
-    def on_app_state_changed(self):
-        self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
-        self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
-
     def update(self):
         self.update_tags_at_cursor()
         self.update_link_at_cursor()

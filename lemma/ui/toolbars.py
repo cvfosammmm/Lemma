@@ -34,14 +34,6 @@ class ToolBars():
 
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
 
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('document_changed', self.on_document_change)
-        MessageBus.connect('app_state_changed', self.on_app_state_changed)
-
-    def on_history_changed(self): self.update()
-    def on_document_change(self): self.update()
-    def on_app_state_changed(self): self.update()
-
     def update(self):
         active_document = History.get_active_document()
         if active_document == None: return

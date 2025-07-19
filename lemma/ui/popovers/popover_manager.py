@@ -47,12 +47,6 @@ class PopoverManager():
                 name = os.path.basename(path)
                 exec('import lemma.ui.popovers.' + name + '.popover as ' + name + '\nself.popovers["' + name + '"] = ' + name + '.Popover(self.use_cases)')
 
-        MessageBus.connect('app_state_changed', self.on_app_state_changed)
-
-        self.update()
-
-    def on_app_state_changed(self): self.update()
-
     def update(self):
         name = ApplicationState.get_value('active_popover')
 

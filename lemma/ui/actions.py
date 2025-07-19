@@ -34,9 +34,10 @@ import lemma.infrastructure.timer as timer
 
 class Actions(object):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window, application, model_state):
         self.main_window = main_window
         self.application = application
+        self.model_state = model_state
         self.use_cases = application.use_cases
 
         self.actions = dict()
@@ -91,81 +92,46 @@ class Actions(object):
         self.actions['quit'] = Gio.SimpleAction.new('quit', None)
         self.main_window.add_action(self.actions['quit'])
 
-        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('new_document', self.on_new_document)
-        MessageBus.connect('document_removed', self.on_document_removed)
-        MessageBus.connect('document_changed', self.on_document_change)
-        MessageBus.connect('mode_set', self.on_mode_set)
-        self.update()
-
     def add_simple_action(self, name, callback, parameter=None):
         self.actions[name] = Gio.SimpleAction.new(name, parameter)
         self.main_window.add_action(self.actions[name])
         self.actions[name].connect('activate', callback)
 
-    def on_clipboard_changed(self, clipboard): self.update()
-    def on_history_changed(self): self.update()
-    def on_new_document(self): self.update()
-    def on_document_removed(self): self.update()
-    def on_document_change(self): self.update()
-    def on_mode_set(self): self.update()
-
     @timer.timer
     def update(self):
-        document = History.get_active_document()
-        mode = ApplicationState.get_value('mode')
-        has_active_doc = (mode == 'documents' and document != None)
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state()) if has_active_doc else []
-
-        prev_doc = History.get_previous_if_any(document)
-        next_doc = History.get_next_if_any(document)
-        can_undo = has_active_doc and document.can_undo()
-        can_redo = has_active_doc and document.can_redo()
-        insert_in_line = has_active_doc and document.cursor.get_insert_node().parent.is_root()
-        has_selection = has_active_doc and document.cursor.has_selection()
-        clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
-        text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
-        subtree_in_clipboard = 'lemma/ast' in clipboard_formats
-        links_inside_selection = has_active_doc and len([node for node in selected_nodes if node.link != None]) > 0
-        widget_selected = len(selected_nodes) == 1 and selected_nodes[0].is_widget()
-        selected_widget_is_max = widget_selected and (selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width() or not selected_nodes[0].value.is_resizable())
-        selected_widget_is_min = widget_selected and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable())
-        cursor_inside_link = has_active_doc and document.cursor.get_insert_node().is_inside_link()
-
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
-        self.actions['export-bulk'].set_enabled(has_active_doc)
-        self.actions['delete-document'].set_enabled(has_active_doc)
-        self.actions['rename-document'].set_enabled(has_active_doc)
-        self.actions['export-markdown'].set_enabled(has_active_doc)
-        self.actions['export-html'].set_enabled(has_active_doc)
-        self.actions['go-back'].set_enabled(mode == 'draft' or prev_doc != None)
-        self.actions['go-forward'].set_enabled(next_doc != None)
-        self.actions['undo'].set_enabled(has_active_doc and can_undo)
-        self.actions['redo'].set_enabled(has_active_doc and can_redo)
-        self.actions['cut'].set_enabled(has_active_doc and has_selection)
-        self.actions['copy'].set_enabled(has_active_doc and has_selection)
-        self.actions['paste'].set_enabled(has_active_doc and (text_in_clipboard or subtree_in_clipboard))
-        self.actions['delete'].set_enabled(mode == 'documents' and has_selection)
-        self.actions['select-all'].set_enabled(has_active_doc)
-        self.actions['remove-selection'].set_enabled(has_active_doc and has_selection)
-        self.actions['insert-link'].set_enabled(has_active_doc and insert_in_line)
-        self.actions['show-insert-image-dialog'].set_enabled(has_active_doc and insert_in_line)
-        self.actions['widget-shrink'].set_enabled(has_active_doc and not selected_widget_is_min)
-        self.actions['widget-enlarge'].set_enabled(has_active_doc and not selected_widget_is_max)
-        self.actions['remove-link'].set_enabled(has_active_doc and (links_inside_selection or ((not has_selection) and cursor_inside_link)))
-        self.actions['edit-link'].set_enabled(has_active_doc and ((not has_selection) and cursor_inside_link))
-        self.actions['subscript'].set_enabled(has_active_doc)
-        self.actions['superscript'].set_enabled(has_active_doc)
-        self.actions['insert-xml'].set_enabled(has_active_doc)
-        self.actions['set-paragraph-style'].set_enabled(has_active_doc)
-        self.actions['toggle-bold'].set_enabled(has_active_doc)
-        self.actions['toggle-italic'].set_enabled(has_active_doc)
+        self.actions['export-bulk'].set_enabled(self.model_state.has_active_doc)
+        self.actions['delete-document'].set_enabled(self.model_state.has_active_doc)
+        self.actions['rename-document'].set_enabled(self.model_state.has_active_doc)
+        self.actions['export-markdown'].set_enabled(self.model_state.has_active_doc)
+        self.actions['export-html'].set_enabled(self.model_state.has_active_doc)
+        self.actions['go-back'].set_enabled(self.model_state.mode == 'draft' or self.model_state.prev_doc != None)
+        self.actions['go-forward'].set_enabled(self.model_state.next_doc != None)
+        self.actions['undo'].set_enabled(self.model_state.has_active_doc and self.model_state.can_undo)
+        self.actions['redo'].set_enabled(self.model_state.has_active_doc and self.model_state.can_redo)
+        self.actions['cut'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
+        self.actions['copy'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
+        self.actions['paste'].set_enabled(self.model_state.has_active_doc and (self.model_state.text_in_clipboard or self.model_state.subtree_in_clipboard))
+        self.actions['delete'].set_enabled(self.model_state.mode == 'documents' and self.model_state.has_selection)
+        self.actions['select-all'].set_enabled(self.model_state.has_active_doc)
+        self.actions['remove-selection'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
+        self.actions['insert-link'].set_enabled(self.model_state.has_active_doc and self.model_state.insert_in_line)
+        self.actions['show-insert-image-dialog'].set_enabled(self.model_state.has_active_doc and self.model_state.insert_in_line)
+        self.actions['widget-shrink'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_min)
+        self.actions['widget-enlarge'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_max)
+        self.actions['remove-link'].set_enabled(self.model_state.remove_link_active)
+        self.actions['edit-link'].set_enabled(self.model_state.edit_link_active)
+        self.actions['subscript'].set_enabled(self.model_state.has_active_doc)
+        self.actions['superscript'].set_enabled(self.model_state.has_active_doc)
+        self.actions['insert-xml'].set_enabled(self.model_state.has_active_doc)
+        self.actions['set-paragraph-style'].set_enabled(self.model_state.has_active_doc)
+        self.actions['toggle-bold'].set_enabled(self.model_state.has_active_doc)
+        self.actions['toggle-italic'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-symbols-sidebar'].set_enabled(True)
-        self.actions['show-paragraph-style-menu'].set_enabled(has_active_doc)
-        self.actions['show-edit-menu'].set_enabled(has_active_doc)
-        self.actions['show-document-menu'].set_enabled(has_active_doc)
+        self.actions['show-paragraph-style-menu'].set_enabled(self.model_state.has_active_doc)
+        self.actions['show-edit-menu'].set_enabled(self.model_state.has_active_doc)
+        self.actions['show-document-menu'].set_enabled(self.model_state.has_active_doc)
         self.actions['show-hamburger-menu'].set_enabled(True)
         self.actions['show-settings-dialog'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)

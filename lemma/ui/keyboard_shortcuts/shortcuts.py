@@ -38,10 +38,6 @@ class Shortcuts(object):
         self.main_window.add_controller(self.shortcut_controller_app)
         self.main_window.document_view.content.add_controller(self.shortcut_controller_document)
 
-        MessageBus.connect('app_state_changed', self.on_app_state_changed)
-
-    def on_app_state_changed(self): self.update()
-
     def update(self):
         if ApplicationState.get_value('active_popover') != None and self.shortcut_controller_app.get_widget() == self.main_window:
             self.main_window.remove_controller(self.shortcut_controller_app)
