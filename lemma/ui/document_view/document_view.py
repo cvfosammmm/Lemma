@@ -22,6 +22,7 @@ from gi.repository import Gtk, Gdk
 import time
 from urllib.parse import urlparse
 
+from lemma.settings.settings import Settings
 from lemma.ui.document_view.document_view_controller import DocumentViewController
 from lemma.ui.document_view.document_view_presenter import DocumentViewPresenter
 from lemma.document_repo.document_repo import DocumentRepo
@@ -29,6 +30,7 @@ from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.title_widget.title_widget import TitleWidget
 from lemma.ui.helpers.observable import Observable
+import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.timer as timer
 
 
@@ -149,7 +151,27 @@ class DocumentView(Observable):
             self.submit()
 
     def submit(self):
+        document = History.get_active_document()
+        prev_title = document.title
+
         self.use_cases.set_title(self.title_widget.title)
+
+        if Settings.get_value('update_backlinks'):
+            backlinks = DocumentRepo.list_by_link_target(prev_title)
+            for document_id in reversed(backlinks):
+                linking_doc = DocumentRepo.get_by_id(document_id)
+                links = linking_doc.ast.get_link_bounds_and_targets()
+                for link in links:
+                    bounds, target = link
+                    if target == prev_title:
+                        pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
+                        char_nodes = [node.value for node in linking_doc.ast.get_subtree(pos_1, pos_2) if node.is_char()]
+                        if ''.join(char_nodes) == target:
+                            xml = '<char link_target="' + xml_helpers.escape(self.title_widget.title) + '">' + xml_helpers.escape(self.title_widget.title) + '</char>'
+                            self.use_cases.replace_section(bounds[0], bounds[1], xml)
+                        else:
+                            self.use_cases.set_link(linking_doc, bounds, self.title_widget.title)
+
         self.stop_renaming()
 
     def on_entry_keypress(self, controller, keyval, keycode, state):

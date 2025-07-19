@@ -160,6 +160,8 @@ class Popover():
         self.submit()
 
     def submit(self):
+        document = History.get_active_document()
+
         if self.current_values['link_target'] != '':
             if self.bounds == None:
                 tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
@@ -167,9 +169,9 @@ class Popover():
                 xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
                 self.use_cases.insert_xml(xml)
             else:
-                self.use_cases.set_link(self.bounds, self.current_values['link_target'])
+                self.use_cases.set_link(document, self.bounds, self.current_values['link_target'])
         elif self.bounds != None:
-            self.use_cases.set_link(self.bounds, None)
+            self.use_cases.set_link(document, self.bounds, None)
 
         self.use_cases.hide_popovers()
 

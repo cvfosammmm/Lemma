@@ -207,15 +207,6 @@ class UseCases(object):
     def set_title(self, title):
         document = History.get_active_document()
 
-        backlinks = []
-        if Settings.get_value('update_backlinks'):
-            backlinks = DocumentRepo.list_by_link_target(document.title)
-            for document_id in reversed(backlinks):
-                linking_doc = DocumentRepo.get_by_id(document_id)
-                nodes = [n for n in linking_doc.ast.flatten() if n.link == document.title]
-                linking_doc.add_command('set_link', nodes, title)
-                DocumentRepo.update(linking_doc)
-
         document.title = title
         document.update_last_modified()
         document.update()
@@ -424,9 +415,7 @@ class UseCases(object):
         MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
-    def set_link(self, bounds, target):
-        document = History.get_active_document()
-
+    def set_link(self, document, bounds, target):
         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
         char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
         document.add_command('set_link', char_nodes, target)

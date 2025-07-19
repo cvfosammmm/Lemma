@@ -271,6 +271,22 @@ class Node():
             node = node[index]
         return node
 
+    def get_link_bounds_and_targets(self):
+        current_target = None
+        current_bounds = [None, None]
+        result = list()
+        for node in self:
+            current_bounds[1] = node
+            if current_target != node.link:
+                if current_bounds[0] != None and current_target != None:
+                    result.append([[current_bounds[0], current_bounds[1]], current_target])
+                current_bounds[0] = node
+            current_target = node.link
+        if current_bounds[0] != None and current_target != None:
+            result.append([[current_bounds[0], current_bounds[1]], current_target])
+
+        return result
+
     def __str__(self):
         string = self.type + ':' + str(self.value)
         return string

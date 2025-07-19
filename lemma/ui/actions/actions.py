@@ -343,7 +343,7 @@ class Actions(object):
             bounds = document.cursor.get_insert_node().link_bounds()
         else:
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
-        self.use_cases.set_link(bounds, None)
+        self.use_cases.set_link(document, bounds, None)
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry
