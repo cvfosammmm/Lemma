@@ -171,7 +171,7 @@ class DocumentView():
                         char_nodes = [node.value for node in linking_doc.ast.get_subtree(pos_1, pos_2) if node.is_char()]
                         if ''.join(char_nodes) == target:
                             xml = '<char link_target="' + xml_helpers.escape(self.title_widget.title) + '">' + xml_helpers.escape(self.title_widget.title) + '</char>'
-                            self.use_cases.replace_section(bounds[0], bounds[1], xml)
+                            self.use_cases.replace_section(linking_doc, bounds[0], bounds[1], xml)
                         else:
                             self.use_cases.set_link(linking_doc, bounds, self.title_widget.title)
 

@@ -237,7 +237,7 @@ class Autocomplete():
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         xml = AutocompleteDB.get_xml(self.widget.listbox.get_selected_row().title[1:])
-        self.application.use_cases.replace_section(self.session_first_node, insert, xml)
+        self.application.use_cases.replace_section(document, self.session_first_node, insert, xml)
 
         self.deactivate()
 

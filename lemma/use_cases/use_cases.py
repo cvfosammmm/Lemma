@@ -231,8 +231,7 @@ class UseCases(object):
 
         MessageBus.add_change_code('keyboard_input')
 
-    def replace_section(self, node_from, node_to, xml):
-        document = History.get_active_document()
+    def replace_section(self, document, node_from, node_to, xml):
         insert = document.cursor.get_insert_node()
         parser = xml_parser.XMLParser()
         nodes = parser.parse(xml, insert.parent.type)
