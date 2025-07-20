@@ -109,7 +109,7 @@ class DocumentViewPresenter():
             if leaf_box != None:
                 node = leaf_box.node
                 if node != None:
-                    if node.link != None:
+                    if node.link != None and not self.model.ctrl_pressed:
                         self.content.set_cursor_from_name('pointer')
                     elif node.is_widget():
                         self.content.set_cursor_from_name(node.value.get_cursor_name())

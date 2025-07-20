@@ -30,7 +30,7 @@ import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
 import lemma.ui.main_window.main_window as main_window
 import lemma.ui.document_history as document_history
-import lemma.ui.document_view.document_view as document_view
+import lemma.ui.document_view as document_view
 import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
 import lemma.ui.document_list as document_list

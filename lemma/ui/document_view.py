@@ -23,8 +23,8 @@ import time
 from urllib.parse import urlparse
 
 from lemma.settings.settings import Settings
-from lemma.ui.document_view.document_view_controller import DocumentViewController
-from lemma.ui.document_view.document_view_presenter import DocumentViewPresenter
+from lemma.ui.document_view_controller import DocumentViewController
+from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
@@ -43,7 +43,7 @@ class DocumentView():
         self.model_state = model_state
 
         self.cursor_x, self.cursor_y = None, None
-        self.keyboard_modifiers_state = 0
+        self.ctrl_pressed = False
         self.scrolling_multiplier = 2.5
         self.selected_link_target = None
         self.link_target_at_cursor = None
@@ -116,9 +116,9 @@ class DocumentView():
             self.set_link_target_at_pointer(link)
             self.presenter.update_pointer()
 
-    def set_keyboard_modifiers_state(self, state):
-        if state != self.keyboard_modifiers_state:
-            self.keyboard_modifiers_state = state
+    def set_ctrl_pressed(self, is_pressed):
+        if is_pressed != self.ctrl_pressed:
+            self.ctrl_pressed = is_pressed
             self.last_cursor_or_scrolling_change = time.time()
             self.presenter.update()
 

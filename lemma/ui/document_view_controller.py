@@ -47,7 +47,7 @@ class DocumentViewController():
         self.key_controller_content = Gtk.EventControllerKey()
         self.key_controller_content.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller_content.connect('key-pressed', self.on_keypress_content)
-        self.key_controller_content.connect('modifiers', self.on_modifiers_change)
+        self.key_controller_content.connect('key-released', self.on_keyrelease_content)
         self.content.add_controller(self.key_controller_content)
 
         self.im_context = Gtk.IMContextSimple()
@@ -217,14 +217,13 @@ class DocumentViewController():
             self.use_cases.scroll_to_xy(x, y)
         return
 
-    def on_modifiers_change(self, controller, state):
-        self.model.set_keyboard_modifiers_state(state)
-
     def on_keypress_content(self, controller, keyval, keycode, state):
-        if self.model.document == None: return False
-
         modifiers = Gtk.accelerator_get_default_mod_mask()
         ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
+
+        self.model.set_ctrl_pressed(int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK or Gdk.keyval_name(keyval).startswith('Control'))
+
+        if self.model.document == None: return False
 
         document = self.model.document
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
@@ -275,14 +274,24 @@ class DocumentViewController():
             case _: return False
         return True
 
+    def on_keyrelease_content(self, controller, keyval, keycode, state):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+        self.model.set_ctrl_pressed(int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
+
     def on_im_commit(self, im_context, text):
         self.use_cases.im_commit(text)
 
     def on_focus_in(self, controller):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
+
         self.im_context.focus_in()
         self.view.content.queue_draw()
 
     def on_focus_out(self, controller):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
+
         self.im_context.focus_out()
         self.view.content.queue_draw()
 
@@ -290,12 +299,21 @@ class DocumentViewController():
         self.view.content.queue_draw()
 
     def on_enter(self, controller, x, y):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
+
         self.model.set_cursor_position(x, y)
 
     def on_hover(self, controller, x, y):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
+
         self.model.set_cursor_position(x, y)
 
     def on_leave(self, controller):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
+
         self.model.set_cursor_position(None, None)
 
     def on_resize(self, drawing_area, width, height):
