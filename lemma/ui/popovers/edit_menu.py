@@ -25,9 +25,18 @@ from lemma.ui.popovers.popover_templates import PopoverView
 
 class Popover(object):
 
-    def __init__(self, use_cases):
+    def __init__(self, use_cases, model_state):
         self.use_cases = use_cases
+        self.model_state = model_state
         self.view = View(use_cases)
+
+    def update(self):
+        self.view.open_link_button.set_visible(self.model_state.open_link_active)
+        self.view.open_link_separator.set_visible(self.model_state.open_link_active)
+        self.view.copy_link_button.set_visible(self.model_state.copy_link_active)
+        self.view.remove_link_button.set_visible(self.model_state.remove_link_active)
+        self.view.edit_link_button.set_visible(self.model_state.edit_link_active)
+        self.view.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
 
     def on_popup(self):
         pass

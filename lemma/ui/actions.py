@@ -202,7 +202,6 @@ class Actions(object):
         clipboard.set_content(cp_union)
 
     def paste(self, action=None, parameter=''):
-        print(Gdk.Display.get_default().get_clipboard().get_formats().to_string())
         Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'text/plain;charset=utf-8', 'lemma/ast'], 0, None, self.on_paste)
 
     def on_paste(self, clipboard, result):

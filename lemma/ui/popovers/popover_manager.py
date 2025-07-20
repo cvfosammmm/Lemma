@@ -19,19 +19,22 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-import os.path
-
+import lemma.ui.popovers.document_menu as document_menu
+import lemma.ui.popovers.edit_menu as edit_menu
+import lemma.ui.popovers.hamburger_menu as hamburger_menu
+import lemma.ui.popovers.paragraph_style as paragraph_style
+import lemma.ui.popovers.link_ac as link_ac
 from lemma.application_state.application_state import ApplicationState
 from lemma.message_bus.message_bus import MessageBus
 
 
 class PopoverManager():
 
-    def __init__(self, main_window, application):
-        self.popovers = dict()
+    def __init__(self, main_window, application, model_state):
         self.current_popover_name = None
         self.prev_focus_widget = None
         self.use_cases = application.use_cases
+        self.model_state = model_state
         self.main_window = main_window
         self.popoverlay = main_window.popoverlay
         self.inbetween = main_window.inbetween
@@ -42,12 +45,16 @@ class PopoverManager():
         self.inbetween.add_controller(controller_click)
         self.inbetween.set_can_target(False)
 
-        for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
-            if 'popover.py' in files:
-                name = os.path.basename(path)
-                exec('import lemma.ui.popovers.' + name + '.popover as ' + name + '\nself.popovers["' + name + '"] = ' + name + '.Popover(self.use_cases)')
+        self.popovers = dict()
+        self.popovers["document_menu"] = document_menu.Popover(self.use_cases, self.model_state)
+        self.popovers["edit_menu"] = edit_menu.Popover(self.use_cases, self.model_state)
+        self.popovers["hamburger_menu"] = hamburger_menu.Popover(self.use_cases, self.model_state)
+        self.popovers["paragraph_style"] = paragraph_style.Popover(self.use_cases, self.model_state)
+        self.popovers["link_ac"] = link_ac.Popover(self.use_cases, self.model_state)
 
     def update(self):
+        for popover in self.popovers.values(): popover.update()
+
         name = ApplicationState.get_value('active_popover')
 
         if self.current_popover_name == name: return

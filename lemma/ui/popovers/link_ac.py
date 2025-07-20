@@ -30,8 +30,9 @@ import lemma.infrastructure.xml_helpers as xml_helpers
 
 class Popover():
 
-    def __init__(self, use_cases):
+    def __init__(self, use_cases, model_state):
         self.use_cases = use_cases
+        self.model_state = model_state
         self.view = View(use_cases)
 
         self.current_values = dict()
@@ -48,6 +49,9 @@ class Popover():
 
         self.view.listbox.connect('row-activated', self.on_suggestion_row_activated)
         self.view.listbox.connect('selected-rows-changed', self.on_selected_rows_changed)
+
+    def update(self):
+        pass
 
     def on_popup(self):
         self.use_cases.app_state_set_value('document_view_hide_cursor_on_unfocus', False)

@@ -25,14 +25,18 @@ from lemma.ui.popovers.popover_templates import PopoverView
 
 class Popover(object):
 
-    def __init__(self, use_cases):
+    def __init__(self, use_cases, model_state):
         self.use_cases = use_cases
+        self.model_state = model_state
         self.view = View(use_cases)
 
         self.key_controller = Gtk.EventControllerKey()
         self.key_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller.connect('key-pressed', self.on_keypress)
         self.view.add_controller(self.key_controller)
+
+    def update(self):
+        pass
 
     def on_popup(self):
         pass

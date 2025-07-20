@@ -71,7 +71,7 @@ class Application(Adw.Application):
         self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window, self)
-        self.popover_manager = PopoverManager(self.main_window, self)
+        self.popover_manager = PopoverManager(self.main_window, self, self.model_state)
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
         MessageBus.connect('history_changed', self.on_history_changed)
@@ -108,6 +108,7 @@ class Application(Adw.Application):
         self.cursor_state.update()
         self.document_list.update()
         self.document_view.update()
+        self.popover_manager.update()
         self.toolbars.update()
         self.window_state.update()
 
@@ -128,6 +129,7 @@ class Application(Adw.Application):
         self.document_history.update()
         self.cursor_state.update()
         self.document_view.update()
+        self.popover_manager.update()
         self.toolbars.update()
 
     def on_document_ast_changed(self):
@@ -142,6 +144,7 @@ class Application(Adw.Application):
         self.document_history.update()
         self.document_list.update()
         self.document_view.update()
+        self.popover_manager.update()
         self.document_draft.update()
         self.window_state.update()
 
