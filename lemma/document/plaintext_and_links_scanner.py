@@ -18,31 +18,33 @@
 import lemma.infrastructure.timer as timer
 
 
-class PlaintextScanner(object):
+class PlaintextAndLinksScanner(object):
 
     def __init__(self, document):
         self.document = document
 
         self.text = ''
-
-    def update(self):
-        if self.document.has_changed(self):
-            self.update_text()
+        self.links = []
 
     @timer.timer
-    def update_text(self):
-        self.text = ''
+    def update(self):
+        if self.document.has_changed(self):
+            self.text = ''
+            self.links = []
 
-        for child in self.document.ast:
-            self.process_node(child)
+            for child in self.document.ast:
+                self.process_node(child)
 
-        self.document.plaintext = self.text
+            self.document.plaintext = self.text
+            self.document.links = set(self.links)
 
     def process_node(self, node):
         if node.is_eol():
             self.text += '\n'
 
         elif node.is_char():
+            if node.link != None:
+                self.links.append(node.link)
             if node.is_whitespace():
                 if self.text == '' or self.text[-1] != ' ':
                     self.text += ' '

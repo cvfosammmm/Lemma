@@ -19,7 +19,7 @@ import time, os.path
 
 from lemma.document.ast import Node, Cursor
 from lemma.document.layout import Layouter
-from lemma.document.plaintext_scanner import PlaintextScanner
+from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
 from lemma.document.clipping import Clipping
 import lemma.infrastructure.timer as timer
 
@@ -45,12 +45,13 @@ class Document():
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.layout = None
         self.plaintext = None
+        self.links = set()
 
         self.change_flag = dict()
 
         self.layouter = Layouter(self)
         self.clipping = Clipping(self)
-        self.plaintext_scanner = PlaintextScanner(self)
+        self.plaintext_and_links_scanner = PlaintextAndLinksScanner(self)
 
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
@@ -108,7 +109,7 @@ class Document():
     def update(self):
         self.layouter.update()
         self.clipping.update()
-        self.plaintext_scanner.update()
+        self.plaintext_and_links_scanner.update()
 
     def has_changed(self, client):
         if client not in self.change_flag:

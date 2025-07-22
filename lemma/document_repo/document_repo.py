@@ -121,6 +121,7 @@ class DocumentRepo():
                 return result[0]
             return 0
 
+    @timer.timer
     def add(document):
         if document.id in DocumentRepo.documents_by_id: return
 
@@ -138,6 +139,7 @@ class DocumentRepo():
 
         DocumentRepo.update_db(document)
 
+    @timer.timer
     def delete(document):
         if document.id not in DocumentRepo.documents_by_id: return
 
@@ -149,6 +151,7 @@ class DocumentRepo():
 
         DocumentRepo.update_db(document)
 
+    @timer.timer
     def update(document):
         if not document.has_changed(DocumentRepo): return
 
@@ -163,6 +166,7 @@ class DocumentRepo():
 
         DocumentRepo.update_db(document)
 
+    @timer.timer
     def update_db(document):
         cursor = DocumentRepo.db_connection.cursor()
 
@@ -170,22 +174,13 @@ class DocumentRepo():
         cursor.execute("DELETE FROM link_graph WHERE document_id=" + str(document.id))
 
         if document.id in DocumentRepo.documents_by_id:
-            links = DocumentRepo.find_links(document.ast)
             data = set()
-            for link in links:
+            for link in document.links:
                 data.add((document.id, link))
 
             cursor.execute("INSERT INTO document VALUES (" + str(document.id) + ", " + str(int(document.last_modified * 10000000)) + ")")
             cursor.executemany("INSERT INTO link_graph VALUES (?, ?)", list(data))
 
         DocumentRepo.db_connection.commit()
-
-    def find_links(node):
-        links = []
-        if node.link != None:
-            links.append(node.link)
-        for child in node:
-            links += DocumentRepo.find_links(child)
-        return links
 
 
