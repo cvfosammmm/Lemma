@@ -27,12 +27,6 @@ import cairo
 from lemma.infrastructure.font_manager import FontManager
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.document.layout import LayoutWidget
-from lemma.document.layout import LayoutChar
-from lemma.document.layout import LayoutPlaceholder
-from lemma.document.layout import LayoutMathScript
-from lemma.document.layout import LayoutMathFraction
-from lemma.document.layout import LayoutMathRoot
 from lemma.application_state.application_state import ApplicationState
 import lemma.infrastructure.timer as timer
 
@@ -57,7 +51,7 @@ class DocumentViewPresenter():
 
     def update_size(self):
         document = self.model.document
-        height = self.model.document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        height = self.model.document.layout['height'] + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
         scrolling_offset_y = document.clipping.offset_y
 
         self.view.adjustment_x.set_page_size(1)
@@ -70,7 +64,7 @@ class DocumentViewPresenter():
 
     def update_scrollbars(self):
         document = self.model.document
-        height = self.model.document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        height = self.model.document.layout['height'] + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
         self.view.scrollbar_x.set_visible(False)
         self.view.scrollbar_y.set_visible(height > ApplicationState.get_value('document_view_height'))
@@ -105,9 +99,9 @@ class DocumentViewPresenter():
         if y < -ApplicationState.get_value('subtitle_height'):
             self.content.set_cursor_from_name('text')
         elif y > 0:
-            leaf_box = document.layout.get_leaf_at_xy(x, y)
+            leaf_box = document.layouter.get_leaf_at_xy(x, y)
             if leaf_box != None:
-                node = leaf_box.node
+                node = leaf_box['node']
                 if node != None:
                     if node.link != None and not self.model.ctrl_pressed:
                         self.content.set_cursor_from_name('pointer')
@@ -171,16 +165,16 @@ class DocumentViewPresenter():
         offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - scrolling_offset_y
         self.first_selection_node = document.cursor.get_first_node()
         self.last_selection_node = document.cursor.get_last_node()
-        first_selection_line = self.first_selection_node.layout.get_ancestors()[-2]
-        last_selection_line = self.last_selection_node.layout.get_ancestors()[-2]
+        first_selection_line = document.layouter.get_ancestors(self.first_selection_node.layout)[-2]
+        last_selection_line = document.layouter.get_ancestors(self.last_selection_node.layout)[-2]
 
         self.draw_title(ctx, ApplicationState.get_value('document_padding_left'), ApplicationState.get_value('document_padding_top') - scrolling_offset_y)
 
         in_selection = False
-        for line_layout in document.layout.children:
-            if offset_y + line_layout.y + line_layout.height >= 0 and offset_y + line_layout.y <= height:
+        for line_layout in document.layout['children']:
+            if offset_y + line_layout['y'] + line_layout['height'] >= 0 and offset_y + line_layout['y'] <= height:
                 self.draw_layout(line_layout, ctx, offset_x, offset_y, in_selection)
-            if offset_y + line_layout.y > height: break
+            if offset_y + line_layout['y'] > height: break
 
             if not in_selection and line_layout == first_selection_line: in_selection = True
             if in_selection and line_layout == last_selection_line: in_selection = False
@@ -188,104 +182,104 @@ class DocumentViewPresenter():
         self.draw_cursor(ctx, offset_x, offset_y)
 
     def draw_layout(self, layout, ctx, offset_x, offset_y, in_selection):
-        if isinstance(layout, LayoutChar):
+        if layout['type'] == 'char':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            fontname = FontManager.get_fontname_from_node(layout.node)
-            fg_color = self.get_fg_color_by_node(layout.node)
+            fontname = FontManager.get_fontname_from_node(layout['node'])
+            fg_color = self.get_fg_color_by_node(layout['node'])
             baseline = FontManager.get_ascend(fontname=fontname)
 
-            surface = FontManager.get_surface(layout.node.value, fontname=fontname)
+            surface = FontManager.get_surface(layout['node'].value, fontname=fontname)
 
             if surface != None:
                 if fontname != 'emojis':
-                    ctx.set_source_surface(surface, offset_x + layout.x + layout.left, offset_y + baseline + layout.y + layout.top)
+                    ctx.set_source_surface(surface, offset_x + layout['x'] + layout['left'], offset_y + baseline + layout['y'] + layout['top'])
                     pattern = ctx.get_source()
                     pattern.set_filter(cairo.Filter.BEST)
                     Gdk.cairo_set_source_rgba(ctx, fg_color)
                     ctx.mask(pattern)
                     ctx.fill()
                 else:
-                    ctx.set_source_surface(surface, offset_x + layout.x + layout.left, offset_y + baseline + layout.y + layout.top)
+                    ctx.set_source_surface(surface, offset_x + layout['x'] + layout['left'], offset_y + baseline + layout['y'] + layout['top'])
                     ctx.mask(ctx.get_source())
                     ctx.fill()
 
-        if isinstance(layout, LayoutWidget):
+        if layout['type'] == 'widget':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            surface = layout.node.value.get_cairo_surface()
-            fontname = FontManager.get_fontname_from_node(layout.node)
+            surface = layout['node'].value.get_cairo_surface()
+            fontname = FontManager.get_fontname_from_node(layout['node'])
             top = -FontManager.get_descend(fontname=fontname)
-            ctx.set_source_surface(surface, offset_x + layout.x, offset_y + layout.y + top)
-            ctx.rectangle(offset_x + layout.x, offset_y + layout.y, layout.width, layout.height)
+            ctx.set_source_surface(surface, offset_x + layout['x'], offset_y + layout['y'] + top)
+            ctx.rectangle(offset_x + layout['x'], offset_y + layout['y'], layout['width'], layout['height'])
             ctx.fill()
 
-        if isinstance(layout, LayoutPlaceholder):
+        if layout['type'] == 'placeholder':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            fontname = FontManager.get_fontname_from_node(layout.node)
+            fontname = FontManager.get_fontname_from_node(layout['node'])
             baseline = FontManager.get_ascend(fontname=fontname)
 
             width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
-            fg_color = self.get_fg_color_by_node(layout.node)
+            fg_color = self.get_fg_color_by_node(layout['node'])
             top += baseline
 
             surface = FontManager.get_surface('▯', fontname=fontname)
-            ctx.set_source_surface(surface, offset_x + layout.x + left, offset_y + layout.y + top)
+            ctx.set_source_surface(surface, offset_x + layout['x'] + left, offset_y + layout['y'] + top)
             pattern = ctx.get_source()
             pattern.set_filter(cairo.Filter.BEST)
             Gdk.cairo_set_source_rgba(ctx, fg_color)
             ctx.mask(pattern)
             ctx.fill()
 
-        if isinstance(layout, LayoutMathRoot):
+        if layout['type'] == 'mathroot':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-        if isinstance(layout, LayoutMathFraction):
+        if layout['type'] == 'mathfraction':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-        if isinstance(layout, LayoutMathScript):
+        if layout['type'] == 'mathscript':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-        for child in layout.children:
-            if not in_selection and child.node != None and child.node == self.first_selection_node:
+        for child in layout['children']:
+            if not in_selection and child['node'] != None and child['node'] == self.first_selection_node:
                 in_selection = True
-            if in_selection and child.node != None and child.node == self.last_selection_node:
+            if in_selection and child['node'] != None and child['node'] == self.last_selection_node:
                 in_selection = False
-            self.draw_layout(child, ctx, offset_x + layout.x, offset_y + layout.y, in_selection)
+            self.draw_layout(child, ctx, offset_x + layout['x'], offset_y + layout['y'], in_selection)
 
-        if isinstance(layout, LayoutMathRoot):
-            fg_color = self.get_fg_color_by_node(layout.node)
+        if layout['type'] == 'mathroot':
+            fg_color = self.get_fg_color_by_node(layout['node'])
             Gdk.cairo_set_source_rgba(ctx, fg_color)
 
-            line_offset = max(7, layout.children[1].width)
-            line_width = layout.children[0].width
-            line_height = layout.children[0].height
+            line_offset = max(7, layout['children'][1]['width'])
+            line_width = layout['children'][0]['width']
+            line_height = layout['children'][0]['height']
 
             ctx.set_line_width(2)
-            ctx.move_to(offset_x + layout.x + line_offset - 6, offset_y + line_height - 10)
-            ctx.line_to(offset_x + layout.x + line_offset, offset_y + line_height - 2)
+            ctx.move_to(offset_x + layout['x'] + line_offset - 6, offset_y + line_height - 10)
+            ctx.line_to(offset_x + layout['x'] + line_offset, offset_y + line_height - 2)
             ctx.stroke()
             ctx.set_line_width(1)
-            ctx.move_to(offset_x + layout.x + line_offset, offset_y + line_height - 2)
-            ctx.line_to(offset_x + layout.x + line_offset + 9, offset_y + 1)
+            ctx.move_to(offset_x + layout['x'] + line_offset, offset_y + line_height - 2)
+            ctx.line_to(offset_x + layout['x'] + line_offset + 9, offset_y + 1)
             ctx.stroke()
-            ctx.rectangle(offset_x + layout.x + line_offset + 9, offset_y, line_width, 1)
+            ctx.rectangle(offset_x + layout['x'] + line_offset + 9, offset_y, line_width, 1)
             ctx.fill()
 
-        if isinstance(layout, LayoutMathFraction):
-            fg_color = self.get_fg_color_by_node(layout.node)
+        if layout['type'] == 'mathfraction':
+            fg_color = self.get_fg_color_by_node(layout['node'])
             Gdk.cairo_set_source_rgba(ctx, fg_color)
 
-            line_offset = layout.children[0].children[1].height
-            line_width = layout.width
+            line_offset = layout['children'][0]['children'][1]['width']
+            line_width = layout['width']
 
-            ctx.rectangle(offset_x + layout.x + 1, offset_y + line_offset + 1, line_width - 2, 1)
+            ctx.rectangle(offset_x + layout['x'] + 1, offset_y + line_offset + 1, line_width - 2, 1)
             ctx.fill()
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-        ctx.rectangle(offset_x + layout.x, offset_y, layout.width, layout.parent.height)
+        ctx.rectangle(offset_x + layout['x'], offset_y, layout['width'], layout['parent']['height'])
         ctx.fill()
 
     def get_fg_color_by_node(self, node):
@@ -324,11 +318,11 @@ class DocumentViewPresenter():
 
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
-        x, y = insert.layout.get_absolute_xy()
+        x, y = self.model.document.layouter.get_absolute_xy(layout)
         fontname = FontManager.get_fontname_from_node(insert)
         padding_top = FontManager.get_padding_top(fontname)
         padding_bottom = 0#FontManager.get_padding_bottom(fontname)
-        cursor_coords = (x + offset_x, y + offset_y + padding_top, 1, layout.height - padding_top - padding_bottom)
+        cursor_coords = (x + offset_x, y + offset_y + padding_top, 1, layout['height'] - padding_top - padding_bottom)
 
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('cursor'))
         ctx.rectangle(*cursor_coords)

@@ -379,8 +379,7 @@ class Cursor():
         self.node_insert = self.document.ast.get_node_at_position(position[0])
         self.node_selection = self.document.ast.get_node_at_position(position[1])
 
-    def update_implicit_x_position(self):
-        x, y = self.get_insert_node().layout.get_absolute_xy()
+    def update_implicit_x_position(self, x):
         self.implicit_x_position = x
 
     def prev(self, node):

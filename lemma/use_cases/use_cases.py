@@ -27,8 +27,6 @@ from lemma.application_state.application_state import ApplicationState
 from lemma.db.character_db import CharacterDB
 from lemma.widgets.image import Image
 from lemma.document.ast import Node
-from lemma.document.layout import LayoutVBox
-from lemma.document.layout import LayoutDocument
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.storage.storage import Storage
@@ -59,7 +57,7 @@ class UseCases(object):
         document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
 
         insert = document.cursor.get_insert_node()
-        x, y = insert.layout.get_absolute_xy()
+        x, y = document.layouter.get_absolute_xy(insert.layout)
         x -= document.clipping.offset_x
         y -= document.clipping.offset_y
         document_view = self.main_window.document_view
@@ -71,12 +69,12 @@ class UseCases(object):
         fontname = FontManager.get_fontname_from_node(insert)
         padding_top = FontManager.get_padding_top(fontname)
         padding_bottom = FontManager.get_padding_bottom(fontname)
-        y += insert.layout.height - padding_top - padding_bottom
+        y += insert.layout['height'] - padding_top - padding_bottom
 
         orientation = 'bottom'
         if y + 260 > document_view_allocation.size.height:
             orientation = 'top'
-            y -= insert.layout.height - padding_top - padding_bottom
+            y -= insert.layout['height'] - padding_top - padding_bottom
 
         if not document.cursor.has_selection() and insert.is_inside_link():
             document.add_command('move_cursor_to_node', *insert.link_bounds())
@@ -550,24 +548,24 @@ class UseCases(object):
     def up(self, do_selection=False):
         document = History.get_active_document()
 
-        x, y = document.cursor.get_insert_node().layout.get_absolute_xy()
+        x, y = document.layouter.get_absolute_xy(document.cursor.get_insert_node().layout)
         if document.cursor.implicit_x_position != None:
             x = document.cursor.implicit_x_position
 
         new_node = None
         insert_layout = document.cursor.get_insert_node().layout
-        ancestors = insert_layout.get_ancestors()
+        ancestors = document.layouter.get_ancestors(insert_layout)
         for i, box in enumerate(ancestors):
-            if new_node == None and isinstance(box, LayoutVBox) or isinstance(box, LayoutDocument):
-                j = box.children.index(ancestors[i - 1])
-                for child in reversed(box.children[:j]):
+            if new_node == None and box['type'] == 'vbox' or box['type'] == 'document':
+                j = box['children'].index(ancestors[i - 1])
+                for child in reversed(box['children'][:j]):
                     if new_node == None:
                         min_distance = 10000
-                        for layout in child.children:
-                            layout_x, layout_y = layout.get_absolute_xy()
+                        for layout in child['children']:
+                            layout_x, layout_y = document.layouter.get_absolute_xy(layout)
                             distance = abs(layout_x - x)
                             if distance < min_distance:
-                                new_node = layout.node
+                                new_node = layout['node']
                                 min_distance = distance
         if new_node == None:
             new_node = document.ast[0]
@@ -583,24 +581,24 @@ class UseCases(object):
     def down(self, do_selection=False):
         document = History.get_active_document()
 
-        x, y = document.cursor.get_insert_node().layout.get_absolute_xy()
+        x, y = document.layouter.get_absolute_xy(document.cursor.get_insert_node().layout)
         if document.cursor.implicit_x_position != None:
             x = document.cursor.implicit_x_position
 
         new_node = None
         insert_layout = document.cursor.get_insert_node().layout
-        ancestors = insert_layout.get_ancestors()
+        ancestors = document.layouter.get_ancestors(insert_layout)
         for i, box in enumerate(ancestors):
-            if new_node == None and isinstance(box, LayoutVBox) or isinstance(box, LayoutDocument):
-                j = box.children.index(ancestors[i - 1])
-                for child in box.children[j + 1:]:
+            if new_node == None and box['type'] == 'vbox' or box['type'] == 'document':
+                j = box['children'].index(ancestors[i - 1])
+                for child in box['children'][j + 1:]:
                     if new_node == None:
                         min_distance = 10000
-                        for layout in child.children:
-                            layout_x, layout_y = layout.get_absolute_xy()
+                        for layout in child['children']:
+                            layout_x, layout_y = document.layouter.get_absolute_xy(layout)
                             distance = abs(layout_x - x)
                             if distance < min_distance:
-                                new_node = layout.node
+                                new_node = layout['node']
                                 min_distance = distance
         if new_node == None:
             new_node = document.ast[-1]
@@ -617,11 +615,11 @@ class UseCases(object):
         document = History.get_active_document()
 
         layout = document.cursor.get_insert_node().layout
-        while layout.parent.parent != None:
-            layout = layout.parent
-        while layout.children[0].node == None:
-            layout = layout.children[0]
-        new_node = layout.children[0].node
+        while layout['parent']['parent'] != None:
+            layout = layout['parent']
+        while layout['children'][0]['node'] == None:
+            layout = layout['children'][0]
+        new_node = layout['children'][0]['node']
 
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node)
@@ -636,11 +634,11 @@ class UseCases(object):
         document = History.get_active_document()
 
         layout = document.cursor.get_insert_node().layout
-        while layout.parent.parent != None:
-            layout = layout.parent
-        while layout.children[-1].node == None:
-            layout = layout.children[-1]
-        new_node = layout.children[-1].node
+        while layout['parent']['parent'] != None:
+            layout = layout['parent']
+        while layout['children'][-1]['node'] == None:
+            layout = layout['children'][-1]
+        new_node = layout['children'][-1]['node']
 
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node)
@@ -728,7 +726,7 @@ class UseCases(object):
     def move_cursor_by_xy_offset(self, x, y, do_selection=False):
         document = History.get_active_document()
 
-        orig_x, orig_y = document.cursor.get_insert_node().layout.get_absolute_xy()
+        orig_x, orig_y = document.layouter.get_absolute_xy(document.cursor.get_insert_node().layout)
         if document.cursor.implicit_x_position != None:
             orig_x = document.cursor.implicit_x_position
         new_y = orig_y + y
@@ -816,21 +814,21 @@ class UseCases(object):
     def get_insert_on_screen_scrolling_position(self):
         document = History.get_active_document()
         insert_node = document.cursor.get_insert_node()
-        insert_position = insert_node.layout.get_absolute_xy()
+        insert_position = document.layouter.get_absolute_xy(insert_node.layout)
         content_offset = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         insert_y = insert_position[1] + content_offset
-        insert_height = insert_node.layout.height
+        insert_height = insert_node.layout['height']
         window_height = ApplicationState.get_value('document_view_height')
         scrolling_offset_y = document.clipping.offset_y
-        content_height = document.layout.height + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        content_height = document.layout['height'] + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
         if window_height <= 0: return (0, 0)
         if insert_y == content_offset: return (0, 0)
         if insert_y < scrolling_offset_y:
             if insert_height > window_height: return (0, insert_y - window_height + insert_height)
             else: return (0, insert_y)
-        if insert_position[1] == document.layout.height - document.layout.children[-1].height and content_height >= window_height:
-            return (0, document.layout.height + content_offset + ApplicationState.get_value('document_padding_bottom') - window_height)
+        if insert_position[1] == document.layout['height'] - document.layout['children'][-1]['height'] and content_height >= window_height:
+            return (0, document.layout['height'] + content_offset + ApplicationState.get_value('document_padding_bottom') - window_height)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
             return (0, insert_y - window_height + insert_height)
         return (document.clipping.offset_x, document.clipping.offset_y)

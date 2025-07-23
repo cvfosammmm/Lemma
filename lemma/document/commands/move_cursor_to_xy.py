@@ -28,12 +28,12 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        layout = document.layout.get_cursor_holding_layout_close_to_xy(self.x, self.y)
+        layout = document.layouter.get_cursor_holding_layout_close_to_xy(self.x, self.y)
 
         if self.do_selection:
-            document.cursor.move_insert_to_node_with_selection(layout.node)
+            document.cursor.move_insert_to_node_with_selection(layout['node'])
         else:
-            document.cursor.move_insert_to_node(layout.node)
+            document.cursor.move_insert_to_node(layout['node'])
 
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])

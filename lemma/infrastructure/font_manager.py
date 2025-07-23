@@ -25,6 +25,7 @@ import os.path
 import lib.freetype2.freetype2 as freetype2
 import lib.harfpy.harfbuzz as harfbuzz
 import lib.fontconfig.fontconfig as fontconfig
+import lemma.infrastructure.timer as timer
 
 from lemma.infrastructure.service_locator import ServiceLocator
 
@@ -32,6 +33,8 @@ from lemma.infrastructure.service_locator import ServiceLocator
 class FontManager():
 
     fonts = dict()
+    hb_features = (harfbuzz.Feature(tag=harfbuzz.HB.TAG(b'liga'), value=0), harfbuzz.Feature(tag=harfbuzz.HB.TAG(b'kern'), value=1))
+    hb_buffer = harfbuzz.Buffer.create()
 
     def add_font(name, filename, size, ascend, descend, padding_top, padding_bottom):
         fontconfig.Config.get_current().app_font_add_file(filename)
@@ -92,20 +95,20 @@ class FontManager():
 
         return FontManager.fonts[fontname]['char_extents'][char]
  
+    @timer.timer
     def measure(text, fontname='book'):
-        harfbuzz_buffer = harfbuzz.Buffer.create()
+        harfbuzz_buffer = FontManager.hb_buffer
+        harfbuzz_buffer.reset()
         harfbuzz_buffer.add_str(text)
         harfbuzz_buffer.guess_segment_properties()
-        features = (harfbuzz.Feature(tag = harfbuzz.HB.TAG(b'liga'), value = 0), harfbuzz.Feature(tag = harfbuzz.HB.TAG(b'kern'), value = 1))
-        harfbuzz.shape(FontManager.fonts[fontname]['harfbuzz_font'], harfbuzz_buffer, features)
-        positions = harfbuzz_buffer.glyph_positions
+        harfbuzz.shape(FontManager.fonts[fontname]['harfbuzz_font'], harfbuzz_buffer, FontManager.hb_features)
 
         result = []
-        for i, char in enumerate(text):
+        for pos, char in zip(harfbuzz_buffer.glyph_positions, text):
             if char not in FontManager.fonts[fontname]['char_extents']:
                 FontManager.load_glyph(char, fontname=fontname)
             extents = FontManager.fonts[fontname]['char_extents'][char][:]
-            extents[0] = int(positions[i].x_advance)
+            extents[0] = int(pos.x_advance)
             result.append(extents)
 
         return result
