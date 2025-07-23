@@ -26,17 +26,20 @@ class PlaintextAndLinksScanner(object):
         self.text = ''
         self.links = []
 
-    @timer.timer
     def update(self):
         if self.document.has_changed(self):
-            self.text = ''
-            self.links = []
+            self.update_pal()
 
-            for child in self.document.ast:
-                self.process_node(child)
+    @timer.timer
+    def update_pal(self):
+        self.text = ''
+        self.links = []
 
-            self.document.plaintext = self.text
-            self.document.links = set(self.links)
+        for child in self.document.ast:
+            self.process_node(child)
+
+        self.document.plaintext = self.text
+        self.document.links = set(self.links)
 
     def process_node(self, node):
         if node.is_eol():
