@@ -18,8 +18,9 @@
 
 class Command():
 
-    def __init__(self, nodes):
+    def __init__(self, position_node, nodes):
         self.is_undo_checkpoint = True
+        self.position_node = position_node
         self.nodes = nodes
         self.state = dict()
 
@@ -28,8 +29,7 @@ class Command():
         self.state['nodes_added'] = []
 
         for node in self.nodes:
-            insert = document.cursor.get_insert_node()
-            insert.parent.insert_before(insert, node)
+            self.position_node.parent.insert_before(self.position_node, node)
             self.state['nodes_added'].append(node)
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)

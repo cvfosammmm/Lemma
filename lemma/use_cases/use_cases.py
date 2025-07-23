@@ -237,9 +237,9 @@ class UseCases(object):
         nodes = parser.parse(xml, insert.parent.type)
 
         commands = []
-        commands.append(['delete', node_to, node_from])
+        commands.append(['delete', node_from, node_to])
+        commands.append(['insert', node_to, nodes])
         commands.append(['move_cursor_to_node', node_to])
-        commands.append(['insert_nodes', nodes])
         document.add_composite_command(*commands)
 
         document.add_command('update_implicit_x_position')
@@ -257,7 +257,7 @@ class UseCases(object):
         nodes = parser.parse(xml, insert.parent.type)
         selection_from = document.cursor.get_first_node()
         selection_to = document.cursor.get_last_node()
-        commands = [['delete', selection_from, selection_to], ['move_cursor_to_node', selection_to], ['insert_nodes', nodes]]
+        commands = [['delete', selection_from, selection_to], ['insert', selection_to, nodes], ['move_cursor_to_node', selection_to]]
 
         if len(nodes) == 0: return
 
@@ -365,8 +365,9 @@ class UseCases(object):
 
         image = Image(filename)
         if document.cursor.get_insert_node().parent.is_root():
+            insert = document.cursor.get_insert_node()
             node = Node('widget', image)
-            document.add_command('insert_nodes', [node])
+            document.add_command('insert', insert, [node])
             document.add_command('update_implicit_x_position')
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
@@ -398,8 +399,7 @@ class UseCases(object):
                     nodes = parser.parse(xml)
 
                     commands = [['delete', last_node.prev_in_parent(length), last_node]]
-                    commands.append(['move_cursor_to_node', last_node])
-                    commands.append(['insert_nodes', nodes])
+                    commands.append(['insert', last_node, nodes])
                     commands.append(['move_cursor_to_node', last_node.next_in_parent()])
 
                     document.add_composite_command(*commands)
