@@ -237,8 +237,8 @@ class UseCases(object):
         nodes = parser.parse(xml, insert.parent.type)
 
         commands = []
-        commands.append(['move_cursor_to_node', node_to, node_from])
-        commands.append(['delete_selection'])
+        commands.append(['delete', node_to, node_from])
+        commands.append(['move_cursor_to_node', node_to])
         commands.append(['insert_nodes', nodes])
         document.add_composite_command(*commands)
 
@@ -255,7 +255,9 @@ class UseCases(object):
         insert_prev = insert.prev_in_parent()
         parser = xml_parser.XMLParser()
         nodes = parser.parse(xml, insert.parent.type)
-        commands = [['delete_selection'], ['insert_nodes', nodes]]
+        selection_from = document.cursor.get_first_node()
+        selection_to = document.cursor.get_last_node()
+        commands = [['delete', selection_from, selection_to], ['move_cursor_to_node', selection_to], ['insert_nodes', nodes]]
 
         if len(nodes) == 0: return
 
@@ -307,7 +309,7 @@ class UseCases(object):
         if document.cursor.has_selection():
             self.delete_selection()
         elif not insert.is_first_in_parent():
-            document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert], ['delete_selection'])
+            document.add_composite_command(['delete', document.cursor.prev_no_descent(insert), insert], ['move_cursor_to_node', insert])
             document.add_command('update_implicit_x_position')
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
@@ -329,7 +331,8 @@ class UseCases(object):
         if document.cursor.has_selection():
             self.delete_selection()
         elif not insert.is_last_in_parent():
-            document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert], ['delete_selection'])
+            insert_new = document.cursor.next_no_descent(insert)
+            document.add_composite_command(['delete', insert, insert_new], ['move_cursor_to_node', insert_new])
             document.add_command('update_implicit_x_position')
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
@@ -346,7 +349,10 @@ class UseCases(object):
     @timer.timer
     def delete_selection(self):
         document = History.get_active_document()
-        document.add_command('delete_selection')
+        node_from = document.cursor.get_first_node()
+        node_to = document.cursor.get_last_node()
+
+        document.add_composite_command(['delete', node_from, node_to], ['move_cursor_to_node', node_to])
         document.add_command('update_implicit_x_position')
         document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
         DocumentRepo.update(document)
@@ -387,12 +393,12 @@ class UseCases(object):
                 if CharacterDB.has_replacement(chars[i:]):
                     length = len(chars) - i
                     text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
-                    xml = '<char tags="' + ' '.join(tags) + '">' + text + '</char>'
+                    xml = '<char tags="' + ' '.join(first_node.tags) + '">' + text + '</char>'
                     parser = xml_parser.XMLParser()
                     nodes = parser.parse(xml)
 
-                    commands = [['move_cursor_to_node', last_node.prev_in_parent(length), last_node]]
-                    commands.append(['delete_selection'])
+                    commands = [['delete', last_node.prev_in_parent(length), last_node]]
+                    commands.append(['move_cursor_to_node', last_node])
                     commands.append(['insert_nodes', nodes])
                     commands.append(['move_cursor_to_node', last_node.next_in_parent()])
 

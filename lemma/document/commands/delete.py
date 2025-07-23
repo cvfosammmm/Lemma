@@ -18,25 +18,24 @@
 
 class Command():
 
-    def __init__(self):
+    def __init__(self, node_from, node_to):
+        self.node_from = node_from
+        self.node_to = node_to
         self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        first_node = document.cursor.get_first_node()
-        last_node = document.cursor.get_last_node()
-        self.state['deleted_nodes'] = first_node.parent.remove_range(first_node, last_node)
-        document.cursor.set_insert_selection_nodes(last_node, last_node)
+        if self.node_from.parent == self.node_to.parent:
+            self.state['deleted_nodes'] = self.node_from.parent.remove_range(self.node_from, self.node_to)
 
         self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
         document.update_last_modified()
 
     def undo(self, document):
-        insert = document.cursor.get_insert_node()
         for node in self.state['deleted_nodes']:
-            insert.parent.insert_before(insert, node)
+            self.node_to.parent.insert_before(self.node_to, node)
 
         document.cursor.set_state(self.state['cursor_state_before'])
         document.update_last_modified()
