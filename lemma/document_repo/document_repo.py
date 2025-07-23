@@ -63,12 +63,12 @@ class DocumentRepo():
 
     @timer.timer
     def list():
-        return [doc.id for doc in sorted(DocumentRepo.documents, key=lambda doc: doc.last_modified)]
+        return [doc.id for doc in sorted(DocumentRepo.documents, key=lambda doc: -doc.last_modified)]
 
     @timer.timer
     def list_by_link_target(title):
         if title in DocumentRepo.documents_by_link_target:
-            return [doc.id for doc in sorted(DocumentRepo.documents_by_link_target[title], key=lambda doc: doc.last_modified)]
+            return [doc.id for doc in sorted(DocumentRepo.documents_by_link_target[title], key=lambda doc: -doc.last_modified)]
         return []
 
     @timer.timer
