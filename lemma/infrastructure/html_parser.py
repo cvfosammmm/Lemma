@@ -51,10 +51,10 @@ class HTMLParser(HTMLParserLib):
             self.composite.append(Node('end'))
         else:
             self.feed(body)
-            del(self.composite.children[-1])
-            if not self.composite.children[-1].is_end():
+            self.composite[-1].remove_from_parent()
+            if not self.composite[-1].is_end():
                 self.composite.append(Node('end'))
-            self.composite.children[-1].paragraph_style = self.paragraph_style
+            self.composite[-1].paragraph_style = self.paragraph_style
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)

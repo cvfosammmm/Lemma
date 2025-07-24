@@ -108,7 +108,7 @@ class Layouter(object):
                 if subtree != None:
                     layout_tree['children'].append(subtree)
         else:
-            for child in node.children:
+            for child in node:
                 subtree = self.make_layout_tree(child, layout_tree)
                 if subtree != None:
                     layout_tree['children'].append(subtree)

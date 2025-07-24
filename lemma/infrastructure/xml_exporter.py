@@ -33,23 +33,23 @@ class XMLExporter(object):
 
         if node.type == 'root':
             return '<root' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node.children]) + '</root>'
+                + ''.join([self.export_xml(child) for child in node]) + '</root>'
 
         if node.type == 'mathscript':
             return '<mathscript' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node.children]) + '</mathscript>'
+                + ''.join([self.export_xml(child) for child in node]) + '</mathscript>'
 
         if node.type == 'mathfraction':
             return '<mathfraction' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node.children]) + '</mathfraction>'
+                + ''.join([self.export_xml(child) for child in node]) + '</mathfraction>'
 
         if node.type == 'mathroot':
             return '<mathroot' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node.children]) + '</mathroot>'
+                + ''.join([self.export_xml(child) for child in node]) + '</mathroot>'
 
         if node.type == 'mathlist':
             return '<mathlist' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node.children]) + '</mathlist>'
+                + ''.join([self.export_xml(child) for child in node]) + '</mathlist>'
 
         if node.type == 'char':
             return '<char' + attributes + '>' + xml_helpers.escape(node.value) + '</char>'
