@@ -28,6 +28,7 @@ import lib.freetype2.freetype2 as freetype2
 import lib.fontconfig.fontconfig as fontconfig
 import lemma.infrastructure.timer as timer
 
+from lemma.db.character_db import CharacterDB
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -64,12 +65,12 @@ class FontManager():
             return 'math_small'
         if node.in_fraction():
             return 'math_small'
-        if node.is_mathsymbol():
+        if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
             return 'math'
         if node.value != None and node.is_char() and node.value.isnumeric():
             return 'math'
 
-        if node.is_emoji():
+        if node.is_char() and CharacterDB.is_emoji(node.value):
             return 'emojis'
 
         if node.get_paragraph_style().startswith('h'):

@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.infrastructure.font_manager import FontManager
+from lemma.db.character_db import CharacterDB
 from lemma.infrastructure.layout_info import LayoutInfo
 import lemma.infrastructure.timer as timer
 
@@ -121,7 +122,7 @@ class Layouter(object):
         last_tags = set()
         result = list()
         for node in parent_node:
-            if node.is_whitespace() or not node.is_text() or node.is_emoji():
+            if node.type != 'char' or node.is_whitespace() or CharacterDB.is_mathsymbol(node.value) or CharacterDB.is_emoji(node.value):
                 result.append(node)
                 last_type = None
                 last_tags = set()

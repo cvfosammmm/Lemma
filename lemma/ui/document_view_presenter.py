@@ -289,8 +289,6 @@ class DocumentViewPresenter():
                 return ColorManager.get_ui_color('links')
             else:
                 return ColorManager.get_ui_color('links_page_not_existing')
-        elif node.is_mathsymbol():
-            return ColorManager.get_ui_color('math')
         else:
             return ColorManager.get_ui_color('text')
 

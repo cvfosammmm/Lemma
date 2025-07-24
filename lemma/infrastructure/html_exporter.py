@@ -18,6 +18,7 @@
 import urllib.parse
 import os, os.path
 
+from lemma.db.character_db import CharacterDB
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -107,7 +108,7 @@ class HTMLExporter(object):
         self.html += text
 
     def process_node(self, node):
-        if node.is_mathsymbol():
+        if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
             if node.parent.is_root():
                 self.html += '<math>'
             self.html += node.value

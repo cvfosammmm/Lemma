@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.db.character_db import CharacterDB
-
 
 class Node():
 
@@ -116,11 +114,8 @@ class Node():
 
     def is_eol(self): return self.type == 'eol'
     def is_end(self): return self.type == 'end'
-    def is_mathsymbol(self): return self.type == 'char' and CharacterDB.is_mathsymbol(self.value)
-    def is_emoji(self): return self.type == 'char' and CharacterDB.is_emoji(self.value)
     def is_whitespace(self): return self.type == 'eol' or (self.is_char() and self.value.isspace())
     def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
-    def is_text(self): return self.type == 'char' and not self.is_mathsymbol() and not self.is_whitespace()
     def is_char(self): return self.type == 'char'
     def is_placeholder(self): return self.type == 'placeholder'
     def is_widget(self): return self.type == 'widget'
