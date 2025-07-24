@@ -202,17 +202,24 @@ class Actions(object):
         clipboard.set_content(cp_union)
 
     def paste(self, action=None, parameter=''):
-        Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'text/plain;charset=utf-8', 'lemma/ast'], 0, None, self.on_paste)
+        clipboard = Gdk.Display.get_default().get_clipboard()
+        if clipboard.get_formats().contain_mime_type('lemma/ast'):
+            Gdk.Display.get_default().get_clipboard().read_async(['lemma/ast'], 0, None, self.on_paste_ast)
+        else:
+            Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'text/plain;charset=utf-8'], 0, None, self.on_paste)
+
+    def on_paste_ast(self, clipboard, result):
+        result = clipboard.read_finish(result)
+        document = History.get_active_document()
+
+        xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
+        self.use_cases.insert_xml(xml)
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
         document = History.get_active_document()
 
-        if result[1].startswith('lemma/ast'):
-            xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
-            self.use_cases.insert_xml(xml)
-
-        elif result[1].startswith('text/plain'):
+        if result[1].startswith('text/plain'):
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
 
             tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
