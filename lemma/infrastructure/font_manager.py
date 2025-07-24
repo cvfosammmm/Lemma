@@ -17,13 +17,14 @@
 
 import gi
 gi.require_version('Rsvg', '2.0')
+gi.require_version('HarfBuzz', '0.0')
 from gi.repository import Rsvg
+from gi.repository import HarfBuzz
 
 import cairo
 import os.path
 
 import lib.freetype2.freetype2 as freetype2
-import lib.harfpy.harfbuzz as harfbuzz
 import lib.fontconfig.fontconfig as fontconfig
 import lemma.infrastructure.timer as timer
 
@@ -33,8 +34,8 @@ from lemma.infrastructure.service_locator import ServiceLocator
 class FontManager():
 
     fonts = dict()
-    hb_features = (harfbuzz.Feature(tag=harfbuzz.HB.TAG(b'liga'), value=0), harfbuzz.Feature(tag=harfbuzz.HB.TAG(b'kern'), value=1))
-    hb_buffer = harfbuzz.Buffer.create()
+    harfbuzz_buffer = HarfBuzz.buffer_create()
+    harfbuzz_features = [HarfBuzz.feature_from_string(b'liga 0')[1], HarfBuzz.feature_from_string(b'kern 1')[1]]
 
     def add_font(name, filename, size, ascend, descend, padding_top, padding_bottom):
         fontconfig.Config.get_current().app_font_add_file(filename)
@@ -49,7 +50,9 @@ class FontManager():
         FontManager.fonts[name]['line_height'] = FontManager.fonts[name]['ascend'] - FontManager.fonts[name]['descend']
         FontManager.fonts[name]['padding_top'] = padding_top
         FontManager.fonts[name]['padding_bottom'] = padding_bottom
-        FontManager.fonts[name]['harfbuzz_font'] = harfbuzz.Font.ft_create(face)
+        harfbuzz_face = HarfBuzz.face_create_from_file_or_fail(filename, 0)
+        FontManager.fonts[name]['harfbuzz_font'] = HarfBuzz.font_create(harfbuzz_face)
+        HarfBuzz.font_set_scale(FontManager.fonts[name]['harfbuzz_font'], size * 64, size * 64)
         FontManager.fonts[name]['char_extents'] = dict()
         FontManager.fonts[name]['surface_cache'] = dict()
 
@@ -94,21 +97,22 @@ class FontManager():
             FontManager.load_glyph(char, fontname=fontname)
 
         return FontManager.fonts[fontname]['char_extents'][char]
- 
+
     @timer.timer
     def measure(text, fontname='book'):
-        harfbuzz_buffer = FontManager.hb_buffer
-        harfbuzz_buffer.reset()
-        harfbuzz_buffer.add_str(text)
-        harfbuzz_buffer.guess_segment_properties()
-        harfbuzz.shape(FontManager.fonts[fontname]['harfbuzz_font'], harfbuzz_buffer, FontManager.hb_features)
+        harfbuzz_buffer = FontManager.harfbuzz_buffer
+        HarfBuzz.buffer_reset(harfbuzz_buffer)
+        HarfBuzz.buffer_add_utf8(harfbuzz_buffer, text.encode('utf8'), 0, -1)
+        HarfBuzz.buffer_guess_segment_properties(harfbuzz_buffer)
+        HarfBuzz.shape(FontManager.fonts[fontname]['harfbuzz_font'], harfbuzz_buffer, FontManager.harfbuzz_features)
+        positions = HarfBuzz.buffer_get_glyph_positions(harfbuzz_buffer)
 
         result = []
-        for pos, char in zip(harfbuzz_buffer.glyph_positions, text):
+        for pos, char in zip(positions, text):
             if char not in FontManager.fonts[fontname]['char_extents']:
                 FontManager.load_glyph(char, fontname=fontname)
             extents = FontManager.fonts[fontname]['char_extents'][char][:]
-            extents[0] = int(pos.x_advance)
+            extents[0] = int(pos.x_advance / 64)
             result.append(extents)
 
         return result

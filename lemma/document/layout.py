@@ -94,12 +94,12 @@ class Layouter(object):
         if node.type == 'root':
             for child in self.group_words(node):
                 if isinstance(child, list) and child[0].is_text():
-                    subtree = {'type': 'word', 'node': node, 'parent': None, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+                    subtree = {'type': 'word', 'node': node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
                     char_nodes = child
                     text = ''.join([char.value for char in char_nodes])
                     fontname = FontManager.get_fontname_from_node(char_nodes[0])
                     for char_node, extents in zip(char_nodes, FontManager.measure(text, fontname=fontname)):
-                        subsubtree = {'type': 'char', 'node': char_node, 'parent': node, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': extents}
+                        subsubtree = {'type': 'char', 'node': char_node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': extents}
                         char_node.layout = subsubtree
                         subtree['children'].append(subsubtree)
                 else:
