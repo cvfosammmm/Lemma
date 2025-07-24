@@ -99,7 +99,7 @@ class Layouter(object):
                     text = ''.join([char.value for char in char_nodes])
                     fontname = FontManager.get_fontname_from_node(char_nodes[0])
                     for char_node, extents in zip(char_nodes, FontManager.measure(text, fontname=fontname)):
-                        subsubtree = {'type': 'char', 'node': char_node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                        subsubtree = {'type': 'char', 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                         subsubtree['width'], subsubtree['height'], subsubtree['left'], subsubtree['top'] = extents
                         char_node.layout = subsubtree
                         subtree['children'].append(subsubtree)
