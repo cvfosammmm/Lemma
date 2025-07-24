@@ -48,18 +48,10 @@ class Layouter(object):
                        'left': 0,
                        'top': 0}
 
-        if node.type == 'root':
-            layout_tree['type'] = 'document'
-            layout_tree['node'] = node
-            node.layout = layout_tree
-        elif node.type == 'char':
+        if node.type == 'char':
             layout_tree['type'] = 'char'
             layout_tree['node'] = node
             layout_tree['width'], layout_tree['height'], layout_tree['left'], layout_tree['top'] = FontManager.measure_single(node.value, fontname=FontManager.get_fontname_from_node(node))
-            node.layout = layout_tree
-        elif node.type == 'placeholder':
-            layout_tree['type'] = 'placeholder'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'eol':
             layout_tree['type'] = 'eol'
@@ -67,6 +59,10 @@ class Layouter(object):
             node.layout = layout_tree
         elif node.type == 'end':
             layout_tree['type'] = 'end'
+            layout_tree['node'] = node
+            node.layout = layout_tree
+        elif node.type == 'placeholder':
+            layout_tree['type'] = 'placeholder'
             layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'widget':
@@ -88,12 +84,16 @@ class Layouter(object):
         elif node.type == 'mathlist':
             layout_tree['type'] = 'hbox'
             layout_tree['node'] = node
+        elif node.type == 'root':
+            layout_tree['type'] = 'document'
+            layout_tree['node'] = node
+            node.layout = layout_tree
         else:
             return None
 
         if node.type == 'root':
             for child in self.group_words(node):
-                if isinstance(child, list) and child[0].is_text():
+                if isinstance(child, list):
                     subtree = {'type': 'word', 'node': node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                     char_nodes = child
                     text = ''.join([char.value for char in char_nodes])
