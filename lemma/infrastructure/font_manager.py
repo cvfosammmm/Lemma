@@ -50,7 +50,8 @@ class FontManager():
         FontManager.fonts[name]['line_height'] = FontManager.fonts[name]['ascend'] - FontManager.fonts[name]['descend']
         FontManager.fonts[name]['padding_top'] = padding_top
         FontManager.fonts[name]['padding_bottom'] = padding_bottom
-        harfbuzz_face = HarfBuzz.face_create_from_file_or_fail(filename, 0)
+        harfbuzz_blob = HarfBuzz.blob_create_from_file_or_fail(filename)
+        harfbuzz_face = HarfBuzz.face_create(harfbuzz_blob, 0)
         FontManager.fonts[name]['harfbuzz_font'] = HarfBuzz.font_create(harfbuzz_face)
         HarfBuzz.font_set_scale(FontManager.fonts[name]['harfbuzz_font'], size * 64, size * 64)
         FontManager.fonts[name]['char_extents'] = dict()
