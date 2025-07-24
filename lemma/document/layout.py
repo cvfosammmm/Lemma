@@ -46,8 +46,7 @@ class Layouter(object):
                        'width': 0,
                        'height': 0,
                        'left': 0,
-                       'top': 0,
-                       'extents': None}
+                       'top': 0}
 
         if node.type == 'root':
             layout_tree['type'] = 'document'
@@ -56,6 +55,7 @@ class Layouter(object):
         elif node.type == 'char':
             layout_tree['type'] = 'char'
             layout_tree['node'] = node
+            layout_tree['width'], layout_tree['height'], layout_tree['left'], layout_tree['top'] = FontManager.measure_single(node.value, fontname=FontManager.get_fontname_from_node(node))
             node.layout = layout_tree
         elif node.type == 'placeholder':
             layout_tree['type'] = 'placeholder'
@@ -94,12 +94,13 @@ class Layouter(object):
         if node.type == 'root':
             for child in self.group_words(node):
                 if isinstance(child, list) and child[0].is_text():
-                    subtree = {'type': 'word', 'node': node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+                    subtree = {'type': 'word', 'node': node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                     char_nodes = child
                     text = ''.join([char.value for char in char_nodes])
                     fontname = FontManager.get_fontname_from_node(char_nodes[0])
                     for char_node, extents in zip(char_nodes, FontManager.measure(text, fontname=fontname)):
-                        subsubtree = {'type': 'char', 'node': char_node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': extents}
+                        subsubtree = {'type': 'char', 'node': char_node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                        subsubtree['width'], subsubtree['height'], subsubtree['left'], subsubtree['top'] = extents
                         char_node.layout = subsubtree
                         subtree['children'].append(subsubtree)
                 else:
@@ -139,14 +140,14 @@ class Layouter(object):
                 self.layout(child)
 
             lines = list()
-            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
             current_line_width = 0
             for child in layout_tree['children']:
                 if child['type'] == 'eol':
                     current_line['children'].append(child)
                     child['parent'] = current_line
                     lines.append(current_line)
-                    current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+                    current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                     current_line_width = 0
                 else:
                     break_after_char = (child['type'] == 'char' and child['node'].is_whitespace()) or child['type'] == 'end' or child['type'] == 'eol'
@@ -156,12 +157,12 @@ class Layouter(object):
                         current_line_width += child['width']
                         if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
                             lines.append(current_line)
-                            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+                            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                             current_line_width = 0
                     else:
                         if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
                             lines.append(current_line)
-                            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+                            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                             current_line_width = 0
                         current_line['children'].append(child)
                         child['parent'] = current_line
@@ -236,7 +237,7 @@ class Layouter(object):
                 for child in layout_tree['children']:
                     self.layout(child)
 
-                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                 height = 0
                 for child in layout_tree['children']:
                     child['parent'] = vbox
@@ -275,7 +276,7 @@ class Layouter(object):
                 for child in layout_tree['children']:
                     self.layout(child)
 
-                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0, 'extents': None}
+                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                 height = 0
                 for child in layout_tree['children']:
                     child['parent'] = vbox
@@ -342,11 +343,6 @@ class Layouter(object):
                 layout_tree['height'] = max(layout_tree['height'], child['height'])
 
         elif layout_tree['type'] == 'char':
-            if layout_tree['extents'] == None:
-                fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-                layout_tree['extents'] = FontManager.measure_single(layout_tree['node'].value, fontname=fontname)
-
-            layout_tree['width'], layout_tree['height'], layout_tree['left'], layout_tree['top'] = layout_tree['extents']
             layout_tree['x'] = None
             layout_tree['y'] = None
 
