@@ -98,7 +98,7 @@ class PageFontColorView(Gtk.Box):
         self.get_style_context().add_class('settings-page')
 
         self.explainer = Gtk.Label()
-        self.explainer.set_markup('<b>Note:</b>  If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming/">https://www.cvfosammmm.org/lemma/book/theming/</a>.')
+        self.explainer.set_markup('<b>Note:</b>  If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming.html">https://www.cvfosammmm.org/lemma/book/theming.html</a>.')
         self.explainer.set_wrap(True)
         self.explainer.set_halign(Gtk.Align.FILL)
         self.explainer.add_css_class('explainer-bottom')
