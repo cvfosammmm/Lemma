@@ -59,7 +59,10 @@ class DocumentRepo():
                 DocumentRepo.documents_by_id[document.id] = document
                 DocumentRepo.update_link_graph(document)
 
-        DocumentRepo.max_document_id = max(DocumentRepo.documents_by_id)
+        if len(DocumentRepo.documents_by_id) > 0:
+            DocumentRepo.max_document_id = max(DocumentRepo.documents_by_id)
+        else:
+            DocumentRepo.max_document_id = 0
 
     @timer.timer
     def list():
