@@ -25,7 +25,6 @@ class Node():
         self.children = []
         self.type = type_str
         self.value = value
-        self.box = None
         self.tags = set()
         self.link = None
         self.paragraph_style = 'p'
@@ -33,9 +32,6 @@ class Node():
 
     def set_parent(self, parent):
         self.parent = parent
-
-    def set_box(self, box):
-        self.box = box
 
     def insert(self, index, node):
         self.children.insert(index, node)
