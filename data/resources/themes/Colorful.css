@@ -82,7 +82,6 @@
 /* Document View */
 @define-color title_color green;
 @define-color text #222f;
-@define-color math @text;
 @define-color links #37e;
 @define-color links_page_not_existing #d33;
 @define-color selection_fg #fff;
