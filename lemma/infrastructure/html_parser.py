@@ -19,6 +19,7 @@ import urllib.parse, os.path
 from html.parser import HTMLParser as HTMLParserLib
 
 from lemma.document.ast import Node
+from lemma.document.root_node import RootNode
 from lemma.widgets.image import Image
 from lemma.infrastructure.layout_info import LayoutInfo
 
@@ -41,7 +42,7 @@ class HTMLParser(HTMLParserLib):
         self.composite_prev = None
 
     def run(self):
-        self.composite = Node('root')
+        self.composite = RootNode('root')
 
         head, divider, rest = self.html.partition('<body>')
         body, divider, rest = rest.partition('</body>')

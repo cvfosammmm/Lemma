@@ -95,11 +95,7 @@ class Node():
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            node = Node(self.type, self.value)
-            node.tags = self.tags
-            node.link = self.link
-            node.children = self.children.__getitem__(key)
-            return node
+            return self.children.__getitem__(key)
         else:
             return self.children.__getitem__(key)
 
@@ -126,7 +122,6 @@ class Node():
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
     def focus_on_click(self): return self.type in {'widget', 'placeholder'}
     def is_leaf(self): return self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}
-    def is_composite(self): return len(self.children) > 0
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
