@@ -76,12 +76,6 @@ class XMLParser(object):
             node = Node('mathlist')
             self.current_node.append(node)
             self.current_node = node
-        if tag == 'end':
-            node = Node('end')
-            node.link = self.current_link
-            node.tags = self.current_tags
-            node.paragraph_style = self.current_paragraph_style
-            self.current_node.append(node)
         if tag == 'placeholder':
             node = Node('placeholder', '')
             node.link = self.current_link

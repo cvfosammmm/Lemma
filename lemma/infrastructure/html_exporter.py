@@ -45,8 +45,7 @@ class HTMLExporter(object):
         self.html += '</head>'
 
         self.html += '<body>'
-        lines = self.group_by_line(document.ast)
-        for line in lines:
+        for line in document.ast.children:
             node_lists = self.group_by_node_type(line)
 
             self.html += '<' + line[-1].get_paragraph_style() + '>'
@@ -57,16 +56,6 @@ class HTMLExporter(object):
 
         self.html += '</html>'
         return self.html
-
-    def group_by_line(self, root_node):
-        result = list()
-        result.append(list())
-        for node in root_node:
-            result[-1].append(node)
-            if node.is_eol():
-                result.append(list())
-
-        return result
 
     def group_by_node_type(self, node_list):
         last_type = None
@@ -163,7 +152,5 @@ class HTMLExporter(object):
         elif node.is_widget():
             self.html += node.value.to_html(os.path.join(self.pathname, str(self.document_id) + '-' + str(self.file_no)))
             self.file_no += 1
-        elif node.is_end():
-            self.html += '<end/>'
 
 

@@ -18,8 +18,7 @@
 import urllib.parse, os.path
 from html.parser import HTMLParser as HTMLParserLib
 
-from lemma.document.ast import Node
-from lemma.document.root_node import RootNode
+from lemma.document.ast import RootNode, Node
 from lemma.widgets.image import Image
 from lemma.infrastructure.layout_info import LayoutInfo
 
@@ -48,13 +47,9 @@ class HTMLParser(HTMLParserLib):
         body, divider, rest = rest.partition('</body>')
         self.feed(head)
 
-        if body == '':
-            self.composite.append(Node('end'))
-        else:
+        if body != '':
             self.feed(body)
-            self.composite[-1].remove_from_parent()
-            if not self.composite[-1].is_end():
-                self.composite.append(Node('end'))
+            self.composite[-2].remove_from_parent()
             self.composite[-1].paragraph_style = self.paragraph_style
 
     def handle_starttag(self, tag, attrs):
@@ -116,10 +111,6 @@ class HTMLParser(HTMLParserLib):
                     node = Node('placeholder', value)
                     node.paragraph_style = self.paragraph_style
                     self.composite.append(node)
-        if tag == 'end':
-            node = Node('end')
-            node.paragraph_style = self.paragraph_style
-            self.composite.append(node)
 
     def handle_endtag(self, tag):
         self.open_tags.pop()

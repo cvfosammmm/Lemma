@@ -17,8 +17,7 @@
 
 import time, os.path
 
-from lemma.document.ast import Node, Cursor
-from lemma.document.root_node import RootNode
+from lemma.document.ast import RootNode, Node, Cursor
 from lemma.document.layout import Layouter
 from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
 from lemma.document.clipping import Clipping
@@ -42,7 +41,6 @@ class Document():
         self.id = id
         self.title = ''
         self.ast = RootNode('root')
-        self.ast.insert(0, Node('end'))
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.layout = None
         self.plaintext = None
