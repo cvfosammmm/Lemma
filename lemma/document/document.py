@@ -21,6 +21,7 @@ from lemma.document.ast import RootNode, Node, Cursor
 from lemma.document.layouter import Layouter
 from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
 from lemma.document.clipping import Clipping
+from lemma.infrastructure.layout_info import LayoutInfo
 import lemma.infrastructure.timer as timer
 
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
@@ -117,12 +118,11 @@ class Document():
         self.change_flag[client] = False
         return result
 
-    def get_width(self):
-        return max([line['layout']['width'] for line in self.ast.lines])
-
+    @timer.timer
     def get_height(self):
-        return sum([line['layout']['height'] for line in self.ast.lines])
+        return self.ast.lines[-1]['layout']['y'] + self.ast.lines[-1]['layout']['height']
 
+    @timer.timer
     def get_line_layouts(self):
         result = []
         for line in self.ast.lines:
@@ -149,7 +149,7 @@ class Document():
 
     def get_cursor_holding_layout_close_to_xy(self, x, y):
         if y < 0: x = 0
-        if y > self.get_height(): x = self.get_width()
+        if y > self.get_height(): x = LayoutInfo.get_layout_width()
 
         hbox = self.get_line_at_y(y)
         if y >= hbox['y'] and y < hbox['y'] + hbox['height']:
