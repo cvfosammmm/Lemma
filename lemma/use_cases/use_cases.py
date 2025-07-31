@@ -561,11 +561,11 @@ class UseCases(object):
                     j = box['children'].index(ancestors[i - 1])
                     prev_hboxes = box['children'][:j]
                 elif box['type'] == 'paragraph':
-                    hboxes = document.get_line_layouts()
                     prev_hboxes = []
-                    for hbox in hboxes:
-                        if hbox['y'] < ancestors[i - 1]['y']:
-                            prev_hboxes.append(hbox)
+                    for paragraph in document.ast.lines:
+                        for hbox in paragraph['layout']['children']:
+                            if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
+                                prev_hboxes.append(hbox)
                 for hbox in reversed(prev_hboxes):
                     if new_node == None:
                         min_distance = 10000
@@ -602,11 +602,11 @@ class UseCases(object):
                     j = box['children'].index(ancestors[i - 1])
                     prev_hboxes = box['children'][j + 1:]
                 elif box['type'] == 'paragraph':
-                    hboxes = document.get_line_layouts()
                     prev_hboxes = []
-                    for hbox in hboxes:
-                        if hbox['y'] > ancestors[i - 1]['y']:
-                            prev_hboxes.append(hbox)
+                    for paragraph in document.ast.lines:
+                        for hbox in paragraph['layout']['children']:
+                            if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
+                                prev_hboxes.append(hbox)
                 for child in prev_hboxes:
                     if new_node == None:
                         min_distance = 10000

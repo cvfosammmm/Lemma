@@ -37,8 +37,6 @@ class Layouter(object):
             layout_tree = self.make_layout_tree_line(self.document.ast, line)
             self.layout(layout_tree)
             layout_tree['y'] = y_offset
-            for line in layout_tree['children']:
-                line['y'] += y_offset
             y_offset += layout_tree['height']
 
     @timer.timer

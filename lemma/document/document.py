@@ -118,17 +118,8 @@ class Document():
         self.change_flag[client] = False
         return result
 
-    @timer.timer
     def get_height(self):
         return self.ast.lines[-1]['layout']['y'] + self.ast.lines[-1]['layout']['height']
-
-    @timer.timer
-    def get_line_layouts(self):
-        result = []
-        for line in self.ast.lines:
-            for layout in line['layout']['children']:
-                result.append(layout)
-        return result
 
     def get_ancestors(self, layout):
         ancestors = []
@@ -140,7 +131,7 @@ class Document():
     def get_leaf_at_xy(self, x, y):
         line = self.get_line_at_y(y)
 
-        if y >= line['y'] and y < line['y'] + line['height']:
+        if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
             for node in [node for node in self.flatten(line) if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}]:
                 node_x, node_y = self.get_absolute_xy(node)
                 if x >= node_x and x <= node_x + node['width'] and y >= node_y and y <= node_y + node['height']:
@@ -152,7 +143,7 @@ class Document():
         if y > self.get_height(): x = LayoutInfo.get_layout_width()
 
         hbox = self.get_line_at_y(y)
-        if y >= hbox['y'] and y < hbox['y'] + hbox['height']:
+        if y >= hbox['y'] + hbox['parent']['y'] and y < hbox['y'] + hbox['parent']['y'] + hbox['height']:
             for layout in self.flatten(hbox):
                 if layout['type'] == 'hbox':
                     layout_x, layout_y = self.get_absolute_xy(layout)
@@ -179,21 +170,22 @@ class Document():
         return result
 
     def get_line_at_y(self, y):
-        line_layouts = self.get_line_layouts()
-
         if y < 0:
-            return line_layouts[0]
+            return self.ast.lines[0]['layout']['children'][0]
         elif y > self.get_height():
-            return line_layouts[-1]
+            return self.ast.lines[-1]['layout']['children'][-1]
         else:
-            for child in line_layouts:
-                if y >= child['y'] and y < child['y'] + child['height']:
-                    return child
+            for paragraph in self.ast.lines:
+                if y >= paragraph['layout']['y'] and y < paragraph['layout']['y'] + paragraph['layout']['height']:
+                    y -= paragraph['layout']['y']
+                    for line in paragraph['layout']['children']:
+                        if y >= line['y'] and y < line['y'] + line['height']:
+                            return line
 
     def get_absolute_xy(self, layout):
         x, y = (0, 0)
 
-        while not layout['parent'] == None:
+        while not layout == None:
             x += layout['x']
             y += layout['y']
             layout = layout['parent']
