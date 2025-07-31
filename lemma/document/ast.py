@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import lemma.infrastructure.timer as timer
+
 
 class RootNode():
 
@@ -34,8 +36,9 @@ class RootNode():
     def set_parent(self, parent):
         self.parent = parent
 
-    def insert(self, index, node):
-        line, offset = self.index_to_line_offset(index)
+    @timer.timer
+    def insert_before(self, child, node):
+        line, offset = self.line_offset(child)
 
         self.lines[line]['nodes'].insert(offset, node)
         if node.type == 'eol':
@@ -45,10 +48,7 @@ class RootNode():
 
         node.set_parent(self)
 
-    def insert_before(self, child, node):
-        index = self.index(child)
-        self.insert(index, node)
-
+    @timer.timer
     def append(self, node):
         self.lines[-1]['nodes'].insert(-1, node)
         if node.type == 'eol':
@@ -57,6 +57,7 @@ class RootNode():
 
         node.set_parent(self)
 
+    @timer.timer
     def remove(self, node):
         parent_line_no = 0
         for i, line in enumerate(self.lines):
@@ -70,15 +71,30 @@ class RootNode():
                 break
         node.set_parent(None)
 
+    @timer.timer
     def remove_range(self, first_node, last_node):
-        index_1 = self.index(first_node)
-        index_2 = self.index(last_node)
-        nodes = self[index_1:index_2]
+        line_1, offset_1 = self.line_offset(first_node)
+        line_2, offset_2 = self.line_offset(last_node)
+        if line_1 != line_2:
+            nodes = []
+            for line in self.lines[line_1 + 1:line_2]:
+                nodes = line['nodes']
+            del(self.lines[line_1 + 1:line_2])
+            nodes += self.lines[line_1]['nodes'][offset_1:]
+            del(self.lines[line_1]['nodes'][offset_1:])
+            nodes += self.lines[line_2]['nodes'][:offset_2]
+            del(self.lines[line_2]['nodes'][:offset_2])
+            self.lines[line_1]['nodes'] = self.lines[line_1]['nodes'] + self.lines[line_2]['nodes']
+        else:
+            nodes = self.lines[line_1]['nodes'][offset_1:offset_2]
+            del(self.lines[line_1]['nodes'][offset_1:offset_2])
+
         for node in nodes:
-            self.remove(node)
+            node.set_parent(None)
 
         return nodes
 
+    @timer.timer
     def index(self, node):
         count = 0
         for line in self.lines:
@@ -87,6 +103,14 @@ class RootNode():
                 return count
             count += len(line['nodes'])
 
+    @timer.timer
+    def line_offset(self, node):
+        count = 0
+        for i, line in enumerate(self.lines):
+            if node in line['nodes']:
+                return i, line['nodes'].index(node)
+
+    @timer.timer
     def index_to_line_offset(self, index):
         if index == 0: return 0, 0
 
@@ -99,18 +123,22 @@ class RootNode():
             index -= len(line['nodes'])
         return 0, 0
 
+    @timer.timer
     def get_lines(self):
         return [line['nodes'] for line in self.lines]
 
+    @timer.timer
     def get_position(self):
         return Position(*list())
 
+    @timer.timer
     def get_paragraph_style(self):
         node = self
         while not node.parent.is_root():
             node = node.parent
         return node.paragraph_style
 
+    @timer.timer
     def get_subtree(self, pos1, pos2):
         pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
         parent = self.get_node_at_position(pos1[:-1])
@@ -167,6 +195,7 @@ class RootNode():
         if self.parent.is_root(): return False
         return self.parent.parent.type == 'mathfraction'
 
+    @timer.timer
     def flatten(self):
         result = [self]
         for line in self.lines:
@@ -174,12 +203,14 @@ class RootNode():
                 result += child.flatten()
         return result
 
+    @timer.timer
     def get_node_at_position(self, pos):
         node = self
         for index in pos:
             node = node[index]
         return node
 
+    @timer.timer
     def get_link_bounds_and_targets(self):
         current_target = None
         current_bounds = [None, None]

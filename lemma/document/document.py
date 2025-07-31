@@ -22,7 +22,6 @@ from lemma.document.layouter import Layouter
 from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
 from lemma.document.clipping import Clipping
 from lemma.infrastructure.layout_info import LayoutInfo
-import lemma.infrastructure.timer as timer
 
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:
@@ -104,7 +103,6 @@ class Document():
             self.change_flag[client] = True
         self.last_modified = time.time()
 
-    @timer.timer
     def update(self):
         self.layouter.update()
         self.clipping.update()
