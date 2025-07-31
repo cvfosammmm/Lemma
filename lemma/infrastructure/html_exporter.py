@@ -45,7 +45,7 @@ class HTMLExporter(object):
         self.html += '</head>'
 
         self.html += '<body>'
-        for line in document.ast.children:
+        for line in document.ast.get_lines():
             node_lists = self.group_by_node_type(line)
 
             self.html += '<' + line[-1].get_paragraph_style() + '>'
@@ -103,7 +103,7 @@ class HTMLExporter(object):
             self.html += node.value
             if node.parent.is_root():
                 self.html += '</math>'
-        elif node.is_mathscript():
+        elif node.type == 'mathscript':
             if node.parent.is_root():
                 self.html += '<math>'
             self.html += '<msubsup>'
@@ -116,7 +116,7 @@ class HTMLExporter(object):
             self.html += '</msubsup>'
             if node.parent.is_root():
                 self.html += '</math>'
-        elif node.is_mathfraction():
+        elif node.type == 'mathfraction':
             if node.parent.is_root():
                 self.html += '<math>'
             self.html += '<mfrac>'
@@ -129,7 +129,7 @@ class HTMLExporter(object):
             self.html += '</mfrac>'
             if node.parent.is_root():
                 self.html += '</math>'
-        elif node.is_mathroot():
+        elif node.type == 'mathroot':
             if node.parent.is_root():
                 self.html += '<math>'
             self.html += '<mroot>'
@@ -142,15 +142,17 @@ class HTMLExporter(object):
             self.html += '</mroot>'
             if node.parent.is_root():
                 self.html += '</math>'
-        elif node.is_mathlist():
+        elif node.type == 'mathlist':
             for child in node:
                 self.process_node(child)
         elif node.is_char():
             self.html += node.value
         elif node.is_placeholder():
             self.html += '<placeholder value="' + node.value + '"/>'
-        elif node.is_widget():
+        elif node.type == 'widget':
             self.html += node.value.to_html(os.path.join(self.pathname, str(self.document_id) + '-' + str(self.file_no)))
             self.file_no += 1
+        elif node.type == 'end':
+            self.html += '<end/>'
 
 

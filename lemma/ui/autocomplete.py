@@ -317,7 +317,7 @@ class AutocompleteWidget(Gtk.ScrolledWindow):
     def update_position(self):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
-        insert_x, insert_y = document.layouter.get_absolute_xy(insert.layout)
+        insert_x, insert_y = document.get_absolute_xy(insert.layout)
         content_offset = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         scrolling_offset_y = document.clipping.offset_y
         insert_y += content_offset - scrolling_offset_y

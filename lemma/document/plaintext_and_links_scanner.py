@@ -42,7 +42,7 @@ class PlaintextAndLinksScanner(object):
         self.document.links = set(self.links)
 
     def process_node(self, node):
-        if node.is_eol():
+        if node.type == 'eol':
             self.text += '\n'
 
         elif node.is_char():

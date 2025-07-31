@@ -100,7 +100,7 @@ class DocumentViewController():
 
         elif y > 0:
             link = self.get_link_at_xy(x, y)
-            leaf_box = document.layouter.get_leaf_at_xy(x, y)
+            leaf_box = document.get_leaf_at_xy(x, y)
 
             if n_press == 1:
                 if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
@@ -181,7 +181,7 @@ class DocumentViewController():
             self.use_cases.scroll_to_xy(new_x, new_y)
 
         if y - ApplicationState.get_value('document_view_height') > 0:
-            height = self.model.document.layout['height'] + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+            height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
             new_x = self.model.document.clipping.offset_x
             new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height'))
             self.use_cases.scroll_to_xy(new_x, new_y)
@@ -203,7 +203,7 @@ class DocumentViewController():
 
         if controller.get_current_event_state() & modifiers == 0:
             document = self.model.document
-            height = document.layout['height'] + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+            height = document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
             if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
                 dx *= ApplicationState.get_value('document_view_width') ** (2/3)
@@ -329,7 +329,7 @@ class DocumentViewController():
             self.use_cases.scroll_to_xy(offset_x, offset_y)
 
     def get_link_at_xy(self, x, y):
-        layout = self.model.document.layouter.get_leaf_at_xy(x, y)
+        layout = self.model.document.get_leaf_at_xy(x, y)
 
         if layout != None:
             return layout['node'].link

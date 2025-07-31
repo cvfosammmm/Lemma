@@ -18,7 +18,7 @@
 import time, os.path
 
 from lemma.document.ast import RootNode, Node, Cursor
-from lemma.document.layout import Layouter
+from lemma.document.layouter import Layouter
 from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
 from lemma.document.clipping import Clipping
 import lemma.infrastructure.timer as timer
@@ -42,7 +42,6 @@ class Document():
         self.title = ''
         self.ast = RootNode('root')
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
-        self.layout = None
         self.plaintext = None
         self.links = set()
 
@@ -117,5 +116,88 @@ class Document():
         result = self.change_flag[client]
         self.change_flag[client] = False
         return result
+
+    def get_width(self):
+        return max([line['layout']['width'] for line in self.ast.lines])
+
+    def get_height(self):
+        return sum([line['layout']['height'] for line in self.ast.lines])
+
+    def get_line_layouts(self):
+        result = []
+        for line in self.ast.lines:
+            for layout in line['layout']['children']:
+                result.append(layout)
+        return result
+
+    def get_ancestors(self, layout):
+        ancestors = []
+        while layout['parent'] != None:
+            ancestors.append(layout['parent'])
+            layout = layout['parent']
+        return ancestors
+
+    def get_leaf_at_xy(self, x, y):
+        line = self.get_line_at_y(y)
+
+        if y >= line['y'] and y < line['y'] + line['height']:
+            for node in [node for node in self.flatten(line) if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}]:
+                node_x, node_y = self.get_absolute_xy(node)
+                if x >= node_x and x <= node_x + node['width'] and y >= node_y and y <= node_y + node['height']:
+                    return node
+        return None
+
+    def get_cursor_holding_layout_close_to_xy(self, x, y):
+        if y < 0: x = 0
+        if y > self.get_height(): x = self.get_width()
+
+        hbox = self.get_line_at_y(y)
+        if y >= hbox['y'] and y < hbox['y'] + hbox['height']:
+            for layout in self.flatten(hbox):
+                if layout['type'] == 'hbox':
+                    layout_x, layout_y = self.get_absolute_xy(layout)
+                    if x >= layout_x and x <= layout_x + layout['width'] \
+                            and y >= layout_y and y <= layout_y + layout['height'] \
+                            and hbox in self.get_ancestors(layout):
+                        hbox = layout
+
+        closest_layout = None
+        min_distance = 10000
+        for layout in hbox['children']:
+            layout_x, layout_y = self.get_absolute_xy(layout)
+            distance = abs(layout_x - x)
+            if distance < min_distance:
+                closest_layout = layout
+                min_distance = distance
+
+        return closest_layout
+
+    def flatten(self, layout_tree):
+        result = [layout_tree]
+        for child in layout_tree['children']:
+            result += self.flatten(child)
+        return result
+
+    def get_line_at_y(self, y):
+        line_layouts = self.get_line_layouts()
+
+        if y < 0:
+            return line_layouts[0]
+        elif y > self.get_height():
+            return line_layouts[-1]
+        else:
+            for child in line_layouts:
+                if y >= child['y'] and y < child['y'] + child['height']:
+                    return child
+
+    def get_absolute_xy(self, layout):
+        x, y = (0, 0)
+
+        while not layout['parent'] == None:
+            x += layout['x']
+            y += layout['y']
+            layout = layout['parent']
+
+        return x, y
 
 

@@ -258,7 +258,7 @@ class Actions(object):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
-        if not document.cursor.has_selection() and prev_char != None and prev_char.is_symbol():
+        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not prev_char.is_whitespace():
             xml = '<mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
@@ -268,7 +268,7 @@ class Actions(object):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
-        if not document.cursor.has_selection() and prev_char != None and prev_char.is_symbol():
+        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not prev_char.is_whitespace():
             xml = '<mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'

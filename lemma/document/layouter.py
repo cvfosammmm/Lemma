@@ -32,14 +32,50 @@ class Layouter(object):
 
     @timer.timer
     def update_layout(self):
-        layout_tree = self.make_layout_tree(self.document.ast)
-        self.layout(layout_tree)
-        self.document.layout = layout_tree
+        y_offset = 0
+        for line in self.document.ast.lines:
+            layout_tree = self.make_layout_tree_line(self.document.ast, line)
+            self.layout(layout_tree)
+            layout_tree['y'] = y_offset
+            for line in layout_tree['children']:
+                line['y'] += y_offset
+            y_offset += layout_tree['height']
+
+    @timer.timer
+    def make_layout_tree_line(self, root, line):
+        layout_tree = {'type': 'paragraph',
+                       'node': root,
+                       'parent': None,
+                       'children': [],
+                       'x': 0,
+                       'y': 0,
+                       'width': 0,
+                       'height': 0,
+                       'left': 0,
+                       'top': 0}
+        line['layout'] = layout_tree
+
+        for child in self.group_words(line['nodes']):
+            if isinstance(child, list):
+                subtree = {'type': 'word', 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                char_nodes = child
+                text = ''.join([char.value for char in char_nodes])
+                fontname = FontManager.get_fontname_from_node(char_nodes[0])
+                for char_node, extents in zip(char_nodes, FontManager.measure(text, fontname=fontname)):
+                    subsubtree = {'type': 'char', 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                    subsubtree['width'], subsubtree['height'], subsubtree['left'], subsubtree['top'] = extents
+                    char_node.layout = subsubtree
+                    subtree['children'].append(subsubtree)
+            else:
+                subtree = self.make_layout_tree(child, layout_tree)
+            layout_tree['children'].append(subtree)
+
+        return layout_tree
 
     @timer.timer
     def make_layout_tree(self, node, parent=None):
         layout_tree = {'type': None,
-                       'node': None,
+                       'node': node,
                        'parent': parent,
                        'children': [],
                        'x': 0,
@@ -51,77 +87,47 @@ class Layouter(object):
 
         if node.type == 'char':
             layout_tree['type'] = 'char'
-            layout_tree['node'] = node
             layout_tree['width'], layout_tree['height'], layout_tree['left'], layout_tree['top'] = FontManager.measure_single(node.value, fontname=FontManager.get_fontname_from_node(node))
             node.layout = layout_tree
         elif node.type == 'eol':
             layout_tree['type'] = 'eol'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'end':
             layout_tree['type'] = 'end'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'placeholder':
             layout_tree['type'] = 'placeholder'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'widget':
             layout_tree['type'] = 'widget'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'mathscript':
             layout_tree['type'] = 'mathscript'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'mathfraction':
             layout_tree['type'] = 'mathfraction'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'mathroot':
             layout_tree['type'] = 'mathroot'
-            layout_tree['node'] = node
             node.layout = layout_tree
         elif node.type == 'mathlist':
             layout_tree['type'] = 'hbox'
-            layout_tree['node'] = node
-        elif node.type == 'root':
-            layout_tree['type'] = 'document'
-            layout_tree['node'] = node
-            node.layout = layout_tree
         else:
             return None
 
-        if node.type == 'root':
-            for child in self.group_words(node):
-                if isinstance(child, list):
-                    subtree = {'type': 'word', 'node': node, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
-                    char_nodes = child
-                    text = ''.join([char.value for char in char_nodes])
-                    fontname = FontManager.get_fontname_from_node(char_nodes[0])
-                    for char_node, extents in zip(char_nodes, FontManager.measure(text, fontname=fontname)):
-                        subsubtree = {'type': 'char', 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
-                        subsubtree['width'], subsubtree['height'], subsubtree['left'], subsubtree['top'] = extents
-                        char_node.layout = subsubtree
-                        subtree['children'].append(subsubtree)
-                else:
-                    subtree = self.make_layout_tree(child, layout_tree)
-                if subtree != None:
-                    layout_tree['children'].append(subtree)
-        else:
-            for child in node:
-                subtree = self.make_layout_tree(child, layout_tree)
-                if subtree != None:
-                    layout_tree['children'].append(subtree)
+        for child in node:
+            subtree = self.make_layout_tree(child, layout_tree)
+            if subtree != None:
+                layout_tree['children'].append(subtree)
 
         return layout_tree
 
     @timer.timer
-    def group_words(self, parent_node):
+    def group_words(self, nodes):
         last_type = None
         last_tags = set()
         result = list()
-        for node in parent_node:
+        for node in nodes:
             if node.type != 'char' or node.is_whitespace() or CharacterDB.is_mathsymbol(node.value) or CharacterDB.is_emoji(node.value):
                 result.append(node)
                 last_type = None
@@ -136,7 +142,7 @@ class Layouter(object):
         return result
 
     def layout(self, layout_tree):
-        if layout_tree['type'] == 'document':
+        if layout_tree['type'] == 'paragraph':
             for child in layout_tree['children']:
                 self.layout(child)
 
@@ -147,9 +153,6 @@ class Layouter(object):
                 if child['type'] == 'eol':
                     current_line['children'].append(child)
                     child['parent'] = current_line
-                    lines.append(current_line)
-                    current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
-                    current_line_width = 0
                 else:
                     break_after_char = (child['type'] == 'char' and child['node'].is_whitespace()) or child['type'] == 'end' or child['type'] == 'eol'
                     if break_after_char:
@@ -383,75 +386,5 @@ class Layouter(object):
             layout_tree['height'] = height
             layout_tree['x'] = None
             layout_tree['y'] = None
-
-    def get_ancestors(self, layout):
-        ancestors = []
-        while layout['parent'] != None:
-            ancestors.append(layout['parent'])
-            layout = layout['parent']
-        return ancestors
-
-    def get_leaf_at_xy(self, x, y):
-        line = self.get_line_at_y(y)
-
-        if y >= line['y'] and y < line['y'] + line['height']:
-            for node in [node for node in self.flatten(line) if node['node'] != None and node['node'].is_leaf()]:
-                node_x, node_y = self.get_absolute_xy(node)
-                if x >= node_x and x <= node_x + node['width'] and y >= node_y and y <= node_y + node['height']:
-                    return node
-        return None
-
-    def get_cursor_holding_layout_close_to_xy(self, x, y):
-        if y < 0: x = 0
-        if y > self.document.layout['height']: x = self.document.layout['width']
-
-        hbox = self.get_line_at_y(y)
-        if y >= hbox['y'] and y < hbox['y'] + hbox['height']:
-            for layout in self.flatten(hbox):
-                if layout['type'] == 'hbox':
-                    layout_x, layout_y = self.get_absolute_xy(layout)
-                    if x >= layout_x and x <= layout_x + layout['width'] \
-                            and y >= layout_y and y <= layout_y + layout['height'] \
-                            and hbox in self.get_ancestors(layout):
-                        hbox = layout
-
-        closest_layout = None
-        min_distance = 10000
-        for layout in hbox['children']:
-            layout_x, layout_y = self.get_absolute_xy(layout)
-            distance = abs(layout_x - x)
-            if distance < min_distance:
-                closest_layout = layout
-                min_distance = distance
-
-        return closest_layout
-
-    def flatten(self, layout_tree):
-        result = [layout_tree]
-        for child in layout_tree['children']:
-            result += self.flatten(child)
-        return result
-
-    def get_line_at_y(self, y):
-        layout = self.document.layout
-
-        if y < 0:
-            return layout['children'][0]
-        elif y > layout['height']:
-            return layout['children'][-1]
-        else:
-            for child in layout['children']:
-                if y >= child['y'] and y < child['y'] + child['height']:
-                    return child
-
-    def get_absolute_xy(self, layout):
-        x, y = (0, 0)
-
-        while not layout['parent'] == None:
-            x += layout['x']
-            y += layout['y']
-            layout = layout['parent']
-
-        return x, y
 
 

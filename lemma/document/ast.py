@@ -22,7 +22,7 @@ class RootNode():
         self.parent = None
         end_node = Node('end')
         end_node.set_parent(self)
-        self.children = [[end_node]]
+        self.lines = [{'nodes': [end_node], 'layout': None}]
         self.type = type_str
         self.value = value
         self.tags = set()
@@ -37,11 +37,11 @@ class RootNode():
     def insert(self, index, node):
         line, offset = self.index_to_line_offset(index)
 
-        self.children[line].insert(offset, node)
+        self.lines[line]['nodes'].insert(offset, node)
         if node.type == 'eol':
-            new_line = self.children[line][offset + 1:]
-            self.children.insert(line + 1, new_line)
-            del(self.children[line][offset + 1:])
+            new_line = {'nodes': self.lines[line]['nodes'][offset + 1:], 'layout': None}
+            self.lines.insert(line + 1, new_line)
+            del(self.lines[line]['nodes'][offset + 1:])
 
         node.set_parent(self)
 
@@ -50,23 +50,23 @@ class RootNode():
         self.insert(index, node)
 
     def append(self, node):
-        self.children[-1].insert(-1, node)
+        self.lines[-1]['nodes'].insert(-1, node)
         if node.type == 'eol':
-            self.children.append([self.children[-1][-1]])
-            del(self.children[-2][-1])
+            self.lines.append({'nodes': [self.lines[-1]['nodes'][-1]], 'layout': None})
+            del(self.lines[-2]['nodes'][-1])
 
         node.set_parent(self)
 
     def remove(self, node):
         parent_line_no = 0
-        for i, line in enumerate(self.children):
-            if node in line:
-                line.remove(node)
+        for i, line in enumerate(self.lines):
+            if node in line['nodes']:
+                line['nodes'].remove(node)
                 if node.type == 'eol':
-                    self.children[i] = line + self.children[i + 1]
-                    del(self.children[i + 1])
-                elif len(self.children[i]) == 0:
-                    del(self.children[i])
+                    self.lines[i] = {'nodes': line['nodes'] + self.lines[i + 1]['nodes'], 'layout': None}
+                    del(self.lines[i + 1])
+                elif len(self.lines[i]['nodes']) == 0:
+                    del(self.lines[i])
                 break
         node.set_parent(None)
 
@@ -79,16 +79,13 @@ class RootNode():
 
         return nodes
 
-    def remove_from_parent(self):
-        self.parent.remove(self)
-
     def index(self, node):
         count = 0
-        for line in self.children:
-            if node in line:
-                count += line.index(node)
+        for line in self.lines:
+            if node in line['nodes']:
+                count += line['nodes'].index(node)
                 return count
-            count += len(line)
+            count += len(line['nodes'])
 
     def index_to_line_offset(self, index):
         if index == 0: return 0, 0
@@ -96,33 +93,23 @@ class RootNode():
         if index < 0:
             index += len(self)
 
-        for i, line in enumerate(self.children):
-            if index < len(line):
+        for i, line in enumerate(self.lines):
+            if index < len(line['nodes']):
                 return i, index
-            index -= len(line)
+            index -= len(line['nodes'])
         return 0, 0
 
-    def get_position(self):
-        node = self
-        position = list()
-        while not node.is_root():
-            position.insert(0, node.parent.index(node))
-            node = node.parent
+    def get_lines(self):
+        return [line['nodes'] for line in self.lines]
 
-        return Position(*position)
+    def get_position(self):
+        return Position(*list())
 
     def get_paragraph_style(self):
         node = self
         while not node.parent.is_root():
             node = node.parent
         return node.paragraph_style
-
-    def copy(self):
-        node = RootNode(self.type, self.value)
-        node.tags = self.tags
-        node.link = self.link
-        node.children = self.children
-        return node
 
     def get_subtree(self, pos1, pos2):
         pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
@@ -131,7 +118,7 @@ class RootNode():
         return parent[pos1[-1]:pos2[-1]]
 
     def __len__(self):
-        return sum([len(line) for line in self.children])
+        return sum([len(line['nodes']) for line in self.lines])
 
     def __iter__(self):
         self.current_iter_index = -1
@@ -148,160 +135,44 @@ class RootNode():
             return [self[subkey] for subkey in range(len(self))[key]]
         else:
             line, offset = self.index_to_line_offset(key)
-            return self.children[line].__getitem__(offset)
+            return self.lines[line]['nodes'].__getitem__(offset)
 
     def ancestors(self):
-        node = self
-        ancestors = []
-        while not node.is_root():
-            ancestors.insert(0, node.parent)
-            node = node.parent
+        return []
 
-        return ancestors
-
-    def is_eol(self): return self.type == 'eol'
-    def is_end(self): return self.type == 'end'
     def is_whitespace(self): return self.type == 'eol' or (self.is_char() and self.value.isspace())
-    def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
     def is_char(self): return self.type == 'char'
     def is_placeholder(self): return self.type == 'placeholder'
     def is_widget(self): return self.type == 'widget'
-    def is_mathscript(self): return self.type == 'mathscript'
-    def is_mathfraction(self): return self.type == 'mathfraction'
-    def is_mathroot(self): return self.type == 'mathroot'
-    def is_mathlist(self): return self.type == 'mathlist'
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
     def focus_on_click(self): return self.type in {'widget', 'placeholder'}
-    def is_leaf(self): return self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
     def is_subscript(self):
         if self.parent.is_root(): return False
 
-        if self.parent.parent.is_mathscript():
+        if self.parent.parent.type == 'mathscript':
             return self.parent == self.parent.parent[0]
         return False
     def is_superscript(self):
         if self.parent.is_root(): return False
 
-        if self.parent.parent.is_mathscript():
+        if self.parent.parent.type == 'mathscript':
             return self.parent == self.parent.parent[1]
-        if self.parent.parent.is_mathroot():
+        if self.parent.parent.type == 'mathroot':
             return self.parent == self.parent.parent[1]
         return False
     def in_fraction(self):
         if self.parent.is_root(): return False
-        return self.parent.parent.is_mathfraction()
-
-    def is_first_in_line(self):
-        if not self.parent.is_root(): return False
-        if self.is_first_in_parent(): return True
-        if self.prev_in_parent().is_eol(): return True
-
-        return False
-
-    def is_last_in_line(self):
-        if not self.parent.is_root(): return False
-        if self.is_last_in_parent(): return True
-        if self.is_eol(): return True
-
-        return False
-
-    def is_inside_link(self):
-        if self.link == None: return False
-        if self.is_first_in_parent(): return False
-        return self.link == self.prev_in_parent().link
-
-    def link_bounds(self):
-        if self.link == None: return (None, None)
-        if self.is_first_in_parent(): return (None, None)
-
-        node1 = self
-        node2 = self
-
-        while node2 != None:
-            next_node = node2.next_in_parent()
-            if next_node != None and next_node.link == self.link:
-                node2 = next_node
-            else:
-                if next_node != self and next_node != None:
-                    node2 = next_node
-                break
-        while node1 != None:
-            prev_node = node1.prev_in_parent()
-            if prev_node != None and prev_node.link == self.link:
-                node1 = prev_node
-            else:
-                break
-        return (node1, node2)
-
-    def word_bounds(self):
-        if self.is_whitespace(): return (None, None)
-
-        node1 = self
-        node2 = self
-
-        while node2 != None:
-            next_node = node2.next_in_parent()
-            if next_node == None:
-                break
-            elif next_node.is_whitespace():
-                node2 = next_node
-                break
-            else:
-                node2 = next_node
-        while node1 != None:
-            prev_node = node1.prev_in_parent()
-            if prev_node == None or prev_node.is_whitespace():
-                break
-            else:
-                node1 = prev_node
-        return (node1, node2)
-
-    def line_bounds(self):
-        return (self.line_start(), self.line_end())
-
-    def prev_in_parent(self, steps=1):
-        if self != self.parent[0]:
-            index = self.parent.index(self) - steps
-            return self.parent[index]
-        return None
-
-    def next_in_parent(self, steps=1):
-        if self != self.parent[-1]:
-            index = self.parent.index(self) + steps
-            return self.parent[index]
-        return None
+        return self.parent.parent.type == 'mathfraction'
 
     def flatten(self):
         result = [self]
-        for line in self.children:
-            for child in line:
+        for line in self.lines:
+            for child in line['nodes']:
                 result += child.flatten()
         return result
-
-    def line_start(self):
-        node = self
-
-        while not node.parent.is_root():
-            node = node.parent
-
-        while not node.is_first_in_line():
-            node = node.prev_in_parent()
-
-        return node
-
-    def line_end(self):
-        node = self
-
-        while not node.parent.is_root():
-            node = node.parent
-
-        while not node.is_last_in_line():
-            node = node.next_in_parent()
-
-        return node
 
     def get_node_at_position(self, pos):
         node = self
@@ -330,8 +201,8 @@ class RootNode():
         return string
 
     def validate(self):
-        for line in self.children:
-            for child in line:
+        for line in self.lines:
+            for child in line['nodes']:
                 if child.type not in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot'}:
                     return False
                 if not child.validate():
@@ -406,12 +277,6 @@ class Node():
         node.children = self.children
         return node
 
-    def get_subtree(self, pos1, pos2):
-        pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
-        parent = self.get_node_at_position(pos1[:-1])
-
-        return parent[pos1[-1]:pos2[-1]]
-
     def __len__(self): return len(self.children)
     def __iter__(self): return self.children.__iter__()
 
@@ -430,52 +295,44 @@ class Node():
 
         return ancestors
 
-    def is_eol(self): return self.type == 'eol'
-    def is_end(self): return self.type == 'end'
     def is_whitespace(self): return self.type == 'eol' or (self.is_char() and self.value.isspace())
-    def is_symbol(self): return self.type == 'char' and not self.is_whitespace()
     def is_char(self): return self.type == 'char'
     def is_placeholder(self): return self.type == 'placeholder'
     def is_widget(self): return self.type == 'widget'
-    def is_mathscript(self): return self.type == 'mathscript'
-    def is_mathfraction(self): return self.type == 'mathfraction'
-    def is_mathroot(self): return self.type == 'mathroot'
-    def is_mathlist(self): return self.type == 'mathlist'
     def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
     def focus_on_click(self): return self.type in {'widget', 'placeholder'}
-    def is_leaf(self): return self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}
     def is_first_in_parent(self): return self == self.parent[0]
     def is_last_in_parent(self): return self == self.parent[-1]
     def is_root(self): return self.parent == None
     def is_subscript(self):
         if self.parent.is_root(): return False
 
-        if self.parent.parent.is_mathscript():
+        if self.parent.parent.type == 'mathscript':
             return self.parent == self.parent.parent[0]
         return False
     def is_superscript(self):
         if self.parent.is_root(): return False
 
-        if self.parent.parent.is_mathscript():
+        if self.parent.parent.type == 'mathscript':
             return self.parent == self.parent.parent[1]
-        if self.parent.parent.is_mathroot():
+        if self.parent.parent.type == 'mathroot':
             return self.parent == self.parent.parent[1]
         return False
     def in_fraction(self):
         if self.parent.is_root(): return False
-        return self.parent.parent.is_mathfraction()
+        return self.parent.parent.type == 'mathfraction'
 
     def is_first_in_line(self):
         if not self.parent.is_root(): return False
         if self.is_first_in_parent(): return True
-        if self.prev_in_parent().is_eol(): return True
+        if self.prev_in_parent().type == 'eol': return True
 
         return False
 
     def is_last_in_line(self):
         if not self.parent.is_root(): return False
         if self.is_last_in_parent(): return True
-        if self.is_eol(): return True
+        if self.type == 'eol': return True
 
         return False
 
@@ -572,28 +429,6 @@ class Node():
             node = node.next_in_parent()
 
         return node
-
-    def get_node_at_position(self, pos):
-        node = self
-        for index in pos:
-            node = node[index]
-        return node
-
-    def get_link_bounds_and_targets(self):
-        current_target = None
-        current_bounds = [None, None]
-        result = list()
-        for node in self:
-            current_bounds[1] = node
-            if current_target != node.link:
-                if current_bounds[0] != None and current_target != None:
-                    result.append([[current_bounds[0], current_bounds[1]], current_target])
-                current_bounds[0] = node
-            current_target = node.link
-        if current_bounds[0] != None and current_target != None:
-            result.append([[current_bounds[0], current_bounds[1]], current_target])
-
-        return result
 
     def __str__(self):
         string = self.type + ':' + str(self.value)

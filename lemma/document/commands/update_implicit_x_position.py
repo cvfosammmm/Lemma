@@ -25,7 +25,7 @@ class Command():
     def run(self, document):
         self.state['implicit_x_before'] = document.cursor.implicit_x_position
 
-        x, y = document.layouter.get_absolute_xy(document.cursor.get_insert_node().layout)
+        x, y = document.get_absolute_xy(document.cursor.get_insert_node().layout)
         document.cursor.update_implicit_x_position(x)
 
     def undo(self, document):

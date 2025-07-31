@@ -109,7 +109,7 @@ class DocumentView():
             link = None
 
             if y > 0:
-                leaf_box = document.layouter.get_leaf_at_xy(x, y)
+                leaf_box = document.get_leaf_at_xy(x, y)
                 if leaf_box != None and leaf_box['node'] != None and leaf_box['node'].link != None:
                     link = leaf_box['node'].link
 

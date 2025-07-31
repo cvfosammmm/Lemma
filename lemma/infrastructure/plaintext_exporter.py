@@ -33,7 +33,7 @@ class PlaintextExporter(object):
         return self.text
 
     def process_node(self, node):
-        if node.is_eol():
+        if node.type == 'eol':
             self.text += '\n'
 
         elif node.is_char():

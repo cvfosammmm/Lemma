@@ -51,7 +51,7 @@ class DocumentViewPresenter():
 
     def update_size(self):
         document = self.model.document
-        height = self.model.document.layout['height'] + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
         scrolling_offset_y = document.clipping.offset_y
 
         self.view.adjustment_x.set_page_size(1)
@@ -64,7 +64,7 @@ class DocumentViewPresenter():
 
     def update_scrollbars(self):
         document = self.model.document
-        height = self.model.document.layout['height'] + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
         self.view.scrollbar_x.set_visible(False)
         self.view.scrollbar_y.set_visible(height > ApplicationState.get_value('document_view_height'))
@@ -99,7 +99,7 @@ class DocumentViewPresenter():
         if y < -ApplicationState.get_value('subtitle_height'):
             self.content.set_cursor_from_name('text')
         elif y > 0:
-            leaf_box = document.layouter.get_leaf_at_xy(x, y)
+            leaf_box = document.get_leaf_at_xy(x, y)
             if leaf_box != None:
                 node = leaf_box['node']
                 if node != None:
@@ -165,19 +165,20 @@ class DocumentViewPresenter():
         offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - scrolling_offset_y
         self.first_selection_node = document.cursor.get_first_node()
         self.last_selection_node = document.cursor.get_last_node()
-        first_selection_line = document.layouter.get_ancestors(self.first_selection_node.layout)[-2]
-        last_selection_line = document.layouter.get_ancestors(self.last_selection_node.layout)[-2]
+        first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
+        last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
 
         self.draw_title(ctx, ApplicationState.get_value('document_padding_left'), ApplicationState.get_value('document_padding_top') - scrolling_offset_y)
 
         in_selection = False
-        for line_layout in document.layout['children']:
+        layouts = document.get_line_layouts()
+        for line_layout in layouts:
             if offset_y + line_layout['y'] + line_layout['height'] >= 0 and offset_y + line_layout['y'] <= height:
                 self.draw_layout(line_layout, ctx, offset_x, offset_y, in_selection)
             if offset_y + line_layout['y'] > height: break
 
-            if not in_selection and line_layout == first_selection_line: in_selection = True
-            if in_selection and line_layout == last_selection_line: in_selection = False
+            if not in_selection and line_layout['y'] == first_selection_line['y']: in_selection = True
+            if in_selection and line_layout['y'] == last_selection_line['y']: in_selection = False
 
         self.draw_cursor(ctx, offset_x, offset_y)
 
@@ -316,7 +317,7 @@ class DocumentViewPresenter():
 
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
-        x, y = self.model.document.layouter.get_absolute_xy(layout)
+        x, y = self.model.document.get_absolute_xy(layout)
         fontname = FontManager.get_fontname_from_node(insert)
         padding_top = FontManager.get_padding_top(fontname)
         padding_bottom = 0#FontManager.get_padding_bottom(fontname)
