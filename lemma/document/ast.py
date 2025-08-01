@@ -69,7 +69,6 @@ class RootNode():
                 elif len(self.lines[i]['nodes']) == 0:
                     del(self.lines[i])
                 break
-        node.set_parent(None)
 
     @timer.timer
     def remove_range(self, first_node, last_node):
@@ -88,9 +87,6 @@ class RootNode():
         else:
             nodes = self.lines[line_1]['nodes'][offset_1:offset_2]
             del(self.lines[line_1]['nodes'][offset_1:offset_2])
-
-        for node in nodes:
-            node.set_parent(None)
 
         return nodes
 
@@ -268,15 +264,12 @@ class Node():
 
     def remove(self, node):
         self.children.remove(node)
-        node.set_parent(None)
 
     def remove_range(self, first_node, last_node):
         index_1 = self.index(first_node)
         index_2 = self.index(last_node)
         nodes = self.children[index_1:index_2]
         del(self.children[index_1:index_2])
-        for node in nodes:
-            node.set_parent(None)
 
         return nodes
 

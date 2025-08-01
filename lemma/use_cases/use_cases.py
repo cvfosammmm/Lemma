@@ -307,7 +307,7 @@ class UseCases(object):
         if document.cursor.has_selection():
             self.delete_selection()
         elif not insert.is_first_in_parent():
-            document.add_composite_command(['delete', document.cursor.prev_no_descent(insert), insert], ['move_cursor_to_node', insert])
+            document.add_command('delete', document.cursor.prev_no_descent(insert), insert)
             document.add_command('update_implicit_x_position')
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
@@ -330,7 +330,7 @@ class UseCases(object):
             self.delete_selection()
         elif not insert.is_last_in_parent():
             insert_new = document.cursor.next_no_descent(insert)
-            document.add_composite_command(['delete', insert, insert_new], ['move_cursor_to_node', insert_new])
+            document.add_command('delete', insert, insert_new)
             document.add_command('update_implicit_x_position')
             document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
@@ -350,7 +350,7 @@ class UseCases(object):
         node_from = document.cursor.get_first_node()
         node_to = document.cursor.get_last_node()
 
-        document.add_composite_command(['delete', node_from, node_to], ['move_cursor_to_node', node_to])
+        document.add_command('delete', node_from, node_to)
         document.add_command('update_implicit_x_position')
         document.add_command('scroll_to_xy', *self.get_insert_on_screen_scrolling_position())
         DocumentRepo.update(document)
