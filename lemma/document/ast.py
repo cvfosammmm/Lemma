@@ -76,14 +76,13 @@ class RootNode():
         line_2, offset_2 = self.line_offset(last_node)
         if line_1 != line_2:
             nodes = []
-            for line in self.lines[line_1 + 1:line_2]:
-                nodes = line['nodes']
-            del(self.lines[line_1 + 1:line_2])
             nodes += self.lines[line_1]['nodes'][offset_1:]
-            del(self.lines[line_1]['nodes'][offset_1:])
+            for line in self.lines[line_1 + 1:line_2]:
+                nodes += line['nodes']
             nodes += self.lines[line_2]['nodes'][:offset_2]
-            del(self.lines[line_2]['nodes'][:offset_2])
-            self.lines[line_1]['nodes'] = self.lines[line_1]['nodes'] + self.lines[line_2]['nodes']
+
+            self.lines[line_1]['nodes'] = self.lines[line_1]['nodes'][:offset_1] + self.lines[line_2]['nodes'][offset_2:]
+            del(self.lines[line_1 + 1:line_2 + 1])
         else:
             nodes = self.lines[line_1]['nodes'][offset_1:offset_2]
             del(self.lines[line_1]['nodes'][offset_1:offset_2])
