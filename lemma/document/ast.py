@@ -156,8 +156,8 @@ class RootNode():
     def __getitem__(self, key):
         if isinstance(key, slice):
             if len(range(len(self))[key]) > 0:
-                index_1 = range(len(self))[key][0]
-                index_2 = range(len(self))[key][-1]
+                index_1 = key.start
+                index_2 = key.stop
                 line_no_1, offset_1 = self.index_to_line_no_offset(index_1)
                 line_no_2, offset_2 = self.index_to_line_no_offset(index_2)
 
