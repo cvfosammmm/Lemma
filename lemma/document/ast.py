@@ -38,13 +38,13 @@ class RootNode():
 
     @timer.timer
     def insert_before(self, child, node):
-        line, offset = self.line_offset(child)
+        line_no, offset = self.line_no_offset(child)
 
-        self.lines[line]['nodes'].insert(offset, node)
+        self.lines[line_no]['nodes'].insert(offset, node)
         if node.type == 'eol':
-            new_line = {'nodes': self.lines[line]['nodes'][offset + 1:], 'layout': None}
-            self.lines.insert(line + 1, new_line)
-            del(self.lines[line]['nodes'][offset + 1:])
+            new_line = {'nodes': self.lines[line_no]['nodes'][offset + 1:], 'layout': None}
+            self.lines.insert(line_no + 1, new_line)
+            del(self.lines[line_no]['nodes'][offset + 1:])
 
         node.set_parent(self)
 
@@ -72,20 +72,20 @@ class RootNode():
 
     @timer.timer
     def remove_range(self, first_node, last_node):
-        line_1, offset_1 = self.line_offset(first_node)
-        line_2, offset_2 = self.line_offset(last_node)
-        if line_1 != line_2:
+        line_no_1, offset_1 = self.line_no_offset(first_node)
+        line_no_2, offset_2 = self.line_no_offset(last_node)
+        if line_no_1 != line_no_2:
             nodes = []
-            nodes += self.lines[line_1]['nodes'][offset_1:]
-            for line in self.lines[line_1 + 1:line_2]:
+            nodes += self.lines[line_no_1]['nodes'][offset_1:]
+            for line in self.lines[line_no_1 + 1:line_no_2]:
                 nodes += line['nodes']
-            nodes += self.lines[line_2]['nodes'][:offset_2]
+            nodes += self.lines[line_no_2]['nodes'][:offset_2]
 
-            self.lines[line_1]['nodes'] = self.lines[line_1]['nodes'][:offset_1] + self.lines[line_2]['nodes'][offset_2:]
-            del(self.lines[line_1 + 1:line_2 + 1])
+            self.lines[line_no_1]['nodes'] = self.lines[line_no_1]['nodes'][:offset_1] + self.lines[line_no_2]['nodes'][offset_2:]
+            del(self.lines[line_no_1 + 1:line_no_2 + 1])
         else:
-            nodes = self.lines[line_1]['nodes'][offset_1:offset_2]
-            del(self.lines[line_1]['nodes'][offset_1:offset_2])
+            nodes = self.lines[line_no_1]['nodes'][offset_1:offset_2]
+            del(self.lines[line_no_1]['nodes'][offset_1:offset_2])
 
         return nodes
 
@@ -99,14 +99,14 @@ class RootNode():
             count += len(line['nodes'])
 
     @timer.timer
-    def line_offset(self, node):
+    def line_no_offset(self, node):
         count = 0
         for i, line in enumerate(self.lines):
             if node in line['nodes']:
                 return i, line['nodes'].index(node)
 
     @timer.timer
-    def index_to_line_offset(self, index):
+    def index_to_line_no_offset(self, index):
         if index == 0: return 0, 0
 
         if index < 0:
@@ -157,8 +157,8 @@ class RootNode():
         if isinstance(key, slice):
             return [self[subkey] for subkey in range(len(self))[key]]
         else:
-            line, offset = self.index_to_line_offset(key)
-            return self.lines[line]['nodes'].__getitem__(offset)
+            line_no, offset = self.index_to_line_no_offset(key)
+            return self.lines[line_no]['nodes'].__getitem__(offset)
 
     def ancestors(self):
         return []
