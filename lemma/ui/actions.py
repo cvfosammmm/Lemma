@@ -191,7 +191,15 @@ class Actions(object):
         ast = History.get_active_document().ast
         cursor = History.get_active_document().cursor
         subtree = ast.get_subtree(*cursor.get_state())
-        chars = ''.join([node.value for node in subtree if node.is_char()])
+
+        chars = []
+        for node in subtree:
+            if node.type == 'char':
+                chars.append(node.value)
+            elif node.type == 'eol':
+                chars.append('\n')
+        chars = ''.join(chars)
+
         exporter = xml_exporter.XMLExporter()
         xml = ''.join([exporter.export_xml(node) for node in subtree])
 
