@@ -38,15 +38,24 @@ class DocumentList(object):
 
         self.document_ids = DocumentRepo.list()
         self.search_terms = []
+        self.focus_index = None
         self.selected_index = None
 
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
         self.view.scrolling_widget.connect('secondary_button_press', self.on_secondary_button_press)
+        self.view.scrolling_widget.connect('hover_state_changed', self.on_hover_state_changed)
+
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
         self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)
+        self.main_window.headerbar.hb_left.search_entry.connect('activate', self.activate_selected_button)
+
         self.shortcuts_controller = ShortcutController()
         self.shortcuts_controller.add_with_callback('Escape', self.stop_search)
+        self.shortcuts_controller.add_with_callback('Up', self.select_previous_button)
+        self.shortcuts_controller.add_with_callback('Down', self.select_next_button)
+        self.shortcuts_controller.add_with_callback('Tab', self.select_next_button)
+        self.shortcuts_controller.add_with_callback('<Shift>Tab', self.select_previous_button)
         self.main_window.headerbar.hb_left.search_entry.add_controller(self.shortcuts_controller)
 
         self.view.content.set_draw_func(self.draw)
@@ -58,6 +67,11 @@ class DocumentList(object):
         self.document_ids = [doc_id for doc_id in DocumentRepo.list() if self.search_terms_in_document(DocumentRepo.get_by_id(doc_id))]
         self.view.scrolling_widget.set_size(1, max(len(self.document_ids) * self.view.line_height, 1))
         self.view.scrolling_widget.queue_draw()
+
+    def set_focus_index(self, index):
+        if index != self.focus_index:
+            self.focus_index = index
+            self.view.content.queue_draw()
 
     def set_selected_index(self, index):
         if index != self.selected_index:
@@ -95,6 +109,10 @@ class DocumentList(object):
 
         return True
 
+    def on_hover_state_changed(self, scrolling_widget):
+        item_num = self.get_item_at_cursor()
+        self.set_focus_index(item_num)
+
     def on_context_menu_close(self, popover):
         self.set_selected_index(None)
 
@@ -112,6 +130,8 @@ class DocumentList(object):
         else:
             entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, None)
 
+        self.set_focus_index(None)
+        self.set_selected_index(None)
         self.update()
 
     def on_search_entry_icon_released(self, entry, icon_pos, data=None):
@@ -121,6 +141,26 @@ class DocumentList(object):
     def stop_search(self):
         self.main_window.headerbar.hb_left.search_entry.set_text('')
         self.main_window.document_view.content.grab_focus()
+
+    def activate_selected_button(self, entry):
+        if self.focus_index != None:
+            self.activate_item(self.focus_index)
+        self.set_focus_index(None)
+        self.set_selected_index(None)
+
+    def select_next_button(self):
+        if self.focus_index == None:
+            new_index = 0
+        else:
+            new_index = (self.focus_index + 1) % len(self.document_ids)
+        self.set_focus_index(new_index)
+
+    def select_previous_button(self):
+        if self.focus_index == None:
+            new_index = len(self.document_ids) - 1
+        else:
+            new_index = (self.focus_index - 1) % len(self.document_ids)
+        self.set_focus_index(new_index)
 
     def draw(self, widget, ctx, width, height):
         sidebar_fg_1 = ColorManager.get_ui_color('sidebar_fg_1')
@@ -159,7 +199,7 @@ class DocumentList(object):
                 Gdk.cairo_set_source_rgba(ctx, selected_color)
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
-            elif not highlight_active and i == self.get_item_at_cursor():
+            elif not highlight_active and i == self.focus_index:
                 Gdk.cairo_set_source_rgba(ctx, hover_color)
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
