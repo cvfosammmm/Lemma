@@ -26,16 +26,16 @@ from random import randrange
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.settings.settings import Settings
 from lemma.infrastructure.color_manager import ColorManager
+from lemma.use_cases.use_cases import UseCases
 from lemma.ui.helpers.cairo import rounded_rectangle
 
 
 class PageColors(object):
 
-    def __init__(self, settings, main_window, use_cases):
+    def __init__(self, settings, main_window):
         self.view = PageFontColorView()
         self.settings = settings
         self.main_window = main_window
-        self.use_cases = use_cases
         self.style_previews = dict()
 
     def init(self):
@@ -81,7 +81,7 @@ class PageColors(object):
 
     def on_checkbutton_toggled(self, button, name):
         if button.get_active():
-            self.use_cases.settings_set_value('color_scheme', name)
+            UseCases.settings_set_value('color_scheme', name)
             button.get_parent().add_css_class('selected')
         else:
             button.get_parent().remove_css_class('selected')

@@ -27,13 +27,13 @@ import html2text
 from lemma.infrastructure.html_exporter import HTMLExporter
 from lemma.infrastructure.service_locator import ServiceLocator
 from lemma.settings.settings import Settings
+from lemma.use_cases.use_cases import UseCases
 
 
 class Dialog(object):
 
-    def __init__(self, main_window, use_cases):
+    def __init__(self, main_window):
         self.main_window = main_window
-        self.use_cases = use_cases
         self.document = None
         self.current_tags = set()
         self.current_link = None
@@ -68,7 +68,7 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                self.use_cases.settings_set_value('last_export_folder', os.path.dirname(filename))
+                UseCases.settings_set_value('last_export_folder', os.path.dirname(filename))
 
                 if not filename.endswith('.md'):
                     filename += '.md'

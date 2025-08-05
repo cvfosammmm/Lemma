@@ -27,6 +27,7 @@ from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.infrastructure.layout_info import LayoutInfo
 from lemma.message_bus.message_bus import MessageBus
 from lemma.history.history import History
+from lemma.use_cases.use_cases import UseCases
 import lemma.infrastructure.xml_helpers as xml_helpers
 import lemma.infrastructure.xml_exporter as xml_exporter
 import lemma.infrastructure.timer as timer
@@ -38,7 +39,6 @@ class Actions(object):
         self.main_window = main_window
         self.application = application
         self.model_state = model_state
-        self.use_cases = application.use_cases
 
         self.actions = dict()
         self.add_simple_action('add-document', self.add_document)
@@ -142,7 +142,7 @@ class Actions(object):
         self.actions['show-about-dialog'].set_enabled(True)
 
     def add_document(self, action=None, paramenter=''):
-        self.use_cases.enter_draft_mode()
+        UseCases.enter_draft_mode()
 
     def import_markdown_files(self, action=None, paramenter=''):
         DialogLocator.get_dialog('import_documents').run()
@@ -151,7 +151,7 @@ class Actions(object):
         DialogLocator.get_dialog('export_bulk').run()
 
     def delete_document(self, action=None, parameter=''):
-        self.use_cases.delete_document(History.get_active_document())
+        UseCases.delete_document(History.get_active_document())
 
     def rename_document(self, action=None, parameter=''):
         self.application.document_view.init_renaming()
@@ -165,26 +165,26 @@ class Actions(object):
     def go_back(self, action=None, parameter=''):
         mode = ApplicationState.get_value('mode')
         if mode == 'draft':
-            self.use_cases.leave_draft_mode()
+            UseCases.leave_draft_mode()
         else:
             prev_doc = History.get_previous_if_any(History.get_active_document())
             if prev_doc != None:
-                self.use_cases.set_active_document(prev_doc, update_history=False, scroll_to_top=False)
+                UseCases.set_active_document(prev_doc, update_history=False, scroll_to_top=False)
 
     def go_forward(self, action=None, parameter=''):
         next_doc = History.get_next_if_any(History.get_active_document())
         if next_doc != None:
-            self.use_cases.set_active_document(next_doc, update_history=False, scroll_to_top=False)
+            UseCases.set_active_document(next_doc, update_history=False, scroll_to_top=False)
 
     def undo(self, action=None, parameter=''):
-        self.use_cases.undo()
+        UseCases.undo()
 
     def redo(self, action=None, parameter=''):
-        self.use_cases.redo()
+        UseCases.redo()
 
     def cut(self, action=None, parameter=''):
         self.copy()
-        self.use_cases.delete_selection()
+        UseCases.delete_selection()
 
     def copy(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
@@ -213,7 +213,7 @@ class Actions(object):
         document = History.get_active_document()
 
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
-        self.use_cases.insert_xml(xml)
+        UseCases.insert_xml(xml)
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
@@ -235,24 +235,24 @@ class Actions(object):
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
                     text = xml_helpers.escape(stext)
                     xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
-                    self.use_cases.insert_xml(xml)
+                    UseCases.insert_xml(xml)
                     return
 
             text = xml_helpers.escape(text)
             xml = '<char tags="' + ' '.join(tags_at_cursor) + '"' + link_attr + '>' + text + '</char>'
-            self.use_cases.insert_xml(xml)
+            UseCases.insert_xml(xml)
 
     def delete(self, action=None, parameter=''):
-        self.use_cases.delete()
+        UseCases.delete()
 
     def select_all(self, action=None, parameter=''):
-        self.use_cases.select_all()
+        UseCases.select_all()
 
     def remove_selection(self, action=None, parameter=''):
-        self.use_cases.remove_selection()
+        UseCases.remove_selection()
 
     def insert_xml(self, action=None, parameter=None):
-        self.use_cases.insert_xml(parameter.get_string())
+        UseCases.insert_xml(parameter.get_string())
 
     def subscript(self, action=None, parameter=''):
         document = History.get_active_document()
@@ -262,7 +262,7 @@ class Actions(object):
             xml = '<mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
-        self.use_cases.insert_xml(xml)
+        UseCases.insert_xml(xml)
 
     def superscript(self, action=None, parameter=''):
         document = History.get_active_document()
@@ -272,24 +272,24 @@ class Actions(object):
             xml = '<mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'
-        self.use_cases.insert_xml(xml)
+        UseCases.insert_xml(xml)
 
     def set_paragraph_style(self, action=None, parameter=None):
-        self.use_cases.set_paragraph_style(parameter.get_string())
+        UseCases.set_paragraph_style(parameter.get_string())
 
     def toggle_bold(self, action=None, parameter=''):
         document = History.get_active_document()
         if document.cursor.has_selection():
-            self.use_cases.toggle_tag('bold')
+            UseCases.toggle_tag('bold')
         else:
-            self.use_cases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'bold'})
+            UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'bold'})
 
     def toggle_italic(self, action=None, parameter=''):
         document = History.get_active_document()
         if document.cursor.has_selection():
-            self.use_cases.toggle_tag('italic')
+            UseCases.toggle_tag('italic')
         else:
-            self.use_cases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
+            UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
 
     def show_insert_image_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('insert_image').run()
@@ -298,24 +298,24 @@ class Actions(object):
         document = History.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-        self.use_cases.resize_widget(selected_nodes[0].value.get_width() - 1)
+        UseCases.resize_widget(selected_nodes[0].value.get_width() - 1)
 
     def widget_enlarge(self, action=None, parameter=None):
         document = History.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-        self.use_cases.resize_widget(selected_nodes[0].value.get_width() + 1)
+        UseCases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
     def open_link(self, action=None, parameter=''):
         document = History.get_active_document()
 
-        self.use_cases.open_link(document.cursor.get_insert_node().link)
+        UseCases.open_link(document.cursor.get_insert_node().link)
 
     def insert_link(self, action=None, parameter=''):
-        self.use_cases.show_insert_link_popover()
+        UseCases.show_insert_link_popover(self.main_window)
 
     def edit_link(self, action=None, parameter=''):
-        self.use_cases.show_insert_link_popover()
+        UseCases.show_insert_link_popover(self.main_window)
 
     def copy_link(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
@@ -338,7 +338,7 @@ class Actions(object):
             bounds = document.cursor.get_insert_node().link_bounds()
         else:
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
-        self.use_cases.set_link(document, bounds, None)
+        UseCases.set_link(document, bounds, None)
 
     def start_global_search(self, action=None, parameter=''):
         search_entry = self.main_window.headerbar.hb_left.search_entry
@@ -347,16 +347,16 @@ class Actions(object):
     def toggle_symbols_sidebar(self, action=None, parameter=None):
         toggle_button = self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle
         if toggle_button.get_active():
-            self.use_cases.hide_tools_sidebar()
+            UseCases.hide_tools_sidebar()
         else:
-            self.use_cases.show_tools_sidebar('math')
+            UseCases.show_tools_sidebar('math')
 
     def toggle_emojis_sidebar(self, action=None, parameter=None):
         toggle_button = self.main_window.toolbar.toolbar_right.emoji_sidebar_toggle
         if toggle_button.get_active():
-            self.use_cases.hide_tools_sidebar()
+            UseCases.hide_tools_sidebar()
         else:
-            self.use_cases.show_tools_sidebar('emojis')
+            UseCases.show_tools_sidebar('emojis')
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
@@ -364,7 +364,7 @@ class Actions(object):
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y
-        self.use_cases.show_popover('paragraph_style', x, y, 'top')
+        UseCases.show_popover('paragraph_style', x, y, 'top')
 
     def show_edit_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_right.edit_menu_button
@@ -372,7 +372,7 @@ class Actions(object):
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y
-        self.use_cases.show_popover('edit_menu', x, y, 'top')
+        UseCases.show_popover('edit_menu', x, y, 'top')
 
     def show_document_menu(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_right.document_menu_button
@@ -380,7 +380,7 @@ class Actions(object):
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y + allocation.size.height
-        self.use_cases.show_popover('document_menu', x, y, 'bottom')
+        UseCases.show_popover('document_menu', x, y, 'bottom')
 
     def show_hamburger_menu(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_left.hamburger_menu_button
@@ -388,7 +388,7 @@ class Actions(object):
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y + allocation.size.height
-        self.use_cases.show_popover('hamburger_menu', x, y, 'bottom')
+        UseCases.show_popover('hamburger_menu', x, y, 'bottom')
 
     def show_settings_dialog(self, action=None, parameter=''):
         DialogLocator.get_dialog('settings').run()

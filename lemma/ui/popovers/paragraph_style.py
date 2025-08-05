@@ -25,10 +25,9 @@ from lemma.ui.popovers.popover_templates import PopoverView
 
 class Popover(object):
 
-    def __init__(self, use_cases, model_state):
-        self.use_cases = use_cases
+    def __init__(self, model_state):
         self.model_state = model_state
-        self.view = View(use_cases)
+        self.view = View()
 
     def update(self):
         pass
@@ -42,8 +41,8 @@ class Popover(object):
 
 class View(PopoverView):
 
-    def __init__(self, use_cases):
-        PopoverView.__init__(self, use_cases)
+    def __init__(self):
+        PopoverView.__init__(self)
 
         self.set_width(252)
 

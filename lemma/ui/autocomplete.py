@@ -24,15 +24,15 @@ from lemma.history.history import History
 from lemma.settings.settings import Settings
 from lemma.db.autocomplete_db import AutocompleteDB
 from lemma.application_state.application_state import ApplicationState
+from lemma.use_cases.use_cases import UseCases
 
 
 class Autocomplete():
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         self.main_window = main_window
         self.widget = AutocompleteWidget()
         self.main_window.document_view.add_overlay(self.widget)
-        self.application = application
 
         self.is_active = False
         self.command_at_cursor = ''
@@ -237,7 +237,7 @@ class Autocomplete():
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         xml = AutocompleteDB.get_xml(self.widget.listbox.get_selected_row().title[1:])
-        self.application.use_cases.replace_section(document, self.session_first_node, insert, xml)
+        UseCases.replace_section(document, self.session_first_node, insert, xml)
 
         self.deactivate()
 

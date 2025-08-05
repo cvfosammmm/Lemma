@@ -27,6 +27,7 @@ from lemma.ui.document_view_controller import DocumentViewController
 from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
+from lemma.use_cases.use_cases import UseCases
 from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.title_widget.title_widget import TitleWidget
 from lemma.application_state.application_state import ApplicationState
@@ -36,10 +37,9 @@ import lemma.infrastructure.timer as timer
 
 class DocumentView():
 
-    def __init__(self, main_window, application, model_state):
+    def __init__(self, main_window, model_state):
         self.main_window = main_window
         self.view = main_window.document_view
-        self.use_cases = application.use_cases
         self.model_state = model_state
 
         self.cursor_x, self.cursor_y = None, None
@@ -52,7 +52,7 @@ class DocumentView():
 
         self.document = None
 
-        self.controller = DocumentViewController(self, self.use_cases)
+        self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
         self.title_widget = TitleWidget(self)
@@ -87,11 +87,11 @@ class DocumentView():
         self.presenter.update()
 
     def set_size(self, width, height):
-        self.use_cases.app_state_set_value('document_view_width', width)
-        self.use_cases.app_state_set_value('document_view_height', height)
+        UseCases.app_state_set_value('document_view_width', width)
+        UseCases.app_state_set_value('document_view_height', height)
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
-        self.use_cases.scroll_to_xy(offset_x, offset_y)
+        UseCases.scroll_to_xy(offset_x, offset_y)
         self.presenter.update()
 
     def set_cursor_position(self, x, y):
@@ -135,14 +135,14 @@ class DocumentView():
             self.title_widget.activate()
             self.presenter.scroll_to_position([0, 0])
             self.title_widget.view.set_visible(True)
-            self.use_cases.app_state_set_value('title_buttons_height', 50)
+            UseCases.app_state_set_value('title_buttons_height', 50)
             self.view.content.queue_draw()
             self.title_widget.grab_focus()
 
     def stop_renaming(self):
         self.title_widget.deactivate()
         self.title_widget.view.set_visible(False)
-        self.use_cases.app_state_set_value('title_buttons_height', 0)
+        UseCases.app_state_set_value('title_buttons_height', 0)
         self.view.content.grab_focus()
 
     def on_entry_activate(self, entry=None):
@@ -157,7 +157,7 @@ class DocumentView():
         document = History.get_active_document()
         prev_title = document.title
 
-        self.use_cases.set_title(self.title_widget.title)
+        UseCases.set_title(self.title_widget.title)
 
         if Settings.get_value('update_backlinks'):
             backlinks = DocumentRepo.list_by_link_target(prev_title)
@@ -171,9 +171,9 @@ class DocumentView():
                         char_nodes = [node.value for node in linking_doc.ast.get_subtree(pos_1, pos_2) if node.is_char()]
                         if ''.join(char_nodes) == target:
                             xml = '<char link_target="' + xml_helpers.escape(self.title_widget.title) + '">' + xml_helpers.escape(self.title_widget.title) + '</char>'
-                            self.use_cases.replace_section(linking_doc, bounds[0], bounds[1], xml)
+                            UseCases.replace_section(linking_doc, bounds[0], bounds[1], xml)
                         else:
-                            self.use_cases.set_link(linking_doc, bounds, self.title_widget.title)
+                            UseCases.set_link(linking_doc, bounds, self.title_widget.title)
 
         self.stop_renaming()
 

@@ -21,13 +21,13 @@ from lemma.settings.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
+from lemma.use_cases.use_cases import UseCases
 
 
 class WindowState(object):
 
-    def __init__(self, main_window, app):
+    def __init__(self, main_window):
         self.main_window = main_window
-        self.use_cases = app.use_cases
         self.toolbar_right = self.main_window.toolbar.toolbar_right
 
         self.toolbar_right.symbols_sidebar_toggle.connect('clicked', self.on_tools_sidebar_toggle_clicked, 'math')
@@ -59,9 +59,9 @@ class WindowState(object):
 
     def on_tools_sidebar_toggle_clicked(self, toggle_button, name):
         if not toggle_button.get_active():
-            self.use_cases.hide_tools_sidebar()
+            UseCases.hide_tools_sidebar()
         else:
-            self.use_cases.show_tools_sidebar(name)
+            UseCases.show_tools_sidebar(name)
 
     def on_backlinks_toggle_toggled(self, toggle_button, parameter=None):
         self.main_window.navigation_sidebar.paned.set_show_widget(toggle_button.get_active())
@@ -93,12 +93,12 @@ class WindowState(object):
         self.main_window.navigation_sidebar.paned.set_target_position(navbar_paned_position)
 
     def save_window_state(self):
-        self.use_cases.settings_set_value('width', self.main_window.get_property('default-width'))
-        self.use_cases.settings_set_value('height', self.main_window.get_property('default-height'))
-        self.use_cases.settings_set_value('is_maximized', self.main_window.get_property('maximized'))
-        self.use_cases.settings_set_value('sidebar_position', self.main_window.headerbar.get_property('position'))
-        self.use_cases.settings_set_value('tools_sidebar_position', self.main_window.document_view_paned.target_position)
-        self.use_cases.settings_set_value('show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
-        self.use_cases.settings_set_value('navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)
+        UseCases.settings_set_value('width', self.main_window.get_property('default-width'))
+        UseCases.settings_set_value('height', self.main_window.get_property('default-height'))
+        UseCases.settings_set_value('is_maximized', self.main_window.get_property('maximized'))
+        UseCases.settings_set_value('sidebar_position', self.main_window.headerbar.get_property('position'))
+        UseCases.settings_set_value('tools_sidebar_position', self.main_window.document_view_paned.target_position)
+        UseCases.settings_set_value('show_backlinks', self.main_window.navigation_sidebar.paned.show_widget)
+        UseCases.settings_set_value('navbar_paned_position', self.main_window.navigation_sidebar.paned.target_position)
 
 

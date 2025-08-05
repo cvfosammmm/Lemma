@@ -24,13 +24,13 @@ import datetime
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.message_bus.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
+from lemma.use_cases.use_cases import UseCases
 
 
 class DocumentDraft():
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         self.view = main_window.draft_view
-        self.use_cases = application.use_cases
 
         self.title = ''
         self.title_changed = False
@@ -111,17 +111,17 @@ class DocumentDraft():
     def submit(self):
         title = self.title
         self.deactivate()
-        self.use_cases.new_document(title)
+        UseCases.new_document(title)
 
     def on_entry_keypress(self, controller, keyval, keycode, state):
         if keyval == Gdk.keyval_from_name('Escape'):
             if state & Gtk.accelerator_get_default_mod_mask() == 0:
-                self.use_cases.leave_draft_mode()
+                UseCases.leave_draft_mode()
                 return True
         return False
 
     def on_cancel_button_clicked(self, widget=None):
-        self.use_cases.leave_draft_mode()
+        UseCases.leave_draft_mode()
 
     def init(self):
         self.reset_title()

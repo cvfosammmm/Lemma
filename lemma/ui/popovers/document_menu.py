@@ -21,14 +21,14 @@ from gi.repository import Gtk, Gdk
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
+from lemma.use_cases.use_cases import UseCases
 
 
 class Popover(object):
 
-    def __init__(self, use_cases, model_state):
-        self.use_cases = use_cases
+    def __init__(self, model_state):
         self.model_state = model_state
-        self.view = View(use_cases)
+        self.view = View()
 
         self.key_controller = Gtk.EventControllerKey()
         self.key_controller.connect('key-pressed', self.on_keypress)
@@ -48,7 +48,7 @@ class Popover(object):
 
         if keyval == Gdk.keyval_from_name('F12'):
             if state & modifiers == 0:
-                self.use_cases.hide_popovers()
+                UseCases.hide_popovers()
 
                 return True
 
@@ -57,8 +57,8 @@ class Popover(object):
 
 class View(PopoverView):
 
-    def __init__(self, use_cases):
-        PopoverView.__init__(self, use_cases)
+    def __init__(self):
+        PopoverView.__init__(self)
 
         self.set_width(306)
 

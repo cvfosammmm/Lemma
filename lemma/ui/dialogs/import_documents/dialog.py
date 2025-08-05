@@ -24,13 +24,13 @@ import os.path
 
 import lemma.ui.dialogs.import_documents.import_documents_viewgtk as view
 from lemma.settings.settings import Settings
+from lemma.use_cases.use_cases import UseCases
 
 
 class Dialog(object):
 
-    def __init__(self, main_window, use_cases):
+    def __init__(self, main_window):
         self.main_window = main_window
-        self.use_cases = use_cases
         self.current_values = dict()
 
     def run(self):
@@ -83,7 +83,7 @@ class Dialog(object):
         else:
             if files != None and len(files) > 0:
                 import_folder = os.path.dirname(files[0].get_path())
-                self.use_cases.settings_set_value('last_import_folder', import_folder)
+                UseCases.settings_set_value('last_import_folder', import_folder)
                 for file in files:
                     self.add_file_to_list(file.get_path())
                 self.view.list.invalidate_sort()
@@ -113,6 +113,6 @@ class Dialog(object):
 
     def import_files(self):
         for path in self.current_values['files']:
-            self.use_cases.import_markdown(path)
+            UseCases.import_markdown(path)
 
 

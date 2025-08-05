@@ -20,16 +20,15 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
+from lemma.use_cases.use_cases import UseCases
 
 
 class PopoverView(Gtk.Overlay):
 
-    def __init__(self, use_cases):
+    def __init__(self):
         Gtk.Overlay.__init__(self)
         self.set_focusable(True)
         self.add_css_class('popover')
-
-        self.use_cases = use_cases
 
         self.key_controller = Gtk.EventControllerKey()
         self.key_controller.connect('key-pressed', self.on_keypress)
@@ -60,7 +59,7 @@ class PopoverView(Gtk.Overlay):
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
         if (state & modifiers, keyval) == (0, Gdk.keyval_from_name('Escape')):
-            self.use_cases.hide_popovers()
+            UseCases.hide_popovers()
 
         if (state & modifiers, keyval) == (0, Gdk.keyval_from_name('Return')):
             self.activate_selected_button()
@@ -124,7 +123,7 @@ class PopoverView(Gtk.Overlay):
         button.connect('clicked', self.on_closing_button_click)
 
     def on_closing_button_click(self, button):
-        self.use_cases.hide_popovers()
+        UseCases.hide_popovers()
 
     def add_widget(self, widget, pagename='main'):
         box = self.stack.get_child_by_name(pagename)

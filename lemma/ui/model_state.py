@@ -27,9 +27,8 @@ import lemma.infrastructure.timer as timer
 
 class ModelState(object):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         self.main_window = main_window
-        self.application = application
 
         self.document = None
         self.mode = None

@@ -18,14 +18,14 @@
 from lemma.history.history import History
 from lemma.application_state.application_state import ApplicationState
 from lemma.message_bus.message_bus import MessageBus
+from lemma.use_cases.use_cases import UseCases
 import lemma.infrastructure.timer as timer
 
 
 class CursorState():
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         self.toolbar = main_window.toolbar
-        self.use_cases = application.use_cases
 
     def update(self):
         self.update_tags_at_cursor()
@@ -38,29 +38,29 @@ class CursorState():
         document = History.get_active_document()
 
         if document == None:
-            self.use_cases.app_state_set_value('tags_at_cursor', set())
+            UseCases.app_state_set_value('tags_at_cursor', set())
         else:
             node = document.cursor.get_first_node()
             node = node.prev_in_parent()
             if node == None:
-                self.use_cases.app_state_set_value('tags_at_cursor', set())
+                UseCases.app_state_set_value('tags_at_cursor', set())
             else:
-                self.use_cases.app_state_set_value('tags_at_cursor', node.tags.copy())
+                UseCases.app_state_set_value('tags_at_cursor', node.tags.copy())
 
     def update_link_at_cursor(self):
         document = History.get_active_document()
 
         if document == None:
-            self.use_cases.app_state_set_value('link_at_cursor', None)
+            UseCases.app_state_set_value('link_at_cursor', None)
         else:
             node = document.cursor.get_first_node()
             prev_node = node.prev_in_parent()
             if node == None or prev_node == None:
-                self.use_cases.app_state_set_value('link_at_cursor', None)
+                UseCases.app_state_set_value('link_at_cursor', None)
             elif node.link == prev_node.link:
-                self.use_cases.app_state_set_value('link_at_cursor', node.link)
+                UseCases.app_state_set_value('link_at_cursor', node.link)
             else:
-                self.use_cases.app_state_set_value('link_at_cursor', None)
+                UseCases.app_state_set_value('link_at_cursor', None)
 
     def update_tag_toggle(self, button, tagname):
         document = History.get_active_document()

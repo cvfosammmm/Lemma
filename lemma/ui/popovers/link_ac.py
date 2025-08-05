@@ -24,16 +24,16 @@ import os
 from lemma.ui.popovers.popover_templates import PopoverView
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
+from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
 import lemma.infrastructure.xml_helpers as xml_helpers
 
 
 class Popover():
 
-    def __init__(self, use_cases, model_state):
-        self.use_cases = use_cases
+    def __init__(self, model_state):
         self.model_state = model_state
-        self.view = View(use_cases)
+        self.view = View()
 
         self.current_values = dict()
         self.bounds = None
@@ -54,7 +54,7 @@ class Popover():
         pass
 
     def on_popup(self):
-        self.use_cases.app_state_set_value('document_view_hide_cursor_on_unfocus', False)
+        UseCases.app_state_set_value('document_view_hide_cursor_on_unfocus', False)
 
         self.init_current_values()
 
@@ -80,7 +80,7 @@ class Popover():
         self.update_list()
 
     def on_popdown(self):
-        self.use_cases.app_state_set_value('document_view_hide_cursor_on_unfocus', True)
+        UseCases.app_state_set_value('document_view_hide_cursor_on_unfocus', True)
 
     def init_current_values(self):
         self.current_values['link_target'] = ''
@@ -171,19 +171,19 @@ class Popover():
                 tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
-                self.use_cases.insert_xml(xml)
+                UseCases.insert_xml(xml)
             else:
-                self.use_cases.set_link(document, self.bounds, self.current_values['link_target'])
+                UseCases.set_link(document, self.bounds, self.current_values['link_target'])
         elif self.bounds != None:
-            self.use_cases.set_link(document, self.bounds, None)
+            UseCases.set_link(document, self.bounds, None)
 
-        self.use_cases.hide_popovers()
+        UseCases.hide_popovers()
 
 
 class View(PopoverView):
 
-    def __init__(self, use_cases):
-        PopoverView.__init__(self, use_cases)
+    def __init__(self):
+        PopoverView.__init__(self)
         self.add_css_class('insert-link-popover')
         self.set_width(300)
         self.set_size_request(300, 260)

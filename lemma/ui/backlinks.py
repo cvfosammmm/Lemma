@@ -20,17 +20,16 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.application_state.application_state import ApplicationState
+from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 
 
 class Backlinks(object):
 
-    def __init__(self, main_window, application, model_state):
+    def __init__(self, main_window, model_state):
         self.main_window = main_window
         self.view = self.main_window.backlinks
-        self.application = application
         self.model_state = model_state
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
@@ -44,6 +43,6 @@ class Backlinks(object):
                 self.view.add_item(linking_doc)
 
     def on_row_activated(self, listbox, row):
-        self.application.use_cases.set_active_document(row.get_child().document)
+        UseCases.set_active_document(row.get_child().document)
 
 

@@ -20,22 +20,22 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 from lemma.settings.settings import Settings
+from lemma.use_cases.use_cases import UseCases
 
 
 class PageAutocomplete(object):
 
-    def __init__(self, settings, main_window, use_cases):
+    def __init__(self, settings, main_window):
         self.view = PageAutocompleteView()
         self.settings = settings
         self.main_window = main_window
-        self.use_cases = use_cases
 
     def init(self):
         self.view.checkbox_stylized_latex.set_active(Settings.get_value('stylized_latex_autocomplete'))
         self.view.checkbox_stylized_latex.connect('toggled', self.on_checkbutton_toggled, 'stylized_latex_autocomplete')
 
     def on_checkbutton_toggled(self, button, key):
-        self.use_cases.settings_set_value(key, button.get_active())
+        UseCases.settings_set_value(key, button.get_active())
 
 
 class PageAutocompleteView(Gtk.Box):

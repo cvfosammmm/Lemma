@@ -21,6 +21,7 @@ from gi.repository import Gdk, Pango, PangoCairo
 
 from lemma.infrastructure.color_manager import ColorManager
 from lemma.application_state.application_state import ApplicationState
+from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.helpers.cairo import rounded_rectangle
@@ -28,9 +29,8 @@ from lemma.ui.helpers.cairo import rounded_rectangle
 
 class DocumentHistory(object):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         self.view = main_window.history_view
-        self.application = application
 
         self.layout = Pango.Layout(self.view.get_pango_context())
         self.layout.set_ellipsize(Pango.EllipsizeMode.END)
@@ -96,7 +96,7 @@ class DocumentHistory(object):
 
         document = self.get_document_at_cursor()
         if document != None and document == self.selected_document:
-            self.application.use_cases.set_active_document(document, update_history=False, scroll_to_top=False)
+            UseCases.set_active_document(document, update_history=False, scroll_to_top=False)
         self.set_selected_document(None)
 
     def set_selected_document(self, document):

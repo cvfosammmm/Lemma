@@ -23,14 +23,14 @@ from lemma.infrastructure.layout_info import LayoutInfo
 from lemma.history.history import History
 from lemma.message_bus.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
+from lemma.use_cases.use_cases import UseCases
 
 
 class ToolBars():
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         self.headerbar = main_window.headerbar
         self.toolbar = main_window.toolbar
-        self.application = application
 
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
 
@@ -83,7 +83,7 @@ class ToolBars():
                 button.remove_css_class('active')
 
     def on_widget_scale_change_value(self, scale, scroll, value):
-        self.application.use_cases.resize_widget(value)
+        UseCases.resize_widget(value)
         return True
 
 

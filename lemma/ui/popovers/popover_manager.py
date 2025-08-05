@@ -26,14 +26,14 @@ import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_ac as link_ac
 from lemma.application_state.application_state import ApplicationState
 from lemma.message_bus.message_bus import MessageBus
+from lemma.use_cases.use_cases import UseCases
 
 
 class PopoverManager():
 
-    def __init__(self, main_window, application, model_state):
+    def __init__(self, main_window, model_state):
         self.current_popover_name = None
         self.prev_focus_widget = None
-        self.use_cases = application.use_cases
         self.model_state = model_state
         self.main_window = main_window
         self.popoverlay = main_window.popoverlay
@@ -46,11 +46,11 @@ class PopoverManager():
         self.inbetween.set_can_target(False)
 
         self.popovers = dict()
-        self.popovers["document_menu"] = document_menu.Popover(self.use_cases, self.model_state)
-        self.popovers["edit_menu"] = edit_menu.Popover(self.use_cases, self.model_state)
-        self.popovers["hamburger_menu"] = hamburger_menu.Popover(self.use_cases, self.model_state)
-        self.popovers["paragraph_style"] = paragraph_style.Popover(self.use_cases, self.model_state)
-        self.popovers["link_ac"] = link_ac.Popover(self.use_cases, self.model_state)
+        self.popovers["document_menu"] = document_menu.Popover(self.model_state)
+        self.popovers["edit_menu"] = edit_menu.Popover(self.model_state)
+        self.popovers["hamburger_menu"] = hamburger_menu.Popover(self.model_state)
+        self.popovers["paragraph_style"] = paragraph_style.Popover(self.model_state)
+        self.popovers["link_ac"] = link_ac.Popover(self.model_state)
 
     def update(self):
         for popover in self.popovers.values(): popover.update()
@@ -141,6 +141,6 @@ class PopoverManager():
         self.prev_focus_widget = widget
 
     def on_click_inbetween(self, controller, n_press, x, y):
-        self.use_cases.hide_popovers()
+        UseCases.hide_popovers()
 
 

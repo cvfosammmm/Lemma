@@ -39,7 +39,6 @@ import lemma.ui.backlinks as backlinks
 import lemma.ui.actions as actions
 import lemma.ui.autocomplete as autocomplete
 import lemma.ui.model_state as model_state
-import lemma.use_cases.use_cases as use_cases
 import lemma.ui.shortcuts as shortcuts
 
 
@@ -52,26 +51,25 @@ class Application(Adw.Application):
         Adw.Application.do_activate(self)
 
         self.main_window = main_window.MainWindow(self)
-        self.model_state = model_state.ModelState(self.main_window, self)
+        self.model_state = model_state.ModelState(self.main_window)
 
-        self.use_cases = use_cases.UseCases(self.main_window)
         ColorManager.init(self.main_window)
         self.main_window.add_widgets()
-        DialogLocator.init_dialogs(self.main_window, self.use_cases)
+        DialogLocator.init_dialogs(self.main_window)
 
         self.colors = colors.Colors(self.main_window)
-        self.document_history = document_history.DocumentHistory(self.main_window, self)
-        self.document_view = document_view.DocumentView(self.main_window, self, self.model_state)
-        self.cursor_state = cursor_state.CursorState(self.main_window, self)
-        self.toolbars = toolbars.ToolBars(self.main_window, self)
-        self.document_draft = document_draft.DocumentDraft(self.main_window, self)
-        self.document_list = document_list.DocumentList(self.main_window, self)
-        self.backlinks = backlinks.Backlinks(self.main_window, self, self.model_state)
+        self.document_history = document_history.DocumentHistory(self.main_window)
+        self.document_view = document_view.DocumentView(self.main_window, self.model_state)
+        self.cursor_state = cursor_state.CursorState(self.main_window)
+        self.toolbars = toolbars.ToolBars(self.main_window)
+        self.document_draft = document_draft.DocumentDraft(self.main_window)
+        self.document_list = document_list.DocumentList(self.main_window)
+        self.backlinks = backlinks.Backlinks(self.main_window, self.model_state)
         self.actions = actions.Actions(self.main_window, self, self.model_state)
-        self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
+        self.autocomplete = autocomplete.Autocomplete(self.main_window)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
-        self.window_state = window_state.WindowState(self.main_window, self)
-        self.popover_manager = PopoverManager(self.main_window, self, self.model_state)
+        self.window_state = window_state.WindowState(self.main_window)
+        self.popover_manager = PopoverManager(self.main_window, self.model_state)
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
         MessageBus.connect('history_changed', self.on_history_changed)

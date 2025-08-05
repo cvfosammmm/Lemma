@@ -27,13 +27,13 @@ from lemma.infrastructure.color_manager import ColorManager
 from lemma.ui.shortcuts import ShortcutController
 from lemma.application_state.application_state import ApplicationState
 from lemma.message_bus.message_bus import MessageBus
+from lemma.use_cases.use_cases import UseCases
 
 
 class DocumentList(object):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         self.main_window = main_window
-        self.use_cases = application.use_cases
         self.view = main_window.document_list
 
         self.document_ids = DocumentRepo.list()
@@ -66,7 +66,7 @@ class DocumentList(object):
 
     def activate_item(self, index):
         document = DocumentRepo.get_by_id(self.document_ids[index])
-        self.use_cases.set_active_document(document)
+        UseCases.set_active_document(document)
 
     def on_primary_button_press(self, scrolling_widget, data):
         x_offset, y_offset, state = data
@@ -100,7 +100,7 @@ class DocumentList(object):
 
     def on_delete_document_clicked(self, button):
         document = DocumentRepo.get_by_id(self.document_ids[self.selected_index])
-        self.use_cases.delete_document(document)
+        UseCases.delete_document(document)
         self.view.context_menu.popover.popdown()
 
     def on_search_entry_changed(self, entry, data=None):

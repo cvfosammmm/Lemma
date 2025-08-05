@@ -21,12 +21,13 @@ from gi.repository import Gtk
 
 from PIL import Image as PIL_Image
 
+from lemma.use_cases.use_cases import UseCases
+
 
 class Dialog(object):
 
-    def __init__(self, main_window, use_cases):
+    def __init__(self, main_window):
         self.main_window = main_window
-        self.use_cases = use_cases
 
     def run(self):
         self.setup()
@@ -50,6 +51,6 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                self.use_cases.add_image_from_filename(filename)
+                UseCases.add_image_from_filename(filename)
 
 
