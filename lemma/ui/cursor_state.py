@@ -66,12 +66,15 @@ class CursorState():
         document = History.get_active_document()
         if document == None: return
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
+        chars_selected = False
         all_tagged = True
-        for node in char_nodes:
-            if tagname not in node.tags: all_tagged = False
+        for node in [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]:
+            chars_selected = True
+            if tagname not in node.tags:
+                all_tagged = False
+                break
 
-        if len(char_nodes) > 0:
+        if chars_selected:
             if all_tagged:
                 button.add_css_class('checked')
             else:

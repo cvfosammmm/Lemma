@@ -155,7 +155,23 @@ class RootNode():
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return [self[subkey] for subkey in range(len(self))[key]]
+            if len(range(len(self))[key]) > 0:
+                index_1 = range(len(self))[key][0]
+                index_2 = range(len(self))[key][-1]
+                line_no_1, offset_1 = self.index_to_line_no_offset(index_1)
+                line_no_2, offset_2 = self.index_to_line_no_offset(index_2)
+
+                if line_no_1 != line_no_2:
+                    nodes = []
+                    nodes += self.lines[line_no_1]['nodes'][offset_1:]
+                    for line in self.lines[line_no_1 + 1:line_no_2]:
+                        nodes += line['nodes']
+                    nodes += self.lines[line_no_2]['nodes'][:offset_2]
+                else:
+                    nodes = self.lines[line_no_1]['nodes'][offset_1:offset_2]
+                return nodes
+            else:
+                return []
         else:
             line_no, offset = self.index_to_line_no_offset(key)
             return self.lines[line_no]['nodes'].__getitem__(offset)
