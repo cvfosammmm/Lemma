@@ -28,23 +28,23 @@ class Dialog():
         data = list()
 
         section = {'title': 'Windows and Panels', 'items': list()}
-        section['items'].append({'title': 'Show global menu', 'shortcut': 'F10'})
-        section['items'].append({'title': 'Show document menu', 'shortcut': 'F12'})
-        section['items'].append({'title': 'Show symbols sidebar', 'shortcut': '&lt;alt&gt;1'})
-        section['items'].append({'title': 'Show emojis sidebar', 'shortcut': '&lt;alt&gt;2'})
-        section['items'].append({'title': 'Show keyboard shortcuts', 'shortcut': '&lt;ctrl&gt;question'})
-        section['items'].append({'title': 'Quit the application', 'shortcut': '&lt;ctrl&gt;Q'})
+        section['items'].append({'title': 'Show Global Menu', 'shortcut': 'F10'})
+        section['items'].append({'title': 'Show Document Menu', 'shortcut': 'F12'})
+        section['items'].append({'title': 'Show Symbols Sidebar', 'shortcut': '&lt;alt&gt;1'})
+        section['items'].append({'title': 'Show Emojis Sidebar', 'shortcut': '&lt;alt&gt;2'})
+        section['items'].append({'title': 'Show Keyboard Shortcuts', 'shortcut': '&lt;ctrl&gt;question'})
+        section['items'].append({'title': 'Quit the Application', 'shortcut': '&lt;ctrl&gt;Q'})
         data.append(section)
 
         section = {'title': 'Documents', 'items': list()}
-        section['items'].append({'title': 'Create new document', 'shortcut': '&lt;ctrl&gt;N'})
-        section['items'].append({'title': 'Rename document', 'shortcut': 'F2'})
+        section['items'].append({'title': 'Create new Document', 'shortcut': '&lt;ctrl&gt;N'})
+        section['items'].append({'title': 'Rename Document', 'shortcut': 'F2'})
         data.append(section)
 
         section = {'title': 'Navigation', 'items': list()}
         section['items'].append({'title': 'Search', 'shortcut': '&lt;ctrl&gt;F'})
-        section['items'].append({'title': 'Go back', 'shortcut': '&lt;alt&gt;Left'})
-        section['items'].append({'title': 'Go forward', 'shortcut': '&lt;alt&gt;Right'})
+        section['items'].append({'title': 'Go Back', 'shortcut': '&lt;alt&gt;Left'})
+        section['items'].append({'title': 'Go Forward', 'shortcut': '&lt;alt&gt;Right'})
         data.append(section)
 
         section = {'title': 'Undo and Redo', 'items': list()}
@@ -59,18 +59,18 @@ class Dialog():
         data.append(section)
 
         section = {'title': 'Cursor Movement', 'items': list()}
-        section['items'].append({'title': 'Go to parent node', 'shortcut': '&lt;ctrl&gt;Up'})
-        section['items'].append({'title': 'Extend selection', 'shortcut': '&lt;ctrl&gt;&lt;shift&gt;Up'})
-        section['items'].append({'title': 'Select all', 'shortcut': '&lt;ctrl&gt;A'})
-        section['items'].append({'title': 'Jump left', 'shortcut': '&lt;ctrl&gt;Left'})
-        section['items'].append({'title': 'Jump right', 'shortcut': '&lt;ctrl&gt;Right'})
-        section['items'].append({'title': 'Select next placeholder', 'shortcut': 'Tab'})
-        section['items'].append({'title': 'Select previous placeholder', 'shortcut': '&lt;shift&gt;Tab'})
+        section['items'].append({'title': 'Go to Parent Node', 'shortcut': '&lt;ctrl&gt;Up'})
+        section['items'].append({'title': 'Extend Selection', 'shortcut': '&lt;ctrl&gt;&lt;shift&gt;Up'})
+        section['items'].append({'title': 'Select All', 'shortcut': '&lt;ctrl&gt;A'})
+        section['items'].append({'title': 'Jump Left', 'shortcut': '&lt;ctrl&gt;Left'})
+        section['items'].append({'title': 'Jump Right', 'shortcut': '&lt;ctrl&gt;Right'})
+        section['items'].append({'title': 'Select Next Placeholder', 'shortcut': 'Tab'})
+        section['items'].append({'title': 'Select Previous Placeholder', 'shortcut': '&lt;shift&gt;Tab'})
         data.append(section)
 
         section = {'title': 'Formatting', 'items': list()}
-        section['items'].append({'title': 'Bold text', 'shortcut': '&lt;ctrl&gt;B'})
-        section['items'].append({'title': 'Italic text', 'shortcut': '&lt;ctrl&gt;I'})
+        section['items'].append({'title': 'Bold Text', 'shortcut': '&lt;ctrl&gt;B'})
+        section['items'].append({'title': 'Italic Text', 'shortcut': '&lt;ctrl&gt;I'})
         section['items'].append({'title': 'Heading 2', 'shortcut': '&lt;ctrl&gt;2'})
         section['items'].append({'title': 'Heading 3', 'shortcut': '&lt;ctrl&gt;3'})
         section['items'].append({'title': 'Heading 4', 'shortcut': '&lt;ctrl&gt;4'})
