@@ -734,6 +734,7 @@ label.explainer {
 }
 .filechooser button.link {
     padding: 0px;
+    font-weight: bold;
 }
 
 
