@@ -27,6 +27,7 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
+        self.state['deleted_nodes'] = []
         if self.node_from.parent == self.node_to.parent:
             self.state['deleted_nodes'] = self.node_from.parent.remove_range(self.node_from, self.node_to)
             document.cursor.set_insert_selection_nodes(self.node_to, self.node_to)
