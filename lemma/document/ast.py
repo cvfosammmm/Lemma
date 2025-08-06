@@ -462,10 +462,8 @@ class Node():
         while not node.parent.is_root():
             node = node.parent
 
-        while not node.is_first_in_line():
-            node = node.prev_in_parent()
-
-        return node
+        line_no, offset = node.parent.line_no_offset(node)
+        return node.parent.get_lines()[line_no][0]
 
     def line_end(self):
         node = self
@@ -473,10 +471,8 @@ class Node():
         while not node.parent.is_root():
             node = node.parent
 
-        while not node.is_last_in_line():
-            node = node.next_in_parent()
-
-        return node
+        line_no, offset = node.parent.line_no_offset(node)
+        return node.parent.get_lines()[line_no][-1]
 
     def __str__(self):
         string = self.type + ':' + str(self.value)
