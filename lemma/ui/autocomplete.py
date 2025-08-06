@@ -171,9 +171,9 @@ class Autocomplete():
             node = node.prev_in_parent()
             if node == None:
                 break
-            elif node.is_char() and node.value.isalpha():
+            elif node.type == 'char' and node.value.isalpha():
                 command_at_cursor = node.value + command_at_cursor
-            elif node.is_char() and node.value == '\\':
+            elif node.type == 'char' and node.value == '\\':
                 command_at_cursor = node.value + command_at_cursor
                 first_command_node = node
                 break

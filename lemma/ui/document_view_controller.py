@@ -23,6 +23,7 @@ import time
 
 import lemma.infrastructure.xml_helpers as xml_helpers
 from lemma.application_state.application_state import ApplicationState
+from lemma.db.node_type_db import NodeTypeDB
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -110,7 +111,7 @@ class DocumentViewController():
                     UseCases.move_cursor_to_xy(x, y, False)
 
                 else:
-                    if leaf_box != None and leaf_box['node'].focus_on_click():
+                    if leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
                         UseCases.select_node(leaf_box['node'])
                     else:
                         UseCases.move_cursor_to_xy(x, y, False)
@@ -259,7 +260,7 @@ class DocumentViewController():
             case ('escape', _):
                 if document.cursor.has_selection():
                     selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-                    if len(selected_nodes) == 1 and selected_nodes[0].is_widget():
+                    if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget':
                         UseCases.remove_selection()
             case ('return', _):
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():

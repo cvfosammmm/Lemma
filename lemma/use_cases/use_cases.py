@@ -25,6 +25,7 @@ import lemma.infrastructure.xml_parser as xml_parser
 from lemma.settings.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.db.character_db import CharacterDB
+from lemma.db.node_type_db import NodeTypeDB
 from lemma.widgets.image import Image
 from lemma.document.ast import Node
 from lemma.document_repo.document_repo import DocumentRepo
@@ -274,9 +275,9 @@ class UseCases():
 
             subtree = document.ast.get_subtree(*document.cursor.get_state())
             prev_selection.parent.insert_before(prev_selection, [node.copy() for node in subtree])
-            prev_selection.parent.remove(prev_selection)
+            prev_selection.parent.remove([prev_selection])
 
-        placeholders = [n for n in nodes.flatten() if n.is_placeholder()]
+        placeholders = [n for n in nodes.flatten() if n.type == 'placeholder']
         if len(placeholders) > 0:
             commands.append(['move_cursor_to_node', placeholders[0], placeholders[0].next_in_parent()])
         elif 'new_insert' in parser.marks and 'new_selection_bound' in parser.marks:
@@ -358,7 +359,7 @@ class UseCases():
         document = History.get_active_document()
 
         image = Image(filename)
-        if document.cursor.get_insert_node().parent.is_root():
+        if document.cursor.get_insert_node().parent.type == 'root':
             insert = document.cursor.get_insert_node()
             node = Node('widget', image)
             document.add_command('insert', insert, [node])
@@ -376,7 +377,7 @@ class UseCases():
         first_node = last_node
         for i in range(5):
             prev_node = first_node.prev_in_parent()
-            if prev_node != None and prev_node.is_char():
+            if prev_node != None and prev_node.type == 'char':
                 first_node = prev_node
             else:
                 break
@@ -416,7 +417,7 @@ class UseCases():
     @timer.timer
     def set_link(document, bounds, target):
         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
-        char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(pos_1, pos_2) if node.type == 'char']
         document.add_command('set_link', char_nodes, target)
         document.add_command('move_cursor_to_node', bounds[1])
         DocumentRepo.update(document)
@@ -440,7 +441,7 @@ class UseCases():
     def toggle_tag(tagname):
         document = History.get_active_document()
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']
         all_tagged = True
         for node in char_nodes:
             if tagname not in node.tags: all_tagged = False
@@ -481,7 +482,7 @@ class UseCases():
         selection = document.cursor.get_selection_node()
 
         insert_prev = insert.prev_in_parent()
-        if insert_prev != None and insert_prev.is_char() and not insert_prev.is_whitespace():
+        if insert_prev != None and insert_prev.type == 'char' and not NodeTypeDB.is_whitespace(insert_prev):
             insert_new = insert_prev.word_bounds()[0]
         else:
             insert_new = document.cursor.prev_no_descent(insert)
@@ -523,7 +524,7 @@ class UseCases():
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
 
-        if insert != None and insert.is_char() and not insert.is_whitespace():
+        if insert != None and insert.type == 'char' and not NodeTypeDB.is_whitespace(insert):
             insert_new = insert.word_bounds()[1]
         else:
             insert_new = document.cursor.next_no_descent(insert)
@@ -668,17 +669,17 @@ class UseCases():
         insert = document.cursor.get_insert_node()
         node = insert
 
-        if len(selected_nodes) == 1 and selected_nodes[0].is_placeholder():
+        if len(selected_nodes) == 1 and selected_nodes[0].type == 'placeholder':
             node = document.cursor.next(node)
 
-        while not node.is_placeholder():
+        while not node.type == 'placeholder':
             if node == document.ast[-1]:
                 node = document.ast[0]
             else:
                 node = document.cursor.next(node)
             if node == insert: break
 
-        if node.is_placeholder():
+        if node.type == 'placeholder':
             UseCases.select_node(node)
 
     @timer.timer
@@ -689,17 +690,17 @@ class UseCases():
         insert = document.cursor.get_insert_node()
         node = insert
 
-        if insert.is_placeholder() or (len(selected_nodes) == 1 and selected_nodes[0].is_placeholder()):
+        if insert.type == 'placeholder' or (len(selected_nodes) == 1 and selected_nodes[0].type == 'placeholder'):
             node = document.cursor.prev(node)
 
-        while not node.is_placeholder():
+        while not node.type == 'placeholder':
             if node == document.ast[0]:
                 node = document.ast[-1]
             else:
                 node = document.cursor.prev(node)
             if node == insert: break
 
-        if node.is_placeholder():
+        if node.type == 'placeholder':
             UseCases.select_node(node)
 
     @timer.timer
@@ -766,10 +767,10 @@ class UseCases():
         insert = document.cursor.get_insert_node()
         new_insert = None
         for ancestor in reversed(insert.ancestors()):
-            if ancestor.can_hold_cursor():
+            if NodeTypeDB.can_hold_cursor(ancestor):
                 new_insert = ancestor
                 break
-            if (ancestor.type == 'mathlist' or ancestor.is_root()) and insert != ancestor[0]:
+            if (ancestor.type == 'mathlist' or ancestor.type == 'root') and insert != ancestor[0]:
                 new_insert = ancestor[0]
                 break
 
@@ -795,7 +796,7 @@ class UseCases():
 
         else:
             for ancestor in reversed(insert.ancestors()):
-                if ancestor.can_hold_cursor():
+                if NodeTypeDB.can_hold_cursor(ancestor):
                     new_insert = ancestor
                     new_selection = document.cursor.get_selection_node()
                     break
@@ -807,7 +808,7 @@ class UseCases():
                     new_selection = ancestor[0]
                     break
 
-                if ancestor.is_root():
+                if ancestor.type == 'root':
                     line_start, line_end = document.cursor.get_insert_node().line_bounds()
                     if line_start != None and line_end != None and (document.cursor.get_first_node().get_position() > line_start.get_position() or document.cursor.get_last_node().get_position() < line_end.get_position()):
                         new_insert = line_end

@@ -17,6 +17,7 @@
 
 from lemma.infrastructure.font_manager import FontManager
 from lemma.db.character_db import CharacterDB
+from lemma.db.node_type_db import NodeTypeDB
 from lemma.infrastructure.layout_info import LayoutInfo
 import lemma.infrastructure.timer as timer
 
@@ -126,7 +127,7 @@ class Layouter(object):
         last_tags = set()
         result = list()
         for node in nodes:
-            if node.type != 'char' or node.is_whitespace() or CharacterDB.is_mathsymbol(node.value) or CharacterDB.is_emoji(node.value):
+            if node.type != 'char' or NodeTypeDB.is_whitespace(node) or CharacterDB.is_mathsymbol(node.value) or CharacterDB.is_emoji(node.value):
                 result.append(node)
                 last_type = None
                 last_tags = set()
@@ -152,7 +153,7 @@ class Layouter(object):
                     current_line['children'].append(child)
                     child['parent'] = current_line
                 else:
-                    break_after_char = (child['type'] == 'char' and child['node'].is_whitespace()) or child['type'] == 'end' or child['type'] == 'eol'
+                    break_after_char = (child['type'] == 'char' and NodeTypeDB.is_whitespace(child['node'])) or child['type'] == 'end' or child['type'] == 'eol'
                     if break_after_char:
                         current_line['children'].append(child)
                         child['parent'] = current_line

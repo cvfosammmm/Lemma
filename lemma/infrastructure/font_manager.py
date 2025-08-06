@@ -29,6 +29,7 @@ import lib.fontconfig.fontconfig as fontconfig
 import lemma.infrastructure.timer as timer
 
 from lemma.db.character_db import CharacterDB
+from lemma.db.node_type_db import NodeTypeDB
 from lemma.infrastructure.service_locator import ServiceLocator
 
 
@@ -61,16 +62,16 @@ class FontManager():
     def get_fontname_from_node(node=None):
         if node == None: return 'book'
 
-        if node.is_subscript() or node.is_superscript():
+        if NodeTypeDB.is_subscript(node) or NodeTypeDB.is_superscript(node):
             return 'math_small'
-        if node.in_fraction():
+        if NodeTypeDB.in_fraction(node):
             return 'math_small'
         if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
             return 'math'
-        if node.value != None and node.is_char() and node.value.isnumeric():
+        if node.value != None and node.type == 'char' and node.value.isnumeric():
             return 'math'
 
-        if node.is_char() and CharacterDB.is_emoji(node.value):
+        if node.type == 'char' and CharacterDB.is_emoji(node.value):
             return 'emojis'
 
         if node.get_paragraph_style().startswith('h'):

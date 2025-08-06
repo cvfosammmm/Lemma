@@ -49,8 +49,7 @@ class HTMLParser(HTMLParserLib):
 
         if body != '':
             self.feed(body)
-            self.composite[-2].remove_from_parent()
-            self.composite[-2].remove_from_parent()
+            self.composite[-2].parent.remove([self.composite[-3], self.composite[-2]])
             self.composite[-1].paragraph_style = self.paragraph_style
 
     def handle_starttag(self, tag, attrs):

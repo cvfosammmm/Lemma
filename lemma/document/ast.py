@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.db.node_type_db import NodeTypeDB
 import lemma.infrastructure.timer as timer
 
 
@@ -66,17 +67,18 @@ class RootNode():
         node.set_parent(self)
 
     @timer.timer
-    def remove(self, node):
-        parent_line_no = 0
-        for i, line in enumerate(self.lines):
-            if node in line['nodes']:
-                line['nodes'].remove(node)
-                if node.type == 'eol':
-                    self.lines[i] = {'nodes': line['nodes'] + self.lines[i + 1]['nodes'], 'layout': None}
-                    del(self.lines[i + 1])
-                elif len(self.lines[i]['nodes']) == 0:
-                    del(self.lines[i])
-                break
+    def remove(self, nodes):
+        for node in nodes:
+            parent_line_no = 0
+            for i, line in enumerate(self.lines):
+                if node in line['nodes']:
+                    line['nodes'].remove(node)
+                    if node.type == 'eol':
+                        self.lines[i] = {'nodes': line['nodes'] + self.lines[i + 1]['nodes'], 'layout': None}
+                        del(self.lines[i + 1])
+                    elif len(self.lines[i]['nodes']) == 0:
+                        del(self.lines[i])
+                    break
 
     @timer.timer
     def remove_range(self, first_node, last_node):
@@ -137,7 +139,7 @@ class RootNode():
     @timer.timer
     def get_paragraph_style(self):
         node = self
-        while not node.parent.is_root():
+        while not node.parent.type == 'root':
             node = node.parent
         return node.paragraph_style
 
@@ -187,32 +189,11 @@ class RootNode():
     def ancestors(self):
         return []
 
-    def is_whitespace(self): return self.type == 'eol' or (self.is_char() and self.value.isspace())
-    def is_char(self): return self.type == 'char'
-    def is_placeholder(self): return self.type == 'placeholder'
-    def is_widget(self): return self.type == 'widget'
-    def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
-    def focus_on_click(self): return self.type in {'widget', 'placeholder'}
-    def is_first_in_parent(self): return self == self.parent[0]
-    def is_last_in_parent(self): return self == self.parent[-1]
-    def is_root(self): return self.parent == None
-    def is_subscript(self):
-        if self.parent.is_root(): return False
+    def is_first_in_parent(self):
+        return self == self.parent[0]
 
-        if self.parent.parent.type == 'mathscript':
-            return self.parent == self.parent.parent[0]
-        return False
-    def is_superscript(self):
-        if self.parent.is_root(): return False
-
-        if self.parent.parent.type == 'mathscript':
-            return self.parent == self.parent.parent[1]
-        if self.parent.parent.type == 'mathroot':
-            return self.parent == self.parent.parent[1]
-        return False
-    def in_fraction(self):
-        if self.parent.is_root(): return False
-        return self.parent.parent.type == 'mathfraction'
+    def is_last_in_parent(self):
+        return self == self.parent[-1]
 
     @timer.timer
     def flatten(self):
@@ -274,20 +255,19 @@ class Node():
     def set_parent(self, parent):
         self.parent = parent
 
-    def insert(self, index, node):
-        self.children.insert(index, node)
-        node.set_parent(self)
-
     def insert_before(self, child, nodes):
         for node in nodes:
             index = self.index(child)
-            self.insert(index, node)
+            self.children.insert(index, node)
+            node.set_parent(self)
 
     def append(self, node):
-        self.insert(len(self.children), node)
+        self.children.insert(len(self.children), node)
+        node.set_parent(self)
 
-    def remove(self, node):
-        self.children.remove(node)
+    def remove(self, nodes):
+        for node in nodes:
+            self.children.remove(node)
 
     def remove_range(self, first_node, last_node):
         index_1 = self.index(first_node)
@@ -297,16 +277,13 @@ class Node():
 
         return nodes
 
-    def remove_from_parent(self):
-        self.parent.remove(self)
-
     def index(self, node):
         return self.children.index(node)
 
     def get_position(self):
         node = self
         position = list()
-        while not node.is_root():
+        while not node.type == 'root':
             position.insert(0, node.parent.index(node))
             node = node.parent
 
@@ -314,7 +291,7 @@ class Node():
 
     def get_paragraph_style(self):
         node = self
-        while not node.parent.is_root():
+        while not node.parent.type == 'root':
             node = node.parent
         return node.paragraph_style
 
@@ -337,48 +314,27 @@ class Node():
     def ancestors(self):
         node = self
         ancestors = []
-        while not node.is_root():
+        while not node.type == 'root':
             ancestors.insert(0, node.parent)
             node = node.parent
 
         return ancestors
 
-    def is_whitespace(self): return self.type == 'eol' or (self.is_char() and self.value.isspace())
-    def is_char(self): return self.type == 'char'
-    def is_placeholder(self): return self.type == 'placeholder'
-    def is_widget(self): return self.type == 'widget'
-    def can_hold_cursor(self): return self.type != 'mathlist' and self.type != 'list' and self.type != 'root'
-    def focus_on_click(self): return self.type in {'widget', 'placeholder'}
-    def is_first_in_parent(self): return self == self.parent[0]
-    def is_last_in_parent(self): return self == self.parent[-1]
-    def is_root(self): return self.parent == None
-    def is_subscript(self):
-        if self.parent.is_root(): return False
+    def is_first_in_parent(self):
+        return self == self.parent[0]
 
-        if self.parent.parent.type == 'mathscript':
-            return self.parent == self.parent.parent[0]
-        return False
-    def is_superscript(self):
-        if self.parent.is_root(): return False
-
-        if self.parent.parent.type == 'mathscript':
-            return self.parent == self.parent.parent[1]
-        if self.parent.parent.type == 'mathroot':
-            return self.parent == self.parent.parent[1]
-        return False
-    def in_fraction(self):
-        if self.parent.is_root(): return False
-        return self.parent.parent.type == 'mathfraction'
+    def is_last_in_parent(self):
+        return self == self.parent[-1]
 
     def is_first_in_line(self):
-        if not self.parent.is_root(): return False
+        if not self.parent.type == 'root': return False
         if self.is_first_in_parent(): return True
         if self.prev_in_parent().type == 'eol': return True
 
         return False
 
     def is_last_in_line(self):
-        if not self.parent.is_root(): return False
+        if not self.parent.type == 'root': return False
         if self.is_last_in_parent(): return True
         if self.type == 'eol': return True
 
@@ -413,7 +369,7 @@ class Node():
         return (node1, node2)
 
     def word_bounds(self):
-        if self.is_whitespace(): return (None, None)
+        if NodeTypeDB.is_whitespace(self): return (None, None)
 
         node1 = self
         node2 = self
@@ -422,14 +378,14 @@ class Node():
             next_node = node2.next_in_parent()
             if next_node == None:
                 break
-            elif next_node.is_whitespace():
+            elif NodeTypeDB.is_whitespace(next_node):
                 node2 = next_node
                 break
             else:
                 node2 = next_node
         while node1 != None:
             prev_node = node1.prev_in_parent()
-            if prev_node == None or prev_node.is_whitespace():
+            if prev_node == None or NodeTypeDB.is_whitespace(prev_node):
                 break
             else:
                 node1 = prev_node
@@ -459,7 +415,7 @@ class Node():
     def line_start(self):
         node = self
 
-        while not node.parent.is_root():
+        while not node.parent.type == 'root':
             node = node.parent
 
         line_no, offset = node.parent.line_no_offset(node)
@@ -468,7 +424,7 @@ class Node():
     def line_end(self):
         node = self
 
-        while not node.parent.is_root():
+        while not node.parent.type == 'root':
             node = node.parent
 
         line_no, offset = node.parent.line_no_offset(node)
@@ -575,10 +531,10 @@ class Cursor():
             while not len(node.children) == 0:
                 node = node[-1]
 
-        elif not node.parent.is_root():
+        elif not node.parent.type == 'root':
             node = node.parent
 
-        if not node.can_hold_cursor():
+        if not NodeTypeDB.can_hold_cursor(node):
             return self.prev(node)
 
         return node
@@ -588,14 +544,14 @@ class Cursor():
             node = node[0]
 
         else:
-            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
+            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
                 node = node.parent
-            if not node.is_root():
+            if not node.type == 'root':
                 node = node.parent[node.parent.index(node) + 1]
             else:
                 node = node[-1]
 
-        if not node.can_hold_cursor():
+        if not NodeTypeDB.can_hold_cursor(node):
             return self.next(node)
 
         return node
@@ -605,10 +561,10 @@ class Cursor():
             index = node.parent.index(node) - 1
             node = node.parent[index]
 
-        elif not node.parent.is_root():
+        elif not node.parent.type == 'root':
             node = node.parent
 
-        if not node.can_hold_cursor():
+        if not NodeTypeDB.can_hold_cursor(node):
             return self.prev_no_descent(node)
 
         return node
@@ -619,14 +575,14 @@ class Cursor():
             node = node.parent[index]
 
         else:
-            while not node.is_root() and node.parent.index(node) == len(node.parent) - 1:
+            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
                 node = node.parent
-            if not node.is_root():
+            if not node.type == 'root':
                 node = node.parent[node.parent.index(node) + 1]
             else:
                 node = node[-1]
 
-        if not node.can_hold_cursor():
+        if not NodeTypeDB.can_hold_cursor(node):
             return self.next_no_descent(node)
 
         return node
@@ -682,11 +638,11 @@ class Cursor():
 
         # compute the smallest common ancestor of both the insert and the selection node.
         ancestors = list(zip(self.node_insert.ancestors() + [self.node_insert], self.node_selection.ancestors() + [self.node_selection]))
-        common_ancestors_and_their_children = [(node_1, node_2) for (node_1, node_2) in list(ancestors) if node_1.parent == node_2.parent or node_1.is_root()]
+        common_ancestors_and_their_children = [(node_1, node_2) for (node_1, node_2) in list(ancestors) if node_1.parent == node_2.parent or node_1.type == 'root']
 
         # if the children of the sca can't hold the cursor, go up some more
         for node_1, node_2 in reversed(common_ancestors_and_their_children):
-            if node_1.can_hold_cursor() and node_2.can_hold_cursor():
+            if NodeTypeDB.can_hold_cursor(node_1) and NodeTypeDB.can_hold_cursor(node_2):
                 sca = node_1.parent
                 break
 

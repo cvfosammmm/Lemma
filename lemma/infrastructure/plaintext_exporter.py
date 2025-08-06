@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.db.node_type_db import NodeTypeDB
+
 
 class PlaintextExporter(object):
 
@@ -36,8 +38,8 @@ class PlaintextExporter(object):
         if node.type == 'eol':
             self.text += '\n'
 
-        elif node.is_char():
-            if node.is_whitespace():
+        elif node.type == 'char':
+            if NodeTypeDB.is_whitespace(node):
                 if self.text == '' or self.text[-1] != ' ':
                     self.text += ' '
             else:

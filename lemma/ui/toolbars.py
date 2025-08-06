@@ -44,7 +44,7 @@ class ToolBars():
         edit_link_visible = has_active_doc and ((not has_selection) and cursor_inside_link)
 
         selected_nodes = active_document.ast.get_subtree(*active_document.cursor.get_state())
-        if len(selected_nodes) == 1 and selected_nodes[0].is_widget() and selected_nodes[0].value.is_resizable():
+        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.is_resizable():
             widget = selected_nodes[0].value
 
             self.toolbar.mode_stack.set_visible_child_name('widget_resizable')

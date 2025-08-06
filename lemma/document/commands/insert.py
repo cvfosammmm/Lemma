@@ -34,8 +34,8 @@ class Command():
         document.update_last_modified()
 
     def undo(self, document):
-        for node in self.state['nodes_added']:
-            node.remove_from_parent()
+        self.position_node.parent.remove(self.state['nodes_added'])
+
         document.cursor.set_state(self.state['cursor_state_before'])
         document.update_last_modified()
 

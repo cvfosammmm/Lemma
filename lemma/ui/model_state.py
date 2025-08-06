@@ -62,14 +62,14 @@ class ModelState(object):
         self.next_doc = History.get_next_if_any(self.document)
         self.can_undo = self.has_active_doc and self.document.can_undo()
         self.can_redo = self.has_active_doc and self.document.can_redo()
-        self.insert_in_line = self.has_active_doc and self.document.cursor.get_insert_node().parent.is_root()
+        self.insert_in_line = self.has_active_doc and self.document.cursor.get_insert_node().parent.type == 'root'
         self.has_selection = self.has_active_doc and self.document.cursor.has_selection()
         self.clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         self.text_in_clipboard = 'text/plain;charset=utf-8' in self.clipboard_formats
         self.subtree_in_clipboard = 'lemma/ast' in self.clipboard_formats
         self.links_inside_selection = self.has_active_doc and len([node for node in self.selected_nodes if node.link != None]) > 0
         self.whole_selection_is_one_link = self.links_inside_selection and (len(set([node.link for node in self.selected_nodes])) == 1)
-        self.widget_selected = len(self.selected_nodes) == 1 and self.selected_nodes[0].is_widget()
+        self.widget_selected = len(self.selected_nodes) == 1 and self.selected_nodes[0].type == 'widget'
         self.selected_widget_is_max = self.widget_selected and (self.selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width() or not self.selected_nodes[0].value.is_resizable())
         self.selected_widget_is_min = self.widget_selected and (self.selected_nodes[0].value.get_width() == self.selected_nodes[0].value.get_minimum_width() or not self.selected_nodes[0].value.is_resizable())
         self.cursor_inside_link = self.has_active_doc and self.document.cursor.get_insert_node().is_inside_link()

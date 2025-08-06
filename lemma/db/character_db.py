@@ -415,9 +415,6 @@ class CharacterDB(object):
     def is_closing_symbol(char):
         return char in CharacterDB.closing_symbols
 
-    def is_whitespace(char):
-        return (ServiceLocator.get_regex_matcher('\\s').match(char) != None)
-
     def has_replacement(text):
         return text in CharacterDB.replacements
 

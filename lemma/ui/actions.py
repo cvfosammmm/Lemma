@@ -25,6 +25,7 @@ import pickle, base64
 from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.db.node_type_db import NodeTypeDB
 from lemma.message_bus.message_bus import MessageBus
 from lemma.history.history import History
 from lemma.use_cases.use_cases import UseCases
@@ -266,7 +267,7 @@ class Actions(object):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
-        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not prev_char.is_whitespace():
+        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
             xml = '<mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
@@ -276,7 +277,7 @@ class Actions(object):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
-        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not prev_char.is_whitespace():
+        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
             xml = '<mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'

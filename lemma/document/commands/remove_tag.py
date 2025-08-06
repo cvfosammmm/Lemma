@@ -24,7 +24,7 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.is_char()]
+        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']
 
         self.state['affected_nodes'] = list()
         for node in char_nodes:

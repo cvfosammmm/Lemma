@@ -73,7 +73,7 @@ class HTMLExporter(object):
         return result
 
     def process_list(self, node_list):
-        if node_list[0].is_char():
+        if node_list[0].type == 'char':
             self.process_word(node_list)
         else:
             for node in node_list:
@@ -98,13 +98,13 @@ class HTMLExporter(object):
 
     def process_node(self, node):
         if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '<math>'
             self.html += node.value
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '</math>'
         elif node.type == 'mathscript':
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '<math>'
             self.html += '<msubsup>'
             self.html += '<mn>'
@@ -114,10 +114,10 @@ class HTMLExporter(object):
             self.process_node(node[1])
             self.html += '</mn>'
             self.html += '</msubsup>'
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '</math>'
         elif node.type == 'mathfraction':
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '<math>'
             self.html += '<mfrac>'
             self.html += '<mn>'
@@ -127,10 +127,10 @@ class HTMLExporter(object):
             self.process_node(node[1])
             self.html += '</mn>'
             self.html += '</mfrac>'
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '</math>'
         elif node.type == 'mathroot':
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '<math>'
             self.html += '<mroot>'
             self.html += '<mtext>'
@@ -140,14 +140,14 @@ class HTMLExporter(object):
             self.process_node(node[1])
             self.html += '</mtext>'
             self.html += '</mroot>'
-            if node.parent.is_root():
+            if node.parent.type == 'root':
                 self.html += '</math>'
         elif node.type == 'mathlist':
             for child in node:
                 self.process_node(child)
-        elif node.is_char():
+        elif node.type == 'char':
             self.html += node.value
-        elif node.is_placeholder():
+        elif node.type == 'placeholder':
             self.html += '<placeholder value="' + node.value + '"/>'
         elif node.type == 'widget':
             self.html += node.value.to_html(os.path.join(self.pathname, str(self.document_id) + '-' + str(self.file_no)))
