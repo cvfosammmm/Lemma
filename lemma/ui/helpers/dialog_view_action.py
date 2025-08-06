@@ -78,15 +78,6 @@ class DialogViewAction(Gtk.Window):
         self.content.append(label)
         return label
 
-    def add_explainer_label(self, markup):
-        label = Gtk.Label()
-        label.set_markup(markup)
-        label.set_xalign(0)
-        label.set_wrap(True)
-        label.add_css_class('explainer')
-        self.content.append(label)
-        return label
-
     def add_radio_group(self, choices):
         hbox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         button_dict = {}

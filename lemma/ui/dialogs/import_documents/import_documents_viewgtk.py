@@ -29,7 +29,12 @@ class ImportDocumentsView(DialogViewAction):
     def __init__(self, main_window):
         DialogViewAction.__init__(self, main_window, _('Import Markdown Files'), 500, 'import-markdown-files-dialog', _('Import'))
 
-        self.explainer = self.add_explainer_label(_('<b>Warning:</b> This will not work with arbitrary .md-files. It\'s only supposed to work with files previously exported from Lemma.'))
+        self.explainer = Gtk.Label()
+        self.explainer.set_markup(_('<b>Warning:</b> This will not work with arbitrary .md-files. It\'s only supposed to work with files previously exported from Lemma.'))
+        self.explainer.set_xalign(0)
+        self.explainer.set_wrap(True)
+        self.explainer.add_css_class('explainer-top')
+        self.content.append(self.explainer)
 
         self.list_label = self.add_header_label('<b>' + _('Files to import') + '</b>')
         self.list_label.set_margin_bottom(1)

@@ -542,11 +542,6 @@ window.settings flowboxchild box.selected button.color-preview-wrapper {
 window.settings flowboxchild checkbutton {
     margin-left: -1px;
 }
-window.settings label.explainer-bottom {
-    padding: 18px;
-    background: @shade_color;
-    border-top: 1px solid @dialog_list_border;
-}
 window.settings checkbutton.single {
     margin-left: 14px;
     margin-right: 14px;
@@ -729,8 +724,15 @@ window.export-bulk-dialog checkbutton.select-all label {
 
 /* widgets */
 
-label.explainer {
-    color: @description_color;
+label.explainer-top {
+    padding: 18px;
+    background: @shade_color;
+    border-bottom: 1px solid @dialog_list_border;
+}
+label.explainer-bottom {
+    padding: 18px;
+    background: @shade_color;
+    border-top: 1px solid @dialog_list_border;
 }
 .filechooser button.link {
     padding: 0px;
