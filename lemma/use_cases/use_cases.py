@@ -273,8 +273,7 @@ class UseCases():
             prev_selection = parser.marks['prev_selection']
 
             subtree = document.ast.get_subtree(*document.cursor.get_state())
-            for node in subtree:
-                prev_selection.parent.insert_before(prev_selection, node.copy())
+            prev_selection.parent.insert_before(prev_selection, [node.copy() for node in subtree])
             prev_selection.parent.remove(prev_selection)
 
         placeholders = [n for n in nodes.flatten() if n.is_placeholder()]

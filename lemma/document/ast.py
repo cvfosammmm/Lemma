@@ -37,16 +37,24 @@ class RootNode():
         self.parent = parent
 
     @timer.timer
-    def insert_before(self, child, node):
+    def insert_before(self, child, nodes):
         line_no, offset = self.line_no_offset(child)
 
-        self.lines[line_no]['nodes'].insert(offset, node)
-        if node.type == 'eol':
-            new_line = {'nodes': self.lines[line_no]['nodes'][offset + 1:], 'layout': None}
-            self.lines.insert(line_no + 1, new_line)
-            del(self.lines[line_no]['nodes'][offset + 1:])
+        for node in nodes:
+            if node.type == 'eol':
+                self.lines[line_no]['nodes'].insert(offset, node)
+                new_line = {'nodes': self.lines[line_no]['nodes'][offset + 1:], 'layout': None}
+                self.lines.insert(line_no + 1, new_line)
+                del(self.lines[line_no]['nodes'][offset + 1:])
 
-        node.set_parent(self)
+                line_no += 1
+                offset = 0
+            else:
+                self.lines[line_no]['nodes'].insert(offset, node)
+
+                offset += 1
+
+            node.set_parent(self)
 
     @timer.timer
     def append(self, node):
@@ -270,9 +278,10 @@ class Node():
         self.children.insert(index, node)
         node.set_parent(self)
 
-    def insert_before(self, child, node):
-        index = self.index(child)
-        self.insert(index, node)
+    def insert_before(self, child, nodes):
+        for node in nodes:
+            index = self.index(child)
+            self.insert(index, node)
 
     def append(self, node):
         self.insert(len(self.children), node)
