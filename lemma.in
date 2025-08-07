@@ -32,10 +32,10 @@ gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
 
 # init static variables
 AppInfo.init_lemma_version('@lemma_version@')
-Paths.init_resources_path('@resources_path@')
+Paths.init_resources_folder('@resources_path@')
 
 # setup fonts
-font_path = os.path.join(Paths.get_resources_path(), 'fonts')
+font_path = os.path.join(Paths.get_resources_folder(), 'fonts')
 FontManager.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), 19.407, 21, 7, 0, 1)
 FontManager.add_font('bold', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Bold.otf'), 19.407, 21, 7, 0, 1)
 FontManager.add_font('bolditalic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-BoldItalic.otf'), 19.407, 21, 7, 0, 1)

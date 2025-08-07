@@ -34,7 +34,7 @@ class Colors(object):
 
         self.color_scheme = Settings.get_value('color_scheme')
         if self.color_scheme == 'default':
-            path = os.path.join(Paths.get_resources_path(), 'themes', 'default.css')
+            path = os.path.join(Paths.get_resources_folder(), 'themes', 'default.css')
         else:
             path = Settings.get_value('color_scheme')
 

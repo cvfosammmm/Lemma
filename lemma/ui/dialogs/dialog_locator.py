@@ -25,7 +25,7 @@ import lemma.ui.dialogs.keyboard_shortcuts as keyboard_shortcuts
 import lemma.ui.dialogs.settings as settings
 
 
-class DialogLocator(object):
+class DialogLocator():
 
     dialogs = dict()
 

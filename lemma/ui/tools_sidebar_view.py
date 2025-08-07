@@ -33,7 +33,7 @@ class ToolsSidebar(Gtk.Stack):
         Gtk.Stack.__init__(self)
         self.set_size_request(262, 280)
 
-        self.resources_path = Paths.get_resources_path()
+        self.resources_folder = Paths.get_resources_folder()
 
         self.populate_symbols()
         self.populate_emojis()
@@ -200,7 +200,7 @@ class ToolsSidebar(Gtk.Stack):
         if css_class:
             flowbox.add_css_class(css_class)
 
-        res_path = Paths.get_resources_path()
+        res_path = Paths.get_resources_folder()
         for symbol in symbols:
             filename = 'emoji_u' + hex(ord(symbol))[2:] + '.png'
             pic = Gtk.Image.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/png', filename))
@@ -223,7 +223,7 @@ class ToolsSidebar(Gtk.Stack):
         if css_class:
             flowbox.add_css_class(css_class)
         for data in symbols:
-            pic = Gtk.Picture.new_for_filename(os.path.join(self.resources_path, 'icons_extra', 'sidebar-' + data[0] + '-symbolic.svg'))
+            pic = Gtk.Picture.new_for_filename(os.path.join(self.resources_folder, 'icons_extra', 'sidebar-' + data[0] + '-symbolic.svg'))
             pic.set_valign(Gtk.Align.CENTER)
             pic.set_halign(Gtk.Align.CENTER)
             button = Gtk.Button()

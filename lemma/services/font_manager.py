@@ -151,7 +151,7 @@ class FontManager():
             surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width), int(height))
             ctx = cairo.Context(surface)
 
-            res_path = Paths.get_resources_path()
+            res_path = Paths.get_resources_folder()
             filename = 'emoji_u' + hex(ord(char))[2:] + '.svg'
             rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/svg', filename))
             rsvg_handle.render_document(ctx, viewport)

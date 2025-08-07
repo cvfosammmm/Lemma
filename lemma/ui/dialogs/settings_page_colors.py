@@ -43,7 +43,7 @@ class PageColors(object):
 
     def update_switchers(self):
         self.style_previews = dict()
-        dirname = os.path.join(Paths.get_resources_path(), 'themes')
+        dirname = os.path.join(Paths.get_resources_folder(), 'themes')
 
         self.add_theme_choice(os.path.join(dirname, 'default.css'), 0)
         self.add_chooser('default', 'default', 0, False)

@@ -21,8 +21,7 @@ from xdg.BaseDirectory import xdg_config_home
 
 class Paths():
 
-    resources_path = None
-    app_icons_path = None
+    resources_folder = None
 
     def get_config_folder():
         return os.path.join(xdg_config_home, 'lemma')
@@ -33,10 +32,10 @@ class Paths():
     def get_user_themes_folder():
         return os.path.expanduser(Paths.get_config_folder() + '/themes')
 
-    def init_resources_path(resources_path):
-        Paths.resources_path = resources_path
+    def init_resources_folder(resources_folder):
+        Paths.resources_folder = resources_folder
 
-    def get_resources_path():
-        return Paths.resources_path
+    def get_resources_folder():
+        return Paths.resources_folder
 
 
