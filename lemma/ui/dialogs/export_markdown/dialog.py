@@ -25,7 +25,7 @@ import urllib.parse
 import html2text
 
 from lemma.services.html_exporter import HTMLExporter
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 
@@ -73,7 +73,7 @@ class Dialog(object):
                 if not filename.endswith('.md'):
                     filename += '.md'
 
-                data_dir = ServiceLocator.get_notes_folder()
+                data_dir = Paths.get_notes_folder()
                 files_folder = filename[:-3] + '_files'
                 has_files = False
                 for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:

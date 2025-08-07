@@ -18,7 +18,8 @@
 import sys, os.path, gettext
 
 from lemma.services.font_manager import FontManager
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.app_info import AppInfo
+from lemma.services.paths import Paths
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.services.timer import Timer
 import lemma.ui.application as application
@@ -30,11 +31,11 @@ from lemma.application_state.application_state import ApplicationState
 gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
 
 # init static variables
-ServiceLocator.init_lemma_version('@lemma_version@')
-ServiceLocator.init_resources_path('@resources_path@')
+AppInfo.init_lemma_version('@lemma_version@')
+Paths.init_resources_path('@resources_path@')
 
 # setup fonts
-font_path = os.path.join(ServiceLocator.get_resources_path(), 'fonts')
+font_path = os.path.join(Paths.get_resources_path(), 'fonts')
 FontManager.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), 19.407, 21, 7, 0, 1)
 FontManager.add_font('bold', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Bold.otf'), 19.407, 21, 7, 0, 1)
 FontManager.add_font('bolditalic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-BoldItalic.otf'), 19.407, 21, 7, 0, 1)
@@ -51,15 +52,15 @@ FontManager.add_font('h6', os.path.join(font_path, 'newcomputermodern/otf/NewCMS
 FontManager.add_font('emojis', os.path.join(font_path, 'Noto_Color_Emoji/NotoColorEmoji-Regular.ttf'), 19.407, 21, 7, 0, 1)
 
 # setup folder for user themes
-pathname = ServiceLocator.get_user_themes_folder()
+pathname = Paths.get_user_themes_folder()
 if not os.path.exists(pathname): os.makedirs(pathname)
 
 # setup folder for notes
-pathname = ServiceLocator.get_notes_folder()
+pathname = Paths.get_notes_folder()
 if not os.path.exists(pathname): os.makedirs(pathname)
 
 # setup config folder
-pathname = ServiceLocator.get_config_folder()
+pathname = Paths.get_config_folder()
 if not os.path.isdir(pathname): os.makedirs(pathname)
 
 Settings.init()

@@ -22,7 +22,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, GObject, Adw
 
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.ui.main_window.welcome_view import WelcomeView
 from lemma.ui.main_window.headerbar import HeaderBar
 from lemma.ui.main_window.document_history import DocumentHistoryView
@@ -97,7 +97,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.popoverlay.add_overlay(self.inbetween)
         self.popoverlay.set_child(self.main_box)
 
-        resources_path = ServiceLocator.get_resources_path()
+        resources_path = Paths.get_resources_path()
 
         self.css_provider = Gtk.CssProvider()
         self.css_provider.load_from_path(os.path.join(resources_path, 'style.css'))
@@ -108,7 +108,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.css_provider_colors = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        resources_path = ServiceLocator.get_resources_path()
+        resources_path = Paths.get_resources_path()
         icon_theme = Gtk.IconTheme.get_for_display(self.get_display())
         icon_theme.add_search_path(os.path.join(resources_path, 'icons'))
 

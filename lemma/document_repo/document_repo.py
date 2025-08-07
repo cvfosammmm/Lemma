@@ -21,7 +21,7 @@ from operator import attrgetter
 from lemma.document.document import Document
 from lemma.services.html_exporter import HTMLExporter
 from lemma.services.html_parser import HTMLParser
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 import lemma.services.timer as timer
 
 
@@ -37,7 +37,7 @@ class DocumentRepo():
 
     @timer.timer
     def init():
-        DocumentRepo.pathname = ServiceLocator.get_notes_folder()
+        DocumentRepo.pathname = Paths.get_notes_folder()
 
         for direntry in os.scandir(DocumentRepo.pathname):
             if direntry.is_file() and direntry.name.isdigit():

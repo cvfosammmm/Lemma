@@ -23,7 +23,7 @@ from gi.repository import Gtk, Gio, GLib
 import os.path, shutil, os
 
 from lemma.services.html_exporter import HTMLExporter
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 
@@ -69,7 +69,7 @@ class Dialog(object):
                 if not filename.endswith('.html'):
                     filename += '.html'
 
-                data_dir = ServiceLocator.get_notes_folder()
+                data_dir = Paths.get_notes_folder()
                 files_folder = filename[:-5] + '_files'
                 has_files = False
                 for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document.id) + '-')]:

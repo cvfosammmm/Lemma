@@ -23,7 +23,7 @@ import os, os.path
 import xml.etree.ElementTree as ET
 from random import randrange
 
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.services.settings import Settings
 from lemma.services.color_manager import ColorManager
 from lemma.use_cases.use_cases import UseCases
@@ -43,7 +43,7 @@ class PageColors(object):
 
     def update_switchers(self):
         self.style_previews = dict()
-        dirname = os.path.join(ServiceLocator.get_resources_path(), 'themes')
+        dirname = os.path.join(Paths.get_resources_path(), 'themes')
 
         self.add_theme_choice(os.path.join(dirname, 'default.css'), 0)
         self.add_chooser('default', 'default', 0, False)
@@ -54,9 +54,9 @@ class PageColors(object):
             self.add_chooser(os.path.join(dirname, name + '.css'), name, count, True)
             count += 1
 
-        for name in [file[:-4] for file in os.listdir(ServiceLocator.get_user_themes_folder())]:
-            self.add_theme_choice(os.path.join(ServiceLocator.get_user_themes_folder(), name + '.css'), count)
-            self.add_chooser(os.path.join(ServiceLocator.get_user_themes_folder(), name + '.css'), name, count, True)
+        for name in [file[:-4] for file in os.listdir(Paths.get_user_themes_folder())]:
+            self.add_theme_choice(os.path.join(Paths.get_user_themes_folder(), name + '.css'), count)
+            self.add_chooser(os.path.join(Paths.get_user_themes_folder(), name + '.css'), name, count, True)
             count += 1
 
         active_id = Settings.get_value('color_scheme')

@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.app_info import AppInfo
 
 
 class Dialog(object):
@@ -36,7 +36,7 @@ class Dialog(object):
         self.view.set_transient_for(self.main_window)
         self.view.set_modal(True)
         self.view.set_program_name('Lemma')
-        self.view.set_version(ServiceLocator.get_lemma_version())
+        self.view.set_version(AppInfo.get_lemma_version())
         self.view.set_copyright('Copyright © 2017-present')
         self.view.set_comments(_('Lemma is a note-taking app.'))
         self.view.set_license_type(Gtk.License.GPL_3_0)

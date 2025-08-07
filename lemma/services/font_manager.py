@@ -30,7 +30,7 @@ import lemma.services.timer as timer
 
 from lemma.services.character_db import CharacterDB
 from lemma.services.node_type_db import NodeTypeDB
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 
 
 class FontManager():
@@ -151,7 +151,7 @@ class FontManager():
             surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width), int(height))
             ctx = cairo.Context(surface)
 
-            res_path = ServiceLocator.get_resources_path()
+            res_path = Paths.get_resources_path()
             filename = 'emoji_u' + hex(ord(char))[2:] + '.svg'
             rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/svg', filename))
             rsvg_handle.render_document(ctx, viewport)

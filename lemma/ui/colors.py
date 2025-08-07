@@ -17,7 +17,7 @@
 
 import os.path
 
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.services.settings import Settings
 
 
@@ -34,7 +34,7 @@ class Colors(object):
 
         self.color_scheme = Settings.get_value('color_scheme')
         if self.color_scheme == 'default':
-            path = os.path.join(ServiceLocator.get_resources_path(), 'themes', 'default.css')
+            path = os.path.join(Paths.get_resources_path(), 'themes', 'default.css')
         else:
             path = Settings.get_value('color_scheme')
 

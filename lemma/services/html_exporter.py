@@ -19,13 +19,13 @@ import urllib.parse
 import os, os.path
 
 from lemma.services.character_db import CharacterDB
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 
 
 class HTMLExporter(object):
 
     def __init__(self):
-        self.pathname = ServiceLocator.get_notes_folder()
+        self.pathname = Paths.get_notes_folder()
         self.file_no = 0
         self.document_id = None
         self.html = ''
@@ -33,7 +33,7 @@ class HTMLExporter(object):
     def export_html(self, document):
         self.document_id = document.id
 
-        data_dir = ServiceLocator.get_notes_folder()
+        data_dir = Paths.get_notes_folder()
         for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document_id) + '-')]:
             os.remove(os.path.join(data_dir, file))
         self.file_no = 0

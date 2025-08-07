@@ -17,7 +17,7 @@
 
 import os, os.path, pickle
 
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.services.settings import Settings
@@ -27,7 +27,7 @@ from lemma.application_state.application_state import ApplicationState
 class Storage(object):
 
     def populate_settings():
-        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'settings.pickle'), 'rb')
+        try: filehandle = open(os.path.join(Paths.get_config_folder(), 'settings.pickle'), 'rb')
         except IOError: return False
         else:
             try: Settings.data = pickle.load(filehandle)
@@ -35,7 +35,7 @@ class Storage(object):
         return True
 
     def populate_history():
-        pathname = os.path.join(ServiceLocator.get_notes_folder(), 'workspace')
+        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
         if not os.path.isfile(pathname): return
 
         with open(pathname, 'rb') as file:
@@ -49,12 +49,12 @@ class Storage(object):
                         History.activate_document(document)
 
     def save_settings():
-        try: filehandle = open(os.path.join(ServiceLocator.get_config_folder(), 'settings.pickle'), 'wb')
+        try: filehandle = open(os.path.join(Paths.get_config_folder(), 'settings.pickle'), 'wb')
         except IOError: return False
         else: pickle.dump(Settings.data, filehandle)
 
     def save_history():
-        pathname = os.path.join(ServiceLocator.get_notes_folder(), 'workspace')
+        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
 
         try: filehandle = open(pathname, 'wb')
         except IOError: pass

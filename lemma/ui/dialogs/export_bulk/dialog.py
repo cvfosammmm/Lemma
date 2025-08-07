@@ -26,7 +26,7 @@ import os.path, os
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
 from lemma.services.html_exporter import HTMLExporter
 from lemma.services.settings import Settings
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 
@@ -131,7 +131,7 @@ class Dialog(object):
                     markdown += html2text.html2text(html)
                     file.writestr(str(document.id) + '.md', markdown)
 
-                data_dir = ServiceLocator.get_notes_folder()
+                data_dir = Paths.get_notes_folder()
                 for include in [file for file in os.listdir(data_dir) if file.startswith(str(document.id) + '-')]:
                     file.write(os.path.join(data_dir, include), arcname=include)
 

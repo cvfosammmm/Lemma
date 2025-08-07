@@ -21,7 +21,7 @@ from gi.repository import Gtk, GLib
 
 import os.path
 
-from lemma.services.service_locator import ServiceLocator
+from lemma.services.paths import Paths
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.services.character_db import CharacterDB
 import lemma.services.timer as timer
@@ -33,7 +33,7 @@ class ToolsSidebar(Gtk.Stack):
         Gtk.Stack.__init__(self)
         self.set_size_request(262, 280)
 
-        self.resources_path = ServiceLocator.get_resources_path()
+        self.resources_path = Paths.get_resources_path()
 
         self.populate_symbols()
         self.populate_emojis()
@@ -200,7 +200,7 @@ class ToolsSidebar(Gtk.Stack):
         if css_class:
             flowbox.add_css_class(css_class)
 
-        res_path = ServiceLocator.get_resources_path()
+        res_path = Paths.get_resources_path()
         for symbol in symbols:
             filename = 'emoji_u' + hex(ord(symbol))[2:] + '.png'
             pic = Gtk.Image.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/png', filename))

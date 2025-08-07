@@ -15,45 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import re
 import os.path
 from xdg.BaseDirectory import xdg_config_home
 
 
-class ServiceLocator():
+class Paths():
 
-    lemma_version = None
     resources_path = None
     app_icons_path = None
-    regexes = dict()
-
-    def get_regex_matcher(pattern):
-        try:
-            regex = ServiceLocator.regexes[pattern]
-        except KeyError:
-            regex = re.compile(pattern)
-            ServiceLocator.regexes[pattern] = regex
-        return regex
 
     def get_config_folder():
         return os.path.join(xdg_config_home, 'lemma')
 
     def get_notes_folder():
-        return os.path.expanduser(ServiceLocator.get_config_folder() + '/notes')
+        return os.path.expanduser(Paths.get_config_folder() + '/notes')
 
     def get_user_themes_folder():
-        return os.path.expanduser(ServiceLocator.get_config_folder() + '/themes')
-
-    def init_lemma_version(lemma_version):
-        ServiceLocator.lemma_version = lemma_version
-
-    def get_lemma_version():
-        return ServiceLocator.lemma_version
+        return os.path.expanduser(Paths.get_config_folder() + '/themes')
 
     def init_resources_path(resources_path):
-        ServiceLocator.resources_path = resources_path
+        Paths.resources_path = resources_path
 
     def get_resources_path():
-        return ServiceLocator.resources_path
+        return Paths.resources_path
 
 
