@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="42"
+   width="44"
    height="16"
-   viewBox="0 0 42 16"
+   viewBox="0 0 44 16"
    version="1.1"
    id="svg17"
    sodipodi:docname="sidebar-prodwithindex-symbolic.svg"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +24,7 @@
      showgrid="false"
      inkscape:zoom="18.17824"
      inkscape:cx="18.511143"
-     inkscape:cy="10.452057"
+     inkscape:cy="10.479562"
      inkscape:window-width="1440"
      inkscape:window-height="831"
      inkscape:window-x="0"
@@ -63,18 +63,18 @@
          id="rect383-7"
          width="4"
          height="5"
-         x="14.5"
+         x="15.500004"
          y="10.5" />
       <rect
          style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-9"
          width="4"
          height="5"
-         x="27.5"
+         x="28.500004"
          y="10.5" />
       <g
          id="use975"
-         transform="matrix(1.4176577,0,0,1,18.757132,15.375009)">
+         transform="matrix(1.4176577,0,0,1,19.757135,15.375009)">
         <path
            d="M 5.1090385,-3.875009 H 0.87670526 v 1 H 5.1090385 Z"
            id="path4501"
@@ -90,13 +90,13 @@
          id="rect383-7-1"
          width="4"
          height="5"
-         x="14.5"
+         x="15.500004"
          y="0.5" />
       <g
          fill="#000000"
          fill-opacity="1"
          id="g985"
-         transform="matrix(1.4490566,0,0,1.6050157,-183.10352,-311.38107)">
+         transform="matrix(1.4490566,0,0,1.6050157,-182.10352,-311.38107)">
         <g
            id="use983"
            transform="translate(125.798,194.005)">
@@ -110,7 +110,7 @@
          id="rect383-7-9-2"
          width="5"
          height="7"
-         x="36.5"
+         x="37.500004"
          y="4.5" />
     </g>
   </g>

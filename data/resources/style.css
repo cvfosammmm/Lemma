@@ -247,15 +247,11 @@ box.tools-sidebar label.header {
 box.tools-sidebar label.header.first {
     margin-top: 2px;
 }
-box.tools-sidebar flowbox {
+box.tools-sidebar wrap-box {
     margin-left: 6px;
     margin-right: 6px;
     margin-top: 0px;
     margin-bottom: 0px;
-}
-box.tools-sidebar flowboxchild {
-    padding: 0px;
-    border-radius: 0px;
 }
 box.tools-sidebar button {
     padding: 6px;
