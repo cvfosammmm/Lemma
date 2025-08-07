@@ -15,7 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os.path
+import lemma.ui.dialogs.about as about
+import lemma.ui.dialogs.export_bulk as export_bulk
+import lemma.ui.dialogs.export_html as export_html
+import lemma.ui.dialogs.export_markdown as export_markdown
+import lemma.ui.dialogs.import_documents as import_documents
+import lemma.ui.dialogs.insert_image as insert_image
+import lemma.ui.dialogs.keyboard_shortcuts as keyboard_shortcuts
+import lemma.ui.dialogs.settings as settings
 
 
 class DialogLocator(object):
@@ -23,10 +30,14 @@ class DialogLocator(object):
     dialogs = dict()
 
     def init_dialogs(main_window):
-        for (path, directories, files) in os.walk(os.path.dirname(os.path.realpath(__file__))):
-            if 'dialog.py' in files:
-                name = os.path.basename(path)
-                exec('import lemma.ui.dialogs.' + name + '.dialog as ' + name + '\nDialogLocator.dialogs["' + name + '"] = ' + name + '.Dialog(main_window)')
+        DialogLocator.dialogs['about'] = about.Dialog(main_window)
+        DialogLocator.dialogs['export_bulk'] = export_bulk.Dialog(main_window)
+        DialogLocator.dialogs['export_html'] = export_html.Dialog(main_window)
+        DialogLocator.dialogs['export_markdown'] = export_markdown.Dialog(main_window)
+        DialogLocator.dialogs['import_documents'] = import_documents.Dialog(main_window)
+        DialogLocator.dialogs['insert_image'] = insert_image.Dialog(main_window)
+        DialogLocator.dialogs['keyboard_shortcuts'] = keyboard_shortcuts.Dialog(main_window)
+        DialogLocator.dialogs['settings'] = settings.Dialog(main_window)
 
     def get_dialog(dialog_type):
         return DialogLocator.dialogs[dialog_type]

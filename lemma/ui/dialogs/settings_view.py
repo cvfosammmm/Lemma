@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.ui.helpers.dialog_view import DialogView
+from lemma.ui.dialogs.dialog_view import DialogView
 
 
 class Settings(DialogView):

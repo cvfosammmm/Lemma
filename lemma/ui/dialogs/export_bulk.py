@@ -23,7 +23,7 @@ import zipfile
 import html2text
 import os.path, os
 
-import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
+import lemma.ui.dialogs.export_bulk_view as view
 from lemma.services.html_exporter import HTMLExporter
 from lemma.services.settings import Settings
 from lemma.services.paths import Paths

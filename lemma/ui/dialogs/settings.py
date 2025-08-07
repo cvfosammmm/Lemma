@@ -19,10 +19,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-import lemma.ui.dialogs.settings.settings_viewgtk as view
-import lemma.ui.dialogs.settings.page_colors as page_colors
-import lemma.ui.dialogs.settings.page_workspace as page_workspace
-import lemma.ui.dialogs.settings.page_autocomplete as page_autocomplete
+import lemma.ui.dialogs.settings_view as view
+import lemma.ui.dialogs.settings_page_colors as page_colors
+import lemma.ui.dialogs.settings_page_workspace as page_workspace
+import lemma.ui.dialogs.settings_page_autocomplete as page_autocomplete
 from lemma.use_cases.use_cases import UseCases
 
 

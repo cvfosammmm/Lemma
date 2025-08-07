@@ -23,18 +23,18 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, GObject, Adw
 
 from lemma.services.paths import Paths
-from lemma.ui.main_window.welcome_view import WelcomeView
-from lemma.ui.main_window.headerbar import HeaderBar
-from lemma.ui.main_window.document_history import DocumentHistoryView
-from lemma.ui.main_window.document_list_view import DocumentListView
-from lemma.ui.main_window.backlinks import BacklinksView
-from lemma.ui.main_window.toolbar import ToolBar
-from lemma.ui.main_window.tools_sidebar import ToolsSidebar
-from lemma.ui.main_window.document_view import DocumentView
-from lemma.ui.main_window.navigation_sidebar import NavigationSidebar
-from lemma.ui.main_window.document_draft import DocumentDraftView
-from lemma.ui.title_widget.title_widget import TitleWidget
-from lemma.ui.helpers.animated_paned import AnimatedHPaned
+from lemma.ui.welcome_view import WelcomeView
+from lemma.ui.headerbar_view import HeaderBar
+from lemma.ui.document_history_view import DocumentHistoryView
+from lemma.ui.document_list_view import DocumentListView
+from lemma.ui.backlinks_view import BacklinksView
+from lemma.ui.toolbars_view import ToolBarsView
+from lemma.ui.tools_sidebar_view import ToolsSidebar
+from lemma.ui.document_view_view import DocumentView
+from lemma.ui.navigation_sidebar_view import NavigationSidebar
+from lemma.ui.document_draft_view import DocumentDraftView
+from lemma.ui.title_widget import TitleWidget
+from lemma.ui.animated_paned import AnimatedHPaned
 
 
 class MainWindow(Adw.ApplicationWindow):
@@ -52,7 +52,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.headerbar = HeaderBar()
         self.history_view = DocumentHistoryView()
         self.headerbar.hb_right.history_overlay.set_child(self.history_view)
-        self.toolbar = ToolBar()
+        self.toolbar = ToolBarsView()
 
         self.document_list = DocumentListView()
         self.backlinks = BacklinksView()

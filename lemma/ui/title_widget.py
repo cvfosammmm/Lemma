@@ -23,7 +23,7 @@ from gi.repository import Gdk
 import datetime
 
 from lemma.document_repo.document_repo import DocumentRepo
-import lemma.ui.title_widget.title_widget_viewgtk as title_widget_view
+import lemma.ui.title_widget_view as title_widget_view
 import lemma.services.timer as timer
 
 

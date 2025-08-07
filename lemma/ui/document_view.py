@@ -28,7 +28,7 @@ from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.use_cases.use_cases import UseCases
-from lemma.ui.title_widget.title_widget import TitleWidget
+from lemma.ui.title_widget import TitleWidget
 from lemma.application_state.application_state import ApplicationState
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer

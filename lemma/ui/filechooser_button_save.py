@@ -21,7 +21,7 @@ from gi.repository import Gtk, Pango, Gio
 
 import os.path
 
-from lemma.ui.helpers.observable import Observable
+from lemma.ui.observable import Observable
 
 
 class FilechooserButtonView(Gtk.Box):

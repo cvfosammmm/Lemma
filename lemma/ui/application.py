@@ -28,7 +28,7 @@ from lemma.ui.popovers.popover_manager import PopoverManager
 
 import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
-import lemma.ui.main_window.main_window as main_window
+import lemma.ui.main_window_view as main_window_view
 import lemma.ui.document_history as document_history
 import lemma.ui.document_view as document_view
 import lemma.ui.cursor_state as cursor_state
@@ -50,7 +50,7 @@ class Application(Adw.Application):
     def do_activate(self):
         Adw.Application.do_activate(self)
 
-        self.main_window = main_window.MainWindow(self)
+        self.main_window = main_window_view.MainWindow(self)
         self.model_state = model_state.ModelState(self.main_window)
 
         ColorManager.init(self.main_window)

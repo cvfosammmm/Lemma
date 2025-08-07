@@ -20,8 +20,8 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, Pango
 
-from lemma.ui.helpers.scrolling_widget import ScrollingWidget
-from lemma.ui.helpers.context_menu import ContextMenu
+from lemma.ui.scrolling_widget import ScrollingWidget
+from lemma.ui.context_menu import ContextMenu
 
 
 class DocumentListView(Gtk.Overlay):

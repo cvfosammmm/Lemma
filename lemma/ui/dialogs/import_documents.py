@@ -22,7 +22,7 @@ from gi.repository import Gtk, GLib, Gio
 
 import os.path
 
-import lemma.ui.dialogs.import_documents.import_documents_viewgtk as view
+import lemma.ui.dialogs.import_documents_view as view
 from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 

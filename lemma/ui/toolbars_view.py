@@ -23,7 +23,7 @@ from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.services.layout_info import LayoutInfo
 
 
-class ToolBar(Gtk.ActionBar):
+class ToolBarsView(Gtk.ActionBar):
 
     def __init__(self):
         Gtk.ActionBar.__init__(self)

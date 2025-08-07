@@ -23,7 +23,7 @@ from lemma.services.color_manager import ColorManager
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
-from lemma.ui.helpers.cairo import rounded_rectangle
+from lemma.ui.cairo import rounded_rectangle
 
 
 class DocumentHistory(object):
