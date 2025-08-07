@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.service_locator import ServiceLocator
 
 
 class Dialog(object):

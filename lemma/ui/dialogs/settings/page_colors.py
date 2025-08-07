@@ -23,9 +23,9 @@ import os, os.path
 import xml.etree.ElementTree as ET
 from random import randrange
 
-from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.settings.settings import Settings
-from lemma.infrastructure.color_manager import ColorManager
+from lemma.services.service_locator import ServiceLocator
+from lemma.services.settings import Settings
+from lemma.services.color_manager import ColorManager
 from lemma.use_cases.use_cases import UseCases
 from lemma.ui.helpers.cairo import rounded_rectangle
 

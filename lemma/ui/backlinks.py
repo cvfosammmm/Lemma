@@ -22,7 +22,6 @@ from gi.repository import Gtk, Gdk
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
-from lemma.message_bus.message_bus import MessageBus
 
 
 class Backlinks(object):

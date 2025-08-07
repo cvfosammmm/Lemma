@@ -21,7 +21,7 @@ from lemma.document.ast import RootNode, Node, Cursor
 from lemma.document.layouter import Layouter
 from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
 from lemma.document.clipping import Clipping
-from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.services.layout_info import LayoutInfo
 
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
     for file in files:

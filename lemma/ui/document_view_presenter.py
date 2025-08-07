@@ -24,11 +24,11 @@ import datetime
 import time
 import cairo
 
-from lemma.infrastructure.font_manager import FontManager
-from lemma.infrastructure.color_manager import ColorManager
+from lemma.services.font_manager import FontManager
+from lemma.services.color_manager import ColorManager
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
-import lemma.infrastructure.timer as timer
+import lemma.services.timer as timer
 
 
 class DocumentViewPresenter():

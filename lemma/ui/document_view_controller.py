@@ -21,9 +21,9 @@ from gi.repository import Gtk, Gdk
 
 import time
 
-import lemma.infrastructure.xml_helpers as xml_helpers
+import lemma.services.xml_helpers as xml_helpers
 from lemma.application_state.application_state import ApplicationState
-from lemma.db.node_type_db import NodeTypeDB
+from lemma.services.node_type_db import NodeTypeDB
 from lemma.use_cases.use_cases import UseCases
 
 

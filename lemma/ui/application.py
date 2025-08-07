@@ -21,8 +21,8 @@ gi.require_version('Adw', '1')
 from gi.repository import Adw
 from gi.repository import Gdk
 
-from lemma.message_bus.message_bus import MessageBus
-from lemma.infrastructure.color_manager import ColorManager
+from lemma.services.message_bus import MessageBus
+from lemma.services.color_manager import ColorManager
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
 

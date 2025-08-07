@@ -17,10 +17,10 @@
 
 import os, os.path, pickle
 
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
-from lemma.settings.settings import Settings
+from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 
 

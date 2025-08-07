@@ -26,11 +26,11 @@ import os.path
 
 import lib.freetype2.freetype2 as freetype2
 import lib.fontconfig.fontconfig as fontconfig
-import lemma.infrastructure.timer as timer
+import lemma.services.timer as timer
 
-from lemma.db.character_db import CharacterDB
-from lemma.db.node_type_db import NodeTypeDB
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.character_db import CharacterDB
+from lemma.services.node_type_db import NodeTypeDB
+from lemma.services.service_locator import ServiceLocator
 
 
 class FontManager():

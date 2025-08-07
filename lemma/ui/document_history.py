@@ -19,11 +19,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gdk, Pango, PangoCairo
 
-from lemma.infrastructure.color_manager import ColorManager
+from lemma.services.color_manager import ColorManager
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
-from lemma.message_bus.message_bus import MessageBus
 from lemma.ui.helpers.cairo import rounded_rectangle
 
 

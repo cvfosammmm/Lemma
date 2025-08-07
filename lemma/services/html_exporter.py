@@ -18,8 +18,8 @@
 import urllib.parse
 import os, os.path
 
-from lemma.db.character_db import CharacterDB
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.character_db import CharacterDB
+from lemma.services.service_locator import ServiceLocator
 
 
 class HTMLExporter(object):

@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.db.node_type_db import NodeTypeDB
-import lemma.infrastructure.timer as timer
+from lemma.services.node_type_db import NodeTypeDB
+import lemma.services.timer as timer
 
 
 class RootNode():

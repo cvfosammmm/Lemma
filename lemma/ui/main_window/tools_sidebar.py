@@ -21,10 +21,10 @@ from gi.repository import Gtk, GLib
 
 import os.path
 
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.service_locator import ServiceLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
-from lemma.db.character_db import CharacterDB
-import lemma.infrastructure.timer as timer
+from lemma.services.character_db import CharacterDB
+import lemma.services.timer as timer
 
 
 class ToolsSidebar(Gtk.Stack):

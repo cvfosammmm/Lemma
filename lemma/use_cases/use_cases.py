@@ -20,22 +20,22 @@ import webbrowser
 import os.path
 from markdown_it import MarkdownIt
 
-import lemma.infrastructure.xml_helpers as xml_helpers
-import lemma.infrastructure.xml_parser as xml_parser
-from lemma.settings.settings import Settings
+import lemma.services.xml_helpers as xml_helpers
+import lemma.services.xml_parser as xml_parser
+from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
-from lemma.db.character_db import CharacterDB
-from lemma.db.node_type_db import NodeTypeDB
+from lemma.services.character_db import CharacterDB
+from lemma.services.node_type_db import NodeTypeDB
 from lemma.widgets.image import Image
 from lemma.document.ast import Node
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.storage.storage import Storage
 from lemma.document.document import Document
-from lemma.message_bus.message_bus import MessageBus
-from lemma.infrastructure.html_parser import HTMLParser
-from lemma.infrastructure.font_manager import FontManager
-import lemma.infrastructure.timer as timer
+from lemma.services.message_bus import MessageBus
+from lemma.services.html_parser import HTMLParser
+from lemma.services.font_manager import FontManager
+import lemma.services.timer as timer
 
 
 class UseCases():

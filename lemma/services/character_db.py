@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.service_locator import ServiceLocator
 
 
 class CharacterDB(object):

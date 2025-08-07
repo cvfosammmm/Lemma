@@ -17,9 +17,8 @@
 
 import os.path
 
-from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.settings.settings import Settings
-from lemma.message_bus.message_bus import MessageBus
+from lemma.services.service_locator import ServiceLocator
+from lemma.services.settings import Settings
 
 
 class Colors(object):

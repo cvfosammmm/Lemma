@@ -20,9 +20,9 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gdk
 
 from lemma.application_state.application_state import ApplicationState
-from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.services.layout_info import LayoutInfo
 from lemma.history.history import History
-import lemma.infrastructure.timer as timer
+import lemma.services.timer as timer
 
 
 class ModelState(object):

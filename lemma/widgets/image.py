@@ -19,8 +19,8 @@ import os.path
 from PIL import Image as PIL_Image
 import cairo
 
-from lemma.infrastructure.layout_info import LayoutInfo
-from lemma.db.file_format_db import FileFormatDB
+from lemma.services.layout_info import LayoutInfo
+from lemma.services.file_format_db import FileFormatDB
 
 
 class Image(object):

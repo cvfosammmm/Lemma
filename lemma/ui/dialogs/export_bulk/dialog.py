@@ -24,9 +24,9 @@ import html2text
 import os.path, os
 
 import lemma.ui.dialogs.export_bulk.export_bulk_viewgtk as view
-from lemma.infrastructure.html_exporter import HTMLExporter
-from lemma.settings.settings import Settings
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.html_exporter import HTMLExporter
+from lemma.services.settings import Settings
+from lemma.services.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 

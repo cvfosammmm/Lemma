@@ -23,10 +23,9 @@ import time, datetime
 
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
-from lemma.infrastructure.color_manager import ColorManager
+from lemma.services.color_manager import ColorManager
 from lemma.ui.shortcuts import ShortcutController
 from lemma.application_state.application_state import ApplicationState
-from lemma.message_bus.message_bus import MessageBus
 from lemma.use_cases.use_cases import UseCases
 
 

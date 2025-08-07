@@ -22,9 +22,9 @@ from gi.repository import Gtk, Gio, GLib
 
 import os.path, shutil, os
 
-from lemma.infrastructure.html_exporter import HTMLExporter
-from lemma.infrastructure.service_locator import ServiceLocator
-from lemma.settings.settings import Settings
+from lemma.services.html_exporter import HTMLExporter
+from lemma.services.service_locator import ServiceLocator
+from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 
 

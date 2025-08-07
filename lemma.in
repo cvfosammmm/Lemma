@@ -17,13 +17,13 @@
 
 import sys, os.path, gettext
 
-from lemma.infrastructure.font_manager import FontManager
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.font_manager import FontManager
+from lemma.services.service_locator import ServiceLocator
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.infrastructure.timer import Timer
+from lemma.services.timer import Timer
 import lemma.ui.application as application
 from lemma.storage.storage import Storage
-from lemma.settings.settings import Settings
+from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 
 # setup gettext

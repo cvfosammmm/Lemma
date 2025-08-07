@@ -26,7 +26,7 @@ from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
-import lemma.infrastructure.xml_helpers as xml_helpers
+import lemma.services.xml_helpers as xml_helpers
 
 
 class Popover():

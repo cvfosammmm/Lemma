@@ -20,7 +20,7 @@ from html.parser import HTMLParser as HTMLParserLib
 
 from lemma.document.ast import RootNode, Node
 from lemma.widgets.image import Image
-from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.services.layout_info import LayoutInfo
 
 
 class HTMLParser(HTMLParserLib):

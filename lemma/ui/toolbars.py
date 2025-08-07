@@ -19,9 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Pango
 
-from lemma.infrastructure.layout_info import LayoutInfo
+from lemma.services.layout_info import LayoutInfo
 from lemma.history.history import History
-from lemma.message_bus.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 

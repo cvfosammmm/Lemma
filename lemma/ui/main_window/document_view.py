@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, Pango
 
-from lemma.infrastructure.color_manager import ColorManager
+from lemma.services.color_manager import ColorManager
 from lemma.ui.helpers.context_menu import ContextMenu
 
 

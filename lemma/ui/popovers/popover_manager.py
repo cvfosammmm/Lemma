@@ -25,7 +25,6 @@ import lemma.ui.popovers.hamburger_menu as hamburger_menu
 import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_ac as link_ac
 from lemma.application_state.application_state import ApplicationState
-from lemma.message_bus.message_bus import MessageBus
 from lemma.use_cases.use_cases import UseCases
 
 

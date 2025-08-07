@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import pickle
-import lemma.infrastructure.xml_helpers as xml_helpers
+import lemma.services.xml_helpers as xml_helpers
 
 
 class XMLExporter(object):

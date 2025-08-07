@@ -24,14 +24,13 @@ import pickle, base64
 
 from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
-from lemma.infrastructure.layout_info import LayoutInfo
-from lemma.db.node_type_db import NodeTypeDB
-from lemma.message_bus.message_bus import MessageBus
+from lemma.services.layout_info import LayoutInfo
+from lemma.services.node_type_db import NodeTypeDB
 from lemma.history.history import History
 from lemma.use_cases.use_cases import UseCases
-import lemma.infrastructure.xml_helpers as xml_helpers
-import lemma.infrastructure.xml_exporter as xml_exporter
-import lemma.infrastructure.timer as timer
+import lemma.services.xml_helpers as xml_helpers
+import lemma.services.xml_exporter as xml_exporter
+import lemma.services.timer as timer
 
 
 class Actions(object):

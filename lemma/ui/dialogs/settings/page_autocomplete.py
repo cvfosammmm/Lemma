@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.settings.settings import Settings
+from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 
 

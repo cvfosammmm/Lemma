@@ -17,10 +17,9 @@
 
 import os.path
 
-from lemma.settings.settings import Settings
+from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.history.history import History
-from lemma.message_bus.message_bus import MessageBus
 from lemma.use_cases.use_cases import UseCases
 
 

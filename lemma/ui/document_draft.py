@@ -22,7 +22,6 @@ from gi.repository import Gtk, Gdk
 import datetime
 
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.message_bus.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 

@@ -19,10 +19,10 @@ import os.path
 from operator import attrgetter
 
 from lemma.document.document import Document
-from lemma.infrastructure.html_exporter import HTMLExporter
-from lemma.infrastructure.html_parser import HTMLParser
-from lemma.infrastructure.service_locator import ServiceLocator
-import lemma.infrastructure.timer as timer
+from lemma.services.html_exporter import HTMLExporter
+from lemma.services.html_parser import HTMLParser
+from lemma.services.service_locator import ServiceLocator
+import lemma.services.timer as timer
 
 
 class DocumentRepo():

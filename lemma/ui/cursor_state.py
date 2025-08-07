@@ -17,9 +17,8 @@
 
 from lemma.history.history import History
 from lemma.application_state.application_state import ApplicationState
-from lemma.message_bus.message_bus import MessageBus
 from lemma.use_cases.use_cases import UseCases
-import lemma.infrastructure.timer as timer
+import lemma.services.timer as timer
 
 
 class CursorState():

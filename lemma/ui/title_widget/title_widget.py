@@ -24,7 +24,7 @@ import datetime
 
 from lemma.document_repo.document_repo import DocumentRepo
 import lemma.ui.title_widget.title_widget_viewgtk as title_widget_view
-import lemma.infrastructure.timer as timer
+import lemma.services.timer as timer
 
 
 class TitleWidget(object):

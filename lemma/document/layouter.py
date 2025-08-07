@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.infrastructure.font_manager import FontManager
-from lemma.db.character_db import CharacterDB
-from lemma.db.node_type_db import NodeTypeDB
-from lemma.infrastructure.layout_info import LayoutInfo
-import lemma.infrastructure.timer as timer
+from lemma.services.font_manager import FontManager
+from lemma.services.character_db import CharacterDB
+from lemma.services.node_type_db import NodeTypeDB
+from lemma.services.layout_info import LayoutInfo
+import lemma.services.timer as timer
 
 
 class Layouter(object):

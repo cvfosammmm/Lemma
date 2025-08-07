@@ -22,7 +22,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, GObject, Adw
 
-from lemma.infrastructure.service_locator import ServiceLocator
+from lemma.services.service_locator import ServiceLocator
 from lemma.ui.main_window.welcome_view import WelcomeView
 from lemma.ui.main_window.headerbar import HeaderBar
 from lemma.ui.main_window.document_history import DocumentHistoryView

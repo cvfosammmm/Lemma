@@ -19,10 +19,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-from lemma.message_bus.message_bus import MessageBus
+from lemma.services.message_bus import MessageBus
 from lemma.history.history import History
-from lemma.settings.settings import Settings
-from lemma.db.autocomplete_db import AutocompleteDB
+from lemma.services.settings import Settings
+from lemma.services.autocomplete_db import AutocompleteDB
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 

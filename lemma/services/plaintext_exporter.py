@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.db.node_type_db import NodeTypeDB
+from lemma.services.node_type_db import NodeTypeDB
 
 
 class PlaintextExporter(object):
