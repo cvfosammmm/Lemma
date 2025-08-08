@@ -1,6 +1,6 @@
 id: org.cvfosammmm.Lemma
 runtime: org.gnome.Platform
-runtime-version: '47'
+runtime-version: '48'
 sdk: org.gnome.Sdk
 command: lemma
 finish-args:
