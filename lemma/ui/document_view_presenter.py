@@ -38,6 +38,8 @@ class DocumentViewPresenter():
         self.view = self.model.view
         self.content = self.view.content
         self.scrolling_job = None
+        self.render_cache = dict()
+        self.last_cache_reset = time.time()
 
         self.content.set_draw_func(self.draw)
 
@@ -47,6 +49,9 @@ class DocumentViewPresenter():
         self.update_size()
         self.update_scrollbars()
         self.update_pointer()
+        if self.model.document.last_modified > self.last_cache_reset:
+            self.render_cache = dict()
+            self.last_cache_reset = time.time()
         self.view.content.queue_draw()
 
     def update_size(self):
@@ -158,8 +163,8 @@ class DocumentViewPresenter():
     @timer.timer
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return
-
         document = self.model.document
+
         offset_x = ApplicationState.get_value('document_padding_left')
         scrolling_offset_y = document.clipping.offset_y
         offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - scrolling_offset_y
@@ -171,11 +176,19 @@ class DocumentViewPresenter():
         self.draw_title(ctx, ApplicationState.get_value('document_padding_left'), ApplicationState.get_value('document_padding_top') - scrolling_offset_y)
 
         in_selection = False
-        for paragraph in document.ast.lines:
-            for line_layout in paragraph['layout']['children']:
+        for i, paragraph in enumerate(document.ast.lines):
+            for j, line_layout in enumerate(paragraph['layout']['children']):
                 if offset_y + line_layout['y'] + paragraph['layout']['y'] + line_layout['height'] >= 0 and offset_y + line_layout['y'] + paragraph['layout']['y'] <= height:
-                    self.draw_layout(line_layout, ctx, offset_x, offset_y + paragraph['layout']['y'], in_selection)
-                if offset_y + line_layout['y'] + paragraph['layout']['y'] > height: break
+                    if (i,j) not in self.render_cache:
+                        surface = ctx.get_target().create_similar(cairo.Content.COLOR_ALPHA, int(line_layout['width']), int(line_layout['height']))
+                        self.draw_layout(line_layout, cairo.Context(surface), -line_layout['x'], -line_layout['y'], in_selection)
+                        self.render_cache[(i,j)] = surface
+
+                    ctx.set_source_surface(self.render_cache[(i,j)], offset_x, offset_y + paragraph['layout']['y'] + line_layout['y'])
+                    ctx.rectangle(offset_x, offset_y + paragraph['layout']['y'] + line_layout['y'], line_layout['width'], line_layout['height'])
+                    ctx.fill()
+                elif (i,j) in self.render_cache:
+                    del(self.render_cache[(i,j)])
 
                 if not in_selection and line_layout['y'] + line_layout['parent']['y'] == first_selection_line['y'] + first_selection_line['parent']['y']: in_selection = True
                 if in_selection and line_layout['y'] + line_layout['parent']['y'] == last_selection_line['y'] + last_selection_line['parent']['y']: in_selection = False
