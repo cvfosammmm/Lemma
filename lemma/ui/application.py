@@ -40,6 +40,7 @@ import lemma.ui.actions as actions
 import lemma.ui.autocomplete as autocomplete
 import lemma.ui.model_state as model_state
 import lemma.ui.shortcuts as shortcuts
+import lemma.services.timer as timer
 
 
 class Application(Adw.Application):
@@ -121,10 +122,10 @@ class Application(Adw.Application):
         self.backlinks.update()
         self.document_list.update()
 
+    @timer.timer
     def on_document_changed(self):
         self.model_state.update()
         self.actions.update()
-        self.document_history.update()
         self.cursor_state.update()
         self.document_view.update()
         self.popover_manager.update()
@@ -146,6 +147,7 @@ class Application(Adw.Application):
         self.document_draft.update()
         self.window_state.update()
 
+    @timer.timer
     def on_app_state_changed(self):
         self.toolbars.update()
         self.shortcuts.update()

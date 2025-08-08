@@ -26,6 +26,7 @@ import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_ac as link_ac
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
+import lemma.services.timer as timer
 
 
 class PopoverManager():
@@ -51,6 +52,7 @@ class PopoverManager():
         self.popovers["paragraph_style"] = paragraph_style.Popover(self.model_state)
         self.popovers["link_ac"] = link_ac.Popover(self.model_state)
 
+    @timer.timer
     def update(self):
         for popover in self.popovers.values(): popover.update()
 

@@ -24,6 +24,7 @@ from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.history.history import History
 from lemma.ui.cairo import rounded_rectangle
+import lemma.services.timer as timer
 
 
 class DocumentHistory(object):
@@ -45,11 +46,13 @@ class DocumentHistory(object):
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
 
+    @timer.timer
     def update(self):
         self.update_size()
         self.scroll_active_document_on_screen()
         self.view.content.queue_draw()
 
+    @timer.timer
     def update_size(self):
         mode = ApplicationState.get_value('mode')
         width = 0
@@ -66,6 +69,7 @@ class DocumentHistory(object):
         width += 72
         self.view.scrolling_widget.set_size(width, 1)
 
+    @timer.timer
     def scroll_active_document_on_screen(self):
         if self.view.scrolling_widget.adjustment_x.get_upper() < self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width or History.active_document_index == len(self.items) - 1:
             self.view.scrolling_widget.scroll_to_position((self.view.scrolling_widget.adjustment_x.get_upper(), 0))

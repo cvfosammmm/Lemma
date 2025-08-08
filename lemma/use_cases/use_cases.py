@@ -49,6 +49,11 @@ class UseCases():
         ApplicationState.set_value(item, value)
         MessageBus.add_change_code('app_state_changed')
 
+    def app_state_set_values(values):
+        for key, value in values.items():
+            ApplicationState.set_value(key, value)
+        MessageBus.add_change_code('app_state_changed')
+
     def show_insert_link_popover(main_window):
         document = History.get_active_document()
 

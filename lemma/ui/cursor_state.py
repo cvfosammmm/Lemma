@@ -26,40 +26,30 @@ class CursorState():
     def __init__(self, main_window):
         self.toolbar = main_window.toolbar
 
+    @timer.timer
     def update(self):
-        self.update_tags_at_cursor()
-        self.update_link_at_cursor()
+        self.update_tags_and_link_at_cursor()
         self.update_paragraph_style_at_cursor()
         self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
 
-    def update_tags_at_cursor(self):
+    @timer.timer
+    def update_tags_and_link_at_cursor(self):
         document = History.get_active_document()
 
         if document == None:
-            UseCases.app_state_set_value('tags_at_cursor', set())
+            UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
         else:
-            node = document.cursor.get_first_node()
+            node = document.cursor.get_insert_node()
             node = node.prev_in_parent()
+
             if node == None:
-                UseCases.app_state_set_value('tags_at_cursor', set())
+                UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
             else:
-                UseCases.app_state_set_value('tags_at_cursor', node.tags.copy())
-
-    def update_link_at_cursor(self):
-        document = History.get_active_document()
-
-        if document == None:
-            UseCases.app_state_set_value('link_at_cursor', None)
-        else:
-            node = document.cursor.get_first_node()
-            prev_node = node.prev_in_parent()
-            if node == None or prev_node == None:
-                UseCases.app_state_set_value('link_at_cursor', None)
-            elif node.link == prev_node.link:
-                UseCases.app_state_set_value('link_at_cursor', node.link)
-            else:
-                UseCases.app_state_set_value('link_at_cursor', None)
+                if node.link == prev_node.link:
+                    UseCases.app_state_set_values({'tags_at_cursor': node.tags.copy(), 'link_at_cursor': node.link})
+                else:
+                    UseCases.app_state_set_values({'tags_at_cursor': node.tags.copy(), 'link_at_cursor': None})
 
     def update_tag_toggle(self, button, tagname):
         document = History.get_active_document()
@@ -67,11 +57,12 @@ class CursorState():
 
         chars_selected = False
         all_tagged = True
-        for node in [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']:
+        if document.cursor.has_selection():
             chars_selected = True
-            if tagname not in node.tags:
-                all_tagged = False
-                break
+            for node in [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']:
+                if tagname not in node.tags:
+                    all_tagged = False
+                    break
 
         if chars_selected:
             if all_tagged:
@@ -84,6 +75,7 @@ class CursorState():
             else:
                 button.remove_css_class('checked')
 
+    @timer.timer
     def update_paragraph_style_at_cursor(self):
         document = History.get_active_document()
         if document == None: return

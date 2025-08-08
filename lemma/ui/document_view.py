@@ -86,8 +86,7 @@ class DocumentView():
         self.presenter.update()
 
     def set_size(self, width, height):
-        UseCases.app_state_set_value('document_view_width', width)
-        UseCases.app_state_set_value('document_view_height', height)
+        UseCases.app_state_set_values({'document_view_width': width, 'document_view_height': height})
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
         UseCases.scroll_to_xy(offset_x, offset_y)
