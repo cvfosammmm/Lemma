@@ -25,22 +25,29 @@ class Command():
 
     def run(self, document):
         self.state['width_before'] = None
+        self.state['widget'] = None
+        self.state['node'] = None
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.is_resizable():
             widget = selected_nodes[0].value
             self.state['width_before'] = widget.get_width()
             self.state['widget'] = widget
+            self.state['node'] = selected_nodes[0]
             widget.set_width(self.width)
             self.is_undo_checkpoint = True
 
-        document.update_last_modified()
+        if self.state['node'] != None:
+            document.invalidate(self.state['node'].line_no())
+            document.update_last_modified()
 
     def undo(self, document):
         if self.state['width_before'] != None:
             widget = self.state['widget']
             widget.set_width(self.state['width_before'])
 
-        document.update_last_modified()
+        if self.state['node'] != None:
+            document.invalidate(self.state['node'].line_no())
+            document.update_last_modified()
 
 

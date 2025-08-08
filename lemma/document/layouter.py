@@ -28,20 +28,23 @@ class Layouter(object):
         self.document = document
 
     def update(self):
-        if self.document.has_changed(self):
-            self.update_layout()
+        self.update_layout()
 
     @timer.timer
     def update_layout(self):
         y_offset = 0
         for line in self.document.ast.lines:
-            layout_tree = self.make_layout_tree_line(self.document.ast, line)
-            self.layout(layout_tree)
+            if line['layout'] == None:
+                layout_tree = self.make_layout_tree_line(self.document.ast, line['nodes'])
+                self.layout(layout_tree)
+                line['layout'] = layout_tree
+            else:
+                layout_tree = line['layout']
             layout_tree['y'] = y_offset
             y_offset += layout_tree['height']
 
     @timer.timer
-    def make_layout_tree_line(self, root, line):
+    def make_layout_tree_line(self, root, nodes):
         layout_tree = {'type': 'paragraph',
                        'node': root,
                        'parent': None,
@@ -52,9 +55,8 @@ class Layouter(object):
                        'height': 0,
                        'left': 0,
                        'top': 0}
-        line['layout'] = layout_tree
 
-        for child in self.group_words(line['nodes']):
+        for child in self.group_words(nodes):
             if isinstance(child, list):
                 subtree = {'type': 'word', 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
                 char_nodes = child

@@ -103,6 +103,9 @@ class Document():
             self.change_flag[client] = True
         self.last_modified = time.time()
 
+    def invalidate(self, line_no):
+        self.ast.lines[line_no]['layout'] = None
+
     def update(self):
         self.layouter.update()
         self.clipping.update()

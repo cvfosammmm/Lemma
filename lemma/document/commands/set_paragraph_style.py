@@ -39,12 +39,18 @@ class Command():
         self.state['nodes_and_previous_paragraph_style'].append([last_node, last_node.paragraph_style])
         last_node.paragraph_style = self.paragraph_style
 
+        for line_no in range(first_node.line_no(), last_node.line_no() + 1):
+            document.invalidate(line_no)
         document.update_last_modified()
 
     def undo(self, document):
         for node, paragraph_style in self.state['nodes_and_previous_paragraph_style']:
             node.paragraph_style = paragraph_style
 
+        first_node = self.state['nodes_and_previous_paragraph_style'][0][0]
+        last_node = self.state['nodes_and_previous_paragraph_style'][-1][0]
+        for line_no in range(first_node.line_no(), last_node.line_no() + 1):
+            document.invalidate(line_no)
         document.update_last_modified()
 
 

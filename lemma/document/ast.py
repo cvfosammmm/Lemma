@@ -394,6 +394,15 @@ class Node():
     def line_bounds(self):
         return (self.line_start(), self.line_end())
 
+    def line_no(self):
+        node = self
+
+        while not node.parent.type == 'root':
+            node = node.parent
+
+        line_no, offset = node.parent.line_no_offset(node)
+        return line_no
+
     def prev_in_parent(self, steps=1):
         if self != self.parent[0]:
             index = self.parent.index(self) - steps

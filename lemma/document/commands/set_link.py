@@ -33,13 +33,19 @@ class Command():
             node.link = self.target
         self.state['nodes_and_prev_target'] = list(zip(self.nodes, prev_links))
 
-        document.update_last_modified()
+        if len(self.nodes) > 0:
+            for line_no in range(self.nodes[0].line_no(), self.nodes[-1].line_no() + 1):
+                document.invalidate(line_no)
+            document.update_last_modified()
 
     def undo(self, document):
         for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]
         document.cursor.set_state(self.state['cursor_state_before'])
 
-        document.update_last_modified()
+        if len(self.nodes) > 0:
+            for line_no in range(self.nodes[0].line_no(), self.nodes[-1].line_no() + 1):
+                document.invalidate(line_no)
+            document.update_last_modified()
 
 

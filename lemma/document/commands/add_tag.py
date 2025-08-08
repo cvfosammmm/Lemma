@@ -32,12 +32,18 @@ class Command():
                 self.state['affected_nodes'].append(node)
                 node.tags.add(self.tag_name)
 
-        document.update_last_modified()
+        if len(char_nodes) > 0:
+            for line_no in range(char_nodes[0].line_no(), char_nodes[-1].line_no() + 1):
+                document.invalidate(line_no)
+            document.update_last_modified()
 
     def undo(self, document):
         for node in self.state['affected_nodes']:
             node.tags.remove(self.tag_name)
 
-        document.update_last_modified()
+        if len(self.state['affected_nodes']) > 0:
+            for line_no in range(self.state['affected_nodes'][0].line_no(), self.state['affected_nodes'][-1].line_no() + 1):
+                document.invalidate(line_no)
+            document.update_last_modified()
 
 

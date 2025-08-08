@@ -27,16 +27,24 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
+        document.invalidate(self.position_node.line_no())
+
         self.position_node.parent.insert_before(self.position_node, self.nodes)
         self.state['nodes_added'] = self.nodes
 
         self.is_undo_checkpoint = (len(self.state['nodes_added']) > 0)
+
         document.update_last_modified()
 
     def undo(self, document):
+        if len(self.state['nodes_added']) > 0:
+            document.invalidate(self.state['nodes_added'][0].line_no())
+            document.invalidate(self.state['nodes_added'][-1].line_no())
+
         self.position_node.parent.remove(self.state['nodes_added'])
 
         document.cursor.set_state(self.state['cursor_state_before'])
+
         document.update_last_modified()
 
 

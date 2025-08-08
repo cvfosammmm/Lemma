@@ -183,6 +183,7 @@ class UseCases():
         if scroll_to_top:
             UseCases.scroll_to_xy(0, 0)
 
+    @timer.timer
     def undo():
         document = History.get_active_document()
         document.undo()
@@ -191,6 +192,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
         MessageBus.add_change_code('document_ast_changed')
 
+    @timer.timer
     def redo():
         document = History.get_active_document()
         document.redo()
