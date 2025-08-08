@@ -154,14 +154,17 @@ class RootNode():
         return sum([len(line['nodes']) for line in self.lines])
 
     def __iter__(self):
-        self.current_iter_index = -1
+        self.current_iter_index = [0, -1]
         return self
 
     def __next__(self):
-        self.current_iter_index += 1
-        if self.current_iter_index < len(self):
-            return self[self.current_iter_index]
-        raise StopIteration
+        self.current_iter_index[1] += 1
+        if self.current_iter_index[1] >= len(self.lines[self.current_iter_index[0]]['nodes']):
+            self.current_iter_index[0] += 1
+            self.current_iter_index[1] = 0
+        if self.current_iter_index[0] >= len(self.lines):
+            raise StopIteration
+        return self.lines[self.current_iter_index[0]]['nodes'][self.current_iter_index[1]]
 
     def __getitem__(self, key):
         if isinstance(key, slice):
