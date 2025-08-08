@@ -49,7 +49,7 @@ class DocumentViewPresenter():
         self.update_size()
         self.update_scrollbars()
         self.update_pointer()
-        if self.model.document.last_modified > self.last_cache_reset:
+        if max(self.model.document.last_cursor_movement, self.model.document.last_modified) > self.last_cache_reset:
             self.render_cache = dict()
             self.last_cache_reset = time.time()
         self.view.content.queue_draw()

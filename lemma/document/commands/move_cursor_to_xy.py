@@ -35,7 +35,11 @@ class Command():
         else:
             document.cursor.move_insert_to_node(layout['node'])
 
+        document.update_last_cursor_movement()
+
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])
+
+        document.update_last_cursor_movement()
 
 

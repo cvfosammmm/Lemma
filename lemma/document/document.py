@@ -34,6 +34,7 @@ class Document():
 
     def __init__(self, id=None):
         self.last_modified = time.time()
+        self.last_cursor_movement = time.time()
         self.commands = list()
         self.commands_preedit = list()
         self.last_command = -1
@@ -102,6 +103,10 @@ class Document():
         for client in self.change_flag:
             self.change_flag[client] = True
         self.last_modified = time.time()
+        self.last_cursor_movement = time.time()
+
+    def update_last_cursor_movement(self):
+        self.last_cursor_movement = time.time()
 
     def invalidate(self, line_no):
         self.ast.lines[line_no]['layout'] = None

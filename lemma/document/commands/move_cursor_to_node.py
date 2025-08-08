@@ -29,7 +29,11 @@ class Command():
 
         document.cursor.set_insert_selection_nodes(self.insert, self.selection_bound)
 
+        document.update_last_cursor_movement()
+
     def undo(self, document):
         document.cursor.set_state(self.state['cursor_state_before'])
+
+        document.update_last_cursor_movement()
 
 

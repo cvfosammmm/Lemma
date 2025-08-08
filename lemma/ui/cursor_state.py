@@ -41,9 +41,9 @@ class CursorState():
             UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
         else:
             node = document.cursor.get_insert_node()
-            node = node.prev_in_parent()
+            prev_node = node.prev_in_parent()
 
-            if node == None:
+            if node == None or prev_node == None:
                 UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
             else:
                 if node.link == prev_node.link:
