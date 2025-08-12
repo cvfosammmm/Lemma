@@ -39,6 +39,7 @@ class DocumentViewPresenter():
         self.content = self.view.content
         self.scrolling_job = None
         self.render_cache = dict()
+        self.last_rendered_document = None
         self.last_cache_reset = time.time()
 
         self.content.set_draw_func(self.draw)
@@ -49,8 +50,12 @@ class DocumentViewPresenter():
         self.update_size()
         self.update_scrollbars()
         self.update_pointer()
-        if max(self.model.document.last_cursor_movement, self.model.document.last_modified) > self.last_cache_reset:
+
+        new_active_document = self.model.document != self.last_rendered_document
+        document_changed = max(self.model.document.last_cursor_movement, self.model.document.last_modified) > self.last_cache_reset
+        if new_active_document or document_changed:
             self.render_cache = dict()
+            self.last_rendered_document = self.model.document
             self.last_cache_reset = time.time()
         self.view.content.queue_draw()
 
