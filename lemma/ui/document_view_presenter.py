@@ -174,6 +174,11 @@ class DocumentViewPresenter():
         self.colors['text'] = ColorManager.get_ui_color('text')
         self.colors['links'] = ColorManager.get_ui_color('links')
         self.colors['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
+        self.colors['selection_bg'] = ColorManager.get_ui_color('selection_bg')
+        self.colors['title_color'] = ColorManager.get_ui_color('title_color')
+        self.colors['description_color'] = ColorManager.get_ui_color('description_color')
+        self.colors['border_1'] = ColorManager.get_ui_color('border_1')
+        self.colors['cursor'] = ColorManager.get_ui_color('cursor')
 
         offset_x = ApplicationState.get_value('document_padding_left')
         scrolling_offset_y = document.clipping.offset_y
@@ -303,7 +308,7 @@ class DocumentViewPresenter():
             ctx.fill()
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
+        Gdk.cairo_set_source_rgba(ctx, self.colors['selection_bg'])
         ctx.rectangle(offset_x + layout['x'], offset_y, layout['width'], layout['parent']['height'])
         ctx.fill()
 
@@ -320,17 +325,17 @@ class DocumentViewPresenter():
         self.view.layout_title.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
         self.view.layout_title.set_text(self.model.document.title)
         ctx.move_to(offset_x, offset_y)
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('title_color'))
+        Gdk.cairo_set_source_rgba(ctx, self.colors['title_color'])
         PangoCairo.show_layout(ctx, self.view.layout_title)
 
         self.view.layout_subtitle.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
         datetime_last_modified = datetime.datetime.fromtimestamp(self.model.document.last_modified)
         self.view.layout_subtitle.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
         ctx.move_to(offset_x, offset_y + ApplicationState.get_value('title_height') + 8)
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('description_color'))
+        Gdk.cairo_set_source_rgba(ctx, self.colors['description_color'])
         PangoCairo.show_layout(ctx, self.view.layout_subtitle)
 
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('border_1'))
+        Gdk.cairo_set_source_rgba(ctx, self.colors['border_1'])
         ctx.rectangle(offset_x, offset_y + ApplicationState.get_value('title_height'), ApplicationState.get_value('title_width'), 1)
         ctx.fill()
 
@@ -346,7 +351,7 @@ class DocumentViewPresenter():
         padding_bottom = 0#FontManager.get_padding_bottom(fontname)
         cursor_coords = (x + offset_x, y + offset_y + padding_top, 1, layout['height'] - padding_top - padding_bottom)
 
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('cursor'))
+        Gdk.cairo_set_source_rgba(ctx, self.colors['cursor'])
         ctx.rectangle(*cursor_coords)
         ctx.fill()
 
