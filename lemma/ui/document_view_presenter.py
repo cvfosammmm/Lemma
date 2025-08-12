@@ -41,6 +41,7 @@ class DocumentViewPresenter():
         self.render_cache = dict()
         self.last_rendered_document = None
         self.last_cache_reset = time.time()
+        self.colors = dict()
 
         self.content.set_draw_func(self.draw)
 
@@ -170,6 +171,10 @@ class DocumentViewPresenter():
         if self.model.document == None: return
         document = self.model.document
 
+        self.colors['text'] = ColorManager.get_ui_color('text')
+        self.colors['links'] = ColorManager.get_ui_color('links')
+        self.colors['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
+
         offset_x = ApplicationState.get_value('document_padding_left')
         scrolling_offset_y = document.clipping.offset_y
         offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - scrolling_offset_y
@@ -205,20 +210,21 @@ class DocumentViewPresenter():
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
             fontname = FontManager.get_fontname_from_node(layout['node'])
-            fg_color = self.get_fg_color_by_node(layout['node'])
             baseline = FontManager.get_ascend(fontname=fontname)
 
-            surface = FontManager.get_surface(layout['node'].value, fontname=fontname)
-
-            if surface != None:
-                if fontname != 'emojis':
+            if fontname != 'emojis':
+                fg_color = self.get_fg_color_by_node(layout['node'])
+                surface = FontManager.get_surface(layout['node'].value, fontname=fontname)
+                if surface != None:
                     ctx.set_source_surface(surface, offset_x + layout['x'] + layout['left'], offset_y + baseline + layout['y'] + layout['top'])
                     pattern = ctx.get_source()
                     pattern.set_filter(cairo.Filter.BEST)
                     Gdk.cairo_set_source_rgba(ctx, fg_color)
                     ctx.mask(pattern)
                     ctx.fill()
-                else:
+            else:
+                surface = FontManager.get_surface(layout['node'].value, fontname=fontname)
+                if surface != None:
                     ctx.set_source_surface(surface, offset_x + layout['x'] + layout['left'], offset_y + baseline + layout['y'] + layout['top'])
                     ctx.mask(ctx.get_source())
                     ctx.fill()
@@ -303,13 +309,12 @@ class DocumentViewPresenter():
 
     def get_fg_color_by_node(self, node):
         if node.link != None:
-            if urlparse(node.link).scheme in ['http', 'https'] or \
-                DocumentRepo.get_by_title(node.link) != None:
-                return ColorManager.get_ui_color('links')
+            if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
+                return self.colors['links']
             else:
-                return ColorManager.get_ui_color('links_page_not_existing')
+                return self.colors['links_page_not_existing']
         else:
-            return ColorManager.get_ui_color('text')
+            return self.colors['text']
 
     def draw_title(self, ctx, offset_x, offset_y):
         self.view.layout_title.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)

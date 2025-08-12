@@ -29,6 +29,7 @@ class DocumentRepo():
 
     documents = list()
     documents_by_id = dict()
+    documents_by_title = dict()
     documents_by_link_target = dict()
     link_targets_by_document = dict()
     max_document_id = 0
@@ -57,6 +58,7 @@ class DocumentRepo():
 
                 DocumentRepo.documents.append(document)
                 DocumentRepo.documents_by_id[document.id] = document
+                DocumentRepo.documents_by_title[document.title] = document
                 DocumentRepo.update_link_graph(document)
 
         if len(DocumentRepo.documents_by_id) > 0:
@@ -82,9 +84,8 @@ class DocumentRepo():
 
     @timer.timer
     def get_by_title(title):
-        for document in DocumentRepo.documents:
-            if document.title == title:
-                return document
+        if title in DocumentRepo.documents_by_title:
+            return DocumentRepo.documents_by_title[title]
         return None
 
     @timer.timer
@@ -111,6 +112,7 @@ class DocumentRepo():
 
         DocumentRepo.documents.append(document)
         DocumentRepo.documents_by_id[document.id] = document
+        DocumentRepo.documents_by_title[document.title] = document
         DocumentRepo.max_document_id = max(document.id, DocumentRepo.max_document_id)
 
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
@@ -130,6 +132,7 @@ class DocumentRepo():
 
         DocumentRepo.documents.remove(document)
         del(DocumentRepo.documents_by_id[document.id])
+        del(DocumentRepo.documents_by_title[document.title])
 
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
         os.remove(pathname)
@@ -143,6 +146,9 @@ class DocumentRepo():
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
         exporter = HTMLExporter()
         html = exporter.export_html(document)
+
+        del(DocumentRepo.documents_by_title[document.title])
+        DocumentRepo.documents_by_title[document.title] = document
 
         try: filehandle = open(pathname, 'w')
         except IOError: pass
