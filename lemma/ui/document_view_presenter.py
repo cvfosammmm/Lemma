@@ -290,7 +290,7 @@ class DocumentViewPresenter():
             fg_color = self.get_fg_color_by_node(layout['node'])
             Gdk.cairo_set_source_rgba(ctx, fg_color)
 
-            line_offset = layout['children'][0]['children'][1]['width']
+            line_offset = layout['children'][0]['children'][1]['height']
             line_width = layout['width']
 
             ctx.rectangle(offset_x + layout['x'] + 1, offset_y + line_offset + 1, line_width - 2, 1)
