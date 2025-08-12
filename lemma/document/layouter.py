@@ -28,7 +28,8 @@ class Layouter(object):
         self.document = document
 
     def update(self):
-        self.update_layout()
+        if self.document.has_changed(self):
+            self.update_layout()
 
     @timer.timer
     def update_layout(self):

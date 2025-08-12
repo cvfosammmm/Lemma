@@ -102,6 +102,7 @@ class Document():
     def update_last_modified(self):
         for client in self.change_flag:
             self.change_flag[client] = True
+
         self.last_modified = time.time()
         self.last_cursor_movement = time.time()
 
