@@ -27,7 +27,7 @@ class Command():
     def run(self, document):
         self.state['clipping_state_before'] = document.clipping.get_state()
 
-        document.clipping.set_scrolling_offset(self.x, self.y)
+        document.clipping.set_scrolling_offset(int(self.x), int(self.y))
 
     def undo(self, document):
         document.clipping.set_state(self.state['clipping_state_before'])

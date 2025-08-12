@@ -151,7 +151,6 @@ class DocumentRepo():
 
         DocumentRepo.update_link_graph(document)
 
-    @timer.timer
     def update_link_graph(document):
         if document in DocumentRepo.link_targets_by_document:
             for link_target in DocumentRepo.link_targets_by_document[document]:
