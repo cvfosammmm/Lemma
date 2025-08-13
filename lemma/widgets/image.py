@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os.path
+import os.path, io
 from PIL import Image as PIL_Image
 import cairo
 
@@ -25,12 +25,12 @@ from lemma.services.file_format_db import FileFormatDB
 
 class Image(object):
 
-    def __init__(self, filename, width=None):
-        self.pil_image = PIL_Image.open(filename)
+    def __init__(self, data, attributes=dict()):
+        self.pil_image = PIL_Image.open(data)
         self.cairo_surface = None
 
-        if width != None:
-            self.set_width(width)
+        if 'width' in attributes:
+            self.set_width(int(attributes['width']))
         else:
             self.set_width(min(self.pil_image.width, LayoutInfo.get_layout_width()))
 
@@ -79,18 +79,19 @@ class Image(object):
     def is_resizable(self):
         return True
 
+    def get_data(self):
+        with io.BytesIO() as buffer:
+            self.pil_image.save(buffer, format=self.get_format())
+            data = buffer.getvalue()
+        return data
+
+    def get_attributes(self):
+        return {'type': 'image', 'width': str(self.get_width())}
+
     def to_html(self, data_location_prefix):
         file_ending = FileFormatDB.get_ending_from_format_name(self.pil_image.format)
         filename = data_location_prefix + file_ending
         self.pil_image.save(filename)
         return '<img src="' + filename + '" width="' + str(self.get_width()) + '" />'
-
-    # make this pickle
-    def __getstate__(self):
-        return {'pil_image': self.pil_image, 'width': self.get_width()}
-
-    def __setstate__(self, state):
-        self.pil_image = state['pil_image']
-        self.set_width(state['width'])
 
 

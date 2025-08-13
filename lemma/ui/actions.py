@@ -26,10 +26,10 @@ from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
+from lemma.services.xml_exporter import XMLExporter
 from lemma.history.history import History
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.xml_helpers as xml_helpers
-import lemma.services.xml_exporter as xml_exporter
 import lemma.services.timer as timer
 
 
@@ -200,8 +200,7 @@ class Actions(object):
                 chars.append('\n')
         chars = ''.join(chars)
 
-        exporter = xml_exporter.XMLExporter()
-        xml = ''.join([exporter.export_xml(node) for node in subtree])
+        xml = ''.join([XMLExporter.export_xml(node) for node in subtree])
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
         cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode()))

@@ -17,8 +17,10 @@
 
 import xml.parsers.expat
 import pickle
+import io
 
 from lemma.document.ast import Node
+from lemma.widgets.image import Image
 
 
 class XMLParser(object):
@@ -36,6 +38,7 @@ class XMLParser(object):
         self.current_link = None
         self.current_tags = None
         self.current_paragraph_style = 'p'
+        self.current_attributes = dict()
 
     def parse(self, xml_string, root_node_type='root'):
         self.current_node = Node(root_node_type)
@@ -90,6 +93,7 @@ class XMLParser(object):
             self.current_node.append(node)
         if tag == 'widget':
             self.widget_data = ''
+            self.current_attributes = attrs
 
         if node != None and 'marks' in attrs:
             for mark in attrs['marks'].split():
@@ -107,11 +111,13 @@ class XMLParser(object):
         if tag == 'mathlist':
             self.current_node = self.current_node.parent
         if tag == 'widget':
-            node = Node('widget', pickle.loads(eval(self.widget_data)))
-            node.link = self.current_link
-            node.tags = self.current_tags
-            node.paragraph_style = self.current_paragraph_style
-            self.current_node.append(node)
+            if 'type' in self.current_attributes and self.current_attributes['type'] == 'image':
+                with io.BytesIO(eval(self.widget_data)) as widget_data_stream:
+                    node = Node('widget', Image(widget_data_stream, attributes=self.current_attributes))
+                node.link = self.current_link
+                node.tags = self.current_tags
+                node.paragraph_style = self.current_paragraph_style
+                self.current_node.append(node)
             self.widget_data = ''
 
     def handle_data(self, data):

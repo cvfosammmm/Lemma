@@ -365,7 +365,8 @@ class UseCases():
     def add_image_from_filename(filename):
         document = History.get_active_document()
 
-        image = Image(filename)
+        with open(filename, 'rb') as file:
+            image = Image(file)
         if document.cursor.get_insert_node().parent.type == 'root':
             insert = document.cursor.get_insert_node()
             node = Node('widget', image)

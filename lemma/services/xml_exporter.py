@@ -15,16 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import pickle
 import lemma.services.xml_helpers as xml_helpers
 
 
-class XMLExporter(object):
+class XMLExporter():
 
-    def __init__(self):
-        pass
-
-    def export_xml(self, node):
+    def export_xml(node):
         attributes = ' paragraph_style="' + node.paragraph_style + '"'
         if node.link != None:
             attributes += ' link_target="' + xml_helpers.escape(node.link) + '"'
@@ -33,29 +29,32 @@ class XMLExporter(object):
 
         if node.type == 'root':
             return '<root' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node]) + '</root>'
+                + ''.join([XMLExporter.export_xml(child) for child in node]) + '</root>'
 
         if node.type == 'mathscript':
             return '<mathscript' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node]) + '</mathscript>'
+                + ''.join([XMLExporter.export_xml(child) for child in node]) + '</mathscript>'
 
         if node.type == 'mathfraction':
             return '<mathfraction' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node]) + '</mathfraction>'
+                + ''.join([XMLExporter.export_xml(child) for child in node]) + '</mathfraction>'
 
         if node.type == 'mathroot':
             return '<mathroot' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node]) + '</mathroot>'
+                + ''.join([XMLExporter.export_xml(child) for child in node]) + '</mathroot>'
 
         if node.type == 'mathlist':
             return '<mathlist' + attributes + '>'\
-                + ''.join([self.export_xml(child) for child in node]) + '</mathlist>'
+                + ''.join([XMLExporter.export_xml(child) for child in node]) + '</mathlist>'
 
         if node.type == 'char':
             return '<char' + attributes + '>' + xml_helpers.escape(node.value) + '</char>'
 
         if node.type == 'widget':
-            return '<widget' + attributes + '><![CDATA[' + str(pickle.dumps(node.value)) + ']]></widget>'
+            data = node.value.get_data()
+            for key, value in node.value.get_attributes().items():
+                attributes += ' ' + key + '="' + value + '"'
+            return '<widget' + attributes + '><![CDATA[' + str(data) + ']]></widget>'
 
         if node.type == 'placeholder':
             return '<placeholder' + attributes + '/>'

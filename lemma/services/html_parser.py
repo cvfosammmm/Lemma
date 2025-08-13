@@ -76,12 +76,13 @@ class HTMLParser(HTMLParserLib):
                 if name == 'width':
                     width = int(value)
 
-            try: image = Image(os.path.join(self.path, filename), width=width)
-            except FileNotFoundError: pass
-            else:
+            try:
+                with open(os.path.join(self.path, filename), 'rb') as file:
+                    image = Image(file, attributes={'width': width})
                 node = Node('widget', image)
                 node.paragraph_style = self.paragraph_style
                 self.composite.append(node)
+            except FileNotFoundError: pass
         if tag == 'msubsup':
             node = Node('mathscript')
             node.paragraph_style = self.paragraph_style
