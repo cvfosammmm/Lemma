@@ -678,6 +678,9 @@ window.import-markdown-files-dialog list row button {
 window.import-markdown-files-dialog box.button-box {
     margin: 0px 18px 18px 18px;
 }
+window.import-markdown-files-dialog button.add-file-button {
+    font-weight: bold;
+}
 
 /* buld export dialog */
 
