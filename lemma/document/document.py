@@ -21,6 +21,7 @@ from lemma.document.ast import RootNode, Node, Cursor
 from lemma.document.layouter import Layouter
 from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
 from lemma.document.clipping import Clipping
+from lemma.document.xml_scanner import XMLScanner
 from lemma.services.layout_info import LayoutInfo
 
 for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
@@ -44,6 +45,7 @@ class Document():
         self.ast = RootNode('root')
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.plaintext = None
+        self.xml = None
         self.links = set()
 
         self.change_flag = dict()
@@ -51,6 +53,7 @@ class Document():
         self.layouter = Layouter(self)
         self.clipping = Clipping(self)
         self.plaintext_and_links_scanner = PlaintextAndLinksScanner(self)
+        self.xml_scanner = XMLScanner(self)
 
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
@@ -116,6 +119,7 @@ class Document():
         self.layouter.update()
         self.clipping.update()
         self.plaintext_and_links_scanner.update()
+        self.xml_scanner.update()
 
     def has_changed(self, client):
         if client not in self.change_flag:

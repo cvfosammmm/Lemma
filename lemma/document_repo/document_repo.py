@@ -19,8 +19,7 @@ import os.path
 from operator import attrgetter
 
 from lemma.document.document import Document
-from lemma.services.html_exporter import HTMLExporter
-from lemma.services.html_parser import HTMLParser
+from lemma.services.xml_parser import XMLParser
 from lemma.services.paths import Paths
 import lemma.services.timer as timer
 
@@ -29,7 +28,6 @@ class DocumentRepo():
 
     documents = list()
     documents_by_id = dict()
-    documents_by_title = dict()
     documents_by_link_target = dict()
     link_targets_by_document = dict()
     max_document_id = 0
@@ -46,20 +44,21 @@ class DocumentRepo():
                 document.last_modified = os.path.getmtime(direntry.path)
 
                 with open(direntry.path, 'r') as file:
-                    html = file.read()
+                    xml = file.read()
 
-                parser = HTMLParser(html, DocumentRepo.pathname)
-                parser.run()
-                document.title = parser.title
-                document.ast = parser.composite
-                document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
-                document.update()
-                document.change_flag[DocumentRepo] = False
+                parser = XMLParser()
+                nodes = parser.parse(xml)
+                if nodes != None:
+                    for node in nodes:
+                        document.ast.append(node)
+                    document.title = parser.title
+                    document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
+                    document.update()
+                    document.change_flag[DocumentRepo] = False
 
-                DocumentRepo.documents.append(document)
-                DocumentRepo.documents_by_id[document.id] = document
-                DocumentRepo.documents_by_title[document.title] = document
-                DocumentRepo.update_link_graph(document)
+                    DocumentRepo.documents.append(document)
+                    DocumentRepo.documents_by_id[document.id] = document
+                    DocumentRepo.update_link_graph(document)
 
         if len(DocumentRepo.documents_by_id) > 0:
             DocumentRepo.max_document_id = max(DocumentRepo.documents_by_id)
@@ -84,8 +83,9 @@ class DocumentRepo():
 
     @timer.timer
     def get_by_title(title):
-        if title in DocumentRepo.documents_by_title:
-            return DocumentRepo.documents_by_title[title]
+        for document in DocumentRepo.documents:
+            if document.title == title:
+                return document
         return None
 
     @timer.timer
@@ -112,17 +112,15 @@ class DocumentRepo():
 
         DocumentRepo.documents.append(document)
         DocumentRepo.documents_by_id[document.id] = document
-        DocumentRepo.documents_by_title[document.title] = document
         DocumentRepo.max_document_id = max(document.id, DocumentRepo.max_document_id)
 
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
-        exporter = HTMLExporter()
-        html = exporter.export_html(document)
+        xml = document.xml
 
         try: filehandle = open(pathname, 'w')
         except IOError: pass
         else:
-            filehandle.write(html)
+            filehandle.write(xml)
 
         DocumentRepo.update_link_graph(document)
 
@@ -132,7 +130,6 @@ class DocumentRepo():
 
         DocumentRepo.documents.remove(document)
         del(DocumentRepo.documents_by_id[document.id])
-        del(DocumentRepo.documents_by_title[document.title])
 
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
         os.remove(pathname)
@@ -144,16 +141,12 @@ class DocumentRepo():
         if not document.has_changed(DocumentRepo): return
 
         pathname = os.path.join(DocumentRepo.pathname, str(document.id))
-        exporter = HTMLExporter()
-        html = exporter.export_html(document)
-
-        del(DocumentRepo.documents_by_title[document.title])
-        DocumentRepo.documents_by_title[document.title] = document
+        xml = document.xml
 
         try: filehandle = open(pathname, 'w')
         except IOError: pass
         else:
-            filehandle.write(html)
+            filehandle.write(xml)
 
         DocumentRepo.update_link_graph(document)
 

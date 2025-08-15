@@ -15,9 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import urllib.parse
+
 
 def escape(text):
     escape_translation = str.maketrans({'<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;'})
     return text.translate(escape_translation)
+
+def embellish_with_link_and_tags(xml, link, tags):
+    if 'italic' in tags:
+        xml = '<em>' + xml + '</em>'
+    if 'bold' in tags:
+        xml = '<strong>' + xml + '</strong>'
+    if link != None:
+        xml = '<a href="' + urllib.parse.quote_plus(link) + '">' + xml + '</a>'
+    return xml
 
 

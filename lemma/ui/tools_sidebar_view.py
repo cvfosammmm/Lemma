@@ -112,12 +112,12 @@ class ToolsSidebar(Gtk.Stack):
         self.box.append(headline)
 
         symbols = []
-        symbols.append(['subscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>\')'])
-        symbols.append(['superscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>\')'])
-        symbols.append(['subsuperscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>\')'])
-        symbols.append(['fraction', 'win.insert-xml(\'<mathfraction><mathlist><placeholder marks="prev_selection new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathfraction>\')'])
-        symbols.append(['sqrt', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathroot>\')'])
-        symbols.append(['nthroot', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="new_selection_bound prev_selection"/><end marks="new_insert"/></mathlist><mathlist><placeholder/><end/></mathlist></mathroot>\')'])
+        symbols.append(['subscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>\')'])
+        symbols.append(['superscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>\')'])
+        symbols.append(['subsuperscript', 'win.insert-xml(\'<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>\')'])
+        symbols.append(['fraction', 'win.insert-xml(\'<mathfraction><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathfraction>\')'])
+        symbols.append(['sqrt', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist></mathlist></mathroot>\')'])
+        symbols.append(['nthroot', 'win.insert-xml(\'<mathroot><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathroot>\')'])
         wrapbox = self.create_wrapbox_for_pictures(symbols)
         self.box.append(wrapbox)
 

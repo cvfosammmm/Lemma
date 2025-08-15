@@ -22,6 +22,7 @@ from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.xml_parser as xml_parser
+import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.character_db import CharacterDB
@@ -223,11 +224,8 @@ class UseCases():
         tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
         link_at_cursor = ApplicationState.get_value('link_at_cursor')
 
-        link_attr = ''
-        if link_at_cursor != None:
-            link_attr = ' link_target="' + link_at_cursor + '"'
-
-        UseCases.insert_xml('<char tags="' + ' '.join(tags_at_cursor) + '"' + link_attr + '>' + xml_helpers.escape(text) + '</char>')
+        xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
+        UseCases.insert_xml(xml)
 
         if not document.cursor.has_selection() and text.isspace():
             UseCases.replace_max_string_before_cursor()
@@ -237,7 +235,7 @@ class UseCases():
     def replace_section(document, node_from, node_to, xml):
         insert = document.cursor.get_insert_node()
         parser = xml_parser.XMLParser()
-        nodes = parser.parse(xml, insert.parent.type)
+        nodes = parser.parse(xml)
 
         commands = []
         commands.append(['delete', node_from, node_to])
@@ -257,13 +255,18 @@ class UseCases():
         insert = document.cursor.get_insert_node()
         insert_prev = insert.prev_in_parent()
         parser = xml_parser.XMLParser()
-        nodes = parser.parse(xml, insert.parent.type)
+
+        if document.cursor.has_selection():
+            prev_selection = document.ast.get_subtree(*document.cursor.get_state())
+            prev_selection_xml = xml_exporter.XMLExporter.export(prev_selection)
+            xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml)
+
+        nodes = parser.parse(xml)
         selection_from = document.cursor.get_first_node()
         selection_to = document.cursor.get_last_node()
         commands = [['delete', selection_from, selection_to], ['insert', selection_to, nodes], ['move_cursor_to_node', selection_to]]
 
         if len(nodes) == 0: return
-
         if insert_prev != None and not insert_prev.type == 'eol':
             last_node_style = nodes[-1].paragraph_style
             for node in nodes:
@@ -277,31 +280,30 @@ class UseCases():
                 if node.type == 'eol': break
                 node.paragraph_style = insert.paragraph_style
 
-        if 'prev_selection' in parser.marks and document.cursor.has_selection():
-            prev_selection = parser.marks['prev_selection']
+        root_copy = selection_to.parent.copy()
+        for node in nodes:
+            root_copy.append(node)
+        if not root_copy.validate():
+            return
 
-            subtree = document.ast.get_subtree(*document.cursor.get_state())
-            prev_selection.parent.insert_before(prev_selection, [node.copy() for node in subtree])
-            prev_selection.parent.remove([prev_selection])
+        document.add_composite_command(*commands)
 
-        placeholders = [n for n in nodes.flatten() if n.type == 'placeholder']
-        if len(placeholders) > 0:
-            commands.append(['move_cursor_to_node', placeholders[0], placeholders[0].next_in_parent()])
-        elif 'new_insert' in parser.marks and 'new_selection_bound' in parser.marks:
-            if parser.marks['new_insert'].parent != None and parser.marks['new_selection_bound'].parent != None:
-                commands.append(['move_cursor_to_node', parser.marks['new_insert'], parser.marks['new_selection_bound']])
-        elif 'new_insert' in parser.marks:
-            if parser.marks['new_insert'].parent != None:
-                commands.append(['move_cursor_to_node', parser.marks['new_insert']])
+        placeholder_found = False
+        for node_list in [node.flatten() for node in nodes]:
+            for node in node_list:
+                if node.type == 'placeholder':
+                    UseCases.select_node(node)
+                    placeholder_found = True
+                    break
+            if placeholder_found:
+                break
+                    
+        document.add_command('update_implicit_x_position')
+        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
-        if nodes.validate():
-            document.add_composite_command(*commands)
-            document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
-
-            DocumentRepo.update(document)
-            MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_ast_changed')
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def backspace():
@@ -397,7 +399,7 @@ class UseCases():
                 if CharacterDB.has_replacement(chars[i:]):
                     length = len(chars) - i
                     text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
-                    xml = '<char tags="' + ' '.join(first_node.tags) + '">' + text + '</char>'
+                    xml = xml_helpers.embellish_with_link_and_tags(text, None, first_node.tags)
                     parser = xml_parser.XMLParser()
                     nodes = parser.parse(xml)
 

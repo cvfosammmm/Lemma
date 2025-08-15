@@ -47,9 +47,9 @@ class CursorState():
                 UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
             else:
                 if node.link == prev_node.link:
-                    UseCases.app_state_set_values({'tags_at_cursor': node.tags.copy(), 'link_at_cursor': node.link})
+                    UseCases.app_state_set_values({'tags_at_cursor': prev_node.tags.copy(), 'link_at_cursor': node.link})
                 else:
-                    UseCases.app_state_set_values({'tags_at_cursor': node.tags.copy(), 'link_at_cursor': None})
+                    UseCases.app_state_set_values({'tags_at_cursor': prev_node.tags.copy(), 'link_at_cursor': None})
 
     def update_tag_toggle(self, button, tagname):
         document = History.get_active_document()
@@ -58,8 +58,8 @@ class CursorState():
         chars_selected = False
         all_tagged = True
         if document.cursor.has_selection():
-            chars_selected = True
             for node in [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']:
+                chars_selected = True
                 if tagname not in node.tags:
                     all_tagged = False
                     break

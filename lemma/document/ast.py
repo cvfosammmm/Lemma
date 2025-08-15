@@ -150,6 +150,12 @@ class RootNode():
 
         return parent[pos1[-1]:pos2[-1]]
 
+    def copy(self):
+        node = RootNode(self.type, self.value)
+        node.tags = self.tags
+        node.link = self.link
+        return node
+
     def __len__(self):
         return sum([len(line['nodes']) for line in self.lines])
 
@@ -237,10 +243,11 @@ class RootNode():
     def validate(self):
         for line in self.lines:
             for child in line['nodes']:
-                if child.type not in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot'}:
+                if child.type not in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}:
                     return False
                 if not child.validate():
                     return False
+        return True
 
 
 class Node():
@@ -302,7 +309,6 @@ class Node():
         node = Node(self.type, self.value)
         node.tags = self.tags
         node.link = self.link
-        node.children = self.children
         return node
 
     def __len__(self): return len(self.children)

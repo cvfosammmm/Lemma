@@ -170,7 +170,7 @@ class Popover():
             if self.bounds == None:
                 tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
                 text = xml_helpers.escape(self.current_values['link_target'])
-                xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
+                xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
             else:
                 UseCases.set_link(document, self.bounds, self.current_values['link_target'])

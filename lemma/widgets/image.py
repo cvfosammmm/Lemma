@@ -21,6 +21,7 @@ import cairo
 
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.file_format_db import FileFormatDB
+import lemma.services.timer as timer
 
 
 class Image(object):

@@ -125,8 +125,8 @@ class HTMLParser(HTMLParserLib):
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
 
-        if tag == 'strong': self.tags.remove('bold')
-        if tag == 'em': self.tags.remove('italic')
+        if tag == 'strong': self.tags.discard('bold')
+        if tag == 'em': self.tags.discard('italic')
         if tag == 'a': self.link_target = None
         if tag == 'msubsup':
             self.composite = self.composite.parent

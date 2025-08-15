@@ -27,11 +27,14 @@ class Command():
         self.state['nodes_and_previous_paragraph_style'] = []
 
         first_node = document.cursor.get_first_node().line_start()
-        next_to_last = document.cursor.get_last_node().prev_in_parent()
-        if next_to_last != None:
-            last_node = next_to_last.line_end()
+        if document.cursor.has_selection():
+            next_to_last = document.cursor.get_last_node().prev_in_parent()
+            if next_to_last != None:
+                last_node = next_to_last.line_end()
+            else:
+                last_node = document.cursor.get_last_node().line_end()
         else:
-            last_node = document.cursor.get_last_node().line_end()
+            last_node = first_node.line_end()
 
         for node in document.ast.get_subtree(first_node.get_position(), last_node.get_position()):
             self.state['nodes_and_previous_paragraph_style'].append([node, node.paragraph_style])

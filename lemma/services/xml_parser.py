@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import xml.parsers.expat
-import pickle
 import io
 
 from lemma.document.ast import Node
@@ -32,110 +31,118 @@ class XMLParser(object):
         self.expat_parser.EndElementHandler = self.handle_endtag
         self.expat_parser.CharacterDataHandler = self.handle_data
 
+        self.nodes = []
         self.current_node = None
-        self.marks = dict()
         self.open_tags = []
         self.current_link = None
-        self.current_tags = None
+        self.current_tags = set()
         self.current_paragraph_style = 'p'
         self.current_attributes = dict()
+        self.widget_data = ''
+        self.title = ''
 
-    def parse(self, xml_string, root_node_type='root'):
-        self.current_node = Node(root_node_type)
-        self.expat_parser.Parse('<?xml version="1.0" encoding="utf-8"?><list>' + xml_string + '</list>', 1)
-
-        return self.current_node
+    def parse(self, xml_string):
+        self.nodes = []
+        self.current_node = None
+        self.current_tags = set()
+        self.title = ''
+        try:
+            self.expat_parser.Parse('<?xml version="1.0" encoding="utf-8"?><list>' + xml_string + '</list>', 1)
+        except xml.parsers.expat.ExpatError as error:
+            return None
+        else:
+            return self.nodes
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)
 
-        if 'link_target' in attrs:
-            self.current_link = attrs['link_target']
-        else:
-            self.current_link = None
-        if 'tags' in attrs:
-            self.current_tags = set(attrs['tags'].split())
-        else:
-            self.current_tags = set()
-        if 'paragraph_style' in attrs:
-            self.current_paragraph_style = attrs['paragraph_style']
-        else:
-            self.current_paragraph_style = 'p'
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6']:
+            self.current_paragraph_style = tag
+        if tag == 'a' and 'href' in attrs:
+            self.current_link = attrs['href']
+        if tag == 'em':
+            self.current_tags.add('italic')
+        if tag == 'strong':
+            self.current_tags.add('bold')
 
         node = None
         if tag == 'mathscript':
             node = Node('mathscript')
-            self.current_node.append(node)
-            self.current_node = node
         if tag == 'mathfraction':
             node = Node('mathfraction')
-            self.current_node.append(node)
-            self.current_node = node
         if tag == 'mathroot':
             node = Node('mathroot')
-            self.current_node.append(node)
-            self.current_node = node
         if tag == 'mathlist':
             node = Node('mathlist')
-            self.current_node.append(node)
-            self.current_node = node
         if tag == 'end':
             node = Node('end')
             node.link = self.current_link
-            node.tags = self.current_tags
+            node.tags = self.current_tags.copy()
             node.paragraph_style = self.current_paragraph_style
-            self.current_node.append(node)
         if tag == 'placeholder':
             node = Node('placeholder', '')
             node.link = self.current_link
-            node.tags = self.current_tags
+            node.tags = self.current_tags.copy()
             node.paragraph_style = self.current_paragraph_style
-            self.current_node.append(node)
         if tag == 'widget':
-            self.widget_data = ''
+            node = Node('widget', None)
+            node.link = self.current_link
+            node.tags = self.current_tags.copy()
+            node.paragraph_style = self.current_paragraph_style
             self.current_attributes = attrs
+            self.widget_data = ''
 
-        if node != None and 'marks' in attrs:
-            for mark in attrs['marks'].split():
-                self.marks[mark] = node
+        if tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'widget']:
+            if self.current_node != None:
+                self.current_node.append(node)
+            else:
+                self.nodes.append(node)
+            self.current_node = node
 
     def handle_endtag(self, tag):
         self.open_tags.pop()
 
-        if tag == 'mathscript':
-            self.current_node = self.current_node.parent
-        if tag == 'mathfraction':
-            self.current_node = self.current_node.parent
-        if tag == 'mathroot':
-            self.current_node = self.current_node.parent
-        if tag == 'mathlist':
-            self.current_node = self.current_node.parent
-        if tag == 'widget':
-            if 'type' in self.current_attributes and self.current_attributes['type'] == 'image':
+        if tag == 'a':
+            self.current_link = None
+        if tag == 'em':
+            self.current_tags.discard('italic')
+        if tag == 'strong':
+            self.current_tags.discard('bold')
+
+        if tag == 'widget' and self.current_node.type == 'widget':
+            if self.current_attributes['type'] == 'image':
                 with io.BytesIO(eval(self.widget_data)) as widget_data_stream:
-                    node = Node('widget', Image(widget_data_stream, attributes=self.current_attributes))
-                node.link = self.current_link
-                node.tags = self.current_tags
-                node.paragraph_style = self.current_paragraph_style
-                self.current_node.append(node)
-            self.widget_data = ''
+                    self.current_node.value = Image(widget_data_stream, attributes=self.current_attributes)
+
+        if tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'widget']:
+            if self.current_node.parent != None:
+                self.current_node = self.current_node.parent
+            else:
+                self.current_node = None
 
     def handle_data(self, data):
-        if 'widget' in self.open_tags:
+        if self.current_node != None and self.current_node.type == 'widget':
             self.widget_data += data
+
+        elif 'head' in self.open_tags and 'title' in self.open_tags:
+            self.title += data
 
         else:
             for char in data:
                 if char == '\n':
                     node = Node('eol')
                     node.link = self.current_link
-                    node.tags = self.current_tags
+                    node.tags = self.current_tags.copy()
                     node.paragraph_style = self.current_paragraph_style
                 else:
                     node = Node('char', char)
                     node.link = self.current_link
-                    node.tags = self.current_tags
+                    node.tags = self.current_tags.copy()
                     node.paragraph_style = self.current_paragraph_style
-                self.current_node.append(node)
+
+                if self.current_node != None:
+                    self.current_node.append(node)
+                else:
+                    self.nodes.append(node)
 
 

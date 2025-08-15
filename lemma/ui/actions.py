@@ -20,7 +20,6 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gio, GLib, GObject, Gdk
 
 from urllib.parse import urlparse
-import pickle, base64
 
 from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
@@ -200,7 +199,7 @@ class Actions(object):
                 chars.append('\n')
         chars = ''.join(chars)
 
-        xml = ''.join([XMLExporter.export_xml(node) for node in subtree])
+        xml = XMLExporter.export(subtree)
 
         cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
         cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode()))
@@ -232,21 +231,17 @@ class Actions(object):
             tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
             link_at_cursor = ApplicationState.get_value('link_at_cursor')
 
-            link_attr = ''
-            if link_at_cursor != None:
-                link_attr = ' link_target="' + link_at_cursor + '"'
-
             if len(text) < 2000:
                 stext = text.strip()
                 parsed_url = urlparse(stext)
                 if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
                     text = xml_helpers.escape(stext)
-                    xml = '<char tags="' + ' '.join(tags_at_cursor) + '" link_target="' + text + '">' + text + '</char>'
+                    xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                     UseCases.insert_xml(xml)
                     return
 
             text = xml_helpers.escape(text)
-            xml = '<char tags="' + ' '.join(tags_at_cursor) + '"' + link_attr + '>' + text + '</char>'
+            xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
             UseCases.insert_xml(xml)
 
     def delete(self, action=None, parameter=''):
@@ -266,9 +261,9 @@ class Actions(object):
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
-            xml = '<mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
+            xml = '<mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         else:
-            xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist><mathlist></mathlist></mathscript>'
+            xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
 
     def superscript(self, action=None, parameter=''):
@@ -276,9 +271,9 @@ class Actions(object):
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
-            xml = '<mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'
+            xml = '<mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         else:
-            xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder marks="new_selection_bound"/><end marks="new_insert"/></mathlist></mathscript>'
+            xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
 
     def set_paragraph_style(self, action=None, parameter=None):
