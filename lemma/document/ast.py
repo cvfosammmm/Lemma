@@ -430,6 +430,7 @@ class Node():
             result += child.flatten()
         return result
 
+    @timer.timer
     def line_start(self):
         node = self
 
@@ -437,7 +438,7 @@ class Node():
             node = node.parent
 
         line_no, offset = node.parent.line_no_offset(node)
-        return node.parent.get_lines()[line_no][0]
+        return node.parent.lines[line_no]['nodes'][0]
 
     def line_end(self):
         node = self
@@ -446,7 +447,7 @@ class Node():
             node = node.parent
 
         line_no, offset = node.parent.line_no_offset(node)
-        return node.parent.get_lines()[line_no][-1]
+        return node.parent.lines[line_no]['nodes'][-1]
 
     def __str__(self):
         string = self.type + ':' + str(self.value)
