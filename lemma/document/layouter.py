@@ -143,101 +143,11 @@ class Layouter(object):
                 result[-1].append(node)
         return result
 
+    @timer.timer
     def layout(self, layout_tree):
-        if layout_tree['type'] == 'paragraph':
-            for child in layout_tree['children']:
-                self.layout(child)
-
-            lines = list()
-            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
-            current_line_width = 0
-            for child in layout_tree['children']:
-                if child['type'] == 'eol':
-                    current_line['children'].append(child)
-                    child['parent'] = current_line
-                else:
-                    break_after_char = (child['type'] == 'char' and NodeTypeDB.is_whitespace(child['node'])) or child['type'] == 'end' or child['type'] == 'eol'
-                    if break_after_char:
-                        current_line['children'].append(child)
-                        child['parent'] = current_line
-                        current_line_width += child['width']
-                        if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
-                            lines.append(current_line)
-                            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
-                            current_line_width = 0
-                    else:
-                        if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
-                            lines.append(current_line)
-                            current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
-                            current_line_width = 0
-                        current_line['children'].append(child)
-                        child['parent'] = current_line
-                        current_line_width += child['width']
-            lines.append(current_line)
-
-            layout_tree['height'] = 0
-            for line in lines:
-                self.layout(line)
-                line['x'] = 0
-                line['y'] = layout_tree['height']
-                layout_tree['height'] += line['height']
-            layout_tree['children'] = lines
-            layout_tree['width'] = LayoutInfo.get_layout_width()
-            layout_tree['x'] = 0
-            layout_tree['y'] = 0
-
-        elif layout_tree['type'] == 'vbox':
-            for child in layout_tree['children']:
-                self.layout(child)
-
-            layout_tree['width'] = 0
-            layout_tree['height'] = 0
-            for child in layout_tree['children']:
-                child['x'] = 0
-                child['y'] = layout_tree['height']
-
-                layout_tree['height'] += child['height']
-                layout_tree['width'] = max(layout_tree['width'], child['width'])
-
-            layout_tree['x'] = None
-            layout_tree['y'] = None
-
-        elif layout_tree['type'] == 'hbox':
-            new_children = []
-            for child in layout_tree['children']:
-                if child['type'] == 'word':
-                    for word_child in child['children']:
-                        word_child['parent'] = layout_tree
-                        new_children.append(word_child)
-                else:
-                    new_children.append(child)
-            layout_tree['children'] = new_children
-
-            for child in layout_tree['children']:
-                self.layout(child)
-
-            min_descend = 0
-            for child in layout_tree['children']:
-                fontname = FontManager.get_fontname_from_node(child['node'])
-                min_descend = min(min_descend, FontManager.get_descend(fontname=fontname))
-
-            for child in layout_tree['children']:
-                fontname = FontManager.get_fontname_from_node(child['node'])
-                child['height'] -= min_descend - FontManager.get_descend(fontname=fontname)
-
-            layout_tree['width'] = 0
-            layout_tree['height'] = 0
-            for child in layout_tree['children']:
-                fontname = FontManager.get_fontname_from_node(child['node'])
-                child['x'] = layout_tree['width']
-
-                layout_tree['width'] += child['width']
-                layout_tree['height'] = max(layout_tree['height'], child['height'] - min_descend + FontManager.get_descend(fontname=fontname))
-
-            for child in layout_tree['children']:
-                fontname = FontManager.get_fontname_from_node(child['node'])
-                child['y'] = layout_tree['height'] - child['height']
-
+        if layout_tree['type'] == 'paragraph': self.layout_paragraph(layout_tree)
+        elif layout_tree['type'] == 'vbox': self.layout_vbox(layout_tree)
+        elif layout_tree['type'] == 'hbox': self.layout_hbox(layout_tree)
         elif layout_tree['type'] == 'mathscript':
             if len(layout_tree['children']) == 2:
                 for child in layout_tree['children']:
@@ -388,5 +298,102 @@ class Layouter(object):
             layout_tree['height'] = height
             layout_tree['x'] = None
             layout_tree['y'] = None
+
+    @timer.timer
+    def layout_paragraph(self, layout_tree):
+        for child in layout_tree['children']:
+            self.layout(child)
+
+        lines = list()
+        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+        current_line_width = 0
+        for child in layout_tree['children']:
+            if child['type'] == 'eol':
+                current_line['children'].append(child)
+                child['parent'] = current_line
+            else:
+                break_after_char = (child['type'] == 'char' and NodeTypeDB.is_whitespace(child['node'])) or child['type'] == 'end' or child['type'] == 'eol'
+                if break_after_char:
+                    current_line['children'].append(child)
+                    child['parent'] = current_line
+                    current_line_width += child['width']
+                    if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
+                        lines.append(current_line)
+                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                        current_line_width = 0
+                else:
+                    if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
+                        lines.append(current_line)
+                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                        current_line_width = 0
+                    current_line['children'].append(child)
+                    child['parent'] = current_line
+                    current_line_width += child['width']
+        lines.append(current_line)
+
+        layout_tree['height'] = 0
+        for line in lines:
+            self.layout(line)
+            line['x'] = 0
+            line['y'] = layout_tree['height']
+            layout_tree['height'] += line['height']
+        layout_tree['children'] = lines
+        layout_tree['width'] = LayoutInfo.get_layout_width()
+        layout_tree['x'] = 0
+        layout_tree['y'] = 0
+
+    @timer.timer
+    def layout_vbox(self, layout_tree):
+        for child in layout_tree['children']:
+            self.layout(child)
+
+        layout_tree['width'] = 0
+        layout_tree['height'] = 0
+        for child in layout_tree['children']:
+            child['x'] = 0
+            child['y'] = layout_tree['height']
+
+            layout_tree['height'] += child['height']
+            layout_tree['width'] = max(layout_tree['width'], child['width'])
+
+        layout_tree['x'] = None
+        layout_tree['y'] = None
+
+    @timer.timer
+    def layout_hbox(self, layout_tree):
+        new_children = []
+        for child in layout_tree['children']:
+            if child['type'] == 'word':
+                for word_child in child['children']:
+                    word_child['parent'] = layout_tree
+                    new_children.append(word_child)
+            else:
+                new_children.append(child)
+        layout_tree['children'] = new_children
+
+        for child in layout_tree['children']:
+            self.layout(child)
+
+        min_descend = 0
+        for child in layout_tree['children']:
+            fontname = FontManager.get_fontname_from_node(child['node'])
+            min_descend = min(min_descend, FontManager.get_descend(fontname=fontname))
+
+        for child in layout_tree['children']:
+            fontname = FontManager.get_fontname_from_node(child['node'])
+            child['height'] -= min_descend - FontManager.get_descend(fontname=fontname)
+
+        layout_tree['width'] = 0
+        layout_tree['height'] = 0
+        for child in layout_tree['children']:
+            fontname = FontManager.get_fontname_from_node(child['node'])
+            child['x'] = layout_tree['width']
+
+            layout_tree['width'] += child['width']
+            layout_tree['height'] = max(layout_tree['height'], child['height'] - min_descend + FontManager.get_descend(fontname=fontname))
+
+        for child in layout_tree['children']:
+            fontname = FontManager.get_fontname_from_node(child['node'])
+            child['y'] = layout_tree['height'] - child['height']
 
 

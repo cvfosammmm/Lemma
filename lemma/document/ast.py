@@ -25,7 +25,7 @@ class RootNode():
         self.parent = None
         end_node = Node('end')
         end_node.set_parent(self)
-        self.lines = [{'nodes': [end_node], 'layout': None}]
+        self.lines = [{'nodes': [end_node], 'layout': None, 'xml': None}]
         self.type = type_str
         self.value = value
         self.tags = set()
@@ -44,7 +44,7 @@ class RootNode():
         for node in nodes:
             if node.type == 'eol':
                 self.lines[line_no]['nodes'].insert(offset, node)
-                new_line = {'nodes': self.lines[line_no]['nodes'][offset + 1:], 'layout': None}
+                new_line = {'nodes': self.lines[line_no]['nodes'][offset + 1:], 'layout': None, 'xml': None}
                 self.lines.insert(line_no + 1, new_line)
                 del(self.lines[line_no]['nodes'][offset + 1:])
 
@@ -61,7 +61,7 @@ class RootNode():
     def append(self, node):
         self.lines[-1]['nodes'].insert(-1, node)
         if node.type == 'eol':
-            self.lines.append({'nodes': [self.lines[-1]['nodes'][-1]], 'layout': None})
+            self.lines.append({'nodes': [self.lines[-1]['nodes'][-1]], 'layout': None, 'xml': None})
             del(self.lines[-2]['nodes'][-1])
 
         node.set_parent(self)
@@ -74,7 +74,7 @@ class RootNode():
                 if node in line['nodes']:
                     line['nodes'].remove(node)
                     if node.type == 'eol':
-                        self.lines[i] = {'nodes': line['nodes'] + self.lines[i + 1]['nodes'], 'layout': None}
+                        self.lines[i] = {'nodes': line['nodes'] + self.lines[i + 1]['nodes'], 'layout': None, 'xml': None}
                         del(self.lines[i + 1])
                     elif len(self.lines[i]['nodes']) == 0:
                         del(self.lines[i])

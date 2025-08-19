@@ -114,6 +114,7 @@ class Document():
 
     def invalidate(self, line_no):
         self.ast.lines[line_no]['layout'] = None
+        self.ast.lines[line_no]['xml'] = None
 
     def update(self):
         self.layouter.update()

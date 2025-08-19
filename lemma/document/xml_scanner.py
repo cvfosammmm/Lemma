@@ -34,8 +34,10 @@ class XMLScanner(object):
         xml = '<head><title>' + xml_helpers.escape(self.document.title) + '</title></head>'
 
         xml += '<root>'
-        for line in self.document.ast.get_lines():
-            xml += XMLExporter.export(line)
+        for line in self.document.ast.lines:
+            if line['xml'] == None:
+                line['xml'] = XMLExporter.export(line['nodes'])
+            xml += line['xml']
         xml += '</root>'
 
         self.document.xml = xml

@@ -21,6 +21,7 @@ from operator import attrgetter
 from lemma.document.document import Document
 from lemma.services.xml_parser import XMLParser
 from lemma.services.paths import Paths
+import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
 
@@ -150,6 +151,7 @@ class DocumentRepo():
 
         DocumentRepo.update_link_graph(document)
 
+    @timer.timer
     def update_link_graph(document):
         if document in DocumentRepo.link_targets_by_document:
             for link_target in DocumentRepo.link_targets_by_document[document]:
