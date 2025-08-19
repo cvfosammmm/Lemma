@@ -107,6 +107,7 @@ class DocumentHistory(object):
             self.selected_document = document
             self.view.content.queue_draw()
 
+    @timer.timer
     def draw(self, widget, ctx, width, height):
         mode = ApplicationState.get_value('mode')
         document_at_cursor = self.get_document_at_cursor()
@@ -171,6 +172,7 @@ class DocumentHistory(object):
             if x < offset: return document
         return None
 
+    @timer.timer
     def get_item_extents(self, text):
         self.layout.set_font_description(self.font_desc_bold)
         self.layout.set_width(-1)
