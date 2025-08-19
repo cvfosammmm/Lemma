@@ -130,6 +130,7 @@ class Application(Adw.Application):
         self.document_view.update()
         self.popover_manager.update()
         self.toolbars.update()
+        self.document_history.update()
 
     def on_document_ast_changed(self):
         self.model_state.update()
