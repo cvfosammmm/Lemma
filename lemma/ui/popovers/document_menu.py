@@ -72,10 +72,6 @@ class View(PopoverView):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.export_document_button = MenuBuilder.create_button(_('Export HTML...'))
-        self.export_document_button.set_action_name('win.export-html')
-        self.add_closing_button(self.export_document_button)
-
         self.export_document_button = MenuBuilder.create_button(_('Export Markdown...'))
         self.export_document_button.set_action_name('win.export-markdown')
         self.add_closing_button(self.export_document_button)

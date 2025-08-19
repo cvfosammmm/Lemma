@@ -19,7 +19,8 @@ import time, os.path
 
 from lemma.document.ast import RootNode, Node, Cursor
 from lemma.document.layouter import Layouter
-from lemma.document.plaintext_and_links_scanner import PlaintextAndLinksScanner
+from lemma.document.plaintext_scanner import PlaintextScanner
+from lemma.document.links_scanner import LinksScanner
 from lemma.document.clipping import Clipping
 from lemma.document.xml_scanner import XMLScanner
 from lemma.services.layout_info import LayoutInfo
@@ -52,7 +53,8 @@ class Document():
 
         self.layouter = Layouter(self)
         self.clipping = Clipping(self)
-        self.plaintext_and_links_scanner = PlaintextAndLinksScanner(self)
+        self.plaintext_scanner = PlaintextScanner(self)
+        self.links_scanner = LinksScanner(self)
         self.xml_scanner = XMLScanner(self)
 
     def add_command(self, name, *parameters):
@@ -119,7 +121,8 @@ class Document():
     def update(self):
         self.layouter.update()
         self.clipping.update()
-        self.plaintext_and_links_scanner.update()
+        self.plaintext_scanner.update()
+        self.links_scanner.update()
         self.xml_scanner.update()
 
     def has_changed(self, client):

@@ -15,38 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.services.node_type_db import NodeTypeDB
 import lemma.services.timer as timer
 
 
-class PlaintextAndLinksScanner(object):
+class LinksScanner(object):
 
     def __init__(self, document):
         self.document = document
 
     def update(self):
         if self.document.has_changed(self):
-            self.update_pal()
+            self.update_links()
 
     @timer.timer
-    def update_pal(self):
-        text = ''
+    def update_links(self):
         links = []
 
-        for line in self.document.ast.get_lines():
-            for node in line:
-                if node.type == 'eol':
-                    text += '\n'
-                elif node.type == 'char':
-                    if node.link != None:
-                        links.append(node.link)
-                    if NodeTypeDB.is_whitespace(node):
-                        if text == '' or text[-1] != ' ':
-                            text += ' '
-                    else:
-                        text += node.value
+        for line in self.document.ast.lines:
+            for node in line['nodes']:
+                if node.link != None and node.type == 'char':
+                    links.append(node.link)
 
-        self.document.plaintext = text
         self.document.links = set(links)
 
 

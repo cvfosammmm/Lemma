@@ -47,7 +47,6 @@ class Dialog(object):
 
     def init_current_values(self):
         self.current_values['filename'] = None
-        self.current_values['format'] = 'html'
         self.current_values['documents'] = [DocumentRepo.get_by_id(doc_id) for doc_id in DocumentRepo.list()]
 
     def populate_view(self):
@@ -57,8 +56,6 @@ class Dialog(object):
         if last_export_folder != None:
             self.view.file_chooser_button.dialog.set_initial_folder(Gio.File.new_for_path(last_export_folder))
 
-        self.view.file_format_buttons[self.current_values['format']].set_active(True)
-
         for document in [DocumentRepo.get_by_id(doc_id) for doc_id in DocumentRepo.list()]:
             row = view.Row(document)
             row.button.set_active(document in self.current_values['documents'])
@@ -67,9 +64,6 @@ class Dialog(object):
 
     def observe_view(self):
         self.view.file_chooser_button.connect('file-set', self.on_file_chosen)
-
-        for value, button in self.view.file_format_buttons.items():
-            button.connect('toggled', self.on_checkbutton_toggled, 'format', value)
 
         for row in self.view.list:
             row.button.connect('toggled', self.on_document_button_toggled, row.document)
@@ -118,18 +112,11 @@ class Dialog(object):
         with zipfile.ZipFile(filename, 'x') as file:
             for document in self.current_values['documents']:
 
-                if self.current_values['format'] == 'html':
-                    exporter = HTMLExporter()
-                    html = exporter.export_html(document)
-                    html = html.replace('<body>', '<body><h1>' + document.title + '</h1>')
-                    file.writestr(str(document.id) + '.html', html)
-
-                if self.current_values['format'] == 'markdown':
-                    exporter = HTMLExporter()
-                    html = exporter.export_html(document)
-                    markdown = '# ' + document.title + '\n'
-                    markdown += html2text.html2text(html)
-                    file.writestr(str(document.id) + '.md', markdown)
+                exporter = HTMLExporter()
+                html = exporter.export_html(document)
+                markdown = '# ' + document.title + '\n'
+                markdown += html2text.html2text(html)
+                file.writestr(str(document.id) + '.md', markdown)
 
                 data_dir = Paths.get_notes_folder()
                 for include in [file for file in os.listdir(data_dir) if file.startswith(str(document.id) + '-')]:

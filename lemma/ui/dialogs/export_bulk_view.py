@@ -33,11 +33,6 @@ class ExportBulkView(DialogViewAction):
         self.file_chooser_button.dialog.set_initial_name('.zip')
         self.file_chooser_button.dialog.set_title(_('Choose File'))
 
-        self.format_label = self.add_header_label('<b>' + _('Format') + '</b>')
-        self.format_label.set_margin_top(2)
-        self.format_label.set_margin_bottom(-1)
-        self.file_format_buttons = self.add_radio_group({'html': _('HTML (recommended)'), 'markdown': _('Markdown')})
-
         self.documents_label = self.add_header_label('<b>' + _('Documents to export') + '</b>')
         self.documents_label.set_margin_bottom(1)
 

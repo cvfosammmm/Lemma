@@ -145,7 +145,58 @@ class Layouter(object):
 
     @timer.timer
     def layout(self, layout_tree):
-        if layout_tree['type'] == 'paragraph': self.layout_paragraph(layout_tree)
+        if layout_tree['type'] == 'char':
+            layout_tree['x'] = None
+            layout_tree['y'] = None
+        elif layout_tree['type'] == 'word':
+            for child in layout_tree['children']:
+                self.layout(child)
+
+            layout_tree['width'] = 0
+            layout_tree['height'] = 0
+            for child in layout_tree['children']:
+                child['x'] = layout_tree['width']
+
+                layout_tree['width'] += child['width']
+                layout_tree['height'] = max(layout_tree['height'], child['height'])
+
+        elif layout_tree['type'] == 'placeholder':
+            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
+            width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
+
+            layout_tree['width'] = width
+            layout_tree['height'] = height
+            layout_tree['x'] = None
+            layout_tree['y'] = None
+
+        elif layout_tree['type'] == 'widget':
+            width, height = layout_tree['node'].value.get_width(), layout_tree['node'].value.get_height()
+            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
+            height -= 2 * FontManager.get_descend(fontname=fontname)
+
+            layout_tree['width'] = width
+            layout_tree['height'] = height
+            layout_tree['x'] = None
+            layout_tree['y'] = None
+
+        elif layout_tree['type'] == 'eol':
+            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
+            width, height, left, top = FontManager.measure_single('\n', fontname=fontname)
+
+            layout_tree['width'] = 1
+            layout_tree['height'] = height
+            layout_tree['x'] = None
+            layout_tree['y'] = None
+
+        elif layout_tree['type'] == 'end':
+            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
+            width, height, left, top = FontManager.measure_single('\n', fontname=fontname)
+
+            layout_tree['width'] = 1
+            layout_tree['height'] = height
+            layout_tree['x'] = None
+            layout_tree['y'] = None
+        elif layout_tree['type'] == 'paragraph': self.layout_paragraph(layout_tree)
         elif layout_tree['type'] == 'vbox': self.layout_vbox(layout_tree)
         elif layout_tree['type'] == 'hbox': self.layout_hbox(layout_tree)
         elif layout_tree['type'] == 'mathscript':
@@ -243,59 +294,6 @@ class Layouter(object):
 
             layout_tree['width'] = layout_tree['children'][0]['width'] + max(7, layout_tree['children'][1]['width']) + 10
             layout_tree['height'] = layout_tree['children'][0]['height']
-            layout_tree['x'] = None
-            layout_tree['y'] = None
-
-        elif layout_tree['type'] == 'word':
-            for child in layout_tree['children']:
-                self.layout(child)
-
-            layout_tree['width'] = 0
-            layout_tree['height'] = 0
-            for child in layout_tree['children']:
-                child['x'] = layout_tree['width']
-
-                layout_tree['width'] += child['width']
-                layout_tree['height'] = max(layout_tree['height'], child['height'])
-
-        elif layout_tree['type'] == 'char':
-            layout_tree['x'] = None
-            layout_tree['y'] = None
-
-        elif layout_tree['type'] == 'placeholder':
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
-
-            layout_tree['width'] = width
-            layout_tree['height'] = height
-            layout_tree['x'] = None
-            layout_tree['y'] = None
-
-        elif layout_tree['type'] == 'widget':
-            width, height = layout_tree['node'].value.get_width(), layout_tree['node'].value.get_height()
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            height -= 2 * FontManager.get_descend(fontname=fontname)
-
-            layout_tree['width'] = width
-            layout_tree['height'] = height
-            layout_tree['x'] = None
-            layout_tree['y'] = None
-
-        elif layout_tree['type'] == 'eol':
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            width, height, left, top = FontManager.measure_single('\n', fontname=fontname)
-
-            layout_tree['width'] = 1
-            layout_tree['height'] = height
-            layout_tree['x'] = None
-            layout_tree['y'] = None
-
-        elif layout_tree['type'] == 'end':
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            width, height, left, top = FontManager.measure_single('\n', fontname=fontname)
-
-            layout_tree['width'] = 1
-            layout_tree['height'] = height
             layout_tree['x'] = None
             layout_tree['y'] = None
 

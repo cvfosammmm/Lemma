@@ -46,7 +46,6 @@ class Actions(object):
         self.add_simple_action('delete-document', self.delete_document)
         self.add_simple_action('rename-document', self.rename_document)
         self.add_simple_action('export-markdown', self.export_markdown)
-        self.add_simple_action('export-html', self.export_html)
 
         self.add_simple_action('go-back', self.go_back)
         self.add_simple_action('go-forward', self.go_forward)
@@ -106,7 +105,6 @@ class Actions(object):
         self.actions['delete-document'].set_enabled(self.model_state.has_active_doc)
         self.actions['rename-document'].set_enabled(self.model_state.has_active_doc)
         self.actions['export-markdown'].set_enabled(self.model_state.has_active_doc)
-        self.actions['export-html'].set_enabled(self.model_state.has_active_doc)
         self.actions['go-back'].set_enabled(self.model_state.mode == 'draft' or self.model_state.prev_doc != None)
         self.actions['go-forward'].set_enabled(self.model_state.next_doc != None)
         self.actions['undo'].set_enabled(self.model_state.has_active_doc and self.model_state.can_undo)
@@ -157,9 +155,6 @@ class Actions(object):
 
     def export_markdown(self, action=None, parameter=''):
         DialogLocator.get_dialog('export_markdown').run(History.get_active_document())
-
-    def export_html(self, action=None, parameter=''):
-        DialogLocator.get_dialog('export_html').run(History.get_active_document())
 
     def go_back(self, action=None, parameter=''):
         mode = ApplicationState.get_value('mode')
