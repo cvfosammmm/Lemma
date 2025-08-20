@@ -30,12 +30,12 @@ class HTMLExporter(object):
         self.document_id = None
         self.html = ''
 
-    def export_document(self, document, files_folder):
+    def export_document(self, document, filename):
         self.document_id = document.id
-        self.files_folder = files_folder
+        self.files_folder = filename[:-3] + '_files'
 
-        if os.path.exists(files_folder): shutil.rmtree(files_folder)
-        os.mkdir(files_folder)
+        if os.path.exists(self.files_folder): shutil.rmtree(self.files_folder)
+        os.mkdir(self.files_folder)
 
         self.file_no = 0
 

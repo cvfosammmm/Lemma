@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import urllib.parse
 import os.path, io
 from PIL import Image as PIL_Image
 import cairo
@@ -93,6 +94,6 @@ class Image(object):
         file_ending = FileFormatDB.get_ending_from_format_name(self.pil_image.format)
         filename = data_location_prefix + file_ending
         self.pil_image.save(filename)
-        return '<img src="' + filename + '" width="' + str(self.get_width()) + '" />'
+        return '<img src="' + urllib.parse.quote(os.path.split(os.path.dirname(filename))[1] + '/' + os.path.basename(filename)) + '" width="' + str(self.get_width()) + '" />'
 
 
