@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import urllib.parse
-import os, os.path
+import os, os.path, shutil
 
 from lemma.services.character_db import CharacterDB
 from lemma.services.paths import Paths
@@ -25,26 +25,28 @@ from lemma.services.paths import Paths
 class HTMLExporter(object):
 
     def __init__(self):
-        self.pathname = Paths.get_notes_folder()
+        self.files_folder = None
         self.file_no = 0
         self.document_id = None
         self.html = ''
 
-    def export_html(self, document):
+    def export_document(self, document, files_folder):
         self.document_id = document.id
+        self.files_folder = files_folder
 
-        data_dir = Paths.get_notes_folder()
-        for file in [file for file in os.listdir(data_dir) if file.startswith(str(self.document_id) + '-')]:
-            os.remove(os.path.join(data_dir, file))
+        if os.path.exists(files_folder): shutil.rmtree(files_folder)
+        os.mkdir(files_folder)
+
         self.file_no = 0
 
-        self.html = '<html>'
+        self.html = '<html>\n'
 
-        self.html += '<head>'
-        self.html += '<title>' + document.title + '</title>'
-        self.html += '</head>'
+        self.html += '<head>\n'
+        self.html += '<title>' + document.title + '</title>\n'
+        self.html += '</head>\n'
 
-        self.html += '<body>'
+        self.html += '<body>\n'
+        self.html += '<h1>' + document.title + '</h1>\n'
         for line in document.ast.get_lines():
             node_lists = self.group_by_node_type(line)
 
@@ -52,7 +54,7 @@ class HTMLExporter(object):
             for node_list in node_lists:
                 self.process_list(node_list)
             self.html += '</' + line[-1].get_paragraph_style() + '>\n'
-        self.html += '</body>'
+        self.html += '</body>\n'
 
         self.html += '</html>'
         return self.html
@@ -92,7 +94,7 @@ class HTMLExporter(object):
         if 'bold' in node.tags:
             text = '<strong>' + text + '</strong>'
         if node.link != None:
-            text = '<a href="' + urllib.parse.quote_plus(node.link) + '">' + text + '</a>'
+            text = '<a href="' + urllib.parse.quote(node.link) + '.html">' + text + '</a>'
 
         self.html += text
 
@@ -150,7 +152,7 @@ class HTMLExporter(object):
         elif node.type == 'placeholder':
             self.html += '<placeholder value="' + node.value + '"/>'
         elif node.type == 'widget':
-            self.html += node.value.to_html(os.path.join(self.pathname, str(self.document_id) + '-' + str(self.file_no)))
+            self.html += node.value.to_html(os.path.join(self.files_folder, str(self.file_no)))
             self.file_no += 1
         elif node.type == 'end':
             self.html += '<end/>'

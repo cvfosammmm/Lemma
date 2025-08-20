@@ -133,6 +133,7 @@ class UseCases():
         markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
         mdi = MarkdownIt()
         html = mdi.render(markdown)
+        html = html.replace('.md">', '">')
 
         parser = HTMLParser(html, os.path.dirname(path))
         parser.run()
