@@ -19,7 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import GLib, Gio
 
-import zipfile
+import tempfile
+import shutil
 import html2text
 import os.path, os
 
@@ -106,21 +107,23 @@ class Dialog(object):
         self.view.close()
 
     def on_submit_button_clicked(self, button):
-        filename = self.current_values['filename']
-        UseCases.settings_set_value('last_bulk_export_folder', os.path.dirname(filename))
+        arch_filename = self.current_values['filename']
+        UseCases.settings_set_value('last_bulk_export_folder', os.path.dirname(arch_filename))
 
-        with zipfile.ZipFile(filename, 'x') as file:
+        with tempfile.TemporaryDirectory() as temp_dir:
             for document in self.current_values['documents']:
+                filename = os.path.join(temp_dir, str(document.id) + '.md')
 
                 exporter = HTMLExporter()
-                html = exporter.export_html(document)
-                markdown = '# ' + document.title + '\n'
-                markdown += html2text.html2text(html)
-                file.writestr(str(document.id) + '.md', markdown)
+                html = exporter.export_document(document, filename)
 
-                data_dir = Paths.get_notes_folder()
-                for include in [file for file in os.listdir(data_dir) if file.startswith(str(document.id) + '-')]:
-                    file.write(os.path.join(data_dir, include), arcname=include)
+                html = html.replace('.html">', '.md">')
+                markdown = html2text.html2text(html)
+
+                with open(filename, 'w') as f:
+                    f.write(markdown)
+
+            shutil.make_archive(arch_filename[:-4], 'zip', temp_dir)
 
         self.view.close()
 
