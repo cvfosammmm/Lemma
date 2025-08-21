@@ -47,6 +47,15 @@ class DocumentListView(Gtk.Overlay):
         self.layout_teaser.set_ellipsize(Pango.EllipsizeMode.END)
         self.layout_teaser.set_font_description(Pango.FontDescription.from_string('NewComputerModern08 Book 13px'))
 
+        self.layout_no_results = Pango.Layout(self.get_pango_context())
+        self.layout_no_results.set_alignment(Pango.Alignment.CENTER)
+        self.layout_no_results.set_font_description(Pango.FontDescription.from_string('Cantarell Black 14'))
+
+        self.layout_no_results_details = Pango.Layout(self.get_pango_context())
+        self.layout_no_results_details.set_alignment(Pango.Alignment.CENTER)
+        self.layout_no_results_details.set_line_spacing(1.2)
+        self.layout_no_results_details.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
+
         self.scrolling_widget = ScrollingWidget()
         self.content = self.scrolling_widget.content
         self.set_child(self.scrolling_widget.view)

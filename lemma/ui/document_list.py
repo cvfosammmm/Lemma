@@ -17,9 +17,11 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
+gi.require_version('Rsvg', '2.0')
 from gi.repository import Gtk, Gdk, Pango, PangoCairo
+from gi.repository import Rsvg
 
-import time, datetime
+import time, datetime, os.path
 
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
@@ -27,6 +29,8 @@ from lemma.services.color_manager import ColorManager
 from lemma.ui.shortcuts import ShortcutController
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
+from lemma.services.paths import Paths
+import lemma.services.timer as timer
 
 
 class DocumentList(object):
@@ -162,6 +166,19 @@ class DocumentList(object):
         self.set_focus_index(new_index)
 
     def draw(self, widget, ctx, width, height):
+        bg_color = ColorManager.get_ui_color('sidebar_bg_1')
+
+        Gdk.cairo_set_source_rgba(ctx, bg_color)
+        ctx.rectangle(0, 0, width, height)
+        ctx.fill()
+
+        if len(self.document_ids) > 0:
+            self.draw_documents(ctx, width, height)
+        elif len(self.search_terms) > 0:
+            self.draw_no_results_page(ctx, width, height)
+
+    @timer.timer
+    def draw_documents(self, ctx, width, height):
         sidebar_fg_1 = ColorManager.get_ui_color('sidebar_fg_1')
         sidebar_fg_2 = ColorManager.get_ui_color('sidebar_fg_2')
         bg_color = ColorManager.get_ui_color('sidebar_bg_1')
@@ -176,9 +193,6 @@ class DocumentList(object):
         self.view.layout_date.set_width((width - 30) * Pango.SCALE)
         self.view.layout_teaser.set_width((width - 30) * Pango.SCALE)
 
-        Gdk.cairo_set_source_rgba(ctx, bg_color)
-        ctx.rectangle(0, 0, width, height)
-        ctx.fill()
         Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
 
         for i, document_id in enumerate(self.document_ids):
@@ -229,6 +243,34 @@ class DocumentList(object):
             ctx.move_to(15, self.view.line_height * i + 37 - scrolling_offset)
             self.view.layout_teaser.set_text(teaser_text)
             PangoCairo.show_layout(ctx, self.view.layout_teaser)
+
+    @timer.timer
+    def draw_no_results_page(self, ctx, width, height):
+        sidebar_fg_4 = ColorManager.get_ui_color('sidebar_fg_4')
+
+        Gdk.cairo_set_source_rgba(ctx, sidebar_fg_4)
+
+        viewport = Rsvg.Rectangle()
+        viewport.x = width / 2 - 36
+        viewport.y = 65
+        viewport.width = 72
+        viewport.height = 72
+
+        res_path = Paths.get_resources_folder()
+        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons/hicolor/scalable/actions/no-results-symbolic.svg'))
+        rsvg_handle.set_stylesheet(b'rect,path,ellipse,circle { fill: ' + sidebar_fg_4.to_string().encode() + b' !important; }')
+        rsvg_handle.render_document(ctx, viewport)
+
+        ctx.move_to(0, 170)
+        self.view.layout_no_results.set_text('No Results Found')
+        self.view.layout_no_results.set_width(width * Pango.SCALE)
+        PangoCairo.show_layout(ctx, self.view.layout_no_results)
+
+        ctx.move_to(18, 200)
+        search_text = self.main_window.headerbar.hb_left.search_entry.get_text()
+        self.view.layout_no_results_details.set_text('There were no results for "' + search_text + '".')
+        self.view.layout_no_results_details.set_width((width - 36) * Pango.SCALE)
+        PangoCairo.show_layout(ctx, self.view.layout_no_results_details)
 
     def get_last_modified_string(self, document):
         datetime_today, datetime_this_week, datetime_this_year = self.get_datetimes_today_week_year()
