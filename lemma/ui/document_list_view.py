@@ -30,7 +30,7 @@ class DocumentListView(Gtk.Overlay):
         Gtk.Overlay.__init__(self)
         self.add_css_class('document-list')
         self.set_focusable(True)
-        self.set_size_request(262, -1)
+        self.set_size_request(262, 280)
 
         self.page_size = 1
         self.line_height = 70
