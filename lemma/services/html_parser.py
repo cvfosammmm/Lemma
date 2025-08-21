@@ -152,12 +152,16 @@ class HTMLParser(HTMLParserLib):
 
         else:
             for char in data:
-                if char != '\n':
-                    node = Node('char', char)
-                    node.tags = self.tags.copy()
-                    node.paragraph_style = self.paragraph_style
-                    if self.link_target != None:
-                        node.link = self.link_target
-                    self.composite.append(node)
+                if char == '\n':
+                    if len(self.open_tags) > 0:
+                        char = ' '
+                    else:
+                        continue
+                node = Node('char', char)
+                node.tags = self.tags.copy()
+                node.paragraph_style = self.paragraph_style
+                if self.link_target != None:
+                    node.link = self.link_target
+                self.composite.append(node)
 
 
