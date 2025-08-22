@@ -43,13 +43,20 @@ class HTMLParser(HTMLParserLib):
     def run(self):
         self.composite = RootNode('root')
 
-        head, divider, rest = self.html.partition('<body>')
-        body, divider, rest = rest.partition('</body>')
+        start, divider, rest = self.html.partition('<body>')
+        if rest != '':
+            head = start
+            body, divider, rest = rest.partition('</body>')
+        else:
+            head = ''
+            body = start
+
         self.feed(head)
 
+        body = body.strip()
         if body != '':
             self.feed(body)
-            self.composite[-2].parent.remove([self.composite[-3], self.composite[-2]])
+            self.composite[-2].parent.remove([self.composite[-2]])
             self.composite[-1].paragraph_style = self.paragraph_style
 
     def handle_starttag(self, tag, attrs):
