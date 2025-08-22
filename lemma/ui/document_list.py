@@ -189,13 +189,18 @@ class DocumentList(object):
 
         scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
 
+        first_item_no = int(scrolling_offset // self.view.line_height)
+        last_item_no = int((scrolling_offset + height) // self.view.line_height) + 1
+
         self.view.layout_header.set_width((width - 80) * Pango.SCALE)
         self.view.layout_date.set_width((width - 30) * Pango.SCALE)
         self.view.layout_teaser.set_width((width - 30) * Pango.SCALE)
 
         Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
 
-        for i, document_id in enumerate(self.document_ids):
+        for i, document_id in enumerate(self.document_ids[first_item_no:last_item_no]):
+            i += first_item_no
+
             document = DocumentRepo.get_by_id(document_id)
             mode = ApplicationState.get_value('mode')
             highlight_active = (document == History.get_active_document() and mode == 'documents')
