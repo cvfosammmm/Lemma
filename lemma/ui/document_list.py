@@ -219,19 +219,6 @@ class DocumentList(object):
                 teaser_color = sidebar_fg_1
                 date_color = sidebar_fg_1
 
-            if highlight_active:
-                Gdk.cairo_set_source_rgba(ctx, active_bg_color)
-                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
-                ctx.fill()
-            elif i == self.selected_index:
-                Gdk.cairo_set_source_rgba(ctx, selected_color)
-                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
-                ctx.fill()
-            elif not highlight_active and i == self.focus_index:
-                Gdk.cairo_set_source_rgba(ctx, hover_color)
-                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
-                ctx.fill()
-
             title_text = document.title
             if len(document.plaintext) == 0:
                 teaser_text = '(' + _('empty') + ')'
@@ -239,9 +226,25 @@ class DocumentList(object):
             else:
                 teaser_text = ' '.join(document.plaintext.splitlines())[:100].strip()
             date_text = self.get_last_modified_string(document)
-
             key = title_text + teaser_text + date_text
-            if not highlight_active and i != self.selected_index and i != self.focus_index and key in self.render_cache:
+
+            if highlight_active:
+                Gdk.cairo_set_source_rgba(ctx, active_bg_color)
+                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
+                ctx.fill()
+                key += ':highlight_active'
+            elif i == self.selected_index:
+                Gdk.cairo_set_source_rgba(ctx, selected_color)
+                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
+                ctx.fill()
+                key += ':selected'
+            elif not highlight_active and i == self.focus_index:
+                Gdk.cairo_set_source_rgba(ctx, hover_color)
+                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
+                ctx.fill()
+                key += ':focus'
+
+            if key in self.render_cache:
                 new_render_cache[key] = self.render_cache[key]
             else:
                 surface = ctx.get_target().create_similar(cairo.Content.COLOR_ALPHA, width, self.view.line_height)
