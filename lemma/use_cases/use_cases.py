@@ -122,13 +122,9 @@ class UseCases():
     def import_markdown(path):
         document = Document()
         document.id = DocumentRepo.get_max_document_id() + 1
-        document.title = os.path.basename(path)[:-3]
 
         with open(path, 'r') as file:
             markdown = file.read()
-
-        if markdown.startswith('# ' + document.title):
-            markdown = markdown[len(document.title) + 3:]
 
         markdown = markdown.replace('$`', '<math>').replace('`$', '</math>')
         mdi = MarkdownIt()
@@ -137,6 +133,12 @@ class UseCases():
 
         parser = HTMLParser(html, os.path.dirname(path))
         parser.run()
+
+        if parser.title != None:
+            document.title = parser.title
+        else:
+            document.title = os.path.basename(path)[:-3]
+
         document.ast = parser.composite
         document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
         document.update_last_modified()

@@ -127,7 +127,7 @@ class HTMLParser(HTMLParserLib):
     def handle_endtag(self, tag):
         self.open_tags.pop()
 
-        if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6']:
             node = Node('eol')
             node.paragraph_style = self.paragraph_style
             self.composite.append(node)
@@ -149,6 +149,9 @@ class HTMLParser(HTMLParserLib):
 
     def handle_data(self, data):
         if 'title' in self.open_tags:
+            self.title = data
+
+        elif 'h1' in self.open_tags:
             self.title = data
 
         elif 'math' in self.open_tags:
