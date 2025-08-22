@@ -22,6 +22,7 @@ from gi.repository import Gtk, Gdk, Pango, PangoCairo
 from gi.repository import Rsvg
 
 import time, datetime, os.path
+import cairo
 
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
@@ -38,6 +39,8 @@ class DocumentList(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.view = main_window.document_list
+
+        self.render_cache = dict()
 
         self.document_ids = DocumentRepo.list()
         self.search_terms = []
@@ -69,6 +72,7 @@ class DocumentList(object):
     def update(self):
         self.document_ids = [doc_id for doc_id in DocumentRepo.list() if self.search_terms_in_document(DocumentRepo.get_by_id(doc_id))]
         self.view.scrolling_widget.set_size(1, max(len(self.document_ids) * self.view.line_height, 1))
+
         self.view.scrolling_widget.queue_draw()
 
     def set_focus_index(self, index):
@@ -198,12 +202,14 @@ class DocumentList(object):
 
         Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
 
+        new_render_cache = dict()
         for i, document_id in enumerate(self.document_ids[first_item_no:last_item_no]):
             i += first_item_no
 
             document = DocumentRepo.get_by_id(document_id)
             mode = ApplicationState.get_value('mode')
             highlight_active = (document == History.get_active_document() and mode == 'documents')
+
             if highlight_active:
                 title_color = active_fg_color
                 teaser_color = active_fg_color
@@ -213,16 +219,16 @@ class DocumentList(object):
                 teaser_color = sidebar_fg_1
                 date_color = sidebar_fg_1
 
-            if i == self.selected_index:
+            if highlight_active:
+                Gdk.cairo_set_source_rgba(ctx, active_bg_color)
+                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
+                ctx.fill()
+            elif i == self.selected_index:
                 Gdk.cairo_set_source_rgba(ctx, selected_color)
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
             elif not highlight_active and i == self.focus_index:
                 Gdk.cairo_set_source_rgba(ctx, hover_color)
-                ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
-                ctx.fill()
-            if highlight_active:
-                Gdk.cairo_set_source_rgba(ctx, active_bg_color)
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
 
@@ -234,20 +240,35 @@ class DocumentList(object):
                 teaser_text = ' '.join(document.plaintext.splitlines())[:100].strip()
             date_text = self.get_last_modified_string(document)
 
-            Gdk.cairo_set_source_rgba(ctx, title_color)
-            ctx.move_to(15, self.view.line_height * i + 14 - scrolling_offset)
-            self.view.layout_header.set_text(title_text)
-            PangoCairo.show_layout(ctx, self.view.layout_header)
+            key = title_text + teaser_text + date_text
+            if not highlight_active and i != self.selected_index and i != self.focus_index and key in self.render_cache:
+                new_render_cache[key] = self.render_cache[key]
+            else:
+                surface = ctx.get_target().create_similar(cairo.Content.COLOR_ALPHA, width, self.view.line_height)
+                self.render_listitem(cairo.Context(surface), title_color, title_text, date_color, date_text, teaser_color, teaser_text)
+                new_render_cache[key] = surface
 
-            Gdk.cairo_set_source_rgba(ctx, date_color)
-            ctx.move_to(15, self.view.line_height * i + 14 - scrolling_offset)
-            self.view.layout_date.set_text(date_text)
-            PangoCairo.show_layout(ctx, self.view.layout_date)
+            ctx.set_source_surface(new_render_cache[key], 0, self.view.line_height * i - scrolling_offset)
+            ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
+            ctx.fill()
 
-            Gdk.cairo_set_source_rgba(ctx, teaser_color)
-            ctx.move_to(15, self.view.line_height * i + 37 - scrolling_offset)
-            self.view.layout_teaser.set_text(teaser_text)
-            PangoCairo.show_layout(ctx, self.view.layout_teaser)
+        self.render_cache = new_render_cache
+
+    def render_listitem(self, ctx, title_color, title_text, date_color, date_text, teaser_color, teaser_text):
+        Gdk.cairo_set_source_rgba(ctx, title_color)
+        ctx.move_to(15, 14)
+        self.view.layout_header.set_text(title_text)
+        PangoCairo.show_layout(ctx, self.view.layout_header)
+
+        Gdk.cairo_set_source_rgba(ctx, date_color)
+        ctx.move_to(15, 14)
+        self.view.layout_date.set_text(date_text)
+        PangoCairo.show_layout(ctx, self.view.layout_date)
+
+        Gdk.cairo_set_source_rgba(ctx, teaser_color)
+        ctx.move_to(15, 37)
+        self.view.layout_teaser.set_text(teaser_text)
+        PangoCairo.show_layout(ctx, self.view.layout_teaser)
 
     @timer.timer
     def draw_no_results_page(self, ctx, width, height):
