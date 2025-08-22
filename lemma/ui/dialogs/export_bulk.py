@@ -48,7 +48,7 @@ class Dialog(object):
 
     def init_current_values(self):
         self.current_values['filename'] = None
-        self.current_values['documents'] = [DocumentRepo.get_by_id(doc_id) for doc_id in DocumentRepo.list()]
+        self.current_values['documents'] = set([DocumentRepo.get_by_id(doc_id) for doc_id in DocumentRepo.list()])
 
     def populate_view(self):
         last_export_folder = Settings.get_value('last_bulk_export_folder')
