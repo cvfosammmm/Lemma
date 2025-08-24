@@ -90,6 +90,9 @@
 @define-color selection_bg #c6defa;
 @define-color cursor #000000ff;
 
+/* Toolbar */
+@define-color toolbar_fg #000000ff;
+
 /* Welcome Page */
 @define-color welcome_fg #ddd;
 @define-color welcome_bg @window_bg_color;

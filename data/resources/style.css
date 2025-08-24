@@ -206,6 +206,9 @@ paned.document-view separator.wide {
     border-top: 1px solid @border_1;
     padding: 0px;
 }
+.toolbar button {
+    color: @toolbar_fg;
+}
 .toolbar button.checked {
     background-color: @view_active_color;
 }
