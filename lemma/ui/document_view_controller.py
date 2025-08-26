@@ -329,6 +329,7 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
 
     def on_im_commit(self, im_context, text):
+        document = self.model.document
         UseCases.im_commit(text)
         UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 

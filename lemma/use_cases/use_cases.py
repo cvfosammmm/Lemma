@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import GLib
+
 from urllib.parse import urlparse
 import webbrowser
 import os.path
@@ -841,17 +845,33 @@ class UseCases():
 
     @timer.timer
     def animated_scroll_to_xy(document, x, y):
-        document.add_command('scroll_to_xy', x, y, time.time())
+        timestamp = time.time()
+        document.set_last_scroll_scheduled_timestamp(timestamp)
 
-        DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        duration = 200
+        frame_length = 15
+        steps = duration // frame_length
+
+        prev_x, prev_y = document.clipping.get_state()
+        for i in range(1, steps):
+            current_x = (i / steps) * x + ((steps - i) / steps) * prev_x
+            current_y = (i / steps) * y + ((steps - i) / steps) * prev_y
+            GLib.timeout_add(i * frame_length, UseCases.add_scrolling_command, document, current_x, current_y, timestamp)
+        GLib.timeout_add(duration, UseCases.add_scrolling_command, document, x, y, timestamp)
 
     @timer.timer
     def scroll_to_xy(document, x, y):
-        document = History.get_active_document()
-        document.add_command('scroll_to_xy', x, y, time.time())
+        timestamp = time.time()
+        document.set_last_scroll_scheduled_timestamp(timestamp)
 
-        DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        UseCases.add_scrolling_command(document, x, y, timestamp)
+
+    def add_scrolling_command(document, x, y, timestamp):
+        if timestamp == document.last_scroll_scheduled_timestamp:
+            document.add_command('scroll_to_xy', x, y, timestamp)
+
+            DocumentRepo.update(document)
+            MessageBus.add_change_code('document_changed')
+        return False
 
 

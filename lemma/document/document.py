@@ -41,6 +41,10 @@ class Document():
         self.commands_preedit = list()
         self.last_command = -1
 
+        # This static variable is checked by timed scrolling commands to see
+        # if they are still relevant, or if they are superseded by a new event.
+        self.last_scroll_scheduled_timestamp = None
+
         self.id = id
         self.title = ''
         self.ast = RootNode('root')
@@ -113,6 +117,9 @@ class Document():
 
     def update_last_cursor_movement(self):
         self.last_cursor_movement = time.time()
+
+    def set_last_scroll_scheduled_timestamp(self, last_scroll_scheduled_timestamp):
+        self.last_scroll_scheduled_timestamp = last_scroll_scheduled_timestamp
 
     def invalidate(self, line_no):
         self.ast.lines[line_no]['layout'] = None
