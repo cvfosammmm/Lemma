@@ -116,6 +116,7 @@ class UseCases():
             target_document = DocumentRepo.get_by_title(link_target)
             if target_document != None:
                 UseCases.set_active_document(target_document)
+                UseCases.scroll_to_xy(0, 0)
             else:
                 UseCases.new_document(link_target)
 
@@ -173,13 +174,14 @@ class UseCases():
         DocumentRepo.delete(document)
         if document == History.get_active_document():
             UseCases.set_active_document(History.get_next_in_line(document))
+            UseCases.scroll_to_xy(0, 0)
         History.delete(document)
         Storage.save_history()
 
         MessageBus.add_change_code('history_changed')
         MessageBus.add_change_code('document_removed')
 
-    def set_active_document(document, update_history=True, scroll_to_top=True):
+    def set_active_document(document, update_history=True):
         ApplicationState.set_value('mode', 'documents')
         if update_history and document != None:
             History.add(document)
@@ -188,9 +190,6 @@ class UseCases():
 
         MessageBus.add_change_code('mode_set')
         MessageBus.add_change_code('history_changed')
-
-        if scroll_to_top:
-            UseCases.scroll_to_xy(0, 0)
 
     @timer.timer
     def undo():

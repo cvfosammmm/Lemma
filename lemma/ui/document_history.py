@@ -99,7 +99,7 @@ class DocumentHistory(object):
 
         document = self.get_document_at_cursor()
         if document != None and document == self.selected_document:
-            UseCases.set_active_document(document, update_history=False, scroll_to_top=False)
+            UseCases.set_active_document(document, update_history=False)
         self.set_selected_document(None)
 
     def set_selected_document(self, document):

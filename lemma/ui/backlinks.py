@@ -43,5 +43,6 @@ class Backlinks(object):
 
     def on_row_activated(self, listbox, row):
         UseCases.set_active_document(row.get_child().document)
+        UseCases.scroll_to_xy(0, 0)
 
 

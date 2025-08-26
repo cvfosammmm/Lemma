@@ -163,12 +163,12 @@ class Actions(object):
         else:
             prev_doc = History.get_previous_if_any(History.get_active_document())
             if prev_doc != None:
-                UseCases.set_active_document(prev_doc, update_history=False, scroll_to_top=False)
+                UseCases.set_active_document(prev_doc, update_history=False)
 
     def go_forward(self, action=None, parameter=''):
         next_doc = History.get_next_if_any(History.get_active_document())
         if next_doc != None:
-            UseCases.set_active_document(next_doc, update_history=False, scroll_to_top=False)
+            UseCases.set_active_document(next_doc, update_history=False)
 
     def undo(self, action=None, parameter=''):
         UseCases.undo()
