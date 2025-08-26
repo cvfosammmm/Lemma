@@ -238,6 +238,7 @@ class Autocomplete():
         insert = document.cursor.get_insert_node()
         xml = AutocompleteDB.get_xml(self.widget.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
         self.deactivate()
 

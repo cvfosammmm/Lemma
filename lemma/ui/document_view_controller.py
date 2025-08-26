@@ -113,6 +113,7 @@ class DocumentViewController():
                 else:
                     if leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
                         UseCases.select_node(leaf_box['node'])
+                        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
                     else:
                         UseCases.move_cursor_to_xy(x, y, False)
                     if link != None:
@@ -127,6 +128,7 @@ class DocumentViewController():
                         UseCases.move_cursor_to_xy(x, y, False)
                     else:
                         UseCases.extend_selection()
+                        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
             self.content.grab_focus()
 
@@ -179,13 +181,13 @@ class DocumentViewController():
         if y < 0:
             new_x = self.model.document.clipping.offset_x
             new_y = max(0, self.model.document.clipping.offset_y + y)
-            UseCases.scroll_to_xy(new_x, new_y)
+            UseCases.scroll_to_xy(self.model.document, new_x, new_y)
 
         if y - ApplicationState.get_value('document_view_height') > 0:
             height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
             new_x = self.model.document.clipping.offset_x
             new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height'))
-            UseCases.scroll_to_xy(new_x, new_y)
+            UseCases.scroll_to_xy(self.model.document, new_x, new_y)
 
         x -= ApplicationState.get_value('document_padding_left')
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
@@ -215,7 +217,7 @@ class DocumentViewController():
             x = min(0, max(0, document.clipping.offset_x + dx))
             y = min(max(0, height - ApplicationState.get_value('document_view_height')), max(0, document.clipping.offset_y + dy))
 
-            UseCases.scroll_to_xy(x, y)
+            UseCases.scroll_to_xy(document, x, y)
         return
 
     def on_keypress_content(self, controller, keyval, keycode, state):
@@ -228,32 +230,74 @@ class DocumentViewController():
 
         document = self.model.document
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
-            case ('left', 0): UseCases.left()
-            case ('right', 0): UseCases.right()
-            case ('up', 0): UseCases.up()
-            case ('down', 0): UseCases.down()
-            case ('home', 0): UseCases.line_start()
-            case ('end', 0): UseCases.line_end()
-            case ('page_up', 0): UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100)
-            case ('page_down', 0): UseCases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100)
+            case ('left', 0):
+                UseCases.left()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('right', 0):
+                UseCases.right()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('up', 0):
+                UseCases.up()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('down', 0):
+                UseCases.down()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('home', 0):
+                UseCases.line_start()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('end', 0):
+                UseCases.line_end()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('page_up', 0):
+                UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('page_down', 0):
+                UseCases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
-            case ('left', Gdk.ModifierType.SHIFT_MASK): UseCases.left(True)
-            case ('right', Gdk.ModifierType.SHIFT_MASK): UseCases.right(True)
-            case ('up', Gdk.ModifierType.SHIFT_MASK): UseCases.up(True)
-            case ('down', Gdk.ModifierType.SHIFT_MASK): UseCases.down(True)
-            case ('home', Gdk.ModifierType.SHIFT_MASK): UseCases.line_start(True)
-            case ('end', Gdk.ModifierType.SHIFT_MASK): UseCases.line_end(True)
+            case ('left', Gdk.ModifierType.SHIFT_MASK):
+                UseCases.left(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('right', Gdk.ModifierType.SHIFT_MASK):
+                UseCases.right(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('up', Gdk.ModifierType.SHIFT_MASK):
+                UseCases.up(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('down', Gdk.ModifierType.SHIFT_MASK):
+                UseCases.down(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('home', Gdk.ModifierType.SHIFT_MASK):
+                UseCases.line_start(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('end', Gdk.ModifierType.SHIFT_MASK):
+                UseCases.line_end(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100, True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100, True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
-            case ('up', Gdk.ModifierType.CONTROL_MASK): UseCases.move_cursor_to_parent()
-            case ('up', 5): UseCases.extend_selection()
-            case ('left', Gdk.ModifierType.CONTROL_MASK): UseCases.jump_left(False)
-            case ('left', 5): UseCases.jump_left(True)
-            case ('right', Gdk.ModifierType.CONTROL_MASK): UseCases.jump_right(False)
-            case ('right', 5): UseCases.jump_right(True)
+            case ('up', Gdk.ModifierType.CONTROL_MASK):
+                UseCases.move_cursor_to_parent()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('up', 5):
+                UseCases.extend_selection()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('left', Gdk.ModifierType.CONTROL_MASK):
+                UseCases.jump_left(False)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('left', 5):
+                UseCases.jump_left(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('right', Gdk.ModifierType.CONTROL_MASK):
+                UseCases.jump_right(False)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('right', 5):
+                UseCases.jump_right(True)
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
             case ('tab', 0): UseCases.select_next_placeholder()
             case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK): UseCases.select_prev_placeholder()
@@ -269,8 +313,13 @@ class DocumentViewController():
                     UseCases.insert_xml('\n')
                     if not document.cursor.has_selection():
                         UseCases.replace_max_string_before_cursor()
-            case ('backspace', _): UseCases.backspace()
-            case ('delete', _): UseCases.delete()
+                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('backspace', _):
+                UseCases.backspace()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            case ('delete', _):
+                UseCases.delete()
+                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
             case _: return False
         return True
@@ -281,6 +330,7 @@ class DocumentViewController():
 
     def on_im_commit(self, im_context, text):
         UseCases.im_commit(text)
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()
@@ -327,7 +377,7 @@ class DocumentViewController():
         offset_y = self.view.adjustment_y.get_value()
         self.model.last_cursor_or_scrolling_change = time.time()
         if offset_x != document.clipping.offset_x or offset_y != document.clipping.offset_y:
-            UseCases.scroll_to_xy(offset_x, offset_y)
+            UseCases.scroll_to_xy(document, offset_x, offset_y)
 
     def get_link_at_xy(self, x, y):
         layout = self.model.document.get_leaf_at_xy(x, y)

@@ -129,43 +129,6 @@ class DocumentViewPresenter():
         else:
             self.content.set_cursor_from_name('default')
 
-    def scroll_to_position(self, position, animate=False):
-        document = self.model.document
-        window_width = ApplicationState.get_value('document_view_width')
-        yoffset = max(position[1], 0)
-        xoffset = max(position[0], 0)
-        scrolling_offset_x = document.clipping.offset_x
-        scrolling_offset_y = document.clipping.offset_y
-
-        self.scrolling_job = {'from': (scrolling_offset_x, scrolling_offset_y), 'to': (xoffset, yoffset), 'starting_time': time.time(), 'duration': 0.2 if animate else 0}
-        self.scroll_now()
-
-    def scroll_now(self):
-        if self.scrolling_job == None: return False
-
-        if self.scrolling_job['duration'] == 0:
-            fraction_done = 1
-        else:
-            time_percent = (time.time() - self.scrolling_job['starting_time']) / self.scrolling_job['duration']
-            fraction_done = (time_percent - 1)**3 + 1 # easing
-
-        if fraction_done >= 1:
-            new_x = self.scrolling_job['to'][0]
-            new_y = self.scrolling_job['to'][1]
-        else:
-            new_x = self.scrolling_job['from'][0] * (1 - fraction_done) + self.scrolling_job['to'][0] * fraction_done
-            new_y = self.scrolling_job['from'][1] * (1 - fraction_done) + self.scrolling_job['to'][1] * fraction_done
-
-        self.view.adjustment_x.set_value(new_x)
-        self.view.adjustment_y.set_value(new_y)
-
-        if (new_x, new_y) == self.scrolling_job['to']:
-            self.scrolling_job = None
-        else:
-            GObject.timeout_add(15, self.scroll_now)
-
-        return False
-
     @timer.timer
     def draw(self, widget, ctx, width, height):
         if self.model.document == None: return

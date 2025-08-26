@@ -42,7 +42,9 @@ class Backlinks(object):
                 self.view.add_item(linking_doc)
 
     def on_row_activated(self, listbox, row):
-        UseCases.set_active_document(row.get_child().document)
-        UseCases.scroll_to_xy(0, 0)
+        new_active_document = row.get_child().document
+
+        UseCases.set_active_document(new_active_document)
+        UseCases.scroll_to_xy(new_active_document, 0, 0)
 
 

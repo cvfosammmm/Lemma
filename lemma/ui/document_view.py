@@ -89,7 +89,9 @@ class DocumentView():
         UseCases.app_state_set_values({'document_view_width': width, 'document_view_height': height})
         offset_x = self.view.adjustment_x.get_value()
         offset_y = self.view.adjustment_y.get_value()
-        UseCases.scroll_to_xy(offset_x, offset_y)
+
+        if self.document != None:
+            UseCases.scroll_to_xy(self.document, offset_x, offset_y)
         self.presenter.update()
 
     def set_cursor_position(self, x, y):
@@ -131,9 +133,9 @@ class DocumentView():
     def init_renaming(self):
         if self.document != None:
             self.title_widget.activate()
-            self.presenter.scroll_to_position([0, 0])
             self.title_widget.view.set_visible(True)
             UseCases.app_state_set_value('title_buttons_height', 50)
+            UseCases.scroll_to_xy(self.document, 0, 0)
             self.view.content.queue_draw()
             self.title_widget.grab_focus()
 
@@ -170,6 +172,7 @@ class DocumentView():
                         if ''.join(char_nodes) == target:
                             xml = '<a href="' + xml_helpers.escape(self.title_widget.title) + '">' + xml_helpers.escape(self.title_widget.title) + '</a>'
                             UseCases.replace_section(linking_doc, bounds[0], bounds[1], xml)
+                            UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
                         else:
                             UseCases.set_link(linking_doc, bounds, self.title_widget.title)
 

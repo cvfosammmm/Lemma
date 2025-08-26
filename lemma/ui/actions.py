@@ -177,8 +177,11 @@ class Actions(object):
         UseCases.redo()
 
     def cut(self, action=None, parameter=''):
+        document = History.get_active_document()
+
         self.copy()
         UseCases.delete_selection()
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def copy(self, action=None, parameter=''):
         clipboard = Gdk.Display.get_default().get_clipboard()
@@ -215,6 +218,7 @@ class Actions(object):
 
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
@@ -233,11 +237,13 @@ class Actions(object):
                     text = xml_helpers.escape(stext)
                     xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                     UseCases.insert_xml(xml)
+                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
                     return
 
             text = xml_helpers.escape(text)
             xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
             UseCases.insert_xml(xml)
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def delete(self, action=None, parameter=''):
         UseCases.delete()
@@ -249,7 +255,10 @@ class Actions(object):
         UseCases.remove_selection()
 
     def insert_xml(self, action=None, parameter=None):
+        document = History.get_active_document()
+
         UseCases.insert_xml(parameter.get_string())
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def subscript(self, action=None, parameter=''):
         document = History.get_active_document()
@@ -260,6 +269,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def superscript(self, action=None, parameter=''):
         document = History.get_active_document()
@@ -270,6 +280,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def set_paragraph_style(self, action=None, parameter=None):
         UseCases.set_paragraph_style(parameter.get_string())
@@ -309,9 +320,15 @@ class Actions(object):
         UseCases.open_link(document.cursor.get_insert_node().link)
 
     def insert_link(self, action=None, parameter=''):
+        document = History.get_active_document()
+
+        UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
         UseCases.show_insert_link_popover(self.main_window)
 
     def edit_link(self, action=None, parameter=''):
+        document = History.get_active_document()
+
+        UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
         UseCases.show_insert_link_popover(self.main_window)
 
     def copy_link(self, action=None, parameter=''):

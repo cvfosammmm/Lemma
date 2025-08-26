@@ -18,6 +18,7 @@
 from urllib.parse import urlparse
 import webbrowser
 import os.path
+import time
 from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
@@ -57,8 +58,6 @@ class UseCases():
 
     def show_insert_link_popover(main_window):
         document = History.get_active_document()
-
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         insert = document.cursor.get_insert_node()
         x, y = document.get_absolute_xy(insert.layout)
@@ -116,7 +115,7 @@ class UseCases():
             target_document = DocumentRepo.get_by_title(link_target)
             if target_document != None:
                 UseCases.set_active_document(target_document)
-                UseCases.scroll_to_xy(0, 0)
+                UseCases.scroll_to_xy(target_document, 0, 0)
             else:
                 UseCases.new_document(link_target)
 
@@ -173,8 +172,9 @@ class UseCases():
     def delete_document(document):
         DocumentRepo.delete(document)
         if document == History.get_active_document():
-            UseCases.set_active_document(History.get_next_in_line(document))
-            UseCases.scroll_to_xy(0, 0)
+            new_active_document = History.get_next_in_line(document)
+            UseCases.set_active_document(new_active_document)
+            UseCases.scroll_to_xy(new_active_document, 0, 0)
         History.delete(document)
         Storage.save_history()
 
@@ -227,8 +227,8 @@ class UseCases():
         link_at_cursor = ApplicationState.get_value('link_at_cursor')
 
         xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
-        UseCases.insert_xml(xml)
 
+        UseCases.insert_xml(xml)
         if not document.cursor.has_selection() and text.isspace():
             UseCases.replace_max_string_before_cursor()
 
@@ -246,7 +246,6 @@ class UseCases():
         document.add_composite_command(*commands)
 
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
         MessageBus.add_change_code('document_ast_changed')
@@ -295,13 +294,13 @@ class UseCases():
             for node in node_list:
                 if node.type == 'placeholder':
                     UseCases.select_node(node)
+                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
                     placeholder_found = True
                     break
             if placeholder_found:
                 break
                     
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -317,14 +316,12 @@ class UseCases():
         elif not insert.is_first_in_parent():
             document.add_command('delete', document.cursor.prev_no_descent(insert), insert)
             document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.prev_no_descent(insert), insert])
             document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
@@ -340,14 +337,12 @@ class UseCases():
             insert_new = document.cursor.next_no_descent(insert)
             document.add_command('delete', insert, insert_new)
             document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
         elif len(insert.parent) == 1:
             document.add_composite_command(['move_cursor_to_node', document.cursor.next_no_descent(insert), insert])
             document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
@@ -360,7 +355,6 @@ class UseCases():
 
         document.add_command('delete', node_from, node_to)
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
         MessageBus.add_change_code('document_ast_changed')
@@ -371,15 +365,14 @@ class UseCases():
 
         with open(filename, 'rb') as file:
             image = Image(file)
-        if document.cursor.get_insert_node().parent.type == 'root':
-            insert = document.cursor.get_insert_node()
-            node = Node('widget', image)
-            document.add_command('insert', insert, [node])
-            document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
-            DocumentRepo.update(document)
-            MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_ast_changed')
+
+        insert = document.cursor.get_insert_node()
+        node = Node('widget', image)
+        document.add_command('insert', insert, [node])
+        document.add_command('update_implicit_x_position')
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def replace_max_string_before_cursor():
@@ -411,7 +404,6 @@ class UseCases():
 
                     document.add_composite_command(*commands)
                     document.add_command('update_implicit_x_position')
-                    document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
                     DocumentRepo.update(document)
                     MessageBus.add_change_code('document_changed')
                     MessageBus.add_change_code('document_ast_changed')
@@ -481,7 +473,6 @@ class UseCases():
         else:
             document.add_command('move_cursor_to_node', document.cursor.prev(insert))
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -506,7 +497,6 @@ class UseCases():
         else:
             document.add_command('move_cursor_to_node', insert_new)
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -524,7 +514,6 @@ class UseCases():
         else:
             document.add_command('move_cursor_to_node', document.cursor.next(insert))
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -548,7 +537,6 @@ class UseCases():
         else:
             document.add_command('move_cursor_to_node', insert_new)
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -589,7 +577,6 @@ class UseCases():
 
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node)
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -630,7 +617,6 @@ class UseCases():
 
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node)
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -649,7 +635,6 @@ class UseCases():
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node)
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -668,7 +653,6 @@ class UseCases():
         selection_node = document.cursor.get_selection_node()
         document.add_command('move_cursor_to_node', new_node, new_node if not do_selection else selection_node)
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -693,6 +677,7 @@ class UseCases():
 
         if node.type == 'placeholder':
             UseCases.select_node(node)
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def select_prev_placeholder():
@@ -714,6 +699,7 @@ class UseCases():
 
         if node.type == 'placeholder':
             UseCases.select_node(node)
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def select_node(node):
@@ -721,7 +707,6 @@ class UseCases():
 
         next_node = node.next_in_parent()
         document.add_command('move_cursor_to_node', node, next_node)
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -731,7 +716,6 @@ class UseCases():
         document = History.get_active_document()
         document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -742,10 +726,11 @@ class UseCases():
         if document.cursor.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
             document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
+
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def move_cursor_by_xy_offset(x, y, do_selection=False):
@@ -757,7 +742,6 @@ class UseCases():
         new_y = orig_y + y
 
         document.add_command('move_cursor_to_xy', orig_x, new_y, do_selection)
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -767,7 +751,6 @@ class UseCases():
         document = History.get_active_document()
         document.add_command('move_cursor_to_xy', x, y, do_selection)
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -789,7 +772,6 @@ class UseCases():
         if new_insert != None:
             document.add_command('move_cursor_to_node', new_insert, new_insert)
             document.add_command('update_implicit_x_position')
-            document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
@@ -831,7 +813,6 @@ class UseCases():
 
         document.add_command('move_cursor_to_node', new_insert, new_selection)
         document.add_command('update_implicit_x_position')
-        document.add_command('scroll_to_xy', *UseCases.get_insert_on_screen_scrolling_position())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -859,9 +840,16 @@ class UseCases():
         return (document.clipping.offset_x, document.clipping.offset_y)
 
     @timer.timer
-    def scroll_to_xy(x, y):
+    def animated_scroll_to_xy(document, x, y):
+        document.add_command('scroll_to_xy', x, y, time.time())
+
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+
+    @timer.timer
+    def scroll_to_xy(document, x, y):
         document = History.get_active_document()
-        document.add_command('scroll_to_xy', x, y)
+        document.add_command('scroll_to_xy', x, y, time.time())
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')

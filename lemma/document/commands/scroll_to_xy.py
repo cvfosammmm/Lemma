@@ -18,16 +18,24 @@
 
 class Command():
 
-    def __init__(self, x, y):
+    # This static variable is checked by timed scrolling commands to see
+    # if they are still relevant, or if they are superseded by a new event.
+    last_scroll_scheduled_timestamp = None
+
+    def __init__(self, x, y, scheduled_timestamp):
         self.x = x
         self.y = y
         self.is_undo_checkpoint = False
         self.state = dict()
 
+        self.scheduled_timestamp = scheduled_timestamp
+        Command.last_scroll_scheduled_timestamp = scheduled_timestamp
+
     def run(self, document):
         self.state['clipping_state_before'] = document.clipping.get_state()
 
-        document.clipping.set_scrolling_offset(int(self.x), int(self.y))
+        if self.scheduled_timestamp == Command.last_scroll_scheduled_timestamp:
+            document.clipping.set_scrolling_offset(int(self.x), int(self.y))
 
     def undo(self, document):
         document.clipping.set_state(self.state['clipping_state_before'])

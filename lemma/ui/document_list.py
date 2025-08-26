@@ -88,7 +88,7 @@ class DocumentList(object):
     def activate_item(self, index):
         document = DocumentRepo.get_by_id(self.document_ids[index])
         UseCases.set_active_document(document)
-        UseCases.scroll_to_xy(0, 0)
+        UseCases.scroll_to_xy(document, 0, 0)
 
     def on_primary_button_press(self, scrolling_widget, data):
         x_offset, y_offset, state = data
