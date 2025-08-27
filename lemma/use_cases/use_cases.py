@@ -848,16 +848,20 @@ class UseCases():
         timestamp = time.time()
         document.set_last_scroll_scheduled_timestamp(timestamp)
 
-        duration = 200
+        duration = 150
         frame_length = 15
         steps = duration // frame_length
 
         prev_x, prev_y = document.clipping.get_state()
         for i in range(1, steps):
-            current_x = (i / steps) * x + ((steps - i) / steps) * prev_x
-            current_y = (i / steps) * y + ((steps - i) / steps) * prev_y
-            GLib.timeout_add(i * frame_length, UseCases.add_scrolling_command, document, current_x, current_y, timestamp)
+            easing_factor = (UseCases.ease(i * frame_length / duration))
+            current_x = (easing_factor * i / steps) * x + ((steps - easing_factor * i) / steps) * prev_x
+            current_y = (easing_factor * i / steps) * y + ((steps - easing_factor * i) / steps) * prev_y
+            GLib.timeout_add((i - 1) * frame_length, UseCases.add_scrolling_command, document, current_x, current_y, timestamp)
         GLib.timeout_add(duration, UseCases.add_scrolling_command, document, x, y, timestamp)
+
+    def ease(time):
+        return  (time - 1)**3 + 1
 
     @timer.timer
     def scroll_to_xy(document, x, y):
@@ -866,6 +870,7 @@ class UseCases():
 
         UseCases.add_scrolling_command(document, x, y, timestamp)
 
+    @timer.timer
     def add_scrolling_command(document, x, y, timestamp):
         if timestamp == document.last_scroll_scheduled_timestamp:
             document.add_command('scroll_to_xy', x, y, timestamp)
