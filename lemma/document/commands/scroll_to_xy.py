@@ -18,18 +18,16 @@
 
 class Command():
 
-    def __init__(self, x, y, scheduled_timestamp):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
         self.is_undo_checkpoint = False
-        self.scheduled_timestamp = scheduled_timestamp
         self.state = dict()
 
     def run(self, document):
         self.state['clipping_state_before'] = document.clipping.get_state()
 
-        if self.scheduled_timestamp == document.last_scroll_scheduled_timestamp:
-            document.clipping.set_scrolling_offset(int(self.x), int(self.y))
+        document.clipping.set_scrolling_offset(int(self.x), int(self.y))
 
     def undo(self, document):
         document.clipping.set_state(self.state['clipping_state_before'])

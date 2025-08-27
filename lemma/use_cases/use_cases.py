@@ -46,6 +46,10 @@ import lemma.services.timer as timer
 
 class UseCases():
 
+    # This static variable is checked by timed scrolling commands to see
+    # if they are still relevant, or if they are superseded by a new event.
+    last_scroll_scheduled_timestamp_by_document_id = dict()
+
     def settings_set_value(item, value):
         Settings.set_value(item, value)
         Storage.save_settings()
@@ -846,7 +850,7 @@ class UseCases():
     @timer.timer
     def animated_scroll_to_xy(document, x, y):
         timestamp = time.time()
-        document.set_last_scroll_scheduled_timestamp(timestamp)
+        UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id] = timestamp
 
         duration = 256
         frame_length = 16
@@ -866,14 +870,14 @@ class UseCases():
     @timer.timer
     def scroll_to_xy(document, x, y):
         timestamp = time.time()
-        document.set_last_scroll_scheduled_timestamp(timestamp)
+        UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id] = timestamp
 
         UseCases.add_scrolling_command(document, x, y, timestamp)
 
     @timer.timer
     def add_scrolling_command(document, x, y, timestamp):
-        if timestamp == document.last_scroll_scheduled_timestamp:
-            document.add_command('scroll_to_xy', x, y, timestamp)
+        if timestamp == UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id]:
+            document.add_command('scroll_to_xy', x, y)
 
             MessageBus.add_change_code('document_changed')
         return False
