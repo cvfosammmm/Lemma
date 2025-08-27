@@ -848,20 +848,20 @@ class UseCases():
         timestamp = time.time()
         document.set_last_scroll_scheduled_timestamp(timestamp)
 
-        duration = 150
-        frame_length = 15
-        steps = duration // frame_length
+        duration = 256
+        frame_length = 16
 
         prev_x, prev_y = document.clipping.get_state()
-        for i in range(1, steps):
-            easing_factor = (UseCases.ease(i * frame_length / duration))
-            current_x = (easing_factor * i / steps) * x + ((steps - easing_factor * i) / steps) * prev_x
-            current_y = (easing_factor * i / steps) * y + ((steps - easing_factor * i) / steps) * prev_y
-            GLib.timeout_add((i - 1) * frame_length, UseCases.add_scrolling_command, document, current_x, current_y, timestamp)
-        GLib.timeout_add(duration, UseCases.add_scrolling_command, document, x, y, timestamp)
+        if prev_y == y and prev_x == x: return
 
-    def ease(time):
-        return  (time - 1)**3 + 1
+        # these factors correspond to a spring animation with damping factor of 1, mass of 0.2 and stiffness of 350.
+        animation_factors = [0.14521632886418778, 0.38680949651114804, 0.5961508878602289, 0.7471932740676479, 0.8469876969721808, 0.9095846909702064, 0.9475247122520112, 0.9699664865615893, 0.9830014314472356, 0.9904664008194531, 0.9946935799717825, 0.9970653570501354, 0.9983859489194434, 0.9991164990228094, 0.9995184028082745]
+
+        for i, animation_factor in enumerate(animation_factors):
+            current_x = prev_x + animation_factor * (x - prev_x)
+            current_y = prev_y + animation_factor * (y - prev_y)
+            GLib.timeout_add(i * frame_length, UseCases.add_scrolling_command, document, current_x, current_y, timestamp)
+        GLib.timeout_add(duration, UseCases.add_scrolling_command, document, x, y, timestamp)
 
     @timer.timer
     def scroll_to_xy(document, x, y):
@@ -875,7 +875,6 @@ class UseCases():
         if timestamp == document.last_scroll_scheduled_timestamp:
             document.add_command('scroll_to_xy', x, y, timestamp)
 
-            DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
         return False
 
