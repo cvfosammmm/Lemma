@@ -485,6 +485,9 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+
     @timer.timer
     def jump_left(do_selection=False):
         document = History.get_active_document()
@@ -509,6 +512,9 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+
     @timer.timer
     def right(do_selection=False):
         document = History.get_active_document()
@@ -525,6 +531,9 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
+
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def jump_right(do_selection=False):
@@ -549,17 +558,20 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+
     @timer.timer
     def up(do_selection=False):
         document = History.get_active_document()
+        insert = document.cursor.get_insert_node()
 
-        x, y = document.get_absolute_xy(document.cursor.get_insert_node().layout)
+        x, y = document.get_absolute_xy(insert.layout)
         if document.cursor.implicit_x_position != None:
             x = document.cursor.implicit_x_position
 
         new_node = None
-        insert_layout = document.cursor.get_insert_node().layout
-        ancestors = document.get_ancestors(insert_layout)
+        ancestors = document.get_ancestors(insert.layout)
         for i, box in enumerate(ancestors):
             if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
                 if box['type'] == 'vbox':
@@ -589,17 +601,20 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+
     @timer.timer
     def down(do_selection=False):
         document = History.get_active_document()
+        insert = document.cursor.get_insert_node()
 
-        x, y = document.get_absolute_xy(document.cursor.get_insert_node().layout)
+        x, y = document.get_absolute_xy(insert.layout)
         if document.cursor.implicit_x_position != None:
             x = document.cursor.implicit_x_position
 
         new_node = None
-        insert_layout = document.cursor.get_insert_node().layout
-        ancestors = document.get_ancestors(insert_layout)
+        ancestors = document.get_ancestors(insert.layout)
         for i, box in enumerate(ancestors):
             if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
                 if box['type'] == 'vbox':
@@ -629,11 +644,15 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+
     @timer.timer
     def line_start(do_selection=False):
         document = History.get_active_document()
+        insert = document.cursor.get_insert_node()
 
-        layout = document.cursor.get_insert_node().layout
+        layout = insert.layout
         while layout['parent']['parent'] != None:
             layout = layout['parent']
         while layout['children'][0]['node'] == None:
@@ -647,11 +666,15 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+
     @timer.timer
     def line_end(do_selection=False):
         document = History.get_active_document()
+        insert = document.cursor.get_insert_node()
 
-        layout = document.cursor.get_insert_node().layout
+        layout = insert.layout
         while layout['parent']['parent'] != None:
             layout = layout['parent']
         while layout['children'][-1]['node'] == None:
@@ -664,6 +687,9 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
+
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def select_next_placeholder():
@@ -743,8 +769,9 @@ class UseCases():
     @timer.timer
     def move_cursor_by_xy_offset(x, y, do_selection=False):
         document = History.get_active_document()
+        insert = document.cursor.get_insert_node()
 
-        orig_x, orig_y = document.get_absolute_xy(document.cursor.get_insert_node().layout)
+        orig_x, orig_y = document.get_absolute_xy(insert.layout)
         if document.cursor.implicit_x_position != None:
             orig_x = document.cursor.implicit_x_position
         new_y = orig_y + y
@@ -753,6 +780,9 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
+
+        if insert != document.cursor.get_insert_node():
+            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
@@ -783,6 +813,8 @@ class UseCases():
 
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
+
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def extend_selection():
@@ -824,6 +856,8 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
+
+        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def get_insert_on_screen_scrolling_position():
         document = History.get_active_document()

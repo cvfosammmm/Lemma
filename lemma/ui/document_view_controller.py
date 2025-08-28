@@ -129,7 +129,6 @@ class DocumentViewController():
                         UseCases.move_cursor_to_xy(x, y, False)
                     else:
                         UseCases.extend_selection()
-                        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
             self.content.grab_focus()
 
@@ -239,72 +238,50 @@ class DocumentViewController():
         match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
             case ('left', 0):
                 UseCases.left()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('right', 0):
                 UseCases.right()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('up', 0):
                 UseCases.up()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('down', 0):
                 UseCases.down()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('home', 0):
                 UseCases.line_start()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('end', 0):
                 UseCases.line_end()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('page_up', 0):
                 UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('page_down', 0):
                 UseCases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
             case ('left', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.left(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('right', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.right(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('up', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.up(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('down', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.down(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('home', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.line_start(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('end', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.line_end(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100, True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100, True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
             case ('up', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.move_cursor_to_parent()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('up', 5):
                 UseCases.extend_selection()
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('left', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.jump_left(False)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('left', 5):
                 UseCases.jump_left(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('right', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.jump_right(False)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
             case ('right', 5):
                 UseCases.jump_right(True)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
             case ('tab', 0): UseCases.select_next_placeholder()
             case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK): UseCases.select_prev_placeholder()
