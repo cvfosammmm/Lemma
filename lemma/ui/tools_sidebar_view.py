@@ -33,7 +33,7 @@ class ToolsSidebar(Gtk.Stack):
 
     def __init__(self):
         Gtk.Stack.__init__(self)
-        self.set_size_request(262, 280)
+        self.set_size_request(266, 280)
 
         self.resources_folder = Paths.get_resources_folder()
 
@@ -221,6 +221,7 @@ class ToolsSidebar(Gtk.Stack):
 
     def create_wrapbox(self, symbols):
         wrapbox = Adw.WrapBox()
+        wrapbox.set_line_spacing(0)
 
         for data in symbols:
             image = Gtk.Image.new_from_icon_name('sidebar-' + data[0] + '-symbolic')
@@ -237,6 +238,7 @@ class ToolsSidebar(Gtk.Stack):
 
     def create_wrapbox_for_pictures(self, symbols):
         wrapbox = Adw.WrapBox()
+        wrapbox.set_line_spacing(0)
 
         for data in symbols:
             pic = Gtk.Picture.new_for_filename(os.path.join(self.resources_folder, 'icons_extra', 'sidebar-' + data[0] + '-symbolic.svg'))
@@ -253,6 +255,8 @@ class ToolsSidebar(Gtk.Stack):
 
     def create_wrapbox_for_emojis(self, symbols):
         wrapbox = Adw.WrapBox()
+        wrapbox.set_line_spacing(0)
+        wrapbox.add_css_class('emoji')
 
         res_path = Paths.get_resources_folder()
         for symbol in symbols:
