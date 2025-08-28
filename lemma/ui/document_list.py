@@ -140,6 +140,7 @@ class DocumentList(object):
 
         self.set_focus_index(None)
         self.set_selected_index(None)
+        self.scroll_index_on_screen(0)
         self.update()
 
     def on_search_entry_icon_released(self, entry, icon_pos, data=None):
