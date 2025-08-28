@@ -162,6 +162,7 @@ class DocumentList(object):
         else:
             new_index = (self.focus_index + 1) % len(self.document_ids)
         self.set_focus_index(new_index)
+        self.scroll_index_on_screen(new_index)
 
     def select_previous_button(self):
         if self.focus_index == None:
@@ -169,6 +170,15 @@ class DocumentList(object):
         else:
             new_index = (self.focus_index - 1) % len(self.document_ids)
         self.set_focus_index(new_index)
+        self.scroll_index_on_screen(new_index)
+
+    def scroll_index_on_screen(self, index):
+        scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
+        view_height = self.view.scrolling_widget.height
+
+        y = min(scrolling_offset, index * self.view.line_height)
+        y = max(y, (index + 1) * self.view.line_height - view_height)
+        self.view.scrolling_widget.scroll_to_position([0, y])
 
     def draw(self, widget, ctx, width, height):
         bg_color = ColorManager.get_ui_color('sidebar_bg_1')
