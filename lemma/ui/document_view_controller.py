@@ -77,6 +77,7 @@ class DocumentViewController():
         self.scrolling_controller = Gtk.EventControllerScroll()
         self.scrolling_controller.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
         self.scrolling_controller.connect('scroll', self.on_scroll)
+        self.scrolling_controller.connect('decelerate', self.on_decelerate)
         self.content.add_controller(self.scrolling_controller)
 
         self.view.adjustment_x.connect('value-changed', self.on_adjustment_value_changed)
@@ -219,6 +220,12 @@ class DocumentViewController():
 
             UseCases.scroll_to_xy(document, x, y)
         return
+
+    def on_decelerate(self, controller, vel_x, vel_y):
+        if abs(vel_x) > 0 and abs(vel_y / vel_x) >= 1: vel_x = 0
+        if abs(vel_y) > 0 and abs(vel_x / vel_y) >  1: vel_y = 0
+
+        UseCases.decelerate_scrolling(self.model.document, vel_x, vel_y)
 
     def on_keypress_content(self, controller, keyval, keycode, state):
         modifiers = Gtk.accelerator_get_default_mod_mask()

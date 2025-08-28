@@ -875,6 +875,34 @@ class UseCases():
         UseCases.add_scrolling_command(document, x, y, timestamp)
 
     @timer.timer
+    def decelerate_scrolling(document, vel_x, vel_y):
+        timestamp = time.time()
+        UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id] = timestamp
+
+        time_elapsed = 0
+        exponential_factor = 1
+        x, y = document.clipping.get_state()
+        vel_x /= 16
+        vel_y /= 16
+
+        min_y = 0
+        max_y = max(0, ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') + document.get_height() + ApplicationState.get_value('document_padding_bottom') - ApplicationState.get_value('document_view_height'))
+        min_x = 0
+        max_x = max(0, ApplicationState.get_value('document_padding_left') + document.get_width() - ApplicationState.get_value('document_view_width'))
+        
+        offset_x = ApplicationState.get_value('document_padding_left')
+        scrolling_offset_y = document.clipping.offset_y
+        offset_y =  - scrolling_offset_y
+
+        while abs(vel_x * exponential_factor) >= 0.5 or abs(vel_y * exponential_factor) >= 0.5:
+            time_elapsed += 16
+            exponential_factor = 2.71828 ** (-4 * time_elapsed / 1000)
+            x = min(max_x, max(min_x, x + exponential_factor * vel_x))
+            y = min(max_y, max(min_y, y + exponential_factor * vel_y))
+
+            GLib.timeout_add(time_elapsed - 16, UseCases.add_scrolling_command, document, x, y, timestamp)
+
+    @timer.timer
     def add_scrolling_command(document, x, y, timestamp):
         if timestamp == UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id]:
             document.add_command('scroll_to_xy', x, y)

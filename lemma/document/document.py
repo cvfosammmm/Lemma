@@ -136,6 +136,9 @@ class Document():
     def get_height(self):
         return self.ast.lines[-1]['layout']['y'] + self.ast.lines[-1]['layout']['height']
 
+    def get_width(self):
+        return self.ast.lines[0]['layout']['width']
+
     def get_ancestors(self, layout):
         ancestors = []
         while layout['parent'] != None:
