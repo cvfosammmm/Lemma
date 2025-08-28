@@ -238,7 +238,7 @@ class DocumentList(object):
             else:
                 teaser_text = ' '.join(document.plaintext.splitlines())[:100].strip()
             date_text = self.get_last_modified_string(document)
-            key = title_text + teaser_text + date_text
+            key = title_text + teaser_text + date_text + str(width)
 
             if highlight_active:
                 Gdk.cairo_set_source_rgba(ctx, active_bg_color)
