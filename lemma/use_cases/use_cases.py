@@ -182,7 +182,9 @@ class UseCases():
         if document == History.get_active_document():
             new_active_document = History.get_next_in_line(document)
             UseCases.set_active_document(new_active_document)
-            UseCases.scroll_to_xy(new_active_document, 0, 0)
+            if new_active_document != None:
+                UseCases.scroll_to_xy(new_active_document, 0, 0)
+                
         History.delete(document)
         Storage.save_history()
 

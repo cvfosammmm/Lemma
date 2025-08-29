@@ -39,7 +39,9 @@ class History():
     def delete(document):
         if document not in History.documents: return
 
-        if History.documents.index(document) < History.active_document_index:
+        if History.active_document_index == None:
+            History.active_document_index = None
+        elif History.documents.index(document) < History.active_document_index:
             History.active_document_index -= 1
         History.documents.remove(document)
 

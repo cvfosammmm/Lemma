@@ -40,7 +40,9 @@ class DocumentHistory(object):
         self.font_desc_bold.set_weight(Pango.Weight.BOLD)
 
         self.items = list()
-        self.selected_document = None
+        self.selected_index = None
+
+        self.size_cache = dict()
 
         self.view.content.set_draw_func(self.draw)
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
@@ -55,19 +57,22 @@ class DocumentHistory(object):
     @timer.timer
     def update_size(self):
         mode = ApplicationState.get_value('mode')
-        width = 0
+
+        total_width = 0
         self.items = list()
         for i, document in enumerate(History.documents):
-            self.items.append((i, document, width))
-            width += self.get_item_extents(document.title).width / Pango.SCALE
-            width += 37
+            if document.title not in self.size_cache:
+                self.size_cache[document.title] = self.get_item_extents(document.title).width / Pango.SCALE + 37
+            document_width = self.size_cache[document.title]
+            self.items.append((i, document, total_width, document_width))
+            total_width += document_width
             if i == History.active_document_index and mode == 'draft':
                 break
         if mode == 'draft':
-            width += self.get_item_extents('New Document').width / Pango.SCALE
-            width += 37
-        width += 72
-        self.view.scrolling_widget.set_size(width, 1)
+            total_width += self.get_item_extents('New Document').width / Pango.SCALE + 37
+        total_width += 72
+
+        self.view.scrolling_widget.set_size(total_width, 1)
 
     @timer.timer
     def scroll_active_document_on_screen(self):
@@ -76,12 +81,12 @@ class DocumentHistory(object):
             return
 
         if History.active_document_index != None:
-            i, document, document_offset = self.items[History.active_document_index]
+            i, document, document_offset, document_width = self.items[History.active_document_index]
             if document_offset < self.view.scrolling_widget.scrolling_offset_x:
                 self.view.scrolling_widget.scroll_to_position((document_offset, 0))
                 return
 
-            i, document, document_offset = self.items[History.active_document_index + 1]
+            i, document, document_offset, document_width = self.items[History.active_document_index + 1]
             if document_offset > self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width:
                 self.view.scrolling_widget.scroll_to_position((document_offset - self.view.scrolling_widget.width - 1, 0))
                 return
@@ -90,68 +95,67 @@ class DocumentHistory(object):
         x_offset, y_offset, state = data
 
         if state == 0:
-            document = self.get_document_at_cursor()
-            if document != None:
-                self.set_selected_document(document)
+            hover_index = self.get_hover_index()
+            if hover_index != None:
+                self.set_selected_index(hover_index)
 
     def on_primary_button_release(self, scrolling_widget, data):
         x_offset, y_offset, state = data
 
-        document = self.get_document_at_cursor()
-        if document != None and document == self.selected_document:
-            UseCases.set_active_document(document, update_history=False)
-        self.set_selected_document(None)
+        hover_index = self.get_hover_index()
+        if hover_index != None and hover_index == self.selected_index:
+            UseCases.set_active_document(self.items[hover_index][1], update_history=False)
+        self.set_selected_index(None)
 
-    def set_selected_document(self, document):
-        if document != self.selected_document:
-            self.selected_document = document
+    def set_selected_index(self, index):
+        if index != self.selected_index:
+            self.selected_index = index
             self.view.content.queue_draw()
 
     @timer.timer
     def draw(self, widget, ctx, width, height):
         mode = ApplicationState.get_value('mode')
-        document_at_cursor = self.get_document_at_cursor()
-        offset = -1 - int(self.view.scrolling_widget.scrolling_offset_x)
+        hover_index = self.get_hover_index()
+        scrolling_offset = int(self.view.scrolling_widget.scrolling_offset_x) + 1
         hover_color = ColorManager.get_ui_color('history_hover')
         selected_color = ColorManager.get_ui_color('history_active_bg')
         fg_color = ColorManager.get_ui_color('history_fg')
 
-        for i, document, document_offset in self.items:
+        draft_offset = 0
+        for i, document, document_offset, document_width in self.items:
             is_active = (i == History.active_document_index)
-            extents = self.get_item_extents(document.title)
-            px_width = extents.width / Pango.SCALE + 37
-            font_desc = self.font_desc_bold if (is_active and mode != 'draft') else self.font_desc_normal
+            if document_offset + document_width >= self.view.scrolling_widget.scrolling_offset_x and document_offset <= self.view.scrolling_widget.scrolling_offset_x + width:
+                font_desc = self.font_desc_bold if (is_active and mode != 'draft') else self.font_desc_normal
 
-            if document == document_at_cursor:
-                if document == self.selected_document:
-                    Gdk.cairo_set_source_rgba(ctx, selected_color)
-                else:
-                    Gdk.cairo_set_source_rgba(ctx, hover_color)
-                rounded_rectangle(ctx, offset, 6, px_width, 35, 6)
-                ctx.fill()
+                if i == hover_index:
+                    if i == self.selected_index:
+                        Gdk.cairo_set_source_rgba(ctx, selected_color)
+                    else:
+                        Gdk.cairo_set_source_rgba(ctx, hover_color)
+                    rounded_rectangle(ctx, document_offset - scrolling_offset, 6, document_width, 35, 6)
+                    ctx.fill()
 
-            ctx.move_to(offset + 18, int((height - extents.height / Pango.SCALE) / 2) - 1)
-            self.layout.set_font_description(font_desc)
-            self.layout.set_width(extents.width)
-            self.layout.set_text(document.title)
-            Gdk.cairo_set_source_rgba(ctx, fg_color)
-            PangoCairo.show_layout(ctx, self.layout)
-            self.draw_divider(ctx, offset, height)
-
-            offset += px_width
+                ctx.move_to(document_offset - scrolling_offset, 13)
+                self.layout.set_font_description(font_desc)
+                self.layout.set_width(document_width * Pango.SCALE)
+                self.layout.set_text(document.title)
+                Gdk.cairo_set_source_rgba(ctx, fg_color)
+                PangoCairo.show_layout(ctx, self.layout)
+                self.draw_divider(ctx, document_offset - scrolling_offset, height)
 
             if is_active and mode == 'draft':
+                draft_offset = document_offset + document_width + 1 - scrolling_offset
                 break
 
         if mode == 'draft':
             extents = self.get_item_extents('New Document')
-            ctx.move_to(offset + 18, int((height - extents.height / Pango.SCALE) / 2) - 1)
+            ctx.move_to(draft_offset, 13)
             self.layout.set_font_description(self.font_desc_bold)
-            self.layout.set_width(extents.width)
+            self.layout.set_width(extents.width + 37 * Pango.SCALE)
             self.layout.set_text('New Document')
             Gdk.cairo_set_source_rgba(ctx, fg_color)
             PangoCairo.show_layout(ctx, self.layout)
-            self.draw_divider(ctx, offset, height)
+            self.draw_divider(ctx, draft_offset, height)
 
     def draw_divider(self, ctx, offset, height):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('border_1'))
@@ -166,10 +170,22 @@ class DocumentHistory(object):
         x += self.view.scrolling_widget.scrolling_offset_x
 
         offset = 0
-        for i, document, document_offset in self.items:
-            extents = self.get_item_extents(document.title)
-            offset += extents.width / Pango.SCALE + 37
-            if x < offset: return document
+        for i, document, document_offset, document_width in self.items:
+            if x >= document_offset and x < document_offset + document_width:
+                return document
+        return None
+
+    def get_hover_index(self):
+        y = self.view.scrolling_widget.cursor_y
+        x = self.view.scrolling_widget.cursor_x
+        if y == None or x == None: return None
+        if y < 6 or y > 41: return None
+        x += self.view.scrolling_widget.scrolling_offset_x
+
+        offset = 0
+        for i, document, document_offset, document_width in self.items:
+            if x >= document_offset and x < document_offset + document_width:
+                return i
         return None
 
     @timer.timer

@@ -61,6 +61,8 @@ class DocumentViewPresenter():
         self.view.content.queue_draw()
 
     def update_size(self):
+        if self.model.document == None: return
+
         document = self.model.document
         height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
         scrolling_offset_y = document.clipping.offset_y
@@ -74,6 +76,8 @@ class DocumentViewPresenter():
             self.view.adjustment_y.set_value(self.view.adjustment_y.get_upper())
 
     def update_scrollbars(self):
+        if self.model.document == None: return
+
         document = self.model.document
         height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
@@ -97,6 +101,8 @@ class DocumentViewPresenter():
         return False
 
     def update_pointer(self):
+        if self.model.document == None: return
+
         document = self.model.document
         if document == None:
             self.content.set_cursor_from_name('default')
