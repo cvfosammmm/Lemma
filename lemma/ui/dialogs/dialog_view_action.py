@@ -60,6 +60,7 @@ class DialogViewAction(Gtk.Window):
 
         self.cancel_button = Gtk.Button.new_with_mnemonic(_('_Cancel'))
         self.cancel_button.set_can_focus(False)
+        self.cancel_button.add_css_class('cancel')
 
         self.submit_button = Gtk.Button.new_with_mnemonic(action_label)
         self.submit_button.set_can_focus(False)

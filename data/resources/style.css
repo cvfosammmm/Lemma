@@ -1,3 +1,9 @@
+/* general */
+
+label link, button.link {
+    color: @accent_color;
+}
+
 /* scrollbars */
 
 scrollbar {
@@ -449,10 +455,14 @@ window.action-dialog headerbar {
     background: @dialog_bg_color;
     border-bottom: 1px solid @dialog_border;
     box-shadow: none;
+    color: @dialog_fg_color;
 }
 window.action-dialog actionbar {
     box-shadow: none;
     border-top: 1px solid @dialog_list_border;
+}
+window.action-dialog actionbar button.cancel {
+    color: @dialog_fg_color;
 }
 window.action-dialog actionbar box {
     background: @dialog_bg_color;
@@ -511,6 +521,7 @@ window.settings notebook tab {
 }
 window.settings headerbar {
     background: @dialog_bg_color;
+    color: @dialog_fg_color;
     border-bottom: none;
     box-shadow: none;
     padding-bottom: 0px;
@@ -556,6 +567,13 @@ window.settings checkbutton.single {
 }
 window.settings checkbutton.single check {
     margin-right: 6px;
+}
+
+/* shortcuts dialog */
+
+window.shortcuts label.keycap {
+    color: @keycap_fg;
+    background: @keycap_bg;
 }
 
 /* insert link dialog */

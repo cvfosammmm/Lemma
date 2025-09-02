@@ -38,6 +38,11 @@
 @define-color dialog_list_bg #fff;
 @define-color dialog_list_border #ddd;
 
+/* Shortcuts Dialog */
+
+@define-color keycap_fg rgba(0, 0, 0, 0.8);
+@define-color keycap_bg #ddd;
+
 /* Popovers */
 @define-color popover_bg_color #fafafa;
 @define-color popover_fg_color rgba(0, 0, 0, 0.8);
