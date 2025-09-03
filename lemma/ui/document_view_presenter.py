@@ -24,7 +24,9 @@ import datetime
 import time
 import cairo
 
-from lemma.services.font_manager import FontManager
+from lemma.services.text_shaper import TextShaper
+from lemma.services.text_renderer import TextRenderer
+from lemma.services.font_helper import FontHelper
 from lemma.services.color_manager import ColorManager
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
@@ -42,6 +44,8 @@ class DocumentViewPresenter():
         self.last_rendered_document = None
         self.last_cache_reset = time.time()
         self.colors = dict()
+        self.hidpi_factor = 1
+        self.hidpi_factor_inverted = 1
 
         self.content.set_draw_func(self.draw)
 
@@ -140,6 +144,8 @@ class DocumentViewPresenter():
         if self.model.document == None: return
         document = self.model.document
 
+        self.hidpi_factor = widget.get_native().get_surface().get_scale()
+        self.hidpi_factor_inverted = 1 / self.hidpi_factor
         self.colors['text'] = ColorManager.get_ui_color('text')
         self.colors['links'] = ColorManager.get_ui_color('links')
         self.colors['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
@@ -183,32 +189,44 @@ class DocumentViewPresenter():
         if layout['type'] == 'char':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            fontname = FontManager.get_fontname_from_node(layout['node'])
-            baseline = FontManager.get_ascend(fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout['node'])
+            baseline = TextShaper.get_ascend(fontname=fontname)
 
             if fontname != 'emojis':
                 fg_color = self.get_fg_color_by_node(layout['node'])
-                surface = FontManager.get_surface(layout['node'].value, fontname=fontname)
+                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
-                    ctx.set_source_surface(surface, offset_x + layout['x'] + layout['left'], offset_y + baseline + layout['y'] + layout['top'])
+                    matrix = ctx.get_matrix()
+                    ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+
+                    ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
+
                     pattern = ctx.get_source()
                     pattern.set_filter(cairo.Filter.BEST)
                     Gdk.cairo_set_source_rgba(ctx, fg_color)
                     ctx.mask(pattern)
                     ctx.fill()
+
+                    ctx.set_matrix(matrix)
             else:
-                surface = FontManager.get_surface(layout['node'].value, fontname=fontname)
+                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
-                    ctx.set_source_surface(surface, offset_x + layout['x'] + layout['left'], offset_y + baseline + layout['y'] + layout['top'])
+                    matrix = ctx.get_matrix()
+                    ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+
+                    ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
+
                     ctx.mask(ctx.get_source())
                     ctx.fill()
+
+                    ctx.set_matrix(matrix)
 
         if layout['type'] == 'widget':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
             surface = layout['node'].value.get_cairo_surface()
-            fontname = FontManager.get_fontname_from_node(layout['node'])
-            top = -FontManager.get_descend(fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout['node'])
+            top = -TextShaper.get_descend(fontname=fontname)
             ctx.set_source_surface(surface, offset_x + layout['x'], offset_y + layout['y'] + top)
             ctx.rectangle(offset_x + layout['x'], offset_y + layout['y'], layout['width'], layout['height'])
             ctx.fill()
@@ -216,20 +234,23 @@ class DocumentViewPresenter():
         if layout['type'] == 'placeholder':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            fontname = FontManager.get_fontname_from_node(layout['node'])
-            baseline = FontManager.get_ascend(fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout['node'])
+            baseline = TextShaper.get_ascend(fontname=fontname)
 
-            width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
             fg_color = self.get_fg_color_by_node(layout['node'])
-            top += baseline
+            surface, left, top = TextRenderer.get_glyph('▯', fontname=fontname, scale=self.hidpi_factor)
 
-            surface = FontManager.get_surface('▯', fontname=fontname)
-            ctx.set_source_surface(surface, offset_x + layout['x'] + left, offset_y + layout['y'] + top)
+            matrix = ctx.get_matrix()
+            ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+
+            ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
             pattern = ctx.get_source()
             pattern.set_filter(cairo.Filter.BEST)
             Gdk.cairo_set_source_rgba(ctx, fg_color)
             ctx.mask(pattern)
             ctx.fill()
+
+            ctx.set_matrix(matrix)
 
         if layout['type'] == 'mathroot':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -315,9 +336,9 @@ class DocumentViewPresenter():
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
         x, y = self.model.document.get_absolute_xy(layout)
-        fontname = FontManager.get_fontname_from_node(insert)
-        padding_top = FontManager.get_padding_top(fontname)
-        padding_bottom = 0#FontManager.get_padding_bottom(fontname)
+        fontname = FontHelper.get_fontname_from_node(insert)
+        padding_top = TextShaper.get_padding_top(fontname)
+        padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
         cursor_coords = (x + offset_x, y + offset_y + padding_top, 1, layout['height'] - padding_top - padding_bottom)
 
         Gdk.cairo_set_source_rgba(ctx, self.colors['cursor'])

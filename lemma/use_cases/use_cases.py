@@ -40,7 +40,8 @@ from lemma.storage.storage import Storage
 from lemma.document.document import Document
 from lemma.services.message_bus import MessageBus
 from lemma.services.html_parser import HTMLParser
-from lemma.services.font_manager import FontManager
+from lemma.services.text_shaper import TextShaper
+from lemma.services.font_helper import FontHelper
 import lemma.services.timer as timer
 
 
@@ -77,9 +78,9 @@ class UseCases():
         y += document_view_allocation.origin.y
         x += ApplicationState.get_value('document_padding_left')
         y += ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
-        fontname = FontManager.get_fontname_from_node(insert)
-        padding_top = FontManager.get_padding_top(fontname)
-        padding_bottom = FontManager.get_padding_bottom(fontname)
+        fontname = FontHelper.get_fontname_from_node(insert)
+        padding_top = TextShaper.get_padding_top(fontname)
+        padding_bottom = TextShaper.get_padding_bottom(fontname)
         y += insert.layout['height'] - padding_top - padding_bottom
 
         orientation = 'bottom'

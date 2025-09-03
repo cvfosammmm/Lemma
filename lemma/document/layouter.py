@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.services.font_manager import FontManager
+from lemma.services.text_shaper import TextShaper
+from lemma.services.font_helper import FontHelper
 from lemma.services.character_db import CharacterDB
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.layout_info import LayoutInfo
@@ -53,19 +54,17 @@ class Layouter(object):
                        'x': 0,
                        'y': 0,
                        'width': 0,
-                       'height': 0,
-                       'left': 0,
-                       'top': 0}
+                       'height': 0}
 
         for child in self.group_words(nodes):
             if isinstance(child, list):
-                subtree = {'type': 'word', 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                subtree = {'type': 'word', 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
                 char_nodes = child
                 text = ''.join([char.value for char in char_nodes])
-                fontname = FontManager.get_fontname_from_node(char_nodes[0])
-                for char_node, extents in zip(char_nodes, FontManager.measure(text, fontname=fontname)):
-                    subsubtree = {'type': 'char', 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
-                    subsubtree['width'], subsubtree['height'], subsubtree['left'], subsubtree['top'] = extents
+                fontname = FontHelper.get_fontname_from_node(char_nodes[0])
+                for char_node, extents in zip(char_nodes, TextShaper.measure(text, fontname=fontname)):
+                    subsubtree = {'type': 'char', 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
+                    subsubtree['width'], subsubtree['height'] = extents
                     char_node.layout = subsubtree
                     subtree['children'].append(subsubtree)
             else:
@@ -83,13 +82,11 @@ class Layouter(object):
                        'x': 0,
                        'y': 0,
                        'width': 0,
-                       'height': 0,
-                       'left': 0,
-                       'top': 0}
+                       'height': 0}
 
         if node.type == 'char':
             layout_tree['type'] = 'char'
-            layout_tree['width'], layout_tree['height'], layout_tree['left'], layout_tree['top'] = FontManager.measure_single(node.value, fontname=FontManager.get_fontname_from_node(node))
+            layout_tree['width'], layout_tree['height'] = TextShaper.measure_single(node.value, fontname=FontHelper.get_fontname_from_node(node))
             node.layout = layout_tree
         elif node.type == 'eol':
             layout_tree['type'] = 'eol'
@@ -161,8 +158,8 @@ class Layouter(object):
                 layout_tree['height'] = max(layout_tree['height'], child['height'])
 
         elif layout_tree['type'] == 'placeholder':
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            width, height, left, top = FontManager.measure_single('▯', fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+            width, height = TextShaper.measure_single('▯', fontname=fontname)
 
             layout_tree['width'] = width
             layout_tree['height'] = height
@@ -171,8 +168,8 @@ class Layouter(object):
 
         elif layout_tree['type'] == 'widget':
             width, height = layout_tree['node'].value.get_width(), layout_tree['node'].value.get_height()
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            height -= 2 * FontManager.get_descend(fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+            height -= 2 * TextShaper.get_descend(fontname=fontname)
 
             layout_tree['width'] = width
             layout_tree['height'] = height
@@ -180,8 +177,8 @@ class Layouter(object):
             layout_tree['y'] = None
 
         elif layout_tree['type'] == 'eol':
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            width, height, left, top = FontManager.measure_single('\n', fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+            width, height = TextShaper.measure_single('\n', fontname=fontname)
 
             layout_tree['width'] = 1
             layout_tree['height'] = height
@@ -189,8 +186,8 @@ class Layouter(object):
             layout_tree['y'] = None
 
         elif layout_tree['type'] == 'end':
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            width, height, left, top = FontManager.measure_single('\n', fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+            width, height = TextShaper.measure_single('\n', fontname=fontname)
 
             layout_tree['width'] = 1
             layout_tree['height'] = height
@@ -204,7 +201,7 @@ class Layouter(object):
                 for child in layout_tree['children']:
                     self.layout(child)
 
-                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
                 height = 0
                 for child in layout_tree['children']:
                     child['parent'] = vbox
@@ -227,8 +224,8 @@ class Layouter(object):
                 layout_tree['children'][0]['children'][1]['height'] = layout_tree['children'][0]['children'][0]['height']
                 layout_tree['children'][0]['height'] += layout_tree['children'][0]['children'][1]['height']
 
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            extents = FontManager.measure_single(' ', fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+            extents = TextShaper.measure_single(' ', fontname=fontname)
 
             layout_tree['children'][0]['x'] = 1
             layout_tree['children'][0]['y'] = extents[1] / 2 - layout_tree['children'][0]['height'] / 2
@@ -243,7 +240,7 @@ class Layouter(object):
                 for child in layout_tree['children']:
                     self.layout(child)
 
-                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
                 height = 0
                 for child in layout_tree['children']:
                     child['parent'] = vbox
@@ -272,8 +269,8 @@ class Layouter(object):
             for child in layout_tree['children'][0]['children'][1]['children']:
                 child['y'] += 2
 
-            fontname = FontManager.get_fontname_from_node(layout_tree['node'])
-            extents = FontManager.measure_single(' ', fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+            extents = TextShaper.measure_single(' ', fontname=fontname)
 
             layout_tree['children'][0]['x'] = 1
             layout_tree['children'][0]['y'] = extents[1] / 2 - layout_tree['children'][0]['height'] / 2
@@ -303,7 +300,7 @@ class Layouter(object):
             self.layout(child)
 
         lines = list()
-        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
         current_line_width = 0
         for child in layout_tree['children']:
             if child['type'] == 'eol':
@@ -317,12 +314,12 @@ class Layouter(object):
                     current_line_width += child['width']
                     if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
                         lines.append(current_line)
-                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
                         current_line_width = 0
                 else:
                     if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
                         lines.append(current_line)
-                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'left': 0, 'top': 0}
+                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
                         current_line_width = 0
                     current_line['children'].append(child)
                     child['parent'] = current_line
@@ -374,24 +371,24 @@ class Layouter(object):
 
         min_descend = 0
         for child in layout_tree['children']:
-            fontname = FontManager.get_fontname_from_node(child['node'])
-            min_descend = min(min_descend, FontManager.get_descend(fontname=fontname))
+            fontname = FontHelper.get_fontname_from_node(child['node'])
+            min_descend = min(min_descend, TextShaper.get_descend(fontname=fontname))
 
         for child in layout_tree['children']:
-            fontname = FontManager.get_fontname_from_node(child['node'])
-            child['height'] -= min_descend - FontManager.get_descend(fontname=fontname)
+            fontname = FontHelper.get_fontname_from_node(child['node'])
+            child['height'] -= min_descend - TextShaper.get_descend(fontname=fontname)
 
         layout_tree['width'] = 0
         layout_tree['height'] = 0
         for child in layout_tree['children']:
-            fontname = FontManager.get_fontname_from_node(child['node'])
+            fontname = FontHelper.get_fontname_from_node(child['node'])
             child['x'] = layout_tree['width']
 
             layout_tree['width'] += child['width']
-            layout_tree['height'] = max(layout_tree['height'], child['height'] - min_descend + FontManager.get_descend(fontname=fontname))
+            layout_tree['height'] = max(layout_tree['height'], child['height'] - min_descend + TextShaper.get_descend(fontname=fontname))
 
         for child in layout_tree['children']:
-            fontname = FontManager.get_fontname_from_node(child['node'])
+            fontname = FontHelper.get_fontname_from_node(child['node'])
             child['y'] = layout_tree['height'] - child['height']
 
 
