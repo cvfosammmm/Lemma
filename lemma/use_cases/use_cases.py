@@ -878,7 +878,7 @@ class UseCases():
         if insert_y < scrolling_offset_y:
             if insert_height > window_height: return (0, insert_y - window_height + insert_height)
             else: return (0, insert_y)
-        if insert_position[1] == document.get_height() - document.ast.lines[-1]['layout']['children'][-1]['height'] and content_height >= window_height:
+        if insert_position[1] >= document.get_height() - insert_height and content_height >= window_height:
             return (0, document.get_height() + content_offset + ApplicationState.get_value('document_padding_bottom') - window_height)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
             return (0, insert_y - window_height + insert_height)
