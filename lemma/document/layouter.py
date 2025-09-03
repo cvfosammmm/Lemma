@@ -303,11 +303,11 @@ class Layouter(object):
         current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
         current_line_width = 0
         for child in layout_tree['children']:
-            if child['type'] == 'eol':
+            if child['type'] == 'eol' or child['type'] == 'end':
                 current_line['children'].append(child)
                 child['parent'] = current_line
             else:
-                break_after_char = (child['type'] == 'char' and NodeTypeDB.is_whitespace(child['node'])) or child['type'] == 'end' or child['type'] == 'eol'
+                break_after_char = (child['type'] == 'char' and NodeTypeDB.is_whitespace(child['node']))
                 if break_after_char:
                     current_line['children'].append(child)
                     child['parent'] = current_line
