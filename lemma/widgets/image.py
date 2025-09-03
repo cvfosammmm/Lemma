@@ -19,6 +19,7 @@ import urllib.parse
 import os.path, io
 from PIL import Image as PIL_Image
 import cairo
+import math
 
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.file_format_db import FileFormatDB
@@ -27,40 +28,48 @@ import lemma.services.timer as timer
 
 class Image(object):
 
+    @timer.timer
     def __init__(self, data, attributes=dict()):
-        self.pil_image = PIL_Image.open(data)
-        self.cairo_surface = None
+        self.data = data.read()
+        self.width = None
+        self.height = None
+
+        with PIL_Image.open(data) as pil_image:
+            self.format = pil_image.format
+            self.original_width = pil_image.width
+            self.original_height = pil_image.height
+
+            if 'A' not in pil_image.getbands():
+                pil_image.putalpha(256)
+            img_bytes = bytearray(pil_image.tobytes('raw', 'BGRa'))
+            self.cairo_surface = cairo.ImageSurface.create_for_data(img_bytes, cairo.FORMAT_ARGB32, self.original_width, self.original_height)
 
         if 'width' in attributes:
             self.set_width(int(attributes['width']))
         else:
-            self.set_width(min(self.pil_image.width, LayoutInfo.get_layout_width()))
+            self.set_width(min(self.original_width, LayoutInfo.get_layout_width()))
 
     def set_width(self, width):
-        height = int((width / self.pil_image.width) * self.pil_image.height)
-        img = self.pil_image.resize((width, height))
-        if 'A' not in img.getbands():
-            img.putalpha(256)
-        img_bytes = bytearray(img.tobytes('raw', 'BGRa'))
-        self.cairo_surface = cairo.ImageSurface.create_for_data(img_bytes, cairo.FORMAT_ARGB32, img.width, img.height)
+        self.width = width
+        self.height = int((width / self.original_width) * self.original_height)
 
     def get_width(self):
-        return self.cairo_surface.get_width()
+        return self.width
 
     def get_minimum_width(self):
         return LayoutInfo.get_min_image_size()
 
     def get_height(self):
-        return self.cairo_surface.get_height()
+        return self.height
 
     def get_original_width(self):
-        return self.pil_image.width
+        return self.original_width
 
     def get_original_height(self):
-        return self.pil_image.height
+        return self.original_height
 
     def get_format(self):
-        return self.pil_image.format
+        return self.format
 
     def get_cairo_surface(self):
         return self.cairo_surface
@@ -82,18 +91,16 @@ class Image(object):
         return True
 
     def get_data(self):
-        with io.BytesIO() as buffer:
-            self.pil_image.save(buffer, format=self.get_format())
-            data = buffer.getvalue()
-        return data
+        return self.data
 
     def get_attributes(self):
         return {'type': 'image', 'width': str(self.get_width())}
 
     def to_html(self, data_location_prefix):
-        file_ending = FileFormatDB.get_ending_from_format_name(self.pil_image.format)
-        filename = data_location_prefix + file_ending
-        self.pil_image.save(filename)
+        with PIL_Image.open(io.BytesIO(self.data)) as pil_image:
+            file_ending = FileFormatDB.get_ending_from_format_name(pil_image.format)
+            filename = data_location_prefix + file_ending
+            pil_image.save(filename)
         return '<img src="' + urllib.parse.quote(os.path.split(os.path.dirname(filename))[1] + '/' + os.path.basename(filename)) + '" width="' + str(self.get_width()) + '" />'
 
 

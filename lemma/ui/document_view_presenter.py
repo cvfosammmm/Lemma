@@ -224,12 +224,21 @@ class DocumentViewPresenter():
         if layout['type'] == 'widget':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            surface = layout['node'].value.get_cairo_surface()
+            widget = layout['node'].value
+            surface = widget.get_cairo_surface()
             fontname = FontHelper.get_fontname_from_node(layout['node'])
             top = -TextShaper.get_descend(fontname=fontname)
-            ctx.set_source_surface(surface, offset_x + layout['x'], offset_y + layout['y'] + top)
-            ctx.rectangle(offset_x + layout['x'], offset_y + layout['y'], layout['width'], layout['height'])
+
+            matrix = ctx.get_matrix()
+            widget_factor_x = widget.get_width() / widget.get_original_width()
+            widget_factor_y = widget.get_height() / widget.get_original_height()
+            ctx.scale(widget_factor_x, widget_factor_y)
+
+            ctx.set_source_surface(surface, (offset_x + layout['x']) / widget_factor_x, (offset_y + layout['y'] + top) / widget_factor_y)
+            ctx.rectangle((offset_x + layout['x']) / widget_factor_x, (offset_y + layout['y'] + top) / widget_factor_y, layout['width'] / widget_factor_x, layout['height'] / widget_factor_y)
             ctx.fill()
+
+            ctx.set_matrix(matrix)
 
         if layout['type'] == 'placeholder':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
