@@ -25,7 +25,6 @@ import cairo
 import os.path
 
 import lib.freetype2.freetype2 as freetype2
-import lib.fontconfig.fontconfig as fontconfig
 import lemma.services.timer as timer
 
 from lemma.services.paths import Paths
@@ -36,8 +35,6 @@ class TextRenderer():
     fonts = dict()
 
     def add_font(name, filename, size, ascend, descend):
-        fontconfig.Config.get_current().app_font_add_file(filename)
-
         TextRenderer.fonts[name] = dict()
         TextRenderer.fonts[name]['size'] = size
         TextRenderer.fonts[name]['filename'] = filename
