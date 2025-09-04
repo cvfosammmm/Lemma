@@ -46,6 +46,8 @@ class DocumentViewPresenter():
         self.colors = dict()
         self.hidpi_factor = 1
         self.hidpi_factor_inverted = 1
+        self.matrix_default = None
+        self.matrix_scaled = None
 
         self.content.set_draw_func(self.draw)
 
@@ -146,6 +148,11 @@ class DocumentViewPresenter():
 
         self.hidpi_factor = widget.get_native().get_surface().get_scale()
         self.hidpi_factor_inverted = 1 / self.hidpi_factor
+        self.matrix_default = ctx.get_matrix()
+        ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+        self.matrix_scaled = ctx.get_matrix()
+        ctx.set_matrix(self.matrix_default)
+
         self.colors['text'] = ColorManager.get_ui_color('text')
         self.colors['links'] = ColorManager.get_ui_color('links')
         self.colors['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
@@ -192,13 +199,12 @@ class DocumentViewPresenter():
             fontname = FontHelper.get_fontname_from_node(layout['node'])
             baseline = TextShaper.get_ascend(fontname=fontname)
 
+            ctx.set_matrix(self.matrix_scaled)
+
             if fontname != 'emojis':
                 fg_color = self.get_fg_color_by_node(layout['node'])
                 surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
-                    matrix = ctx.get_matrix()
-                    ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
-
                     ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
 
                     pattern = ctx.get_source()
@@ -206,20 +212,17 @@ class DocumentViewPresenter():
                     Gdk.cairo_set_source_rgba(ctx, fg_color)
                     ctx.mask(pattern)
                     ctx.fill()
-
-                    ctx.set_matrix(matrix)
             else:
                 surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
-                    matrix = ctx.get_matrix()
-                    ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+                    ctx.set_matrix(self.matrix_scaled)
 
                     ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
 
                     ctx.mask(ctx.get_source())
                     ctx.fill()
 
-                    ctx.set_matrix(matrix)
+            ctx.set_matrix(self.matrix_default)
 
         if layout['type'] == 'widget':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -238,7 +241,7 @@ class DocumentViewPresenter():
             ctx.rectangle((offset_x + layout['x']) / widget_factor_x, (offset_y + layout['y'] + top) / widget_factor_y, layout['width'] / widget_factor_x, layout['height'] / widget_factor_y)
             ctx.fill()
 
-            ctx.set_matrix(matrix)
+            ctx.set_matrix(self.matrix_default)
 
         if layout['type'] == 'placeholder':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -249,8 +252,7 @@ class DocumentViewPresenter():
             fg_color = self.get_fg_color_by_node(layout['node'])
             surface, left, top = TextRenderer.get_glyph('▯', fontname=fontname, scale=self.hidpi_factor)
 
-            matrix = ctx.get_matrix()
-            ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+            ctx.set_matrix(self.matrix_scaled)
 
             ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
             pattern = ctx.get_source()
@@ -259,7 +261,7 @@ class DocumentViewPresenter():
             ctx.mask(pattern)
             ctx.fill()
 
-            ctx.set_matrix(matrix)
+            ctx.set_matrix(self.matrix_default)
 
         if layout['type'] == 'mathroot':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
