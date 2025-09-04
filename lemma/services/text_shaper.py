@@ -67,22 +67,18 @@ class TextShaper():
 
         return TextShaper.fonts[fontname]['char_extents'][char]
 
-    @timer.timer
     def measure(text, fontname='book'):
         harfbuzz_buffer = TextShaper.harfbuzz_buffer
         HarfBuzz.buffer_reset(harfbuzz_buffer)
         HarfBuzz.buffer_add_utf8(harfbuzz_buffer, text.encode('utf8'), 0, -1)
         HarfBuzz.buffer_guess_segment_properties(harfbuzz_buffer)
         HarfBuzz.shape(TextShaper.fonts[fontname]['harfbuzz_font'], harfbuzz_buffer, TextShaper.harfbuzz_features)
-        positions = HarfBuzz.buffer_get_glyph_positions(harfbuzz_buffer)
 
         result = []
-        for pos, char in zip(positions, text):
-            if char not in TextShaper.fonts[fontname]['char_extents']:
-                TextShaper.load_glyph(char, fontname)
-            extents = TextShaper.fonts[fontname]['char_extents'][char][:]
-            extents[0] = int(pos.x_advance / 64)
-            result.append(extents)
+        positions = HarfBuzz.buffer_get_glyph_positions(harfbuzz_buffer)
+        line_height = TextShaper.fonts[fontname]['line_height']
+        for pos in positions:
+            result.append([int(pos.x_advance / 64), line_height])
 
         return result
 
