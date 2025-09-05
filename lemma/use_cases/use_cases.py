@@ -942,6 +942,9 @@ class UseCases():
     @timer.timer
     def add_scrolling_command(document, x, y, timestamp):
         if timestamp == UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id]:
+            if (x, y) == document.clipping.get_state():
+                return
+
             document.add_command('scroll_to_xy', x, y)
 
             MessageBus.add_change_code('document_changed')
