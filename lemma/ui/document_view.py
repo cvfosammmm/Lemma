@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 from lemma.services.settings import Settings
 from lemma.ui.document_view_controller import DocumentViewController
 from lemma.ui.document_view_presenter import DocumentViewPresenter
+from lemma.ui.document_view_view import DocumentViewDrawingArea
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.history.history import History
 from lemma.use_cases.use_cases import UseCases
@@ -38,7 +39,6 @@ class DocumentView():
 
     def __init__(self, main_window, model_state):
         self.main_window = main_window
-        self.view = main_window.document_view
         self.model_state = model_state
 
         self.cursor_x, self.cursor_y = None, None
@@ -51,6 +51,9 @@ class DocumentView():
 
         self.document = None
 
+        self.view = main_window.document_view
+        self.view.content = DocumentViewDrawingArea(self)
+        self.view.set_child(self.view.content)
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
@@ -84,6 +87,7 @@ class DocumentView():
 
         self.update_link_at_cursor()
         self.presenter.update()
+        self.view.content.update()
 
     def set_size(self, width, height):
         UseCases.app_state_set_values({'document_view_width': width, 'document_view_height': height})

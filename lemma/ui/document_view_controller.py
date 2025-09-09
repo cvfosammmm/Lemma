@@ -83,8 +83,6 @@ class DocumentViewController():
         self.view.adjustment_x.connect('value-changed', self.on_adjustment_value_changed)
         self.view.adjustment_y.connect('value-changed', self.on_adjustment_value_changed)
 
-        self.content.connect('resize', self.on_resize)
-
     def on_primary_button_press(self, controller, n_press, x, y):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
@@ -351,9 +349,6 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.model.set_cursor_position(None, None)
-
-    def on_resize(self, drawing_area, width, height):
-        self.model.set_size(width, height)
 
     def on_adjustment_value_changed(self, adjustment):
         document = self.model.document
