@@ -86,6 +86,7 @@ class Application(Adw.Application):
         self.actions.update()
         self.backlinks.update()
         self.document_history.update()
+        self.cursor_state.update()
         self.document_list.update()
         self.document_draft.update()
         self.window_state.update()
