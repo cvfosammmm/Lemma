@@ -117,10 +117,10 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
         self.hidpi_factor = self.get_native().get_surface().get_scale()
         self.hidpi_factor_inverted = 1 / self.hidpi_factor
-        self.matrix_default = ctx.get_matrix()
-        ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
-        self.matrix_scaled = ctx.get_matrix()
-        ctx.set_matrix(self.matrix_default)
+        allocation = self.compute_bounds(self.get_native()).out_bounds
+        surface_transform = self.get_native().get_surface_transform()
+        self.device_offset_x = 1 - ((allocation.get_x() + surface_transform.x) * self.hidpi_factor) % 1
+        self.device_offset_y = 1 - ((allocation.get_y() + surface_transform.y) * self.hidpi_factor) % 1
 
         self.colors['text'] = ColorManager.get_ui_color('text')
         self.colors['links'] = ColorManager.get_ui_color('links')
@@ -141,20 +141,19 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
         self.draw_title(ctx, ApplicationState.get_value('document_padding_left'), ApplicationState.get_value('document_padding_top') - scrolling_offset_y)
 
-        Gdk.cairo_set_source_rgba(ctx, self.colors['text'])
-
+        ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
         for i, paragraph in enumerate(document.ast.lines):
             for j, line_layout in enumerate(paragraph['layout']['children']):
                 if offset_y + line_layout['y'] + paragraph['layout']['y'] + line_layout['height'] >= 0 and offset_y + line_layout['y'] + paragraph['layout']['y'] <= self.height:
                     if (i,j) not in self.render_cache:
-                        surface = ctx.get_target().create_similar(cairo.Content.COLOR_ALPHA, int(line_layout['width']), int(line_layout['height']))
+                        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int(line_layout['width'] * self.hidpi_factor), int(line_layout['height'] * self.hidpi_factor))
                         self.draw_layout(line_layout, cairo.Context(surface), -line_layout['x'], -line_layout['y'], in_selection)
                         self.render_cache[(i,j)] = surface
 
-                    ctx.set_source_surface(self.render_cache[(i,j)], offset_x, offset_y + paragraph['layout']['y'] + line_layout['y'])
-                    ctx.rectangle(offset_x, offset_y + paragraph['layout']['y'] + line_layout['y'], line_layout['width'], line_layout['height'])
-                    ctx.fill()
+                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(offset_x * self.hidpi_factor), self.device_offset_y + int((offset_y + paragraph['layout']['y'] + line_layout['y']) * self.hidpi_factor))
+
+                    ctx.paint()
                 elif (i,j) in self.render_cache:
                     del(self.render_cache[(i,j)])
 
@@ -170,13 +169,11 @@ class DocumentViewDrawingArea(Gtk.Widget):
             fontname = FontHelper.get_fontname_from_node(layout['node'])
             baseline = TextShaper.get_ascend(fontname=fontname)
 
-            ctx.set_matrix(self.matrix_scaled)
-
             if fontname != 'emojis':
                 fg_color = self.get_fg_color_by_node(layout['node'])
                 surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
-                    ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
+                    ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
 
                     pattern = ctx.get_source()
                     pattern.set_filter(cairo.Filter.BEST)
@@ -186,14 +183,10 @@ class DocumentViewDrawingArea(Gtk.Widget):
             else:
                 surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
-                    ctx.set_matrix(self.matrix_scaled)
-
-                    ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
+                    ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
 
                     ctx.mask(ctx.get_source())
                     ctx.fill()
-
-            ctx.set_matrix(self.matrix_default)
 
         if layout['type'] == 'widget':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -204,15 +197,14 @@ class DocumentViewDrawingArea(Gtk.Widget):
             top = -TextShaper.get_descend(fontname=fontname)
 
             matrix = ctx.get_matrix()
-            widget_factor_x = widget.get_width() / widget.get_original_width()
-            widget_factor_y = widget.get_height() / widget.get_original_height()
+            widget_factor_x = widget.get_width() * self.hidpi_factor / widget.get_original_width()
+            widget_factor_y = widget.get_height() * self.hidpi_factor / widget.get_original_height()
             ctx.scale(widget_factor_x, widget_factor_y)
 
-            ctx.set_source_surface(surface, (offset_x + layout['x']) / widget_factor_x, (offset_y + layout['y'] + top) / widget_factor_y)
-            ctx.rectangle((offset_x + layout['x']) / widget_factor_x, (offset_y + layout['y'] + top) / widget_factor_y, layout['width'] / widget_factor_x, layout['height'] / widget_factor_y)
-            ctx.fill()
+            ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor / widget_factor_x, (offset_y + layout['y'] + top) * self.hidpi_factor / widget_factor_y)
+            ctx.paint()
 
-            ctx.set_matrix(self.matrix_default)
+            ctx.set_matrix(matrix)
 
         if layout['type'] == 'placeholder':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -223,16 +215,12 @@ class DocumentViewDrawingArea(Gtk.Widget):
             fg_color = self.get_fg_color_by_node(layout['node'])
             surface, left, top = TextRenderer.get_glyph('▯', fontname=fontname, scale=self.hidpi_factor)
 
-            ctx.set_matrix(self.matrix_scaled)
-
-            ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor + left, (offset_y + baseline + layout['y']) * self.hidpi_factor + top)
+            ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
             pattern = ctx.get_source()
             pattern.set_filter(cairo.Filter.BEST)
             Gdk.cairo_set_source_rgba(ctx, fg_color)
             ctx.mask(pattern)
             ctx.fill()
-
-            ctx.set_matrix(self.matrix_default)
 
         if layout['type'] == 'mathroot':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -259,14 +247,14 @@ class DocumentViewDrawingArea(Gtk.Widget):
             line_height = layout['children'][0]['height']
 
             ctx.set_line_width(2)
-            ctx.move_to(offset_x + layout['x'] + line_offset - 6, offset_y + line_height - 10)
-            ctx.line_to(offset_x + layout['x'] + line_offset, offset_y + line_height - 2)
+            ctx.move_to((offset_x + layout['x'] + line_offset - 6) * self.hidpi_factor, (offset_y + line_height - 10) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + line_height - 2) * self.hidpi_factor)
             ctx.stroke()
             ctx.set_line_width(1)
-            ctx.move_to(offset_x + layout['x'] + line_offset, offset_y + line_height - 2)
-            ctx.line_to(offset_x + layout['x'] + line_offset + 9, offset_y + 1)
+            ctx.move_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + line_height - 2) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, (offset_y + 1) * self.hidpi_factor)
             ctx.stroke()
-            ctx.rectangle(offset_x + layout['x'] + line_offset + 9, offset_y, line_width, 1)
+            ctx.rectangle((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, int(offset_y * self.hidpi_factor), line_width, 1)
             ctx.fill()
 
         if layout['type'] == 'mathfraction':
@@ -276,12 +264,12 @@ class DocumentViewDrawingArea(Gtk.Widget):
             line_offset = layout['children'][0]['children'][1]['height']
             line_width = layout['width']
 
-            ctx.rectangle(offset_x + layout['x'] + 1, offset_y + line_offset + 1, line_width - 2, 1)
+            ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + line_offset + 1) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
             ctx.fill()
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
         Gdk.cairo_set_source_rgba(ctx, self.colors['selection_bg'])
-        ctx.rectangle(offset_x + layout['x'], offset_y, layout['width'], layout['parent']['height'])
+        ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, offset_y * self.hidpi_factor, layout['width'] * self.hidpi_factor, layout['parent']['height'] * self.hidpi_factor)
         ctx.fill()
 
     def get_fg_color_by_node(self, node):
@@ -322,7 +310,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         fontname = FontHelper.get_fontname_from_node(insert)
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
-        cursor_coords = (x + offset_x, y + offset_y + padding_top, 1, layout['height'] - padding_top - padding_bottom)
+        cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
         Gdk.cairo_set_source_rgba(ctx, self.colors['cursor'])
         ctx.rectangle(*cursor_coords)
