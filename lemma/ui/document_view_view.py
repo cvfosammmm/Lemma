@@ -328,9 +328,10 @@ class DocumentViewDrawingArea(Gtk.Widget):
         ctx.fill()
 
     def draw_cursor(self, ctx, offset_x, offset_y):
-        if not self.is_focus() and ApplicationState.get_value('document_view_hide_cursor_on_unfocus'): return
-        if self.model.document.cursor.has_selection(): return
-        if not self.cursor_visible: return
+        if ApplicationState.get_value('document_view_hide_cursor_on_unfocus'):
+            if not self.has_focus(): return
+            if self.model.document.cursor.has_selection(): return
+            if not self.cursor_visible: return
 
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
