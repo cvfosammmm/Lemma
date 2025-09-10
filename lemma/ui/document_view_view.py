@@ -83,6 +83,16 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
         self.colors = dict()
 
+        self.window_surface = None
+
+        self.layout_title = Pango.Layout(self.get_pango_context())
+        self.layout_title.set_ellipsize(Pango.EllipsizeMode.END)
+        self.layout_title.set_font_description(Pango.FontDescription.from_string('NewComputerModernSans10 Regular 36px'))
+
+        self.layout_subtitle = Pango.Layout(self.get_pango_context())
+        self.layout_subtitle.set_ellipsize(Pango.EllipsizeMode.END)
+        self.layout_subtitle.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
+
         self.render_cache = dict()
         self.last_rendered_document = None
         self.last_cache_reset = time.time()
@@ -109,7 +119,6 @@ class DocumentViewDrawingArea(Gtk.Widget):
     def reset_cursor_blink(self):
         self.cursor_blink_reset = time.time()
 
-    @timer.timer
     def animation_callback(self, widget, frame_clock):
         time_since_blink_start = time.time() - self.cursor_blink_reset
         time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
@@ -130,25 +139,56 @@ class DocumentViewDrawingArea(Gtk.Widget):
         if self.model.document == None: return
         document = self.model.document
 
-        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.get_allocated_width(), self.get_allocated_height()))
-
         self.height = self.get_allocated_height()
+        self.width = self.get_allocated_width()
 
-        self.layout_title = Pango.Layout(self.get_pango_context())
-        self.layout_title.set_ellipsize(Pango.EllipsizeMode.END)
-        self.layout_title.set_font_description(Pango.FontDescription.from_string('NewComputerModernSans10 Regular 36px'))
+        self.setup_scaling_offsets()
+        self.setup_colors()
 
-        self.layout_subtitle = Pango.Layout(self.get_pango_context())
-        self.layout_subtitle.set_ellipsize(Pango.EllipsizeMode.END)
-        self.layout_subtitle.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
+        content_offset_x = ApplicationState.get_value('document_padding_left')
+        content_offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - document.clipping.offset_y
+        title_offset_y = ApplicationState.get_value('document_padding_top') - document.clipping.offset_y
+        self.first_selection_node = document.cursor.get_first_node()
+        self.last_selection_node = document.cursor.get_last_node()
+        first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
+        last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
 
-        self.hidpi_factor = self.get_native().get_surface().get_scale()
+        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
+
+        self.draw_title(ctx, content_offset_x, title_offset_y)
+
+        ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+        in_selection = False
+        for i, paragraph in enumerate(document.ast.lines):
+            for j, line_layout in enumerate(paragraph['layout']['children']):
+                if content_offset_y + line_layout['y'] + paragraph['layout']['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph['layout']['y'] <= self.height:
+                    if (i,j) not in self.render_cache:
+                        self.draw_line(ctx, i, j, line_layout, in_selection)
+
+                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(content_offset_x * self.hidpi_factor), self.device_offset_y + int((content_offset_y + paragraph['layout']['y'] + line_layout['y']) * self.hidpi_factor))
+                    ctx.paint()
+                elif (i,j) in self.render_cache:
+                    del(self.render_cache[(i,j)])
+
+                if not in_selection and line_layout['y'] + line_layout['parent']['y'] == first_selection_line['y'] + first_selection_line['parent']['y']: in_selection = True
+                if in_selection and line_layout['y'] + line_layout['parent']['y'] == last_selection_line['y'] + last_selection_line['parent']['y']: in_selection = False
+
+        self.draw_cursor(ctx, content_offset_x, content_offset_y)
+
+    @timer.timer
+    def setup_scaling_offsets(self):
+        if self.window_surface == None:
+            self.window_surface = self.model.main_window.get_surface()
+
+        self.hidpi_factor = self.window_surface.get_scale()
         self.hidpi_factor_inverted = 1 / self.hidpi_factor
         allocation = self.compute_bounds(self.get_native()).out_bounds
         surface_transform = self.get_native().get_surface_transform()
         self.device_offset_x = 1 - ((allocation.get_x() + surface_transform.x) * self.hidpi_factor) % 1
         self.device_offset_y = 1 - ((allocation.get_y() + surface_transform.y) * self.hidpi_factor) % 1
 
+    @timer.timer
+    def setup_colors(self):
         self.colors['text'] = ColorManager.get_ui_color('text')
         self.colors['links'] = ColorManager.get_ui_color('links')
         self.colors['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
@@ -158,36 +198,11 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.colors['border_1'] = ColorManager.get_ui_color('border_1')
         self.colors['cursor'] = ColorManager.get_ui_color('cursor')
 
-        offset_x = ApplicationState.get_value('document_padding_left')
-        scrolling_offset_y = document.clipping.offset_y
-        offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - scrolling_offset_y
-        self.first_selection_node = document.cursor.get_first_node()
-        self.last_selection_node = document.cursor.get_last_node()
-        first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
-        last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
-
-        self.draw_title(ctx, ApplicationState.get_value('document_padding_left'), ApplicationState.get_value('document_padding_top') - scrolling_offset_y)
-
-        ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
-        in_selection = False
-        for i, paragraph in enumerate(document.ast.lines):
-            for j, line_layout in enumerate(paragraph['layout']['children']):
-                if offset_y + line_layout['y'] + paragraph['layout']['y'] + line_layout['height'] >= 0 and offset_y + line_layout['y'] + paragraph['layout']['y'] <= self.height:
-                    if (i,j) not in self.render_cache:
-                        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int(line_layout['width'] * self.hidpi_factor), int(line_layout['height'] * self.hidpi_factor))
-                        self.draw_layout(line_layout, cairo.Context(surface), -line_layout['x'], -line_layout['y'], in_selection)
-                        self.render_cache[(i,j)] = surface
-
-                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(offset_x * self.hidpi_factor), self.device_offset_y + int((offset_y + paragraph['layout']['y'] + line_layout['y']) * self.hidpi_factor))
-
-                    ctx.paint()
-                elif (i,j) in self.render_cache:
-                    del(self.render_cache[(i,j)])
-
-                if not in_selection and line_layout['y'] + line_layout['parent']['y'] == first_selection_line['y'] + first_selection_line['parent']['y']: in_selection = True
-                if in_selection and line_layout['y'] + line_layout['parent']['y'] == last_selection_line['y'] + last_selection_line['parent']['y']: in_selection = False
-
-        self.draw_cursor(ctx, offset_x, offset_y)
+    @timer.timer
+    def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
+        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int(layout['width'] * self.hidpi_factor), int(layout['height'] * self.hidpi_factor))
+        self.draw_layout(layout, cairo.Context(surface), -layout['x'], -layout['y'], in_selection)
+        self.render_cache[(paragraph_no, line_no)] = surface
 
     def draw_layout(self, layout, ctx, offset_x, offset_y, in_selection):
         if layout['type'] == 'char':
@@ -201,19 +216,12 @@ class DocumentViewDrawingArea(Gtk.Widget):
                 surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
                     ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
-
-                    pattern = ctx.get_source()
-                    pattern.set_filter(cairo.Filter.BEST)
-                    Gdk.cairo_set_source_rgba(ctx, fg_color)
-                    ctx.mask(pattern)
-                    ctx.fill()
+                    ctx.paint()
             else:
                 surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
                 if surface != None:
                     ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
-
-                    ctx.mask(ctx.get_source())
-                    ctx.fill()
+                    ctx.paint()
 
         if layout['type'] == 'widget':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -299,6 +307,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, offset_y * self.hidpi_factor, layout['width'] * self.hidpi_factor, layout['parent']['height'] * self.hidpi_factor)
         ctx.fill()
 
+    @timer.timer
     def get_fg_color_by_node(self, node):
         if node.link != None:
             if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:

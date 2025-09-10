@@ -22,8 +22,6 @@ from lemma.services.node_type_db import NodeTypeDB
 class FontHelper():
 
     def get_fontname_from_node(node=None):
-        if node == None: return 'book'
-
         if NodeTypeDB.is_subscript(node) or NodeTypeDB.is_superscript(node):
             return 'math_small'
         if NodeTypeDB.in_fraction(node):
