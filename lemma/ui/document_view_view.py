@@ -103,8 +103,11 @@ class DocumentViewDrawingArea(Gtk.Widget):
             self.render_cache = dict()
             self.last_rendered_document = self.model.document
             self.last_cache_reset = time.time()
-            self.cursor_blink_reset = time.time()
+            self.reset_cursor_blink()
         self.queue_draw()
+
+    def reset_cursor_blink(self):
+        self.cursor_blink_reset = time.time()
 
     @timer.timer
     def animation_callback(self, widget, frame_clock):

@@ -320,6 +320,7 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.im_context.focus_in()
+        self.view.content.reset_cursor_blink()
         self.view.content.queue_draw()
 
     def on_focus_out(self, controller):
