@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, PangoCairo, Pango, Graphene
+from gi.repository import Gtk, Gdk, GLib, PangoCairo, Pango, Graphene
 
 from urllib.parse import urlparse
 import datetime
@@ -87,6 +87,13 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.last_rendered_document = None
         self.last_cache_reset = time.time()
 
+        self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
+        self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
+        self.cursor_blink_reset = time.time()
+        self.cursor_visible = True
+
+        self.add_tick_callback(self.animation_callback)
+
     def update(self):
         if self.model.document == None: return
 
@@ -96,7 +103,24 @@ class DocumentViewDrawingArea(Gtk.Widget):
             self.render_cache = dict()
             self.last_rendered_document = self.model.document
             self.last_cache_reset = time.time()
+            self.cursor_blink_reset = time.time()
         self.queue_draw()
+
+    @timer.timer
+    def animation_callback(self, widget, frame_clock):
+        time_since_blink_start = time.time() - self.cursor_blink_reset
+        time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
+
+        if time_since_blink_start <= 10 and time_in_cycle > 0.6:
+            cursor_visible = False
+        else:
+            cursor_visible = True
+
+        if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
+            self.cursor_visible = cursor_visible
+            self.queue_draw()
+
+        return True
 
     @timer.timer
     def do_snapshot(self, snapshot):
@@ -303,6 +327,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
     def draw_cursor(self, ctx, offset_x, offset_y):
         if not self.is_focus() and ApplicationState.get_value('document_view_hide_cursor_on_unfocus'): return
         if self.model.document.cursor.has_selection(): return
+        if not self.cursor_visible: return
 
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
