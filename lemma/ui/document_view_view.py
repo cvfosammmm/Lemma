@@ -198,6 +198,10 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.colors['border_1'] = ColorManager.get_ui_color('border_1')
         self.colors['cursor'] = ColorManager.get_ui_color('cursor')
 
+        self.colors['text_string'] = self.colors['text'].to_string()
+        self.colors['links_string'] = self.colors['links'].to_string()
+        self.colors['links_page_not_existing_string'] = self.colors['links_page_not_existing'].to_string()
+
     @timer.timer
     def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
         surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int(layout['width'] * self.hidpi_factor), int(layout['height'] * self.hidpi_factor))
@@ -212,13 +216,13 @@ class DocumentViewDrawingArea(Gtk.Widget):
             baseline = TextShaper.get_ascend(fontname=fontname)
 
             if fontname != 'emojis':
-                fg_color = self.get_fg_color_by_node(layout['node'])
-                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
+                fg_color = self.get_fg_color_string_by_node(layout['node'])
+                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname, fg_color, self.hidpi_factor)
                 if surface != None:
                     ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
                     ctx.paint()
             else:
-                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname=fontname, scale=self.hidpi_factor)
+                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname, None, self.hidpi_factor)
                 if surface != None:
                     ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
                     ctx.paint()
@@ -247,15 +251,11 @@ class DocumentViewDrawingArea(Gtk.Widget):
             fontname = FontHelper.get_fontname_from_node(layout['node'])
             baseline = TextShaper.get_ascend(fontname=fontname)
 
-            fg_color = self.get_fg_color_by_node(layout['node'])
-            surface, left, top = TextRenderer.get_glyph('▯', fontname=fontname, scale=self.hidpi_factor)
+            fg_color = self.get_fg_color_string_by_node(layout['node'])
+            surface, left, top = TextRenderer.get_glyph('▯', fontname, fg_color, self.hidpi_factor)
 
             ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
-            pattern = ctx.get_source()
-            pattern.set_filter(cairo.Filter.BEST)
-            Gdk.cairo_set_source_rgba(ctx, fg_color)
-            ctx.mask(pattern)
-            ctx.fill()
+            ctx.paint()
 
         if layout['type'] == 'mathroot':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
@@ -306,6 +306,16 @@ class DocumentViewDrawingArea(Gtk.Widget):
         Gdk.cairo_set_source_rgba(ctx, self.colors['selection_bg'])
         ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, offset_y * self.hidpi_factor, layout['width'] * self.hidpi_factor, layout['parent']['height'] * self.hidpi_factor)
         ctx.fill()
+
+    @timer.timer
+    def get_fg_color_string_by_node(self, node):
+        if node.link != None:
+            if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
+                return self.colors['links_string']
+            else:
+                return self.colors['links_page_not_existing_string']
+        else:
+            return self.colors['text_string']
 
     @timer.timer
     def get_fg_color_by_node(self, node):

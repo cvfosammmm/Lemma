@@ -18,8 +18,10 @@
 import gi
 gi.require_version('Rsvg', '2.0')
 gi.require_version('HarfBuzz', '0.0')
+gi.require_version('Gdk', '4.0')
 from gi.repository import Rsvg
 from gi.repository import HarfBuzz
+from gi.repository import Gdk
 
 import cairo
 import os.path
@@ -44,17 +46,17 @@ class TextRenderer():
         TextRenderer.fonts[name]['line_height'] = ascend + descend
         TextRenderer.fonts[name]['cache'] = dict()
 
-    def get_glyph(char, fontname='book', scale=1):
-        if char + '-' + str(scale) not in TextRenderer.fonts[fontname]['cache']:
-            TextRenderer.load_glyph(char, fontname, scale)
+    def get_glyph(char, fontname='book', color=None, scale=1):
+        if (char, color, scale) not in TextRenderer.fonts[fontname]['cache']:
+            TextRenderer.load_glyph(char, fontname, color, scale)
 
-        return TextRenderer.fonts[fontname]['cache'][char + '-' + str(scale)]
+        return TextRenderer.fonts[fontname]['cache'][(char, color, scale)]
 
-    def load_glyph(char, fontname, scale=1):
+    def load_glyph(char, fontname, color, scale=1):
         if fontname == 'emojis':
             TextRenderer.load_emoji(char, scale)
         else:
-            TextRenderer.load_glyph_from_font(char, fontname, scale)
+            TextRenderer.load_glyph_from_font(char, fontname, color, scale)
 
     def load_emoji(char, scale):
         TextRenderer.fonts['emojis']['face'].set_char_size(size=TextRenderer.fonts['emojis']['size'] * scale, resolution=72)
@@ -80,19 +82,32 @@ class TextRenderer():
         rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/svg', filename))
         rsvg_handle.render_document(ctx, viewport)
 
-        TextRenderer.fonts['emojis']['cache'][char + '-' + str(scale)] = (surface, left, top)
+        TextRenderer.fonts['emojis']['cache'][(char, None, scale)] = (surface, left, top)
 
-    def load_glyph_from_font(char, fontname, scale):
+    def load_glyph_from_font(char, fontname, color, scale):
         TextRenderer.fonts[fontname]['face'].set_char_size(size=TextRenderer.fonts[fontname]['size'] * scale, resolution=72)
         TextRenderer.fonts[fontname]['face'].load_char(ord(char), freetype2.FT.LOAD_DEFAULT)
         TextRenderer.fonts[fontname]['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
 
+        width = TextRenderer.fonts[fontname]['face'].glyph.advance.x
+        height = TextRenderer.fonts[fontname]['line_height']
         left = TextRenderer.fonts[fontname]['face'].glyph.bitmap_left
         top = -TextRenderer.fonts[fontname]['face'].glyph.bitmap_top
 
         if TextRenderer.fonts[fontname]['face'].glyph.bitmap.width > 0:
-            TextRenderer.fonts[fontname]['cache'][char + '-' + str(scale)] = (TextRenderer.fonts[fontname]['face'].glyph.bitmap.make_image_surface(), left, top)
+            surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width), int(height))
+            ctx = cairo.Context(surface)
+            ctx.set_source_surface(TextRenderer.fonts[fontname]['face'].glyph.bitmap.make_image_surface(), 0, 0)
+            pattern = ctx.get_source()
+            pattern.set_filter(cairo.Filter.BEST)
+            rgba = Gdk.RGBA()
+            rgba.parse(color)
+            ctx.set_source_rgba(rgba.red, rgba.green, rgba.blue, rgba.alpha)
+            ctx.mask(pattern)
+            ctx.fill()
+
+            TextRenderer.fonts[fontname]['cache'][(char, color, scale)] = (surface, left, top)
         else:
-            TextRenderer.fonts[fontname]['cache'][char + '-' + str(scale)] = (None, 0, 0)
+            TextRenderer.fonts[fontname]['cache'][(char, color, scale)] = (None, 0, 0)
 
 
