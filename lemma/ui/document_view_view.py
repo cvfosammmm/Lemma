@@ -155,7 +155,8 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
         ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
 
-        self.draw_title(ctx, content_offset_x, title_offset_y)
+        if content_offset_y >= 0:
+            self.draw_title(ctx, content_offset_x, title_offset_y)
 
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
@@ -182,8 +183,8 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
         self.hidpi_factor = self.window_surface.get_scale()
         self.hidpi_factor_inverted = 1 / self.hidpi_factor
-        allocation = self.compute_bounds(self.get_native()).out_bounds
-        surface_transform = self.get_native().get_surface_transform()
+        allocation = self.compute_bounds(self.model.main_window).out_bounds
+        surface_transform = self.model.main_window.get_surface_transform()
         self.device_offset_x = 1 - ((allocation.get_x() + surface_transform.x) * self.hidpi_factor) % 1
         self.device_offset_y = 1 - ((allocation.get_y() + surface_transform.y) * self.hidpi_factor) % 1
 
