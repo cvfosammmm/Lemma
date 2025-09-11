@@ -311,23 +311,19 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
     @timer.timer
     def get_fg_color_string_by_node(self, node):
-        if node.link != None:
-            if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
-                return self.colors['links_string']
-            else:
-                return self.colors['links_page_not_existing_string']
-        else:
+        if node.link == None:
             return self.colors['text_string']
+        if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
+            return self.colors['links_string']
+        return self.colors['links_page_not_existing_string']
 
     @timer.timer
     def get_fg_color_by_node(self, node):
-        if node.link != None:
-            if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
-                return self.colors['links']
-            else:
-                return self.colors['links_page_not_existing']
-        else:
+        if node.link == None:
             return self.colors['text']
+        if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
+            return self.colors['links']
+        return self.colors['links_page_not_existing']
 
     @timer.timer
     def draw_title(self, ctx, offset_x, offset_y):
