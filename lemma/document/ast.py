@@ -108,14 +108,12 @@ class RootNode():
                 return count
             count += len(line['nodes'])
 
-    @timer.timer
     def line_no_offset(self, node):
         count = 0
         for i, line in enumerate(self.lines):
             if node in line['nodes']:
                 return i, line['nodes'].index(node)
 
-    @timer.timer
     def index_to_line_no_offset(self, index):
         if index == 0: return 0, 0
 
@@ -128,22 +126,18 @@ class RootNode():
             index -= len(line['nodes'])
         return 0, 0
 
-    @timer.timer
     def get_lines(self):
         return [line['nodes'] for line in self.lines]
 
-    @timer.timer
     def get_position(self):
         return Position(*list())
 
-    @timer.timer
     def get_paragraph_style(self):
         node = self
         while not node.parent.type == 'root':
             node = node.parent
         return node.paragraph_style
 
-    @timer.timer
     def get_subtree(self, pos1, pos2):
         pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
         parent = self.get_node_at_position(pos1[:-1])
@@ -430,7 +424,6 @@ class Node():
             result += child.flatten()
         return result
 
-    @timer.timer
     def line_start(self):
         node = self
 
@@ -621,12 +614,21 @@ class Cursor():
     def get_selection_position(self):
         return self.node_selection.get_position()
 
+    @timer.timer
+    def get_first_and_last_node(self):
+        if self.get_insert_position() < self.get_selection_position():
+            return (self.node_insert, self.node_selection)
+        else:
+            return (self.node_selection, self.node_insert)
+
+    @timer.timer
     def get_first_node(self):
         if self.get_insert_position() < self.get_selection_position():
             return self.node_insert
         else:
             return self.node_selection
 
+    @timer.timer
     def get_last_node(self):
         if self.get_insert_position() < self.get_selection_position():
             return self.node_selection

@@ -150,8 +150,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         content_offset_x = ApplicationState.get_value('document_padding_left')
         content_offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - document.clipping.offset_y
         title_offset_y = ApplicationState.get_value('document_padding_top') - document.clipping.offset_y
-        self.first_selection_node = document.cursor.get_first_node()
-        self.last_selection_node = document.cursor.get_last_node()
+        self.first_selection_node, self.last_selection_node = document.cursor.get_first_and_last_node()
         first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
         last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
 
@@ -215,7 +214,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         if layout['type'] == 'char':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            fontname = FontHelper.get_fontname_from_node(layout['node'])
+            fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
 
             if fontname != 'emojis':
@@ -235,7 +234,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
             widget = layout['node'].value
             surface = widget.get_cairo_surface()
-            fontname = FontHelper.get_fontname_from_node(layout['node'])
+            fontname = layout['fontname']
             top = -TextShaper.get_descend(fontname=fontname)
 
             matrix = ctx.get_matrix()
@@ -251,7 +250,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         if layout['type'] == 'placeholder':
             if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
 
-            fontname = FontHelper.get_fontname_from_node(layout['node'])
+            fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
 
             fg_color = self.get_fg_color_string_by_node(layout['node'])
@@ -352,6 +351,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         Gdk.cairo_set_source_rgba(ctx, self.colors['description_color'])
         PangoCairo.show_layout(ctx, self.layout_subtitle)
 
+    @timer.timer
     def draw_cursor(self, ctx, offset_x, offset_y):
         if ApplicationState.get_value('document_view_hide_cursor_on_unfocus'):
             if not self.has_focus(): return
@@ -361,8 +361,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
         x, y = self.model.document.get_absolute_xy(layout)
-        fontname = FontHelper.get_fontname_from_node(insert)
-        padding_top = TextShaper.get_padding_top(fontname)
+        padding_top = TextShaper.get_padding_top(layout['fontname'])
         padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
