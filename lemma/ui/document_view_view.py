@@ -94,6 +94,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.layout_subtitle.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
 
         self.render_cache = dict()
+        self.do_render_title = True
         self.last_rendered_document = None
         self.last_cache_reset = time.time()
 
@@ -111,6 +112,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         document_changed = max(self.model.document.last_cursor_movement, self.model.document.last_modified) > self.last_cache_reset
         if new_active_document or document_changed:
             self.render_cache = dict()
+            self.do_render_title = True
             self.last_rendered_document = self.model.document
             self.last_cache_reset = time.time()
             self.reset_cursor_blink()
@@ -330,22 +332,25 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
     @timer.timer
     def draw_title(self, ctx, offset_x, offset_y):
-        self.layout_title.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
-        self.layout_title.set_text(self.model.document.title)
+        if self.do_render_title:
+            self.layout_title.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
+            self.layout_title.set_text(self.model.document.title)
+            self.layout_subtitle.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
+            datetime_last_modified = datetime.datetime.fromtimestamp(self.model.document.last_modified)
+            self.layout_subtitle.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
+            self.do_render_title = False
+
         ctx.move_to(offset_x, offset_y)
         Gdk.cairo_set_source_rgba(ctx, self.colors['title_color'])
         PangoCairo.show_layout(ctx, self.layout_title)
 
-        self.layout_subtitle.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
-        datetime_last_modified = datetime.datetime.fromtimestamp(self.model.document.last_modified)
-        self.layout_subtitle.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
-        ctx.move_to(offset_x, offset_y + ApplicationState.get_value('title_height') + 8)
-        Gdk.cairo_set_source_rgba(ctx, self.colors['description_color'])
-        PangoCairo.show_layout(ctx, self.layout_subtitle)
-
         Gdk.cairo_set_source_rgba(ctx, self.colors['border_1'])
         ctx.rectangle(offset_x, offset_y + ApplicationState.get_value('title_height'), ApplicationState.get_value('title_width'), 1)
         ctx.fill()
+
+        ctx.move_to(offset_x, offset_y + ApplicationState.get_value('title_height') + 8)
+        Gdk.cairo_set_source_rgba(ctx, self.colors['description_color'])
+        PangoCairo.show_layout(ctx, self.layout_subtitle)
 
     def draw_cursor(self, ctx, offset_x, offset_y):
         if ApplicationState.get_value('document_view_hide_cursor_on_unfocus'):
