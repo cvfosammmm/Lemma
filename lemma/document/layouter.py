@@ -54,16 +54,17 @@ class Layouter(object):
                        'x': 0,
                        'y': 0,
                        'width': 0,
-                       'height': 0}
+                       'height': 0,
+                       'fontname': None}
 
         for child in self.group_words(nodes):
             if isinstance(child, list):
-                subtree = {'type': 'word', 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
                 char_nodes = child
                 text = ''.join([char.value for char in char_nodes])
                 fontname = FontHelper.get_fontname_from_node(char_nodes[0])
+                subtree = {'type': 'word', 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': fontname}
                 for char_node, extents in zip(char_nodes, TextShaper.measure(text, fontname=fontname)):
-                    subsubtree = {'type': 'char', 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
+                    subsubtree = {'type': 'char', 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': fontname}
                     subsubtree['width'], subsubtree['height'] = extents
                     char_node.layout = subsubtree
                     subtree['children'].append(subsubtree)
@@ -82,35 +83,45 @@ class Layouter(object):
                        'x': 0,
                        'y': 0,
                        'width': 0,
-                       'height': 0}
+                       'height': 0,
+                       'fontname': None}
 
         if node.type == 'char':
             layout_tree['type'] = 'char'
-            layout_tree['width'], layout_tree['height'] = TextShaper.measure_single(node.value, fontname=FontHelper.get_fontname_from_node(node))
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['width'], layout_tree['height'] = TextShaper.measure_single(node.value, fontname=layout_tree['fontname'])
             node.layout = layout_tree
         elif node.type == 'eol':
             layout_tree['type'] = 'eol'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'end':
             layout_tree['type'] = 'end'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'placeholder':
             layout_tree['type'] = 'placeholder'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'widget':
             layout_tree['type'] = 'widget'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'mathscript':
             layout_tree['type'] = 'mathscript'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'mathfraction':
             layout_tree['type'] = 'mathfraction'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'mathroot':
             layout_tree['type'] = 'mathroot'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'mathlist':
             layout_tree['type'] = 'hbox'
+            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
         else:
             return None
 
@@ -201,7 +212,7 @@ class Layouter(object):
                 for child in layout_tree['children']:
                     self.layout(child)
 
-                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
+                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
                 height = 0
                 for child in layout_tree['children']:
                     child['parent'] = vbox
@@ -240,7 +251,7 @@ class Layouter(object):
                 for child in layout_tree['children']:
                     self.layout(child)
 
-                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
+                vbox = {'type': 'vbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
                 height = 0
                 for child in layout_tree['children']:
                     child['parent'] = vbox
@@ -300,7 +311,7 @@ class Layouter(object):
             self.layout(child)
 
         lines = list()
-        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
+        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
         current_line_width = 0
         for child in layout_tree['children']:
             if child['type'] == 'eol' or child['type'] == 'end':
@@ -314,12 +325,12 @@ class Layouter(object):
                     current_line_width += child['width']
                     if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
                         lines.append(current_line)
-                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
+                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
                         current_line_width = 0
                 else:
                     if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
                         lines.append(current_line)
-                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0}
+                        current_line = {'type': 'hbox', 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
                         current_line_width = 0
                     current_line['children'].append(child)
                     child['parent'] = current_line
@@ -371,24 +382,20 @@ class Layouter(object):
 
         min_descend = 0
         for child in layout_tree['children']:
-            fontname = FontHelper.get_fontname_from_node(child['node'])
-            min_descend = min(min_descend, TextShaper.get_descend(fontname=fontname))
+            min_descend = min(min_descend, TextShaper.get_descend(fontname=child['fontname']))
 
         for child in layout_tree['children']:
-            fontname = FontHelper.get_fontname_from_node(child['node'])
-            child['height'] -= min_descend - TextShaper.get_descend(fontname=fontname)
+            child['height'] -= min_descend - TextShaper.get_descend(fontname=child['fontname'])
 
         layout_tree['width'] = 0
         layout_tree['height'] = 0
         for child in layout_tree['children']:
-            fontname = FontHelper.get_fontname_from_node(child['node'])
             child['x'] = layout_tree['width']
 
             layout_tree['width'] += child['width']
-            layout_tree['height'] = max(layout_tree['height'], child['height'] - min_descend + TextShaper.get_descend(fontname=fontname))
+            layout_tree['height'] = max(layout_tree['height'], child['height'] - min_descend + TextShaper.get_descend(fontname=child['fontname']))
 
         for child in layout_tree['children']:
-            fontname = FontHelper.get_fontname_from_node(child['node'])
             child['y'] = layout_tree['height'] - child['height']
 
 

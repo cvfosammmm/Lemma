@@ -18,6 +18,8 @@
 from lemma.services.character_db import CharacterDB
 from lemma.services.node_type_db import NodeTypeDB
 
+import lemma.services.timer as timer
+
 
 class FontHelper():
 
