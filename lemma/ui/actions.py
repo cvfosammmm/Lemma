@@ -171,12 +171,18 @@ class Actions(object):
             UseCases.set_active_document(next_doc, update_history=False)
 
     def undo(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         UseCases.undo()
 
     def redo(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         UseCases.redo()
 
     def cut(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         self.copy()
@@ -184,6 +190,8 @@ class Actions(object):
         UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def copy(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         clipboard = Gdk.Display.get_default().get_clipboard()
         ast = History.get_active_document().ast
         cursor = History.get_active_document().cursor
@@ -206,6 +214,8 @@ class Actions(object):
         clipboard.set_content(cp_union)
 
     def paste(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         clipboard = Gdk.Display.get_default().get_clipboard()
         if clipboard.get_formats().contain_mime_type('lemma/ast'):
             Gdk.Display.get_default().get_clipboard().read_async(['lemma/ast'], 0, None, self.on_paste_ast)
@@ -246,21 +256,31 @@ class Actions(object):
             UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def delete(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         UseCases.delete()
 
     def select_all(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         UseCases.select_all()
 
     def remove_selection(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         UseCases.remove_selection()
 
     def insert_xml(self, action=None, parameter=None):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         UseCases.insert_xml(parameter.get_string())
         UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def subscript(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
@@ -272,6 +292,8 @@ class Actions(object):
         UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def superscript(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
@@ -283,9 +305,13 @@ class Actions(object):
         UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     def set_paragraph_style(self, action=None, parameter=None):
+        self.application.document_view.view.content.grab_focus()
+
         UseCases.set_paragraph_style(parameter.get_string())
 
     def toggle_bold(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
         if document.cursor.has_selection():
             UseCases.toggle_tag('bold')
@@ -293,6 +319,8 @@ class Actions(object):
             UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'bold'})
 
     def toggle_italic(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
         if document.cursor.has_selection():
             UseCases.toggle_tag('italic')
@@ -300,38 +328,52 @@ class Actions(object):
             UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
 
     def show_insert_image_dialog(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         DialogLocator.get_dialog('insert_image').run()
 
     def widget_shrink(self, action=None, parameter=None):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         UseCases.resize_widget(selected_nodes[0].value.get_width() - 1)
 
     def widget_enlarge(self, action=None, parameter=None):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         UseCases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
     def open_link(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         UseCases.open_link(document.cursor.get_insert_node().link)
 
     def insert_link(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
         UseCases.show_insert_link_popover(self.main_window)
 
     def edit_link(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
         UseCases.show_insert_link_popover(self.main_window)
 
     def copy_link(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         clipboard = Gdk.Display.get_default().get_clipboard()
         ast = History.get_active_document().ast
         cursor = History.get_active_document().cursor
@@ -344,6 +386,8 @@ class Actions(object):
             clipboard.set_content(cp_union)
 
     def remove_link(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
         document = History.get_active_document()
 
         if document.cursor.has_selection():

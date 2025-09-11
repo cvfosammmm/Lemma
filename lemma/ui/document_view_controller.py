@@ -317,6 +317,7 @@ class DocumentViewController():
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()
+        self.model.stop_renaming()
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.im_context.focus_in()
