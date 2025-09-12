@@ -111,8 +111,7 @@ class XMLParser(object):
 
         if tag == 'widget' and self.current_node.type == 'widget':
             if self.current_attributes['type'] == 'image':
-                with io.BytesIO(eval(self.widget_data)) as widget_data_stream:
-                    self.current_node.value = Image(widget_data_stream, attributes=self.current_attributes)
+                self.current_node.value = Image(eval(self.widget_data), attributes=self.current_attributes)
 
         if tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'widget']:
             if self.current_node.parent != None:

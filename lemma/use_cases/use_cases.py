@@ -22,7 +22,7 @@ from gi.repository import GLib
 from urllib.parse import urlparse
 import webbrowser
 import os.path
-import time
+import time, io
 from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
@@ -371,11 +371,19 @@ class UseCases():
         MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
-    def add_image_from_filename(filename):
-        document = History.get_active_document()
+    def add_image_from_bytes(data):
+        image = Image(data)
+        UseCases.add_image(image)
 
+    @timer.timer
+    def add_image_from_filename(filename):
         with open(filename, 'rb') as file:
-            image = Image(file)
+            data = data.read()
+        image = Image(data)
+        UseCases.add_image(image)
+
+    def add_image(image):
+        document = History.get_active_document()
 
         insert = document.cursor.get_insert_node()
         node = Node('widget', image)

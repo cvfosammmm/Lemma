@@ -85,7 +85,8 @@ class HTMLParser(HTMLParserLib):
 
             try:
                 with open(os.path.join(self.path, filename), 'rb') as file:
-                    image = Image(file, attributes={'width': width})
+                    data = file.read()
+                image = Image(data, attributes={'width': width})
                 node = Node('widget', image)
                 node.paragraph_style = self.paragraph_style
                 self.composite.append(node)

@@ -30,11 +30,11 @@ class Image(object):
 
     @timer.timer
     def __init__(self, data, attributes=dict()):
-        self.data = data.read()
+        self.data = data
         self.width = None
         self.height = None
 
-        with PIL_Image.open(data) as pil_image:
+        with PIL_Image.open(io.BytesIO(data)) as pil_image:
             self.format = pil_image.format
             self.original_width = pil_image.width
             self.original_height = pil_image.height

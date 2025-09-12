@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GObject, Gio
 
 import time
 
@@ -67,6 +67,11 @@ class DocumentViewController():
         self.drag_controller.connect('drag-update', self.on_drag_update)
         self.drag_controller.connect('drag-end', self.on_drag_end)
         self.content.add_controller(self.drag_controller)
+
+        self.drop_target = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
+        self.drop_target.set_gtypes([Gdk.FileList, str])
+        self.drop_target.connect('drop', self.on_drop)
+        self.content.add_controller(self.drop_target)
 
         self.motion_controller = Gtk.EventControllerMotion()
         self.motion_controller.connect('enter', self.on_enter)
@@ -195,6 +200,18 @@ class DocumentViewController():
 
     def on_drag_end(self, gesture, x, y, data=None):
         pass
+
+    def on_drop(self, controller, value, x, y):
+        if isinstance(value, Gdk.FileList):
+            for file in value.get_files():
+                file_info = file.query_info('standard::content-type', 0, None)
+                path = file.get_parse_name()
+                content_type = file_info.get_content_type()
+
+                if content_type.startswith('image/'):
+                    UseCases.add_image_from_bytes(file.load_bytes()[0].unref_to_data())
+        elif isinstance(value, str):
+            pass
 
     def on_scroll(self, controller, dx, dy):
         if abs(dx) > 0 and abs(dy / dx) >= 1: dx = 0
