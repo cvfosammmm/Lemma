@@ -96,6 +96,7 @@
 @define-color selection_bg #c6defa;
 @define-color selection_bg #c6defa;
 @define-color cursor #000000ff;
+@define-color drop_color @text;
 
 /* Toolbar */
 @define-color toolbar_fg #000000ff;

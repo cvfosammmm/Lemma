@@ -71,6 +71,9 @@ class DocumentViewController():
         self.drop_target = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
         self.drop_target.set_gtypes([Gdk.FileList, str])
         self.drop_target.connect('drop', self.on_drop)
+        self.drop_target.connect('enter', self.on_drop_enter)
+        self.drop_target.connect('motion', self.on_drop_hover)
+        self.drop_target.connect('leave', self.on_drop_leave)
         self.content.add_controller(self.drop_target)
 
         self.motion_controller = Gtk.EventControllerMotion()
@@ -202,16 +205,26 @@ class DocumentViewController():
         pass
 
     def on_drop(self, controller, value, x, y):
-        if isinstance(value, Gdk.FileList):
-            for file in value.get_files():
-                file_info = file.query_info('standard::content-type', 0, None)
-                path = file.get_parse_name()
-                content_type = file_info.get_content_type()
+        x -= ApplicationState.get_value('document_padding_left')
+        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        y += self.model.document.clipping.offset_y
 
-                if content_type.startswith('image/'):
-                    UseCases.add_image_from_bytes(file.load_bytes()[0].unref_to_data())
-        elif isinstance(value, str):
-            pass
+        UseCases.process_drop(value, x, y)
+
+    def on_drop_enter(self, controller, x, y):
+        return Gdk.DragAction.COPY
+
+    def on_drop_hover(self, controller, x, y):
+        x -= ApplicationState.get_value('document_padding_left')
+        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        y += self.model.document.clipping.offset_y
+
+        UseCases.move_drop_cursor_to_xy(x, y)
+
+        return Gdk.DragAction.COPY
+
+    def on_drop_leave(self, controller):
+        UseCases.reset_drop_cursor()
 
     def on_scroll(self, controller, dx, dy):
         if abs(dx) > 0 and abs(dy / dx) >= 1: dx = 0

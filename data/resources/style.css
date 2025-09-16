@@ -81,6 +81,13 @@ label.link-overlay {
     border-top-left-radius: 3px;
 }
 
+/* document view */
+
+.document-view:drop(active) {
+    border-width: 0px;
+    box-shadow: none;
+}
+
 /* title-widget */
 
 .document-title {

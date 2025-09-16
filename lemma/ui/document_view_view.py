@@ -78,6 +78,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         Gtk.Widget.__init__(self)
         self.model = model
 
+        self.add_css_class('document-view')
         self.set_focusable(True)
         self.set_vexpand(True)
 
@@ -175,7 +176,10 @@ class DocumentViewDrawingArea(Gtk.Widget):
                 if not in_selection and line_layout['y'] + line_layout['parent']['y'] == first_selection_line['y'] + first_selection_line['parent']['y']: in_selection = True
                 if in_selection and line_layout['y'] + line_layout['parent']['y'] == last_selection_line['y'] + last_selection_line['parent']['y']: in_selection = False
 
-        self.draw_cursor(ctx, content_offset_x, content_offset_y)
+        if ApplicationState.get_value('drop_cursor_position') != None:
+            self.draw_drop_cursor(ctx, content_offset_x, content_offset_y)
+        else:
+            self.draw_cursor(ctx, content_offset_x, content_offset_y)
 
     @timer.timer
     def setup_scaling_offsets(self):
@@ -199,6 +203,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.colors['description_color'] = ColorManager.get_ui_color('description_color')
         self.colors['border_1'] = ColorManager.get_ui_color('border_1')
         self.colors['cursor'] = ColorManager.get_ui_color('cursor')
+        self.colors['drop_cursor'] = ColorManager.get_ui_color('drop_color')
 
         self.colors['text_string'] = self.colors['text'].to_string()
         self.colors['links_string'] = self.colors['links'].to_string()
@@ -362,6 +367,20 @@ class DocumentViewDrawingArea(Gtk.Widget):
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
         Gdk.cairo_set_source_rgba(ctx, self.colors['cursor'])
+        ctx.rectangle(*cursor_coords)
+        ctx.fill()
+
+    @timer.timer
+    def draw_drop_cursor(self, ctx, offset_x, offset_y):
+        x, y = ApplicationState.get_value('drop_cursor_position')
+        layout = self.model.document.get_cursor_holding_layout_close_to_xy(x, y)
+
+        x, y = self.model.document.get_absolute_xy(layout)
+        padding_top = TextShaper.get_padding_top(layout['fontname'])
+        padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
+        cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
+
+        Gdk.cairo_set_source_rgba(ctx, self.colors['drop_cursor'])
         ctx.rectangle(*cursor_coords)
         ctx.fill()
 

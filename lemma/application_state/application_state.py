@@ -28,6 +28,7 @@ class ApplicationState():
         ApplicationState.defaults['active_popover'] = None
         ApplicationState.defaults['popover_position'] = (0, 0)
         ApplicationState.defaults['popover_orientation'] = 'bottom'
+        ApplicationState.defaults['drop_cursor_position'] = None
 
         ApplicationState.defaults['document_view_width'] = 0
         ApplicationState.defaults['document_view_height'] = 0

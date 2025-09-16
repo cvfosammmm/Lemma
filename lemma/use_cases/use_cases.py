@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import GLib
+from gi.repository import GLib, Gdk
 
 from urllib.parse import urlparse
 import webbrowser
@@ -800,6 +800,44 @@ class UseCases():
         document = History.get_active_document()
         document.add_command('move_cursor_to_xy', x, y, do_selection)
         document.add_command('update_implicit_x_position')
+
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+
+    @timer.timer
+    def move_drop_cursor_to_xy(x, y):
+        document = History.get_active_document()
+        ApplicationState.set_value('drop_cursor_position', (x, y))
+
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+
+    @timer.timer
+    def reset_drop_cursor():
+        document = History.get_active_document()
+        ApplicationState.set_value('drop_cursor_position', None)
+
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+
+    @timer.timer
+    def process_drop(value, x, y):
+        document = History.get_active_document()
+
+        ApplicationState.set_value('drop_cursor_position', None)
+
+        if isinstance(value, Gdk.FileList):
+            for file in value.get_files():
+                file_info = file.query_info('standard::content-type', 0, None)
+                path = file.get_parse_name()
+                content_type = file_info.get_content_type()
+
+                if content_type.startswith('image/'):
+                    document.add_command('move_cursor_to_xy', x, y, False)
+                    document.add_command('update_implicit_x_position')
+                    UseCases.add_image_from_bytes(file.load_bytes()[0].unref_to_data())
+        elif isinstance(value, str):
+            pass
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
