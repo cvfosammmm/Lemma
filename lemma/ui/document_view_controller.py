@@ -68,6 +68,8 @@ class DocumentViewController():
         self.drag_controller.connect('drag-end', self.on_drag_end)
         self.content.add_controller(self.drag_controller)
 
+        self.scroll_on_drop_callback_id = None
+        self.drop_cursor_x, self.drop_cursor_y = None, None
         self.drop_target = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
         self.drop_target.set_gtypes([Gdk.FileList, str])
         self.drop_target.connect('drop', self.on_drop)
@@ -205,6 +207,8 @@ class DocumentViewController():
         pass
 
     def on_drop(self, controller, value, x, y):
+        self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
+
         x -= ApplicationState.get_value('document_padding_left')
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         y += self.model.document.clipping.offset_y
@@ -212,9 +216,13 @@ class DocumentViewController():
         UseCases.process_drop(value, x, y)
 
     def on_drop_enter(self, controller, x, y):
+        self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)
+
         return Gdk.DragAction.COPY
 
     def on_drop_hover(self, controller, x, y):
+        self.drop_cursor_x, self.drop_cursor_y = x, y
+
         x -= ApplicationState.get_value('document_padding_left')
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         y += self.model.document.clipping.offset_y
@@ -224,7 +232,25 @@ class DocumentViewController():
         return Gdk.DragAction.COPY
 
     def on_drop_leave(self, controller):
+        self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
+
         UseCases.reset_drop_cursor()
+
+    def scroll_on_drop_callback(self, widget, frame_clock):
+        x, y = self.drop_cursor_x, self.drop_cursor_y
+
+        if y < 56:
+            new_x = self.model.document.clipping.offset_x
+            new_y = max(0, self.model.document.clipping.offset_y + y - 56)
+            UseCases.scroll_to_xy(self.model.document, new_x, new_y)
+
+        if y - ApplicationState.get_value('document_view_height') > -56:
+            height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+            new_x = self.model.document.clipping.offset_x
+            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height') + 56)
+            UseCases.scroll_to_xy(self.model.document, new_x, new_y)
+
+        return True
 
     def on_scroll(self, controller, dx, dy):
         if abs(dx) > 0 and abs(dy / dx) >= 1: dx = 0
