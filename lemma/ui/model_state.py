@@ -43,6 +43,7 @@ class ModelState(object):
         self.clipboard_formats = None
         self.text_in_clipboard = None
         self.subtree_in_clipboard = None
+        self.image_in_clipboard = None
         self.links_inside_selection = None
         self.widget_selected = None
         self.selected_widget_is_max = None
@@ -67,6 +68,7 @@ class ModelState(object):
         self.clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         self.text_in_clipboard = 'text/plain;charset=utf-8' in self.clipboard_formats
         self.subtree_in_clipboard = 'lemma/ast' in self.clipboard_formats
+        self.image_in_clipboard = 'image/jpeg' in self.clipboard_formats or 'image/png' in self.clipboard_formats
         self.links_inside_selection = self.has_active_doc and len([node for node in self.selected_nodes if node.link != None]) > 0
         self.whole_selection_is_one_link = self.links_inside_selection and (len(set([node.link for node in self.selected_nodes])) == 1)
         self.widget_selected = len(self.selected_nodes) == 1 and self.selected_nodes[0].type == 'widget'

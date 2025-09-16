@@ -38,6 +38,7 @@ class Actions(object):
         self.main_window = main_window
         self.application = application
         self.model_state = model_state
+        self.last_data = None
 
         self.actions = dict()
         self.add_simple_action('add-document', self.add_document)
@@ -111,7 +112,7 @@ class Actions(object):
         self.actions['redo'].set_enabled(self.model_state.has_active_doc and self.model_state.can_redo)
         self.actions['cut'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
         self.actions['copy'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
-        self.actions['paste'].set_enabled(self.model_state.has_active_doc and (self.model_state.text_in_clipboard or self.model_state.subtree_in_clipboard))
+        self.actions['paste'].set_enabled(self.model_state.has_active_doc and (self.model_state.text_in_clipboard or self.model_state.subtree_in_clipboard or self.model_state.image_in_clipboard))
         self.actions['delete'].set_enabled(self.model_state.mode == 'documents' and self.model_state.has_selection)
         self.actions['select-all'].set_enabled(self.model_state.has_active_doc)
         self.actions['remove-selection'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
@@ -219,7 +220,9 @@ class Actions(object):
         clipboard = Gdk.Display.get_default().get_clipboard()
         if clipboard.get_formats().contain_mime_type('lemma/ast'):
             Gdk.Display.get_default().get_clipboard().read_async(['lemma/ast'], 0, None, self.on_paste_ast)
-        else:
+        elif clipboard.get_formats().contain_mime_type('image/png') or clipboard.get_formats().contain_mime_type('image/jpeg'):
+            Gdk.Display.get_default().get_clipboard().read_texture_async(None, self.on_paste_image)#read_async(['image/png', 'image/jpeg'], 0, None, self.on_paste_image)
+        elif clipboard.get_formats().contain_mime_type('text/plain;charset=utf-8') or clipboard.get_formats().contain_mime_type('text/plain'):
             Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'text/plain;charset=utf-8'], 0, None, self.on_paste)
 
     def on_paste_ast(self, clipboard, result):
@@ -229,6 +232,11 @@ class Actions(object):
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
         UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+
+    def on_paste_image(self, clipboard, result):
+        texture = clipboard.read_texture_finish(result)
+        data = texture.save_to_png_bytes().unref_to_data()
+        UseCases.add_image_from_bytes(data)
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
