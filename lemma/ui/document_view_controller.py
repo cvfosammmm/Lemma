@@ -213,7 +213,7 @@ class DocumentViewController():
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         y += self.model.document.clipping.offset_y
 
-        UseCases.process_drop(value, x, y)
+        UseCases.handle_drop(value, x, y)
 
     def on_drop_enter(self, controller, x, y):
         self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)

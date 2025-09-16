@@ -821,7 +821,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
     @timer.timer
-    def process_drop(value, x, y):
+    def handle_drop(value, x, y):
         document = History.get_active_document()
 
         ApplicationState.set_value('drop_cursor_position', None)
@@ -836,8 +836,27 @@ class UseCases():
                     document.add_command('move_cursor_to_xy', x, y, False)
                     document.add_command('update_implicit_x_position')
                     UseCases.add_image_from_bytes(file.load_bytes()[0].unref_to_data())
+
         elif isinstance(value, str):
-            pass
+            tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+            link_at_cursor = ApplicationState.get_value('link_at_cursor')
+            text = value
+
+            if len(text) < 2000:
+                stext = text.strip()
+                parsed_url = urlparse(stext)
+                if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
+                    text = xml_helpers.escape(stext)
+                    xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
+                    UseCases.insert_xml(xml)
+                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+                    return
+
+            text = xml_helpers.escape(text)
+            xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
+            document.add_command('move_cursor_to_xy', x, y, False)
+            document.add_command('update_implicit_x_position')
+            UseCases.insert_xml(xml)
 
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
