@@ -377,8 +377,8 @@ class UseCases():
 
     @timer.timer
     def add_image_from_filename(filename):
-        with open(filename, 'rb') as file:
-            data = data.read()
+        texture = Gdk.Texture.new_from_filename(filename)
+        data = texture.save_to_png_bytes().unref_to_data()
         image = Image(data)
         UseCases.add_image(image)
 
