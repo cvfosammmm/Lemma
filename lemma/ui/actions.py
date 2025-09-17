@@ -194,6 +194,8 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         clipboard = Gdk.Display.get_default().get_clipboard()
+        content_providers = []
+
         ast = History.get_active_document().ast
         cursor = History.get_active_document().cursor
         subtree = ast.get_subtree(*cursor.get_state())
@@ -205,13 +207,16 @@ class Actions(object):
             elif node.type == 'eol':
                 chars.append('\n')
         chars = ''.join(chars)
+        content_providers.append(Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode())))
 
         xml = XMLExporter.export(subtree)
+        content_providers.append(Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode())))
 
-        cp_text = Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode()))
-        cp_internal = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode()))
-        cp_union = Gdk.ContentProvider.new_union([cp_text, cp_internal])
+        if len(subtree) == 1 and subtree[0].type == 'widget':
+            data = subtree[0].value.get_data()
+            content_providers.append(Gdk.ContentProvider.new_for_bytes('image/png', GLib.Bytes(data)))
 
+        cp_union = Gdk.ContentProvider.new_union(content_providers)
         clipboard.set_content(cp_union)
 
     def paste(self, action=None, parameter=''):

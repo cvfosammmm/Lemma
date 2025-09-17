@@ -24,38 +24,7 @@ from lemma.ui.popovers.popover_templates import PopoverView
 from lemma.use_cases.use_cases import UseCases
 
 
-class Popover(object):
-
-    def __init__(self, model_state):
-        self.model_state = model_state
-        self.view = View()
-
-        self.key_controller = Gtk.EventControllerKey()
-        self.key_controller.connect('key-pressed', self.on_keypress)
-        self.view.add_controller(self.key_controller)
-
-    def update(self):
-        pass
-
-    def on_popup(self):
-        pass
-
-    def on_popdown(self):
-        pass
-
-    def on_keypress(self, controller, keyval, keycode, state):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-
-        if keyval == Gdk.keyval_from_name('F12'):
-            if state & modifiers == 0:
-                UseCases.hide_popovers()
-
-                return True
-
-        return False
-
-
-class View(PopoverView):
+class Popover(PopoverView):
 
     def __init__(self):
         PopoverView.__init__(self)
@@ -75,5 +44,26 @@ class View(PopoverView):
         self.export_document_button = MenuBuilder.create_button(_('Export Markdown...'))
         self.export_document_button.set_action_name('win.export-markdown')
         self.add_closing_button(self.export_document_button)
+
+        self.key_controller = Gtk.EventControllerKey()
+        self.key_controller.connect('key-pressed', self.on_keypress)
+        self.add_controller(self.key_controller)
+
+    def on_popup(self):
+        pass
+
+    def on_popdown(self):
+        pass
+
+    def on_keypress(self, controller, keyval, keycode, state):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+
+        if keyval == Gdk.keyval_from_name('F12'):
+            if state & modifiers == 0:
+                UseCases.hide_popovers()
+
+                return True
+
+        return False
 
 

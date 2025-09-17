@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+# coding: utf-8
+
+# Copyright (C) 2017-present Robert Griesel
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>
+
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk
+
+from lemma.ui.context_menu import ContextMenu
+from lemma.ui.popovers.popover_menu_builder import MenuBuilder
+from lemma.ui.popovers.popover_templates import PopoverView
+
+
+class ContextMenuDocument():
+
+    def __init__(self, main_window, model_state, application):
+        self.main_window = main_window
+        self.model_state = model_state
+        self.application = application
+
+        self.view_right_click = ContextMenuDocumentView(main_window.document_view)
+        self.view_edit_menu = application.popover_manager.popovers['edit_menu']
+
+    def update(self):
+        self.view_right_click.open_link_button.set_visible(self.model_state.open_link_active)
+        self.view_right_click.open_link_separator.set_visible(self.model_state.open_link_active)
+        self.view_right_click.copy_link_button.set_visible(self.model_state.copy_link_active)
+        self.view_right_click.remove_link_button.set_visible(self.model_state.remove_link_active)
+        self.view_right_click.edit_link_button.set_visible(self.model_state.edit_link_active)
+        self.view_right_click.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
+        hide_back_and_forward = self.model_state.remove_link_active or self.model_state.edit_link_active or self.model_state.open_link_active
+        self.view_right_click.back_button.set_visible(not hide_back_and_forward)
+        self.view_right_click.forward_button.set_visible(not hide_back_and_forward)
+        self.view_right_click.back_forward_separator.set_visible(not hide_back_and_forward)
+
+        self.view_edit_menu.open_link_button.set_visible(self.model_state.open_link_active)
+        self.view_edit_menu.open_link_separator.set_visible(self.model_state.open_link_active)
+        self.view_edit_menu.copy_link_button.set_visible(self.model_state.copy_link_active)
+        self.view_edit_menu.remove_link_button.set_visible(self.model_state.remove_link_active)
+        self.view_edit_menu.edit_link_button.set_visible(self.model_state.edit_link_active)
+        self.view_edit_menu.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
+
+    def popup_at_cursor(self, x, y):
+        self.view_right_click.popup_at_cursor(x, y)
+
+
+class ContextMenuDocumentView(ContextMenu):
+
+    def __init__(self, parent):
+        ContextMenu.__init__(self)
+
+        self.popover.set_parent(parent)
+        self.popover.set_size_request(260, -1)
+        self.popover.set_offset(130, 0)
+
+        self.open_link_button = self.create_button(_('Open Link'))
+        self.open_link_button.set_action_name('win.open-link')
+        self.box.append(self.open_link_button)
+
+        self.open_link_separator = Gtk.Separator()
+        self.box.append(self.open_link_separator)
+
+        self.copy_link_button = self.create_button('Copy Link Target')
+        self.copy_link_button.set_action_name('win.copy-link')
+        self.box.append(self.copy_link_button)
+
+        self.remove_link_button = self.create_button('Remove Link')
+        self.remove_link_button.set_action_name('win.remove-link')
+        self.box.append(self.remove_link_button)
+
+        self.edit_link_button = self.create_button('Edit Link')
+        self.edit_link_button.set_action_name('win.edit-link')
+        self.box.append(self.edit_link_button)
+
+        self.link_buttons_separator = Gtk.Separator()
+        self.box.append(self.link_buttons_separator)
+
+        self.back_button = self.create_button('Back', _('Alt') + '+Left Arrow')
+        self.back_button.set_action_name('win.go-back')
+        self.box.append(self.back_button)
+
+        self.forward_button = self.create_button('Forward', _('Alt') + '+Right Arrow')
+        self.forward_button.set_action_name('win.go-forward')
+        self.box.append(self.forward_button)
+
+        self.back_forward_separator = Gtk.Separator()
+        self.box.append(self.back_forward_separator)
+
+        self.cut_button = self.create_button('Cut', _('Ctrl') + '+X')
+        self.cut_button.set_action_name('win.cut')
+        self.box.append(self.cut_button)
+
+        self.copy_button = self.create_button('Copy', _('Ctrl') + '+C')
+        self.copy_button.set_action_name('win.copy')
+        self.box.append(self.copy_button)
+
+        self.paste_button = self.create_button('Paste', _('Ctrl') + '+V')
+        self.paste_button.set_action_name('win.paste')
+        self.box.append(self.paste_button)
+
+        self.delete_button = self.create_button('Delete')
+        self.delete_button.set_action_name('win.delete')
+        self.box.append(self.delete_button)
+
+        self.box.append(Gtk.Separator())
+
+        self.select_all_button = self.create_button('Select All', _('Ctrl') + '+A')
+        self.select_all_button.set_action_name('win.select-all')
+        self.box.append(self.select_all_button)
+
+
+class EditMenu(PopoverView):
+
+    def __init__(self):
+        PopoverView.__init__(self)
+
+        self.set_width(306)
+
+        self.open_link_button = MenuBuilder.create_button(_('Open Link'))
+        self.open_link_button.set_action_name('win.open-link')
+        self.add_closing_button(self.open_link_button)
+
+        self.open_link_separator = Gtk.Separator()
+        self.add_widget(self.open_link_separator)
+
+        self.copy_link_button = MenuBuilder.create_button(_('Copy Link Target'))
+        self.copy_link_button.set_action_name('win.copy-link')
+        self.add_closing_button(self.copy_link_button)
+
+        self.remove_link_button = MenuBuilder.create_button(_('Remove Link'))
+        self.remove_link_button.set_action_name('win.remove-link')
+        self.add_closing_button(self.remove_link_button)
+
+        self.edit_link_button = MenuBuilder.create_button(_('Edit Link'))
+        self.edit_link_button.set_action_name('win.edit-link')
+        self.add_closing_button(self.edit_link_button)
+
+        self.link_buttons_separator = Gtk.Separator()
+        self.add_widget(self.link_buttons_separator)
+
+        self.cut_button = MenuBuilder.create_button(_('Cut'), shortcut=_('Ctrl') + '+X')
+        self.cut_button.set_action_name('win.cut')
+        self.add_closing_button(self.cut_button)
+        self.copy_button = MenuBuilder.create_button(_('Copy'), shortcut=_('Ctrl') + '+C')
+        self.copy_button.set_action_name('win.copy')
+        self.add_closing_button(self.copy_button)
+        self.paste_button = MenuBuilder.create_button(_('Paste'), shortcut=_('Ctrl') + '+V')
+        self.paste_button.set_action_name('win.paste')
+        self.add_closing_button(self.paste_button)
+        self.delete_button = MenuBuilder.create_button(_('Delete'))
+        self.delete_button.set_action_name('win.delete')
+        self.add_closing_button(self.delete_button)
+
+        self.add_widget(Gtk.Separator())
+
+        self.select_all_button = MenuBuilder.create_button(_('Select All'), shortcut=_('Ctrl') + '+A')
+        self.select_all_button.set_action_name('win.select-all')
+        self.add_closing_button(self.select_all_button)
+
+    def on_popup(self):
+        pass
+
+    def on_popdown(self):
+        pass
+
+

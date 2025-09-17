@@ -23,23 +23,7 @@ from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
 
 
-class Popover(object):
-
-    def __init__(self, model_state):
-        self.model_state = model_state
-        self.view = View()
-
-    def update(self):
-        pass
-
-    def on_popup(self):
-        pass
-
-    def on_popdown(self):
-        pass
-
-
-class View(PopoverView):
+class Popover(PopoverView):
 
     def __init__(self):
         PopoverView.__init__(self)
@@ -58,5 +42,11 @@ class View(PopoverView):
             button = MenuBuilder.create_button(entry[1], shortcut=entry[2])
             button.set_detailed_action_name('win.set-paragraph-style::' + entry[0])
             self.add_closing_button(button)
+
+    def on_popup(self):
+        pass
+
+    def on_popdown(self):
+        pass
 
 

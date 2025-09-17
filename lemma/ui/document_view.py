@@ -37,9 +37,10 @@ import lemma.services.timer as timer
 
 class DocumentView():
 
-    def __init__(self, main_window, model_state):
+    def __init__(self, main_window, model_state, application):
         self.main_window = main_window
         self.model_state = model_state
+        self.application = application
 
         self.cursor_x, self.cursor_y = None, None
         self.ctrl_pressed = False
@@ -73,17 +74,6 @@ class DocumentView():
     @timer.timer
     def update(self):
         self.set_document(History.get_active_document())
-
-        self.view.context_menu.open_link_button.set_visible(self.model_state.open_link_active)
-        self.view.context_menu.open_link_separator.set_visible(self.model_state.open_link_active)
-        self.view.context_menu.copy_link_button.set_visible(self.model_state.copy_link_active)
-        self.view.context_menu.remove_link_button.set_visible(self.model_state.remove_link_active)
-        self.view.context_menu.edit_link_button.set_visible(self.model_state.edit_link_active)
-        self.view.context_menu.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
-        hide_back_and_forward = self.model_state.remove_link_active or self.model_state.edit_link_active or self.model_state.open_link_active
-        self.view.context_menu.back_button.set_visible(not hide_back_and_forward)
-        self.view.context_menu.forward_button.set_visible(not hide_back_and_forward)
-        self.view.context_menu.back_forward_separator.set_visible(not hide_back_and_forward)
 
         self.update_link_at_cursor()
         self.presenter.update()

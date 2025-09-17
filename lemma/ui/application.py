@@ -31,6 +31,7 @@ import lemma.ui.window_state as window_state
 import lemma.ui.main_window_view as main_window_view
 import lemma.ui.document_history as document_history
 import lemma.ui.document_view as document_view
+import lemma.ui.context_menu_document as context_menu_document
 import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
 import lemma.ui.document_list as document_list
@@ -59,8 +60,10 @@ class Application(Adw.Application):
         DialogLocator.init_dialogs(self.main_window)
 
         self.colors = colors.Colors(self.main_window)
+        self.popover_manager = PopoverManager(self.main_window)
         self.document_history = document_history.DocumentHistory(self.main_window)
-        self.document_view = document_view.DocumentView(self.main_window, self.model_state)
+        self.document_view = document_view.DocumentView(self.main_window, self.model_state, self)
+        self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self.model_state, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
         self.toolbars = toolbars.ToolBars(self.main_window)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
@@ -70,7 +73,6 @@ class Application(Adw.Application):
         self.autocomplete = autocomplete.Autocomplete(self.main_window)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window)
-        self.popover_manager = PopoverManager(self.main_window, self.model_state)
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
         MessageBus.connect('history_changed', self.on_history_changed)
@@ -108,6 +110,7 @@ class Application(Adw.Application):
         self.cursor_state.update()
         self.document_list.update()
         self.document_view.update()
+        self.context_menu_document.update()
         self.popover_manager.update()
         self.toolbars.update()
         self.window_state.update()
@@ -129,6 +132,7 @@ class Application(Adw.Application):
         self.actions.update()
         self.cursor_state.update()
         self.document_view.update()
+        self.context_menu_document.update()
         self.popover_manager.update()
         self.toolbars.update()
         self.document_history.update()
@@ -145,6 +149,7 @@ class Application(Adw.Application):
         self.document_history.update()
         self.document_list.update()
         self.document_view.update()
+        self.context_menu_document.update()
         self.popover_manager.update()
         self.document_draft.update()
         self.window_state.update()

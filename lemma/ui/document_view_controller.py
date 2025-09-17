@@ -170,7 +170,7 @@ class DocumentViewController():
         if y > 0:
             if not document.cursor.has_selection():
                 UseCases.move_cursor_to_xy(x_offset, y_offset, False)
-            self.view.context_menu.popup_at_cursor(x, y)
+            self.model.application.context_menu_document.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
         x -= ApplicationState.get_value('document_padding_left')

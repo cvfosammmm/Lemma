@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 import lemma.ui.popovers.document_menu as document_menu
-import lemma.ui.popovers.edit_menu as edit_menu
+from lemma.ui.context_menu_document import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
 import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_ac as link_ac
@@ -31,10 +31,9 @@ import lemma.services.timer as timer
 
 class PopoverManager():
 
-    def __init__(self, main_window, model_state):
+    def __init__(self, main_window):
         self.current_popover_name = None
         self.prev_focus_widget = None
-        self.model_state = model_state
         self.main_window = main_window
         self.popoverlay = main_window.popoverlay
         self.inbetween = main_window.inbetween
@@ -46,16 +45,14 @@ class PopoverManager():
         self.inbetween.set_can_target(False)
 
         self.popovers = dict()
-        self.popovers["document_menu"] = document_menu.Popover(self.model_state)
-        self.popovers["edit_menu"] = edit_menu.Popover(self.model_state)
-        self.popovers["hamburger_menu"] = hamburger_menu.Popover(self.model_state)
-        self.popovers["paragraph_style"] = paragraph_style.Popover(self.model_state)
-        self.popovers["link_ac"] = link_ac.Popover(self.model_state)
+        self.popovers["document_menu"] = document_menu.Popover()
+        self.popovers["edit_menu"] = EditMenu()
+        self.popovers["hamburger_menu"] = hamburger_menu.Popover()
+        self.popovers["paragraph_style"] = paragraph_style.Popover()
+        self.popovers["link_ac"] = link_ac.Popover()
 
     @timer.timer
     def update(self):
-        for popover in self.popovers.values(): popover.update()
-
         name = ApplicationState.get_value('active_popover')
 
         if self.current_popover_name == name: return
@@ -68,55 +65,55 @@ class PopoverManager():
 
     def popup(self, name, x, y, orientation):
         popover = self.popovers[name]
-        popover.view.show_page(None, 'main', Gtk.StackTransitionType.NONE)
+        popover.show_page(None, 'main', Gtk.StackTransitionType.NONE)
 
         window_width = self.main_window.get_width()
         window_height = self.main_window.get_height()
         arrow_width = 20
-        if x - popover.view.width / 2 < 0:
-            popover.view.set_margin_start(0)
-            popover.view.arrow.set_margin_start(x - arrow_width / 2)
-        elif x - popover.view.width / 2 > window_width - popover.view.width:
-            popover.view.set_margin_start(window_width - popover.view.width)
-            popover.view.arrow.set_margin_start(x - window_width + popover.view.width - arrow_width / 2)
+        if x - popover.width / 2 < 0:
+            popover.set_margin_start(0)
+            popover.arrow.set_margin_start(x - arrow_width / 2)
+        elif x - popover.width / 2 > window_width - popover.width:
+            popover.set_margin_start(window_width - popover.width)
+            popover.arrow.set_margin_start(x - window_width + popover.width - arrow_width / 2)
         else:
-            popover.view.set_margin_start(x - popover.view.width / 2)
-            popover.view.arrow.set_margin_start(popover.view.width / 2 - arrow_width / 2)
+            popover.set_margin_start(x - popover.width / 2)
+            popover.arrow.set_margin_start(popover.width / 2 - arrow_width / 2)
 
         if orientation == 'bottom':
-            popover.view.set_margin_bottom(0)
-            popover.view.set_margin_top(max(0, y))
+            popover.set_margin_bottom(0)
+            popover.set_margin_top(max(0, y))
 
-            popover.view.set_halign(Gtk.Align.START)
-            popover.view.set_valign(Gtk.Align.START)
+            popover.set_halign(Gtk.Align.START)
+            popover.set_valign(Gtk.Align.START)
 
-            popover.view.remove_css_class('popover-top')
-            popover.view.add_css_class('popover-bottom')
+            popover.remove_css_class('popover-top')
+            popover.add_css_class('popover-bottom')
 
-            popover.view.arrow_box.set_valign(Gtk.Align.START)
-            popover.view.arrow_box.set_halign(Gtk.Align.START)
-            popover.view.add_overlay(popover.view.arrow_box)
+            popover.arrow_box.set_valign(Gtk.Align.START)
+            popover.arrow_box.set_halign(Gtk.Align.START)
+            popover.add_overlay(popover.arrow_box)
 
         else:
-            popover.view.set_margin_bottom(window_height - y)
-            popover.view.set_margin_top(0)
+            popover.set_margin_bottom(window_height - y)
+            popover.set_margin_top(0)
 
-            popover.view.set_halign(Gtk.Align.START)
-            popover.view.set_valign(Gtk.Align.END)
+            popover.set_halign(Gtk.Align.START)
+            popover.set_valign(Gtk.Align.END)
 
-            popover.view.remove_css_class('popover-bottom')
-            popover.view.add_css_class('popover-top')
+            popover.remove_css_class('popover-bottom')
+            popover.add_css_class('popover-top')
 
-            popover.view.arrow_box.set_valign(Gtk.Align.END)
-            popover.view.arrow_box.set_halign(Gtk.Align.START)
-            popover.view.add_overlay(popover.view.arrow_box)
+            popover.arrow_box.set_valign(Gtk.Align.END)
+            popover.arrow_box.set_halign(Gtk.Align.START)
+            popover.add_overlay(popover.arrow_box)
 
         self.remember_focus_widget()
         self.current_popover_name = name
-        self.popoverlay.add_overlay(popover.view)
+        self.popoverlay.add_overlay(popover)
         self.inbetween.set_can_target(True)
 
-        popover.view.grab_focus()
+        popover.grab_focus()
         popover.on_popup()
 
     def popdown(self):
@@ -125,7 +122,7 @@ class PopoverManager():
         name = self.current_popover_name
         popover = self.popovers[name]
 
-        self.popoverlay.remove_overlay(popover.view)
+        self.popoverlay.remove_overlay(popover)
         self.current_popover_name = None
         self.inbetween.set_can_target(False)
 
