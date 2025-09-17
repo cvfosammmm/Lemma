@@ -162,14 +162,7 @@ paned.document-view separator.wide {
     box-shadow: none;
     background-color: @border_1;
 }
-.navbar paned separator.wide {
-    padding: 0px;
-    margin: 0px;
-    border-top: 1px solid @headerpaned_border_1;
-    border-bottom: 1px solid @headerpaned_border_1;
-    border-bottom-width: 0px;
-    min-height: 1px;
-    box-shadow: none;
+.navbar paned separator {
     background-color: @headerpaned_bg;
 }
 

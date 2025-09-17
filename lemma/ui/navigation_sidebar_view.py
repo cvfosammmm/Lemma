@@ -31,7 +31,7 @@ class NavigationSidebar(Gtk.Box):
 
         self.paned = AnimatedVPaned(document_list, backlinks, False)
         self.paned.set_vexpand(True)
-        self.paned.set_wide_handle(True)
+        self.paned.set_wide_handle(False)
 
         self.backlinks_toggle = Gtk.ToggleButton()
         self.backlinks_toggle.set_tooltip_text(_('Backlinks'))
