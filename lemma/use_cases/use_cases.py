@@ -835,7 +835,9 @@ class UseCases():
                 if content_type.startswith('image/'):
                     document.add_command('move_cursor_to_xy', x, y, False)
                     document.add_command('update_implicit_x_position')
-                    UseCases.add_image_from_bytes(file.load_bytes()[0].unref_to_data())
+                    texture = Gdk.Texture.new_from_file(file)
+                    data = texture.save_to_png_bytes().unref_to_data()
+                    UseCases.add_image_from_bytes(data)
 
         elif isinstance(value, str):
             tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
