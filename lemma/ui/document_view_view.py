@@ -290,14 +290,14 @@ class DocumentViewDrawingArea(Gtk.Widget):
             line_height = layout['children'][0]['height']
 
             ctx.set_line_width(2)
-            ctx.move_to((offset_x + layout['x'] + line_offset - 6) * self.hidpi_factor, (offset_y + line_height - 10) * self.hidpi_factor)
-            ctx.line_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + line_height - 2) * self.hidpi_factor)
+            ctx.move_to((offset_x + layout['x'] + line_offset - 6) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 10) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 2) * self.hidpi_factor)
             ctx.stroke()
             ctx.set_line_width(1)
-            ctx.move_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + line_height - 2) * self.hidpi_factor)
-            ctx.line_to((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, (offset_y + 1) * self.hidpi_factor)
+            ctx.move_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 2) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, (offset_y + layout['y'] + 1) * self.hidpi_factor)
             ctx.stroke()
-            ctx.rectangle((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, int(offset_y * self.hidpi_factor), line_width, 1)
+            ctx.rectangle((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, int((offset_y + layout['y']) * self.hidpi_factor), line_width, 1)
             ctx.fill()
 
         if layout['type'] == 'mathfraction':
@@ -307,7 +307,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
             line_offset = layout['children'][0]['children'][1]['height']
             line_width = layout['width']
 
-            ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + line_offset + 1) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
+            ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
             ctx.fill()
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
