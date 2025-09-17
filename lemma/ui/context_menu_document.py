@@ -45,6 +45,8 @@ class ContextMenuDocument():
         self.view_right_click.back_button.set_visible(not hide_back_and_forward)
         self.view_right_click.forward_button.set_visible(not hide_back_and_forward)
         self.view_right_click.back_forward_separator.set_visible(not hide_back_and_forward)
+        self.view_right_click.export_image_button.set_visible(self.model_state.widget_selected)
+        self.view_right_click.image_functions_separator.set_visible(self.model_state.widget_selected)
 
         self.view_edit_menu.open_link_button.set_visible(self.model_state.open_link_active)
         self.view_edit_menu.open_link_separator.set_visible(self.model_state.open_link_active)
@@ -52,6 +54,8 @@ class ContextMenuDocument():
         self.view_edit_menu.remove_link_button.set_visible(self.model_state.remove_link_active)
         self.view_edit_menu.edit_link_button.set_visible(self.model_state.edit_link_active)
         self.view_edit_menu.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
+        self.view_edit_menu.export_image_button.set_visible(self.model_state.widget_selected)
+        self.view_edit_menu.image_functions_separator.set_visible(self.model_state.widget_selected)
 
     def popup_at_cursor(self, x, y):
         self.view_right_click.popup_at_cursor(x, y)
@@ -98,6 +102,13 @@ class ContextMenuDocumentView(ContextMenu):
 
         self.back_forward_separator = Gtk.Separator()
         self.box.append(self.back_forward_separator)
+
+        self.export_image_button = self.create_button('Export Image...')
+        self.export_image_button.set_action_name('win.export-image')
+        self.box.append(self.export_image_button)
+
+        self.image_functions_separator = Gtk.Separator()
+        self.box.append(self.image_functions_separator)
 
         self.cut_button = self.create_button('Cut', _('Ctrl') + '+X')
         self.cut_button.set_action_name('win.cut')
@@ -150,6 +161,13 @@ class EditMenu(PopoverView):
 
         self.link_buttons_separator = Gtk.Separator()
         self.add_widget(self.link_buttons_separator)
+
+        self.export_image_button = MenuBuilder.create_button('Export Image...')
+        self.export_image_button.set_action_name('win.export-image')
+        self.add_closing_button(self.export_image_button)
+
+        self.image_functions_separator = Gtk.Separator()
+        self.add_widget(self.image_functions_separator)
 
         self.cut_button = MenuBuilder.create_button(_('Cut'), shortcut=_('Ctrl') + '+X')
         self.cut_button.set_action_name('win.cut')

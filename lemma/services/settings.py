@@ -38,6 +38,7 @@ class Settings():
         Settings.defaults['navbar_paned_position'] = -1
 
         Settings.defaults['last_export_folder'] = None
+        Settings.defaults['last_image_export_folder'] = None
         Settings.defaults['last_bulk_export_folder'] = None
         Settings.defaults['last_import_folder'] = None
 

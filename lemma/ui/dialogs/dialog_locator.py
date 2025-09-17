@@ -18,6 +18,7 @@
 import lemma.ui.dialogs.about as about
 import lemma.ui.dialogs.export_bulk as export_bulk
 import lemma.ui.dialogs.export_markdown as export_markdown
+import lemma.ui.dialogs.export_image as export_image
 import lemma.ui.dialogs.import_documents as import_documents
 import lemma.ui.dialogs.insert_image as insert_image
 import lemma.ui.dialogs.keyboard_shortcuts as keyboard_shortcuts
@@ -32,6 +33,7 @@ class DialogLocator():
         DialogLocator.dialogs['about'] = about.Dialog(main_window)
         DialogLocator.dialogs['export_bulk'] = export_bulk.Dialog(main_window)
         DialogLocator.dialogs['export_markdown'] = export_markdown.Dialog(main_window)
+        DialogLocator.dialogs['export_image'] = export_image.Dialog(main_window)
         DialogLocator.dialogs['import_documents'] = import_documents.Dialog(main_window)
         DialogLocator.dialogs['insert_image'] = insert_image.Dialog(main_window)
         DialogLocator.dialogs['keyboard_shortcuts'] = keyboard_shortcuts.Dialog(main_window)

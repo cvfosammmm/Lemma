@@ -103,4 +103,8 @@ class Image(object):
             pil_image.save(filename)
         return '<img src="' + urllib.parse.quote(os.path.split(os.path.dirname(filename))[1] + '/' + os.path.basename(filename)) + '" width="' + str(self.get_width()) + '" />'
 
+    def save_as(self, filename):
+        with PIL_Image.open(io.BytesIO(self.data)) as pil_image:
+            pil_image.save(filename)
+
 

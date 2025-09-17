@@ -90,6 +90,7 @@ class Application(Adw.Application):
         self.document_history.update()
         self.cursor_state.update()
         self.document_list.update()
+        self.context_menu_document.update()
         self.document_draft.update()
         self.window_state.update()
         self.colors.update()

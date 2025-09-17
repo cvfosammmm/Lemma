@@ -34,30 +34,30 @@ class Dialog(object):
 
     def __init__(self, main_window):
         self.main_window = main_window
-        self.document = None
+        self.image = None
 
-    def run(self, document):
-        self.document = document
+    def run(self, image):
+        self.image = image
         self.setup()
         self.view.save(self.main_window, None, self.dialog_process_response)
 
     def setup(self):
         self.view = Gtk.FileDialog()
         self.view.set_modal(True)
-        self.view.set_title(_('Export Document'))
+        self.view.set_title(_('Export Image'))
 
         file_filter = Gtk.FileFilter()
-        file_filter.add_pattern('*.md')
-        file_filter.set_name(_('Markdown Files'))
+        file_filter.add_pattern('*.png')
+        file_filter.set_name(_('PNG Files'))
         self.view.set_default_filter(file_filter)
 
-        export_folder = Settings.get_value('last_export_folder')
+        export_folder = Settings.get_value('last_image_export_folder')
         if export_folder == None or not os.path.exists(export_folder) or not os.path.isdir(export_folder):
-            export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
+            export_folder = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES)
         if export_folder != None:
             self.view.set_initial_folder(Gio.File.new_for_path(export_folder))
 
-        self.view.set_initial_name(self.document.title + '.md')
+        self.view.set_initial_name('Untitled.png')
 
     def dialog_process_response(self, dialog, result):
         try:
@@ -66,18 +66,11 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                UseCases.settings_set_value('last_export_folder', os.path.dirname(filename))
+                UseCases.settings_set_value('last_image_export_folder', os.path.dirname(filename))
 
-                if not filename.endswith('.md'):
-                    filename += '.md'
+                if not filename.endswith('.png'):
+                    filename += '.png'
 
-                exporter = HTMLExporter()
-                html = exporter.export_document(self.document, filename)
-
-                html = html.replace('.html">', '.md">')
-                markdown = html2text.html2text(html)
-
-                with open(filename, 'w') as f:
-                    f.write(markdown)
+                self.image.save_as(filename)
 
 
