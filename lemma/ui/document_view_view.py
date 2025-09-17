@@ -23,6 +23,7 @@ from urllib.parse import urlparse
 import datetime
 import time
 import cairo
+import math
 
 from lemma.ui.context_menu import ContextMenu
 from lemma.services.text_shaper import TextShaper
@@ -211,7 +212,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
     @timer.timer
     def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
-        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int(layout['width'] * self.hidpi_factor), int(layout['height'] * self.hidpi_factor))
+        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int(layout['width'] * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
         self.draw_layout(layout, cairo.Context(surface), -layout['x'], -layout['y'], in_selection)
         self.render_cache[(paragraph_no, line_no)] = surface
 
@@ -311,7 +312,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
         Gdk.cairo_set_source_rgba(ctx, self.colors['selection_bg'])
-        ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, offset_y * self.hidpi_factor, layout['width'] * self.hidpi_factor, layout['parent']['height'] * self.hidpi_factor)
+        ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
         ctx.fill()
 
     @timer.timer
