@@ -83,6 +83,9 @@ label.link-overlay {
 
 /* document view */
 
+.document-view {
+    background: @view_bg_color;
+}
 .document-view:drop(active) {
     border-width: 0px;
     box-shadow: none;
