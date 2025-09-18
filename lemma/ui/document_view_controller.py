@@ -63,11 +63,6 @@ class DocumentViewController():
         self.focus_controller.connect('notify::is-focus', self.on_focus_change)
         self.content.add_controller(self.focus_controller)
 
-        self.drag_source = Gtk.DragSource()
-        self.drag_source.connect('prepare', self.on_drag_source_prepare)
-        self.drag_source.connect('drag-begin', self.on_drag_source_begin)
-        self.content.add_controller(self.drag_source)
-
         self.drag_controller = Gtk.GestureDrag()
         self.drag_controller.connect('drag-begin', self.on_drag_begin)
         self.drag_controller.connect('drag-update', self.on_drag_update)
@@ -178,34 +173,12 @@ class DocumentViewController():
                 UseCases.move_cursor_to_xy(x_offset, y_offset, False)
             self.model.application.context_menu_document.popup_at_cursor(x, y)
 
-    def on_drag_source_prepare(self, controller, x, y):
-        x -= ApplicationState.get_value('document_padding_left')
-        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
-        y += self.model.document.clipping.offset_y
-
-        if self.drag_source_at_xy(x, y):
-            document = self.model.document
-            subtree = document.ast.get_subtree(*document.cursor.get_state())
-
-            data = subtree[0].value.get_data()
-            cp_image = Gdk.ContentProvider.new_for_bytes('image/png', GLib.Bytes(data))
-
-            xml = XMLExporter.export(subtree)
-            cp_ast = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode()))
-
-            cp_union = Gdk.ContentProvider.new_union([cp_ast, cp_image])
-            return cp_union
-        return None
-
-    def on_drag_source_begin(self, controller, drag):
-        controller.set_icon(None, 0, 0)
-
     def on_drag_begin(self, gesture, x, y, data=None):
         x -= ApplicationState.get_value('document_padding_left')
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         y += self.model.document.clipping.offset_y
 
-        if self.drag_source_at_xy(x, y) or y <= 0:
+        if y <= 0:
             gesture.reset()
 
     def on_drag_update(self, gesture, x, y, data=None):
@@ -233,17 +206,6 @@ class DocumentViewController():
 
     def on_drag_end(self, gesture, x, y, data=None):
         pass
-
-    def drag_source_at_xy(self, x, y):
-        document = self.model.document
-        subtree = document.ast.get_subtree(*document.cursor.get_state())
-
-        if len(subtree) == 1 and subtree[0].type == 'widget':
-            layout = subtree[0].layout
-            layout_x, layout_y = document.get_absolute_xy(layout)
-            if x >= layout_x and y >= layout_y and x < layout_x + layout['width'] and y < layout_y + layout['height']:
-                return True
-        return False
 
     def on_drop(self, controller, value, x, y):
         if self.scroll_on_drop_callback_id != None:
