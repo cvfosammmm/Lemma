@@ -26,15 +26,15 @@ class Command():
     def run(self, document):
         self.state['nodes_and_previous_paragraph_style'] = []
 
-        first_node = document.cursor.get_first_node().line_start()
+        first_node = document.cursor.get_first_node().paragraph_start()
         if document.cursor.has_selection():
             next_to_last = document.cursor.get_last_node().prev_in_parent()
             if next_to_last != None:
-                last_node = next_to_last.line_end()
+                last_node = next_to_last.paragraph_end()
             else:
-                last_node = document.cursor.get_last_node().line_end()
+                last_node = document.cursor.get_last_node().paragraph_end()
         else:
-            last_node = first_node.line_end()
+            last_node = first_node.paragraph_end()
 
         for node in document.ast.get_subtree(first_node.get_position(), last_node.get_position()):
             self.state['nodes_and_previous_paragraph_style'].append([node, node.paragraph_style])
@@ -42,8 +42,8 @@ class Command():
         self.state['nodes_and_previous_paragraph_style'].append([last_node, last_node.paragraph_style])
         last_node.paragraph_style = self.paragraph_style
 
-        for line_no in range(first_node.line_no(), last_node.line_no() + 1):
-            document.invalidate(line_no)
+        for paragraph_no in range(first_node.paragraph_no(), last_node.paragraph_no() + 1):
+            document.invalidate(paragraph_no)
         document.update_last_modified()
 
     def undo(self, document):
@@ -52,8 +52,8 @@ class Command():
 
         first_node = self.state['nodes_and_previous_paragraph_style'][0][0]
         last_node = self.state['nodes_and_previous_paragraph_style'][-1][0]
-        for line_no in range(first_node.line_no(), last_node.line_no() + 1):
-            document.invalidate(line_no)
+        for paragraph_no in range(first_node.paragraph_no(), last_node.paragraph_no() + 1):
+            document.invalidate(paragraph_no)
         document.update_last_modified()
 
 

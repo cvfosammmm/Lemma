@@ -32,8 +32,8 @@ class PlaintextScanner(object):
     def update_pal(self):
         text = ''
 
-        for line in self.document.ast.lines:
-            for node in line['nodes']:
+        for paragraph in self.document.ast.paragraphs:
+            for node in paragraph['nodes']:
                 if node.type == 'char':
                     text += node.value
                 elif node.type == 'eol':

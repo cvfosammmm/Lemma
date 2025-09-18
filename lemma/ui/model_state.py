@@ -38,7 +38,7 @@ class ModelState(object):
         self.next_doc = None
         self.can_undo = None
         self.can_redo = None
-        self.insert_in_line = None
+        self.insert_parent_is_root = None
         self.has_selection = None
         self.clipboard_formats = None
         self.text_in_clipboard = None
@@ -63,7 +63,7 @@ class ModelState(object):
         self.next_doc = History.get_next_if_any(self.document)
         self.can_undo = self.has_active_doc and self.document.can_undo()
         self.can_redo = self.has_active_doc and self.document.can_redo()
-        self.insert_in_line = self.has_active_doc and self.document.cursor.get_insert_node().parent.type == 'root'
+        self.insert_parent_is_root = self.has_active_doc and self.document.cursor.get_insert_node().parent.type == 'root'
         self.has_selection = self.has_active_doc and self.document.cursor.has_selection()
         self.clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
         self.text_in_clipboard = 'text/plain;charset=utf-8' in self.clipboard_formats

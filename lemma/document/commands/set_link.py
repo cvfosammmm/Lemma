@@ -34,8 +34,8 @@ class Command():
         self.state['nodes_and_prev_target'] = list(zip(self.nodes, prev_links))
 
         if len(self.nodes) > 0:
-            for line_no in range(self.nodes[0].line_no(), self.nodes[-1].line_no() + 1):
-                document.invalidate(line_no)
+            for paragraph_no in range(self.nodes[0].paragraph_no(), self.nodes[-1].paragraph_no() + 1):
+                document.invalidate(paragraph_no)
             document.update_last_modified()
 
     def undo(self, document):
@@ -44,8 +44,8 @@ class Command():
         document.cursor.set_state(self.state['cursor_state_before'])
 
         if len(self.nodes) > 0:
-            for line_no in range(self.nodes[0].line_no(), self.nodes[-1].line_no() + 1):
-                document.invalidate(line_no)
+            for paragraph_no in range(self.nodes[0].paragraph_no(), self.nodes[-1].paragraph_no() + 1):
+                document.invalidate(paragraph_no)
             document.update_last_modified()
 
 

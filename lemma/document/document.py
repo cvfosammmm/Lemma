@@ -114,9 +114,9 @@ class Document():
     def update_last_cursor_movement(self):
         self.last_cursor_movement = time.time()
 
-    def invalidate(self, line_no):
-        self.ast.lines[line_no]['layout'] = None
-        self.ast.lines[line_no]['xml'] = None
+    def invalidate(self, paragraph_no):
+        self.ast.paragraphs[paragraph_no]['layout'] = None
+        self.ast.paragraphs[paragraph_no]['xml'] = None
 
     def update(self):
         self.layouter.update()
@@ -134,10 +134,10 @@ class Document():
         return result
 
     def get_height(self):
-        return self.ast.lines[-1]['layout']['y'] + self.ast.lines[-1]['layout']['height']
+        return self.ast.paragraphs[-1]['layout']['y'] + self.ast.paragraphs[-1]['layout']['height']
 
     def get_width(self):
-        return self.ast.lines[0]['layout']['width']
+        return self.ast.paragraphs[0]['layout']['width']
 
     def get_ancestors(self, layout):
         ancestors = []
@@ -189,11 +189,11 @@ class Document():
 
     def get_line_at_y(self, y):
         if y < 0:
-            return self.ast.lines[0]['layout']['children'][0]
+            return self.ast.paragraphs[0]['layout']['children'][0]
         elif y > self.get_height():
-            return self.ast.lines[-1]['layout']['children'][-1]
+            return self.ast.paragraphs[-1]['layout']['children'][-1]
         else:
-            for paragraph in self.ast.lines:
+            for paragraph in self.ast.paragraphs:
                 if y >= paragraph['layout']['y'] and y < paragraph['layout']['y'] + paragraph['layout']['height']:
                     y -= paragraph['layout']['y']
                     for line in paragraph['layout']['children']:

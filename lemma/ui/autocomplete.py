@@ -200,8 +200,8 @@ class Autocomplete():
 
     def deactivate_if_necessary(self):
         # Deactivates autocomplete if certain invariants don't hold
-        # The cursor must be on the same line as the starting point
-        # and it must come after it on that line, ...
+        # The cursor must be on the same paragraph as the starting point
+        # and it must come after it on that paragraph, ...
 
         if not Settings.get_value('stylized_latex_autocomplete'):
             self.deactivate()

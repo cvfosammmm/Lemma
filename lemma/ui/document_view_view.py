@@ -160,7 +160,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
-        for i, paragraph in enumerate(document.ast.lines):
+        for i, paragraph in enumerate(document.ast.paragraphs):
             for j, line_layout in enumerate(paragraph['layout']['children']):
                 if content_offset_y + line_layout['y'] + paragraph['layout']['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph['layout']['y'] <= self.height:
                     if (i,j) not in self.render_cache:

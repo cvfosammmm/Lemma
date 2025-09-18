@@ -35,18 +35,18 @@ class Layouter(object):
     @timer.timer
     def update_layout(self):
         y_offset = 0
-        for line in self.document.ast.lines:
-            if line['layout'] == None:
-                layout_tree = self.make_layout_tree_line(self.document.ast, line['nodes'])
+        for paragraph in self.document.ast.paragraphs:
+            if paragraph['layout'] == None:
+                layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph['nodes'])
                 self.layout(layout_tree)
-                line['layout'] = layout_tree
+                paragraph['layout'] = layout_tree
             else:
-                layout_tree = line['layout']
+                layout_tree = paragraph['layout']
             layout_tree['y'] = y_offset
             y_offset += layout_tree['height']
 
     @timer.timer
-    def make_layout_tree_line(self, root, nodes):
+    def make_layout_tree_paragraph(self, root, nodes):
         layout_tree = {'type': 'paragraph',
                        'fixed': False,
                        'node': root,

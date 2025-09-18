@@ -590,7 +590,7 @@ class UseCases():
                     prev_hboxes = box['children'][:j]
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
-                    for paragraph in document.ast.lines:
+                    for paragraph in document.ast.paragraphs:
                         for hbox in paragraph['layout']['children']:
                             if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
@@ -633,7 +633,7 @@ class UseCases():
                     prev_hboxes = box['children'][j + 1:]
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
-                    for paragraph in document.ast.lines:
+                    for paragraph in document.ast.paragraphs:
                         for hbox in paragraph['layout']['children']:
                             if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
@@ -659,7 +659,7 @@ class UseCases():
             UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
-    def line_start(do_selection=False):
+    def paragraph_start(do_selection=False):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
 
@@ -681,7 +681,7 @@ class UseCases():
             UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
-    def line_end(do_selection=False):
+    def paragraph_end(do_selection=False):
         document = History.get_active_document()
         insert = document.cursor.get_insert_node()
 
@@ -920,10 +920,10 @@ class UseCases():
                     break
 
                 if ancestor.type == 'root':
-                    line_start, line_end = document.cursor.get_insert_node().line_bounds()
-                    if line_start != None and line_end != None and (document.cursor.get_first_node().get_position() > line_start.get_position() or document.cursor.get_last_node().get_position() < line_end.get_position()):
-                        new_insert = line_end
-                        new_selection = line_start
+                    paragraph_start, paragraph_end = document.cursor.get_insert_node().paragraph_bounds()
+                    if paragraph_start != None and paragraph_end != None and (document.cursor.get_first_node().get_position() > paragraph_start.get_position() or document.cursor.get_last_node().get_position() < paragraph_end.get_position()):
+                        new_insert = paragraph_end
+                        new_selection = paragraph_start
                     else:
                         new_insert = document.ast[0]
                         new_selection = document.ast[-1]

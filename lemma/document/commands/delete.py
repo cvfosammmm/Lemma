@@ -28,8 +28,8 @@ class Command():
         self.state['cursor_state_before'] = document.cursor.get_state()
         self.state['deleted_nodes'] = []
 
-        document.invalidate(self.node_from.line_no())
-        document.invalidate(self.node_to.line_no())
+        document.invalidate(self.node_from.paragraph_no())
+        document.invalidate(self.node_to.paragraph_no())
 
         if self.node_from.parent == self.node_to.parent:
             self.state['deleted_nodes'] = self.node_from.parent.remove_range(self.node_from, self.node_to)
@@ -40,7 +40,7 @@ class Command():
         document.update_last_modified()
 
     def undo(self, document):
-        document.invalidate(self.node_to.line_no())
+        document.invalidate(self.node_to.paragraph_no())
 
         self.node_to.parent.insert_before(self.node_to, self.state['deleted_nodes'])
 

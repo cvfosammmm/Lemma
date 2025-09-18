@@ -133,8 +133,8 @@ class DocumentViewController():
                 if link == None or int(state & modifiers) != 0:
                     insert = document.cursor.get_insert_node()
                     selection = document.cursor.get_selection_node()
-                    line_start, line_end = insert.line_bounds()
-                    if insert == line_start and selection == line_end or insert == line_end and selection == line_start:
+                    paragraph_start, paragraph_end = insert.paragraph_bounds()
+                    if insert == paragraph_start and selection == paragraph_end or insert == paragraph_end and selection == paragraph_start:
                         UseCases.move_cursor_to_xy(x, y, False)
                     else:
                         UseCases.extend_selection()
@@ -304,9 +304,9 @@ class DocumentViewController():
             case ('down', 0):
                 UseCases.down()
             case ('home', 0):
-                UseCases.line_start()
+                UseCases.paragraph_start()
             case ('end', 0):
-                UseCases.line_end()
+                UseCases.paragraph_end()
             case ('page_up', 0):
                 UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100)
             case ('page_down', 0):
@@ -321,9 +321,9 @@ class DocumentViewController():
             case ('down', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.down(True)
             case ('home', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.line_start(True)
+                UseCases.paragraph_start(True)
             case ('end', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.line_end(True)
+                UseCases.paragraph_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):

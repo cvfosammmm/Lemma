@@ -47,13 +47,13 @@ class HTMLExporter(object):
 
         self.html += '<body>\n'
         self.html += '<h1>' + document.title + '</h1>\n'
-        for line in document.ast.get_lines():
-            node_lists = self.group_by_node_type(line)
+        for paragraph in document.ast.get_paragraphs():
+            node_lists = self.group_by_node_type(paragraph)
 
-            self.html += '<' + line[-1].get_paragraph_style() + '>'
+            self.html += '<' + paragraph[-1].get_paragraph_style() + '>'
             for node_list in node_lists:
                 self.process_list(node_list)
-            self.html += '</' + line[-1].get_paragraph_style() + '>\n'
+            self.html += '</' + paragraph[-1].get_paragraph_style() + '>\n'
         self.html += '</body>\n'
 
         self.html += '</html>'

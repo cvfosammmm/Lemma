@@ -31,8 +31,8 @@ class LinksScanner(object):
     def update_links(self):
         links = []
 
-        for line in self.document.ast.lines:
-            for node in line['nodes']:
+        for paragraph in self.document.ast.paragraphs:
+            for node in paragraph['nodes']:
                 if node.link != None and node.type == 'char':
                     links.append(node.link)
 

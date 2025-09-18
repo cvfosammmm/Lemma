@@ -25,7 +25,7 @@ class RootNode():
         self.parent = None
         end_node = Node('end')
         end_node.set_parent(self)
-        self.lines = [{'nodes': [end_node], 'layout': None, 'xml': None}]
+        self.paragraphs = [{'nodes': [end_node], 'layout': None, 'xml': None}]
         self.type = type_str
         self.value = value
         self.tags = set()
@@ -39,19 +39,19 @@ class RootNode():
 
     @timer.timer
     def insert_before(self, child, nodes):
-        line_no, offset = self.line_no_offset(child)
+        paragraph_no, offset = self.paragraph_no_offset(child)
 
         for node in nodes:
             if node.type == 'eol':
-                self.lines[line_no]['nodes'].insert(offset, node)
-                new_line = {'nodes': self.lines[line_no]['nodes'][offset + 1:], 'layout': None, 'xml': None}
-                self.lines.insert(line_no + 1, new_line)
-                del(self.lines[line_no]['nodes'][offset + 1:])
+                self.paragraphs[paragraph_no]['nodes'].insert(offset, node)
+                new_paragraph = {'nodes': self.paragraphs[paragraph_no]['nodes'][offset + 1:], 'layout': None, 'xml': None}
+                self.paragraphs.insert(paragraph_no + 1, new_paragraph)
+                del(self.paragraphs[paragraph_no]['nodes'][offset + 1:])
 
-                line_no += 1
+                paragraph_no += 1
                 offset = 0
             else:
-                self.lines[line_no]['nodes'].insert(offset, node)
+                self.paragraphs[paragraph_no]['nodes'].insert(offset, node)
 
                 offset += 1
 
@@ -59,75 +59,74 @@ class RootNode():
 
     @timer.timer
     def append(self, node):
-        self.lines[-1]['nodes'].insert(-1, node)
+        self.paragraphs[-1]['nodes'].insert(-1, node)
         if node.type == 'eol':
-            self.lines.append({'nodes': [self.lines[-1]['nodes'][-1]], 'layout': None, 'xml': None})
-            del(self.lines[-2]['nodes'][-1])
+            self.paragraphs.append({'nodes': [self.paragraphs[-1]['nodes'][-1]], 'layout': None, 'xml': None})
+            del(self.paragraphs[-2]['nodes'][-1])
 
         node.set_parent(self)
 
     @timer.timer
     def remove(self, nodes):
         for node in nodes:
-            parent_line_no = 0
-            for i, line in enumerate(self.lines):
-                if node in line['nodes']:
-                    line['nodes'].remove(node)
+            for i, paragraph in enumerate(self.paragraphs):
+                if node in paragraph['nodes']:
+                    paragraph['nodes'].remove(node)
                     if node.type == 'eol':
-                        self.lines[i] = {'nodes': line['nodes'] + self.lines[i + 1]['nodes'], 'layout': None, 'xml': None}
-                        del(self.lines[i + 1])
-                    elif len(self.lines[i]['nodes']) == 0:
-                        del(self.lines[i])
+                        self.paragraphs[i] = {'nodes': paragraph['nodes'] + self.paragraphs[i + 1]['nodes'], 'layout': None, 'xml': None}
+                        del(self.paragraphs[i + 1])
+                    elif len(self.paragraphs[i]['nodes']) == 0:
+                        del(self.paragraphs[i])
                     break
 
     @timer.timer
     def remove_range(self, first_node, last_node):
-        line_no_1, offset_1 = self.line_no_offset(first_node)
-        line_no_2, offset_2 = self.line_no_offset(last_node)
-        if line_no_1 != line_no_2:
+        paragraph_no_1, offset_1 = self.paragraph_no_offset(first_node)
+        paragraph_no_2, offset_2 = self.paragraph_no_offset(last_node)
+        if paragraph_no_1 != paragraph_no_2:
             nodes = []
-            nodes += self.lines[line_no_1]['nodes'][offset_1:]
-            for line in self.lines[line_no_1 + 1:line_no_2]:
-                nodes += line['nodes']
-            nodes += self.lines[line_no_2]['nodes'][:offset_2]
+            nodes += self.paragraphs[paragraph_no_1]['nodes'][offset_1:]
+            for paragraph in self.paragraphs[paragraph_no_1 + 1:paragraph_no_2]:
+                nodes += paragraph['nodes']
+            nodes += self.paragraphs[paragraph_no_2]['nodes'][:offset_2]
 
-            self.lines[line_no_1]['nodes'] = self.lines[line_no_1]['nodes'][:offset_1] + self.lines[line_no_2]['nodes'][offset_2:]
-            del(self.lines[line_no_1 + 1:line_no_2 + 1])
+            self.paragraphs[paragraph_no_1]['nodes'] = self.paragraphs[paragraph_no_1]['nodes'][:offset_1] + self.paragraphs[paragraph_no_2]['nodes'][offset_2:]
+            del(self.paragraphs[paragraph_no_1 + 1:paragraph_no_2 + 1])
         else:
-            nodes = self.lines[line_no_1]['nodes'][offset_1:offset_2]
-            del(self.lines[line_no_1]['nodes'][offset_1:offset_2])
+            nodes = self.paragraphs[paragraph_no_1]['nodes'][offset_1:offset_2]
+            del(self.paragraphs[paragraph_no_1]['nodes'][offset_1:offset_2])
 
         return nodes
 
     @timer.timer
     def index(self, node):
         count = 0
-        for line in self.lines:
-            if node in line['nodes']:
-                count += line['nodes'].index(node)
+        for paragraph in self.paragraphs:
+            if node in paragraph['nodes']:
+                count += paragraph['nodes'].index(node)
                 return count
-            count += len(line['nodes'])
+            count += len(paragraph['nodes'])
 
-    def line_no_offset(self, node):
+    def paragraph_no_offset(self, node):
         count = 0
-        for i, line in enumerate(self.lines):
-            if node in line['nodes']:
-                return i, line['nodes'].index(node)
+        for i, paragraph in enumerate(self.paragraphs):
+            if node in paragraph['nodes']:
+                return i, paragraph['nodes'].index(node)
 
-    def index_to_line_no_offset(self, index):
+    def index_to_paragraph_no_offset(self, index):
         if index == 0: return 0, 0
 
         if index < 0:
             index += len(self)
 
-        for i, line in enumerate(self.lines):
-            if index < len(line['nodes']):
+        for i, paragraph in enumerate(self.paragraphs):
+            if index < len(paragraph['nodes']):
                 return i, index
-            index -= len(line['nodes'])
+            index -= len(paragraph['nodes'])
         return 0, 0
 
-    def get_lines(self):
-        return [line['nodes'] for line in self.lines]
+    def get_paragraphs(self):
+        return [paragraph['nodes'] for paragraph in self.paragraphs]
 
     def get_position(self):
         return Position(*list())
@@ -151,7 +150,7 @@ class RootNode():
         return node
 
     def __len__(self):
-        return sum([len(line['nodes']) for line in self.lines])
+        return sum([len(paragraph['nodes']) for paragraph in self.paragraphs])
 
     def __iter__(self):
         self.current_iter_index = [0, -1]
@@ -159,35 +158,35 @@ class RootNode():
 
     def __next__(self):
         self.current_iter_index[1] += 1
-        if self.current_iter_index[1] >= len(self.lines[self.current_iter_index[0]]['nodes']):
+        if self.current_iter_index[1] >= len(self.paragraphs[self.current_iter_index[0]]['nodes']):
             self.current_iter_index[0] += 1
             self.current_iter_index[1] = 0
-        if self.current_iter_index[0] >= len(self.lines):
+        if self.current_iter_index[0] >= len(self.paragraphs):
             raise StopIteration
-        return self.lines[self.current_iter_index[0]]['nodes'][self.current_iter_index[1]]
+        return self.paragraphs[self.current_iter_index[0]]['nodes'][self.current_iter_index[1]]
 
     def __getitem__(self, key):
         if isinstance(key, slice):
             if len(range(len(self))[key]) > 0:
                 index_1 = key.start
                 index_2 = key.stop
-                line_no_1, offset_1 = self.index_to_line_no_offset(index_1)
-                line_no_2, offset_2 = self.index_to_line_no_offset(index_2)
+                paragraph_no_1, offset_1 = self.index_to_paragraph_no_offset(index_1)
+                paragraph_no_2, offset_2 = self.index_to_paragraph_no_offset(index_2)
 
-                if line_no_1 != line_no_2:
+                if paragraph_no_1 != paragraph_no_2:
                     nodes = []
-                    nodes += self.lines[line_no_1]['nodes'][offset_1:]
-                    for line in self.lines[line_no_1 + 1:line_no_2]:
-                        nodes += line['nodes']
-                    nodes += self.lines[line_no_2]['nodes'][:offset_2]
+                    nodes += self.paragraphs[paragraph_no_1]['nodes'][offset_1:]
+                    for paragraph in self.paragraphs[paragraph_no_1 + 1:paragraph_no_2]:
+                        nodes += paragraph['nodes']
+                    nodes += self.paragraphs[paragraph_no_2]['nodes'][:offset_2]
                 else:
-                    nodes = self.lines[line_no_1]['nodes'][offset_1:offset_2]
+                    nodes = self.paragraphs[paragraph_no_1]['nodes'][offset_1:offset_2]
                 return nodes
             else:
                 return []
         else:
-            line_no, offset = self.index_to_line_no_offset(key)
-            return self.lines[line_no]['nodes'].__getitem__(offset)
+            paragraph_no, offset = self.index_to_paragraph_no_offset(key)
+            return self.paragraphs[paragraph_no]['nodes'].__getitem__(offset)
 
     def ancestors(self):
         return []
@@ -201,8 +200,8 @@ class RootNode():
     @timer.timer
     def flatten(self):
         result = [self]
-        for line in self.lines:
-            for child in line['nodes']:
+        for paragraph in self.paragraphs:
+            for child in paragraph['nodes']:
                 result += child.flatten()
         return result
 
@@ -235,8 +234,8 @@ class RootNode():
         return string
 
     def validate(self):
-        for line in self.lines:
-            for child in line['nodes']:
+        for paragraph in self.paragraphs:
+            for child in paragraph['nodes']:
                 if child.type not in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}:
                     return False
                 if not child.validate():
@@ -329,14 +328,14 @@ class Node():
     def is_last_in_parent(self):
         return self == self.parent[-1]
 
-    def is_first_in_line(self):
+    def is_first_in_paragraph(self):
         if not self.parent.type == 'root': return False
         if self.is_first_in_parent(): return True
         if self.prev_in_parent().type == 'eol': return True
 
         return False
 
-    def is_last_in_line(self):
+    def is_last_in_paragraph(self):
         if not self.parent.type == 'root': return False
         if self.is_last_in_parent(): return True
         if self.type == 'eol': return True
@@ -394,17 +393,17 @@ class Node():
                 node1 = prev_node
         return (node1, node2)
 
-    def line_bounds(self):
-        return (self.line_start(), self.line_end())
+    def paragraph_bounds(self):
+        return (self.paragraph_start(), self.paragraph_end())
 
-    def line_no(self):
+    def paragraph_no(self):
         node = self
 
         while not node.parent.type == 'root':
             node = node.parent
 
-        line_no, offset = node.parent.line_no_offset(node)
-        return line_no
+        paragraph_no, offset = node.parent.paragraph_no_offset(node)
+        return paragraph_no
 
     def prev_in_parent(self, steps=1):
         if self != self.parent[0]:
@@ -424,23 +423,23 @@ class Node():
             result += child.flatten()
         return result
 
-    def line_start(self):
+    def paragraph_start(self):
         node = self
 
         while not node.parent.type == 'root':
             node = node.parent
 
-        line_no, offset = node.parent.line_no_offset(node)
-        return node.parent.lines[line_no]['nodes'][0]
+        paragraph_no, offset = node.parent.paragraph_no_offset(node)
+        return node.parent.paragraphs[paragraph_no]['nodes'][0]
 
-    def line_end(self):
+    def paragraph_end(self):
         node = self
 
         while not node.parent.type == 'root':
             node = node.parent
 
-        line_no, offset = node.parent.line_no_offset(node)
-        return node.parent.lines[line_no]['nodes'][-1]
+        paragraph_no, offset = node.parent.paragraph_no_offset(node)
+        return node.parent.paragraphs[paragraph_no]['nodes'][-1]
 
     def __str__(self):
         string = self.type + ':' + str(self.value)
