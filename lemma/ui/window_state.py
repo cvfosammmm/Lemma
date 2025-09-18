@@ -50,20 +50,28 @@ class WindowState(object):
 
         sidebar_visible = Settings.get_value('show_tools_sidebar')
         active_tab = Settings.get_value('tools_sidebar_active_tab')
-        self.toolbar_right.symbols_sidebar_toggle.set_active(sidebar_visible and active_tab == 'math')
-        self.toolbar_right.emoji_sidebar_toggle.set_active(sidebar_visible and active_tab == 'emojis')
+
+        self.update_toggle(self.toolbar_right.symbols_sidebar_toggle, sidebar_visible and active_tab == 'math')
+        self.update_toggle(self.toolbar_right.emoji_sidebar_toggle, sidebar_visible and active_tab == 'emojis')
+
         self.main_window.tools_sidebar.set_visible_child_name(active_tab)
         self.main_window.document_view_paned.set_show_widget(sidebar_visible)
         self.main_window.document_view_paned.animate(True)
 
-    def on_tools_sidebar_toggle_clicked(self, toggle_button, name):
-        if not toggle_button.get_active():
+    def on_tools_sidebar_toggle_clicked(self, button, name):
+        if Settings.get_value('show_tools_sidebar') and name == Settings.get_value('tools_sidebar_active_tab'):
             UseCases.hide_tools_sidebar()
         else:
             UseCases.show_tools_sidebar(name)
 
-    def on_backlinks_toggle_toggled(self, toggle_button, parameter=None):
-        self.main_window.navigation_sidebar.paned.set_show_widget(toggle_button.get_active())
+    def update_toggle(self, button, new_state):
+        if new_state == True:
+            button.add_css_class('checked')
+        else:
+            button.remove_css_class('checked')
+
+    def on_backlinks_toggle_toggled(self, button, parameter=None):
+        self.main_window.navigation_sidebar.paned.set_show_widget(button.get_active())
         self.main_window.navigation_sidebar.paned.animate(True)
 
     def restore_window_state(self):
