@@ -112,6 +112,11 @@ class Popover(PopoverView):
     def on_keypress(self, controller, keyval, keycode, state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
+        if keyval == Gdk.keyval_from_name('Escape'):
+            if state & modifiers == 0:
+                UseCases.hide_popovers()
+                return True
+
         if keyval == Gdk.keyval_from_name('Up'):
             if state & modifiers == 0:
                 self.select_prev()
