@@ -17,13 +17,14 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, GObject, Gio
+from gi.repository import Gtk, Gdk, GLib, GObject, Gio
 
 import time
 
 import lemma.services.xml_helpers as xml_helpers
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.node_type_db import NodeTypeDB
+from lemma.services.xml_exporter import XMLExporter
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -62,6 +63,11 @@ class DocumentViewController():
         self.focus_controller.connect('notify::is-focus', self.on_focus_change)
         self.content.add_controller(self.focus_controller)
 
+        self.drag_source = Gtk.DragSource()
+        self.drag_source.connect('prepare', self.on_drag_source_prepare)
+        self.drag_source.connect('drag-begin', self.on_drag_source_begin)
+        self.content.add_controller(self.drag_source)
+
         self.drag_controller = Gtk.GestureDrag()
         self.drag_controller.connect('drag-begin', self.on_drag_begin)
         self.drag_controller.connect('drag-update', self.on_drag_update)
@@ -71,7 +77,7 @@ class DocumentViewController():
         self.scroll_on_drop_callback_id = None
         self.drop_cursor_x, self.drop_cursor_y = None, None
         self.drop_target = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
-        self.drop_target.set_gtypes([Gdk.FileList, str])
+        self.drop_target.set_gtypes([Gdk.FileList, str, Gdk.Texture])
         self.drop_target.connect('drop', self.on_drop)
         self.drop_target.connect('enter', self.on_drop_enter)
         self.drop_target.connect('motion', self.on_drop_hover)
@@ -172,12 +178,34 @@ class DocumentViewController():
                 UseCases.move_cursor_to_xy(x_offset, y_offset, False)
             self.model.application.context_menu_document.popup_at_cursor(x, y)
 
+    def on_drag_source_prepare(self, controller, x, y):
+        x -= ApplicationState.get_value('document_padding_left')
+        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        y += self.model.document.clipping.offset_y
+
+        if self.drag_source_at_xy(x, y):
+            document = self.model.document
+            subtree = document.ast.get_subtree(*document.cursor.get_state())
+
+            data = subtree[0].value.get_data()
+            cp_image = Gdk.ContentProvider.new_for_bytes('image/png', GLib.Bytes(data))
+
+            xml = XMLExporter.export(subtree)
+            cp_ast = Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode()))
+
+            cp_union = Gdk.ContentProvider.new_union([cp_ast, cp_image])
+            return cp_union
+        return None
+
+    def on_drag_source_begin(self, controller, drag):
+        controller.set_icon(None, 0, 0)
+
     def on_drag_begin(self, gesture, x, y, data=None):
         x -= ApplicationState.get_value('document_padding_left')
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
         y += self.model.document.clipping.offset_y
 
-        if y <= 0:
+        if self.drag_source_at_xy(x, y) or y <= 0:
             gesture.reset()
 
     def on_drag_update(self, gesture, x, y, data=None):
@@ -206,8 +234,21 @@ class DocumentViewController():
     def on_drag_end(self, gesture, x, y, data=None):
         pass
 
+    def drag_source_at_xy(self, x, y):
+        document = self.model.document
+        subtree = document.ast.get_subtree(*document.cursor.get_state())
+
+        if len(subtree) == 1 and subtree[0].type == 'widget':
+            layout = subtree[0].layout
+            layout_x, layout_y = document.get_absolute_xy(layout)
+            if x >= layout_x and y >= layout_y and x < layout_x + layout['width'] and y < layout_y + layout['height']:
+                return True
+        return False
+
     def on_drop(self, controller, value, x, y):
-        self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
+        if self.scroll_on_drop_callback_id != None:
+            self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
+            self.scroll_on_drop_callback_id = None
 
         x -= ApplicationState.get_value('document_padding_left')
         y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
@@ -232,7 +273,9 @@ class DocumentViewController():
         return Gdk.DragAction.COPY
 
     def on_drop_leave(self, controller):
-        self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
+        if self.scroll_on_drop_callback_id != None:
+            self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
+            self.scroll_on_drop_callback_id = None
 
         UseCases.reset_drop_cursor()
 

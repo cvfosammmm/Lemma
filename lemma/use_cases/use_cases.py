@@ -860,6 +860,13 @@ class UseCases():
             document.add_command('update_implicit_x_position')
             UseCases.insert_xml(xml)
 
+        elif isinstance(value, Gdk.Texture):
+            data = value.save_to_png_bytes().unref_to_data()
+
+            document.add_command('move_cursor_to_xy', x, y, False)
+            document.add_command('update_implicit_x_position')
+            UseCases.add_image_from_bytes(data)
+
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
