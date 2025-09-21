@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="44" date="2025-9-21">
+            <description translatable="no">
+                <p>Some drag and drop support, copy and paste images, ...</p>
+            </description>
+        </release>
         ​<release version="43" date="2025-9-12">
             <description translatable="no">
                 <p>Cursor blink, ...</p>
