@@ -571,6 +571,13 @@ window.settings checkbutton.single {
 window.settings checkbutton.single check {
     margin-right: 6px;
 }
+label.settings-header {
+    font-weight: bold;
+    margin-left: 17px;
+}
+label.settings-text-data-display {
+    margin-left: 17px;
+}
 
 /* shortcuts dialog */
 
