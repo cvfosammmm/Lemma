@@ -578,6 +578,31 @@ label.settings-header {
 label.settings-text-data-display {
     margin-left: 17px;
 }
+.settings-margin-box {
+    margin-left: 17px;
+    margin-right: 17px;
+}
+.settings-colorcode {
+    min-width: 18px;
+    min-height: 18px;
+    margin-right: 18px;
+    border-radius: 2px;
+}
+.storage-scale {
+    min-height: 36px;
+    margin-left: 17px;
+    margin-right: 17px;
+    border-radius: 2px;
+}
+.settings-color-lemma {
+    background: @storage_color_lemma;
+}
+.settings-color-system {
+    background: @storage_color_system;
+}
+.settings-color-freespace {
+    background: @storage_color_free;
+}
 
 /* shortcuts dialog */
 

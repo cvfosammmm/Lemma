@@ -38,6 +38,12 @@
 @define-color dialog_list_bg #fff;
 @define-color dialog_list_border #ddd;
 
+/* Settings Dialog */
+
+@define-color storage_color_lemma #28af08;
+@define-color storage_color_system #f2e57b;
+@define-color storage_color_free #ccc;
+
 /* Shortcuts Dialog */
 
 @define-color keycap_fg rgba(0, 0, 0, 0.8);
