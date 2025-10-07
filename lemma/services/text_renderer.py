@@ -90,7 +90,7 @@ class TextRenderer():
         TextRenderer.fonts[fontname]['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
 
         width = TextRenderer.fonts[fontname]['face'].glyph.advance.x
-        height = TextRenderer.fonts[fontname]['line_height']
+        height = TextRenderer.fonts[fontname]['face'].glyph.metrics['height']
         left = TextRenderer.fonts[fontname]['face'].glyph.bitmap_left
         top = -TextRenderer.fonts[fontname]['face'].glyph.bitmap_top
 
