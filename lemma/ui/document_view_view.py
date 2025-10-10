@@ -63,10 +63,11 @@ class DocumentView(Gtk.Overlay):
         self.adjustment_y = self.scrollbar_y.get_adjustment()
         self.add_overlay(self.scrollbar_y)
 
-        self.link_overlay = Gtk.Label.new('http://url')
+        self.link_overlay = Gtk.Label.new('')
         self.link_overlay.set_valign(Gtk.Align.END)
         self.link_overlay.set_halign(Gtk.Align.END)
         self.link_overlay.add_css_class('link-overlay')
+        self.link_overlay.set_visible(False)
         self.add_overlay(self.link_overlay)
 
 
