@@ -81,8 +81,7 @@ class Actions(object):
         self.add_simple_action('superscript', self.superscript)
 
         self.add_simple_action('start-global-search', self.start_global_search)
-        self.add_simple_action('toggle-symbols-sidebar', self.toggle_symbols_sidebar)
-        self.add_simple_action('toggle-emojis-sidebar', self.toggle_emojis_sidebar)
+        self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar, GLib.VariantType('s'))
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
@@ -132,7 +131,7 @@ class Actions(object):
         self.actions['set-paragraph-style'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-bold'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-italic'].set_enabled(self.model_state.has_active_doc)
-        self.actions['toggle-symbols-sidebar'].set_enabled(True)
+        self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-paragraph-style-menu'].set_enabled(self.model_state.has_active_doc)
         self.actions['show-edit-menu'].set_enabled(self.model_state.has_active_doc)
         self.actions['show-document-menu'].set_enabled(self.model_state.has_active_doc)
@@ -413,11 +412,8 @@ class Actions(object):
         search_entry = self.main_window.headerbar.hb_left.search_entry
         search_entry.grab_focus()
 
-    def toggle_symbols_sidebar(self, action=None, parameter=None):
-        UseCases.toggle_tools_sidebar('math')
-
-    def toggle_emojis_sidebar(self, action=None, parameter=None):
-        UseCases.toggle_tools_sidebar('emojis')
+    def toggle_tools_sidebar(self, action=None, parameter=None):
+        UseCases.toggle_tools_sidebar(parameter.get_string())
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
