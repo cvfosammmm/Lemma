@@ -206,7 +206,7 @@ class DocumentView():
 
         if text != None:
             if not urlparse(text).scheme in ['http', 'https']:
-                if len(DocumentRepo.list_by_title(text)) > 0:
+                if len(DocumentRepo.list_by_title(text)) == 0:
                     text = 'Create "' + text + '"'
 
             self.view.link_overlay.set_text(text)
