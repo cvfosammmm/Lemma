@@ -22,7 +22,7 @@ from gi.repository import Gdk, Pango, PangoCairo
 from lemma.services.color_manager import ColorManager
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
-from lemma.history.history import History
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.ui.cairo import rounded_rectangle
 import lemma.services.timer as timer
 
@@ -40,6 +40,7 @@ class DocumentHistory(object):
         self.font_desc_bold.set_weight(Pango.Weight.BOLD)
 
         self.items = list()
+        self.active_document_index = None
         self.selected_index = None
 
         self.size_cache = dict()
@@ -60,14 +61,16 @@ class DocumentHistory(object):
 
         total_width = 0
         self.items = list()
-        for i, document in enumerate(History.documents):
-            if document.title not in self.size_cache:
-                self.size_cache[document.title] = self.get_item_extents(document.title).width / Pango.SCALE + 37
-            document_width = self.size_cache[document.title]
-            self.items.append((i, document, total_width, document_width))
+        for i, document_stub in enumerate(DocumentRepo.list_by_history()):
+            if document_stub['title'] not in self.size_cache:
+                self.size_cache[document_stub['title']] = self.get_item_extents(document_stub['title']).width / Pango.SCALE + 37
+            document_width = self.size_cache[document_stub['title']]
+            self.items.append((i, document_stub, total_width, document_width))
             total_width += document_width
-            if i == History.active_document_index and mode == 'draft':
-                break
+            if document_stub['id'] == DocumentRepo.get_active_document_id():
+                self.active_document_index = i
+                if mode == 'draft':
+                    break
         if mode == 'draft':
             total_width += self.get_item_extents('New Document').width / Pango.SCALE + 37
         total_width += 72
@@ -76,17 +79,17 @@ class DocumentHistory(object):
 
     @timer.timer
     def scroll_active_document_on_screen(self):
-        if self.view.scrolling_widget.adjustment_x.get_upper() < self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width or History.active_document_index == len(self.items) - 1:
+        if self.view.scrolling_widget.adjustment_x.get_upper() < self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width or self.active_document_index == len(self.items) - 1:
             self.view.scrolling_widget.scroll_to_position((self.view.scrolling_widget.adjustment_x.get_upper(), 0))
             return
 
-        if History.active_document_index != None:
-            i, document, document_offset, document_width = self.items[History.active_document_index]
+        if self.active_document_index != None:
+            i, document_stub, document_offset, document_width = self.items[self.active_document_index]
             if document_offset < self.view.scrolling_widget.scrolling_offset_x:
                 self.view.scrolling_widget.scroll_to_position((document_offset, 0))
                 return
 
-            i, document, document_offset, document_width = self.items[History.active_document_index + 1]
+            i, document_stub, document_offset, document_width = self.items[self.active_document_index + 1]
             if document_offset > self.view.scrolling_widget.scrolling_offset_x + self.view.scrolling_widget.width:
                 self.view.scrolling_widget.scroll_to_position((document_offset - self.view.scrolling_widget.width - 1, 0))
                 return
@@ -104,7 +107,7 @@ class DocumentHistory(object):
 
         hover_index = self.get_hover_index()
         if hover_index != None and hover_index == self.selected_index:
-            UseCases.set_active_document(self.items[hover_index][1], update_history=False)
+            UseCases.set_active_document(self.items[hover_index][1]['id'], update_history=False)
         self.set_selected_index(None)
 
     def set_selected_index(self, index):
@@ -122,8 +125,8 @@ class DocumentHistory(object):
         fg_color = ColorManager.get_ui_color('history_fg')
 
         draft_offset = 0
-        for i, document, document_offset, document_width in self.items:
-            is_active = (i == History.active_document_index)
+        for i, document_stub, document_offset, document_width in self.items:
+            is_active = (i == self.active_document_index)
             if document_offset + document_width >= self.view.scrolling_widget.scrolling_offset_x and document_offset <= self.view.scrolling_widget.scrolling_offset_x + width:
                 font_desc = self.font_desc_bold if (is_active and mode != 'draft') else self.font_desc_normal
 
@@ -138,7 +141,7 @@ class DocumentHistory(object):
                 ctx.move_to(document_offset - scrolling_offset, 13)
                 self.layout.set_font_description(font_desc)
                 self.layout.set_width(document_width * Pango.SCALE)
-                self.layout.set_text(document.title)
+                self.layout.set_text(str(document_stub['title']))
                 Gdk.cairo_set_source_rgba(ctx, fg_color)
                 PangoCairo.show_layout(ctx, self.layout)
                 self.draw_divider(ctx, document_offset - scrolling_offset, height)
@@ -162,19 +165,6 @@ class DocumentHistory(object):
         ctx.rectangle(offset, 9, 1, height - 18)
         ctx.fill()
 
-    def get_document_at_cursor(self):
-        y = self.view.scrolling_widget.cursor_y
-        x = self.view.scrolling_widget.cursor_x
-        if y == None or x == None: return None
-        if y < 6 or y > 41: return None
-        x += self.view.scrolling_widget.scrolling_offset_x
-
-        offset = 0
-        for i, document, document_offset, document_width in self.items:
-            if x >= document_offset and x < document_offset + document_width:
-                return document
-        return None
-
     def get_hover_index(self):
         y = self.view.scrolling_widget.cursor_y
         x = self.view.scrolling_widget.cursor_x
@@ -183,7 +173,7 @@ class DocumentHistory(object):
         x += self.view.scrolling_widget.scrolling_offset_x
 
         offset = 0
-        for i, document, document_offset, document_width in self.items:
+        for i, document_stub, document_offset, document_width in self.items:
             if x >= document_offset and x < document_offset + document_width:
                 return i
         return None

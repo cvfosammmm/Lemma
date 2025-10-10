@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.history.history import History
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
@@ -35,7 +35,7 @@ class CursorState():
 
     @timer.timer
     def update_tags_and_link_at_cursor(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         if document == None:
             UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
@@ -52,7 +52,7 @@ class CursorState():
                     UseCases.app_state_set_values({'tags_at_cursor': prev_node.tags.copy(), 'link_at_cursor': None})
 
     def update_tag_toggle(self, button, tagname):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None: return
 
         chars_selected = False
@@ -77,7 +77,7 @@ class CursorState():
 
     @timer.timer
     def update_paragraph_style_at_cursor(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None: return
 
         current_node = document.cursor.get_first_node()

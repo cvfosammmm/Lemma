@@ -316,7 +316,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
     def get_fg_color_string_by_node(self, node):
         if node.link == None:
             return self.colors['text_string']
-        if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
+        if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
             return self.colors['links_string']
         return self.colors['links_page_not_existing_string']
 
@@ -324,7 +324,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
     def get_fg_color_by_node(self, node):
         if node.link == None:
             return self.colors['text']
-        if node.link.startswith('http') or DocumentRepo.get_by_title(node.link) != None:
+        if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
             return self.colors['links']
         return self.colors['links_page_not_existing']
 

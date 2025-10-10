@@ -21,7 +21,6 @@ from gi.repository import Gtk, Gdk
 
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
-from lemma.history.history import History
 
 
 class Backlinks(object):
@@ -37,14 +36,13 @@ class Backlinks(object):
         self.view.reset()
         if self.model_state.has_active_doc:
             backlinks = DocumentRepo.list_by_link_target(self.model_state.document.title)
-            for document_id in backlinks:
-                linking_doc = DocumentRepo.get_by_id(document_id)
-                self.view.add_item(linking_doc)
+            for document_stub in backlinks:
+                self.view.add_item(document_stub)
 
     def on_row_activated(self, listbox, row):
-        new_active_document = row.get_child().document
+        document_id = row.get_child().document_id
 
-        UseCases.set_active_document(new_active_document)
-        UseCases.scroll_to_xy(new_active_document, 0, 0)
+        UseCases.set_active_document(document_id)
+        UseCases.scroll_to_xy(0, 0)
 
 

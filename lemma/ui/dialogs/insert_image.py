@@ -22,7 +22,7 @@ from gi.repository import Gtk
 from PIL import Image as PIL_Image
 
 from lemma.use_cases.use_cases import UseCases
-from lemma.history.history import History
+from lemma.document_repo.document_repo import DocumentRepo
 
 
 class Dialog(object):
@@ -51,10 +51,10 @@ class Dialog(object):
         except Exception: pass
         else:
             if file != None:
-                document = History.get_active_document()
+                document = DocumentRepo.get_active_document()
                 if document.cursor.get_insert_node().parent.type == 'root':
                     filename = file.get_path()
                     UseCases.add_image_from_filename(filename)
-                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
 

@@ -47,25 +47,25 @@ class BacklinksView(Gtk.Box):
     def reset(self):
         self.listbox.remove_all()
 
-    def add_item(self, document):
-        self.listbox.append(BacklinksListItem(document))
+    def add_item(self, document_stub):
+        self.listbox.append(BacklinksListItem(document_stub))
 
 
 class BacklinksListItem(Gtk.Box):
     
-    def __init__(self, document):
+    def __init__(self, document_stub):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
-        self.document = document
+        self.document_id = document_stub['id']
 
-        self.label_header = Gtk.Label.new(document.title)
+        self.label_header = Gtk.Label.new(document_stub['title'])
         self.label_header.set_xalign(0)
         self.label_header.set_ellipsize(Pango.EllipsizeMode.END)
         self.label_header.add_css_class('header')
         self.append(self.label_header)
 
-        teaser_text = ' '.join(document.plaintext.splitlines())[:100].strip()
+        teaser_text = ' '.join(document_stub['plaintext'].splitlines())[:100].strip()
         self.label_teaser = Gtk.Label.new(teaser_text)
         self.label_teaser.set_xalign(0)
         self.label_teaser.set_ellipsize(Pango.EllipsizeMode.END)

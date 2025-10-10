@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import os, os.path, pickle
+
+from lemma.services.paths import Paths
+
 
 class Settings():
 
@@ -44,6 +48,13 @@ class Settings():
 
         Settings.data = Settings.defaults
 
+        try: filehandle = open(os.path.join(Paths.get_config_folder(), 'settings.pickle'), 'rb')
+        except IOError: return False
+        else:
+            try: Settings.data = pickle.load(filehandle)
+            except EOFError: return False
+        return True
+
     def get_value(item):
         try: value = Settings.data[item]
         except KeyError:
@@ -53,5 +64,10 @@ class Settings():
 
     def set_value(item, value):
         Settings.data[item] = value
+
+    def save():
+        try: filehandle = open(os.path.join(Paths.get_config_folder(), 'settings.pickle'), 'wb')
+        except IOError: return False
+        else: pickle.dump(Settings.data, filehandle)
 
 

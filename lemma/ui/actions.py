@@ -26,7 +26,7 @@ from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
-from lemma.history.history import History
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -151,16 +151,16 @@ class Actions(object):
         DialogLocator.get_dialog('export_bulk').run()
 
     def delete_document(self, action=None, parameter=''):
-        UseCases.delete_document(History.get_active_document())
+        UseCases.delete_document(DocumentRepo.get_active_document_id())
 
     def rename_document(self, action=None, parameter=''):
         self.application.document_view.init_renaming()
 
     def export_markdown(self, action=None, parameter=''):
-        DialogLocator.get_dialog('export_markdown').run(History.get_active_document())
+        DialogLocator.get_dialog('export_markdown').run(DocumentRepo.get_active_document())
 
     def export_image(self, action=None, parameter=''):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         DialogLocator.get_dialog('export_image').run(selected_nodes[0].value)
@@ -170,12 +170,12 @@ class Actions(object):
         if mode == 'draft':
             UseCases.leave_draft_mode()
         else:
-            prev_doc = History.get_previous_if_any(History.get_active_document())
+            prev_doc = DocumentRepo.get_prev_id_in_history(DocumentRepo.get_active_document_id())
             if prev_doc != None:
                 UseCases.set_active_document(prev_doc, update_history=False)
 
     def go_forward(self, action=None, parameter=''):
-        next_doc = History.get_next_if_any(History.get_active_document())
+        next_doc = DocumentRepo.get_next_id_in_history(DocumentRepo.get_active_document_id())
         if next_doc != None:
             UseCases.set_active_document(next_doc, update_history=False)
 
@@ -192,11 +192,9 @@ class Actions(object):
     def cut(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
-
         self.copy()
         UseCases.delete_selection()
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def copy(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -204,8 +202,8 @@ class Actions(object):
         clipboard = Gdk.Display.get_default().get_clipboard()
         content_providers = []
 
-        ast = History.get_active_document().ast
-        cursor = History.get_active_document().cursor
+        ast = DocumentRepo.get_active_document().ast
+        cursor = DocumentRepo.get_active_document().cursor
         subtree = ast.get_subtree(*cursor.get_state())
 
         chars = []
@@ -240,11 +238,10 @@ class Actions(object):
 
     def on_paste_ast(self, clipboard, result):
         result = clipboard.read_finish(result)
-        document = History.get_active_document()
 
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def on_paste_image(self, clipboard, result):
         texture = clipboard.read_texture_finish(result)
@@ -253,7 +250,6 @@ class Actions(object):
 
     def on_paste(self, clipboard, result):
         result = clipboard.read_finish(result)
-        document = History.get_active_document()
 
         if result[1].startswith('text/plain'):
             text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
@@ -268,13 +264,13 @@ class Actions(object):
                     text = xml_helpers.escape(stext)
                     xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                     UseCases.insert_xml(xml)
-                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
                     return
 
             text = xml_helpers.escape(text)
             xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
             UseCases.insert_xml(xml)
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def delete(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -294,15 +290,13 @@ class Actions(object):
     def insert_xml(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
-
         UseCases.insert_xml(parameter.get_string())
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def subscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
@@ -310,12 +304,12 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def superscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
@@ -323,7 +317,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def set_paragraph_style(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
@@ -333,7 +327,7 @@ class Actions(object):
     def toggle_bold(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document.cursor.has_selection():
             UseCases.toggle_tag('bold')
         else:
@@ -342,7 +336,7 @@ class Actions(object):
     def toggle_italic(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document.cursor.has_selection():
             UseCases.toggle_tag('italic')
         else:
@@ -356,7 +350,7 @@ class Actions(object):
     def widget_shrink(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         UseCases.resize_widget(selected_nodes[0].value.get_width() - 1)
@@ -364,7 +358,7 @@ class Actions(object):
     def widget_enlarge(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         UseCases.resize_widget(selected_nodes[0].value.get_width() + 1)
@@ -372,32 +366,28 @@ class Actions(object):
     def open_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         UseCases.open_link(document.cursor.get_insert_node().link)
 
     def insert_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
-
-        UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
         UseCases.show_insert_link_popover(self.main_window)
 
     def edit_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
-
-        UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
         UseCases.show_insert_link_popover(self.main_window)
 
     def copy_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
         clipboard = Gdk.Display.get_default().get_clipboard()
-        ast = History.get_active_document().ast
-        cursor = History.get_active_document().cursor
+        ast = DocumentRepo.get_active_document().ast
+        cursor = DocumentRepo.get_active_document().cursor
         node = cursor.get_insert_node()
 
         if node.link != None:
@@ -409,7 +399,7 @@ class Actions(object):
     def remove_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         if document.cursor.has_selection():
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]

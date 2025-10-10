@@ -25,7 +25,6 @@ import time, datetime, os.path
 import cairo
 
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.history.history import History
 from lemma.services.color_manager import ColorManager
 from lemma.ui.shortcuts import ShortcutController
 from lemma.application_state.application_state import ApplicationState
@@ -42,8 +41,8 @@ class DocumentList(object):
 
         self.render_cache = dict()
 
-        self.document_ids = DocumentRepo.list()
         self.search_terms = []
+        self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
         self.focus_index = None
         self.selected_index = None
 
@@ -70,8 +69,8 @@ class DocumentList(object):
         self.view.context_menu.popover.connect('closed', self.on_context_menu_close)
 
     def update(self):
-        self.document_ids = [doc_id for doc_id in DocumentRepo.list() if self.search_terms_in_document(DocumentRepo.get_by_id(doc_id))]
-        self.view.scrolling_widget.set_size(1, max(len(self.document_ids) * self.view.line_height, 1))
+        self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
+        self.view.scrolling_widget.set_size(1, max(len(self.document_stubs) * self.view.line_height, 1))
 
         self.view.scrolling_widget.queue_draw()
 
@@ -86,16 +85,15 @@ class DocumentList(object):
             self.view.content.queue_draw()
 
     def activate_item(self, index):
-        document = DocumentRepo.get_by_id(self.document_ids[index])
-        UseCases.set_active_document(document)
-        UseCases.scroll_to_xy(document, 0, 0)
+        UseCases.set_active_document(self.document_stubs[index]['id'])
+        UseCases.scroll_to_xy(0, 0)
 
     def on_primary_button_press(self, scrolling_widget, data):
         x_offset, y_offset, state = data
 
         if state == 0:
             item_num = self.get_item_at_cursor()
-            if item_num != None and item_num < len(self.document_ids):
+            if item_num != None and item_num < len(self.document_stubs):
                 self.set_selected_index(item_num)
 
     def on_primary_button_release(self, scrolling_widget, data):
@@ -111,7 +109,7 @@ class DocumentList(object):
 
         if state == 0:
             item_num = self.get_item_at_cursor()
-            if item_num != None and item_num < len(self.document_ids):
+            if item_num != None and item_num < len(self.document_stubs):
                 self.set_selected_index(item_num)
                 self.view.context_menu.popup_at_cursor(x - content.scrolling_offset_x, y - content.scrolling_offset_y)
 
@@ -125,8 +123,7 @@ class DocumentList(object):
         self.set_selected_index(None)
 
     def on_delete_document_clicked(self, button):
-        document = DocumentRepo.get_by_id(self.document_ids[self.selected_index])
-        UseCases.delete_document(document)
+        UseCases.delete_document(self.document_stubs[self.selected_index]['id'])
         self.view.context_menu.popover.popdown()
 
     def on_search_entry_changed(self, entry, data=None):
@@ -161,15 +158,15 @@ class DocumentList(object):
         if self.focus_index == None:
             new_index = 0
         else:
-            new_index = (self.focus_index + 1) % len(self.document_ids)
+            new_index = (self.focus_index + 1) % len(self.document_stubs)
         self.set_focus_index(new_index)
         self.scroll_index_on_screen(new_index)
 
     def select_previous_button(self):
         if self.focus_index == None:
-            new_index = len(self.document_ids) - 1
+            new_index = len(self.document_stubs) - 1
         else:
-            new_index = (self.focus_index - 1) % len(self.document_ids)
+            new_index = (self.focus_index - 1) % len(self.document_stubs)
         self.set_focus_index(new_index)
         self.scroll_index_on_screen(new_index)
 
@@ -188,7 +185,7 @@ class DocumentList(object):
         ctx.rectangle(0, 0, width, height)
         ctx.fill()
 
-        if len(self.document_ids) > 0:
+        if len(self.document_stubs) > 0:
             self.draw_documents(ctx, width, height)
         elif len(self.search_terms) > 0:
             self.draw_no_results_page(ctx, width, height)
@@ -215,12 +212,11 @@ class DocumentList(object):
         Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
 
         new_render_cache = dict()
-        for i, document_id in enumerate(self.document_ids[first_item_no:last_item_no]):
+        for i, document_stub in enumerate(self.document_stubs[first_item_no:last_item_no]):
             i += first_item_no
 
-            document = DocumentRepo.get_by_id(document_id)
             mode = ApplicationState.get_value('mode')
-            highlight_active = (document == History.get_active_document() and mode == 'documents')
+            highlight_active = (document_stub['id'] == DocumentRepo.get_active_document_id() and mode == 'documents')
 
             if highlight_active:
                 title_color = active_fg_color
@@ -231,13 +227,13 @@ class DocumentList(object):
                 teaser_color = sidebar_fg_1
                 date_color = sidebar_fg_1
 
-            title_text = document.title
-            if len(document.plaintext) == 0:
+            title_text = document_stub['title']
+            if len(document_stub['plaintext']) == 0:
                 teaser_text = '(' + _('empty') + ')'
                 teaser_color = sidebar_fg_2
             else:
-                teaser_text = ' '.join(document.plaintext.splitlines())[:100].strip()
-            date_text = self.get_last_modified_string(document)
+                teaser_text = ' '.join(document_stub['plaintext'].splitlines())[:100].strip()
+            date_text = self.get_last_modified_string(document_stub['last_modified'])
             key = title_text + teaser_text + date_text + str(width)
 
             if highlight_active:
@@ -313,14 +309,14 @@ class DocumentList(object):
         self.view.layout_no_results_details.set_width((width - 36) * Pango.SCALE)
         PangoCairo.show_layout(ctx, self.view.layout_no_results_details)
 
-    def get_last_modified_string(self, document):
+    def get_last_modified_string(self, timestamp):
         datetime_today, datetime_this_week, datetime_this_year = self.get_datetimes_today_week_year()
-        datetime_last_modified = datetime.datetime.fromtimestamp(document.last_modified)
-        if document.last_modified >= datetime_today.timestamp():
+        datetime_last_modified = datetime.datetime.fromtimestamp(timestamp)
+        if timestamp >= datetime_today.timestamp():
             return '{datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified)
-        elif document.last_modified >= datetime_this_week.timestamp():
+        elif timestamp >= datetime_this_week.timestamp():
             return '{datetime:%a}'.format(datetime=datetime_last_modified)
-        elif document.last_modified >= datetime_this_year.timestamp():
+        elif timestamp >= datetime_this_year.timestamp():
             return '{datetime.day} {datetime:%b}'.format(datetime=datetime_last_modified)
         else:
             return '{datetime.day} {datetime:%b} {datetime.year}'.format(datetime=datetime_last_modified)
@@ -333,10 +329,6 @@ class DocumentList(object):
         date_this_year = datetime.date(date_today.year, 1, 1)
         datetime_this_year = datetime.datetime.combine(date_this_year, datetime.time(0, 0))
         return (datetime_today, datetime_this_week, datetime_this_year)
-
-    def search_terms_in_document(self, document):
-        if len(self.search_terms) == 0: return True
-        return min(map(lambda x: x in document.plaintext or x in document.title, self.search_terms))
 
     def get_item_at_cursor(self):
         y = self.view.scrolling_widget.cursor_y

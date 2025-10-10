@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.services.message_bus import MessageBus
-from lemma.history.history import History
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.services.settings import Settings
 from lemma.services.autocomplete_db import AutocompleteDB
 from lemma.application_state.application_state import ApplicationState
@@ -56,7 +56,7 @@ class Autocomplete():
         MessageBus.connect('keyboard_input', self.on_keyboard_input)
 
     def on_keyboard_input(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -67,7 +67,7 @@ class Autocomplete():
         self.update()
 
     def on_document_changed(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -76,7 +76,7 @@ class Autocomplete():
         self.update()
 
     def on_history_changed(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -85,7 +85,7 @@ class Autocomplete():
         self.update()
 
     def on_keypress(self, controller, keyval, keycode, state):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -132,7 +132,7 @@ class Autocomplete():
         self.update()
 
     def on_focus_out(self, controller):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -141,7 +141,7 @@ class Autocomplete():
         self.update()
 
     def on_focus_in(self, controller):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -163,7 +163,7 @@ class Autocomplete():
         # Tries to match a backslash followed by letters from the
         # last backslash before the cursor to the cursor.
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         node = document.cursor.get_insert_node()
         command_at_cursor = ''
         first_command_node = None
@@ -234,11 +234,11 @@ class Autocomplete():
 
         if len(self.suggestions) == 0: return
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
         xml = AutocompleteDB.get_xml(self.widget.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
         self.deactivate()
 
@@ -316,7 +316,7 @@ class AutocompleteWidget(Gtk.ScrolledWindow):
                 adjustment.set_value(y + item_height - page_size)
 
     def update_position(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
         insert_x, insert_y = document.get_absolute_xy(insert.layout)
         content_offset = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')

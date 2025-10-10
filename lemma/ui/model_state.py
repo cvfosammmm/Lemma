@@ -21,7 +21,7 @@ from gi.repository import Gdk
 
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
-from lemma.history.history import History
+from lemma.document_repo.document_repo import DocumentRepo
 import lemma.services.timer as timer
 
 
@@ -54,13 +54,14 @@ class ModelState(object):
 
     @timer.timer
     def update(self):
-        self.document = History.get_active_document()
+        self.document = DocumentRepo.get_active_document()
         self.mode = ApplicationState.get_value('mode')
         self.has_active_doc = (self.mode == 'documents' and self.document != None)
         self.selected_nodes = self.document.ast.get_subtree(*self.document.cursor.get_state()) if self.has_active_doc else []
 
-        self.prev_doc = History.get_previous_if_any(self.document)
-        self.next_doc = History.get_next_if_any(self.document)
+        self.prev_doc = DocumentRepo.get_prev_id_in_history(self.document.id) if self.has_active_doc else None
+        self.next_doc = DocumentRepo.get_next_id_in_history(self.document.id) if self.has_active_doc else None
+
         self.can_undo = self.has_active_doc and self.document.can_undo()
         self.can_redo = self.has_active_doc and self.document.can_redo()
         self.insert_parent_is_root = self.has_active_doc and self.document.cursor.get_insert_node().parent.type == 'root'

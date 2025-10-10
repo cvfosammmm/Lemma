@@ -25,7 +25,6 @@ from lemma.ui.popovers.popover_templates import PopoverView
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
-from lemma.history.history import History
 import lemma.services.xml_helpers as xml_helpers
 
 
@@ -82,7 +81,7 @@ class Popover(PopoverView):
 
         self.init_current_values()
 
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document.cursor.has_selection():
             nodes = document.ast.get_subtree(*document.cursor.get_state())
             first_node = nodes[0] if len(nodes) > 0 else None
@@ -186,14 +185,14 @@ class Popover(PopoverView):
         search_terms = self.entry_link_target.get_text().split()
 
         self.listbox.remove_all()
-        for document in DocumentRepo.get_by_terms_in_title(search_terms, limit=20):
-            self.listbox.append(ACItem(document.title))
+        for document_stub in DocumentRepo.list_by_terms_in_title(search_terms, limit=20):
+            self.listbox.append(ACItem(document_stub['title']))
 
     def on_add_button_clicked(self, button):
         self.submit()
 
     def submit(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         if self.current_values['link_target'] != '':
             if self.bounds == None:
@@ -201,7 +200,7 @@ class Popover(PopoverView):
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
-                UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+                UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
             else:
                 UseCases.set_link(document, self.bounds, self.current_values['link_target'])
         elif self.bounds != None:

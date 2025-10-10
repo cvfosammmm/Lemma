@@ -67,7 +67,7 @@ class DocumentDraft():
             self.view.subtext.set_text('Name cannot be empty.')
             self.view.subtext.add_css_class('error')
             self.view.title_entry.add_css_class('error')
-        elif DocumentRepo.get_by_title(self.title):
+        elif len(DocumentRepo.list_by_title(self.title)) > 0:
             self.validation_state = False
             self.view.subtext.set_text('A document with this name already exists.')
             self.view.subtext.add_css_class('error')

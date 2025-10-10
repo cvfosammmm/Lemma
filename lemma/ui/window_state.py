@@ -19,7 +19,7 @@ import os.path
 
 from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
-from lemma.history.history import History
+from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -41,7 +41,7 @@ class WindowState(object):
     def update(self):
         mode = ApplicationState.get_value('mode')
 
-        if mode == 'documents' and History.get_active_document() != None:
+        if mode == 'documents' and DocumentRepo.get_active_document() != None:
             self.main_window.content_stack.set_visible_child_name('document_view')
         elif mode == 'draft':
             self.main_window.content_stack.set_visible_child_name('draft_view')

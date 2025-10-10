@@ -35,8 +35,6 @@ from lemma.services.node_type_db import NodeTypeDB
 from lemma.widgets.image import Image
 from lemma.document.ast import Node
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.history.history import History
-from lemma.storage.storage import Storage
 from lemma.document.document import Document
 from lemma.services.message_bus import MessageBus
 from lemma.services.html_parser import HTMLParser
@@ -53,7 +51,7 @@ class UseCases():
 
     def settings_set_value(item, value):
         Settings.set_value(item, value)
-        Storage.save_settings()
+        Settings.save()
         MessageBus.add_change_code('settings_changed')
 
     def app_state_set_value(item, value):
@@ -66,7 +64,7 @@ class UseCases():
         MessageBus.add_change_code('app_state_changed')
 
     def show_insert_link_popover(main_window):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         x, y = document.get_absolute_xy(insert.layout)
@@ -109,22 +107,22 @@ class UseCases():
     def show_tools_sidebar(name):
         Settings.set_value('show_tools_sidebar', True)
         Settings.set_value('tools_sidebar_active_tab', name)
-        Storage.save_settings()
+        Settings.save()
         MessageBus.add_change_code('settings_changed')
 
     def hide_tools_sidebar():
         Settings.set_value('show_tools_sidebar', False)
-        Storage.save_settings()
+        Settings.save()
         MessageBus.add_change_code('settings_changed')
 
     def open_link(link_target):
         if urlparse(link_target).scheme in ['http', 'https']:
             webbrowser.open(link_target)
         elif link_target != None:
-            target_document = DocumentRepo.get_by_title(link_target)
-            if target_document != None:
-                UseCases.set_active_document(target_document)
-                UseCases.scroll_to_xy(target_document, 0, 0)
+            target_list = DocumentRepo.list_by_title(link_target)
+            if len(target_list) > 0:
+                UseCases.set_active_document(target_list[0]['id'])
+                UseCases.scroll_to_xy(0, 0)
             else:
                 UseCases.new_document(link_target)
 
@@ -176,35 +174,25 @@ class UseCases():
 
         MessageBus.add_change_code('new_document')
 
-        UseCases.set_active_document(document)
+        UseCases.set_active_document(document.id)
 
-    def delete_document(document):
-        DocumentRepo.delete(document)
-        if document == History.get_active_document():
-            new_active_document = History.get_next_in_line(document)
-            UseCases.set_active_document(new_active_document)
-            if new_active_document != None:
-                UseCases.scroll_to_xy(new_active_document, 0, 0)
-                
-        History.delete(document)
-        Storage.save_history()
+    def delete_document(document_id):
+        DocumentRepo.delete(document_id)
+        UseCases.scroll_to_xy(0, 0)
 
-        MessageBus.add_change_code('history_changed')
         MessageBus.add_change_code('document_removed')
+        MessageBus.add_change_code('history_changed')
 
-    def set_active_document(document, update_history=True):
+    def set_active_document(document_id, update_history=True):
         ApplicationState.set_value('mode', 'documents')
-        if update_history and document != None:
-            History.add(document)
-        History.activate_document(document)
-        Storage.save_history()
+        DocumentRepo.activate_document(document_id, update_history)
 
         MessageBus.add_change_code('mode_set')
         MessageBus.add_change_code('history_changed')
 
     @timer.timer
     def undo():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         document.undo()
 
         DocumentRepo.update(document)
@@ -213,7 +201,7 @@ class UseCases():
 
     @timer.timer
     def redo():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         document.redo()
 
         DocumentRepo.update(document)
@@ -222,7 +210,7 @@ class UseCases():
 
     @timer.timer
     def set_title(title):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         document.title = title
         document.update_last_modified()
@@ -233,7 +221,7 @@ class UseCases():
         MessageBus.add_change_code('document_ast_changed')
 
     def im_commit(text):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
         link_at_cursor = ApplicationState.get_value('link_at_cursor')
 
@@ -263,7 +251,7 @@ class UseCases():
 
     @timer.timer
     def insert_xml(xml):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
         insert_prev = insert.prev_in_parent()
         parser = xml_parser.XMLParser()
@@ -305,7 +293,7 @@ class UseCases():
             for node in node_list:
                 if node.type == 'placeholder':
                     UseCases.select_node(node)
-                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
                     placeholder_found = True
                     break
             if placeholder_found:
@@ -319,7 +307,7 @@ class UseCases():
 
     @timer.timer
     def backspace():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
 
         if document.cursor.has_selection():
@@ -339,7 +327,7 @@ class UseCases():
 
     @timer.timer
     def delete():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
 
         if document.cursor.has_selection():
@@ -360,7 +348,7 @@ class UseCases():
 
     @timer.timer
     def delete_selection():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         node_from = document.cursor.get_first_node()
         node_to = document.cursor.get_last_node()
 
@@ -383,7 +371,7 @@ class UseCases():
         UseCases.add_image(image)
 
     def add_image(image):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         node = Node('widget', image)
@@ -395,7 +383,7 @@ class UseCases():
 
     @timer.timer
     def replace_max_string_before_cursor():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         last_node = document.cursor.get_insert_node().prev_in_parent()
         first_node = last_node
@@ -431,7 +419,7 @@ class UseCases():
 
     @timer.timer
     def resize_widget(new_width):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         document.add_command('resize_widget', new_width)
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -449,7 +437,7 @@ class UseCases():
 
     @timer.timer
     def set_paragraph_style(style):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         current_style = document.cursor.get_first_node().get_paragraph_style()
         if current_style == style:
@@ -462,7 +450,7 @@ class UseCases():
 
     @timer.timer
     def toggle_tag(tagname):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']
         all_tagged = True
@@ -481,7 +469,7 @@ class UseCases():
 
     @timer.timer
     def left(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -497,11 +485,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def jump_left(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -524,11 +512,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def right(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -544,11 +532,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def jump_right(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -570,11 +558,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def up(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
 
         x, y = document.get_absolute_xy(insert.layout)
@@ -613,11 +601,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def down(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
 
         x, y = document.get_absolute_xy(insert.layout)
@@ -656,11 +644,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def paragraph_start(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
 
         layout = insert.layout
@@ -678,11 +666,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def paragraph_end(do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
 
         layout = insert.layout
@@ -700,11 +688,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def select_next_placeholder():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         insert = document.cursor.get_insert_node()
@@ -722,11 +710,11 @@ class UseCases():
 
         if node.type == 'placeholder':
             UseCases.select_node(node)
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def select_prev_placeholder():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         insert = document.cursor.get_insert_node()
@@ -744,11 +732,11 @@ class UseCases():
 
         if node.type == 'placeholder':
             UseCases.select_node(node)
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def select_node(node):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         next_node = node.next_in_parent()
         document.add_command('move_cursor_to_node', node, next_node)
@@ -758,7 +746,7 @@ class UseCases():
 
     @timer.timer
     def select_all():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
         document.add_command('update_implicit_x_position')
 
@@ -767,7 +755,7 @@ class UseCases():
 
     @timer.timer
     def remove_selection():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         if document.cursor.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
             document.add_command('update_implicit_x_position')
@@ -775,11 +763,11 @@ class UseCases():
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
 
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def move_cursor_by_xy_offset(x, y, do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
 
         orig_x, orig_y = document.get_absolute_xy(insert.layout)
@@ -793,11 +781,11 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         document.add_command('move_cursor_to_xy', x, y, do_selection)
         document.add_command('update_implicit_x_position')
 
@@ -806,7 +794,7 @@ class UseCases():
 
     @timer.timer
     def move_drop_cursor_to_xy(x, y):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         ApplicationState.set_value('drop_cursor_position', (x, y))
 
         DocumentRepo.update(document)
@@ -814,7 +802,7 @@ class UseCases():
 
     @timer.timer
     def reset_drop_cursor():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         ApplicationState.set_value('drop_cursor_position', None)
 
         DocumentRepo.update(document)
@@ -822,7 +810,7 @@ class UseCases():
 
     @timer.timer
     def handle_drop(value, x, y):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         ApplicationState.set_value('drop_cursor_position', None)
 
@@ -851,7 +839,7 @@ class UseCases():
                     text = xml_helpers.escape(stext)
                     xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                     UseCases.insert_xml(xml)
-                    UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
                     return
 
             text = xml_helpers.escape(text)
@@ -872,7 +860,7 @@ class UseCases():
 
     @timer.timer
     def move_cursor_to_parent():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         new_insert = None
@@ -891,11 +879,11 @@ class UseCases():
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
 
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     @timer.timer
     def extend_selection():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -934,10 +922,10 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
-        UseCases.animated_scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def get_insert_on_screen_scrolling_position():
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         insert_node = document.cursor.get_insert_node()
         insert_position = document.get_absolute_xy(insert_node.layout)
         content_offset = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
@@ -959,7 +947,10 @@ class UseCases():
         return (document.clipping.offset_x, document.clipping.offset_y)
 
     @timer.timer
-    def animated_scroll_to_xy(document, x, y):
+    def animated_scroll_to_xy(x, y):
+        document = DocumentRepo.get_active_document()
+        if document == None: return
+
         timestamp = time.time()
         UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id] = timestamp
 
@@ -979,14 +970,20 @@ class UseCases():
         GLib.timeout_add(duration, UseCases.add_scrolling_command, document, x, y, timestamp)
 
     @timer.timer
-    def scroll_to_xy(document, x, y):
+    def scroll_to_xy(x, y):
+        document = DocumentRepo.get_active_document()
+        if document == None: return
+
         timestamp = time.time()
         UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id] = timestamp
 
         UseCases.add_scrolling_command(document, x, y, timestamp)
 
     @timer.timer
-    def decelerate_scrolling(document, vel_x, vel_y):
+    def decelerate_scrolling(vel_x, vel_y):
+        document = DocumentRepo.get_active_document()
+        if document == None: return
+
         timestamp = time.time()
         UseCases.last_scroll_scheduled_timestamp_by_document_id[document.id] = timestamp
 

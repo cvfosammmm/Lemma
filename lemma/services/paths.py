@@ -23,17 +23,32 @@ class Paths():
 
     resources_folder = None
 
+    def init(resources_folder):
+        Paths.resources_folder = resources_folder
+
+        pathname = Paths.get_user_themes_folder()
+        if not os.path.exists(pathname): os.makedirs(pathname)
+
+        pathname = Paths.get_notes_folder()
+        if not os.path.exists(pathname): os.makedirs(pathname)
+
+        pathname = Paths.get_stubs_folder()
+        if not os.path.exists(pathname): os.makedirs(pathname)
+
+        pathname = Paths.get_config_folder()
+        if not os.path.isdir(pathname): os.makedirs(pathname)
+
     def get_config_folder():
         return os.path.join(xdg_config_home, 'lemma')
 
     def get_notes_folder():
         return os.path.expanduser(Paths.get_config_folder() + '/notes')
 
+    def get_stubs_folder():
+        return os.path.expanduser(Paths.get_config_folder() + '/stubs')
+
     def get_user_themes_folder():
         return os.path.expanduser(Paths.get_config_folder() + '/themes')
-
-    def init_resources_folder(resources_folder):
-        Paths.resources_folder = resources_folder
 
     def get_resources_folder():
         return Paths.resources_folder

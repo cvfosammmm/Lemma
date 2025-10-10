@@ -48,7 +48,7 @@ class Dialog(object):
 
     def init_current_values(self):
         self.current_values['filename'] = None
-        self.current_values['documents'] = set([DocumentRepo.get_by_id(doc_id) for doc_id in DocumentRepo.list()])
+        self.current_values['documents'] = set([DocumentRepo.get_by_id(doc_stub['id']) for doc_stub in DocumentRepo.list()])
 
     def populate_view(self):
         last_export_folder = Settings.get_value('last_bulk_export_folder')
@@ -57,7 +57,7 @@ class Dialog(object):
         if last_export_folder != None:
             self.view.file_chooser_button.dialog.set_initial_folder(Gio.File.new_for_path(last_export_folder))
 
-        for document in [DocumentRepo.get_by_id(doc_id) for doc_id in DocumentRepo.list()]:
+        for document in [DocumentRepo.get_by_id(doc_stub['id']) for doc_stub in DocumentRepo.list()]:
             row = view.Row(document)
             row.button.set_active(document in self.current_values['documents'])
             self.view.list.append(row)

@@ -27,7 +27,6 @@ from lemma.ui.document_view_controller import DocumentViewController
 from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.ui.document_view_view import DocumentViewDrawingArea
 from lemma.document_repo.document_repo import DocumentRepo
-from lemma.history.history import History
 from lemma.use_cases.use_cases import UseCases
 from lemma.ui.title_widget import TitleWidget
 from lemma.application_state.application_state import ApplicationState
@@ -68,12 +67,12 @@ class DocumentView():
         self.title_widget.view.title_entry.add_controller(self.key_controller_window)
         self.view.add_overlay(self.title_widget.view)
 
-        self.set_document(History.get_active_document())
+        self.set_document(DocumentRepo.get_active_document())
         self.presenter.update()
 
     @timer.timer
     def update(self):
-        self.set_document(History.get_active_document())
+        self.set_document(DocumentRepo.get_active_document())
 
         self.update_link_at_cursor()
         self.presenter.update()
@@ -85,7 +84,7 @@ class DocumentView():
         offset_y = self.view.adjustment_y.get_value()
 
         if self.document != None:
-            UseCases.scroll_to_xy(self.document, offset_x, offset_y)
+            UseCases.scroll_to_xy(offset_x, offset_y)
         self.presenter.update()
 
     def set_cursor_position(self, x, y):
@@ -93,7 +92,7 @@ class DocumentView():
             self.cursor_x, self.cursor_y = x, y
             self.last_cursor_or_scrolling_change = time.time()
 
-            document = History.get_active_document()
+            document = DocumentRepo.get_active_document()
             if document == None: return
 
             x = document.clipping.offset_x + (self.cursor_x if self.cursor_x != None else 0)
@@ -129,7 +128,7 @@ class DocumentView():
             self.title_widget.activate()
             self.title_widget.view.set_visible(True)
             UseCases.app_state_set_value('title_buttons_height', 50)
-            UseCases.scroll_to_xy(self.document, 0, 0)
+            UseCases.scroll_to_xy(0, 0)
             self.view.content.queue_draw()
             self.title_widget.grab_focus()
 
@@ -148,7 +147,7 @@ class DocumentView():
             self.submit()
 
     def submit(self):
-        document = History.get_active_document()
+        document = DocumentRepo.get_active_document()
         prev_title = document.title
 
         UseCases.set_title(self.title_widget.title)
@@ -166,7 +165,6 @@ class DocumentView():
                         if ''.join(char_nodes) == target:
                             xml = '<a href="' + xml_helpers.escape(self.title_widget.title) + '">' + xml_helpers.escape(self.title_widget.title) + '</a>'
                             UseCases.replace_section(linking_doc, bounds[0], bounds[1], xml)
-                            UseCases.scroll_to_xy(document, *UseCases.get_insert_on_screen_scrolling_position())
                         else:
                             UseCases.set_link(linking_doc, bounds, self.title_widget.title)
 
@@ -208,8 +206,7 @@ class DocumentView():
 
         if text != None:
             if not urlparse(text).scheme in ['http', 'https']:
-                target_document = DocumentRepo.get_by_title(text)
-                if target_document == None:
+                if len(DocumentRepo.list_by_title(text)) > 0:
                     text = 'Create "' + text + '"'
 
             self.view.link_overlay.set_text(text)
