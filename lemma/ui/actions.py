@@ -231,9 +231,9 @@ class Actions(object):
         if clipboard.get_formats().contain_mime_type('lemma/ast'):
             Gdk.Display.get_default().get_clipboard().read_async(['lemma/ast'], 0, None, self.on_paste_ast)
         elif clipboard.get_formats().contain_mime_type('image/png') or clipboard.get_formats().contain_mime_type('image/jpeg'):
-            Gdk.Display.get_default().get_clipboard().read_texture_async(None, self.on_paste_image)#read_async(['image/png', 'image/jpeg'], 0, None, self.on_paste_image)
+            Gdk.Display.get_default().get_clipboard().read_texture_async(None, self.on_paste_image)
         elif clipboard.get_formats().contain_mime_type('text/plain;charset=utf-8') or clipboard.get_formats().contain_mime_type('text/plain'):
-            Gdk.Display.get_default().get_clipboard().read_async(['text/plain', 'text/plain;charset=utf-8'], 0, None, self.on_paste)
+            Gdk.Display.get_default().get_clipboard().read_text_async(None, self.on_paste_text)
 
     def on_paste_ast(self, clipboard, result):
         result = clipboard.read_finish(result)
@@ -247,29 +247,26 @@ class Actions(object):
         data = texture.save_to_png_bytes().unref_to_data()
         UseCases.add_image_from_bytes(data)
 
-    def on_paste(self, clipboard, result):
-        result = clipboard.read_finish(result)
+    def on_paste_text(self, clipboard, result):
+        text = clipboard.read_text_finish(result)
 
-        if result[1].startswith('text/plain'):
-            text = result[0].read_bytes(8192 * 8192, None).get_data().decode('unicode_escape')
+        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+        link_at_cursor = ApplicationState.get_value('link_at_cursor')
 
-            tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
-            link_at_cursor = ApplicationState.get_value('link_at_cursor')
+        if len(text) < 2000:
+            stext = text.strip()
+            parsed_url = urlparse(stext)
+            if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
+                text = xml_helpers.escape(stext)
+                xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
+                UseCases.insert_xml(xml)
+                UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                return
 
-            if len(text) < 2000:
-                stext = text.strip()
-                parsed_url = urlparse(stext)
-                if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                    text = xml_helpers.escape(stext)
-                    xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
-                    UseCases.insert_xml(xml)
-                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
-                    return
-
-            text = xml_helpers.escape(text)
-            xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
-            UseCases.insert_xml(xml)
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        text = xml_helpers.escape(text)
+        xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
+        UseCases.insert_xml(xml)
+        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
 
     def delete(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
