@@ -59,10 +59,7 @@ class WindowState(object):
         self.main_window.document_view_paned.animate(True)
 
     def on_tools_sidebar_toggle_clicked(self, button, name):
-        if Settings.get_value('show_tools_sidebar') and name == Settings.get_value('tools_sidebar_active_tab'):
-            UseCases.hide_tools_sidebar()
-        else:
-            UseCases.show_tools_sidebar(name)
+        UseCases.toggle_tools_sidebar(name)
 
     def update_toggle(self, button, new_state):
         if new_state == True:

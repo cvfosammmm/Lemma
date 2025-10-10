@@ -414,18 +414,10 @@ class Actions(object):
         search_entry.grab_focus()
 
     def toggle_symbols_sidebar(self, action=None, parameter=None):
-        toggle_button = self.main_window.toolbar.toolbar_right.symbols_sidebar_toggle
-        if toggle_button.get_active():
-            UseCases.hide_tools_sidebar()
-        else:
-            UseCases.show_tools_sidebar('math')
+        UseCases.toggle_tools_sidebar('math')
 
     def toggle_emojis_sidebar(self, action=None, parameter=None):
-        toggle_button = self.main_window.toolbar.toolbar_right.emoji_sidebar_toggle
-        if toggle_button.get_active():
-            UseCases.hide_tools_sidebar()
-        else:
-            UseCases.show_tools_sidebar('emojis')
+        UseCases.toggle_tools_sidebar('emojis')
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button

@@ -104,6 +104,12 @@ class UseCases():
         ApplicationState.set_value('popover_position', (0, 0))
         MessageBus.add_change_code('app_state_changed')
 
+    def toggle_tools_sidebar(name):
+        if Settings.get_value('show_tools_sidebar') and Settings.get_value('tools_sidebar_active_tab') == name:
+            UseCases.hide_tools_sidebar()
+        else:
+            UseCases.show_tools_sidebar(name)
+
     def show_tools_sidebar(name):
         Settings.set_value('show_tools_sidebar', True)
         Settings.set_value('tools_sidebar_active_tab', name)
