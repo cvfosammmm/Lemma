@@ -57,11 +57,7 @@ class DocumentView():
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
-        self.title = ''
-        self.title_changed = False
-        self.title_widget_validation_state = False
         self.title_widget_is_active = False
-
         self.title_widget = TitleWidget()
         self.title_widget.title_entry.connect('activate', self.on_entry_activate)
         self.title_widget.submit_button.connect('clicked', self.on_submit_button_clicked)
@@ -132,68 +128,59 @@ class DocumentView():
             self.reset_title()
             self.view.content.grab_focus()
 
-    def init_renaming(self):
-        if self.document != None:
-            self.title_entry_activate()
-            self.title_widget.set_visible(True)
-            UseCases.app_state_set_value('title_buttons_height', 50)
-            UseCases.scroll_to_xy(0, 0)
-            self.view.content.queue_draw()
-            self.title_widget.title_entry.grab_focus()
-            self.title_widget.title_entry.set_position(len(self.title))
-
-    def stop_renaming(self):
-        self.title_entry_deactivate()
-        self.title_widget.set_visible(False)
-        UseCases.app_state_set_value('title_buttons_height', 0)
-        self.view.content.grab_focus()
-
     def on_title_entry_focus_in(self, controller):
-        if not self.title_widget_is_active:
-            self.title_entry_activate()
-
-    def on_title_entry_changed(self, entry):
-        if self.title_widget_is_active:
-            title = entry.get_text()
-            if title != self.title:
-                self.title = title
-                self.title_changed = True
-                self.validate_title()
-
-    def on_entry_activate(self, entry=None):
-        if self.title_widget_validation_state:
-            self.submit()
-
-    def on_submit_button_clicked(self, widget=None):
-        if self.title_widget_validation_state:
-            self.submit()
-
-    def title_entry_activate(self):
         if not self.title_widget_is_active:
             self.title_widget_is_active = True
             self.reset_title()
             self.validate_title()
             self.title_widget.button_revealer.set_reveal_child(True)
 
-    def title_entry_deactivate(self):
-        self.title_widget_is_active = False
-        self.title_widget.title_entry.set_position(0)
-        self.title_widget.button_revealer.set_reveal_child(False)
+    def on_title_entry_changed(self, entry):
+        if self.title_widget_is_active:
+            self.validate_title()
+
+    def on_entry_activate(self, entry=None):
+        self.submit()
+
+    def on_submit_button_clicked(self, widget=None):
+        self.submit()
+
+    def on_entry_keypress(self, controller, keyval, keycode, state):
+        if keyval == Gdk.keyval_from_name('Escape'):
+            if state & Gtk.accelerator_get_default_mod_mask() == 0:
+                self.cancel()
+                return True
+        return False
+
+    def on_cancel_button_clicked(self, widget=None):
+        self.cancel()
+
+    def init_renaming(self):
+        if self.document != None:
+            self.title_widget.set_visible(True)
+            UseCases.app_state_set_value('title_buttons_height', 50)
+            UseCases.scroll_to_xy(0, 0)
+            self.view.content.queue_draw()
+            self.title_widget.title_entry.grab_focus()
+            self.title_widget.title_entry.set_position(self.title_widget.title_entry.get_text_length())
 
     def validate_title(self):
         if self.document == None: return
 
-        validation_state = True
-        if self.title == '':
-            validation_state = False
-        elif self.title != self.document.title and len(DocumentRepo.list_by_title(self.title)) > 0:
-            validation_state = False
+        title = self.title_widget.title_entry.get_text()
 
-        if self.title != self.document.title and self.title == '':
+        validation_state = True
+        if title == '':
+            validation_state = False
+        elif title != self.document.title and len(DocumentRepo.list_by_title(title)) > 0:
+            validation_state = False
+        self.title_widget.submit_button.set_sensitive(validation_state)
+
+        if title != self.document.title and title == '':
             self.title_widget.subtext.set_text('Name cannot be empty.')
             self.title_widget.subtext.add_css_class('error')
             self.title_widget.title_entry.add_css_class('error')
-        elif self.title != self.document.title and len(DocumentRepo.list_by_title(self.title)) > 0:
+        elif title != self.document.title and len(DocumentRepo.list_by_title(title)) > 0:
             self.title_widget.subtext.set_text('A document with this name already exists.')
             self.title_widget.subtext.add_css_class('error')
             self.title_widget.title_entry.add_css_class('error')
@@ -202,15 +189,14 @@ class DocumentView():
             self.title_widget.subtext.remove_css_class('error')
             self.title_widget.title_entry.remove_css_class('error')
 
-        if validation_state != self.title_widget_validation_state:
-            self.title_widget_validation_state = validation_state
-        self.title_widget.submit_button.set_sensitive(validation_state)
-
     def submit(self):
+        if not self.title_widget.submit_button.get_sensitive(): return
+
         document = DocumentRepo.get_active_document()
         prev_title = document.title
+        title = self.title_widget.title_entry.get_text()
 
-        UseCases.set_title(self.title)
+        UseCases.set_title(title)
 
         if Settings.get_value('update_backlinks'):
             backlinks = DocumentRepo.list_by_link_target(prev_title)
@@ -223,22 +209,12 @@ class DocumentView():
                         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
                         char_nodes = [node.value for node in linking_doc.ast.get_subtree(pos_1, pos_2) if node.type == 'char']
                         if ''.join(char_nodes) == target:
-                            xml = '<a href="' + xml_helpers.escape(self.title) + '">' + xml_helpers.escape(self.title) + '</a>'
+                            xml = '<a href="' + xml_helpers.escape(title) + '">' + xml_helpers.escape(title) + '</a>'
                             UseCases.replace_section(linking_doc, bounds[0], bounds[1], xml)
                         else:
-                            UseCases.set_link(linking_doc, bounds, self.title)
+                            UseCases.set_link(linking_doc, bounds, title)
 
         self.stop_renaming()
-
-    def on_entry_keypress(self, controller, keyval, keycode, state):
-        if keyval == Gdk.keyval_from_name('Escape'):
-            if state & Gtk.accelerator_get_default_mod_mask() == 0:
-                self.cancel()
-                return True
-        return False
-
-    def on_cancel_button_clicked(self, widget=None):
-        self.cancel()
 
     def cancel(self):
         self.reset_title()
@@ -249,12 +225,17 @@ class DocumentView():
             self.title_widget.title_entry.set_enable_undo(False)
             self.title_widget.title_entry.set_text('')
             self.title_widget.title_entry.set_enable_undo(True)
-            self.title_changed = False
         else:
             self.title_widget.title_entry.set_enable_undo(False)
             self.title_widget.title_entry.set_text(self.document.title)
             self.title_widget.title_entry.set_enable_undo(True)
-            self.title_changed = False
+
+    def stop_renaming(self):
+        self.title_widget_is_active = False
+        self.title_widget.button_revealer.set_reveal_child(False)
+        self.title_widget.set_visible(False)
+        UseCases.app_state_set_value('title_buttons_height', 0)
+        self.view.content.grab_focus()
 
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None
