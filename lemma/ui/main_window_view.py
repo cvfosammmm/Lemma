@@ -33,7 +33,6 @@ from lemma.ui.tools_sidebar_view import ToolsSidebar
 from lemma.ui.document_view_view import DocumentView
 from lemma.ui.navigation_sidebar_view import NavigationSidebar
 from lemma.ui.document_draft_view import DocumentDraftView
-from lemma.ui.title_widget import TitleWidget
 from lemma.ui.animated_paned import AnimatedHPaned
 
 

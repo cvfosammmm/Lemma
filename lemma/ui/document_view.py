@@ -26,9 +26,9 @@ from lemma.services.settings import Settings
 from lemma.ui.document_view_controller import DocumentViewController
 from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.ui.document_view_view import DocumentViewDrawingArea
+from lemma.ui.document_view_view import TitleWidget
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
-from lemma.ui.title_widget import TitleWidget
 from lemma.application_state.application_state import ApplicationState
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -57,15 +57,24 @@ class DocumentView():
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
-        self.title_widget = TitleWidget(self)
-        self.title_widget.view.title_entry.connect('activate', self.on_entry_activate)
-        self.title_widget.view.submit_button.connect('clicked', self.on_submit_button_clicked)
-        self.title_widget.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
+        self.title = ''
+        self.title_changed = False
+        self.title_widget_validation_state = False
+        self.title_widget_is_active = False
+
+        self.title_widget = TitleWidget()
+        self.title_widget.title_entry.connect('activate', self.on_entry_activate)
+        self.title_widget.submit_button.connect('clicked', self.on_submit_button_clicked)
+        self.title_widget.cancel_button.connect('clicked', self.on_cancel_button_clicked)
         self.key_controller_window = Gtk.EventControllerKey()
         self.key_controller_window.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
-        self.title_widget.view.title_entry.add_controller(self.key_controller_window)
-        self.view.add_overlay(self.title_widget.view)
+        self.title_widget.title_entry.add_controller(self.key_controller_window)
+        self.focus_controller = Gtk.EventControllerFocus()
+        self.focus_controller.connect('enter', self.on_title_entry_focus_in)
+        self.title_widget.title_entry.add_controller(self.focus_controller)
+        self.title_widget.title_entry.connect('changed', self.on_title_entry_changed)
+        self.view.add_overlay(self.title_widget)
 
         self.set_document(DocumentRepo.get_active_document())
         self.presenter.update()
@@ -120,42 +129,93 @@ class DocumentView():
             self.document = document
             self.view.content.queue_draw()
             self.stop_renaming()
-            self.title_widget.set_document(document)
+            self.reset_title()
             self.view.content.grab_focus()
 
     def init_renaming(self):
         if self.document != None:
-            self.title_widget.activate()
-            self.title_widget.view.set_visible(True)
+            self.title_entry_activate()
+            self.title_widget.set_visible(True)
             UseCases.app_state_set_value('title_buttons_height', 50)
             UseCases.scroll_to_xy(0, 0)
             self.view.content.queue_draw()
-            self.title_widget.grab_focus()
+            self.title_widget.title_entry.grab_focus()
+            self.title_widget.title_entry.set_position(len(self.title))
 
     def stop_renaming(self):
-        self.title_widget.deactivate()
-        self.title_widget.view.set_visible(False)
+        self.title_entry_deactivate()
+        self.title_widget.set_visible(False)
         UseCases.app_state_set_value('title_buttons_height', 0)
         self.view.content.grab_focus()
 
+    def on_title_entry_focus_in(self, controller):
+        if not self.title_widget_is_active:
+            self.title_entry_activate()
+
+    def on_title_entry_changed(self, entry):
+        if self.title_widget_is_active:
+            title = entry.get_text()
+            if title != self.title:
+                self.title = title
+                self.title_changed = True
+                self.validate_title()
+
     def on_entry_activate(self, entry=None):
-        if self.title_widget.validation_state:
+        if self.title_widget_validation_state:
             self.submit()
 
     def on_submit_button_clicked(self, widget=None):
-        if self.title_widget.validation_state:
+        if self.title_widget_validation_state:
             self.submit()
+
+    def title_entry_activate(self):
+        if not self.title_widget_is_active:
+            self.title_widget_is_active = True
+            self.reset_title()
+            self.validate_title()
+            self.title_widget.button_revealer.set_reveal_child(True)
+
+    def title_entry_deactivate(self):
+        self.title_widget_is_active = False
+        self.title_widget.title_entry.set_position(0)
+        self.title_widget.button_revealer.set_reveal_child(False)
+
+    def validate_title(self):
+        if self.document == None: return
+
+        validation_state = True
+        if self.title == '':
+            validation_state = False
+        elif self.title != self.document.title and len(DocumentRepo.list_by_title(self.title)) > 0:
+            validation_state = False
+
+        if self.title != self.document.title and self.title == '':
+            self.title_widget.subtext.set_text('Name cannot be empty.')
+            self.title_widget.subtext.add_css_class('error')
+            self.title_widget.title_entry.add_css_class('error')
+        elif self.title != self.document.title and len(DocumentRepo.list_by_title(self.title)) > 0:
+            self.title_widget.subtext.set_text('A document with this name already exists.')
+            self.title_widget.subtext.add_css_class('error')
+            self.title_widget.title_entry.add_css_class('error')
+        else:
+            self.title_widget.subtext.set_text('Please enter a name for this document.')
+            self.title_widget.subtext.remove_css_class('error')
+            self.title_widget.title_entry.remove_css_class('error')
+
+        if validation_state != self.title_widget_validation_state:
+            self.title_widget_validation_state = validation_state
+        self.title_widget.submit_button.set_sensitive(validation_state)
 
     def submit(self):
         document = DocumentRepo.get_active_document()
         prev_title = document.title
 
-        UseCases.set_title(self.title_widget.title)
+        UseCases.set_title(self.title)
 
         if Settings.get_value('update_backlinks'):
             backlinks = DocumentRepo.list_by_link_target(prev_title)
-            for document_id in reversed(backlinks):
-                linking_doc = DocumentRepo.get_by_id(document_id)
+            for document_stub in reversed(backlinks):
+                linking_doc = DocumentRepo.get_by_id(document_stub['id'])
                 links = linking_doc.ast.get_link_bounds_and_targets()
                 for link in links:
                     bounds, target = link
@@ -163,10 +223,10 @@ class DocumentView():
                         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
                         char_nodes = [node.value for node in linking_doc.ast.get_subtree(pos_1, pos_2) if node.type == 'char']
                         if ''.join(char_nodes) == target:
-                            xml = '<a href="' + xml_helpers.escape(self.title_widget.title) + '">' + xml_helpers.escape(self.title_widget.title) + '</a>'
+                            xml = '<a href="' + xml_helpers.escape(self.title) + '">' + xml_helpers.escape(self.title) + '</a>'
                             UseCases.replace_section(linking_doc, bounds[0], bounds[1], xml)
                         else:
-                            UseCases.set_link(linking_doc, bounds, self.title_widget.title)
+                            UseCases.set_link(linking_doc, bounds, self.title)
 
         self.stop_renaming()
 
@@ -181,8 +241,20 @@ class DocumentView():
         self.cancel()
 
     def cancel(self):
-        self.title_widget.reset_title()
+        self.reset_title()
         self.stop_renaming()
+
+    def reset_title(self):
+        if self.document == None:
+            self.title_widget.title_entry.set_enable_undo(False)
+            self.title_widget.title_entry.set_text('')
+            self.title_widget.title_entry.set_enable_undo(True)
+            self.title_changed = False
+        else:
+            self.title_widget.title_entry.set_enable_undo(False)
+            self.title_widget.title_entry.set_text(self.document.title)
+            self.title_widget.title_entry.set_enable_undo(True)
+            self.title_changed = False
 
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None

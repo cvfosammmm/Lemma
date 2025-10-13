@@ -71,6 +71,49 @@ class DocumentView(Gtk.Overlay):
         self.add_overlay(self.link_overlay)
 
 
+class TitleWidget(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.add_css_class('document-title')
+        self.set_valign(Gtk.Align.FILL)
+
+        self.outer_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+
+        self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.vbox.set_size_request(640, -1)
+
+        self.title_entry = Gtk.Entry()
+
+        self.subtext = Gtk.Label()
+        self.subtext.set_xalign(0)
+
+        self.submit_button = Gtk.Button.new_with_label('Change Name')
+        self.submit_button.set_can_focus(False)
+        self.submit_button.add_css_class('suggested-action')
+        self.submit_button.add_css_class('submit')
+
+        self.cancel_button = Gtk.Button.new_with_label('Cancel')
+        self.cancel_button.set_can_focus(False)
+
+        self.button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.button_box.append(self.submit_button)
+        self.button_box.append(self.cancel_button)
+        self.button_revealer = Gtk.Revealer()
+        self.button_revealer.set_child(self.button_box)
+
+        self.vbox.append(self.title_entry)
+        self.vbox.append(self.subtext)
+        self.vbox.append(self.button_revealer)
+
+        self.outer_vbox.append(self.vbox)
+        self.outer_vbox.append(Gtk.DrawingArea())
+
+        self.append(self.outer_vbox)
+
+
 class DocumentViewDrawingArea(Gtk.Widget):
 
     def __init__(self, model):
