@@ -123,7 +123,7 @@ class DocumentViewController():
                 else:
                     if leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
                         UseCases.select_node(leaf_box['node'])
-                        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                        UseCases.scroll_insert_on_screen(animate=True)
                     else:
                         UseCases.move_cursor_to_xy(x, y, False)
                     if link != None:
@@ -356,13 +356,13 @@ class DocumentViewController():
                     UseCases.insert_xml('\n')
                     if not document.cursor.has_selection():
                         UseCases.replace_max_string_before_cursor()
-                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.scroll_insert_on_screen(animate=True)
             case ('backspace', _):
                 UseCases.backspace()
-                UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                UseCases.scroll_insert_on_screen(animate=True)
             case ('delete', _):
                 UseCases.delete()
-                UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                UseCases.scroll_insert_on_screen(animate=True)
 
             case _: return False
         return True
@@ -374,7 +374,7 @@ class DocumentViewController():
     def on_im_commit(self, im_context, text):
         document = self.model.document
         UseCases.im_commit(text)
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()

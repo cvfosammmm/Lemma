@@ -38,6 +38,14 @@ class DocumentRepo():
 
     @timer.timer
     def init():
+        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
+        workspace_data = None
+        if os.path.isfile(pathname):
+            with open(pathname, 'rb') as file:
+                try:
+                    workspace_data = pickle.loads(file.read())
+                except EOFError: pass
+
         stubs = dict()
         for direntry in os.scandir(Paths.get_stubs_folder()):
             with open(direntry.path, 'rb') as file:
@@ -60,6 +68,9 @@ class DocumentRepo():
                     with open(pathname, 'wb') as filehandle:
                         pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
 
+                    if workspace_data != None and workspace_data['active_document_id'] == document_id:
+                        DocumentRepo.active_document = document
+
                 DocumentRepo.update_link_graph(document_id)
 
         for document_id in stubs:
@@ -71,16 +82,10 @@ class DocumentRepo():
         else:
             DocumentRepo.max_document_id = 0
 
-        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
-        if os.path.isfile(pathname):
-            with open(pathname, 'rb') as file:
-                try:
-                    data = pickle.loads(file.read())
-                except EOFError: pass
-                else:
-                    DocumentRepo.history = [doc_id for doc_id in data['history'] if doc_id in DocumentRepo.document_stubs_by_id]
-                    if data['active_document_id'] in DocumentRepo.document_stubs_by_id:
-                        DocumentRepo.activate_document(data['active_document_id'], update_history=False)
+        if workspace_data != None:
+            DocumentRepo.history = [doc_id for doc_id in workspace_data['history'] if doc_id in DocumentRepo.document_stubs_by_id]
+            if workspace_data['active_document_id'] in DocumentRepo.document_stubs_by_id and DocumentRepo.active_document == None:
+                DocumentRepo.activate_document(workspace_data['active_document_id'], update_history=False)
 
     def list():
         return [stub for stub in sorted(DocumentRepo.document_stubs_by_id.values(), key=lambda stub: -stub['last_modified'])]

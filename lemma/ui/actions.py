@@ -193,7 +193,7 @@ class Actions(object):
 
         self.copy()
         UseCases.delete_selection()
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     def copy(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -240,7 +240,7 @@ class Actions(object):
 
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     def on_paste_image(self, clipboard, result):
         texture = clipboard.read_texture_finish(result)
@@ -260,13 +260,13 @@ class Actions(object):
                 text = xml_helpers.escape(stext)
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
-                UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                UseCases.scroll_insert_on_screen(animate=True)
                 return
 
         text = xml_helpers.escape(text)
         xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
         UseCases.insert_xml(xml)
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     def delete(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -287,7 +287,7 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         UseCases.insert_xml(parameter.get_string())
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     def subscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -300,7 +300,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     def superscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -313,7 +313,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     def set_paragraph_style(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
@@ -369,13 +369,13 @@ class Actions(object):
     def insert_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        UseCases.scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=False)
         UseCases.show_insert_link_popover(self.main_window)
 
     def edit_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        UseCases.scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=False)
         UseCases.show_insert_link_popover(self.main_window)
 
     def copy_link(self, action=None, parameter=''):

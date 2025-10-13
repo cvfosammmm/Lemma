@@ -299,7 +299,7 @@ class UseCases():
             for node in node_list:
                 if node.type == 'placeholder':
                     UseCases.select_node(node)
-                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.scroll_insert_on_screen(animate=True)
                     placeholder_found = True
                     break
             if placeholder_found:
@@ -491,7 +491,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def jump_left(do_selection=False):
@@ -518,7 +518,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def right(do_selection=False):
@@ -538,7 +538,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def jump_right(do_selection=False):
@@ -564,7 +564,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def up(do_selection=False):
@@ -607,7 +607,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def down(do_selection=False):
@@ -650,7 +650,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def paragraph_start(do_selection=False):
@@ -672,7 +672,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def paragraph_end(do_selection=False):
@@ -694,7 +694,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def select_next_placeholder():
@@ -716,7 +716,7 @@ class UseCases():
 
         if node.type == 'placeholder':
             UseCases.select_node(node)
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def select_prev_placeholder():
@@ -738,7 +738,7 @@ class UseCases():
 
         if node.type == 'placeholder':
             UseCases.select_node(node)
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def select_node(node):
@@ -769,7 +769,7 @@ class UseCases():
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
 
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def move_cursor_by_xy_offset(x, y, do_selection=False):
@@ -787,7 +787,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
         if insert != document.cursor.get_insert_node():
-            UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+            UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
@@ -845,7 +845,7 @@ class UseCases():
                     text = xml_helpers.escape(stext)
                     xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                     UseCases.insert_xml(xml)
-                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.scroll_insert_on_screen(animate=True)
                     return
 
             text = xml_helpers.escape(text)
@@ -885,7 +885,7 @@ class UseCases():
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
 
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
     def extend_selection():
@@ -928,9 +928,9 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
 
-        UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+        UseCases.scroll_insert_on_screen(animate=True)
 
-    def get_insert_on_screen_scrolling_position():
+    def scroll_insert_on_screen(animate=True):
         document = DocumentRepo.get_active_document()
         insert_node = document.cursor.get_insert_node()
         insert_position = document.get_absolute_xy(insert_node.layout)
@@ -941,16 +941,21 @@ class UseCases():
         scrolling_offset_y = document.clipping.offset_y
         content_height = document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
 
-        if window_height <= 0: return (0, 0)
-        if insert_y == content_offset: return (0, 0)
-        if insert_y < scrolling_offset_y:
-            if insert_height > window_height: return (0, insert_y - window_height + insert_height)
-            else: return (0, insert_y)
-        if insert_position[1] >= document.get_height() - insert_height and content_height >= window_height:
-            return (0, document.get_height() + content_offset + ApplicationState.get_value('document_padding_bottom') - window_height)
+        if window_height <= 0: new_position = (0, 0)
+        elif document.get_absolute_xy(document.get_line_at_y(insert_position[1]))[1] == 0: new_position = (0, 0)
+        elif insert_y < scrolling_offset_y:
+            if insert_height > window_height: new_position = (0, insert_y - window_height + insert_height)
+            else: new_position = (0, insert_y)
+        elif insert_position[1] >= document.get_height() - insert_height and content_height >= window_height:
+            new_position = (0, document.get_height() + content_offset + ApplicationState.get_value('document_padding_bottom') - window_height)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
-            return (0, insert_y - window_height + insert_height)
-        return (document.clipping.offset_x, document.clipping.offset_y)
+            new_position = (0, insert_y - window_height + insert_height)
+        else: new_position = (document.clipping.offset_x, document.clipping.offset_y)
+
+        if animate:
+            UseCases.animated_scroll_to_xy(*new_position)
+        else:
+            UseCases.scroll_to_xy(*new_position)
 
     @timer.timer
     def animated_scroll_to_xy(x, y):

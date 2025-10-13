@@ -200,7 +200,7 @@ class Popover(PopoverView):
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
-                UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                UseCases.scroll_insert_on_screen(animate=True)
             else:
                 UseCases.set_link(document, self.bounds, self.current_values['link_target'])
         elif self.bounds != None:

@@ -55,6 +55,6 @@ class Dialog(object):
                 if document.cursor.get_insert_node().parent.type == 'root':
                     filename = file.get_path()
                     UseCases.add_image_from_filename(filename)
-                    UseCases.animated_scroll_to_xy(*UseCases.get_insert_on_screen_scrolling_position())
+                    UseCases.scroll_insert_on_screen(animate=True)
 
 
