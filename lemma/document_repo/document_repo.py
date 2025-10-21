@@ -205,7 +205,9 @@ class DocumentRepo():
         if document_id not in DocumentRepo.document_stubs_by_id: return
 
         pathname = os.path.join(Paths.get_notes_folder(), str(document_id))
-        os.remove(pathname)
+        try:
+            os.remove(pathname)
+        except FileNotFoundError: pass
 
         DocumentRepo.update_link_graph(document_id)
 
@@ -217,7 +219,9 @@ class DocumentRepo():
 
         del(DocumentRepo.document_stubs_by_id[document_id])
         pathname = os.path.join(Paths.get_stubs_folder(), str(document_id))
-        os.remove(pathname)
+        try:
+            os.remove(pathname)
+        except FileNotFoundError: pass
 
         DocumentRepo.history.remove(document_id)
         DocumentRepo.save_history()
@@ -241,11 +245,12 @@ class DocumentRepo():
         DocumentRepo.update_link_graph(document.id)
 
     def activate_document(document_id, update_history):
-        if document_id == None: return
-
-        if update_history:
-            DocumentRepo.add_to_history(document_id)
-        DocumentRepo.active_document = DocumentRepo.get_by_id(document_id)
+        if document_id == None:
+            DocumentRepo.active_document = None
+        else:
+            if update_history:
+                DocumentRepo.add_to_history(document_id)
+            DocumentRepo.active_document = DocumentRepo.get_by_id(document_id)
 
         DocumentRepo.save_history()
 
