@@ -42,13 +42,37 @@ class BacklinksView(Gtk.Box):
         self.scrolled_window.set_vexpand(True)
         self.scrolled_window.set_child(self.listbox)
 
-        self.append(self.scrolled_window)
+        self.no_backlinks_page = Gtk.Label.new('')
+        self.no_backlinks_page.add_css_class('info')
+        self.no_backlinks_page.set_xalign(0)
+        self.no_backlinks_page.set_yalign(0)
+        self.no_backlinks_page.set_wrap(True)
 
-    def reset(self):
+        self.no_open_documents_page = Gtk.Label.new('No open documents. Open a document to show its backlinks.')
+        self.no_open_documents_page.add_css_class('info')
+        self.no_open_documents_page.set_xalign(0)
+        self.no_open_documents_page.set_yalign(0)
+        self.no_open_documents_page.set_wrap(True)
+
+        self.stack = Gtk.Stack()
+        self.stack.add_named(self.scrolled_window, 'backlinks')
+        self.stack.add_named(self.no_backlinks_page, 'no_backlinks')
+        self.stack.add_named(self.no_open_documents_page, 'no_open_documents')
+
+        self.append(self.stack)
+
+    def show_backlinks(self, document_stubs):
         self.listbox.remove_all()
+        for document_stub in document_stubs:
+            self.listbox.append(BacklinksListItem(document_stub))
+        self.stack.set_visible_child_name('backlinks')
 
-    def add_item(self, document_stub):
-        self.listbox.append(BacklinksListItem(document_stub))
+    def show_no_backlinks_page(self, document_title):
+        self.no_backlinks_page.set_text('There are no documents that link to "' + document_title + '".')
+        self.stack.set_visible_child_name('no_backlinks')
+
+    def show_no_open_documents_page(self):
+        self.stack.set_visible_child_name('no_open_documents')
 
 
 class BacklinksListItem(Gtk.Box):

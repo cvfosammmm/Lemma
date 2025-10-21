@@ -189,7 +189,12 @@ paned.document-view separator.wide {
 }
 .backlinks label.headline {
     color: @sidebar_fg_1;
-    padding: 15px 0px 15px 15px;
+    padding: 18px 0px 15px 15px;
+    background: @sidebar_bg_1;
+}
+.backlinks label.info {
+    color: @sidebar_fg_2;
+    padding: 15px 15px 15px 15px;
     background: @sidebar_bg_1;
 }
 .backlinks list {

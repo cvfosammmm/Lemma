@@ -33,11 +33,14 @@ class Backlinks(object):
         self.view.listbox.connect('row-activated', self.on_row_activated)
 
     def update(self):
-        self.view.reset()
         if self.model_state.has_active_doc:
             backlinks = DocumentRepo.list_by_link_target(self.model_state.document.title)
-            for document_stub in backlinks:
-                self.view.add_item(document_stub)
+            if len(backlinks) > 0:
+                self.view.show_backlinks(backlinks)
+            else:
+                self.view.show_no_backlinks_page(self.model_state.document.title)
+        else:
+            self.view.show_no_open_documents_page()
 
     def on_row_activated(self, listbox, row):
         document_id = row.get_child().document_id
