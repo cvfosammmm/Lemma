@@ -164,13 +164,20 @@ class DocumentViewController():
     def on_secondary_button_press(self, controller, n_press, x, y):
         if n_press % 3 != 1: return
 
+        modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
         x_offset = document.clipping.offset_x + x - ApplicationState.get_value('document_padding_left')
         y_offset = document.clipping.offset_y + y - ApplicationState.get_value('document_padding_top') - ApplicationState.get_value('title_height') - ApplicationState.get_value('subtitle_height')
+        state = controller.get_current_event_state() & modifiers
 
-        if y > 0:
+        if y_offset > 0:
             if not document.cursor.has_selection():
-                UseCases.move_cursor_to_xy(x_offset, y_offset, False)
+                leaf_box = document.get_leaf_at_xy(x_offset, y_offset)
+                if state == 0 and leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
+                    UseCases.select_node(leaf_box['node'])
+                    UseCases.scroll_insert_on_screen(animate=True)
+                else:
+                    UseCases.move_cursor_to_xy(x_offset, y_offset, False)
             self.model.application.context_menu_document.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
