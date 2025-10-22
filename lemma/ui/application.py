@@ -29,7 +29,7 @@ from lemma.ui.popovers.popover_manager import PopoverManager
 import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
 import lemma.ui.main_window_view as main_window_view
-import lemma.ui.document_history as document_history
+import lemma.ui.history as history
 import lemma.ui.document_view as document_view
 import lemma.ui.context_menu_document as context_menu_document
 import lemma.ui.cursor_state as cursor_state
@@ -61,7 +61,7 @@ class Application(Adw.Application):
 
         self.colors = colors.Colors(self.main_window)
         self.popover_manager = PopoverManager(self.main_window)
-        self.document_history = document_history.DocumentHistory(self.main_window)
+        self.history = history.History(self.main_window)
         self.document_view = document_view.DocumentView(self.main_window, self.model_state, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self.model_state, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
@@ -87,7 +87,7 @@ class Application(Adw.Application):
         self.model_state.update()
         self.actions.update()
         self.backlinks.update()
-        self.document_history.update()
+        self.history.update()
         self.cursor_state.update()
         self.document_list.update()
         self.context_menu_document.update()
@@ -107,7 +107,7 @@ class Application(Adw.Application):
         self.model_state.update()
         self.actions.update()
         self.backlinks.update()
-        self.document_history.update()
+        self.history.update()
         self.cursor_state.update()
         self.document_list.update()
         self.document_view.update()
@@ -136,7 +136,7 @@ class Application(Adw.Application):
         self.context_menu_document.update()
         self.popover_manager.update()
         self.toolbars.update()
-        self.document_history.update()
+        self.history.update()
 
     def on_document_ast_changed(self):
         self.model_state.update()
@@ -147,7 +147,7 @@ class Application(Adw.Application):
         self.model_state.update()
         self.actions.update()
         self.backlinks.update()
-        self.document_history.update()
+        self.history.update()
         self.document_list.update()
         self.document_view.update()
         self.context_menu_document.update()

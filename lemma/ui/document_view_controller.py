@@ -99,7 +99,7 @@ class DocumentViewController():
         document = self.model.document
         x = document.clipping.offset_x + x
         y = document.clipping.offset_y + y
-        state = controller.get_current_event_state() & modifiers
+        keyboard_state = controller.get_current_event_state() & modifiers
 
         self.model.selected_link_target = None
 
@@ -114,10 +114,10 @@ class DocumentViewController():
             leaf_box = document.get_leaf_at_xy(x, y)
 
             if n_press == 1:
-                if int(state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
+                if int(keyboard_state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
                     UseCases.move_cursor_to_xy(x, y, True)
 
-                elif int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
+                elif int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
                     UseCases.move_cursor_to_xy(x, y, False)
 
                 else:
@@ -130,7 +130,7 @@ class DocumentViewController():
                         self.model.selected_link_target = link
 
             else:
-                if link == None or int(state & modifiers) != 0:
+                if link == None or int(keyboard_state & modifiers) != 0:
                     insert = document.cursor.get_insert_node()
                     selection = document.cursor.get_selection_node()
                     paragraph_start, paragraph_end = insert.paragraph_bounds()
@@ -148,9 +148,9 @@ class DocumentViewController():
         document = self.model.document
         x = document.clipping.offset_x + x
         y = document.clipping.offset_y + y
-        state = controller.get_current_event_state() & modifiers
+        keyboard_state = controller.get_current_event_state() & modifiers
 
-        if state == 0:
+        if keyboard_state == 0:
             x -= ApplicationState.get_value('document_padding_left')
             y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
 
@@ -168,12 +168,12 @@ class DocumentViewController():
         document = self.model.document
         x_offset = document.clipping.offset_x + x - ApplicationState.get_value('document_padding_left')
         y_offset = document.clipping.offset_y + y - ApplicationState.get_value('document_padding_top') - ApplicationState.get_value('title_height') - ApplicationState.get_value('subtitle_height')
-        state = controller.get_current_event_state() & modifiers
+        keyboard_state = controller.get_current_event_state() & modifiers
 
         if y_offset > 0:
             if not document.cursor.has_selection():
                 leaf_box = document.get_leaf_at_xy(x_offset, y_offset)
-                if state == 0 and leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
+                if keyboard_state == 0 and leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
                     UseCases.select_node(leaf_box['node'])
                     UseCases.scroll_insert_on_screen(animate=True)
                 else:
@@ -292,16 +292,16 @@ class DocumentViewController():
 
         UseCases.decelerate_scrolling(vel_x, vel_y)
 
-    def on_keypress_content(self, controller, keyval, keycode, state):
+    def on_keypress_content(self, controller, keyval, keycode, keyboard_state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
 
-        self.model.set_ctrl_pressed(int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK or Gdk.keyval_name(keyval).startswith('Control'))
+        self.model.set_ctrl_pressed(int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK or Gdk.keyval_name(keyval).startswith('Control'))
 
         if self.model.document == None: return False
 
         document = self.model.document
-        match (Gdk.keyval_name(keyval).lower(), int(state & modifiers)):
+        match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
             case ('left', 0):
                 UseCases.left()
             case ('right', 0):
@@ -374,9 +374,9 @@ class DocumentViewController():
             case _: return False
         return True
 
-    def on_keyrelease_content(self, controller, keyval, keycode, state):
+    def on_keyrelease_content(self, controller, keyval, keycode, keyboard_state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.set_ctrl_pressed(int(state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
+        self.model.set_ctrl_pressed(int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
 
     def on_im_commit(self, im_context, text):
         document = self.model.document

@@ -27,7 +27,7 @@ from lemma.ui.cairo import rounded_rectangle
 import lemma.services.timer as timer
 
 
-class DocumentHistory(object):
+class History(object):
 
     def __init__(self, main_window):
         self.view = main_window.history_view

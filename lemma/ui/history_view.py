@@ -22,7 +22,7 @@ from gi.repository import Gtk, Pango
 from lemma.ui.scrolling_widget import ScrollingWidget
 
 
-class DocumentHistoryView(Gtk.Overlay):
+class HistoryView(Gtk.Overlay):
 
     def __init__(self):
         Gtk.Overlay.__init__(self)

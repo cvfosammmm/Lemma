@@ -25,7 +25,7 @@ from gi.repository import Gtk, GObject, Adw
 from lemma.services.paths import Paths
 from lemma.ui.welcome_view import WelcomeView
 from lemma.ui.headerbar_view import HeaderBar
-from lemma.ui.document_history_view import DocumentHistoryView
+from lemma.ui.history_view import HistoryView
 from lemma.ui.document_list_view import DocumentListView
 from lemma.ui.backlinks_view import BacklinksView
 from lemma.ui.toolbars_view import ToolBarsView
@@ -49,7 +49,7 @@ class MainWindow(Adw.ApplicationWindow):
 
     def add_widgets(self):
         self.headerbar = HeaderBar()
-        self.history_view = DocumentHistoryView()
+        self.history_view = HistoryView()
         self.headerbar.hb_right.history_overlay.set_child(self.history_view)
         self.toolbar = ToolBarsView()
 
