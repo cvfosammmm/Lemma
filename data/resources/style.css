@@ -275,16 +275,11 @@ box.tools-sidebar wrap-box.emoji {
     margin-right: 5px;
 }
 box.tools-sidebar wrap-box button {
-    padding: 6px;
+    padding: 7px;
     padding-top: 9px;
     padding-bottom: 10px;
     min-height: 16px;
     min-width: 16px;
-}
-box.tools-sidebar wrap-box.emoji button {
-    padding: 7px;
-    padding-top: 9px;
-    padding-bottom: 10px;
 }
 box.tools-sidebar {
     margin-bottom: 9px;

@@ -66,7 +66,6 @@ class Actions(object):
         self.add_simple_action('remove-link', self.remove_link)
         self.add_simple_action('edit-link', self.edit_link)
         self.add_simple_action('copy-link', self.copy_link)
-        self.add_simple_action('insert-xml', self.insert_xml, GLib.VariantType('s'))
 
         self.add_simple_action('set-paragraph-style', self.set_paragraph_style, GLib.VariantType('s'))
         self.add_simple_action('toggle-bold', self.toggle_bold)
@@ -127,7 +126,6 @@ class Actions(object):
         self.actions['copy-link'].set_enabled(self.model_state.copy_link_active)
         self.actions['subscript'].set_enabled(self.model_state.has_active_doc)
         self.actions['superscript'].set_enabled(self.model_state.has_active_doc)
-        self.actions['insert-xml'].set_enabled(self.model_state.has_active_doc)
         self.actions['set-paragraph-style'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-bold'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-italic'].set_enabled(self.model_state.has_active_doc)
@@ -282,12 +280,6 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         UseCases.remove_selection()
-
-    def insert_xml(self, action=None, parameter=None):
-        self.application.document_view.view.content.grab_focus()
-
-        UseCases.insert_xml(parameter.get_string())
-        UseCases.scroll_insert_on_screen(animate=True)
 
     def subscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()

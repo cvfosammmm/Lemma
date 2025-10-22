@@ -38,6 +38,8 @@ import lemma.ui.document_list as document_list
 import lemma.ui.document_draft as document_draft
 import lemma.ui.backlinks as backlinks
 import lemma.ui.actions as actions
+import lemma.ui.sidebar_emojis as sidebar_emojis
+import lemma.ui.sidebar_math as sidebar_math
 import lemma.ui.autocomplete as autocomplete
 import lemma.ui.model_state as model_state
 import lemma.ui.shortcuts as shortcuts
@@ -70,6 +72,8 @@ class Application(Adw.Application):
         self.document_list = document_list.DocumentList(self.main_window)
         self.backlinks = backlinks.Backlinks(self.main_window, self.model_state)
         self.actions = actions.Actions(self.main_window, self, self.model_state)
+        self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self, self.model_state)
+        self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self, self.model_state)
         self.autocomplete = autocomplete.Autocomplete(self.main_window)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window)
@@ -86,6 +90,8 @@ class Application(Adw.Application):
 
         self.model_state.update()
         self.actions.update()
+        self.sidebar_emojis.update()
+        self.sidebar_math.update()
         self.backlinks.update()
         self.history.update()
         self.cursor_state.update()
@@ -146,6 +152,8 @@ class Application(Adw.Application):
     def on_mode_set(self):
         self.model_state.update()
         self.actions.update()
+        self.sidebar_emojis.update()
+        self.sidebar_math.update()
         self.backlinks.update()
         self.history.update()
         self.document_list.update()
@@ -159,6 +167,8 @@ class Application(Adw.Application):
     def on_app_state_changed(self):
         self.toolbars.update()
         self.shortcuts.update()
+        self.sidebar_emojis.update()
+        self.sidebar_math.update()
         self.popover_manager.update()
         self.cursor_state.update_tag_toggle(self.cursor_state.toolbar.toolbar_main.bold_button, 'bold')
         self.cursor_state.update_tag_toggle(self.cursor_state.toolbar.toolbar_main.italic_button, 'italic')

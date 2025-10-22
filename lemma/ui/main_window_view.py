@@ -29,7 +29,6 @@ from lemma.ui.history_view import HistoryView
 from lemma.ui.document_list_view import DocumentListView
 from lemma.ui.backlinks_view import BacklinksView
 from lemma.ui.toolbars_view import ToolBarsView
-from lemma.ui.tools_sidebar_view import ToolsSidebar
 from lemma.ui.document_view_view import DocumentView
 from lemma.ui.navigation_sidebar_view import NavigationSidebar
 from lemma.ui.document_draft_view import DocumentDraftView
@@ -64,8 +63,10 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.welcome = WelcomeView()
         self.document_view = DocumentView()
-        self.tools_sidebar = ToolsSidebar()
         self.draft_view = DocumentDraftView()
+
+        self.tools_sidebar = Gtk.Stack()
+        self.tools_sidebar.set_size_request(266, 280)
 
         self.content_stack = Gtk.Stack()
         self.content_stack.add_css_class('content')
