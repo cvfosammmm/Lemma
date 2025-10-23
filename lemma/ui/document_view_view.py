@@ -419,7 +419,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
         x, y = self.model.document.get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])
-        padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
+        padding_bottom = 0
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
         Gdk.cairo_set_source_rgba(ctx, self.colors['drop_cursor'])

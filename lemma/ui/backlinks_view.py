@@ -89,7 +89,7 @@ class BacklinksListItem(Gtk.Box):
         self.label_header.add_css_class('header')
         self.append(self.label_header)
 
-        teaser_text = ' '.join(document_stub['plaintext'].splitlines())[:100].strip()
+        teaser_text = ' '.join(document_stub['plaintext'].split())[:100].strip()
         self.label_teaser = Gtk.Label.new(teaser_text)
         self.label_teaser.set_xalign(0)
         self.label_teaser.set_ellipsize(Pango.EllipsizeMode.END)

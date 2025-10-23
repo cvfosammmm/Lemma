@@ -232,7 +232,7 @@ class DocumentList(object):
                 teaser_text = '(' + _('empty') + ')'
                 teaser_color = sidebar_fg_2
             else:
-                teaser_text = ' '.join(document_stub['plaintext'].splitlines())[:100].strip()
+                teaser_text = ' '.join(document_stub['plaintext'].split())[:100].strip()
             date_text = self.get_last_modified_string(document_stub['last_modified'])
             key = title_text + teaser_text + date_text + str(width)
 
