@@ -315,9 +315,9 @@ class DocumentViewController():
             case ('end', 0):
                 UseCases.paragraph_end()
             case ('page_up', 0):
-                UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100)
+                UseCases.page(-ApplicationState.get_value('document_view_height') + 100)
             case ('page_down', 0):
-                UseCases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100)
+                UseCases.page(ApplicationState.get_value('document_view_height') - 100)
 
             case ('left', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.left(True)
@@ -332,9 +332,9 @@ class DocumentViewController():
             case ('end', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.paragraph_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.move_cursor_by_xy_offset(0, -ApplicationState.get_value('document_view_height') + 100, True)
+                UseCases.page(-ApplicationState.get_value('document_view_height') + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.move_cursor_by_xy_offset(0, ApplicationState.get_value('document_view_height') - 100, True)
+                UseCases.page(ApplicationState.get_value('document_view_height') - 100, True)
 
             case ('up', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.move_cursor_to_parent()

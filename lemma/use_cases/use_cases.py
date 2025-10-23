@@ -697,6 +697,27 @@ class UseCases():
             UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
+    def page(y, do_selection=False):
+        document = DocumentRepo.get_active_document()
+        insert = document.cursor.get_insert_node()
+
+        orig_x, orig_y = document.get_absolute_xy(insert.layout)
+        if document.cursor.implicit_x_position != None:
+            orig_x = document.cursor.implicit_x_position
+        new_x = orig_x
+        new_y = orig_y + y
+        layout = document.get_cursor_holding_layout_close_to_xy(new_x, new_y)
+
+        new_insert = layout['node']
+        new_selection_bound = document.cursor.get_selection_node() if do_selection else layout['node']
+
+        document.add_command('move_cursor_to_node', new_insert, new_selection_bound)
+        UseCases.scroll_insert_on_screen(animate=True)
+
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+
+    @timer.timer
     def select_next_placeholder():
         document = DocumentRepo.get_active_document()
 
@@ -769,24 +790,6 @@ class UseCases():
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
 
-            UseCases.scroll_insert_on_screen(animate=True)
-
-    @timer.timer
-    def move_cursor_by_xy_offset(x, y, do_selection=False):
-        document = DocumentRepo.get_active_document()
-        insert = document.cursor.get_insert_node()
-
-        orig_x, orig_y = document.get_absolute_xy(insert.layout)
-        if document.cursor.implicit_x_position != None:
-            orig_x = document.cursor.implicit_x_position
-        new_y = orig_y + y
-
-        document.add_command('move_cursor_to_xy', orig_x, new_y, do_selection)
-
-        DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-
-        if insert != document.cursor.get_insert_node():
             UseCases.scroll_insert_on_screen(animate=True)
 
     @timer.timer
