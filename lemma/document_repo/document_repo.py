@@ -31,9 +31,6 @@ class DocumentRepo():
     history = list()
     active_document = None
 
-    document_ids_by_link_target = dict()
-    link_targets_by_document_id = dict()
-
     max_document_id = 0
 
     @timer.timer
@@ -71,8 +68,6 @@ class DocumentRepo():
                     if workspace_data != None and workspace_data['active_document_id'] == document_id:
                         DocumentRepo.active_document = document
 
-                DocumentRepo.update_link_graph(document_id)
-
         for document_id in stubs:
             pathname = os.path.join(Paths.get_stubs_folder(), str(document_id))
             os.remove(pathname)
@@ -100,11 +95,11 @@ class DocumentRepo():
         return result
 
     def list_by_link_target(title):
-        if title in DocumentRepo.document_ids_by_link_target:
-            stubs = [DocumentRepo.get_stub_by_id(doc_id) for doc_id in DocumentRepo.document_ids_by_link_target[title]]
-
-            return sorted(stubs, key=lambda stub: -stub['last_modified'])
-        return []
+        result = []
+        for document_stub in DocumentRepo.list():
+            if title in document_stub['links']:
+                result.append(document_stub)
+        return result
 
     def list_by_terms_in_title(terms, limit=None):
         result = []
@@ -197,7 +192,6 @@ class DocumentRepo():
         with open(pathname, 'wb') as filehandle:
             pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
 
-        DocumentRepo.update_link_graph(document.id)
         DocumentRepo.max_document_id = max(document.id, DocumentRepo.max_document_id)
 
     @timer.timer
@@ -208,8 +202,6 @@ class DocumentRepo():
         try:
             os.remove(pathname)
         except FileNotFoundError: pass
-
-        DocumentRepo.update_link_graph(document_id)
 
         if document_id == DocumentRepo.get_active_document_id():
             new_active_document_id = DocumentRepo.get_prev_id_in_history(document_id)
@@ -223,7 +215,8 @@ class DocumentRepo():
             os.remove(pathname)
         except FileNotFoundError: pass
 
-        DocumentRepo.history.remove(document_id)
+        if document_id in DocumentRepo.history:
+            DocumentRepo.history.remove(document_id)
         DocumentRepo.save_history()
 
     def update(document):
@@ -241,8 +234,6 @@ class DocumentRepo():
         pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
         with open(pathname, 'wb') as filehandle:
             pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
-
-        DocumentRepo.update_link_graph(document.id)
 
     def activate_document(document_id, update_history):
         if document_id == None:
@@ -264,25 +255,6 @@ class DocumentRepo():
         if len(DocumentRepo.history) >= 100:
             DocumentRepo.history = DocumentRepo.history[-100:]
         DocumentRepo.history.append(document_id)
-
-    @timer.timer
-    def update_link_graph(document_id):
-        if document_id in DocumentRepo.link_targets_by_document_id:
-            for link_target in DocumentRepo.link_targets_by_document_id[document_id]:
-                DocumentRepo.document_ids_by_link_target[link_target].remove(document_id)
-            del(DocumentRepo.link_targets_by_document_id[document_id])
-
-        if document_id in DocumentRepo.document_stubs_by_id:
-            stub = DocumentRepo.document_stubs_by_id[document_id]
-
-            for link_target in stub['links']:
-                if link_target not in DocumentRepo.document_ids_by_link_target:
-                    DocumentRepo.document_ids_by_link_target[link_target] = set()
-                DocumentRepo.document_ids_by_link_target[link_target].add(document_id)
-
-                if document_id not in DocumentRepo.link_targets_by_document_id:
-                    DocumentRepo.link_targets_by_document_id[document_id] = set()
-                DocumentRepo.link_targets_by_document_id[document_id].add(link_target)
 
     def save_history():
         pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
