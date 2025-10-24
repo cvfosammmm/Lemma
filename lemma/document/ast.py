@@ -238,6 +238,10 @@ class Paragraph():
         self.layout = None
         self.xml = None
 
+    def invalidate(self):
+        self.layout = None
+        self.xml = None
+
 
 class Node():
 
@@ -392,14 +396,14 @@ class Node():
     def paragraph_bounds(self):
         return (self.paragraph_start(), self.paragraph_end())
 
-    def paragraph_no(self):
+    def paragraph(self):
         node = self
 
         while not node.parent.type == 'root':
             node = node.parent
 
         paragraph_no, offset = node.parent.paragraph_no_offset(node)
-        return paragraph_no
+        return node.parent.paragraphs[paragraph_no]
 
     def prev_in_parent(self, steps=1):
         if self != self.parent[0]:
@@ -420,22 +424,10 @@ class Node():
         return result
 
     def paragraph_start(self):
-        node = self
-
-        while not node.parent.type == 'root':
-            node = node.parent
-
-        paragraph_no, offset = node.parent.paragraph_no_offset(node)
-        return node.parent.paragraphs[paragraph_no].nodes[0]
+        return self.paragraph().nodes[0]
 
     def paragraph_end(self):
-        node = self
-
-        while not node.parent.type == 'root':
-            node = node.parent
-
-        paragraph_no, offset = node.parent.paragraph_no_offset(node)
-        return node.parent.paragraphs[paragraph_no].nodes[-1]
+        return self.paragraph().nodes[-1]
 
     def __str__(self):
         string = self.type + ':' + str(self.value)

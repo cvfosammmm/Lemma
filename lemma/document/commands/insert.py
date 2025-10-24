@@ -27,7 +27,7 @@ class Command():
     def run(self, document):
         self.state['cursor_state_before'] = document.cursor.get_state()
 
-        document.invalidate(self.position_node.paragraph_no())
+        self.position_node.paragraph().invalidate()
 
         self.position_node.parent.insert_before(self.position_node, self.nodes)
         self.state['nodes_added'] = self.nodes
@@ -38,8 +38,8 @@ class Command():
 
     def undo(self, document):
         if len(self.state['nodes_added']) > 0:
-            document.invalidate(self.state['nodes_added'][0].paragraph_no())
-            document.invalidate(self.state['nodes_added'][-1].paragraph_no())
+            self.state['nodes_added'][0].paragraph().invalidate()
+            self.state['nodes_added'][-1].paragraph().invalidate()
 
         self.position_node.parent.remove(self.state['nodes_added'])
 

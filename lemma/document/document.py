@@ -114,10 +114,6 @@ class Document():
     def update_last_cursor_movement(self):
         self.last_cursor_movement = time.time()
 
-    def invalidate(self, paragraph_no):
-        self.ast.paragraphs[paragraph_no].layout = None
-        self.ast.paragraphs[paragraph_no].xml = None
-
     def update(self):
         self.layouter.update()
         self.clipping.update()

@@ -38,7 +38,7 @@ class Command():
             self.is_undo_checkpoint = True
 
         if self.state['node'] != None:
-            document.invalidate(self.state['node'].paragraph_no())
+            self.state['node'].paragraph().invalidate()
             document.update_last_modified()
 
     def undo(self, document):
@@ -47,7 +47,7 @@ class Command():
             widget.set_width(self.state['width_before'])
 
         if self.state['node'] != None:
-            document.invalidate(self.state['node'].paragraph_no())
+            self.state['node'].paragraph().invalidate()
             document.update_last_modified()
 
 
