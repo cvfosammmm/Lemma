@@ -33,7 +33,7 @@ class PlaintextScanner(object):
         text = ''
 
         for paragraph in self.document.ast.paragraphs:
-            for node in paragraph['nodes']:
+            for node in paragraph.nodes:
                 if node.type == 'char':
                     text += node.value
                 elif node.type == 'eol':

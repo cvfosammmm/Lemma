@@ -32,7 +32,7 @@ class LinksScanner(object):
         links = []
 
         for paragraph in self.document.ast.paragraphs:
-            for node in paragraph['nodes']:
+            for node in paragraph.nodes:
                 if node.link != None and node.type == 'char':
                     links.append(node.link)
 

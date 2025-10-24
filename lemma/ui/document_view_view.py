@@ -205,12 +205,12 @@ class DocumentViewDrawingArea(Gtk.Widget):
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
         for i, paragraph in enumerate(document.ast.paragraphs):
-            for j, line_layout in enumerate(paragraph['layout']['children']):
-                if content_offset_y + line_layout['y'] + paragraph['layout']['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph['layout']['y'] <= self.height:
+            for j, line_layout in enumerate(paragraph.layout['children']):
+                if content_offset_y + line_layout['y'] + paragraph.layout['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph.layout['y'] <= self.height:
                     if (i,j) not in self.render_cache:
                         self.draw_line(ctx, i, j, line_layout, in_selection)
 
-                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(content_offset_x * self.hidpi_factor), self.device_offset_y + int((content_offset_y + paragraph['layout']['y'] + line_layout['y']) * self.hidpi_factor))
+                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(content_offset_x * self.hidpi_factor), self.device_offset_y + int((content_offset_y + paragraph.layout['y'] + line_layout['y']) * self.hidpi_factor))
                     ctx.paint()
                 elif (i,j) in self.render_cache:
                     del(self.render_cache[(i,j)])

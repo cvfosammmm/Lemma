@@ -19,13 +19,13 @@ from lemma.services.node_type_db import NodeTypeDB
 import lemma.services.timer as timer
 
 
-class RootNode():
+class Root():
 
     def __init__(self, type_str, value=None):
         self.parent = None
         end_node = Node('end')
         end_node.set_parent(self)
-        self.paragraphs = [{'nodes': [end_node], 'layout': None, 'xml': None}]
+        self.paragraphs = [Paragraph([end_node])]
         self.type = type_str
         self.value = value
         self.tags = set()
@@ -43,15 +43,15 @@ class RootNode():
 
         for node in nodes:
             if node.type == 'eol':
-                self.paragraphs[paragraph_no]['nodes'].insert(offset, node)
-                new_paragraph = {'nodes': self.paragraphs[paragraph_no]['nodes'][offset + 1:], 'layout': None, 'xml': None}
+                self.paragraphs[paragraph_no].nodes.insert(offset, node)
+                new_paragraph = Paragraph(self.paragraphs[paragraph_no].nodes[offset + 1:])
                 self.paragraphs.insert(paragraph_no + 1, new_paragraph)
-                del(self.paragraphs[paragraph_no]['nodes'][offset + 1:])
+                del(self.paragraphs[paragraph_no].nodes[offset + 1:])
 
                 paragraph_no += 1
                 offset = 0
             else:
-                self.paragraphs[paragraph_no]['nodes'].insert(offset, node)
+                self.paragraphs[paragraph_no].nodes.insert(offset, node)
 
                 offset += 1
 
@@ -59,10 +59,10 @@ class RootNode():
 
     @timer.timer
     def append(self, node):
-        self.paragraphs[-1]['nodes'].insert(-1, node)
+        self.paragraphs[-1].nodes.insert(-1, node)
         if node.type == 'eol':
-            self.paragraphs.append({'nodes': [self.paragraphs[-1]['nodes'][-1]], 'layout': None, 'xml': None})
-            del(self.paragraphs[-2]['nodes'][-1])
+            self.paragraphs.append(Paragraph([self.paragraphs[-1].nodes[-1]]))
+            del(self.paragraphs[-2].nodes[-1])
 
         node.set_parent(self)
 
@@ -70,12 +70,12 @@ class RootNode():
     def remove(self, nodes):
         for node in nodes:
             for i, paragraph in enumerate(self.paragraphs):
-                if node in paragraph['nodes']:
-                    paragraph['nodes'].remove(node)
+                if node in paragraph.nodes:
+                    paragraph.nodes.remove(node)
                     if node.type == 'eol':
-                        self.paragraphs[i] = {'nodes': paragraph['nodes'] + self.paragraphs[i + 1]['nodes'], 'layout': None, 'xml': None}
+                        self.paragraphs[i] = Paragraph(paragraph.nodes + self.paragraphs[i + 1].nodes)
                         del(self.paragraphs[i + 1])
-                    elif len(self.paragraphs[i]['nodes']) == 0:
+                    elif len(self.paragraphs[i].nodes) == 0:
                         del(self.paragraphs[i])
                     break
 
@@ -85,16 +85,16 @@ class RootNode():
         paragraph_no_2, offset_2 = self.paragraph_no_offset(last_node)
         if paragraph_no_1 != paragraph_no_2:
             nodes = []
-            nodes += self.paragraphs[paragraph_no_1]['nodes'][offset_1:]
+            nodes += self.paragraphs[paragraph_no_1].nodes[offset_1:]
             for paragraph in self.paragraphs[paragraph_no_1 + 1:paragraph_no_2]:
-                nodes += paragraph['nodes']
-            nodes += self.paragraphs[paragraph_no_2]['nodes'][:offset_2]
+                nodes += paragraph.nodes
+            nodes += self.paragraphs[paragraph_no_2].nodes[:offset_2]
 
-            self.paragraphs[paragraph_no_1]['nodes'] = self.paragraphs[paragraph_no_1]['nodes'][:offset_1] + self.paragraphs[paragraph_no_2]['nodes'][offset_2:]
+            self.paragraphs[paragraph_no_1].nodes = self.paragraphs[paragraph_no_1].nodes[:offset_1] + self.paragraphs[paragraph_no_2].nodes[offset_2:]
             del(self.paragraphs[paragraph_no_1 + 1:paragraph_no_2 + 1])
         else:
-            nodes = self.paragraphs[paragraph_no_1]['nodes'][offset_1:offset_2]
-            del(self.paragraphs[paragraph_no_1]['nodes'][offset_1:offset_2])
+            nodes = self.paragraphs[paragraph_no_1].nodes[offset_1:offset_2]
+            del(self.paragraphs[paragraph_no_1].nodes[offset_1:offset_2])
 
         return nodes
 
@@ -102,16 +102,16 @@ class RootNode():
     def index(self, node):
         count = 0
         for paragraph in self.paragraphs:
-            if node in paragraph['nodes']:
-                count += paragraph['nodes'].index(node)
+            if node in paragraph.nodes:
+                count += paragraph.nodes.index(node)
                 return count
-            count += len(paragraph['nodes'])
+            count += len(paragraph.nodes)
 
     def paragraph_no_offset(self, node):
         count = 0
         for i, paragraph in enumerate(self.paragraphs):
-            if node in paragraph['nodes']:
-                return i, paragraph['nodes'].index(node)
+            if node in paragraph.nodes:
+                return i, paragraph.nodes.index(node)
 
     def index_to_paragraph_no_offset(self, index):
         if index == 0: return 0, 0
@@ -120,22 +120,16 @@ class RootNode():
             index += len(self)
 
         for i, paragraph in enumerate(self.paragraphs):
-            if index < len(paragraph['nodes']):
+            if index < len(paragraph.nodes):
                 return i, index
-            index -= len(paragraph['nodes'])
+            index -= len(paragraph.nodes)
         return 0, 0
 
     def get_paragraphs(self):
-        return [paragraph['nodes'] for paragraph in self.paragraphs]
+        return [paragraph.nodes for paragraph in self.paragraphs]
 
     def get_position(self):
         return Position(*list())
-
-    def get_paragraph_style(self):
-        node = self
-        while not node.parent.type == 'root':
-            node = node.parent
-        return node.paragraph_style
 
     def get_subtree(self, pos1, pos2):
         pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
@@ -144,13 +138,13 @@ class RootNode():
         return parent[pos1[-1]:pos2[-1]]
 
     def copy(self):
-        node = RootNode(self.type, self.value)
+        node = Root(self.type, self.value)
         node.tags = self.tags
         node.link = self.link
         return node
 
     def __len__(self):
-        return sum([len(paragraph['nodes']) for paragraph in self.paragraphs])
+        return sum([len(paragraph.nodes) for paragraph in self.paragraphs])
 
     def __iter__(self):
         self.current_iter_index = [0, -1]
@@ -158,12 +152,12 @@ class RootNode():
 
     def __next__(self):
         self.current_iter_index[1] += 1
-        if self.current_iter_index[1] >= len(self.paragraphs[self.current_iter_index[0]]['nodes']):
+        if self.current_iter_index[1] >= len(self.paragraphs[self.current_iter_index[0]].nodes):
             self.current_iter_index[0] += 1
             self.current_iter_index[1] = 0
         if self.current_iter_index[0] >= len(self.paragraphs):
             raise StopIteration
-        return self.paragraphs[self.current_iter_index[0]]['nodes'][self.current_iter_index[1]]
+        return self.paragraphs[self.current_iter_index[0]].nodes[self.current_iter_index[1]]
 
     def __getitem__(self, key):
         if isinstance(key, slice):
@@ -175,33 +169,27 @@ class RootNode():
 
                 if paragraph_no_1 != paragraph_no_2:
                     nodes = []
-                    nodes += self.paragraphs[paragraph_no_1]['nodes'][offset_1:]
+                    nodes += self.paragraphs[paragraph_no_1].nodes[offset_1:]
                     for paragraph in self.paragraphs[paragraph_no_1 + 1:paragraph_no_2]:
-                        nodes += paragraph['nodes']
-                    nodes += self.paragraphs[paragraph_no_2]['nodes'][:offset_2]
+                        nodes += paragraph.nodes
+                    nodes += self.paragraphs[paragraph_no_2].nodes[:offset_2]
                 else:
-                    nodes = self.paragraphs[paragraph_no_1]['nodes'][offset_1:offset_2]
+                    nodes = self.paragraphs[paragraph_no_1].nodes[offset_1:offset_2]
                 return nodes
             else:
                 return []
         else:
             paragraph_no, offset = self.index_to_paragraph_no_offset(key)
-            return self.paragraphs[paragraph_no]['nodes'].__getitem__(offset)
+            return self.paragraphs[paragraph_no].nodes.__getitem__(offset)
 
     def ancestors(self):
         return []
-
-    def is_first_in_parent(self):
-        return self == self.parent[0]
-
-    def is_last_in_parent(self):
-        return self == self.parent[-1]
 
     @timer.timer
     def flatten(self):
         result = [self]
         for paragraph in self.paragraphs:
-            for child in paragraph['nodes']:
+            for child in paragraph.nodes:
                 result += child.flatten()
         return result
 
@@ -235,12 +223,20 @@ class RootNode():
 
     def validate(self):
         for paragraph in self.paragraphs:
-            for child in paragraph['nodes']:
+            for child in paragraph.nodes:
                 if child.type not in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}:
                     return False
                 if not child.validate():
                     return False
         return True
+
+
+class Paragraph():
+
+    def __init__(self, nodes=[]):
+        self.nodes = nodes
+        self.layout = None
+        self.xml = None
 
 
 class Node():
@@ -430,7 +426,7 @@ class Node():
             node = node.parent
 
         paragraph_no, offset = node.parent.paragraph_no_offset(node)
-        return node.parent.paragraphs[paragraph_no]['nodes'][0]
+        return node.parent.paragraphs[paragraph_no].nodes[0]
 
     def paragraph_end(self):
         node = self
@@ -439,7 +435,7 @@ class Node():
             node = node.parent
 
         paragraph_no, offset = node.parent.paragraph_no_offset(node)
-        return node.parent.paragraphs[paragraph_no]['nodes'][-1]
+        return node.parent.paragraphs[paragraph_no].nodes[-1]
 
     def __str__(self):
         string = self.type + ':' + str(self.value)

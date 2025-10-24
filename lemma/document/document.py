@@ -17,7 +17,7 @@
 
 import time, os.path
 
-from lemma.document.ast import RootNode, Node, Cursor
+from lemma.document.ast import Root, Cursor
 from lemma.document.layouter import Layouter
 from lemma.document.plaintext_scanner import PlaintextScanner
 from lemma.document.links_scanner import LinksScanner
@@ -43,7 +43,7 @@ class Document():
 
         self.id = id
         self.title = ''
-        self.ast = RootNode('root')
+        self.ast = Root('root')
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.plaintext = None
         self.xml = None
@@ -115,8 +115,8 @@ class Document():
         self.last_cursor_movement = time.time()
 
     def invalidate(self, paragraph_no):
-        self.ast.paragraphs[paragraph_no]['layout'] = None
-        self.ast.paragraphs[paragraph_no]['xml'] = None
+        self.ast.paragraphs[paragraph_no].layout = None
+        self.ast.paragraphs[paragraph_no].xml = None
 
     def update(self):
         self.layouter.update()
@@ -134,10 +134,10 @@ class Document():
         return result
 
     def get_height(self):
-        return self.ast.paragraphs[-1]['layout']['y'] + self.ast.paragraphs[-1]['layout']['height']
+        return self.ast.paragraphs[-1].layout['y'] + self.ast.paragraphs[-1].layout['height']
 
     def get_width(self):
-        return self.ast.paragraphs[0]['layout']['width']
+        return self.ast.paragraphs[0].layout['width']
 
     def get_ancestors(self, layout):
         ancestors = []
@@ -189,14 +189,14 @@ class Document():
 
     def get_line_at_y(self, y):
         if y < 0:
-            return self.ast.paragraphs[0]['layout']['children'][0]
+            return self.ast.paragraphs[0].layout['children'][0]
         elif y > self.get_height():
-            return self.ast.paragraphs[-1]['layout']['children'][-1]
+            return self.ast.paragraphs[-1].layout['children'][-1]
         else:
             for paragraph in self.ast.paragraphs:
-                if y >= paragraph['layout']['y'] and y < paragraph['layout']['y'] + paragraph['layout']['height']:
-                    y -= paragraph['layout']['y']
-                    for line in paragraph['layout']['children']:
+                if y >= paragraph.layout['y'] and y < paragraph.layout['y'] + paragraph.layout['height']:
+                    y -= paragraph.layout['y']
+                    for line in paragraph.layout['children']:
                         if y >= line['y'] and y < line['y'] + line['height']:
                             return line
 

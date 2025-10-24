@@ -585,7 +585,7 @@ class UseCases():
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast.paragraphs:
-                        for hbox in paragraph['layout']['children']:
+                        for hbox in paragraph.layout['children']:
                             if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
                 for hbox in reversed(prev_hboxes):
@@ -628,7 +628,7 @@ class UseCases():
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast.paragraphs:
-                        for hbox in paragraph['layout']['children']:
+                        for hbox in paragraph.layout['children']:
                             if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
                 for child in prev_hboxes:

@@ -36,12 +36,12 @@ class Layouter(object):
     def update_layout(self):
         y_offset = 0
         for paragraph in self.document.ast.paragraphs:
-            if paragraph['layout'] == None:
-                layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph['nodes'])
+            if paragraph.layout == None:
+                layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph.nodes)
                 self.layout(layout_tree)
-                paragraph['layout'] = layout_tree
+                paragraph.layout = layout_tree
             else:
-                layout_tree = paragraph['layout']
+                layout_tree = paragraph.layout
             layout_tree['y'] = y_offset
             y_offset += layout_tree['height']
 
