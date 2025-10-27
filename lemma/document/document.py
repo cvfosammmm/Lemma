@@ -43,7 +43,7 @@ class Document():
 
         self.id = id
         self.title = ''
-        self.ast = Root('root')
+        self.ast = Root()
         self.cursor = Cursor(self, self.ast[0], self.ast[0])
         self.plaintext = None
         self.xml = None

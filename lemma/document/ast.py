@@ -21,16 +21,14 @@ import lemma.services.timer as timer
 
 class Root():
 
-    def __init__(self, type_str, value=None):
+    def __init__(self):
         self.parent = None
         end_node = Node('end')
         end_node.set_parent(self)
         self.paragraphs = [Paragraph([end_node])]
-        self.type = type_str
-        self.value = value
+        self.type = 'root'
         self.tags = set()
         self.link = None
-        self.paragraph_style = 'p'
         self.layout = None
         self.current_iter_index = -1
 
@@ -45,6 +43,8 @@ class Root():
             if node.type == 'eol':
                 self.paragraphs[paragraph_no].nodes.insert(offset, node)
                 new_paragraph = Paragraph(self.paragraphs[paragraph_no].nodes[offset + 1:])
+                if len(new_paragraph.nodes) > 1:
+                    new_paragraph.style = self.paragraphs[paragraph_no].style
                 self.paragraphs.insert(paragraph_no + 1, new_paragraph)
                 del(self.paragraphs[paragraph_no].nodes[offset + 1:])
 
@@ -61,10 +61,23 @@ class Root():
     def append(self, node):
         self.paragraphs[-1].nodes.insert(-1, node)
         if node.type == 'eol':
-            self.paragraphs.append(Paragraph([self.paragraphs[-1].nodes[-1]]))
+            new_paragraph = Paragraph([self.paragraphs[-1].nodes[-1]])
+            new_paragraph.style = self.paragraphs[-1].style
+            self.paragraphs.append(new_paragraph)
             del(self.paragraphs[-2].nodes[-1])
 
         node.set_parent(self)
+
+    @timer.timer
+    def append_paragraph(self, paragraph):
+        self.paragraphs[-1].style = paragraph.style
+
+        for node in paragraph.nodes:
+            self.paragraphs[-1].nodes.insert(-1, node)
+            node.set_parent(self)
+            if node.type == 'eol':
+                self.paragraphs.append(Paragraph([self.paragraphs[-1].nodes[-1]]))
+                del(self.paragraphs[-2].nodes[-1])
 
     @timer.timer
     def remove(self, nodes):
@@ -73,6 +86,8 @@ class Root():
                 if node in paragraph.nodes:
                     paragraph.nodes.remove(node)
                     if node.type == 'eol':
+                        if len(self.paragraphs[i].nodes) == 0:
+                            self.paragraphs[i].style = self.paragraphs[i + 1].style
                         self.paragraphs[i] = Paragraph(paragraph.nodes + self.paragraphs[i + 1].nodes)
                         del(self.paragraphs[i + 1])
                     elif len(self.paragraphs[i].nodes) == 0:
@@ -91,6 +106,10 @@ class Root():
             nodes += self.paragraphs[paragraph_no_2].nodes[:offset_2]
 
             self.paragraphs[paragraph_no_1].nodes = self.paragraphs[paragraph_no_1].nodes[:offset_1] + self.paragraphs[paragraph_no_2].nodes[offset_2:]
+
+            if offset_1 == 0:
+                self.paragraphs[paragraph_no_1].style = self.paragraphs[paragraph_no_2].style
+
             del(self.paragraphs[paragraph_no_1 + 1:paragraph_no_2 + 1])
         else:
             nodes = self.paragraphs[paragraph_no_1].nodes[offset_1:offset_2]
@@ -138,7 +157,7 @@ class Root():
         return parent[pos1[-1]:pos2[-1]]
 
     def copy(self):
-        node = Root(self.type, self.value)
+        node = Root()
         node.tags = self.tags
         node.link = self.link
         return node
@@ -238,6 +257,8 @@ class Paragraph():
         self.layout = None
         self.xml = None
 
+        self.style = 'p'
+
     def invalidate(self):
         self.layout = None
         self.xml = None
@@ -252,7 +273,6 @@ class Node():
         self.value = value
         self.tags = set()
         self.link = None
-        self.paragraph_style = 'p'
         self.layout = None
 
     def set_parent(self, parent):
@@ -291,12 +311,6 @@ class Node():
             node = node.parent
 
         return Position(*position)
-
-    def get_paragraph_style(self):
-        node = self
-        while not node.parent.type == 'root':
-            node = node.parent
-        return node.paragraph_style
 
     def copy(self):
         node = Node(self.type, self.value)

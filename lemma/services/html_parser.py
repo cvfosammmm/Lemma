@@ -37,11 +37,13 @@ class HTMLParser(HTMLParserLib):
         self.paragraph_style = 'p'
 
         self.title = None
+        self.root = None
         self.composite = None
         self.composite_prev = None
 
     def run(self):
-        self.composite = Root('root')
+        self.root = Root()
+        self.composite = self.root
 
         start, divider, rest = self.html.partition('<body>')
         if rest != '':
@@ -64,8 +66,8 @@ class HTMLParser(HTMLParserLib):
 
         if tag == 'br':
             node = Node('eol')
-            node.paragraph_style = self.paragraph_style
             self.composite.append(node)
+            self.root.paragraphs[-2].style = self.paragraph_style
 
         if tag == 'strong': self.tags.add('bold')
         if tag == 'em': self.tags.add('italic')
@@ -88,27 +90,22 @@ class HTMLParser(HTMLParserLib):
                     data = file.read()
                 image = Image(data, attributes={'width': width})
                 node = Node('widget', image)
-                node.paragraph_style = self.paragraph_style
                 self.composite.append(node)
             except FileNotFoundError: pass
         if tag == 'msubsup':
             node = Node('mathscript')
-            node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
         if tag == 'mfrac':
             node = Node('mathfraction')
-            node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
         if tag == 'mroot':
             node = Node('mathroot')
-            node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
         if tag in ['mtext', 'mn']:
             node = Node('mathlist')
-            node.paragraph_style = self.paragraph_style
             self.composite.append(node)
             self.composite = node
         if tag in ['mo']:
@@ -118,11 +115,9 @@ class HTMLParser(HTMLParserLib):
             for name, value in attrs:
                 if name == 'value':
                     node = Node('placeholder', value)
-                    node.paragraph_style = self.paragraph_style
                     self.composite.append(node)
         if tag == 'end':
             node = Node('end')
-            node.paragraph_style = self.paragraph_style
             self.composite.append(node)
 
     def handle_endtag(self, tag):
@@ -130,8 +125,8 @@ class HTMLParser(HTMLParserLib):
 
         if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6']:
             node = Node('eol')
-            node.paragraph_style = self.paragraph_style
             self.composite.append(node)
+            self.root.paragraphs[-2].style = self.paragraph_style
 
         if tag == 'strong': self.tags.discard('bold')
         if tag == 'em': self.tags.discard('italic')
@@ -158,7 +153,6 @@ class HTMLParser(HTMLParserLib):
         elif 'math' in self.open_tags:
             for char in data:
                 node = Node('char', char)
-                node.paragraph_style = self.paragraph_style
                 self.composite.append(node)
 
         else:
@@ -170,7 +164,6 @@ class HTMLParser(HTMLParserLib):
                         continue
                 node = Node('char', char)
                 node.tags = self.tags.copy()
-                node.paragraph_style = self.paragraph_style
                 if self.link_target != None:
                     node.link = self.link_target
                 self.composite.append(node)

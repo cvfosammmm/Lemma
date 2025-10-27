@@ -18,7 +18,7 @@
 import xml.parsers.expat
 import io
 
-from lemma.document.ast import Node
+from lemma.document.ast import Paragraph, Node
 from lemma.widgets.image import Image
 
 
@@ -31,17 +31,18 @@ class XMLParser(object):
         self.expat_parser.EndElementHandler = self.handle_endtag
         self.expat_parser.CharacterDataHandler = self.handle_data
 
+        self.paragraphs = []
         self.nodes = []
         self.current_node = None
         self.open_tags = []
         self.current_link = None
         self.current_tags = set()
-        self.current_paragraph_style = 'p'
         self.current_attributes = dict()
         self.widget_data = ''
         self.title = ''
 
     def parse(self, xml_string):
+        self.paragraphs = []
         self.nodes = []
         self.current_node = None
         self.current_tags = set()
@@ -51,13 +52,13 @@ class XMLParser(object):
         except xml.parsers.expat.ExpatError as error:
             return None
         else:
-            return self.nodes
+            if len(self.paragraphs) == 0 and len(self.nodes) > 0:
+                self.paragraphs.append(Paragraph(self.nodes))
+            return self.paragraphs
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6']:
-            self.current_paragraph_style = tag
         if tag == 'a' and 'href' in attrs:
             self.current_link = attrs['href']
         if tag == 'em':
@@ -78,17 +79,14 @@ class XMLParser(object):
             node = Node('end')
             node.link = self.current_link
             node.tags = self.current_tags.copy()
-            node.paragraph_style = self.current_paragraph_style
         if tag == 'placeholder':
             node = Node('placeholder', '')
             node.link = self.current_link
             node.tags = self.current_tags.copy()
-            node.paragraph_style = self.current_paragraph_style
         if tag == 'widget':
             node = Node('widget', None)
             node.link = self.current_link
             node.tags = self.current_tags.copy()
-            node.paragraph_style = self.current_paragraph_style
             self.current_attributes = attrs
             self.widget_data = ''
 
@@ -101,6 +99,12 @@ class XMLParser(object):
 
     def handle_endtag(self, tag):
         self.open_tags.pop()
+
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6']:
+            new_paragraph = Paragraph(self.nodes)
+            new_paragraph.style = tag
+            self.paragraphs.append(new_paragraph)
+            self.nodes = []
 
         if tag == 'a':
             self.current_link = None
@@ -132,12 +136,10 @@ class XMLParser(object):
                     node = Node('eol')
                     node.link = self.current_link
                     node.tags = self.current_tags.copy()
-                    node.paragraph_style = self.current_paragraph_style
                 else:
                     node = Node('char', char)
                     node.link = self.current_link
                     node.tags = self.current_tags.copy()
-                    node.paragraph_style = self.current_paragraph_style
 
                 if self.current_node != None:
                     self.current_node.append(node)

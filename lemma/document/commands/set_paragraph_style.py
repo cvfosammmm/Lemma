@@ -18,43 +18,45 @@
 
 class Command():
 
-    def __init__(self, paragraph_style):
+    def __init__(self, paragraph_style, node=None):
         self.paragraph_style = paragraph_style
+        self.node = node
         self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):
-        self.state['nodes_and_previous_paragraph_style'] = []
+        self.state['paragraphs_and_previous_style'] = []
 
-        first_node = document.cursor.get_first_node().paragraph_start()
-        if document.cursor.has_selection():
-            next_to_last = document.cursor.get_last_node().prev_in_parent()
-            if next_to_last != None:
-                last_node = next_to_last.paragraph_end()
-            else:
-                last_node = document.cursor.get_last_node().paragraph_end()
+        if self.node != None:
+            paragraphs = [self.node.paragraph()]
         else:
-            last_node = first_node.paragraph_end()
+            if document.cursor.has_selection():
+                first_node = document.cursor.get_first_node().paragraph_start()
+                next_to_last = document.cursor.get_last_node().prev_in_parent()
+                if next_to_last != None:
+                    last_node = next_to_last.paragraph_end()
+                else:
+                    last_node = document.cursor.get_last_node().paragraph_end()
 
-        for node in document.ast.get_subtree(first_node.get_position(), last_node.get_position()):
-            self.state['nodes_and_previous_paragraph_style'].append([node, node.paragraph_style])
-            node.paragraph_style = self.paragraph_style
-        self.state['nodes_and_previous_paragraph_style'].append([last_node, last_node.paragraph_style])
-        last_node.paragraph_style = self.paragraph_style
+                paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
+                paragraphs = []
+                for paragraph_no in paragraph_nos:
+                    paragraphs.append(document.ast.paragraphs[paragraph_no])
+            else:
+                paragraphs = [document.cursor.get_insert_node().paragraph()]
 
-        for paragraph_no in range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1):
-            document.ast.paragraphs[paragraph_no].invalidate()
+        for paragraph in paragraphs:
+            self.state['paragraphs_and_previous_style'].append([paragraph, paragraph.style])
+            paragraph.style = self.paragraph_style
+            paragraph.invalidate()
+
         document.update_last_modified()
 
     def undo(self, document):
-        for node, paragraph_style in self.state['nodes_and_previous_paragraph_style']:
-            node.paragraph_style = paragraph_style
+        for paragraph, style in self.state['paragraphs_and_previous_style']:
+            paragraph.style = style
+            paragraph.invalidate()
 
-        first_node = self.state['nodes_and_previous_paragraph_style'][0][0]
-        last_node = self.state['nodes_and_previous_paragraph_style'][-1][0]
-
-        for paragraph_no in range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1):
-            document.ast.paragraphs[paragraph_no].invalidate()
         document.update_last_modified()
 
 

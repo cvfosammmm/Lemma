@@ -212,7 +212,17 @@ class Actions(object):
         chars = ''.join(chars)
         content_providers.append(Gdk.ContentProvider.new_for_bytes('text/plain;charset=utf-8', GLib.Bytes(chars.encode())))
 
-        xml = XMLExporter.export(subtree)
+        xml = ''
+        nodes_by_paragraph = [[]]
+        for node in subtree:
+            nodes_by_paragraph[-1].append(node)
+            if node.type == 'eol':
+                nodes_by_paragraph.append([])
+        if len(nodes_by_paragraph[-1]) == 0:
+            del(nodes_by_paragraph[-1])
+        for nodes in nodes_by_paragraph:
+            paragraph = nodes[0].paragraph()
+            xml += XMLExporter.export_paragraph(subtree, paragraph.style)
         content_providers.append(Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode())))
 
         if len(subtree) == 1 and subtree[0].type == 'widget':

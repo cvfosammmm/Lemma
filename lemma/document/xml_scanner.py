@@ -36,7 +36,7 @@ class XMLScanner(object):
         xml += '<root>'
         for paragraph in self.document.ast.paragraphs:
             if paragraph.xml == None:
-                paragraph.xml = XMLExporter.export(paragraph.nodes)
+                paragraph.xml = XMLExporter.export_paragraph(paragraph.nodes, paragraph.style)
             xml += paragraph.xml
         xml += '</root>'
 

@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.services.text_shaper import TextShaper
-from lemma.services.font_helper import FontHelper
 from lemma.services.character_db import CharacterDB
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.layout_info import LayoutInfo
@@ -27,6 +26,7 @@ class Layouter(object):
 
     def __init__(self, document):
         self.document = document
+        self.paragraph_style = None
 
     def update(self):
         if self.document.has_changed(self):
@@ -37,6 +37,7 @@ class Layouter(object):
         y_offset = 0
         for paragraph in self.document.ast.paragraphs:
             if paragraph.layout == None:
+                self.paragraph_style = paragraph.style
                 layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph.nodes)
                 self.layout(layout_tree)
                 paragraph.layout = layout_tree
@@ -62,7 +63,7 @@ class Layouter(object):
             if isinstance(child, list):
                 char_nodes = child
                 text = ''.join([char.value for char in char_nodes])
-                fontname = FontHelper.get_fontname_from_node(char_nodes[0])
+                fontname = self.get_fontname_from_node(char_nodes[0])
                 subtree = {'type': 'word', 'fixed': False, 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': fontname}
                 for char_node, extents in zip(char_nodes, TextShaper.measure(text, fontname=fontname)):
                     subsubtree = {'type': 'char','fixed': True, 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': extents[0], 'height': extents[1], 'fontname': fontname}
@@ -76,7 +77,7 @@ class Layouter(object):
 
     def make_layout_tree(self, node, parent=None):
         if node.type == 'char':
-            fontname = FontHelper.get_fontname_from_node(node)
+            fontname = self.get_fontname_from_node(node)
             width, height = TextShaper.measure_single(node.value, fontname=fontname)
             layout_tree = {'type': 'char', 'fixed': True, 'node': node, 'parent': parent, 'children': [], 'x': 0, 'y': 0, 'width': width, 'height': height, 'fontname': fontname}
             node.layout = layout_tree
@@ -96,7 +97,7 @@ class Layouter(object):
         if node.type == 'eol':
             layout_tree['type'] = 'eol'
             layout_tree['fixed'] = True
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
             layout_tree['width'] = 1
             width, height = TextShaper.measure_single('\n', fontname=layout_tree['fontname'])
             layout_tree['height'] = height
@@ -104,7 +105,7 @@ class Layouter(object):
         elif node.type == 'end':
             layout_tree['type'] = 'end'
             layout_tree['fixed'] = True
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
             layout_tree['width'] = 1
             width, height = TextShaper.measure_single('\n', fontname=layout_tree['fontname'])
             layout_tree['height'] = height
@@ -112,7 +113,7 @@ class Layouter(object):
         elif node.type == 'placeholder':
             layout_tree['type'] = 'placeholder'
             layout_tree['fixed'] = True
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
             width, height = TextShaper.measure_single('▯', fontname=layout_tree['fontname'])
             layout_tree['width'] = width
             layout_tree['height'] = height
@@ -120,7 +121,7 @@ class Layouter(object):
         elif node.type == 'widget':
             layout_tree['type'] = 'widget'
             layout_tree['fixed'] = True
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
             node.layout = layout_tree
             width, height = layout_tree['node'].value.get_width(), layout_tree['node'].value.get_height()
             height -= 2 * TextShaper.get_descend(fontname=layout_tree['fontname'])
@@ -129,22 +130,22 @@ class Layouter(object):
         elif node.type == 'mathscript':
             layout_tree['type'] = 'mathscript'
             layout_tree['fixed'] = False
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'mathfraction':
             layout_tree['type'] = 'mathfraction'
             layout_tree['fixed'] = False
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'mathroot':
             layout_tree['type'] = 'mathroot'
             layout_tree['fixed'] = False
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
             node.layout = layout_tree
         elif node.type == 'mathlist':
             layout_tree['type'] = 'hbox'
             layout_tree['fixed'] = False
-            layout_tree['fontname'] = FontHelper.get_fontname_from_node(node)
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
         else:
             return None
 
@@ -316,7 +317,7 @@ class Layouter(object):
             layout_tree['children'][0]['children'][1]['height'] = layout_tree['children'][0]['children'][0]['height']
             layout_tree['children'][0]['height'] += layout_tree['children'][0]['children'][1]['height']
 
-        fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+        fontname = self.get_fontname_from_node(layout_tree['node'])
         extents = TextShaper.measure_single(' ', fontname=fontname)
 
         layout_tree['children'][0]['x'] = 1
@@ -363,7 +364,7 @@ class Layouter(object):
         for child in layout_tree['children'][0]['children'][1]['children']:
             child['y'] += 2
 
-        fontname = FontHelper.get_fontname_from_node(layout_tree['node'])
+        fontname = self.get_fontname_from_node(layout_tree['node'])
         extents = TextShaper.measure_single(' ', fontname=fontname)
 
         layout_tree['children'][0]['x'] = 1
@@ -388,5 +389,27 @@ class Layouter(object):
         layout_tree['height'] = layout_tree['children'][0]['height']
         layout_tree['x'] = None
         layout_tree['y'] = None
+
+    def get_fontname_from_node(self, node=None):
+        if NodeTypeDB.is_subscript(node) or NodeTypeDB.is_superscript(node):
+            return 'math_small'
+        if NodeTypeDB.in_fraction(node):
+            return 'math_small'
+        if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
+            return 'math'
+        if node.value != None and node.type == 'char' and node.value.isnumeric():
+            return 'math'
+
+        if node.type == 'char' and CharacterDB.is_emoji(node.value):
+            return 'emojis'
+
+        if self.paragraph_style.startswith('h'):
+            return self.paragraph_style
+
+        if 'bold' in node.tags and 'italic' not in node.tags: return 'bold'
+        if 'bold' in node.tags and 'italic' in node.tags: return 'bolditalic'
+        if 'bold' not in node.tags and 'italic' in node.tags: return 'italic'
+
+        return 'book'
 
 

@@ -27,7 +27,6 @@ import math
 
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
-from lemma.services.font_helper import FontHelper
 from lemma.services.color_manager import ColorManager
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState

@@ -22,22 +22,11 @@ import lemma.services.xml_helpers as xml_helpers
 
 class XMLExporter():
 
-    def export(nodes):
-        xml = ''
-        current_paragraph_tag = None
-
-        node_lists = XMLExporter.group_by_node_type(nodes)
-        for node_list in node_lists:
-            if current_paragraph_tag == None:
-                current_paragraph_tag = node_list[0].get_paragraph_style()
-                xml += '<' + current_paragraph_tag + '>'
+    def export_paragraph(nodes, style='p'):
+        xml = '<' + style + '>'
+        for node_list in XMLExporter.group_by_node_type(nodes):
             xml += XMLExporter.process_list(node_list)
-            if node_list[0].type == 'eol':
-                xml += '</' + current_paragraph_tag + '>'
-                current_paragraph_tag = None
-        if current_paragraph_tag != None:
-            xml += '</' + current_paragraph_tag + '>'
-            current_paragraph_tag = None
+        xml += '</' + style + '>'
 
         return xml
 

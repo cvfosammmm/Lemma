@@ -136,10 +136,10 @@ class DocumentRepo():
             xml = file.read()
 
         parser = XMLParser()
-        nodes = parser.parse(xml)
-        if nodes != None:
-            for node in nodes:
-                document.ast.append(node)
+        paragraphs = parser.parse(xml)
+        if paragraphs != None:
+            for paragraph in paragraphs:
+                document.ast.append_paragraph(paragraph)
 
         document.title = parser.title
         document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])

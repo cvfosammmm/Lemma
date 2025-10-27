@@ -39,7 +39,6 @@ from lemma.document.document import Document
 from lemma.services.message_bus import MessageBus
 from lemma.services.html_parser import HTMLParser
 from lemma.services.text_shaper import TextShaper
-from lemma.services.font_helper import FontHelper
 import lemma.services.timer as timer
 
 
@@ -76,7 +75,7 @@ class UseCases():
         y += document_view_allocation.origin.y
         x += ApplicationState.get_value('document_padding_left')
         y += ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
-        fontname = FontHelper.get_fontname_from_node(insert)
+        fontname = insert.layout['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
         y += insert.layout['height'] - padding_top - padding_bottom
@@ -242,7 +241,11 @@ class UseCases():
     def replace_section(document, node_from, node_to, xml):
         insert = document.cursor.get_insert_node()
         parser = xml_parser.XMLParser()
-        nodes = parser.parse(xml)
+
+        nodes = []
+        paragraphs = parser.parse(xml)
+        for paragraph in paragraphs:
+            nodes += paragraph.nodes
 
         commands = []
         commands.append(['delete', node_from, node_to])
@@ -264,27 +267,35 @@ class UseCases():
 
         if document.cursor.has_selection():
             prev_selection = document.ast.get_subtree(*document.cursor.get_state())
-            prev_selection_xml = xml_exporter.XMLExporter.export(prev_selection)
-            xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml)
+            prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
+            xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[3:-4])
 
-        nodes = parser.parse(xml)
+        nodes = []
+        paragraphs = parser.parse(xml)
+        for paragraph in paragraphs:
+            nodes += paragraph.nodes
+
         selection_from = document.cursor.get_first_node()
         selection_to = document.cursor.get_last_node()
         commands = [['delete', selection_from, selection_to], ['insert', selection_to, nodes], ['move_cursor_to_node', selection_to]]
 
         if len(nodes) == 0: return
-        if insert_prev != None and not insert_prev.type == 'eol':
-            last_node_style = nodes[-1].paragraph_style
-            for node in nodes:
-                node.paragraph_style = insert_prev.paragraph_style
-                if node.type == 'eol':
-                    if insert.type == 'eol':
-                        insert.paragraph_style = last_node_style
-                    break
-        if not insert.type == 'eol':
-            for node in reversed(nodes):
-                if node.type == 'eol': break
-                node.paragraph_style = insert.paragraph_style
+
+        for paragraph in paragraphs:
+            if paragraph == paragraphs[0]:
+                if insert_prev != None and insert_prev.type != 'eol':
+                    continue
+                elif insert.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                    continue
+            elif paragraph == paragraphs[-1]:
+                if insert != 'eol':
+                    continue
+                elif insert_prev != None and insert_prev.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                    continue
+            if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and paragraph.style == 'p':
+                continue
+
+            commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
 
         root_copy = selection_to.parent.copy()
         for node in nodes:
@@ -409,7 +420,11 @@ class UseCases():
                     text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
                     xml = xml_helpers.embellish_with_link_and_tags(text, None, first_node.tags)
                     parser = xml_parser.XMLParser()
-                    nodes = parser.parse(xml)
+
+                    nodes = []
+                    paragraphs = parser.parse(xml)
+                    for paragraph in paragraphs:
+                        nodes += paragraph.nodes
 
                     commands = [['delete', last_node.prev_in_parent(length), last_node]]
                     commands.append(['insert', last_node, nodes])
@@ -445,7 +460,7 @@ class UseCases():
     def set_paragraph_style(style):
         document = DocumentRepo.get_active_document()
 
-        current_style = document.cursor.get_first_node().get_paragraph_style()
+        current_style = document.cursor.get_first_node().paragraph().style
         if current_style == style:
             style = 'p'
 
