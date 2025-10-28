@@ -66,7 +66,6 @@ class Dialog(object):
         else:
             if file != None:
                 filename = file.get_path()
-                print(filename)
                 UseCases.settings_set_value('last_export_folder', os.path.dirname(filename))
 
                 if not filename.endswith('.md'):
