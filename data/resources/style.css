@@ -6,21 +6,21 @@ label link, button.link {
 
 /* scrollbars */
 
-scrollbar {
+scrollbar.vertical {
     background-color: transparent;
     box-shadow: none;
     min-height: 0px;
 }
-scrollbar trough {
+scrollbar.vertical trough {
     margin: 1px;
     min-height: 0px;
 }
-scrollbar slider {
+scrollbar.vertical slider {
     padding: 0px;
     min-width: 3px;
-    min-height: 0px;
+    min-height: 36px;
 }
-scrollbar:hover slider {
+scrollbar.vertical:hover slider {
     min-width: 8px;
 }
 scrollbar.hidden slider {
