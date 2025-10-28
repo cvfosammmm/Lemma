@@ -31,7 +31,7 @@ class Popover(PopoverView):
         self.set_width(252)
 
         entries = list()
-        entries.append(['p', _('Paragraph'), 'Ctrl+7'])
+        entries.append(['p', _('Paragraph'), 'Ctrl+0'])
         entries.append(['h2', _('Heading 2'), 'Ctrl+2'])
         entries.append(['h3', _('Heading 3'), 'Ctrl+3'])
         entries.append(['h4', _('Heading 4'), 'Ctrl+4'])

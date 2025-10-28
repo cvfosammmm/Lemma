@@ -93,7 +93,7 @@ class ShortcutControllerDocument(ShortcutController):
 
         self.add_with_callback('<Control>b', self.actions.actions['toggle-bold'].activate)
         self.add_with_callback('<Control>i', self.actions.actions['toggle-italic'].activate)
-        actions.application.set_accels_for_action('win.set-paragraph-style::p', ['<Control>7'])
+        actions.application.set_accels_for_action('win.set-paragraph-style::p', ['<Control>0'])
         actions.application.set_accels_for_action('win.set-paragraph-style::h2', ['<Control>2'])
         actions.application.set_accels_for_action('win.set-paragraph-style::h3', ['<Control>3'])
         actions.application.set_accels_for_action('win.set-paragraph-style::h4', ['<Control>4'])
