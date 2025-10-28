@@ -27,13 +27,7 @@ class Root():
         end_node.set_parent(self)
         self.paragraphs = [Paragraph([end_node])]
         self.type = 'root'
-        self.tags = set()
-        self.link = None
-        self.layout = None
         self.current_iter_index = -1
-
-    def set_parent(self, parent):
-        self.parent = parent
 
     @timer.timer
     def insert_before(self, child, nodes):
@@ -157,10 +151,7 @@ class Root():
         return parent[pos1[-1]:pos2[-1]]
 
     def copy(self):
-        node = Root()
-        node.tags = self.tags
-        node.link = self.link
-        return node
+        return Root()
 
     def __len__(self):
         return sum([len(paragraph.nodes) for paragraph in self.paragraphs])
@@ -237,8 +228,7 @@ class Root():
         return result
 
     def __str__(self):
-        string = self.type + ':' + str(self.value)
-        return string
+        return 'root'
 
     def validate(self):
         for paragraph in self.paragraphs:
