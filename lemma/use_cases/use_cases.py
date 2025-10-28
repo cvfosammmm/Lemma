@@ -261,14 +261,13 @@ class UseCases():
     @timer.timer
     def insert_xml(xml):
         document = DocumentRepo.get_active_document()
-        insert = document.cursor.get_insert_node()
-        insert_prev = insert.prev_in_parent()
         parser = xml_parser.XMLParser()
 
-        if document.cursor.has_selection():
+        if document.cursor.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
             prev_selection = document.ast.get_subtree(*document.cursor.get_state())
-            prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
-            xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[3:-4])
+            if len([node for node in prev_selection if node.type == 'eol']) == 0:
+                prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
+                xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[3:-4])
 
         nodes = []
         paragraphs = parser.parse(xml)
@@ -281,16 +280,18 @@ class UseCases():
 
         if len(nodes) == 0: return
 
+        node_before = selection_from.prev_in_parent()
+        node_after = selection_to
         for paragraph in paragraphs:
             if paragraph == paragraphs[0]:
-                if insert_prev != None and insert_prev.type != 'eol':
+                if node_before != None and node_before.type != 'eol':
                     continue
-                elif insert.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                elif node_after.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
                     continue
             elif paragraph == paragraphs[-1]:
-                if insert != 'eol':
+                if node_after != 'eol':
                     continue
-                elif insert_prev != None and insert_prev.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                elif node_before != None and node_before.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
                     continue
             if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and paragraph.style == 'p':
                 continue
