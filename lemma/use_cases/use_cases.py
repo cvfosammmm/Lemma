@@ -293,7 +293,7 @@ class UseCases():
                     continue
                 elif node_before != None and node_before.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
                     continue
-            if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and paragraph.style == 'p':
+            if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and not paragraph.style.startswith('h'):
                 continue
 
             commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
