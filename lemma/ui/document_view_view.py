@@ -252,6 +252,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.colors['text_string'] = self.colors['text'].to_string()
         self.colors['links_string'] = self.colors['links'].to_string()
         self.colors['links_page_not_existing_string'] = self.colors['links_page_not_existing'].to_string()
+        self.colors['bullets_string'] = ColorManager.get_ui_color('bullets').to_string()
 
     @timer.timer
     def draw_bullet(self, ctx, offset_x, offset_y, paragraph):
@@ -261,7 +262,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
             first_char_layout = line_layout['children'][0]
             fontname = first_char_layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
-            fg_color = self.get_fg_color_string_by_node(first_char_layout['node'])
+            fg_color = self.colors['bullets_string']
 
             surface, left, top = TextRenderer.get_glyph('-', fontname, fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul') - LayoutInfo.get_bullet_padding() - surface.get_width()
