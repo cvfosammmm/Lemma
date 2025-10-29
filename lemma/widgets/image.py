@@ -47,7 +47,7 @@ class Image(object):
         if 'width' in attributes:
             self.set_width(int(attributes['width']))
         else:
-            self.set_width(min(self.original_width, LayoutInfo.get_layout_width()))
+            self.set_width(min(self.original_width, LayoutInfo.get_max_layout_width()))
 
     def set_width(self, width):
         self.width = width
@@ -82,7 +82,7 @@ class Image(object):
         return self.get_format() + _(' Image') + ' (' + size_string + ')'
 
     def get_longest_possible_status_text(self):
-        max_width = LayoutInfo.get_layout_width()
+        max_width = LayoutInfo.get_max_layout_width()
         max_height = int((max_width / self.get_original_width()) * self.get_original_height())
         max_digits = len(str(max_width)) + len(str(max_height))
         return self.get_format() + _(' Image') + ' ( × ' + max_digits * '0' + ')'

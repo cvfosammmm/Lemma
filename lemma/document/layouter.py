@@ -38,8 +38,12 @@ class Layouter(object):
         for paragraph in self.document.ast.paragraphs:
             if paragraph.layout == None:
                 self.paragraph_style = paragraph.style
+
+                indentation = LayoutInfo.get_indentation(paragraph.style)
+                width = LayoutInfo.get_max_layout_width() - indentation
+
                 layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph.nodes)
-                self.layout(layout_tree)
+                self.layout_paragraph(layout_tree, width, indentation)
                 paragraph.layout = layout_tree
             else:
                 layout_tree = paragraph.layout
@@ -179,7 +183,6 @@ class Layouter(object):
         if layout_tree['type'] == 'word': self.layout_word(layout_tree)
         elif layout_tree['type'] == 'hbox': self.layout_hbox(layout_tree)
         elif layout_tree['type'] == 'vbox': self.layout_vbox(layout_tree)
-        elif layout_tree['type'] == 'paragraph': self.layout_paragraph(layout_tree)
         elif layout_tree['type'] == 'mathscript': self.layout_mathscript(layout_tree)
         elif layout_tree['type'] == 'mathfraction': self.layout_mathfraction(layout_tree)
         elif layout_tree['type'] == 'mathroot': self.layout_mathroot(layout_tree)
@@ -194,7 +197,7 @@ class Layouter(object):
             layout_tree['height'] = max(layout_tree['height'], child['height'])
 
     @timer.timer
-    def layout_paragraph(self, layout_tree):
+    def layout_paragraph(self, layout_tree, layout_width, indentation):
         for child in layout_tree['children']:
             if not child['fixed']:
                 self.layout(child)
@@ -212,12 +215,12 @@ class Layouter(object):
                     current_line['children'].append(child)
                     child['parent'] = current_line
                     current_line_width += child['width']
-                    if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
+                    if current_line_width > 0 and child['width'] + current_line_width > layout_width:
                         lines.append(current_line)
                         current_line = {'type': 'hbox', 'fixed': False, 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
                         current_line_width = 0
                 else:
-                    if current_line_width > 0 and child['width'] + current_line_width > LayoutInfo.get_layout_width():
+                    if current_line_width > 0 and child['width'] + current_line_width > layout_width:
                         lines.append(current_line)
                         current_line = {'type': 'hbox', 'fixed': False, 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
                         current_line_width = 0
@@ -229,11 +232,11 @@ class Layouter(object):
         layout_tree['height'] = 0
         for line in lines:
             self.layout_hbox(line)
-            line['x'] = 0
+            line['x'] = indentation
             line['y'] = layout_tree['height']
             layout_tree['height'] += line['height']
         layout_tree['children'] = lines
-        layout_tree['width'] = LayoutInfo.get_layout_width()
+        layout_tree['width'] = layout_width
         layout_tree['x'] = 0
         layout_tree['y'] = 0
 

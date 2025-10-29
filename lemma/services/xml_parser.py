@@ -100,7 +100,7 @@ class XMLParser(object):
     def handle_endtag(self, tag):
         self.open_tags.pop()
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul']:
             new_paragraph = Paragraph(self.nodes)
             new_paragraph.style = tag
             self.paragraphs.append(new_paragraph)

@@ -78,7 +78,7 @@ class HTMLParser(HTMLParserLib):
         if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             self.paragraph_style = tag
         if tag == 'img':
-            width = LayoutInfo.get_layout_width()
+            width = LayoutInfo.get_max_layout_width()
             for name, value in attrs:
                 if name == 'src':
                     filename = urllib.parse.unquote_plus(value)

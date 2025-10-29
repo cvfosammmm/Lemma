@@ -16,10 +16,18 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class LayoutInfo(object):
+class LayoutInfo():
 
-    def get_layout_width():
+    def get_max_layout_width():
         return 670
+
+    def get_indentation(paragraph_style):
+        if paragraph_style == 'ul':
+            return 48
+        return 0
+
+    def get_bullet_padding():
+        return 16
 
     def get_min_image_size():
         return 16

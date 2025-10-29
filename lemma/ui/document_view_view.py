@@ -28,6 +28,7 @@ import math
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
+from lemma.services.layout_info import LayoutInfo
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
@@ -204,6 +205,8 @@ class DocumentViewDrawingArea(Gtk.Widget):
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
         for i, paragraph in enumerate(document.ast.paragraphs):
+            self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph)
+
             for j, line_layout in enumerate(paragraph.layout['children']):
                 if content_offset_y + line_layout['y'] + paragraph.layout['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph.layout['y'] <= self.height:
                     if (i,j) not in self.render_cache:
@@ -251,9 +254,25 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.colors['links_page_not_existing_string'] = self.colors['links_page_not_existing'].to_string()
 
     @timer.timer
+    def draw_bullet(self, ctx, offset_x, offset_y, paragraph):
+        if paragraph.style == 'ul':
+            layout = paragraph.layout
+            line_layout = layout['children'][0]
+            first_char_layout = line_layout['children'][0]
+            fontname = first_char_layout['fontname']
+            baseline = TextShaper.get_ascend(fontname=fontname)
+            fg_color = self.get_fg_color_string_by_node(first_char_layout['node'])
+
+            surface, left, top = TextRenderer.get_glyph('-', fontname, fg_color, self.hidpi_factor)
+            bullet_indent = LayoutInfo.get_indentation('ul') - LayoutInfo.get_bullet_padding() - surface.get_width()
+            if surface != None:
+                ctx.set_source_surface(surface, int((offset_x + bullet_indent) * self.hidpi_factor + left), int((offset_y + baseline + layout['y'] + first_char_layout['y']) * self.hidpi_factor + top))
+                ctx.paint()
+
+    @timer.timer
     def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
-        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int(layout['width'] * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
-        self.draw_layout(layout, cairo.Context(surface), -layout['x'], -layout['y'], in_selection)
+        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int((layout['x'] + layout['width']) * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
+        self.draw_layout(layout, cairo.Context(surface), 0, -layout['y'], in_selection)
         self.render_cache[(paragraph_no, line_no)] = surface
 
     def draw_layout(self, layout, ctx, offset_x, offset_y, in_selection):

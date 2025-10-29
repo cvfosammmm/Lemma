@@ -73,7 +73,7 @@ class ModelState(object):
         self.links_inside_selection = self.has_active_doc and len([node for node in self.selected_nodes if node.link != None]) > 0
         self.whole_selection_is_one_link = self.links_inside_selection and (len(set([node.link for node in self.selected_nodes])) == 1)
         self.widget_selected = len(self.selected_nodes) == 1 and self.selected_nodes[0].type == 'widget'
-        self.selected_widget_is_max = self.widget_selected and (self.selected_nodes[0].value.get_width() == LayoutInfo.get_layout_width() or not self.selected_nodes[0].value.is_resizable())
+        self.selected_widget_is_max = self.widget_selected and (self.selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width() or not self.selected_nodes[0].value.is_resizable())
         self.selected_widget_is_min = self.widget_selected and (self.selected_nodes[0].value.get_width() == self.selected_nodes[0].value.get_minimum_width() or not self.selected_nodes[0].value.is_resizable())
         self.cursor_inside_link = self.has_active_doc and self.document.cursor.get_insert_node().is_inside_link()
 

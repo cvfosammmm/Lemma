@@ -154,7 +154,7 @@ class Document():
 
     def get_cursor_holding_layout_close_to_xy(self, x, y):
         if y < 0: x = 0
-        if y > self.get_height(): x = LayoutInfo.get_layout_width()
+        if y > self.get_height(): x = LayoutInfo.get_max_layout_width()
 
         hbox = self.get_line_at_y(y)
         if y >= hbox['y'] + hbox['parent']['y'] and y < hbox['y'] + hbox['parent']['y'] + hbox['height']:
