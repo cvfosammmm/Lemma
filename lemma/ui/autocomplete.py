@@ -24,6 +24,7 @@ from lemma.document_repo.document_repo import DocumentRepo
 from lemma.services.settings import Settings
 from lemma.services.autocomplete_db import AutocompleteDB
 from lemma.application_state.application_state import ApplicationState
+from lemma.services.layout_info import LayoutInfo
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -319,11 +320,11 @@ class AutocompleteWidget(Gtk.ScrolledWindow):
         document = DocumentRepo.get_active_document()
         insert = document.cursor.get_insert_node()
         insert_x, insert_y = document.get_absolute_xy(insert.layout)
-        content_offset = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        content_offset = LayoutInfo.get_normal_document_offset()
         scrolling_offset_y = document.clipping.offset_y
         insert_y += content_offset - scrolling_offset_y
         insert_height = insert.layout['height']
-        insert_x += ApplicationState.get_value('document_padding_left')
+        insert_x += LayoutInfo.get_document_padding_left()
         window_height = ApplicationState.get_value('document_view_height')
         window_width = ApplicationState.get_value('document_view_width')
 

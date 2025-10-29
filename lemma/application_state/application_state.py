@@ -32,12 +32,6 @@ class ApplicationState():
 
         ApplicationState.defaults['document_view_width'] = 0
         ApplicationState.defaults['document_view_height'] = 0
-        ApplicationState.defaults['title_width'] = 500
-        ApplicationState.defaults['title_height'] = 54
-        ApplicationState.defaults['subtitle_height'] = 51
-        ApplicationState.defaults['document_padding_left'] = 48
-        ApplicationState.defaults['document_padding_bottom'] = 120
-        ApplicationState.defaults['document_padding_top'] = 48
         ApplicationState.defaults['document_view_hide_cursor_on_unfocus'] = True
 
         ApplicationState.defaults['tags_at_cursor'] = set()

@@ -22,6 +22,7 @@ from gi.repository import GObject
 import time
 
 from lemma.application_state.application_state import ApplicationState
+from lemma.services.layout_info import LayoutInfo
 
 
 class DocumentViewPresenter():
@@ -42,7 +43,7 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         document = self.model.document
-        height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
         scrolling_offset_y = document.clipping.offset_y
 
         self.view.adjustment_x.set_page_size(1)
@@ -57,7 +58,7 @@ class DocumentViewPresenter():
         if self.model.document == None: return
 
         document = self.model.document
-        height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
 
         self.view.scrollbar_x.set_visible(False)
         self.view.scrollbar_y.set_visible(height > ApplicationState.get_value('document_view_height'))
@@ -88,10 +89,10 @@ class DocumentViewPresenter():
 
         x = document.clipping.offset_x + (self.model.cursor_x if self.model.cursor_x != None else 0)
         y = document.clipping.offset_y + (self.model.cursor_y if self.model.cursor_y != None else 0)
-        x -= ApplicationState.get_value('document_padding_left')
-        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
 
-        if y < -ApplicationState.get_value('subtitle_height'):
+        if y < -LayoutInfo.get_subtitle_height():
             self.content.set_cursor_from_name('text')
         elif y > 0:
             leaf_box = document.get_leaf_at_xy(x, y)

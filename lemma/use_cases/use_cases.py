@@ -30,6 +30,7 @@ import lemma.services.xml_parser as xml_parser
 import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
+from lemma.services.layout_info import LayoutInfo
 from lemma.services.character_db import CharacterDB
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.widgets.image import Image
@@ -73,8 +74,8 @@ class UseCases():
         document_view_allocation = document_view.compute_bounds(main_window).out_bounds
         x += document_view_allocation.origin.x
         y += document_view_allocation.origin.y
-        x += ApplicationState.get_value('document_padding_left')
-        y += ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        x += LayoutInfo.get_document_padding_left()
+        y += LayoutInfo.get_normal_document_offset()
         fontname = insert.layout['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
@@ -953,12 +954,12 @@ class UseCases():
         document = DocumentRepo.get_active_document()
         insert_node = document.cursor.get_insert_node()
         insert_position = document.get_absolute_xy(insert_node.layout)
-        content_offset = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        content_offset = LayoutInfo.get_normal_document_offset()
         insert_y = insert_position[1] + content_offset
         insert_height = insert_node.layout['height']
         window_height = ApplicationState.get_value('document_view_height')
         scrolling_offset_y = document.clipping.offset_y
-        content_height = document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+        content_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
 
         if window_height <= 0: new_position = (0, 0)
         elif document.get_absolute_xy(document.get_line_at_y(insert_position[1]))[1] == 0: new_position = (0, 0)
@@ -966,7 +967,7 @@ class UseCases():
             if insert_height > window_height: new_position = (0, insert_y - window_height + insert_height)
             else: new_position = (0, insert_y)
         elif insert_position[1] >= document.get_height() - insert_height and content_height >= window_height:
-            new_position = (0, document.get_height() + content_offset + ApplicationState.get_value('document_padding_bottom') - window_height)
+            new_position = (0, document.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
             new_position = (0, insert_y - window_height + insert_height)
         else: new_position = (document.clipping.offset_x, document.clipping.offset_y)
@@ -1024,11 +1025,11 @@ class UseCases():
         vel_y /= 16
 
         min_y = 0
-        max_y = max(0, ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') + document.get_height() + ApplicationState.get_value('document_padding_bottom') - ApplicationState.get_value('document_view_height'))
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') + document.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.get_value('document_view_height'))
         min_x = 0
-        max_x = max(0, ApplicationState.get_value('document_padding_left') + document.get_width() - ApplicationState.get_value('document_view_width'))
+        max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_width() - ApplicationState.get_value('document_view_width'))
         
-        offset_x = ApplicationState.get_value('document_padding_left')
+        offset_x = LayoutInfo.get_document_padding_left()
         scrolling_offset_y = document.clipping.offset_y
         offset_y =  - scrolling_offset_y
 

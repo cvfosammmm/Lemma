@@ -29,7 +29,7 @@ from lemma.ui.document_view_view import DocumentViewDrawingArea
 from lemma.ui.document_view_view import TitleWidget
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
-from lemma.application_state.application_state import ApplicationState
+from lemma.services.layout_info import LayoutInfo
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
@@ -102,8 +102,8 @@ class DocumentView():
 
             x = document.clipping.offset_x + (self.cursor_x if self.cursor_x != None else 0)
             y = document.clipping.offset_y + (self.cursor_y if self.cursor_y != None else 0)
-            x -= ApplicationState.get_value('document_padding_left')
-            y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+            x -= LayoutInfo.get_document_padding_left()
+            y -= LayoutInfo.get_normal_document_offset()
             link = None
 
             if y > 0:

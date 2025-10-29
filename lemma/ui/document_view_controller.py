@@ -25,6 +25,7 @@ import lemma.services.xml_helpers as xml_helpers
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
+from lemma.services.layout_info import LayoutInfo
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -103,10 +104,10 @@ class DocumentViewController():
 
         self.model.selected_link_target = None
 
-        x -= ApplicationState.get_value('document_padding_left')
-        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
 
-        if y < -ApplicationState.get_value('subtitle_height') and n_press % 3 == 1:
+        if y < -LayoutInfo.get_subtitle_height() and n_press % 3 == 1:
             self.model.init_renaming()
 
         elif y > 0:
@@ -151,10 +152,10 @@ class DocumentViewController():
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if keyboard_state == 0:
-            x -= ApplicationState.get_value('document_padding_left')
-            y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+            x -= LayoutInfo.get_document_padding_left()
+            y -= LayoutInfo.get_normal_document_offset()
 
-            if y >= -ApplicationState.get_value('subtitle_height'):
+            if y >= -LayoutInfo.get_subtitle_height():
                 document = self.model.document
 
                 link = self.get_link_at_xy(x, y)
@@ -166,8 +167,8 @@ class DocumentViewController():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
-        x_offset = document.clipping.offset_x + x - ApplicationState.get_value('document_padding_left')
-        y_offset = document.clipping.offset_y + y - ApplicationState.get_value('document_padding_top') - ApplicationState.get_value('title_height') - ApplicationState.get_value('subtitle_height')
+        x_offset = document.clipping.offset_x + x - LayoutInfo.get_document_padding_left()
+        y_offset = document.clipping.offset_y + y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if y_offset > 0:
@@ -181,8 +182,8 @@ class DocumentViewController():
             self.model.application.context_menu_document.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
-        x -= ApplicationState.get_value('document_padding_left')
-        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
         y += self.model.document.clipping.offset_y
 
         if y <= 0:
@@ -200,13 +201,13 @@ class DocumentViewController():
             UseCases.scroll_to_xy(new_x, new_y)
 
         if y - ApplicationState.get_value('document_view_height') > 0:
-            height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
             new_x = self.model.document.clipping.offset_x
             new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height'))
             UseCases.scroll_to_xy(new_x, new_y)
 
-        x -= ApplicationState.get_value('document_padding_left')
-        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
         y += self.model.document.clipping.offset_y
 
         UseCases.move_cursor_to_xy(x, y, True)
@@ -219,8 +220,8 @@ class DocumentViewController():
             self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
             self.scroll_on_drop_callback_id = None
 
-        x -= ApplicationState.get_value('document_padding_left')
-        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
         y += self.model.document.clipping.offset_y
 
         UseCases.handle_drop(value, x, y)
@@ -233,8 +234,8 @@ class DocumentViewController():
     def on_drop_hover(self, controller, x, y):
         self.drop_cursor_x, self.drop_cursor_y = x, y
 
-        x -= ApplicationState.get_value('document_padding_left')
-        y -= ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height')
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
         y += self.model.document.clipping.offset_y
 
         UseCases.move_drop_cursor_to_xy(x, y)
@@ -257,7 +258,7 @@ class DocumentViewController():
             UseCases.scroll_to_xy(new_x, new_y)
 
         if y - ApplicationState.get_value('document_view_height') > -56:
-            height = self.model.document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
             new_x = self.model.document.clipping.offset_x
             new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height') + 56)
             UseCases.scroll_to_xy(new_x, new_y)
@@ -272,7 +273,7 @@ class DocumentViewController():
 
         if controller.get_current_event_state() & modifiers == 0:
             document = self.model.document
-            height = document.get_height() + ApplicationState.get_value('document_padding_bottom') + ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height')
+            height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
 
             if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
                 dx *= ApplicationState.get_value('document_view_width') ** (2/3)

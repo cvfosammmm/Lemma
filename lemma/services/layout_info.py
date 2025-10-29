@@ -21,6 +21,27 @@ class LayoutInfo():
     def get_max_layout_width():
         return 670
 
+    def get_title_width():
+        return 500
+
+    def get_title_height():
+        return 54
+
+    def get_subtitle_height():
+        return 51
+
+    def get_document_padding_left():
+        return 48
+
+    def get_document_padding_bottom():
+        return 120
+
+    def get_document_padding_top():
+        return 48
+
+    def get_normal_document_offset():
+        return 153 # padding + title
+
     def get_indentation(paragraph_style):
         if paragraph_style == 'ul':
             return 48

@@ -190,9 +190,9 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.setup_scaling_offsets()
         self.setup_colors()
 
-        content_offset_x = ApplicationState.get_value('document_padding_left')
-        content_offset_y = ApplicationState.get_value('document_padding_top') + ApplicationState.get_value('title_height') + ApplicationState.get_value('subtitle_height') + ApplicationState.get_value('title_buttons_height') - document.clipping.offset_y
-        title_offset_y = ApplicationState.get_value('document_padding_top') - document.clipping.offset_y
+        content_offset_x = LayoutInfo.get_document_padding_left()
+        content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') - document.clipping.offset_y
+        title_offset_y = LayoutInfo.get_document_padding_top() - document.clipping.offset_y
         self.first_selection_node, self.last_selection_node = document.cursor.get_first_and_last_node()
         first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
         last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
@@ -267,7 +267,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
             surface, left, top = TextRenderer.get_glyph('-', fontname, fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul') - LayoutInfo.get_bullet_padding() - surface.get_width()
             if surface != None:
-                ctx.set_source_surface(surface, int((offset_x + bullet_indent) * self.hidpi_factor + left), int((offset_y + baseline + layout['y'] + first_char_layout['y']) * self.hidpi_factor + top))
+                ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + first_char_layout['y']) * self.hidpi_factor + top))
                 ctx.paint()
 
     @timer.timer
@@ -394,9 +394,9 @@ class DocumentViewDrawingArea(Gtk.Widget):
     @timer.timer
     def draw_title(self, ctx, offset_x, offset_y):
         if self.do_render_title:
-            self.layout_title.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
+            self.layout_title.set_width(LayoutInfo.get_title_width() * Pango.SCALE)
             self.layout_title.set_text(self.model.document.title)
-            self.layout_subtitle.set_width(ApplicationState.get_value('title_width') * Pango.SCALE)
+            self.layout_subtitle.set_width(LayoutInfo.get_title_width() * Pango.SCALE)
             datetime_last_modified = datetime.datetime.fromtimestamp(self.model.document.last_modified)
             self.layout_subtitle.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
             self.do_render_title = False
@@ -406,10 +406,10 @@ class DocumentViewDrawingArea(Gtk.Widget):
         PangoCairo.show_layout(ctx, self.layout_title)
 
         Gdk.cairo_set_source_rgba(ctx, self.colors['border_1'])
-        ctx.rectangle(offset_x, offset_y + ApplicationState.get_value('title_height'), ApplicationState.get_value('title_width'), 1)
+        ctx.rectangle(offset_x, offset_y + LayoutInfo.get_title_height(), LayoutInfo.get_title_width(), 1)
         ctx.fill()
 
-        ctx.move_to(offset_x, offset_y + ApplicationState.get_value('title_height') + 8)
+        ctx.move_to(offset_x, offset_y + LayoutInfo.get_title_height() + 8)
         Gdk.cairo_set_source_rgba(ctx, self.colors['description_color'])
         PangoCairo.show_layout(ctx, self.layout_subtitle)
 
