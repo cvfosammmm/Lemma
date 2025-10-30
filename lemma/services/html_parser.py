@@ -75,7 +75,7 @@ class HTMLParser(HTMLParserLib):
             for name, value in attrs:
                 if name == 'href':
                     self.link_target = urllib.parse.unquote_plus(value)
-        if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul']:
             self.paragraph_style = tag
         if tag == 'img':
             width = LayoutInfo.get_max_layout_width()
@@ -123,7 +123,7 @@ class HTMLParser(HTMLParserLib):
     def handle_endtag(self, tag):
         self.open_tags.pop()
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'li']:
             node = Node('eol')
             self.composite.append(node)
             self.root.paragraphs[-2].style = self.paragraph_style
