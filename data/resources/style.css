@@ -369,7 +369,7 @@ overlay.popover button label.shortcut {
     margin-left: 18px;
 }
 overlay.popover button image.icon {
-    padding-top: 2px;
+    padding-top: 1px;
     padding-right: 8px;
 }
 overlay.popover separator {

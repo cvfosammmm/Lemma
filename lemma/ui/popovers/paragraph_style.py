@@ -31,16 +31,25 @@ class Popover(PopoverView):
         self.set_width(252)
 
         entries = list()
-        entries.append(['p', _('Normal'), 'Ctrl+0'])
-        entries.append(['h2', _('Heading 2'), 'Ctrl+2'])
-        entries.append(['h3', _('Heading 3'), 'Ctrl+3'])
-        entries.append(['h4', _('Heading 4'), 'Ctrl+4'])
-        entries.append(['h5', _('Heading 5'), 'Ctrl+5'])
-        entries.append(['h6', _('Heading 6'), 'Ctrl+6'])
-        entries.append(['ul', _('Bullet List'), 'Ctrl+7'])
+        entries.append(['p', _('Normal'), 'placeholder', 'Ctrl+0'])
+        entries.append(['h2', _('Heading 2'), 'placeholder', 'Ctrl+2'])
+        entries.append(['h3', _('Heading 3'), 'placeholder', 'Ctrl+3'])
+        entries.append(['h4', _('Heading 4'), 'placeholder', 'Ctrl+4'])
+        entries.append(['h5', _('Heading 5'), 'placeholder', 'Ctrl+5'])
+        entries.append(['h6', _('Heading 6'), 'placeholder', 'Ctrl+6'])
 
         for entry in entries:
-            button = MenuBuilder.create_button(entry[1], shortcut=entry[2])
+            button = MenuBuilder.create_button(entry[1], icon_name=entry[2], shortcut=entry[3])
+            button.set_detailed_action_name('win.set-paragraph-style::' + entry[0])
+            self.add_closing_button(button)
+
+        self.add_widget(Gtk.Separator())
+
+        entries = list()
+        entries.append(['ul', _('Bullet List'), 'view-list-bullet-symbolic', 'Ctrl+7'])
+
+        for entry in entries:
+            button = MenuBuilder.create_button(entry[1], icon_name=entry[2], shortcut=entry[3])
             button.set_detailed_action_name('win.set-paragraph-style::' + entry[0])
             self.add_closing_button(button)
 
