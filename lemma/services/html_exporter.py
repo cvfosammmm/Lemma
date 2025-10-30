@@ -47,16 +47,32 @@ class HTMLExporter(object):
 
         self.html += '<body>\n'
         self.html += '<h1>' + document.title + '</h1>\n'
-        for paragraph in document.ast.paragraphs:
+
+        for i, paragraph in enumerate(document.ast.paragraphs):
+            if paragraph.style in ['ul']:
+                if i == 0 or paragraph.style != document.ast.paragraphs[i-1].style:
+                    self.html += '<' + paragraph.style + '><li>'
+                else:
+                    self.html += '<li>'
+            else:
+                self.html += '<' + paragraph.style + '>'
+
             node_lists = self.group_by_node_type(paragraph.nodes)
 
-            self.html += '<' + paragraph.style + '>'
             for node_list in node_lists:
                 self.process_list(node_list)
-            self.html += '</' + paragraph.style + '>\n'
+
+            if paragraph.style in ['ul']:
+                if i == len(document.ast.paragraphs) or paragraph.style != document.ast.paragraphs[i+1].style:
+                    self.html += '</li></' + paragraph.style + '>'
+                else:
+                    self.html += '</li>'
+            else:
+                self.html += '</' + paragraph.style + '>\n'
         self.html += '</body>\n'
 
         self.html += '</html>'
+        print(self.html)
         return self.html
 
     def group_by_node_type(self, node_list):
