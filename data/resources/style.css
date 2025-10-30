@@ -543,13 +543,10 @@ window.settings headerbar label {
 }
 window.settings flowbox {
     background: @dialog_bg_color;
-    padding-bottom: 18px;
-    padding-left: 16px;
+    padding: 9px 8px;
 }
 window.settings flowboxchild {
-    padding: 0px;
-    padding-top: 18px;
-    padding-right: 16px;
+    padding: 9px 8px;
 }
 window.settings flowboxchild button.color-preview-wrapper {
     border: 1px solid @borders;
