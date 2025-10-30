@@ -90,12 +90,13 @@ class TextRenderer():
         TextRenderer.fonts[fontname]['face'].glyph.render_glyph(freetype2.FT.RENDER_MODE_NORMAL)
 
         width = TextRenderer.fonts[fontname]['face'].glyph.advance.x
+        width = TextRenderer.fonts[fontname]['face'].glyph.metrics['width']
         height = TextRenderer.fonts[fontname]['face'].glyph.metrics['height']
         left = TextRenderer.fonts[fontname]['face'].glyph.bitmap_left
         top = -TextRenderer.fonts[fontname]['face'].glyph.bitmap_top
 
         if TextRenderer.fonts[fontname]['face'].glyph.bitmap.width > 0:
-            surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width), int(height))
+            surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width) + 1, int(height))
             ctx = cairo.Context(surface)
             ctx.set_source_surface(TextRenderer.fonts[fontname]['face'].glyph.bitmap.make_image_surface(), 0, 0)
             pattern = ctx.get_source()
