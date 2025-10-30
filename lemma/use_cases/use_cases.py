@@ -114,12 +114,12 @@ class UseCases():
         Settings.set_value('show_tools_sidebar', True)
         Settings.set_value('tools_sidebar_active_tab', name)
         Settings.save()
-        MessageBus.add_change_code('settings_changed')
+        MessageBus.add_change_code('sidebar_visibility_changed')
 
     def hide_tools_sidebar():
         Settings.set_value('show_tools_sidebar', False)
         Settings.save()
-        MessageBus.add_change_code('settings_changed')
+        MessageBus.add_change_code('sidebar_visibility_changed')
 
     def open_link(link_target):
         if urlparse(link_target).scheme in ['http', 'https']:

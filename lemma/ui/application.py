@@ -87,6 +87,7 @@ class Application(Adw.Application):
         MessageBus.connect('mode_set', self.on_mode_set)
         MessageBus.connect('app_state_changed', self.on_app_state_changed)
         MessageBus.connect('settings_changed', self.on_settings_changed)
+        MessageBus.connect('sidebar_visibility_changed', self.on_sidebar_visibility_changed)
 
         self.model_state.update()
         self.actions.update()
@@ -176,6 +177,11 @@ class Application(Adw.Application):
     def on_settings_changed(self):
         self.window_state.update()
         self.colors.update()
+
+    def on_sidebar_visibility_changed(self):
+        self.window_state.update()
+        self.sidebar_emojis.update()
+        self.sidebar_math.update()
 
     def on_window_close(self, window=None, parameter=None):
         self.save_quit()

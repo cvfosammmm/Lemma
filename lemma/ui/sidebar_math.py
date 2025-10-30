@@ -28,6 +28,7 @@ import os.path
 from lemma.services.paths import Paths
 from lemma.services.character_db import CharacterDB
 from lemma.use_cases.use_cases import UseCases
+from lemma.services.settings import Settings
 import lemma.services.timer as timer
 
 
@@ -366,10 +367,11 @@ class SidebarMath(object):
 
     @timer.timer
     def update(self):
-        if self.model_state.has_active_doc != self.is_active:
-            self.is_active = self.model_state.has_active_doc
-            for button in self.buttons:
-                button.set_sensitive(self.is_active)
+        if Settings.get_value('show_tools_sidebar') and Settings.get_value('tools_sidebar_active_tab') == 'math':
+            if self.model_state.has_active_doc != self.is_active:
+                self.is_active = self.model_state.has_active_doc
+                for button in self.buttons:
+                    button.set_sensitive(self.is_active)
 
     @timer.timer
     def populate(self):
