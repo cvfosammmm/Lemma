@@ -37,8 +37,6 @@ class Root():
             if node.type == 'eol':
                 self.paragraphs[paragraph_no].nodes.insert(offset, node)
                 new_paragraph = Paragraph(self.paragraphs[paragraph_no].nodes[offset + 1:])
-                if len(new_paragraph.nodes) > 1:
-                    new_paragraph.style = self.paragraphs[paragraph_no].style
                 self.paragraphs.insert(paragraph_no + 1, new_paragraph)
                 del(self.paragraphs[paragraph_no].nodes[offset + 1:])
 
@@ -56,7 +54,6 @@ class Root():
         self.paragraphs[-1].nodes.insert(-1, node)
         if node.type == 'eol':
             new_paragraph = Paragraph([self.paragraphs[-1].nodes[-1]])
-            new_paragraph.style = self.paragraphs[-1].style
             self.paragraphs.append(new_paragraph)
             del(self.paragraphs[-2].nodes[-1])
 

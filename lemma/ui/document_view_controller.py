@@ -360,10 +360,27 @@ class DocumentViewController():
             case ('return', _):
                 if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
                     UseCases.open_link(document.cursor.get_insert_node().link)
+                elif not document.cursor.has_selection():
+                    insert_paragraph = document.cursor.get_insert_node().paragraph()
+                    paragraph_style = insert_paragraph.style
+
+                    if paragraph_style in ['ul']:
+                        if len(insert_paragraph.nodes) == 1:
+                            UseCases.set_paragraph_style('p')
+                        else:
+                            UseCases.insert_xml('\n')
+                            UseCases.set_paragraph_style(paragraph_style)
+                    elif paragraph_style.startswith('h'):
+                        UseCases.insert_xml('\n')
+                        if len(document.cursor.get_insert_node().paragraph().nodes) > 1:
+                            UseCases.set_paragraph_style(paragraph_style)
+                    else:
+                        UseCases.insert_xml('\n')
+
+                    UseCases.replace_max_string_before_cursor()
+                    UseCases.scroll_insert_on_screen(animate=True)
                 else:
                     UseCases.insert_xml('\n')
-                    if not document.cursor.has_selection():
-                        UseCases.replace_max_string_before_cursor()
                     UseCases.scroll_insert_on_screen(animate=True)
             case ('backspace', _):
                 UseCases.backspace()

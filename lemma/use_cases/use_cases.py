@@ -296,6 +296,8 @@ class UseCases():
                     continue
             if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and not paragraph.style.startswith('h'):
                 continue
+            if len(paragraphs) == 1 and len(paragraphs[-1].nodes) == 1 and paragraphs[-1].nodes[-1].type == 'eol':
+                continue
 
             commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
 
