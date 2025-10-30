@@ -205,7 +205,8 @@ class DocumentViewDrawingArea(Gtk.Widget):
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
         for i, paragraph in enumerate(document.ast.paragraphs):
-            self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph)
+            if content_offset_y + paragraph.layout['y'] + paragraph.layout['height'] >= 0 and content_offset_y + paragraph.layout['y'] <= self.height:
+                self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph)
 
             for j, line_layout in enumerate(paragraph.layout['children']):
                 if content_offset_y + line_layout['y'] + paragraph.layout['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph.layout['y'] <= self.height:
