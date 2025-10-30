@@ -158,7 +158,7 @@ class HTMLParser(HTMLParserLib):
         else:
             for char in data:
                 if char == '\n':
-                    if len(self.open_tags) > 0:
+                    if len(set(self.open_tags) & {'p', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'}) > 0:
                         char = ' '
                     else:
                         continue

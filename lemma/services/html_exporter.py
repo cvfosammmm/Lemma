@@ -72,7 +72,6 @@ class HTMLExporter(object):
         self.html += '</body>\n'
 
         self.html += '</html>'
-        print(self.html)
         return self.html
 
     def group_by_node_type(self, node_list):
