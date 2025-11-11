@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="16px"
+   viewBox="0 0 16 16"
+   width="16px"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="indent-less-symbolic.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="22.482482"
+     inkscape:cx="10.452583"
+     inkscape:cy="3.7140028"
+     inkscape:window-width="1920"
+     inkscape:window-height="1131"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     d="M 9,1 V 2.0022544 H 5.452941e-4 V 1 Z"
+     style="fill:#2e3436;stroke-width:1.06183"
+     id="path1-7" />
+  <path
+     d="M 8.9994547,4.2573267 V 5.2595811 H 0 V 4.2573267 Z"
+     style="fill:#2e3436;stroke-width:1.06183"
+     id="path1-7-6" />
+  <path
+     d="m 8.9994547,10.77198 v 1.002254 H 0 V 10.77198 Z"
+     style="fill:#2e3436;stroke-width:1.06183"
+     id="path1-7-61" />
+  <path
+     d="m 8.9994547,14.029307 v 1.002254 H 0 v -1.002254 z"
+     style="fill:#2e3436;stroke-width:1.06183"
+     id="path1-7-2" />
+  <path
+     d="M 8.9994547,7.5146534 V 8.5169077 H 0 V 7.5146534 Z"
+     style="fill:#2e3436;stroke-width:1.06183"
+     id="path1-7-7" />
+  <g
+     fill="#222222"
+     id="g4"
+     transform="translate(17,-12)">
+    <path
+       d="m -1.2550946,18.391902 -2,2 V 18.97784 l 2,2 c 0.39062499,0.390625 0.39062499,1.023437 0,1.414062 -0.390625,0.390625 -1.023437,0.390625 -1.414062,0 l -2,-2 c -0.390625,-0.390625 -0.390625,-1.023437 0,-1.414062 l 2,-2 c 0.390625,-0.390625 1.023437,-0.390625 1.414062,0 0.39062499,0.390625 0.39062499,1.023437 0,1.414062 z m 0,0"
+       id="path4" />
+  </g>
+</svg>

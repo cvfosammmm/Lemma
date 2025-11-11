@@ -37,6 +37,8 @@ class Root():
             if node.type == 'eol':
                 self.paragraphs[paragraph_no].nodes.insert(offset, node)
                 new_paragraph = Paragraph(self.paragraphs[paragraph_no].nodes[offset + 1:])
+                new_paragraph.style = self.paragraphs[paragraph_no].style
+                new_paragraph.indentation_level = self.paragraphs[paragraph_no].indentation_level
                 self.paragraphs.insert(paragraph_no + 1, new_paragraph)
                 del(self.paragraphs[paragraph_no].nodes[offset + 1:])
 
@@ -62,6 +64,7 @@ class Root():
     @timer.timer
     def append_paragraph(self, paragraph):
         self.paragraphs[-1].style = paragraph.style
+        self.paragraphs[-1].indentation_level = paragraph.indentation_level
 
         for node in paragraph.nodes:
             self.paragraphs[-1].nodes.insert(-1, node)
@@ -79,6 +82,7 @@ class Root():
                     if node.type == 'eol':
                         if len(self.paragraphs[i].nodes) == 0:
                             self.paragraphs[i].style = self.paragraphs[i + 1].style
+                            self.paragraphs[i].indentation_level = self.paragraphs[i + 1].indentation_level
                         self.paragraphs[i] = Paragraph(paragraph.nodes + self.paragraphs[i + 1].nodes)
                         del(self.paragraphs[i + 1])
                     elif len(self.paragraphs[i].nodes) == 0:
@@ -100,6 +104,7 @@ class Root():
 
             if offset_1 == 0:
                 self.paragraphs[paragraph_no_1].style = self.paragraphs[paragraph_no_2].style
+                self.paragraphs[paragraph_no_1].indentation_level = self.paragraphs[paragraph_no_2].indentation_level
 
             del(self.paragraphs[paragraph_no_1 + 1:paragraph_no_2 + 1])
         else:
@@ -245,6 +250,7 @@ class Paragraph():
         self.xml = None
 
         self.style = 'p'
+        self.indentation_level = 0
 
     def invalidate(self):
         self.layout = None

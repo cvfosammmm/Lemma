@@ -71,6 +71,9 @@ class Actions(object):
         self.add_simple_action('toggle-bold', self.toggle_bold)
         self.add_simple_action('toggle-italic', self.toggle_italic)
 
+        self.add_simple_action('decrease-indent', self.decrease_indent)
+        self.add_simple_action('increase-indent', self.increase_indent)
+
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
 
         self.add_simple_action('widget-shrink', self.widget_shrink)
@@ -129,6 +132,8 @@ class Actions(object):
         self.actions['set-paragraph-style'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-bold'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-italic'].set_enabled(self.model_state.has_active_doc)
+        self.actions['decrease-indent'].set_enabled(self.model_state.has_active_doc)
+        self.actions['increase-indent'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-paragraph-style-menu'].set_enabled(self.model_state.has_active_doc)
         self.actions['show-edit-menu'].set_enabled(self.model_state.has_active_doc)
@@ -222,7 +227,7 @@ class Actions(object):
             del(nodes_by_paragraph[-1])
         for nodes in nodes_by_paragraph:
             paragraph = nodes[0].paragraph()
-            xml += XMLExporter.export_paragraph(nodes, paragraph.style)
+            xml += XMLExporter.export_paragraph(nodes, paragraph.style, paragraph.indentation_level)
         content_providers.append(Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode())))
 
         if len(subtree) == 1 and subtree[0].type == 'widget':
@@ -320,7 +325,14 @@ class Actions(object):
     def set_paragraph_style(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
 
-        UseCases.set_paragraph_style(parameter.get_string())
+        style = parameter.get_string()
+
+        document = DocumentRepo.get_active_document()
+        current_style = document.cursor.get_first_node().paragraph().style
+        if current_style == style:
+            style = 'p'
+
+        UseCases.set_paragraph_style(style)
 
     def toggle_bold(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -339,6 +351,16 @@ class Actions(object):
             UseCases.toggle_tag('italic')
         else:
             UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
+
+    def decrease_indent(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
+        UseCases.change_indentation_level(-1)
+
+    def increase_indent(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
+        UseCases.change_indentation_level(1)
 
     def show_insert_image_dialog(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()

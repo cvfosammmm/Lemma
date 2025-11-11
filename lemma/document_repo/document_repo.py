@@ -65,6 +65,9 @@ class DocumentRepo():
                     with open(pathname, 'wb') as filehandle:
                         pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
 
+                    if document_id in stubs:
+                        del(stubs[document_id])
+
                     if workspace_data != None and workspace_data['active_document_id'] == document_id:
                         DocumentRepo.active_document = document
 
@@ -219,6 +222,7 @@ class DocumentRepo():
             DocumentRepo.history.remove(document_id)
         DocumentRepo.save_history()
 
+    @timer.timer
     def update(document):
         if not document.has_changed(DocumentRepo): return
 

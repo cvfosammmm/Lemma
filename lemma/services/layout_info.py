@@ -42,10 +42,14 @@ class LayoutInfo():
     def get_normal_document_offset():
         return 153 # padding + title
 
-    def get_indentation(paragraph_style):
+    def get_indentation(paragraph_style, indentation_level=0):
         if paragraph_style == 'ul':
-            return 48
-        return 0
+            indentation = 48
+        else:
+            indentation = 0
+        indentation += indentation_level * 48
+
+        return indentation
 
     def get_bullet_padding():
         return 16

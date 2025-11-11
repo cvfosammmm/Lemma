@@ -22,8 +22,8 @@ import lemma.services.xml_helpers as xml_helpers
 
 class XMLExporter():
 
-    def export_paragraph(nodes, style='p'):
-        xml = '<' + style + '>'
+    def export_paragraph(nodes, style='p', indentation_level=0):
+        xml = '<' + style + ' indentation_level="' + str(indentation_level) + '">'
         for node_list in XMLExporter.group_by_node_type(nodes):
             xml += XMLExporter.process_list(node_list)
         xml += '</' + style + '>'

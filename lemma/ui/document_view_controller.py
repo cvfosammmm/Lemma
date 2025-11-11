@@ -372,8 +372,8 @@ class DocumentViewController():
                             UseCases.set_paragraph_style(paragraph_style)
                     elif paragraph_style.startswith('h'):
                         UseCases.insert_xml('\n')
-                        if len(document.cursor.get_insert_node().paragraph().nodes) > 1:
-                            UseCases.set_paragraph_style(paragraph_style)
+                        if len(document.cursor.get_insert_node().paragraph().nodes) == 1:
+                            UseCases.set_paragraph_style('p')
                     else:
                         UseCases.insert_xml('\n')
 

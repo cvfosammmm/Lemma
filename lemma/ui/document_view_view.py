@@ -266,7 +266,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
             fg_color = self.colors['bullets_string']
 
             surface, left, top = TextRenderer.get_glyph('-', fontname, fg_color, self.hidpi_factor)
-            bullet_indent = LayoutInfo.get_indentation('ul') - LayoutInfo.get_bullet_padding() - surface.get_width()
+            bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_bullet_padding() - surface.get_width()
             bullet_measurement = TextShaper.measure_single('-')
             if surface != None:
                 ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))

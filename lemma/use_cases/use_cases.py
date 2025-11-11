@@ -300,6 +300,7 @@ class UseCases():
                 continue
 
             commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
+            commands.append(['set_indentation_level', paragraph.indentation_level, paragraph.nodes[0]])
 
         root_copy = selection_to.parent.copy()
         for node in nodes:
@@ -464,10 +465,6 @@ class UseCases():
     def set_paragraph_style(style):
         document = DocumentRepo.get_active_document()
 
-        current_style = document.cursor.get_first_node().paragraph().style
-        if current_style == style:
-            style = 'p'
-
         document.add_command('set_paragraph_style', style)
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -491,6 +488,35 @@ class UseCases():
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
+
+    @timer.timer
+    def change_indentation_level(difference):
+        document = DocumentRepo.get_active_document()
+
+        if document.cursor.has_selection():
+            first_node = document.cursor.get_first_node().paragraph_start()
+            next_to_last = document.cursor.get_last_node().prev_in_parent()
+            if next_to_last != None:
+                last_node = next_to_last.paragraph_end()
+            else:
+                last_node = document.cursor.get_last_node().paragraph_end()
+
+            paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
+            paragraphs = []
+            for paragraph_no in paragraph_nos:
+                paragraphs.append(document.ast.paragraphs[paragraph_no])
+        else:
+            paragraphs = [document.cursor.get_insert_node().paragraph()]
+
+        commands = []
+        for paragraph in paragraphs:
+            new_level = max(0, min(4, paragraph.indentation_level + difference))
+            commands.append(['set_indentation_level', new_level, paragraph.nodes[0]])
+        document.add_composite_command(*commands)
+
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def left(do_selection=False):

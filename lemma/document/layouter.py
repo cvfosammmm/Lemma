@@ -39,7 +39,7 @@ class Layouter(object):
             if paragraph.layout == None:
                 self.paragraph_style = paragraph.style
 
-                indentation = LayoutInfo.get_indentation(paragraph.style)
+                indentation = LayoutInfo.get_indentation(paragraph.style, paragraph.indentation_level)
                 width = LayoutInfo.get_max_layout_width() - indentation
 
                 layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph.nodes)

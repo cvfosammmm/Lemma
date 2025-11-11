@@ -108,6 +108,7 @@ class ToolBarMain(Gtk.Box):
         self.paragraph_style_menu_button.set_tooltip_text(_('Paragraph Style'))
         self.paragraph_style_menu_button.add_css_class('flat')
         self.paragraph_style_menu_button.set_action_name('win.show-paragraph-style-menu')
+
         self.append(self.paragraph_style_menu_button)
         self.append(Gtk.Separator())
 
@@ -125,6 +126,24 @@ class ToolBarMain(Gtk.Box):
         box.append(self.bold_button)
         box.append(self.italic_button)
         self.append(box)
+
+        self.append(Gtk.Separator())
+
+        self.indent_less_button = Gtk.Button.new_from_icon_name('indent-less-symbolic')
+        self.indent_less_button.set_action_name('win.decrease-indent')
+        self.indent_less_button.set_can_focus(False)
+        self.indent_less_button.set_tooltip_text(_('Decrease Indent'))
+
+        self.indent_more_button = Gtk.Button.new_from_icon_name('indent-more-symbolic')
+        self.indent_more_button.set_action_name('win.increase-indent')
+        self.indent_more_button.set_can_focus(False)
+        self.indent_more_button.set_tooltip_text(_('Increase Indent'))
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.indent_less_button)
+        box.append(self.indent_more_button)
+        self.append(box)
+
         self.append(Gtk.Separator())
 
         self.image_button = Gtk.Button.new_from_icon_name('insert-image-symbolic')
@@ -135,6 +154,7 @@ class ToolBarMain(Gtk.Box):
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.image_button)
         self.append(box)
+
         self.append(Gtk.Separator())
 
         self.insert_link_button = Gtk.ToggleButton()
