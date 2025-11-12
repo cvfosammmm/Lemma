@@ -26,6 +26,7 @@ class ExportBulkView(DialogViewAction):
 
     def __init__(self, main_window):
         DialogViewAction.__init__(self, main_window, _('Export Documents'), 500, 'export-bulk-dialog', _('Export'))
+        self.set_default_size(500, 518)
 
         self.filename_label = self.add_header_label('<b>' + _('Filename') + '</b>')
         self.filename_label.set_margin_bottom(1)
@@ -41,7 +42,6 @@ class ExportBulkView(DialogViewAction):
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_child(self.list)
         self.scrolled_window.set_propagate_natural_height(True)
-        self.scrolled_window.set_max_content_height(242)
         self.content.append(self.scrolled_window)
 
         self.select_all_button = Gtk.CheckButton.new_with_label(_('Select All'))
