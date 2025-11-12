@@ -63,7 +63,7 @@ class HTMLExporter(object):
                 self.process_list(node_list)
 
             if paragraph.style in ['ul']:
-                if i == len(document.ast.paragraphs) or paragraph.style != document.ast.paragraphs[i+1].style:
+                if i == len(document.ast.paragraphs) - 1 or paragraph.style != document.ast.paragraphs[i+1].style:
                     self.html += '</li></' + paragraph.style + '>'
                 else:
                     self.html += '</li>'
