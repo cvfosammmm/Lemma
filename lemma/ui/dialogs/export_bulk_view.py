@@ -33,7 +33,7 @@ class ExportBulkView(DialogViewAction):
         self.file_chooser_button.dialog.set_initial_name('.zip')
         self.file_chooser_button.dialog.set_title(_('Choose File'))
 
-        self.documents_label = self.add_header_label('<b>' + _('Documents to export') + '</b>')
+        self.documents_label = self.add_header_label('<b>' + _('Documents to Export') + '</b>')
         self.documents_label.set_margin_bottom(1)
 
         self.list = Gtk.ListBox()
@@ -51,12 +51,12 @@ class ExportBulkView(DialogViewAction):
 
 class Row(Gtk.ListBoxRow):
 
-    def __init__(self, document):
+    def __init__(self, document_id, title):
         Gtk.ListBoxRow.__init__(self)
         self.set_activatable(False)
 
-        self.document = document
-        label = Gtk.Label.new(document.title)
+        self.document_id = document_id
+        label = Gtk.Label.new(title)
         label.set_ellipsize(Pango.EllipsizeMode.END)
         label.set_margin_end(12)
         self.button = Gtk.CheckButton()

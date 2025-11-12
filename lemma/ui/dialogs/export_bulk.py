@@ -48,7 +48,7 @@ class Dialog(object):
 
     def init_current_values(self):
         self.current_values['filename'] = None
-        self.current_values['documents'] = set([DocumentRepo.get_by_id(doc_stub['id']) for doc_stub in DocumentRepo.list()])
+        self.current_values['document_ids'] = set([doc_stub['id'] for doc_stub in DocumentRepo.list()])
 
     def populate_view(self):
         last_export_folder = Settings.get_value('last_bulk_export_folder')
@@ -57,9 +57,9 @@ class Dialog(object):
         if last_export_folder != None:
             self.view.file_chooser_button.dialog.set_initial_folder(Gio.File.new_for_path(last_export_folder))
 
-        for document in [DocumentRepo.get_by_id(doc_stub['id']) for doc_stub in DocumentRepo.list()]:
-            row = view.Row(document)
-            row.button.set_active(document in self.current_values['documents'])
+        for doc_stub in DocumentRepo.list():
+            row = view.Row(doc_stub['id'], doc_stub['title'])
+            row.button.set_active(doc_stub['id'] in self.current_values['document_ids'])
             self.view.list.append(row)
         self.view.select_all_button.set_active(True)
 
@@ -67,26 +67,26 @@ class Dialog(object):
         self.view.file_chooser_button.connect('file-set', self.on_file_chosen)
 
         for row in self.view.list:
-            row.button.connect('toggled', self.on_document_button_toggled, row.document)
+            row.button.connect('toggled', self.on_document_button_toggled, row.document_id)
         self.view.select_all_button.connect('toggled', self.on_select_all_button_toggled)
 
         self.view.cancel_button.connect('clicked', self.on_cancel_button_clicked)
         self.view.submit_button.connect('clicked', self.on_submit_button_clicked)
 
     def validate(self):
-        is_valid = self.current_values['filename'] != None and len(self.current_values['documents']) > 0
+        is_valid = self.current_values['filename'] != None and len(self.current_values['document_ids']) > 0
         self.view.submit_button.set_sensitive(is_valid)
 
-        if len(self.current_values['documents']) == len(DocumentRepo.list()):
+        if len(self.current_values['document_ids']) == len(DocumentRepo.list()):
             self.view.select_all_button.set_active(True)
-        elif len(self.current_values['documents']) == 0:
+        elif len(self.current_values['document_ids']) == 0:
             self.view.select_all_button.set_active(False)
 
-    def on_document_button_toggled(self, button, document):
+    def on_document_button_toggled(self, button, document_id):
         if button.get_active():
-            self.current_values['documents'].add(document)
+            self.current_values['document_ids'].add(document_id)
         else:
-            self.current_values['documents'].discard(document)
+            self.current_values['document_ids'].discard(document_id)
         self.validate()
 
     def on_select_all_button_toggled(self, button):
@@ -111,7 +111,8 @@ class Dialog(object):
         UseCases.settings_set_value('last_bulk_export_folder', os.path.dirname(arch_filename))
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            for document in self.current_values['documents']:
+            for document_id in self.current_values['document_ids']:
+                document = DocumentRepo.get_by_id(document_id)
                 filename = os.path.join(temp_dir, str(document.id) + '.md')
 
                 exporter = HTMLExporter()
