@@ -22,6 +22,7 @@ from gi.repository import Gtk
 import lemma.ui.dialogs.settings_view as view
 import lemma.ui.dialogs.settings_page_colors as page_colors
 import lemma.ui.dialogs.settings_page_workspace as page_workspace
+import lemma.ui.dialogs.settings_page_toolbars as page_toolbars
 import lemma.ui.dialogs.settings_page_autocomplete as page_autocomplete
 import lemma.ui.dialogs.settings_page_storage as page_storage
 from lemma.use_cases.use_cases import UseCases
@@ -41,16 +42,19 @@ class Dialog(object):
 
         self.page_colors = page_colors.PageColors(self, self.main_window)
         self.page_workspace = page_workspace.PageWorkspace(self, self.main_window)
+        self.page_toolbars = page_toolbars.PageToolbars(self, self.main_window)
         self.page_autocomplete = page_autocomplete.PageAutocomplete(self, self.main_window)
         self.page_storage = page_storage.PageStorage(self, self.main_window)
 
         self.view.notebook.append_page(self.page_colors.view, Gtk.Label.new(_('Colors')))
         self.view.notebook.append_page(self.page_workspace.view, Gtk.Label.new(_('Workspace')))
+        self.view.notebook.append_page(self.page_toolbars.view, Gtk.Label.new(_('Toolbars')))
         self.view.notebook.append_page(self.page_autocomplete.view, Gtk.Label.new(_('Autocomplete')))
         self.view.notebook.append_page(self.page_storage.view, Gtk.Label.new(_('Storage')))
 
         self.page_colors.init()
         self.page_workspace.init()
+        self.page_toolbars.init()
         self.page_autocomplete.init()
         self.page_storage.init()
 

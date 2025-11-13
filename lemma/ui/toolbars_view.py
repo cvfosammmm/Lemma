@@ -110,7 +110,9 @@ class ToolBarMain(Gtk.Box):
         self.paragraph_style_menu_button.set_action_name('win.show-paragraph-style-menu')
 
         self.append(self.paragraph_style_menu_button)
-        self.append(Gtk.Separator())
+
+        self.tag_buttons_separator = Gtk.Separator()
+        self.append(self.tag_buttons_separator)
 
         self.bold_button = Gtk.Button.new_from_icon_name('bold-text-symbolic')
         self.bold_button.set_action_name('win.toggle-bold')
@@ -127,7 +129,8 @@ class ToolBarMain(Gtk.Box):
         box.append(self.italic_button)
         self.append(box)
 
-        self.append(Gtk.Separator())
+        self.indentation_buttons_separator = Gtk.Separator()
+        self.append(self.indentation_buttons_separator)
 
         self.indent_less_button = Gtk.Button.new_from_icon_name('indent-less-symbolic')
         self.indent_less_button.set_action_name('win.decrease-indent')
@@ -144,7 +147,8 @@ class ToolBarMain(Gtk.Box):
         box.append(self.indent_more_button)
         self.append(box)
 
-        self.append(Gtk.Separator())
+        self.insert_buttons_separator = Gtk.Separator()
+        self.append(self.insert_buttons_separator)
 
         self.image_button = Gtk.Button.new_from_icon_name('insert-image-symbolic')
         self.image_button.set_action_name('win.show-insert-image-dialog')
@@ -155,7 +159,8 @@ class ToolBarMain(Gtk.Box):
         box.append(self.image_button)
         self.append(box)
 
-        self.append(Gtk.Separator())
+        self.link_buttons_separator = Gtk.Separator()
+        self.append(self.link_buttons_separator)
 
         self.insert_link_button = Gtk.ToggleButton()
         self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))

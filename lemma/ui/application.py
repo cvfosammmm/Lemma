@@ -175,6 +175,7 @@ class Application(Adw.Application):
         self.cursor_state.update_tag_toggle(self.cursor_state.toolbar.toolbar_main.italic_button, 'italic')
 
     def on_settings_changed(self):
+        self.toolbars.update()
         self.window_state.update()
         self.colors.update()
 
