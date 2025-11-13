@@ -363,13 +363,18 @@ class DocumentViewController():
                 elif not document.cursor.has_selection():
                     insert_paragraph = document.cursor.get_insert_node().paragraph()
                     paragraph_style = insert_paragraph.style
+                    indentation_level = insert_paragraph.indentation_level
 
                     if paragraph_style in ['ul']:
                         if len(insert_paragraph.nodes) == 1:
                             UseCases.set_paragraph_style('p')
+                            if indentation_level != 0:
+                                UseCases.set_indentation_level(0)
                         else:
                             UseCases.insert_xml('\n')
                             UseCases.set_paragraph_style(paragraph_style)
+                            if indentation_level != 0:
+                                UseCases.set_indentation_level(indentation_level)
                     elif paragraph_style.startswith('h'):
                         UseCases.insert_xml('\n')
                         if len(document.cursor.get_insert_node().paragraph().nodes) == 1:

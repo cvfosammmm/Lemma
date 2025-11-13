@@ -466,6 +466,7 @@ class UseCases():
         document = DocumentRepo.get_active_document()
 
         document.add_command('set_paragraph_style', style)
+
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
         MessageBus.add_change_code('document_ast_changed')
@@ -488,6 +489,16 @@ class UseCases():
             DocumentRepo.update(document)
             MessageBus.add_change_code('document_changed')
             MessageBus.add_change_code('document_ast_changed')
+
+    @timer.timer
+    def set_indentation_level(indentation_level):
+        document = DocumentRepo.get_active_document()
+
+        document.add_command('set_indentation_level', indentation_level, document.cursor.get_insert_node())
+
+        DocumentRepo.update(document)
+        MessageBus.add_change_code('document_changed')
+        MessageBus.add_change_code('document_ast_changed')
 
     @timer.timer
     def change_indentation_level(difference):
