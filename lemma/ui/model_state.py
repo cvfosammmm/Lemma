@@ -44,11 +44,13 @@ class ModelState(object):
         self.text_in_clipboard = None
         self.subtree_in_clipboard = None
         self.image_in_clipboard = None
+        self.multiple_lines_selected = None
         self.links_inside_selection = None
         self.widget_selected = None
         self.selected_widget_is_max = None
         self.selected_widget_is_min = None
         self.cursor_inside_link = None
+        self.cursor_starts_paragraph = None
         self.remove_link_active = None
         self.edit_link_active = None
 
@@ -58,6 +60,7 @@ class ModelState(object):
         self.mode = ApplicationState.get_value('mode')
         self.has_active_doc = (self.mode == 'documents' and self.document != None)
         self.selected_nodes = self.document.ast.get_subtree(*self.document.cursor.get_state()) if self.has_active_doc else []
+        self.insert = self.document.cursor.get_insert_node() if self.has_active_doc else None
 
         self.prev_doc = DocumentRepo.get_prev_id_in_history(self.document.id) if self.has_active_doc else None
         self.next_doc = DocumentRepo.get_next_id_in_history(self.document.id) if self.has_active_doc else None
@@ -70,12 +73,14 @@ class ModelState(object):
         self.text_in_clipboard = 'text/plain;charset=utf-8' in self.clipboard_formats
         self.subtree_in_clipboard = 'lemma/ast' in self.clipboard_formats
         self.image_in_clipboard = 'image/jpeg' in self.clipboard_formats or 'image/png' in self.clipboard_formats
+        self.multiple_lines_selected = self.has_active_doc and len([node for node in self.selected_nodes if node.type == 'eol']) > 0
         self.links_inside_selection = self.has_active_doc and len([node for node in self.selected_nodes if node.link != None]) > 0
         self.whole_selection_is_one_link = self.links_inside_selection and (len(set([node.link for node in self.selected_nodes])) == 1)
         self.widget_selected = len(self.selected_nodes) == 1 and self.selected_nodes[0].type == 'widget'
         self.selected_widget_is_max = self.widget_selected and (self.selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width() or not self.selected_nodes[0].value.is_resizable())
         self.selected_widget_is_min = self.widget_selected and (self.selected_nodes[0].value.get_width() == self.selected_nodes[0].value.get_minimum_width() or not self.selected_nodes[0].value.is_resizable())
         self.cursor_inside_link = self.has_active_doc and self.document.cursor.get_insert_node().is_inside_link()
+        self.cursor_starts_paragraph = self.has_active_doc and self.insert == self.insert.paragraph_start()
 
         self.remove_link_active = (self.has_active_doc and (self.links_inside_selection or ((not self.has_selection) and self.cursor_inside_link)))
         self.edit_link_active = (self.has_active_doc and (self.whole_selection_is_one_link or (not self.has_selection) and self.cursor_inside_link))

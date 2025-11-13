@@ -350,8 +350,20 @@ class DocumentViewController():
             case ('right', 5):
                 UseCases.jump_right(True)
 
-            case ('tab', 0): UseCases.select_next_placeholder()
-            case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK): UseCases.select_prev_placeholder()
+            case ('tab', 0):
+                if self.model.application.model_state.multiple_lines_selected:
+                    UseCases.change_indentation_level(1)
+                elif not document.cursor.has_selection() and self.model.application.model_state.cursor_starts_paragraph:
+                    UseCases.change_indentation_level(1)
+                else:
+                    UseCases.select_next_placeholder()
+            case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK):
+                if self.model.application.model_state.multiple_lines_selected:
+                    UseCases.change_indentation_level(-1)
+                elif not document.cursor.has_selection() and self.model.application.model_state.cursor_starts_paragraph:
+                    UseCases.change_indentation_level(-1)
+                else:
+                    UseCases.select_prev_placeholder()
             case ('escape', _):
                 if document.cursor.has_selection():
                     selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
