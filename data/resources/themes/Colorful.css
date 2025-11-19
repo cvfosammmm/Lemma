@@ -105,6 +105,13 @@
 @define-color drop_color @text;
 @define-color bullets @text;
 
+/* Scrollbars */
+@define-color scrollbar_bg #e5e5e5;
+@define-color scrollbar_default #c0c0c0;
+@define-color scrollbar_hover #9b9b9b;
+@define-color scrollbar_active #777777;
+@define-color scrollbar_thin #d1d1d1;
+
 /* Toolbar */
 @define-color toolbar_fg #000000ff;
 

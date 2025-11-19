@@ -49,20 +49,6 @@ class DocumentView(Gtk.Overlay):
         self.layout_subtitle.set_ellipsize(Pango.EllipsizeMode.END)
         self.layout_subtitle.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
 
-        self.scrollbar_x = Gtk.Scrollbar.new(Gtk.Orientation.HORIZONTAL)
-        self.scrollbar_x.set_valign(Gtk.Align.END)
-        self.scrollbar_x.add_css_class('bottom')
-        self.scrollbar_x.add_css_class('overlay-indicator')
-        self.adjustment_x = self.scrollbar_x.get_adjustment()
-        self.add_overlay(self.scrollbar_x)
-
-        self.scrollbar_y = Gtk.Scrollbar.new(Gtk.Orientation.VERTICAL)
-        self.scrollbar_y.set_halign(Gtk.Align.END)
-        self.scrollbar_y.add_css_class('right')
-        self.scrollbar_y.add_css_class('overlay-indicator')
-        self.adjustment_y = self.scrollbar_y.get_adjustment()
-        self.add_overlay(self.scrollbar_y)
-
         self.link_overlay = Gtk.Label.new('')
         self.link_overlay.set_valign(Gtk.Align.END)
         self.link_overlay.set_halign(Gtk.Align.END)
@@ -141,44 +127,6 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.last_rendered_document = None
         self.last_cache_reset = time.time()
 
-        self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
-        self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
-        self.cursor_blink_reset = time.time()
-        self.cursor_visible = True
-
-        self.add_tick_callback(self.animation_callback)
-
-    def update(self):
-        if self.model.document == None: return
-
-        new_active_document = self.model.document != self.last_rendered_document
-        document_changed = max(self.model.document.last_cursor_movement, self.model.document.last_modified) > self.last_cache_reset
-        if new_active_document or document_changed:
-            self.render_cache = dict()
-            self.do_render_title = True
-            self.last_rendered_document = self.model.document
-            self.last_cache_reset = time.time()
-            self.reset_cursor_blink()
-        self.queue_draw()
-
-    def reset_cursor_blink(self):
-        self.cursor_blink_reset = time.time()
-
-    def animation_callback(self, widget, frame_clock):
-        time_since_blink_start = time.time() - self.cursor_blink_reset
-        time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
-
-        if time_since_blink_start <= 10 and time_in_cycle > 0.6:
-            cursor_visible = False
-        else:
-            cursor_visible = True
-
-        if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
-            self.cursor_visible = cursor_visible
-            self.queue_draw()
-
-        return True
-
     @timer.timer
     def do_snapshot(self, snapshot):
         if self.model.document == None: return
@@ -191,8 +139,8 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.setup_colors()
 
         content_offset_x = LayoutInfo.get_document_padding_left()
-        content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') - document.clipping.offset_y
-        title_offset_y = LayoutInfo.get_document_padding_top() - document.clipping.offset_y
+        content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') - self.model.scrolling_position_y
+        title_offset_y = LayoutInfo.get_document_padding_top() - self.model.scrolling_position_y
         self.first_selection_node, self.last_selection_node = document.cursor.get_first_and_last_node()
         first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
         last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
@@ -420,7 +368,7 @@ class DocumentViewDrawingArea(Gtk.Widget):
         if ApplicationState.get_value('document_view_hide_cursor_on_unfocus'):
             if not self.has_focus(): return
             if self.model.document.cursor.has_selection(): return
-            if not self.cursor_visible: return
+            if not self.model.cursor_visible: return
 
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout

@@ -46,6 +46,6 @@ class Backlinks(object):
         document_id = row.get_child().document_id
 
         UseCases.set_active_document(document_id)
-        UseCases.scroll_to_xy(0, 0)
+        UseCases.scroll_to_xy(0, 0, animation_type=None)
 
 

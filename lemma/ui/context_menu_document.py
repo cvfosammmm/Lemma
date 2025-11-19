@@ -86,7 +86,7 @@ class ContextMenuDocumentView(ContextMenu):
         self.box.append(self.remove_link_button)
 
         self.edit_link_button = self.create_button('Edit Link')
-        self.edit_link_button.set_action_name('win.edit-link')
+        self.edit_link_button.set_action_name('win.show-link-popover')
         self.box.append(self.edit_link_button)
 
         self.link_buttons_separator = Gtk.Separator()
@@ -156,7 +156,7 @@ class EditMenu(PopoverView):
         self.add_closing_button(self.remove_link_button)
 
         self.edit_link_button = MenuBuilder.create_button(_('Edit Link'))
-        self.edit_link_button.set_action_name('win.edit-link')
+        self.edit_link_button.set_action_name('win.show-link-popover')
         self.add_closing_button(self.edit_link_button)
 
         self.link_buttons_separator = Gtk.Separator()

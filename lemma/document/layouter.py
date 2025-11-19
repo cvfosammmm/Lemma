@@ -415,4 +415,11 @@ class Layouter(object):
 
         return 'book'
 
+    def flatten_layout(self, layout_tree):
+        result = [layout_tree]
+        for child in layout_tree['children']:
+            result += self.flatten_layout(child)
+        return result
+
+
 

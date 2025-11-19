@@ -31,6 +31,7 @@ import lemma.ui.window_state as window_state
 import lemma.ui.main_window_view as main_window_view
 import lemma.ui.history as history
 import lemma.ui.document_view as document_view
+import lemma.ui.scrollbars as scrollbars
 import lemma.ui.context_menu_document as context_menu_document
 import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
@@ -65,6 +66,7 @@ class Application(Adw.Application):
         self.popover_manager = PopoverManager(self.main_window)
         self.history = history.History(self.main_window)
         self.document_view = document_view.DocumentView(self.main_window, self.model_state, self)
+        self.scrollbars = scrollbars.Scrollbars(self.main_window, self.model_state, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self.model_state, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
         self.toolbars = toolbars.ToolBars(self.main_window)
@@ -74,7 +76,7 @@ class Application(Adw.Application):
         self.actions = actions.Actions(self.main_window, self, self.model_state)
         self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self, self.model_state)
         self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self, self.model_state)
-        self.autocomplete = autocomplete.Autocomplete(self.main_window)
+        self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window)
 
@@ -105,6 +107,14 @@ class Application(Adw.Application):
 
         self.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)
+
+        self.main_window.add_tick_callback(self.animate)
+
+    def animate(self, widget, frame_clock):
+        self.document_view.animate()
+        self.scrollbars.animate()
+
+        return True
 
     def on_clipboard_changed(self, clipboard):
         self.model_state.update()

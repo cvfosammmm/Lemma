@@ -167,7 +167,7 @@ class ToolBarMain(Gtk.Box):
         self.insert_link_button.set_can_focus(False)
         self.insert_link_button.add_css_class('flat')
         self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
-        self.insert_link_button.set_action_name('win.insert-link')
+        self.insert_link_button.set_action_name('win.show-link-popover')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.insert_link_button)

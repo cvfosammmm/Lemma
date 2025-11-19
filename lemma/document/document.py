@@ -15,21 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import time, os.path
+import time
 
 from lemma.document.ast import Root, Cursor
+from lemma.document.command_manager import CommandManager
 from lemma.document.layouter import Layouter
 from lemma.document.plaintext_scanner import PlaintextScanner
 from lemma.document.links_scanner import LinksScanner
 from lemma.document.clipping import Clipping
 from lemma.document.xml_scanner import XMLScanner
 from lemma.services.layout_info import LayoutInfo
-
-for (path, directories, files) in os.walk(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'commands')):
-    for file in files:
-        if file.endswith('.py'):
-            name = os.path.basename(file[:-3])
-            exec('import lemma.document.commands.' + name + ' as ' + name)
+from lemma.application_state.application_state import ApplicationState
 
 
 class Document():
@@ -37,9 +33,6 @@ class Document():
     def __init__(self, id=None):
         self.last_modified = time.time()
         self.last_cursor_movement = time.time()
-        self.commands = list()
-        self.commands_preedit = list()
-        self.last_command = -1
 
         self.id = id
         self.title = ''
@@ -51,6 +44,7 @@ class Document():
 
         self.change_flag = dict()
 
+        self.command_manager = CommandManager(self)
         self.layouter = Layouter(self)
         self.clipping = Clipping(self)
         self.plaintext_scanner = PlaintextScanner(self)
@@ -58,51 +52,58 @@ class Document():
         self.xml_scanner = XMLScanner(self)
 
     def add_command(self, name, *parameters):
-        command = eval(name + '.Command')(*parameters)
-        self.run_command(command)
+        self.command_manager.add_command(name, *parameters)
 
     def add_composite_command(self, *command_specs):
-        commands = [eval(command_spec[0] + '.Command')(*command_spec[1:]) for command_spec in command_specs]
-        self.run_command(composite.Command(commands))
+        self.command_manager.add_composite_command(*command_specs)
 
-    def run_command(self, command):
-        command.run(self)
-        self.update()
+    def select_node(self, node):
+        next_node = node.next_in_parent()
+        self.add_command('move_cursor_to_node', node, next_node)
 
-        self.commands_preedit.append(command)
+    def delete_selection(self):
+        node_from = self.cursor.get_first_node()
+        node_to = self.cursor.get_last_node()
+        self.add_command('delete', node_from, node_to)
+        self.add_command('update_implicit_x_position')
 
-        if command.is_undo_checkpoint:
-            self.commands = self.commands[:self.last_command + 1] + self.commands_preedit
-            self.last_command += len(self.commands_preedit)
-            self.commands_preedit = list()
+    def scroll_insert_on_screen(self, window_height, animation_type=None):
+        insert_node = self.cursor.get_insert_node()
+        insert_position = self.get_absolute_xy(insert_node.layout)
 
-    def can_undo(self):
-        return self.last_command >= 0
+        content_offset = LayoutInfo.get_normal_document_offset()
+        insert_y = insert_position[1] + content_offset
+        insert_height = insert_node.layout['height']
+        scrolling_offset_y = self.get_current_scrolling_offsets()[1]
+        content_height = self.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
 
-    def can_redo(self):
-        return self.last_command < len(self.commands) - 1
+        if window_height <= 0:
+            new_position = (0, 0)
+        elif self.get_absolute_xy(self.get_line_at_y(insert_position[1]))[1] == 0:
+            new_position = (0, 0)
+        elif insert_y < scrolling_offset_y:
+            if insert_height > window_height:
+                new_position = (0, insert_y - window_height + insert_height)
+            else:
+                new_position = (0, insert_y)
+        elif insert_position[1] >= self.get_height() - insert_height and content_height >= window_height:
+            new_position = (0, self.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height)
+        elif insert_y > scrolling_offset_y - insert_height + window_height:
+            new_position = (0, insert_y - window_height + insert_height)
+        else:
+            new_position = self.clipping.get_target_offsets()
+
+        if new_position[0] != self.clipping.target_x or new_position[1] != self.clipping.target_y:
+            self.command_manager.add_command('scroll_to_xy', *new_position, animation_type)
+
+    def scroll_to_xy(self, x, y, animation_type=None):
+        self.command_manager.add_command('scroll_to_xy', x, y, animation_type)
 
     def undo(self):
-        for command in reversed(self.commands_preedit):
-            command.undo(self)
-            self.update()
-        self.commands_preedit = list()
-
-        for command in reversed(self.commands[:self.last_command + 1]):
-            command.undo(self)
-            self.update()
-            self.last_command -= 1
-
-            if command.is_undo_checkpoint: break
+        self.command_manager.undo()
 
     def redo(self):
-        for command in self.commands[self.last_command + 1:]:
-            command.run(self)
-            self.update()
-
-            self.last_command += 1
-
-            if command.is_undo_checkpoint: break
+        self.command_manager.redo()
 
     def update_last_modified(self):
         for client in self.change_flag:
@@ -116,7 +117,6 @@ class Document():
 
     def update(self):
         self.layouter.update()
-        self.clipping.update()
         self.plaintext_scanner.update()
         self.links_scanner.update()
         self.xml_scanner.update()
@@ -129,11 +129,20 @@ class Document():
         self.change_flag[client] = False
         return result
 
+    def can_undo(self):
+        return self.command_manager.can_undo()
+
+    def can_redo(self):
+        return self.command_manager.can_redo()
+
     def get_height(self):
         return self.ast.paragraphs[-1].layout['y'] + self.ast.paragraphs[-1].layout['height']
 
     def get_width(self):
         return self.ast.paragraphs[0].layout['width']
+
+    def get_current_scrolling_offsets(self):
+        return self.clipping.get_current_offsets()
 
     def get_ancestors(self, layout):
         ancestors = []
@@ -146,7 +155,7 @@ class Document():
         line = self.get_line_at_y(y)
 
         if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
-            for node in [node for node in self.flatten(line) if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}]:
+            for node in [node for node in self.layouter.flatten_layout(line) if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}]:
                 node_x, node_y = self.get_absolute_xy(node)
                 if x >= node_x and x <= node_x + node['width'] and y >= node_y and y <= node_y + node['height']:
                     return node
@@ -158,7 +167,7 @@ class Document():
 
         hbox = self.get_line_at_y(y)
         if y >= hbox['y'] + hbox['parent']['y'] and y < hbox['y'] + hbox['parent']['y'] + hbox['height']:
-            for layout in self.flatten(hbox):
+            for layout in self.layouter.flatten_layout(hbox):
                 if layout['type'] == 'hbox':
                     layout_x, layout_y = self.get_absolute_xy(layout)
                     if x >= layout_x and x <= layout_x + layout['width'] \
@@ -176,12 +185,6 @@ class Document():
                 min_distance = distance
 
         return closest_layout
-
-    def flatten(self, layout_tree):
-        result = [layout_tree]
-        for child in layout_tree['children']:
-            result += self.flatten(child)
-        return result
 
     def get_line_at_y(self, y):
         if y < 0:

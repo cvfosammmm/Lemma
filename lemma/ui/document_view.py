@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-import time
+import time, math
 from urllib.parse import urlparse
 
 from lemma.services.settings import Settings
@@ -42,12 +42,18 @@ class DocumentView():
         self.application = application
 
         self.cursor_x, self.cursor_y = None, None
+        self.scrolling_position_x, self.scrolling_position_y = -1, -1
         self.ctrl_pressed = False
         self.scrolling_multiplier = 2.5
         self.selected_link_target = None
         self.link_target_at_cursor = None
         self.link_target_at_pointer = None
         self.last_cursor_or_scrolling_change = time.time()
+
+        self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
+        self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
+        self.cursor_blink_reset = time.time()
+        self.cursor_visible = True
 
         self.document = None
 
@@ -81,15 +87,53 @@ class DocumentView():
 
         self.update_link_at_cursor()
         self.presenter.update()
-        self.view.content.update()
+
+        if self.document == None: return
+
+        new_active_document = self.document != self.view.content.last_rendered_document
+        document_changed = max(self.document.last_cursor_movement, self.document.last_modified) > self.view.content.last_cache_reset
+        if new_active_document or document_changed:
+            self.view.content.render_cache = dict()
+            self.view.content.do_render_title = True
+            self.view.content.last_rendered_document = self.document
+            self.view.content.last_cache_reset = time.time()
+            self.reset_cursor_blink()
+        self.view.content.queue_draw()
+
+    def animate(self):
+        if self.document == None:
+            self.scrolling_position_x, self.scrolling_position_y = -1, -1
+            return True
+
+        scrolling_position_x, scrolling_position_y = self.document.get_current_scrolling_offsets()
+
+        time_since_blink_start = time.time() - self.cursor_blink_reset
+        time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
+
+        if time_since_blink_start <= 10 and time_in_cycle > 0.6:
+            cursor_visible = False
+        else:
+            cursor_visible = True
+
+        do_draw = False
+
+        if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
+            self.cursor_visible = cursor_visible
+            do_draw = True
+
+        if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
+            self.scrolling_position_x = scrolling_position_x
+            self.scrolling_position_y = scrolling_position_y
+            do_draw = True
+
+        if do_draw:
+            self.view.content.queue_draw()
+
+    def reset_cursor_blink(self):
+        self.cursor_blink_reset = time.time()
 
     def set_size(self, width, height):
         UseCases.app_state_set_values({'document_view_width': width, 'document_view_height': height})
-        offset_x = self.view.adjustment_x.get_value()
-        offset_y = self.view.adjustment_y.get_value()
-
-        if self.document != None:
-            UseCases.scroll_to_xy(offset_x, offset_y)
         self.presenter.update()
 
     def set_cursor_position(self, x, y):
@@ -100,8 +144,8 @@ class DocumentView():
             document = DocumentRepo.get_active_document()
             if document == None: return
 
-            x = document.clipping.offset_x + (self.cursor_x if self.cursor_x != None else 0)
-            y = document.clipping.offset_y + (self.cursor_y if self.cursor_y != None else 0)
+            x = self.scrolling_position_x + (self.cursor_x if self.cursor_x != None else 0)
+            y = self.scrolling_position_y + (self.cursor_y if self.cursor_y != None else 0)
             x -= LayoutInfo.get_document_padding_left()
             y -= LayoutInfo.get_normal_document_offset()
             link = None
@@ -112,7 +156,7 @@ class DocumentView():
                     link = leaf_box['node'].link
 
             self.set_link_target_at_pointer(link)
-            self.presenter.update_pointer()
+            self.presenter.update()
 
     def set_ctrl_pressed(self, is_pressed):
         if is_pressed != self.ctrl_pressed:
@@ -159,7 +203,7 @@ class DocumentView():
         if self.document != None:
             self.title_widget.set_visible(True)
             UseCases.app_state_set_value('title_buttons_height', 50)
-            UseCases.scroll_to_xy(0, 0)
+            UseCases.scroll_to_xy(0, 0, animation_type=None)
             self.view.content.queue_draw()
             self.title_widget.title_entry.grab_focus()
             self.title_widget.title_entry.set_position(self.title_widget.title_entry.get_text_length())

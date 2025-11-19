@@ -19,9 +19,11 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib, GObject, Gio
 
+from urllib.parse import urlparse
 import time
 
 import lemma.services.xml_helpers as xml_helpers
+from lemma.widgets.image import Image
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
@@ -92,14 +94,11 @@ class DocumentViewController():
         self.scrolling_controller.connect('decelerate', self.on_decelerate)
         self.content.add_controller(self.scrolling_controller)
 
-        self.view.adjustment_x.connect('value-changed', self.on_adjustment_value_changed)
-        self.view.adjustment_y.connect('value-changed', self.on_adjustment_value_changed)
-
     def on_primary_button_press(self, controller, n_press, x, y):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
-        x = document.clipping.offset_x + x
-        y = document.clipping.offset_y + y
+        x = self.model.scrolling_position_x + x
+        y = self.model.scrolling_position_y + y
         keyboard_state = controller.get_current_event_state() & modifiers
 
         self.model.selected_link_target = None
@@ -124,7 +123,6 @@ class DocumentViewController():
                 else:
                     if leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
                         UseCases.select_node(leaf_box['node'])
-                        UseCases.scroll_insert_on_screen(animate=True)
                     else:
                         UseCases.move_cursor_to_xy(x, y, False)
                     if link != None:
@@ -147,8 +145,8 @@ class DocumentViewController():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
-        x = document.clipping.offset_x + x
-        y = document.clipping.offset_y + y
+        x = self.model.scrolling_position_x + x
+        y = self.model.scrolling_position_y + y
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if keyboard_state == 0:
@@ -167,8 +165,8 @@ class DocumentViewController():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
-        x_offset = document.clipping.offset_x + x - LayoutInfo.get_document_padding_left()
-        y_offset = document.clipping.offset_y + y - LayoutInfo.get_normal_document_offset()
+        x_offset = self.model.scrolling_position_x + x - LayoutInfo.get_document_padding_left()
+        y_offset = self.model.scrolling_position_y + y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if y_offset > 0:
@@ -176,7 +174,6 @@ class DocumentViewController():
                 leaf_box = document.get_leaf_at_xy(x_offset, y_offset)
                 if keyboard_state == 0 and leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
                     UseCases.select_node(leaf_box['node'])
-                    UseCases.scroll_insert_on_screen(animate=True)
                 else:
                     UseCases.move_cursor_to_xy(x_offset, y_offset, False)
             self.model.application.context_menu_document.popup_at_cursor(x, y)
@@ -184,7 +181,7 @@ class DocumentViewController():
     def on_drag_begin(self, gesture, x, y, data=None):
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.model.document.clipping.offset_y
+        y += self.model.scrolling_position_y
 
         if y <= 0:
             gesture.reset()
@@ -196,19 +193,19 @@ class DocumentViewController():
         x, y = start_point.x + x, start_point.y + y
 
         if y < 0:
-            new_x = self.model.document.clipping.offset_x
-            new_y = max(0, self.model.document.clipping.offset_y + y)
-            UseCases.scroll_to_xy(new_x, new_y)
+            new_x = self.model.scrolling_position_x
+            new_y = max(0, self.model.scrolling_position_y + y)
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - ApplicationState.get_value('document_view_height') > 0:
             height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
-            new_x = self.model.document.clipping.offset_x
-            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height'))
-            UseCases.scroll_to_xy(new_x, new_y)
+            new_x = self.model.scrolling_position_x
+            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.scrolling_position_y + y - ApplicationState.get_value('document_view_height'))
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.model.document.clipping.offset_y
+        y += self.model.scrolling_position_y
 
         UseCases.move_cursor_to_xy(x, y, True)
 
@@ -222,9 +219,51 @@ class DocumentViewController():
 
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.model.document.clipping.offset_y
+        y += self.model.scrolling_position_y
 
-        UseCases.handle_drop(value, x, y)
+        self.handle_drop(value, x, y)
+
+    def handle_drop(self, value, x, y):
+        document = DocumentRepo.get_active_document()
+
+        ApplicationState.set_value('drop_cursor_position', None)
+
+        if isinstance(value, Gdk.FileList):
+            for file in value.get_files():
+                file_info = file.query_info('standard::content-type', 0, None)
+                path = file.get_parse_name()
+                content_type = file_info.get_content_type()
+
+                if content_type.startswith('image/'):
+                    texture = Gdk.Texture.new_from_file(file)
+                    data = texture.save_to_png_bytes().unref_to_data()
+                    image = Image(data)
+
+                    UseCases.move_cursor_to_xy(x, y)
+                    UseCases.add_image(image)
+
+        elif isinstance(value, str):
+            tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+            link_at_cursor = ApplicationState.get_value('link_at_cursor')
+            text = value
+
+            if len(text) < 2000 and urlparse(text.strip()).scheme in ['http', 'https'] and '.' in urlparse(text.strip()).netloc:
+                text = xml_helpers.escape(text.strip())
+                xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
+            else:
+                text = xml_helpers.escape(text)
+                xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
+
+            UseCases.move_cursor_to_xy(x, y)
+            UseCases.insert_xml(xml)
+            UseCases.scroll_insert_on_screen(animation_type='default')
+
+        elif isinstance(value, Gdk.Texture):
+            data = value.save_to_png_bytes().unref_to_data()
+            image = Image(data)
+
+            UseCases.move_cursor_to_xy(x, y)
+            UseCases.add_image(image)
 
     def on_drop_enter(self, controller, x, y):
         self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)
@@ -236,7 +275,7 @@ class DocumentViewController():
 
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.model.document.clipping.offset_y
+        y += self.model.scrolling_position_y
 
         UseCases.move_drop_cursor_to_xy(x, y)
 
@@ -253,15 +292,15 @@ class DocumentViewController():
         x, y = self.drop_cursor_x, self.drop_cursor_y
 
         if y < 56:
-            new_x = self.model.document.clipping.offset_x
-            new_y = max(0, self.model.document.clipping.offset_y + y - 56)
-            UseCases.scroll_to_xy(new_x, new_y)
+            new_x = self.model.scrolling_position_x
+            new_y = max(0, self.model.scrolling_position_y + y - 56)
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - ApplicationState.get_value('document_view_height') > -56:
             height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
-            new_x = self.model.document.clipping.offset_x
-            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.document.clipping.offset_y + y - ApplicationState.get_value('document_view_height') + 56)
-            UseCases.scroll_to_xy(new_x, new_y)
+            new_x = self.model.scrolling_position_x
+            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.scrolling_position_y + y - ApplicationState.get_value('document_view_height') + 56)
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         return True
 
@@ -281,17 +320,17 @@ class DocumentViewController():
             else:
                 dy *= self.model.scrolling_multiplier
                 dx *= self.model.scrolling_multiplier
-            x = min(0, max(0, document.clipping.offset_x + dx))
-            y = min(max(0, height - ApplicationState.get_value('document_view_height')), max(0, document.clipping.offset_y + dy))
+            x = min(0, max(0, self.model.scrolling_position_x + dx))
+            y = min(max(0, height - ApplicationState.get_value('document_view_height')), max(0, self.model.scrolling_position_y + dy))
 
-            UseCases.scroll_to_xy(x, y)
+            UseCases.scroll_to_xy(x, y, animation_type=None)
         return
 
     def on_decelerate(self, controller, vel_x, vel_y):
         if abs(vel_x) > 0 and abs(vel_y / vel_x) >= 1: vel_x = 0
         if abs(vel_y) > 0 and abs(vel_x / vel_y) >  1: vel_y = 0
 
-        UseCases.decelerate_scrolling(vel_x, vel_y)
+        UseCases.decelerate_scrolling(self.model.scrolling_position_x, self.model.scrolling_position_y, vel_x, vel_y)
 
     def on_keypress_content(self, controller, keyval, keycode, keyboard_state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
@@ -395,16 +434,16 @@ class DocumentViewController():
                         UseCases.insert_xml('\n')
 
                     UseCases.replace_max_string_before_cursor()
-                    UseCases.scroll_insert_on_screen(animate=True)
+                    UseCases.scroll_insert_on_screen(animation_type='default')
                 else:
                     UseCases.insert_xml('\n')
-                    UseCases.scroll_insert_on_screen(animate=True)
+                    UseCases.scroll_insert_on_screen(animation_type='default')
             case ('backspace', _):
                 UseCases.backspace()
-                UseCases.scroll_insert_on_screen(animate=True)
+                UseCases.scroll_insert_on_screen(animation_type='default')
             case ('delete', _):
                 UseCases.delete()
-                UseCases.scroll_insert_on_screen(animate=True)
+                UseCases.scroll_insert_on_screen(animation_type='default')
 
             case _: return False
         return True
@@ -415,8 +454,16 @@ class DocumentViewController():
 
     def on_im_commit(self, im_context, text):
         document = self.model.document
-        UseCases.im_commit(text)
-        UseCases.scroll_insert_on_screen(animate=True)
+
+        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+        link_at_cursor = ApplicationState.get_value('link_at_cursor')
+        xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
+
+        UseCases.insert_xml(xml)
+        if not document.cursor.has_selection() and text.isspace():
+            UseCases.replace_max_string_before_cursor()
+        UseCases.scroll_insert_on_screen(animation_type='default')
+        UseCases.signal_keyboard_input()
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()
@@ -424,7 +471,7 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.im_context.focus_in()
-        self.view.content.reset_cursor_blink()
+        self.model.reset_cursor_blink()
         self.view.content.queue_draw()
 
     def on_focus_out(self, controller):
@@ -454,15 +501,6 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.model.set_cursor_position(None, None)
-
-    def on_adjustment_value_changed(self, adjustment):
-        document = self.model.document
-
-        offset_x = self.view.adjustment_x.get_value()
-        offset_y = self.view.adjustment_y.get_value()
-        self.model.last_cursor_or_scrolling_change = time.time()
-        if offset_x != document.clipping.offset_x or offset_y != document.clipping.offset_y:
-            UseCases.scroll_to_xy(offset_x, offset_y)
 
     def get_link_at_xy(self, x, y):
         layout = self.model.document.get_leaf_at_xy(x, y)

@@ -17,11 +17,12 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from PIL import Image as PIL_Image
 
 from lemma.use_cases.use_cases import UseCases
+from lemma.widgets.image import Image
 from lemma.document_repo.document_repo import DocumentRepo
 
 
@@ -54,7 +55,9 @@ class Dialog(object):
                 document = DocumentRepo.get_active_document()
                 if document.cursor.get_insert_node().parent.type == 'root':
                     filename = file.get_path()
-                    UseCases.add_image_from_filename(filename)
-                    UseCases.scroll_insert_on_screen(animate=True)
+                    texture = Gdk.Texture.new_from_filename(filename)
+                    data = texture.save_to_png_bytes().unref_to_data()
+                    image = Image(data)
+                    UseCases.add_image(image)
 
 

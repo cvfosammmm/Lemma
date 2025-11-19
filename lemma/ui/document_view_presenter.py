@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import gi
-gi.require_version('Gtk', '4.0')
-from gi.repository import GObject
-
-import time
-
-from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 
 
@@ -35,49 +28,7 @@ class DocumentViewPresenter():
     def update(self):
         if self.model.document == None: return
 
-        self.update_size()
-        self.update_scrollbars()
         self.update_pointer()
-
-    def update_size(self):
-        if self.model.document == None: return
-
-        document = self.model.document
-        height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
-        scrolling_offset_y = document.clipping.offset_y
-
-        self.view.adjustment_x.set_page_size(1)
-        self.view.adjustment_y.set_page_size(ApplicationState.get_value('document_view_height'))
-        self.view.adjustment_x.set_upper(1)
-        self.view.adjustment_y.set_upper(height)
-
-        if scrolling_offset_y > self.view.adjustment_y.get_upper() - ApplicationState.get_value('document_view_height'):
-            self.view.adjustment_y.set_value(self.view.adjustment_y.get_upper())
-
-    def update_scrollbars(self):
-        if self.model.document == None: return
-
-        document = self.model.document
-        height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
-
-        self.view.scrollbar_x.set_visible(False)
-        self.view.scrollbar_y.set_visible(height > ApplicationState.get_value('document_view_height'))
-        self.view.adjustment_x.set_value(document.clipping.offset_x)
-        self.view.adjustment_y.set_value(document.clipping.offset_y)
-
-        if self.model.cursor_x != None and self.model.cursor_x > self.view.get_allocated_width() - 24:
-            self.view.scrollbar_y.add_css_class('hovering')
-        else:
-            self.view.scrollbar_y.remove_css_class('hovering')
-            if self.model.last_cursor_or_scrolling_change < time.time() - 1.5:
-                self.view.scrollbar_x.add_css_class('hidden')
-                self.view.scrollbar_y.add_css_class('hidden')
-            else:
-                self.view.scrollbar_x.remove_css_class('hidden')
-                self.view.scrollbar_y.remove_css_class('hidden')
-
-        GObject.timeout_add(1750, self.update_scrollbars)
-        return False
 
     def update_pointer(self):
         if self.model.document == None: return
@@ -87,8 +38,8 @@ class DocumentViewPresenter():
             self.content.set_cursor_from_name('default')
             return
 
-        x = document.clipping.offset_x + (self.model.cursor_x if self.model.cursor_x != None else 0)
-        y = document.clipping.offset_y + (self.model.cursor_y if self.model.cursor_y != None else 0)
+        x = self.model.scrolling_position_x + (self.model.cursor_x if self.model.cursor_x != None else 0)
+        y = self.model.scrolling_position_y + (self.model.cursor_y if self.model.cursor_y != None else 0)
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
 

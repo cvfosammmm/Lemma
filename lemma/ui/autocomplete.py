@@ -30,12 +30,14 @@ from lemma.use_cases.use_cases import UseCases
 
 class Autocomplete():
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, application):
         self.main_window = main_window
         self.widget = AutocompleteWidget()
         self.main_window.document_view.add_overlay(self.widget)
+        self.application = application
 
         self.is_active = False
+        self.position_on_screen = False
         self.command_at_cursor = ''
         self.command_at_cursor_first_node = None
         self.session_first_node = None
@@ -156,9 +158,32 @@ class Autocomplete():
             self.update_suggestions()
 
         self.widget.set_visible(self.is_active)
-        self.widget.update_position()
-        self.widget.set_visible(self.is_active and self.widget.position_is_visible() and not self.widget.focus_hide)
+        self.update_position()
+        self.widget.set_visible(self.is_active and self.position_on_screen and not self.widget.focus_hide)
         self.widget.queue_draw()
+
+    def update_position(self):
+        document = DocumentRepo.get_active_document()
+        insert = document.cursor.get_insert_node()
+        insert_x, insert_y = document.get_absolute_xy(insert.layout)
+        content_offset = LayoutInfo.get_normal_document_offset()
+        scrolling_offset_y = self.application.document_view.scrolling_position_y
+        insert_y += content_offset - scrolling_offset_y
+        insert_height = insert.layout['height']
+        insert_x += LayoutInfo.get_document_padding_left()
+        window_height = ApplicationState.get_value('document_view_height')
+        window_width = ApplicationState.get_value('document_view_width')
+
+        self.widget.x = min(insert_x, window_width - self.widget.width - 18)
+        if insert_y + insert_height + self.widget.max_height > window_height:
+            self.widget.y = insert_y - self.widget.height
+            self.position_on_screen = (self.widget.y + self.widget.height - self.widget.max_height >= 0 and self.widget.y + self.widget.height + insert_height <= window_height)
+        else:
+            self.widget.y = insert_y + insert_height
+            self.position_on_screen = (self.widget.y - insert_height >= 0 and self.widget.y + self.widget.max_height <= window_height)
+
+        self.widget.set_margin_top(self.widget.y)
+        self.widget.set_margin_start(self.widget.x)
 
     def update_command_at_cursor(self):
         # Tries to match a backslash followed by letters from the
@@ -239,7 +264,7 @@ class Autocomplete():
         insert = document.cursor.get_insert_node()
         xml = AutocompleteDB.get_xml(self.widget.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
-        UseCases.scroll_insert_on_screen(animate=True)
+        UseCases.scroll_insert_on_screen(animation_type='default')
 
         self.deactivate()
 
@@ -256,7 +281,6 @@ class AutocompleteWidget(Gtk.ScrolledWindow):
         self.y = 0
         self.line_height = 35
         self.max_height = 5 * self.line_height + 2
-        self.position_on_screen = False
         self.focus_hide = True
         self.set_size_request(self.width, self.height)
         self.set_valign(Gtk.Align.START)
@@ -315,32 +339,6 @@ class AutocompleteWidget(Gtk.ScrolledWindow):
                 adjustment.set_value(y)
             if offset < y + item_height - page_size:
                 adjustment.set_value(y + item_height - page_size)
-
-    def update_position(self):
-        document = DocumentRepo.get_active_document()
-        insert = document.cursor.get_insert_node()
-        insert_x, insert_y = document.get_absolute_xy(insert.layout)
-        content_offset = LayoutInfo.get_normal_document_offset()
-        scrolling_offset_y = document.clipping.offset_y
-        insert_y += content_offset - scrolling_offset_y
-        insert_height = insert.layout['height']
-        insert_x += LayoutInfo.get_document_padding_left()
-        window_height = ApplicationState.get_value('document_view_height')
-        window_width = ApplicationState.get_value('document_view_width')
-
-        self.x = min(insert_x, window_width - self.width - 18)
-        if insert_y + insert_height + self.max_height > window_height:
-            self.y = insert_y - self.height
-            self.position_on_screen = (self.y + self.height - self.max_height >= 0 and self.y + self.height + insert_height <= window_height)
-        else:
-            self.y = insert_y + insert_height
-            self.position_on_screen = (self.y - insert_height >= 0 and self.y + self.max_height <= window_height)
-
-        self.set_margin_top(self.y)
-        self.set_margin_start(self.x)
-
-    def position_is_visible(self):
-        return self.position_on_screen
 
 
 class ACItem(Gtk.ListBoxRow):

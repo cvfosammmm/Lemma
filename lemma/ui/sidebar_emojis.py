@@ -107,6 +107,6 @@ class SidebarEmojis(object):
         self.application.document_view.view.content.grab_focus()
 
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animate=True)
+        UseCases.scroll_insert_on_screen(animation_type='default')
 
 

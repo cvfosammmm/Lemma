@@ -86,7 +86,7 @@ class DocumentList(object):
 
     def activate_item(self, index):
         UseCases.set_active_document(self.document_stubs[index]['id'])
-        UseCases.scroll_to_xy(0, 0)
+        UseCases.scroll_to_xy(0, 0, animation_type=None)
 
     def on_primary_button_press(self, scrolling_widget, data):
         x_offset, y_offset, state = data

@@ -18,16 +18,17 @@
 
 class Command():
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, animation_type):
         self.x = x
         self.y = y
+        self.animation_type = animation_type
         self.is_undo_checkpoint = False
         self.state = dict()
 
     def run(self, document):
         self.state['clipping_state_before'] = document.clipping.get_state()
 
-        document.clipping.set_scrolling_offset(int(self.x), int(self.y))
+        document.clipping.set_target(int(self.x), int(self.y), self.animation_type)
 
     def undo(self, document):
         document.clipping.set_state(self.state['clipping_state_before'])

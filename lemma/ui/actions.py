@@ -25,6 +25,7 @@ from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
+from lemma.widgets.image import Image
 from lemma.services.xml_exporter import XMLExporter
 from lemma.document_repo.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
@@ -62,9 +63,8 @@ class Actions(object):
         self.add_simple_action('remove-selection', self.remove_selection)
 
         self.add_simple_action('open-link', self.open_link)
-        self.add_simple_action('insert-link', self.insert_link)
+        self.add_simple_action('show-link-popover', self.show_link_popover)
         self.add_simple_action('remove-link', self.remove_link)
-        self.add_simple_action('edit-link', self.edit_link)
         self.add_simple_action('copy-link', self.copy_link)
 
         self.add_simple_action('set-paragraph-style', self.set_paragraph_style, GLib.VariantType('s'))
@@ -119,13 +119,12 @@ class Actions(object):
         self.actions['delete'].set_enabled(self.model_state.mode == 'documents' and self.model_state.has_selection)
         self.actions['select-all'].set_enabled(self.model_state.has_active_doc)
         self.actions['remove-selection'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
-        self.actions['insert-link'].set_enabled(self.model_state.has_active_doc and self.model_state.insert_parent_is_root)
         self.actions['show-insert-image-dialog'].set_enabled(self.model_state.has_active_doc and self.model_state.insert_parent_is_root)
         self.actions['widget-shrink'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_min)
         self.actions['widget-enlarge'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_max)
         self.actions['open-link'].set_enabled(self.model_state.open_link_active)
         self.actions['remove-link'].set_enabled(self.model_state.remove_link_active)
-        self.actions['edit-link'].set_enabled(self.model_state.edit_link_active)
+        self.actions['show-link-popover'].set_enabled((self.model_state.has_active_doc and self.model_state.insert_parent_is_root) or self.model_state.edit_link_active)
         self.actions['copy-link'].set_enabled(self.model_state.copy_link_active)
         self.actions['subscript'].set_enabled(self.model_state.has_active_doc)
         self.actions['superscript'].set_enabled(self.model_state.has_active_doc)
@@ -196,7 +195,7 @@ class Actions(object):
 
         self.copy()
         UseCases.delete_selection()
-        UseCases.scroll_insert_on_screen(animate=True)
+        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def copy(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -253,12 +252,13 @@ class Actions(object):
 
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animate=True)
+        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def on_paste_image(self, clipboard, result):
         texture = clipboard.read_texture_finish(result)
         data = texture.save_to_png_bytes().unref_to_data()
-        UseCases.add_image_from_bytes(data)
+        image = Image(data)
+        UseCases.add_image(image)
 
     def on_paste_text(self, clipboard, result):
         text = clipboard.read_text_finish(result)
@@ -273,13 +273,13 @@ class Actions(object):
                 text = xml_helpers.escape(stext)
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
-                UseCases.scroll_insert_on_screen(animate=True)
+                UseCases.scroll_insert_on_screen(animation_type='default')
                 return
 
         text = xml_helpers.escape(text)
         xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animate=True)
+        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def delete(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -307,7 +307,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animate=True)
+        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def superscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -320,7 +320,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animate=True)
+        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def set_paragraph_style(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
@@ -390,17 +390,11 @@ class Actions(object):
 
         UseCases.open_link(document.cursor.get_insert_node().link)
 
-    def insert_link(self, action=None, parameter=''):
+    def show_link_popover(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        UseCases.scroll_insert_on_screen(animate=False)
-        UseCases.show_insert_link_popover(self.main_window)
-
-    def edit_link(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
-
-        UseCases.scroll_insert_on_screen(animate=False)
-        UseCases.show_insert_link_popover(self.main_window)
+        UseCases.scroll_insert_on_screen(animation_type=None)
+        UseCases.show_link_popover(self.main_window, self.application.document_view.scrolling_position_x, self.application.document_view.scrolling_position_y)
 
     def copy_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
