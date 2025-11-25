@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+from lemma.services.message_bus import MessageBus
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 
@@ -31,6 +32,18 @@ class Backlinks(object):
         self.model_state = model_state
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'document_removed')
+        MessageBus.subscribe(self, 'document_ast_changed')
+        MessageBus.subscribe(self, 'mode_set')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
+            self.update()
 
     def update(self):
         if self.model_state.has_active_doc:

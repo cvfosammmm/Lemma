@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
+from lemma.services.message_bus import MessageBus
 import lemma.ui.popovers.document_menu as document_menu
 from lemma.ui.document_context_menu import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
@@ -50,6 +51,18 @@ class PopoverManager():
         self.popovers["hamburger_menu"] = hamburger_menu.Popover()
         self.popovers["paragraph_style"] = paragraph_style.Popover()
         self.popovers["link_ac"] = link_ac.Popover()
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'mode_set')
+        MessageBus.subscribe(self, 'app_state_changed')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'document_changed' in messages or 'mode_set' in messages or 'app_state_changed' in messages:
+            self.update()
 
     @timer.timer
     def update(self):

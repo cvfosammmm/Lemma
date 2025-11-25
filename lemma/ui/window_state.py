@@ -17,6 +17,7 @@
 
 import os.path
 
+from lemma.services.message_bus import MessageBus
 from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -37,6 +38,18 @@ class WindowState(object):
         self.main_window.navigation_sidebar.backlinks_toggle.connect('toggled', self.on_backlinks_toggle_toggled)
 
         self.restore_window_state()
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'mode_set')
+        MessageBus.subscribe(self, 'settings_changed')
+        MessageBus.subscribe(self, 'sidebar_visibility_changed')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'mode_set' in messages or 'settings_changed' in messages or 'sidebar_visibility_changed' in messages:
+            self.update()
 
     def update(self):
         workspace = WorkspaceRepo.get_workspace()

@@ -21,6 +21,7 @@ from gi.repository import Gio, GLib, GObject, Gdk
 
 from urllib.parse import urlparse
 
+from lemma.services.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.services.layout_info import LayoutInfo
@@ -95,10 +96,28 @@ class Actions(object):
         self.actions['quit'] = Gio.SimpleAction.new('quit', None)
         self.main_window.add_action(self.actions['quit'])
 
+        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_document')
+        MessageBus.subscribe(self, 'document_removed')
+        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'mode_set')
+
+        self.update()
+
     def add_simple_action(self, name, callback, parameter=None):
         self.actions[name] = Gio.SimpleAction.new(name, parameter)
         self.main_window.add_action(self.actions[name])
         self.actions[name].connect('activate', callback)
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_changed' in messages or 'mode_set' in messages:
+            self.update()
+
+    def on_clipboard_changed(self, clipboard):
+        self.update()
 
     @timer.timer
     def update(self):

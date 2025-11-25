@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Pango
 
+from lemma.services.message_bus import MessageBus
 from lemma.services.layout_info import LayoutInfo
 from lemma.application_state.application_state import ApplicationState
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -33,6 +34,16 @@ class ToolBars():
         self.toolbar = main_window.toolbar
 
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'app_state_changed')
+        MessageBus.subscribe(self, 'settings_changed')
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'document_changed' in messages or 'app_state_changed' in messages or 'settings_changed' in messages:
+            self.update()
 
     def update(self):
         active_document = WorkspaceRepo.get_workspace().get_active_document()

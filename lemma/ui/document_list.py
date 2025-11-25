@@ -24,6 +24,7 @@ from gi.repository import Rsvg
 import time, datetime, os.path
 import cairo
 
+from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.services.color_manager import ColorManager
@@ -68,6 +69,19 @@ class DocumentList(object):
 
         self.view.context_menu.delete_document_button.connect('clicked', self.on_delete_document_clicked)
         self.view.context_menu.popover.connect('closed', self.on_context_menu_close)
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_document')
+        MessageBus.subscribe(self, 'document_removed')
+        MessageBus.subscribe(self, 'document_ast_changed')
+        MessageBus.subscribe(self, 'mode_set')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
+            self.update()
 
     def update(self):
         self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)

@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gdk
 
+from lemma.services.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -53,6 +54,25 @@ class ModelState(object):
         self.cursor_starts_paragraph = None
         self.remove_link_active = None
         self.edit_link_active = None
+
+        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_document')
+        MessageBus.subscribe(self, 'document_removed')
+        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'document_ast_changed')
+        MessageBus.subscribe(self, 'mode_set')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_changed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
+            self.update()
+
+    def on_clipboard_changed(self, clipboard):
+        self.update()
 
     @timer.timer
     def update(self):

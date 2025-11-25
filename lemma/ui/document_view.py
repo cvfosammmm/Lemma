@@ -28,6 +28,7 @@ from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
+from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -60,31 +61,27 @@ class DocumentView():
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
-        self.update()
-
-    @timer.timer
-    def update(self):
+    def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
-
         new_active_document = document != self.document
         document_changed = max(document.last_cursor_movement, document.last_modified) > self.last_cache_reset
+        do_draw = False
 
         if new_active_document:
             self.document = document
             self.view.content.grab_focus()
 
-        if self.document == None: return
+        if self.document != None:
+            if new_active_document or document_changed:
+                self.presenter.render_cache = dict()
+                self.last_cache_reset = time.time()
+                self.reset_cursor_blink()
 
-        if new_active_document or document_changed:
-            self.presenter.render_cache = dict()
-            self.last_cache_reset = time.time()
-            self.reset_cursor_blink()
+                self.update_link_at_cursor()
+                self.presenter.update_pointer()
 
-        self.update_link_at_cursor()
-        self.presenter.update()
-        self.view.content.queue_draw()
+                do_draw = True
 
-    def animate(self):
         if self.document == None:
             self.scrolling_position_x, self.scrolling_position_y = -1, -1
             return True
@@ -94,12 +91,13 @@ class DocumentView():
         time_since_blink_start = time.time() - self.cursor_blink_reset
         time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
 
+        cursor_visible = True
         if time_since_blink_start <= 10 and time_in_cycle > 0.6:
             cursor_visible = False
-        else:
-            cursor_visible = True
-
-        do_draw = False
+        if ApplicationState.get_value('document_view_hide_cursor_on_unfocus') and not self.view.content.has_focus():
+            cursor_visible = False
+        if self.document.cursor.has_selection():
+            cursor_visible = False
 
         if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
             self.cursor_visible = cursor_visible
@@ -136,13 +134,13 @@ class DocumentView():
                     link = leaf_box['node'].link
 
             self.set_link_target_at_pointer(link)
-            self.presenter.update()
+            self.presenter.update_pointer()
 
     def set_ctrl_pressed(self, is_pressed):
         if is_pressed != self.ctrl_pressed:
             self.ctrl_pressed = is_pressed
             self.last_cursor_or_scrolling_change = time.time()
-            self.presenter.update()
+            self.presenter.update_pointer()
 
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None

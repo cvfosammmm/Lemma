@@ -16,12 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import gi
-gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Adw
-from gi.repository import Gdk
 
-from lemma.services.message_bus import MessageBus
 from lemma.services.color_manager import ColorManager
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
@@ -81,118 +78,33 @@ class Application(Adw.Application):
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window)
 
-        Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('new_document', self.on_new_document)
-        MessageBus.connect('document_removed', self.on_document_removed)
-        MessageBus.connect('document_changed', self.on_document_changed)
-        MessageBus.connect('document_ast_changed', self.on_document_ast_changed)
-        MessageBus.connect('mode_set', self.on_mode_set)
-        MessageBus.connect('app_state_changed', self.on_app_state_changed)
-        MessageBus.connect('settings_changed', self.on_settings_changed)
-        MessageBus.connect('sidebar_visibility_changed', self.on_sidebar_visibility_changed)
-
-        self.model_state.update()
-        self.actions.update()
-        self.sidebar_emojis.update()
-        self.sidebar_math.update()
-        self.backlinks.update()
-        self.history.update()
-        self.cursor_state.update()
-        self.document_list.update()
-        self.context_menu_document.update()
-        self.document_draft.update()
-        self.window_state.update()
-        self.colors.update()
-        self.popover_manager.update()
-
         self.actions.actions['quit'].connect('activate', self.on_quit_action)
         self.main_window.connect('close-request', self.on_window_close)
 
         self.main_window.add_tick_callback(self.animate)
 
     def animate(self, widget, frame_clock):
+        self.colors.animate()
+        self.model_state.animate()
+        self.actions.animate()
+        self.shortcuts.animate()
+        self.window_state.animate()
+        self.popover_manager.animate()
+        self.document_list.animate()
+        self.history.animate()
+        self.backlinks.animate()
+        self.document_draft.animate()
         self.document_view.animate()
         self.document_title.animate()
+        self.context_menu_document.animate()
+        self.autocomplete.animate()
         self.scrollbars.animate()
+        self.cursor_state.animate()
+        self.toolbars.animate()
+        self.sidebar_emojis.animate()
+        self.sidebar_math.animate()
 
         return True
-
-    def on_clipboard_changed(self, clipboard):
-        self.model_state.update()
-        self.actions.update()
-
-    def on_history_changed(self):
-        self.model_state.update()
-        self.actions.update()
-        self.backlinks.update()
-        self.history.update()
-        self.cursor_state.update()
-        self.document_list.update()
-        self.document_view.update()
-        self.context_menu_document.update()
-        self.popover_manager.update()
-        self.toolbars.update()
-        self.window_state.update()
-
-    def on_new_document(self):
-        self.model_state.update()
-        self.actions.update()
-        self.document_list.update()
-
-    def on_document_removed(self):
-        self.model_state.update()
-        self.actions.update()
-        self.backlinks.update()
-        self.document_list.update()
-
-    def on_document_changed(self):
-        self.model_state.update()
-        self.actions.update()
-        self.cursor_state.update()
-        self.document_view.update()
-        self.context_menu_document.update()
-        self.popover_manager.update()
-        self.toolbars.update()
-        self.history.update()
-
-    def on_document_ast_changed(self):
-        self.model_state.update()
-        self.backlinks.update()
-        self.document_list.update()
-
-    def on_mode_set(self):
-        self.model_state.update()
-        self.actions.update()
-        self.sidebar_emojis.update()
-        self.sidebar_math.update()
-        self.backlinks.update()
-        self.history.update()
-        self.document_list.update()
-        self.document_view.update()
-        self.context_menu_document.update()
-        self.popover_manager.update()
-        self.document_draft.update()
-        self.window_state.update()
-
-    def on_app_state_changed(self):
-        self.toolbars.update()
-        self.shortcuts.update()
-        self.sidebar_emojis.update()
-        self.sidebar_math.update()
-        self.popover_manager.update()
-        self.cursor_state.update_tag_toggle(self.cursor_state.toolbar.toolbar_main.bold_button, 'bold')
-        self.cursor_state.update_tag_toggle(self.cursor_state.toolbar.toolbar_main.italic_button, 'italic')
-
-    def on_settings_changed(self):
-        self.toolbars.update()
-        self.window_state.update()
-        self.colors.update()
-
-    def on_sidebar_visibility_changed(self):
-        self.window_state.update()
-        self.sidebar_emojis.update()
-        self.sidebar_math.update()
 
     def on_window_close(self, window=None, parameter=None):
         self.save_quit()

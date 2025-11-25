@@ -21,6 +21,7 @@ from gi.repository import Gtk, Gdk
 
 import datetime
 
+from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
@@ -44,6 +45,15 @@ class DocumentDraft():
         self.key_controller_window.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.key_controller_window.connect('key-pressed', self.on_entry_keypress)
         self.view.title_entry.add_controller(self.key_controller_window)
+
+        MessageBus.subscribe(self, 'mode_set')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'mode_set' in messages:
+            self.update()
 
     def update(self):
         mode = WorkspaceRepo.get_workspace().get_mode()

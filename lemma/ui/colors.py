@@ -17,6 +17,7 @@
 
 import os.path
 
+from lemma.services.message_bus import MessageBus
 from lemma.services.paths import Paths
 from lemma.services.settings import Settings
 
@@ -27,6 +28,15 @@ class Colors(object):
         self.main_window = main_window
 
         self.color_scheme = None
+
+        MessageBus.subscribe(self, 'settings_changed')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'settings_changed' in messages:
+            self.update()
 
     def update(self):
         color_scheme = Settings.get_value('color_scheme')

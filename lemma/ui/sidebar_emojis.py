@@ -23,6 +23,7 @@ from gi.repository import Adw
 
 import os.path
 
+from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.paths import Paths
 from lemma.use_cases.use_cases import UseCases
@@ -49,6 +50,17 @@ class SidebarEmojis(object):
         self.buttons = list()
 
         self.populate()
+
+        MessageBus.subscribe(self, 'mode_set')
+        MessageBus.subscribe(self, 'app_state_changed')
+        MessageBus.subscribe(self, 'sidebar_visibility_changed')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'mode_set' in messages or 'app_state_changed' in messages or 'sidebar_visibility_changed' in messages:
+            self.update()
 
     @timer.timer
     def update(self):

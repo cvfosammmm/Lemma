@@ -45,18 +45,18 @@ class UseCases():
         Settings.set_value(item, value)
 
         Settings.save()
-        MessageBus.add_change_code('settings_changed')
+        MessageBus.add_message('settings_changed')
 
     def app_state_set_value(item, value):
         ApplicationState.set_value(item, value)
 
-        MessageBus.add_change_code('app_state_changed')
+        MessageBus.add_message('app_state_changed')
 
     def app_state_set_values(values):
         for key, value in values.items():
             ApplicationState.set_value(key, value)
 
-        MessageBus.add_change_code('app_state_changed')
+        MessageBus.add_message('app_state_changed')
 
     def show_link_popover(main_window):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -90,21 +90,21 @@ class UseCases():
         ApplicationState.set_value('popover_orientation', orientation)
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('app_state_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('app_state_changed')
 
     def show_popover(name, x, y, orientation='bottom'):
         ApplicationState.set_value('active_popover', name)
         ApplicationState.set_value('popover_position', (x, y))
         ApplicationState.set_value('popover_orientation', orientation)
 
-        MessageBus.add_change_code('app_state_changed')
+        MessageBus.add_message('app_state_changed')
 
     def hide_popovers():
         ApplicationState.set_value('active_popover', None)
         ApplicationState.set_value('popover_position', (0, 0))
 
-        MessageBus.add_change_code('app_state_changed')
+        MessageBus.add_message('app_state_changed')
 
     def toggle_tools_sidebar(name):
         if Settings.get_value('show_tools_sidebar') and Settings.get_value('tools_sidebar_active_tab') == name:
@@ -114,7 +114,7 @@ class UseCases():
             Settings.set_value('tools_sidebar_active_tab', name)
 
         Settings.save()
-        MessageBus.add_change_code('sidebar_visibility_changed')
+        MessageBus.add_message('sidebar_visibility_changed')
 
     def open_link(link_target):
         workspace = WorkspaceRepo.get_workspace()
@@ -143,9 +143,9 @@ class UseCases():
         if new_document != None:
             DocumentRepo.add(new_document)
         WorkspaceRepo.update(workspace)
-        MessageBus.add_change_code('mode_set')
-        MessageBus.add_change_code('new_document')
-        MessageBus.add_change_code('history_changed')
+        MessageBus.add_message('mode_set')
+        MessageBus.add_message('new_document')
+        MessageBus.add_message('history_changed')
 
     def import_markdown(path):
         document = Document()
@@ -173,7 +173,7 @@ class UseCases():
         document.update()
 
         DocumentRepo.add(document)
-        MessageBus.add_change_code('new_document')
+        MessageBus.add_message('new_document')
 
     def enter_draft_mode():
         workspace = WorkspaceRepo.get_workspace()
@@ -181,7 +181,7 @@ class UseCases():
         workspace.enter_draft_mode()
 
         WorkspaceRepo.update(workspace)
-        MessageBus.add_change_code('mode_set')
+        MessageBus.add_message('mode_set')
 
     def leave_draft_mode():
         workspace = WorkspaceRepo.get_workspace()
@@ -189,7 +189,7 @@ class UseCases():
         workspace.leave_draft_mode()
 
         WorkspaceRepo.update(workspace)
-        MessageBus.add_change_code('mode_set')
+        MessageBus.add_message('mode_set')
 
     def new_document(title):
         workspace = WorkspaceRepo.get_workspace()
@@ -204,9 +204,9 @@ class UseCases():
 
         DocumentRepo.add(document)
         WorkspaceRepo.update(workspace)
-        MessageBus.add_change_code('mode_set')
-        MessageBus.add_change_code('new_document')
-        MessageBus.add_change_code('history_changed')
+        MessageBus.add_message('mode_set')
+        MessageBus.add_message('new_document')
+        MessageBus.add_message('history_changed')
 
     def delete_document(document_id):
         workspace = WorkspaceRepo.get_workspace()
@@ -223,9 +223,9 @@ class UseCases():
 
         DocumentRepo.delete(document_id)
         WorkspaceRepo.update(workspace)
-        MessageBus.add_change_code('document_removed')
-        MessageBus.add_change_code('history_changed')
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_removed')
+        MessageBus.add_message('history_changed')
+        MessageBus.add_message('document_changed')
 
     def set_active_document(document_id, update_history=True):
         workspace = WorkspaceRepo.get_workspace()
@@ -234,8 +234,8 @@ class UseCases():
         workspace.set_active_document(document, update_history)
 
         WorkspaceRepo.update(workspace)
-        MessageBus.add_change_code('mode_set')
-        MessageBus.add_change_code('history_changed')
+        MessageBus.add_message('mode_set')
+        MessageBus.add_message('history_changed')
 
     @timer.timer
     def undo():
@@ -244,8 +244,8 @@ class UseCases():
         document.undo()
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def redo():
@@ -254,8 +254,8 @@ class UseCases():
         document.redo()
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def set_title(title):
@@ -266,11 +266,11 @@ class UseCases():
         document.update()
         DocumentRepo.update(document)
 
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     def signal_keyboard_input():
-        MessageBus.add_change_code('keyboard_input')
+        MessageBus.add_message('keyboard_input')
 
     def replace_section(document, node_from, node_to, xml):
         insert = document.cursor.get_insert_node()
@@ -289,8 +289,8 @@ class UseCases():
 
         document.add_command('update_implicit_x_position')
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def insert_xml(xml):
@@ -357,8 +357,8 @@ class UseCases():
         document.add_command('update_implicit_x_position')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def backspace():
@@ -375,8 +375,8 @@ class UseCases():
             document.add_command('update_implicit_x_position')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def delete():
@@ -394,8 +394,8 @@ class UseCases():
             document.add_command('update_implicit_x_position')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def delete_selection():
@@ -404,8 +404,8 @@ class UseCases():
         document.delete_selection()
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     def add_image(image):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -417,8 +417,8 @@ class UseCases():
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def replace_max_string_before_cursor():
@@ -455,8 +455,8 @@ class UseCases():
                     document.add_composite_command(*commands)
                     document.add_command('update_implicit_x_position')
                     DocumentRepo.update(document)
-                    MessageBus.add_change_code('document_changed')
-                    MessageBus.add_change_code('document_ast_changed')
+                    MessageBus.add_message('document_changed')
+                    MessageBus.add_message('document_ast_changed')
                     return True
         return False
 
@@ -465,8 +465,8 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         document.add_command('resize_widget', new_width)
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def set_link(document, bounds, target):
@@ -475,8 +475,8 @@ class UseCases():
         document.add_command('set_link', char_nodes, target)
         document.add_command('move_cursor_to_node', bounds[1])
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def set_paragraph_style(style):
@@ -485,8 +485,8 @@ class UseCases():
         document.add_command('set_paragraph_style', style)
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def toggle_tag(tagname):
@@ -504,8 +504,8 @@ class UseCases():
                 document.add_command('add_tag', tagname)
 
             DocumentRepo.update(document)
-            MessageBus.add_change_code('document_changed')
-            MessageBus.add_change_code('document_ast_changed')
+            MessageBus.add_message('document_changed')
+            MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def set_indentation_level(indentation_level):
@@ -514,8 +514,8 @@ class UseCases():
         document.add_command('set_indentation_level', indentation_level, document.cursor.get_insert_node())
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def change_indentation_level(difference):
@@ -543,8 +543,8 @@ class UseCases():
         document.add_composite_command(*commands)
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
-        MessageBus.add_change_code('document_ast_changed')
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
     @timer.timer
     def left(do_selection=False):
@@ -564,7 +564,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def jump_left(do_selection=False):
@@ -591,7 +591,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def right(do_selection=False):
@@ -611,7 +611,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def jump_right(do_selection=False):
@@ -637,7 +637,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def up(do_selection=False):
@@ -680,7 +680,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def down(do_selection=False):
@@ -723,7 +723,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def paragraph_start(do_selection=False):
@@ -745,7 +745,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def paragraph_end(do_selection=False):
@@ -767,7 +767,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def page(y, do_selection=False):
@@ -788,7 +788,7 @@ class UseCases():
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def select_next_placeholder():
@@ -813,7 +813,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def select_prev_placeholder():
@@ -838,7 +838,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def select_node(node):
@@ -848,7 +848,7 @@ class UseCases():
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def select_all():
@@ -857,7 +857,7 @@ class UseCases():
         document.add_command('update_implicit_x_position')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def remove_selection():
@@ -868,7 +868,7 @@ class UseCases():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
             DocumentRepo.update(document)
-            MessageBus.add_change_code('document_changed')
+            MessageBus.add_message('document_changed')
 
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
@@ -877,7 +877,7 @@ class UseCases():
         document.add_command('update_implicit_x_position')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def move_drop_cursor_to_xy(x, y):
@@ -885,7 +885,7 @@ class UseCases():
         ApplicationState.set_value('drop_cursor_position', (x, y))
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def reset_drop_cursor():
@@ -893,7 +893,7 @@ class UseCases():
         ApplicationState.set_value('drop_cursor_position', None)
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def move_cursor_to_parent():
@@ -916,7 +916,7 @@ class UseCases():
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def extend_selection():
@@ -958,7 +958,7 @@ class UseCases():
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     def scroll_insert_on_screen(animation_type='default'):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -966,7 +966,7 @@ class UseCases():
 
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type)
 
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def scroll_to_xy(x, y, animation_type='default'):
@@ -975,7 +975,7 @@ class UseCases():
 
         document.scroll_to_xy(x, y, animation_type)
 
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def decelerate_scrolling(x, y, vel_x, vel_y):
@@ -992,6 +992,6 @@ class UseCases():
 
         document.scroll_to_xy(x, y, 'decelerate')
 
-        MessageBus.add_change_code('document_changed')
+        MessageBus.add_message('document_changed')
 
 

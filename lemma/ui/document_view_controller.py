@@ -39,6 +39,8 @@ class DocumentViewController():
         self.view = self.model.view
         self.content = self.view.content
 
+        self.content.connect('realize', self.on_realize)
+
         self.primary_click_controller = Gtk.GestureClick()
         self.primary_click_controller.set_button(1)
         self.primary_click_controller.connect('pressed', self.on_primary_button_press)
@@ -94,6 +96,9 @@ class DocumentViewController():
         self.scrolling_controller.connect('scroll', self.on_scroll)
         self.scrolling_controller.connect('decelerate', self.on_decelerate)
         self.content.add_controller(self.scrolling_controller)
+
+    def on_realize(self, content, data=None):
+        self.model.reset_cursor_blink()
 
     def on_primary_button_press(self, controller, n_press, x, y):
         modifiers = Gtk.accelerator_get_default_mod_mask()

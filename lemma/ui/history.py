@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gdk, Pango, PangoCairo
 
+from lemma.services.message_bus import MessageBus
 from lemma.services.color_manager import ColorManager
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
@@ -49,6 +50,17 @@ class History(object):
         self.view.content.set_draw_func(self.draw)
         self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'mode_set')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'document_changed' in messages or 'mode_set' in messages:
+            self.update()
 
     @timer.timer
     def update(self):

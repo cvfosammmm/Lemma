@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
@@ -25,6 +26,21 @@ class CursorState():
 
     def __init__(self, main_window):
         self.toolbar = main_window.toolbar
+
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'app_state_changed')
+
+        self.update()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'document_changed' in messages:
+            self.update()
+
+        if 'app_state_changed' in messages:
+            self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
+            self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
 
     @timer.timer
     def update(self):

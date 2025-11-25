@@ -18,26 +18,26 @@
 
 class MessageBus():
 
-    connected_functions = dict()
+    subscribers_by_message_type = dict()
+    messages_by_subscriber = dict()
 
-    def add_change_code(change_code, parameter=None):
-        if change_code in MessageBus.connected_functions:
-            for callback in MessageBus.connected_functions[change_code]:
-                if parameter != None:
-                    callback(parameter)
-                else:
-                    callback()
+    def add_message(change_code, parameter=None):
+        if change_code in MessageBus.subscribers_by_message_type:
+            subscribers = MessageBus.subscribers_by_message_type[change_code]
+            for subscriber in subscribers:
+                MessageBus.messages_by_subscriber[subscriber].append(change_code)
 
-    def connect(change_code, callback):
-        if change_code in MessageBus.connected_functions:
-            MessageBus.connected_functions[change_code].add(callback)
-        else:
-            MessageBus.connected_functions[change_code] = {callback}
+    def subscribe(subscriber, message_type):
+        if message_type not in MessageBus.subscribers_by_message_type:
+            MessageBus.subscribers_by_message_type[message_type] = []
+        if subscriber not in MessageBus.subscribers_by_message_type[message_type]:
+            MessageBus.subscribers_by_message_type[message_type].append(subscriber)
+        if subscriber not in MessageBus.messages_by_subscriber:
+            MessageBus.messages_by_subscriber[subscriber] = []
 
-    def disconnect(change_code, callback):
-        if change_code in MessageBus.connected_functions:
-            MessageBus.connected_functions[change_code].discard(callback)
-            if len(MessageBus.connected_functions[change_code]) == 0:
-                del(MessageBus.connected_functions[change_code])
+    def get_messages(subscriber):
+        messages = MessageBus.messages_by_subscriber[subscriber]
+        MessageBus.messages_by_subscriber[subscriber] = []
+        return messages
 
 

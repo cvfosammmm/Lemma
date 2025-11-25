@@ -53,9 +53,18 @@ class Autocomplete():
         focus_controller.connect('leave', self.on_focus_out)
         self.document_view.content.add_controller(focus_controller)
 
-        MessageBus.connect('history_changed', self.on_history_changed)
-        MessageBus.connect('document_changed', self.on_document_changed)
-        MessageBus.connect('keyboard_input', self.on_keyboard_input)
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'keyboard_input')
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages:
+            self.on_history_changed()
+        if 'document_changed' in messages:
+            self.on_document_changed()
+        if 'keyboard_input' in messages:
+            self.on_keyboard_input()
 
     def on_keyboard_input(self):
         document = WorkspaceRepo.get_workspace().get_active_document()

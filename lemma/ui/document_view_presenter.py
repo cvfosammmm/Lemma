@@ -47,11 +47,6 @@ class DocumentViewPresenter():
 
         self.render_cache = dict()
 
-    def update(self):
-        if self.model.document == None: return
-
-        self.update_pointer()
-
     def update_pointer(self):
         if self.model.document == None: return
 
@@ -298,10 +293,7 @@ class DocumentViewPresenter():
 
     @timer.timer
     def draw_cursor(self, ctx, offset_x, offset_y):
-        if ApplicationState.get_value('document_view_hide_cursor_on_unfocus'):
-            if not self.view.has_focus(): return
-            if self.model.document.cursor.has_selection(): return
-            if not self.model.cursor_visible: return
+        if not self.model.cursor_visible: return
 
         insert = self.model.document.cursor.get_insert_node()
         layout = insert.layout
