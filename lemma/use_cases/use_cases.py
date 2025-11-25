@@ -987,6 +987,8 @@ class UseCases():
 
         x = min(max_x, max(0, x + 15.13 / 16 * vel_x))
         y = min(max_y, max(0, y + 15.13 / 16 * vel_y))
+        x = x + 15.13 / 16 * vel_x
+        y = y + 15.13 / 16 * vel_y
 
         document.scroll_to_xy(x, y, 'decelerate')
 

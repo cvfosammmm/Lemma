@@ -17,6 +17,9 @@
 
 import time, os.path
 
+from lemma.services.layout_info import LayoutInfo
+from lemma.application_state.application_state import ApplicationState
+
 
 class Clipping(object):
 
@@ -64,6 +67,12 @@ class Clipping(object):
         else:
             x = self.target_x
             y = self.target_y
+
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') + self.document.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.get_value('document_view_height'))
+        max_x = max(0, LayoutInfo.get_document_padding_left() + self.document.get_width() - ApplicationState.get_value('document_view_width'))
+
+        x = min(max_x, max(0, x))
+        y = min(max_y, max(0, y))
 
         return (x, y)
 
