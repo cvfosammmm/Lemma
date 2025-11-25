@@ -30,7 +30,8 @@ from lemma.services.layout_info import LayoutInfo
 from lemma.services.character_db import CharacterDB
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.document.ast import Node
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.document.document import Document
 from lemma.services.message_bus import MessageBus
 from lemma.services.html_parser import HTMLParser
@@ -57,8 +58,9 @@ class UseCases():
 
         MessageBus.add_change_code('app_state_changed')
 
-    def show_link_popover(main_window, scrolling_position_x, scrolling_position_y):
-        document = DocumentRepo.get_active_document()
+    def show_link_popover(main_window):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        scrolling_position_x, scrolling_position_y = document.get_current_scrolling_offsets()
 
         insert = document.cursor.get_insert_node()
         x, y = document.get_absolute_xy(insert.layout)
@@ -115,20 +117,35 @@ class UseCases():
         MessageBus.add_change_code('sidebar_visibility_changed')
 
     def open_link(link_target):
+        workspace = WorkspaceRepo.get_workspace()
+        new_document = None
+
         if urlparse(link_target).scheme in ['http', 'https']:
             webbrowser.open(link_target)
+
         elif link_target != None:
             target_list = DocumentRepo.list_by_title(link_target)
-            if len(target_list) > 0:
-                DocumentRepo.activate_document(target_list[0]['id'], True)
 
-                document = DocumentRepo.get_active_document()
+            if len(target_list) > 0:
+                document = DocumentRepo.get_by_id(target_list[0]['id'])
                 document.scroll_to_xy(0, 0, animation_type=None)
 
-                MessageBus.add_change_code('history_changed')
-                MessageBus.add_change_code('document_changed')
+                workspace.set_active_document(document, update_history=True)
             else:
-                UseCases.new_document(link_target)
+                new_document = Document()
+                new_document.id = DocumentRepo.get_max_document_id() + 1
+                new_document.title = link_target
+                new_document.update_last_modified()
+                new_document.update()
+
+                workspace.set_active_document(new_document, update_history=True)
+
+        if new_document != None:
+            DocumentRepo.add(new_document)
+        WorkspaceRepo.update(workspace)
+        MessageBus.add_change_code('mode_set')
+        MessageBus.add_change_code('new_document')
+        MessageBus.add_change_code('history_changed')
 
     def import_markdown(path):
         document = Document()
@@ -159,52 +176,70 @@ class UseCases():
         MessageBus.add_change_code('new_document')
 
     def enter_draft_mode():
-        ApplicationState.set_value('mode', 'draft')
+        workspace = WorkspaceRepo.get_workspace()
 
+        workspace.enter_draft_mode()
+
+        WorkspaceRepo.update(workspace)
         MessageBus.add_change_code('mode_set')
 
     def leave_draft_mode():
-        ApplicationState.set_value('mode', 'documents')
+        workspace = WorkspaceRepo.get_workspace()
 
+        workspace.leave_draft_mode()
+
+        WorkspaceRepo.update(workspace)
         MessageBus.add_change_code('mode_set')
 
     def new_document(title):
+        workspace = WorkspaceRepo.get_workspace()
+
         document = Document()
         document.id = DocumentRepo.get_max_document_id() + 1
         document.title = title
         document.update_last_modified()
         document.update()
+
+        workspace.set_active_document(document, update_history=True)
+
         DocumentRepo.add(document)
-
-        ApplicationState.set_value('mode', 'documents')
-        DocumentRepo.activate_document(document.id, True)
-
+        WorkspaceRepo.update(workspace)
         MessageBus.add_change_code('mode_set')
         MessageBus.add_change_code('new_document')
         MessageBus.add_change_code('history_changed')
 
     def delete_document(document_id):
+        workspace = WorkspaceRepo.get_workspace()
+
+        if document_id == workspace.get_active_document_id():
+            new_active_document_id = workspace.get_prev_id_in_history(document_id)
+            if new_active_document_id == None:
+                new_active_document_id = workspace.get_next_id_in_history(document_id)
+
+            document = DocumentRepo.get_by_id(new_active_document_id)
+            workspace.set_active_document(document, update_history=False)
+
+        workspace.remove_from_history(document_id)
+
         DocumentRepo.delete(document_id)
-
-        document = DocumentRepo.get_active_document()
-        if document == None: return
-
-        document.scroll_to_xy(0, 0, animation_type=None)
-
+        WorkspaceRepo.update(workspace)
         MessageBus.add_change_code('document_removed')
         MessageBus.add_change_code('history_changed')
         MessageBus.add_change_code('document_changed')
 
     def set_active_document(document_id, update_history=True):
-        ApplicationState.set_value('mode', 'documents')
-        DocumentRepo.activate_document(document_id, update_history)
+        workspace = WorkspaceRepo.get_workspace()
 
+        document = DocumentRepo.get_by_id(document_id)
+        workspace.set_active_document(document, update_history)
+
+        WorkspaceRepo.update(workspace)
         MessageBus.add_change_code('mode_set')
         MessageBus.add_change_code('history_changed')
 
     @timer.timer
     def undo():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.undo()
 
@@ -214,7 +249,7 @@ class UseCases():
 
     @timer.timer
     def redo():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.redo()
 
@@ -224,7 +259,7 @@ class UseCases():
 
     @timer.timer
     def set_title(title):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.title = title
         document.update_last_modified()
@@ -259,7 +294,7 @@ class UseCases():
 
     @timer.timer
     def insert_xml(xml):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         parser = xml_parser.XMLParser()
 
         if document.cursor.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
@@ -327,7 +362,7 @@ class UseCases():
 
     @timer.timer
     def backspace():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
         if document.cursor.has_selection():
@@ -345,7 +380,7 @@ class UseCases():
 
     @timer.timer
     def delete():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
         if document.cursor.has_selection():
@@ -364,7 +399,7 @@ class UseCases():
 
     @timer.timer
     def delete_selection():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.delete_selection()
 
@@ -373,7 +408,7 @@ class UseCases():
         MessageBus.add_change_code('document_ast_changed')
 
     def add_image(image):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.cursor.get_insert_node()
         node = Node('widget', image)
@@ -387,7 +422,7 @@ class UseCases():
 
     @timer.timer
     def replace_max_string_before_cursor():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         last_node = document.cursor.get_insert_node().prev_in_parent()
         first_node = last_node
@@ -427,7 +462,7 @@ class UseCases():
 
     @timer.timer
     def resize_widget(new_width):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         document.add_command('resize_widget', new_width)
         DocumentRepo.update(document)
         MessageBus.add_change_code('document_changed')
@@ -445,7 +480,7 @@ class UseCases():
 
     @timer.timer
     def set_paragraph_style(style):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.add_command('set_paragraph_style', style)
 
@@ -455,7 +490,7 @@ class UseCases():
 
     @timer.timer
     def toggle_tag(tagname):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']
         all_tagged = True
@@ -474,7 +509,7 @@ class UseCases():
 
     @timer.timer
     def set_indentation_level(indentation_level):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.add_command('set_indentation_level', indentation_level, document.cursor.get_insert_node())
 
@@ -484,7 +519,7 @@ class UseCases():
 
     @timer.timer
     def change_indentation_level(difference):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.cursor.has_selection():
             first_node = document.cursor.get_first_node().paragraph_start()
@@ -513,7 +548,7 @@ class UseCases():
 
     @timer.timer
     def left(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -533,7 +568,7 @@ class UseCases():
 
     @timer.timer
     def jump_left(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -560,7 +595,7 @@ class UseCases():
 
     @timer.timer
     def right(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -580,7 +615,7 @@ class UseCases():
 
     @timer.timer
     def jump_right(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -606,7 +641,7 @@ class UseCases():
 
     @timer.timer
     def up(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
         x, y = document.get_absolute_xy(insert.layout)
@@ -649,7 +684,7 @@ class UseCases():
 
     @timer.timer
     def down(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
         x, y = document.get_absolute_xy(insert.layout)
@@ -692,7 +727,7 @@ class UseCases():
 
     @timer.timer
     def paragraph_start(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
         layout = insert.layout
@@ -714,7 +749,7 @@ class UseCases():
 
     @timer.timer
     def paragraph_end(do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
         layout = insert.layout
@@ -736,7 +771,7 @@ class UseCases():
 
     @timer.timer
     def page(y, do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
         orig_x, orig_y = document.get_absolute_xy(insert.layout)
@@ -757,7 +792,7 @@ class UseCases():
 
     @timer.timer
     def select_next_placeholder():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         insert = document.cursor.get_insert_node()
@@ -782,7 +817,7 @@ class UseCases():
 
     @timer.timer
     def select_prev_placeholder():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         insert = document.cursor.get_insert_node()
@@ -807,7 +842,7 @@ class UseCases():
 
     @timer.timer
     def select_node(node):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.select_node(node)
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
@@ -817,7 +852,7 @@ class UseCases():
 
     @timer.timer
     def select_all():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         document.add_composite_command(['move_cursor_to_node', document.ast[0], document.ast[-1]])
         document.add_command('update_implicit_x_position')
 
@@ -826,7 +861,7 @@ class UseCases():
 
     @timer.timer
     def remove_selection():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document.cursor.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
             document.add_command('update_implicit_x_position')
@@ -837,7 +872,7 @@ class UseCases():
 
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         document.add_command('move_cursor_to_xy', x, y, do_selection)
         document.add_command('update_implicit_x_position')
 
@@ -846,7 +881,7 @@ class UseCases():
 
     @timer.timer
     def move_drop_cursor_to_xy(x, y):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         ApplicationState.set_value('drop_cursor_position', (x, y))
 
         DocumentRepo.update(document)
@@ -854,7 +889,7 @@ class UseCases():
 
     @timer.timer
     def reset_drop_cursor():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         ApplicationState.set_value('drop_cursor_position', None)
 
         DocumentRepo.update(document)
@@ -862,7 +897,7 @@ class UseCases():
 
     @timer.timer
     def move_cursor_to_parent():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.cursor.get_insert_node()
         new_insert = None
@@ -885,7 +920,7 @@ class UseCases():
 
     @timer.timer
     def extend_selection():
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
@@ -926,7 +961,7 @@ class UseCases():
         MessageBus.add_change_code('document_changed')
 
     def scroll_insert_on_screen(animation_type='default'):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type)
@@ -935,7 +970,7 @@ class UseCases():
 
     @timer.timer
     def scroll_to_xy(x, y, animation_type='default'):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
         document.scroll_to_xy(x, y, animation_type)
@@ -944,7 +979,7 @@ class UseCases():
 
     @timer.timer
     def decelerate_scrolling(x, y, vel_x, vel_y):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
         max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') + document.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.get_value('document_view_height'))

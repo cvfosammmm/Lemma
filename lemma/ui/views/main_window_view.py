@@ -23,17 +23,16 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, GObject, Adw
 
 from lemma.services.paths import Paths
-from lemma.ui.welcome_view import WelcomeView
-from lemma.ui.headerbar_view import HeaderBar
-from lemma.ui.history_view import HistoryView
-from lemma.ui.document_list_view import DocumentListView
-from lemma.ui.backlinks_view import BacklinksView
-from lemma.ui.toolbars_view import ToolBarsView
-from lemma.ui.document_view_view import DocumentView
-from lemma.ui.scrollbars_view import ScrollbarViewVertical
-from lemma.ui.navigation_sidebar_view import NavigationSidebar
-from lemma.ui.document_draft_view import DocumentDraftView
-from lemma.ui.animated_paned import AnimatedHPaned
+from lemma.ui.views.welcome_view import WelcomeView
+from lemma.ui.views.headerbar_view import HeaderBar
+from lemma.ui.views.history_view import HistoryView
+from lemma.ui.views.document_list_view import DocumentListView
+from lemma.ui.views.backlinks_view import BacklinksView
+from lemma.ui.views.toolbars_view import ToolBarsView
+from lemma.ui.views.document_view_view import DocumentView
+from lemma.ui.views.navigation_sidebar_view import NavigationSidebar
+from lemma.ui.views.document_draft_view import DocumentDraftView
+from lemma.ui.views.animated_paned import AnimatedHPaned
 
 
 class MainWindow(Adw.ApplicationWindow):
@@ -64,8 +63,6 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.welcome = WelcomeView()
         self.document_view = DocumentView()
-        self.document_scrollbar_vertical = ScrollbarViewVertical()
-        self.document_view.add_overlay(self.document_scrollbar_vertical)
         self.draft_view = DocumentDraftView()
 
         self.tools_sidebar = Gtk.Stack()

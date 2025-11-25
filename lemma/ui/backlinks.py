@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 
 

@@ -21,7 +21,7 @@ from gi.repository import Gtk, Pango
 
 from lemma.services.layout_info import LayoutInfo
 from lemma.application_state.application_state import ApplicationState
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
 
@@ -35,7 +35,7 @@ class ToolBars():
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
 
     def update(self):
-        active_document = DocumentRepo.get_active_document()
+        active_document = WorkspaceRepo.get_workspace().get_active_document()
         if active_document == None: return
 
         has_active_doc = active_document != None

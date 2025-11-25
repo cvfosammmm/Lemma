@@ -23,7 +23,7 @@ from PIL import Image as PIL_Image
 
 from lemma.use_cases.use_cases import UseCases
 from lemma.widgets.image import Image
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
 
 
 class Dialog(object):
@@ -52,7 +52,7 @@ class Dialog(object):
         except Exception: pass
         else:
             if file != None:
-                document = DocumentRepo.get_active_document()
+                document = WorkspaceRepo.get_workspace().get_active_document()
                 if document.cursor.get_insert_node().parent.type == 'root':
                     filename = file.get_path()
                     texture = Gdk.Texture.new_from_filename(filename)

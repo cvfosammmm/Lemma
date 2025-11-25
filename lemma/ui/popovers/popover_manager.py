@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 import lemma.ui.popovers.document_menu as document_menu
-from lemma.ui.context_menu_document import EditMenu
+from lemma.ui.document_context_menu import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
 import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_ac as link_ac

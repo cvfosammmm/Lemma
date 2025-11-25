@@ -28,11 +28,12 @@ from lemma.ui.popovers.popover_manager import PopoverManager
 
 import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
-import lemma.ui.main_window_view as main_window_view
+import lemma.ui.views.main_window_view as main_window_view
 import lemma.ui.history as history
 import lemma.ui.document_view as document_view
+import lemma.ui.document_title as document_title
 import lemma.ui.scrollbars as scrollbars
-import lemma.ui.context_menu_document as context_menu_document
+import lemma.ui.document_context_menu as context_menu_document
 import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
 import lemma.ui.document_list as document_list
@@ -44,7 +45,6 @@ import lemma.ui.sidebar_math as sidebar_math
 import lemma.ui.autocomplete as autocomplete
 import lemma.ui.model_state as model_state
 import lemma.ui.shortcuts as shortcuts
-import lemma.services.timer as timer
 
 
 class Application(Adw.Application):
@@ -65,8 +65,9 @@ class Application(Adw.Application):
         self.colors = colors.Colors(self.main_window)
         self.popover_manager = PopoverManager(self.main_window)
         self.history = history.History(self.main_window)
-        self.document_view = document_view.DocumentView(self.main_window, self.model_state, self)
-        self.scrollbars = scrollbars.Scrollbars(self.main_window, self.model_state, self)
+        self.document_view = document_view.DocumentView(self.main_window, self)
+        self.document_title = document_title.DocumentTitle(self.main_window, self)
+        self.scrollbars = scrollbars.Scrollbars(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self.model_state, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
         self.toolbars = toolbars.ToolBars(self.main_window)
@@ -74,8 +75,8 @@ class Application(Adw.Application):
         self.document_list = document_list.DocumentList(self.main_window)
         self.backlinks = backlinks.Backlinks(self.main_window, self.model_state)
         self.actions = actions.Actions(self.main_window, self, self.model_state)
-        self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self, self.model_state)
-        self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self, self.model_state)
+        self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self)
+        self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self)
         self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
         self.shortcuts = shortcuts.Shortcuts(self.actions, self.main_window)
         self.window_state = window_state.WindowState(self.main_window)
@@ -112,6 +113,7 @@ class Application(Adw.Application):
 
     def animate(self, widget, frame_clock):
         self.document_view.animate()
+        self.document_title.animate()
         self.scrollbars.animate()
 
         return True
@@ -144,7 +146,6 @@ class Application(Adw.Application):
         self.backlinks.update()
         self.document_list.update()
 
-    @timer.timer
     def on_document_changed(self):
         self.model_state.update()
         self.actions.update()
@@ -174,7 +175,6 @@ class Application(Adw.Application):
         self.document_draft.update()
         self.window_state.update()
 
-    @timer.timer
     def on_app_state_changed(self):
         self.toolbars.update()
         self.shortcuts.update()

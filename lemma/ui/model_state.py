@@ -21,7 +21,7 @@ from gi.repository import Gdk
 
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
 import lemma.services.timer as timer
 
 
@@ -56,14 +56,16 @@ class ModelState(object):
 
     @timer.timer
     def update(self):
-        self.document = DocumentRepo.get_active_document()
-        self.mode = ApplicationState.get_value('mode')
+        self.workspace = WorkspaceRepo.get_workspace()
+        self.document = self.workspace.get_active_document()
+
+        self.mode = self.workspace.get_mode()
         self.has_active_doc = (self.mode == 'documents' and self.document != None)
         self.selected_nodes = self.document.ast.get_subtree(*self.document.cursor.get_state()) if self.has_active_doc else []
         self.insert = self.document.cursor.get_insert_node() if self.has_active_doc else None
 
-        self.prev_doc = DocumentRepo.get_prev_id_in_history(self.document.id) if self.has_active_doc else None
-        self.next_doc = DocumentRepo.get_next_id_in_history(self.document.id) if self.has_active_doc else None
+        self.prev_doc = self.workspace.get_prev_id_in_history(self.document.id) if self.has_active_doc else None
+        self.next_doc = self.workspace.get_next_id_in_history(self.document.id) if self.has_active_doc else None
 
         self.can_undo = self.has_active_doc and self.document.can_undo()
         self.can_redo = self.has_active_doc and self.document.can_redo()

@@ -21,7 +21,8 @@ from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.app_info import AppInfo
 from lemma.services.paths import Paths
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.services.timer import Timer
 import lemma.ui.application as application
 from lemma.services.settings import Settings
@@ -70,6 +71,7 @@ TextRenderer.add_font('emojis', os.path.join(font_path, 'Noto_Color_Emoji/NotoCo
 Settings.init()
 ApplicationState.init()
 DocumentRepo.init()
+WorkspaceRepo.init(DocumentRepo)
 
 do_time = '--time' in sys.argv
 if do_time: sys.argv.remove('--time')

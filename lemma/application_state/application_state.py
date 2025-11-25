@@ -24,7 +24,6 @@ class ApplicationState():
     def init():
         ApplicationState.defaults = dict()
 
-        ApplicationState.defaults['mode'] = 'documents'
         ApplicationState.defaults['active_popover'] = None
         ApplicationState.defaults['popover_position'] = (0, 0)
         ApplicationState.defaults['popover_orientation'] = 'bottom'
@@ -33,6 +32,7 @@ class ApplicationState():
         ApplicationState.defaults['document_view_width'] = 0
         ApplicationState.defaults['document_view_height'] = 0
         ApplicationState.defaults['document_view_hide_cursor_on_unfocus'] = True
+        ApplicationState.defaults['title_buttons_height'] = 0
 
         ApplicationState.defaults['tags_at_cursor'] = set()
         ApplicationState.defaults['link_at_cursor'] = None

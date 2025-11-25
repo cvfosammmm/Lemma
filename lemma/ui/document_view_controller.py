@@ -24,6 +24,7 @@ import time
 
 import lemma.services.xml_helpers as xml_helpers
 from lemma.widgets.image import Image
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
@@ -106,10 +107,7 @@ class DocumentViewController():
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
 
-        if y < -LayoutInfo.get_subtitle_height() and n_press % 3 == 1:
-            self.model.init_renaming()
-
-        elif y > 0:
+        if y > 0:
             link = self.get_link_at_xy(x, y)
             leaf_box = document.get_leaf_at_xy(x, y)
 
@@ -224,7 +222,7 @@ class DocumentViewController():
         self.handle_drop(value, x, y)
 
     def handle_drop(self, value, x, y):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         ApplicationState.set_value('drop_cursor_position', None)
 
@@ -467,7 +465,6 @@ class DocumentViewController():
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.stop_renaming()
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.im_context.focus_in()

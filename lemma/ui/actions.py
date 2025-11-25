@@ -27,7 +27,7 @@ from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.widgets.image import Image
 from lemma.services.xml_exporter import XMLExporter
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -152,31 +152,39 @@ class Actions(object):
         DialogLocator.get_dialog('export_bulk').run()
 
     def delete_document(self, action=None, parameter=''):
-        UseCases.delete_document(DocumentRepo.get_active_document_id())
+        document_id = WorkspaceRepo.get_workspace().get_active_document_id()
+
+        UseCases.delete_document(document_id)
 
     def rename_document(self, action=None, parameter=''):
-        self.application.document_view.init_renaming()
+        self.application.document_title.init_renaming()
 
     def export_markdown(self, action=None, parameter=''):
-        DialogLocator.get_dialog('export_markdown').run(DocumentRepo.get_active_document())
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        DialogLocator.get_dialog('export_markdown').run(document)
 
     def export_image(self, action=None, parameter=''):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         DialogLocator.get_dialog('export_image').run(selected_nodes[0].value)
 
     def go_back(self, action=None, parameter=''):
-        mode = ApplicationState.get_value('mode')
+        workspace = WorkspaceRepo.get_workspace()
+
+        mode = workspace.get_mode()
         if mode == 'draft':
             UseCases.leave_draft_mode()
         else:
-            prev_doc = DocumentRepo.get_prev_id_in_history(DocumentRepo.get_active_document_id())
+            prev_doc = workspace.get_prev_id_in_history(workspace.get_active_document_id())
             if prev_doc != None:
                 UseCases.set_active_document(prev_doc, update_history=False)
 
     def go_forward(self, action=None, parameter=''):
-        next_doc = DocumentRepo.get_next_id_in_history(DocumentRepo.get_active_document_id())
+        workspace = WorkspaceRepo.get_workspace()
+
+        next_doc = workspace.get_next_id_in_history(workspace.get_active_document_id())
         if next_doc != None:
             UseCases.set_active_document(next_doc, update_history=False)
 
@@ -203,8 +211,9 @@ class Actions(object):
         clipboard = Gdk.Display.get_default().get_clipboard()
         content_providers = []
 
-        ast = DocumentRepo.get_active_document().ast
-        cursor = DocumentRepo.get_active_document().cursor
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        ast = document.ast
+        cursor = document.cursor
         subtree = ast.get_subtree(*cursor.get_state())
 
         chars = []
@@ -299,7 +308,7 @@ class Actions(object):
     def subscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
@@ -312,7 +321,7 @@ class Actions(object):
     def superscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
@@ -327,7 +336,7 @@ class Actions(object):
 
         style = parameter.get_string()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         current_style = document.cursor.get_first_node().paragraph().style
         if current_style == style:
             style = 'p'
@@ -337,7 +346,7 @@ class Actions(object):
     def toggle_bold(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document.cursor.has_selection():
             UseCases.toggle_tag('bold')
         else:
@@ -346,7 +355,7 @@ class Actions(object):
     def toggle_italic(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document.cursor.has_selection():
             UseCases.toggle_tag('italic')
         else:
@@ -370,7 +379,7 @@ class Actions(object):
     def widget_shrink(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         UseCases.resize_widget(selected_nodes[0].value.get_width() - 1)
@@ -378,7 +387,7 @@ class Actions(object):
     def widget_enlarge(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
         UseCases.resize_widget(selected_nodes[0].value.get_width() + 1)
@@ -386,7 +395,7 @@ class Actions(object):
     def open_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         UseCases.open_link(document.cursor.get_insert_node().link)
 
@@ -394,14 +403,15 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         UseCases.scroll_insert_on_screen(animation_type=None)
-        UseCases.show_link_popover(self.main_window, self.application.document_view.scrolling_position_x, self.application.document_view.scrolling_position_y)
+        UseCases.show_link_popover(self.main_window)
 
     def copy_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
         clipboard = Gdk.Display.get_default().get_clipboard()
-        ast = DocumentRepo.get_active_document().ast
-        cursor = DocumentRepo.get_active_document().cursor
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        ast = document.ast
+        cursor = document.cursor
         node = cursor.get_insert_node()
 
         if node.link != None:
@@ -413,7 +423,7 @@ class Actions(object):
     def remove_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.cursor.has_selection():
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]

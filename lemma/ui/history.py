@@ -22,8 +22,9 @@ from gi.repository import Gdk, Pango, PangoCairo
 from lemma.services.color_manager import ColorManager
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
-from lemma.document_repo.document_repo import DocumentRepo
-from lemma.ui.cairo import rounded_rectangle
+from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
+from lemma.ui.helpers.cairo import rounded_rectangle
 import lemma.services.timer as timer
 
 
@@ -57,17 +58,20 @@ class History(object):
 
     @timer.timer
     def update_size(self):
-        mode = ApplicationState.get_value('mode')
+        workspace = WorkspaceRepo.get_workspace()
+        history = [DocumentRepo.get_stub_by_id(doc_id) for doc_id in workspace.get_history()]
+        mode = workspace.get_mode()
 
         total_width = 0
         self.items = list()
-        for i, document_stub in enumerate(DocumentRepo.list_by_history()):
+
+        for i, document_stub in enumerate(history):
             if document_stub['title'] not in self.size_cache:
                 self.size_cache[document_stub['title']] = self.get_item_extents(document_stub['title']).width / Pango.SCALE + 37
             document_width = self.size_cache[document_stub['title']]
             self.items.append((i, document_stub, total_width, document_width))
             total_width += document_width
-            if document_stub['id'] == DocumentRepo.get_active_document_id():
+            if document_stub['id'] == workspace.get_active_document_id():
                 self.active_document_index = i
                 if mode == 'draft':
                     break
@@ -117,7 +121,9 @@ class History(object):
 
     @timer.timer
     def draw(self, widget, ctx, width, height):
-        mode = ApplicationState.get_value('mode')
+        workspace = WorkspaceRepo.get_workspace()
+        mode = workspace.get_mode()
+
         hover_index = self.get_hover_index()
         scrolling_offset = int(self.view.scrolling_widget.scrolling_offset_x) + 1
         hover_color = ColorManager.get_ui_color('history_hover')
@@ -125,30 +131,32 @@ class History(object):
         fg_color = ColorManager.get_ui_color('history_fg')
 
         draft_offset = 0
-        for i, document_stub, document_offset, document_width in self.items:
-            is_active = (i == self.active_document_index)
-            if document_offset + document_width >= self.view.scrolling_widget.scrolling_offset_x and document_offset <= self.view.scrolling_widget.scrolling_offset_x + width:
-                font_desc = self.font_desc_bold if (is_active and mode != 'draft') else self.font_desc_normal
 
-                if i == hover_index:
-                    if i == self.selected_index:
-                        Gdk.cairo_set_source_rgba(ctx, selected_color)
-                    else:
-                        Gdk.cairo_set_source_rgba(ctx, hover_color)
-                    rounded_rectangle(ctx, document_offset - scrolling_offset, 6, document_width, 35, 6)
-                    ctx.fill()
+        if self.active_document_index != None or mode != 'draft':
+            for i, document_stub, document_offset, document_width in self.items:
+                is_active = (i == self.active_document_index)
+                if document_offset + document_width >= self.view.scrolling_widget.scrolling_offset_x and document_offset <= self.view.scrolling_widget.scrolling_offset_x + width:
+                    font_desc = self.font_desc_bold if (is_active and mode != 'draft') else self.font_desc_normal
 
-                ctx.move_to(document_offset - scrolling_offset, 13)
-                self.layout.set_font_description(font_desc)
-                self.layout.set_width(document_width * Pango.SCALE)
-                self.layout.set_text(str(document_stub['title']))
-                Gdk.cairo_set_source_rgba(ctx, fg_color)
-                PangoCairo.show_layout(ctx, self.layout)
-                self.draw_divider(ctx, document_offset - scrolling_offset, height)
+                    if i == hover_index:
+                        if i == self.selected_index:
+                            Gdk.cairo_set_source_rgba(ctx, selected_color)
+                        else:
+                            Gdk.cairo_set_source_rgba(ctx, hover_color)
+                        rounded_rectangle(ctx, document_offset - scrolling_offset, 6, document_width, 35, 6)
+                        ctx.fill()
 
-            if is_active and mode == 'draft':
-                draft_offset = document_offset + document_width + 1 - scrolling_offset
-                break
+                    ctx.move_to(document_offset - scrolling_offset, 13)
+                    self.layout.set_font_description(font_desc)
+                    self.layout.set_width(document_width * Pango.SCALE)
+                    self.layout.set_text(str(document_stub['title']))
+                    Gdk.cairo_set_source_rgba(ctx, fg_color)
+                    PangoCairo.show_layout(ctx, self.layout)
+                    self.draw_divider(ctx, document_offset - scrolling_offset, height)
+
+                if is_active and mode == 'draft':
+                    draft_offset = document_offset + document_width + 1 - scrolling_offset
+                    break
 
         if mode == 'draft':
             extents = self.get_item_extents('New Document')
@@ -158,7 +166,9 @@ class History(object):
             self.layout.set_text('New Document')
             Gdk.cairo_set_source_rgba(ctx, fg_color)
             PangoCairo.show_layout(ctx, self.layout)
-            self.draw_divider(ctx, draft_offset, height)
+
+            if draft_offset > 0:
+                self.draw_divider(ctx, draft_offset, height)
 
     def draw_divider(self, ctx, offset, height):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('border_1'))

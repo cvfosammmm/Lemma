@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.services.message_bus import MessageBus
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.settings import Settings
 from lemma.services.autocomplete_db import AutocompleteDB
 from lemma.application_state.application_state import ApplicationState
@@ -31,9 +31,8 @@ from lemma.use_cases.use_cases import UseCases
 class Autocomplete():
 
     def __init__(self, main_window, application):
-        self.main_window = main_window
-        self.widget = AutocompleteWidget()
-        self.main_window.document_view.add_overlay(self.widget)
+        self.document_view = main_window.document_view
+        self.view = main_window.document_view.autocomplete_view
         self.application = application
 
         self.is_active = False
@@ -46,20 +45,20 @@ class Autocomplete():
         key_controller = Gtk.EventControllerKey()
         key_controller.connect('key-pressed', self.on_keypress)
         key_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.main_window.document_view.content.add_controller(key_controller)
-        self.widget.listbox.connect('row-activated', self.on_row_activated)
+        self.document_view.content.add_controller(key_controller)
+        self.view.listbox.connect('row-activated', self.on_row_activated)
 
         focus_controller = Gtk.EventControllerFocus()
         focus_controller.connect('enter', self.on_focus_in)
         focus_controller.connect('leave', self.on_focus_out)
-        self.main_window.document_view.content.add_controller(focus_controller)
+        self.document_view.content.add_controller(focus_controller)
 
         MessageBus.connect('history_changed', self.on_history_changed)
         MessageBus.connect('document_changed', self.on_document_changed)
         MessageBus.connect('keyboard_input', self.on_keyboard_input)
 
     def on_keyboard_input(self):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -70,7 +69,7 @@ class Autocomplete():
         self.update()
 
     def on_document_changed(self):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -79,7 +78,7 @@ class Autocomplete():
         self.update()
 
     def on_history_changed(self):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -88,7 +87,7 @@ class Autocomplete():
         self.update()
 
     def on_keypress(self, controller, keyval, keycode, state):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
             self.deactivate()
             return
@@ -120,12 +119,12 @@ class Autocomplete():
 
         elif (state & modifiers, keyval) == (0, Gdk.keyval_from_name('Down')):
             if self.is_active:
-                self.widget.select_next()
+                self.view.select_next()
                 return True
 
         elif (state & modifiers, keyval) == (0, Gdk.keyval_from_name('Up')):
             if self.is_active:
-                self.widget.select_prev()
+                self.view.select_prev()
                 return True
 
         return False
@@ -135,21 +134,21 @@ class Autocomplete():
         self.update()
 
     def on_focus_out(self, controller):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
             self.deactivate()
             return
 
-        self.widget.focus_hide = True
+        self.view.focus_hide = True
         self.update()
 
     def on_focus_in(self, controller):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
             self.deactivate()
             return
 
-        self.widget.focus_hide = False
+        self.view.focus_hide = False
         self.update()
 
     def update(self):
@@ -157,39 +156,39 @@ class Autocomplete():
             self.deactivate_if_necessary()
             self.update_suggestions()
 
-        self.widget.set_visible(self.is_active)
+        self.view.set_visible(self.is_active)
         self.update_position()
-        self.widget.set_visible(self.is_active and self.position_on_screen and not self.widget.focus_hide)
-        self.widget.queue_draw()
+        self.view.set_visible(self.is_active and self.position_on_screen and not self.view.focus_hide)
+        self.view.queue_draw()
 
     def update_position(self):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
         insert_x, insert_y = document.get_absolute_xy(insert.layout)
         content_offset = LayoutInfo.get_normal_document_offset()
-        scrolling_offset_y = self.application.document_view.scrolling_position_y
+        scrolling_offset_y = document.get_current_scrolling_offsets()[1]
         insert_y += content_offset - scrolling_offset_y
         insert_height = insert.layout['height']
         insert_x += LayoutInfo.get_document_padding_left()
         window_height = ApplicationState.get_value('document_view_height')
         window_width = ApplicationState.get_value('document_view_width')
 
-        self.widget.x = min(insert_x, window_width - self.widget.width - 18)
-        if insert_y + insert_height + self.widget.max_height > window_height:
-            self.widget.y = insert_y - self.widget.height
-            self.position_on_screen = (self.widget.y + self.widget.height - self.widget.max_height >= 0 and self.widget.y + self.widget.height + insert_height <= window_height)
+        self.view.x = min(insert_x, window_width - self.view.width - 18)
+        if insert_y + insert_height + self.view.max_height > window_height:
+            self.view.y = insert_y - self.view.height
+            self.position_on_screen = (self.view.y + self.view.height - self.view.max_height >= 0 and self.view.y + self.view.height + insert_height <= window_height)
         else:
-            self.widget.y = insert_y + insert_height
-            self.position_on_screen = (self.widget.y - insert_height >= 0 and self.widget.y + self.widget.max_height <= window_height)
+            self.view.y = insert_y + insert_height
+            self.position_on_screen = (self.view.y - insert_height >= 0 and self.view.y + self.view.max_height <= window_height)
 
-        self.widget.set_margin_top(self.widget.y)
-        self.widget.set_margin_start(self.widget.x)
+        self.view.set_margin_top(self.view.y)
+        self.view.set_margin_start(self.view.x)
 
     def update_command_at_cursor(self):
         # Tries to match a backslash followed by letters from the
         # last backslash before the cursor to the cursor.
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         node = document.cursor.get_insert_node()
         command_at_cursor = ''
         first_command_node = None
@@ -250,7 +249,7 @@ class Autocomplete():
         self.suggestions = AutocompleteDB.get_suggestions(self.command_at_cursor[1:], limit=20)
 
         if len(self.suggestions) > 0:
-            self.widget.set_items(self.suggestions)
+            self.view.set_items(self.suggestions)
         else:
             self.deactivate()
 
@@ -260,97 +259,12 @@ class Autocomplete():
 
         if len(self.suggestions) == 0: return
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
-        xml = AutocompleteDB.get_xml(self.widget.listbox.get_selected_row().title[1:])
+        xml = AutocompleteDB.get_xml(self.view.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
         UseCases.scroll_insert_on_screen(animation_type='default')
 
         self.deactivate()
-
-
-class AutocompleteWidget(Gtk.ScrolledWindow):
-
-    def __init__(self):
-        Gtk.ScrolledWindow.__init__(self)
-        self.add_css_class('autocomplete')
-
-        self.width = 300
-        self.height = 0
-        self.x = 0
-        self.y = 0
-        self.line_height = 35
-        self.max_height = 5 * self.line_height + 2
-        self.focus_hide = True
-        self.set_size_request(self.width, self.height)
-        self.set_valign(Gtk.Align.START)
-        self.set_halign(Gtk.Align.START)
-
-        self.listbox = Gtk.ListBox()
-        self.listbox.set_activate_on_single_click(True)
-        self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        self.listbox.set_can_focus(False)
-
-        self.listbox.connect('selected-rows-changed', self.on_selected_rows_changed)
-
-        self.set_child(self.listbox)
-
-    def set_items(self, items):
-        self.listbox.remove_all()
-        for item in items:
-            self.listbox.append(ACItem('\\' + item))
-        self.listbox.select_row(self.listbox.get_first_child())
-
-        self.height = min(len(items), 5) * self.line_height + 2
-        self.width = 300
-        self.set_size_request(self.width, self.height)
-
-    def select_next(self):
-        listbox = self.listbox
-
-        selected_row = listbox.get_selected_row()
-        if selected_row == listbox.get_last_child():
-            listbox.select_row(listbox.get_first_child())
-        else:
-            listbox.select_row(listbox.get_row_at_index(selected_row.get_index() + 1))
-
-    def select_prev(self):
-        listbox = self.listbox
-
-        selected_row = listbox.get_selected_row()
-        if selected_row == listbox.get_first_child():
-            listbox.select_row(listbox.get_last_child())
-        else:
-            listbox.select_row(listbox.get_row_at_index(selected_row.get_index() - 1))
-
-    def on_selected_rows_changed(self, listbox):
-        selected_row = self.listbox.get_selected_row()
-        adjustment = self.get_vadjustment()
-
-        if selected_row == None:
-            adjustment.set_value(0)
-        else:
-            bounds = selected_row.compute_bounds(self.listbox).out_bounds
-            item_height = bounds.size.height
-            y = bounds.origin.y
-            page_size = adjustment.get_page_size()
-            offset = adjustment.get_value()
-            if offset > y:
-                adjustment.set_value(y)
-            if offset < y + item_height - page_size:
-                adjustment.set_value(y + item_height - page_size)
-
-
-class ACItem(Gtk.ListBoxRow):
-
-    def __init__(self, title):
-        Gtk.ListBoxRow.__init__(self)
-        self.set_size_request(-1, 30)
-
-        self.title = title
-
-        label = Gtk.Label.new(self.title)
-        label.set_xalign(Gtk.Align.FILL)
-        self.set_child(label)
 
 

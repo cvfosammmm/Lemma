@@ -22,7 +22,8 @@ from gi.repository import Gtk, Gdk, GObject
 import os
 
 from lemma.ui.popovers.popover_templates import PopoverView
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.xml_helpers as xml_helpers
@@ -81,7 +82,7 @@ class Popover(PopoverView):
 
         self.init_current_values()
 
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document.cursor.has_selection():
             nodes = document.ast.get_subtree(*document.cursor.get_state())
             first_node = nodes[0] if len(nodes) > 0 else None
@@ -192,7 +193,7 @@ class Popover(PopoverView):
         self.submit()
 
     def submit(self):
-        document = DocumentRepo.get_active_document()
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
         if self.current_values['link_target'] != '':
             if self.bounds == None:

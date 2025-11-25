@@ -24,7 +24,8 @@ from gi.repository import Rsvg
 import time, datetime, os.path
 import cairo
 
-from lemma.document_repo.document_repo import DocumentRepo
+from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.services.color_manager import ColorManager
 from lemma.ui.shortcuts import ShortcutController
 from lemma.application_state.application_state import ApplicationState
@@ -192,6 +193,8 @@ class DocumentList(object):
 
     @timer.timer
     def draw_documents(self, ctx, width, height):
+        workspace = WorkspaceRepo.get_workspace()
+
         sidebar_fg_1 = ColorManager.get_ui_color('sidebar_fg_1')
         sidebar_fg_2 = ColorManager.get_ui_color('sidebar_fg_2')
         bg_color = ColorManager.get_ui_color('sidebar_bg_1')
@@ -215,8 +218,7 @@ class DocumentList(object):
         for i, document_stub in enumerate(self.document_stubs[first_item_no:last_item_no]):
             i += first_item_no
 
-            mode = ApplicationState.get_value('mode')
-            highlight_active = (document_stub['id'] == DocumentRepo.get_active_document_id() and mode == 'documents')
+            highlight_active = (document_stub['id'] == workspace.get_active_document_id() and workspace.get_mode() == 'documents')
 
             if highlight_active:
                 title_color = active_fg_color

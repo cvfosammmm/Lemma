@@ -25,6 +25,7 @@ from gi.repository import Rsvg
 
 import os.path
 
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.paths import Paths
 from lemma.services.character_db import CharacterDB
 from lemma.use_cases.use_cases import UseCases
@@ -34,10 +35,9 @@ import lemma.services.timer as timer
 
 class SidebarMath(object):
 
-    def __init__(self, main_window, application, model_state):
+    def __init__(self, main_window, application):
         self.view = main_window.tools_sidebar
         self.application = application
-        self.model_state = model_state
 
         self.data = dict()
         self.data['math_typesetting'] = {'title': 'Math Typesetting', 'symbols': []}
@@ -367,9 +367,12 @@ class SidebarMath(object):
 
     @timer.timer
     def update(self):
+        document_active = WorkspaceRepo.get_workspace().get_active_document() != None
+
         if Settings.get_value('show_tools_sidebar') and Settings.get_value('tools_sidebar_active_tab') == 'math':
-            if self.model_state.has_active_doc != self.is_active:
-                self.is_active = self.model_state.has_active_doc
+            if document_active != self.is_active:
+                self.is_active = document_active
+
                 for button in self.buttons:
                     button.set_sensitive(self.is_active)
 

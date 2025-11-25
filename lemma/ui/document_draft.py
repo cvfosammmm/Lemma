@@ -21,8 +21,8 @@ from gi.repository import Gtk, Gdk
 
 import datetime
 
-from lemma.document_repo.document_repo import DocumentRepo
-from lemma.application_state.application_state import ApplicationState
+from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -46,7 +46,7 @@ class DocumentDraft():
         self.view.title_entry.add_controller(self.key_controller_window)
 
     def update(self):
-        mode = ApplicationState.get_value('mode')
+        mode = WorkspaceRepo.get_workspace().get_mode()
         if mode == 'draft':
             self.init()
         else:

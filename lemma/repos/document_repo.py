@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import os.path, os, pickle
-from operator import attrgetter
 
 from lemma.document.document import Document
 from lemma.services.xml_parser import XMLParser
@@ -28,21 +27,10 @@ import lemma.services.timer as timer
 class DocumentRepo():
 
     document_stubs_by_id = dict()
-    history = list()
-    active_document = None
-
     max_document_id = 0
 
     @timer.timer
     def init():
-        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
-        workspace_data = None
-        if os.path.isfile(pathname):
-            with open(pathname, 'rb') as file:
-                try:
-                    workspace_data = pickle.loads(file.read())
-                except EOFError: pass
-
         stubs = dict()
         for direntry in os.scandir(Paths.get_stubs_folder()):
             with open(direntry.path, 'rb') as file:
@@ -68,9 +56,6 @@ class DocumentRepo():
                     if document_id in stubs:
                         del(stubs[document_id])
 
-                    if workspace_data != None and workspace_data['active_document_id'] == document_id:
-                        DocumentRepo.active_document = document
-
         for document_id in stubs:
             pathname = os.path.join(Paths.get_stubs_folder(), str(document_id))
             os.remove(pathname)
@@ -79,11 +64,6 @@ class DocumentRepo():
             DocumentRepo.max_document_id = max(DocumentRepo.document_stubs_by_id)
         else:
             DocumentRepo.max_document_id = 0
-
-        if workspace_data != None:
-            DocumentRepo.history = [doc_id for doc_id in workspace_data['history'] if doc_id in DocumentRepo.document_stubs_by_id]
-            if workspace_data['active_document_id'] in DocumentRepo.document_stubs_by_id and DocumentRepo.active_document == None:
-                DocumentRepo.activate_document(workspace_data['active_document_id'], update_history=False)
 
     def list():
         return [stub for stub in sorted(DocumentRepo.document_stubs_by_id.values(), key=lambda stub: -stub['last_modified'])]
@@ -115,9 +95,6 @@ class DocumentRepo():
             if len(result) == limit:
                 break
         return result
-
-    def list_by_history():
-        return [DocumentRepo.get_stub_by_id(doc_id) for doc_id in DocumentRepo.history]
 
     def list_by_title(title):
         return [stub for stub in DocumentRepo.list() if stub['title'] == title]
@@ -151,29 +128,6 @@ class DocumentRepo():
 
         return document
 
-    def get_active_document():
-        if DocumentRepo.active_document == None:
-            return None
-        return DocumentRepo.active_document
-
-    def get_active_document_id():
-        return DocumentRepo.active_document.id if DocumentRepo.active_document != None else None
-
-    def get_prev_id_in_history(document_id):
-        if document_id not in DocumentRepo.history: return None
-
-        index = DocumentRepo.history.index(document_id)
-        if index == 0: return None
-        else:
-            return DocumentRepo.history[index - 1]
-
-    def get_next_id_in_history(document_id):
-        if document_id not in DocumentRepo.history: return None
-
-        index = DocumentRepo.history.index(document_id)
-        if index == (len(DocumentRepo.history) - 1): return None
-        else: return DocumentRepo.history[index + 1]
-
     @timer.timer
     def get_max_document_id():
         return DocumentRepo.max_document_id
@@ -206,21 +160,11 @@ class DocumentRepo():
             os.remove(pathname)
         except FileNotFoundError: pass
 
-        if document_id == DocumentRepo.get_active_document_id():
-            new_active_document_id = DocumentRepo.get_prev_id_in_history(document_id)
-            if new_active_document_id == None:
-                new_active_document_id = DocumentRepo.get_next_id_in_history(document_id)
-            DocumentRepo.activate_document(new_active_document_id, update_history=False)
-
         del(DocumentRepo.document_stubs_by_id[document_id])
         pathname = os.path.join(Paths.get_stubs_folder(), str(document_id))
         try:
             os.remove(pathname)
         except FileNotFoundError: pass
-
-        if document_id in DocumentRepo.history:
-            DocumentRepo.history.remove(document_id)
-        DocumentRepo.save_history()
 
     @timer.timer
     def update(document):
@@ -238,38 +182,5 @@ class DocumentRepo():
         pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
         with open(pathname, 'wb') as filehandle:
             pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
-
-    def activate_document(document_id, update_history):
-        if document_id == None:
-            DocumentRepo.active_document = None
-        else:
-            if update_history:
-                DocumentRepo.add_to_history(document_id)
-            DocumentRepo.active_document = DocumentRepo.get_by_id(document_id)
-
-        DocumentRepo.save_history()
-
-    def add_to_history(document_id):
-        if document_id == None: return
-
-        if DocumentRepo.active_document != None and DocumentRepo.active_document.id in DocumentRepo.history:
-            DocumentRepo.history = DocumentRepo.history[:DocumentRepo.history.index(DocumentRepo.active_document.id) + 1]
-        if document_id in DocumentRepo.history:
-            DocumentRepo.history.remove(document_id)
-        if len(DocumentRepo.history) >= 100:
-            DocumentRepo.history = DocumentRepo.history[-100:]
-        DocumentRepo.history.append(document_id)
-
-    def save_history():
-        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
-
-        try: filehandle = open(pathname, 'wb')
-        except IOError: pass
-        else:
-            active_document_id = DocumentRepo.active_document.id if DocumentRepo.active_document != None else None
-            history_list = [document_id for document_id in DocumentRepo.history if document_id != None]
-            data = {'active_document_id': active_document_id,
-                    'history': history_list}
-            filehandle.write(pickle.dumps(data))
 
 
