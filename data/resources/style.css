@@ -159,6 +159,12 @@ paned.document-view separator.wide {
     box-shadow: none;
 }
 
+/* document list */
+
+overlay.document-list scrollbar slider {
+    min-height: 48px;
+}
+
 /* backlinks */
 
 .backlinks {
@@ -260,6 +266,9 @@ box.tools-sidebar wrap-box button {
 }
 box.tools-sidebar {
     margin-bottom: 9px;
+}
+stack.tools-sidebar scrollbar slider {
+    min-height: 48px;
 }
 
 /* popover */
@@ -374,9 +383,7 @@ button.sidebar:active {
     background: @sidebar_selection;
 }
 
-/*
-** context menus
-*/
+/* context menus */
 
 popover.context-menu contents {
     background: @popover_bg_color;

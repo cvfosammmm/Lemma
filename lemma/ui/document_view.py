@@ -61,6 +61,7 @@ class DocumentView():
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
 
+    @timer.timer
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         new_active_document = document != self.document

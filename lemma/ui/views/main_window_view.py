@@ -67,6 +67,7 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.tools_sidebar = Gtk.Stack()
         self.tools_sidebar.set_size_request(266, 280)
+        self.tools_sidebar.add_css_class('tools-sidebar')
 
         self.content_stack = Gtk.Stack()
         self.content_stack.add_css_class('content')
