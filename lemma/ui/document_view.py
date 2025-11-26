@@ -78,7 +78,6 @@ class DocumentView():
                 self.reset_cursor_blink()
 
                 self.update_link_at_cursor()
-                self.presenter.update_pointer()
 
                 do_draw = True
 
@@ -109,6 +108,7 @@ class DocumentView():
             do_draw = True
 
         if do_draw:
+            self.update_pointer()
             self.view.content.queue_draw()
 
     def reset_cursor_blink(self):
@@ -134,13 +134,47 @@ class DocumentView():
                     link = leaf_box['node'].link
 
             self.set_link_target_at_pointer(link)
-            self.presenter.update_pointer()
+            self.update_pointer()
 
     def set_ctrl_pressed(self, is_pressed):
         if is_pressed != self.ctrl_pressed:
             self.ctrl_pressed = is_pressed
             self.last_cursor_or_scrolling_change = time.time()
-            self.presenter.update_pointer()
+            self.update_pointer()
+
+    def update_pointer(self):
+        if self.document == None: return
+
+        document = self.document
+        if document == None:
+            self.view.set_cursor_from_name('default')
+            return
+
+        x = self.scrolling_position_x + (self.cursor_x if self.cursor_x != None else 0)
+        y = self.scrolling_position_y + (self.cursor_y if self.cursor_y != None else 0)
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
+        y -= ApplicationState.get_value('title_buttons_height')
+
+        if y > 0:
+            leaf_box = document.get_leaf_at_xy(x, y)
+            if leaf_box != None:
+                node = leaf_box['node']
+                if node != None:
+                    if node.link != None and not self.ctrl_pressed:
+                        self.view.set_cursor_from_name('pointer')
+                    elif node.type == 'widget':
+                        self.view.set_cursor_from_name(node.value.get_cursor_name())
+                    elif node.type == 'placeholder':
+                        self.view.set_cursor_from_name('default')
+                    else:
+                        self.view.set_cursor_from_name('text')
+                else:
+                    self.view.set_cursor_from_name('text')
+            else:
+                self.view.set_cursor_from_name('text')
+        else:
+            self.view.set_cursor_from_name('default')
 
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None

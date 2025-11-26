@@ -42,44 +42,8 @@ class DocumentViewPresenter():
         self.view.set_draw_func(self.draw)
 
         self.colors = dict()
-
         self.window_surface = None
-
         self.render_cache = dict()
-
-    def update_pointer(self):
-        if self.model.document == None: return
-
-        document = self.model.document
-        if document == None:
-            self.view.set_cursor_from_name('default')
-            return
-
-        x = self.model.scrolling_position_x + (self.model.cursor_x if self.model.cursor_x != None else 0)
-        y = self.model.scrolling_position_y + (self.model.cursor_y if self.model.cursor_y != None else 0)
-        x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
-        y -= ApplicationState.get_value('title_buttons_height')
-
-        if y > 0:
-            leaf_box = document.get_leaf_at_xy(x, y)
-            if leaf_box != None:
-                node = leaf_box['node']
-                if node != None:
-                    if node.link != None and not self.model.ctrl_pressed:
-                        self.view.set_cursor_from_name('pointer')
-                    elif node.type == 'widget':
-                        self.view.set_cursor_from_name(node.value.get_cursor_name())
-                    elif node.type == 'placeholder':
-                        self.view.set_cursor_from_name('default')
-                    else:
-                        self.view.set_cursor_from_name('text')
-                else:
-                    self.view.set_cursor_from_name('text')
-            else:
-                self.view.set_cursor_from_name('text')
-        else:
-            self.view.set_cursor_from_name('default')
 
     @timer.timer
     def draw(self, snapshot):
