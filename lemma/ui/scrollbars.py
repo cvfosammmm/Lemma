@@ -46,6 +46,7 @@ class Scrollbars():
         self.pointer_pos = None
         self.pointer_entry_time = None
         self.drag_in_progress = False
+        self.visibility_timeout = False
 
         self.motion_controller = Gtk.EventControllerMotion()
         self.motion_controller.connect('enter', self.on_enter)
@@ -74,19 +75,22 @@ class Scrollbars():
         slider_pos_fraction = scrolling_offset / (total_height - height)
         slider_offset = slider_pos_fraction * (height - slider_height)
         drag_in_progress = (drag_pos != None)
+        visibility_timeout = self.pointer_entry_time != None and (time.time() - self.pointer_entry_time > 0.1)
 
-        if self.slider_offset != slider_offset or self.slider_height != slider_height or self.pointer_pos != pointer_pos or self.drag_in_progress != drag_in_progress or self.view_height != height:
+        if self.slider_offset != slider_offset or self.slider_height != slider_height or self.pointer_pos != pointer_pos or self.drag_in_progress != drag_in_progress or self.view_height != height or self.visibility_timeout != visibility_timeout:
             self.slider_offset = slider_offset
             self.slider_height = slider_height
             self.pointer_pos = pointer_pos
             self.drag_in_progress = drag_in_progress
             self.view_height = height
+            self.visibility_timeout = visibility_timeout
 
             self.view.set_can_target(slider_height < height)
             self.view.queue_draw()
 
     def on_enter(self, controller, x=None, y=None):
         self.pointer_entry_time = time.time()
+        self.pointer_x, self.pointer_y = (x, y)
 
     def on_hover(self, controller, x=None, y=None):
         self.pointer_x, self.pointer_y = (x, y)
@@ -126,7 +130,7 @@ class Scrollbars():
 
     @timer.timer
     def draw(self, snapshot):
-        expand_width = self.pointer_pos != None and time.time() - self.pointer_entry_time > 0.1
+        expand_width = self.pointer_pos != None and self.visibility_timeout == True
 
         visible_width = 8 if expand_width else 3
 
