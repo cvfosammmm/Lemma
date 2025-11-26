@@ -107,6 +107,7 @@ class ShortcutControllerDocument(ShortcutController):
         actions.application.set_accels_for_action('win.set-paragraph-style::h5', ['<Control>5'])
         actions.application.set_accels_for_action('win.set-paragraph-style::h6', ['<Control>6'])
         actions.application.set_accels_for_action('win.set-paragraph-style::ul', ['<Control>7'])
+        actions.application.set_accels_for_action('win.set-paragraph-style::ol', ['<Control>8'])
         actions.application.set_accels_for_action('win.set-paragraph-style::p', ['<Control>0'])
         self.add_with_callback('<Control>l', self.actions.actions['show-link-popover'].activate)
         self.add_with_callback('<Control>minus', self.actions.actions['subscript'].activate)

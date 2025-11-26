@@ -103,9 +103,17 @@ class DocumentViewPresenter():
 
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
+        list_item_numbers = [0, 0, 0, 0, 0]
         for i, paragraph in enumerate(document.ast.paragraphs):
+            if paragraph.style == 'ol':
+                list_item_numbers[paragraph.indentation_level] += 1
+                if paragraph.indentation_level < 4:
+                    list_item_numbers = list_item_numbers[:paragraph.indentation_level + 1] + [0, 0, 0, 0, 0][paragraph.indentation_level + 1:]
+            else:
+                list_item_numbers = list_item_numbers[:paragraph.indentation_level] + [0, 0, 0, 0, 0][paragraph.indentation_level:]
+
             if content_offset_y + paragraph.layout['y'] + paragraph.layout['height'] >= 0 and content_offset_y + paragraph.layout['y'] <= self.height:
-                self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph)
+                self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph, list_item_numbers)
 
             for j, line_layout in enumerate(paragraph.layout['children']):
                 if content_offset_y + line_layout['y'] + paragraph.layout['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph.layout['y'] <= self.height:
@@ -154,7 +162,7 @@ class DocumentViewPresenter():
         self.colors['bullets_string'] = ColorManager.get_ui_color('bullets').to_string()
 
     @timer.timer
-    def draw_bullet(self, ctx, offset_x, offset_y, paragraph):
+    def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
         if paragraph.style == 'ul':
             layout = paragraph.layout
             line_layout = layout['children'][0]
@@ -167,6 +175,23 @@ class DocumentViewPresenter():
             bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_bullet_padding() - surface.get_width()
             bullet_measurement = TextShaper.measure_single('-')
             if surface != None:
+                ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
+                ctx.paint()
+
+        elif paragraph.style == 'ol':
+            layout = paragraph.layout
+            line_layout = layout['children'][0]
+            first_char_layout = line_layout['children'][0]
+            fontname = first_char_layout['fontname']
+            baseline = TextShaper.get_ascend(fontname=fontname)
+            fg_color = self.colors['bullets_string']
+
+            text = '.' + ''.join(reversed(str(list_item_numbers[paragraph.indentation_level])))
+            bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_bullet_padding()
+            for char, dim in zip(text, TextShaper.measure(text, fontname)):
+                surface, left, top = TextRenderer.get_glyph(char, fontname, fg_color, self.hidpi_factor)
+                bullet_indent -= dim[0]
+                bullet_measurement = TextShaper.measure_single(char)
                 ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
                 ctx.paint()
 

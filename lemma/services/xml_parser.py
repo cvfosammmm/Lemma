@@ -67,7 +67,7 @@ class XMLParser(object):
         if tag == 'strong':
             self.current_tags.add('bold')
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol']:
             if 'indentation_level' in attrs:
                 self.current_indentation_level = int(attrs['indentation_level'])
 
@@ -105,7 +105,7 @@ class XMLParser(object):
     def handle_endtag(self, tag):
         self.open_tags.pop()
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol']:
             new_paragraph = Paragraph(self.nodes)
             new_paragraph.style = tag
             new_paragraph.indentation_level = self.current_indentation_level

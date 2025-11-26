@@ -45,6 +45,8 @@ class LayoutInfo():
     def get_indentation(paragraph_style, indentation_level=0):
         if paragraph_style == 'ul':
             indentation = 48
+        elif paragraph_style == 'ol':
+            indentation = 48
         else:
             indentation = 0
         indentation += indentation_level * 48

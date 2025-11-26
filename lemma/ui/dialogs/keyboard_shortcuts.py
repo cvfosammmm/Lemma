@@ -77,6 +77,7 @@ class Dialog():
         section['items'].append({'title': 'Heading 5', 'shortcut': '&lt;ctrl&gt;5'})
         section['items'].append({'title': 'Heading 6', 'shortcut': '&lt;ctrl&gt;6'})
         section['items'].append({'title': 'Bullet List', 'shortcut': '&lt;ctrl&gt;7'})
+        section['items'].append({'title': 'Numbered List', 'shortcut': '&lt;ctrl&gt;8'})
         section['items'].append({'title': 'Normal Paragraph', 'shortcut': '&lt;ctrl&gt;0'})
         data.append(section)
 

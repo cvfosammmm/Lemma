@@ -49,7 +49,7 @@ class HTMLExporter(object):
         self.html += '<h1>' + document.title + '</h1>\n'
 
         for i, paragraph in enumerate(document.ast.paragraphs):
-            if paragraph.style in ['ul']:
+            if paragraph.style in ['ul', 'ol']:
                 if i == 0 or paragraph.style != document.ast.paragraphs[i-1].style:
                     self.html += '<' + paragraph.style + '><li>'
                 else:
@@ -62,7 +62,7 @@ class HTMLExporter(object):
             for node_list in node_lists:
                 self.process_list(node_list)
 
-            if paragraph.style in ['ul']:
+            if paragraph.style in ['ul', 'ol']:
                 if i == len(document.ast.paragraphs) - 1 or paragraph.style != document.ast.paragraphs[i+1].style:
                     self.html += '</li></' + paragraph.style + '>'
                 else:
