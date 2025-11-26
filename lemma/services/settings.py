@@ -48,6 +48,8 @@ class Settings():
 
         Settings.defaults['button_visible_bold'] = True
         Settings.defaults['button_visible_italic'] = True
+        Settings.defaults['button_visible_ul'] = False
+        Settings.defaults['button_visible_ol'] = False
         Settings.defaults['button_visible_decrease_indent'] = False
         Settings.defaults['button_visible_increase_indent'] = False
         Settings.defaults['button_visible_insert_image'] = True

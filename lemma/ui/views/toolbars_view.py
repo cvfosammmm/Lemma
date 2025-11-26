@@ -129,6 +129,24 @@ class ToolBarMain(Gtk.Box):
         box.append(self.italic_button)
         self.append(box)
 
+        self.list_buttons_separator = Gtk.Separator()
+        self.append(self.list_buttons_separator)
+
+        self.ul_button = Gtk.Button.new_from_icon_name('view-list-bullet-symbolic')
+        self.ul_button.set_detailed_action_name('win.set-paragraph-style::ul')
+        self.ul_button.set_can_focus(False)
+        self.ul_button.set_tooltip_text(_('Bullet List') + ' (Ctrl+7)')
+
+        self.ol_button = Gtk.Button.new_from_icon_name('view-list-ordered-symbolic')
+        self.ol_button.set_detailed_action_name('win.set-paragraph-style::ol')
+        self.ol_button.set_can_focus(False)
+        self.ol_button.set_tooltip_text(_('Numbered List') + ' (Ctrl+8)')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.ul_button)
+        box.append(self.ol_button)
+        self.append(box)
+
         self.indentation_buttons_separator = Gtk.Separator()
         self.append(self.indentation_buttons_separator)
 

@@ -49,10 +49,9 @@ class ToolBars():
         active_document = WorkspaceRepo.get_workspace().get_active_document()
         if active_document == None: return
 
-        has_active_doc = active_document != None
-        has_selection = has_active_doc and active_document.cursor.has_selection()
-        cursor_inside_link = has_active_doc and active_document.cursor.get_insert_node().is_inside_link()
-        edit_link_visible = has_active_doc and ((not has_selection) and cursor_inside_link)
+        has_selection = active_document.cursor.has_selection()
+        cursor_inside_link = active_document.cursor.get_insert_node().is_inside_link()
+        edit_link_visible = ((not has_selection) and cursor_inside_link)
 
         selected_nodes = active_document.ast.get_subtree(*active_document.cursor.get_state())
         if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.is_resizable():
@@ -100,11 +99,16 @@ class ToolBars():
         self.toolbar.toolbar_main.italic_button.set_visible(Settings.get_value('button_visible_italic'))
         self.toolbar.toolbar_main.indent_less_button.set_visible(Settings.get_value('button_visible_decrease_indent'))
         self.toolbar.toolbar_main.indent_more_button.set_visible(Settings.get_value('button_visible_increase_indent'))
+        self.toolbar.toolbar_main.ul_button.set_visible(Settings.get_value('button_visible_ul'))
+        self.toolbar.toolbar_main.ol_button.set_visible(Settings.get_value('button_visible_ol'))
         self.toolbar.toolbar_main.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
         self.toolbar.toolbar_main.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
 
         tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic')
         self.toolbar.toolbar_main.tag_buttons_separator.set_visible(tag_buttons_visible)
+
+        list_buttons_visible = Settings.get_value('button_visible_ul') or Settings.get_value('button_visible_ol')
+        self.toolbar.toolbar_main.list_buttons_separator.set_visible(list_buttons_visible)
 
         indentation_buttons_visible = Settings.get_value('button_visible_decrease_indent') or Settings.get_value('button_visible_increase_indent')
         self.toolbar.toolbar_main.indentation_buttons_separator.set_visible(indentation_buttons_visible)
