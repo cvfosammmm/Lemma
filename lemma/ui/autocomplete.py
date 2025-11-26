@@ -35,6 +35,8 @@ class Autocomplete():
         self.view = main_window.document_view.autocomplete_view
         self.application = application
 
+        self.scrolling_position_x, self.scrolling_position_y = -1, -1
+
         self.is_active = False
         self.position_on_screen = False
         self.command_at_cursor = ''
@@ -58,6 +60,12 @@ class Autocomplete():
         MessageBus.subscribe(self, 'keyboard_input')
 
     def animate(self):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document == None:
+            self.deactivate()
+            return
+
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages:
             self.on_history_changed()
@@ -66,32 +74,23 @@ class Autocomplete():
         if 'keyboard_input' in messages:
             self.on_keyboard_input()
 
-    def on_keyboard_input(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document == None:
-            self.deactivate()
-            return
+        scrolling_position_x, scrolling_position_y = document.get_current_scrolling_offsets()
+        if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
+            self.scrolling_position_x = scrolling_position_x
+            self.scrolling_position_y = scrolling_position_y
+            self.update()
 
+    def on_keyboard_input(self):
         self.update_command_at_cursor()
         if not self.is_active:
             self.activate_if_possible()
         self.update()
 
     def on_document_changed(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document == None:
-            self.deactivate()
-            return
-
         self.update_command_at_cursor()
         self.update()
 
     def on_history_changed(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document == None:
-            self.deactivate()
-            return
-
         self.update_command_at_cursor()
         self.update()
 
