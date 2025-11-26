@@ -64,13 +64,19 @@ class DocumentView():
     @timer.timer
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
-        new_active_document = document != self.document
-        document_changed = max(document.last_cursor_movement, document.last_modified) > self.last_cache_reset
-        do_draw = False
 
+        new_active_document = document != self.document
         if new_active_document:
             self.document = document
-            self.view.content.grab_focus()
+            if document != None:
+                self.view.content.grab_focus()
+
+        if self.document == None:
+            self.scrolling_position_x, self.scrolling_position_y = -1, -1
+            return True
+
+        document_changed = max(document.last_cursor_movement, document.last_modified) > self.last_cache_reset
+        do_draw = False
 
         if self.document != None:
             if new_active_document or document_changed:
@@ -81,10 +87,6 @@ class DocumentView():
                 self.update_link_at_cursor()
 
                 do_draw = True
-
-        if self.document == None:
-            self.scrolling_position_x, self.scrolling_position_y = -1, -1
-            return True
 
         scrolling_position_x, scrolling_position_y = self.document.get_current_scrolling_offsets()
 

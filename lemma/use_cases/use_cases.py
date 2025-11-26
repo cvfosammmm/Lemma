@@ -201,6 +201,7 @@ class UseCases():
         document.update()
 
         workspace.set_active_document(document, update_history=True)
+        workspace.leave_draft_mode()
 
         DocumentRepo.add(document)
         WorkspaceRepo.update(workspace)
