@@ -75,14 +75,15 @@ class Scrollbars():
         slider_offset = slider_pos_fraction * (height - slider_height)
         drag_in_progress = (drag_pos != None)
 
-        self.slider_offset = slider_offset
-        self.slider_height = slider_height
-        self.pointer_pos = pointer_pos
-        self.drag_in_progress = drag_in_progress
-        self.view_height = height
+        if self.slider_offset != slider_offset or self.slider_height != slider_height or self.pointer_pos != pointer_pos or self.drag_in_progress != drag_in_progress or self.view_height != height:
+            self.slider_offset = slider_offset
+            self.slider_height = slider_height
+            self.pointer_pos = pointer_pos
+            self.drag_in_progress = drag_in_progress
+            self.view_height = height
 
-        self.view.set_can_target(slider_height < height)
-        self.view.queue_draw()
+            self.view.set_can_target(slider_height < height)
+            self.view.queue_draw()
 
     def on_enter(self, controller, x=None, y=None):
         self.pointer_entry_time = time.time()
