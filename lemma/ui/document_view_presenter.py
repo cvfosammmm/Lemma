@@ -41,7 +41,7 @@ class DocumentViewPresenter():
         self.view = self.model.view.content
         self.view.set_draw_func(self.draw)
 
-        self.colors = dict()
+        self.color_cache = dict()
         self.window_surface = None
         self.render_cache = dict()
 
@@ -111,19 +111,19 @@ class DocumentViewPresenter():
 
     @timer.timer
     def setup_colors(self):
-        self.colors['text'] = ColorManager.get_ui_color('text')
-        self.colors['links'] = ColorManager.get_ui_color('links')
-        self.colors['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
-        self.colors['selection_bg'] = ColorManager.get_ui_color('selection_bg')
-        self.colors['description_color'] = ColorManager.get_ui_color('description_color')
-        self.colors['border_1'] = ColorManager.get_ui_color('border_1')
-        self.colors['cursor'] = ColorManager.get_ui_color('cursor')
-        self.colors['drop_cursor'] = ColorManager.get_ui_color('drop_color')
+        self.color_cache['text'] = ColorManager.get_ui_color('text')
+        self.color_cache['links'] = ColorManager.get_ui_color('links')
+        self.color_cache['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
+        self.color_cache['selection_bg'] = ColorManager.get_ui_color('selection_bg')
+        self.color_cache['description_color'] = ColorManager.get_ui_color('description_color')
+        self.color_cache['border_1'] = ColorManager.get_ui_color('border_1')
+        self.color_cache['cursor'] = ColorManager.get_ui_color('cursor')
+        self.color_cache['drop_cursor'] = ColorManager.get_ui_color('drop_color')
 
-        self.colors['text_string'] = self.colors['text'].to_string()
-        self.colors['links_string'] = self.colors['links'].to_string()
-        self.colors['links_page_not_existing_string'] = self.colors['links_page_not_existing'].to_string()
-        self.colors['bullets_string'] = ColorManager.get_ui_color('bullets').to_string()
+        self.color_cache['text_string'] = self.color_cache['text'].to_string()
+        self.color_cache['links_string'] = self.color_cache['links'].to_string()
+        self.color_cache['links_page_not_existing_string'] = self.color_cache['links_page_not_existing'].to_string()
+        self.color_cache['bullets_string'] = ColorManager.get_ui_color('bullets').to_string()
 
     @timer.timer
     def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
@@ -133,7 +133,7 @@ class DocumentViewPresenter():
             first_char_layout = line_layout['children'][0]
             fontname = first_char_layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
-            fg_color = self.colors['bullets_string']
+            fg_color = self.color_cache['bullets_string']
 
             surface, left, top = TextRenderer.get_glyph('-', fontname, fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_bullet_padding() - surface.get_width()
@@ -148,7 +148,7 @@ class DocumentViewPresenter():
             first_char_layout = line_layout['children'][0]
             fontname = first_char_layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
-            fg_color = self.colors['bullets_string']
+            fg_color = self.color_cache['bullets_string']
 
             text = '.' + ''.join(reversed(str(list_item_numbers[paragraph.indentation_level])))
             bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_bullet_padding()
@@ -260,25 +260,25 @@ class DocumentViewPresenter():
             ctx.fill()
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
-        Gdk.cairo_set_source_rgba(ctx, self.colors['selection_bg'])
+        Gdk.cairo_set_source_rgba(ctx, self.color_cache['selection_bg'])
         ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
         ctx.fill()
 
     @timer.timer
     def get_fg_color_string_by_node(self, node):
         if node.link == None:
-            return self.colors['text_string']
+            return self.color_cache['text_string']
         if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
-            return self.colors['links_string']
-        return self.colors['links_page_not_existing_string']
+            return self.color_cache['links_string']
+        return self.color_cache['links_page_not_existing_string']
 
     @timer.timer
     def get_fg_color_by_node(self, node):
         if node.link == None:
-            return self.colors['text']
+            return self.color_cache['text']
         if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
-            return self.colors['links']
-        return self.colors['links_page_not_existing']
+            return self.color_cache['links']
+        return self.color_cache['links_page_not_existing']
 
     @timer.timer
     def draw_cursor(self, ctx, offset_x, offset_y):
@@ -291,7 +291,7 @@ class DocumentViewPresenter():
         padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
-        Gdk.cairo_set_source_rgba(ctx, self.colors['cursor'])
+        Gdk.cairo_set_source_rgba(ctx, self.color_cache['cursor'])
         ctx.rectangle(*cursor_coords)
         ctx.fill()
 
@@ -305,7 +305,7 @@ class DocumentViewPresenter():
         padding_bottom = 0
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
-        Gdk.cairo_set_source_rgba(ctx, self.colors['drop_cursor'])
+        Gdk.cairo_set_source_rgba(ctx, self.color_cache['drop_cursor'])
         ctx.rectangle(*cursor_coords)
         ctx.fill()
 
