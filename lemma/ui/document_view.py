@@ -150,7 +150,7 @@ class DocumentView():
 
         document = self.document
         if document == None:
-            self.view.set_cursor_from_name('default')
+            self.view.content.set_cursor_from_name('default')
             return
 
         x = self.scrolling_position_x + (self.cursor_x if self.cursor_x != None else 0)
@@ -165,19 +165,19 @@ class DocumentView():
                 node = leaf_box['node']
                 if node != None:
                     if node.link != None and not self.ctrl_pressed:
-                        self.view.set_cursor_from_name('pointer')
+                        self.view.content.set_cursor_from_name('pointer')
                     elif node.type == 'widget':
-                        self.view.set_cursor_from_name(node.value.get_cursor_name())
+                        self.view.content.set_cursor_from_name(node.value.get_cursor_name())
                     elif node.type == 'placeholder':
-                        self.view.set_cursor_from_name('default')
+                        self.view.content.set_cursor_from_name('default')
                     else:
-                        self.view.set_cursor_from_name('text')
+                        self.view.content.set_cursor_from_name('text')
                 else:
-                    self.view.set_cursor_from_name('text')
+                    self.view.content.set_cursor_from_name('text')
             else:
-                self.view.set_cursor_from_name('text')
+                self.view.content.set_cursor_from_name('text')
         else:
-            self.view.set_cursor_from_name('default')
+            self.view.content.set_cursor_from_name('default')
 
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None
