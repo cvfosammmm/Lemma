@@ -986,8 +986,8 @@ class UseCases():
         max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') + document.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.get_value('document_view_height'))
         max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_width() - ApplicationState.get_value('document_view_width'))
 
-        x = min(max_x, max(0, x + 15.13 / 16 * vel_x))
-        y = min(max_y, max(0, y + 15.13 / 16 * vel_y))
+        vel_x *= 0.4
+        vel_y *= 0.4
         x = x + 15.13 / 16 * vel_x
         y = y + 15.13 / 16 * vel_y
 
