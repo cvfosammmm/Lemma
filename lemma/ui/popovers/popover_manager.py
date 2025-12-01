@@ -135,15 +135,15 @@ class PopoverManager():
         name = self.current_popover_name
         popover = self.popovers[name]
 
+        if popover.is_focus() or popover.get_focus_child() != None and self.prev_focus_widget != None:
+            self.prev_focus_widget.grab_focus()
+            self.prev_focus_widget = None
+
         self.popoverlay.remove_overlay(popover)
         self.current_popover_name = None
         self.inbetween.set_can_target(False)
 
         popover.on_popdown()
-
-        if self.prev_focus_widget != None:
-            self.prev_focus_widget.grab_focus()
-            self.prev_focus_widget = None
 
     def remember_focus_widget(self):
         widget = self.main_window

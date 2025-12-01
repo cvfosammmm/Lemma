@@ -403,6 +403,8 @@ class Layouter(object):
             return 'math'
         if node.value != None and node.type == 'char' and node.value.isnumeric():
             return 'math'
+        if node.type == 'placeholder':
+            return 'math'
 
         if node.type == 'char' and CharacterDB.is_emoji(node.value):
             return 'emojis'

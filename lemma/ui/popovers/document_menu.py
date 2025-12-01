@@ -31,19 +31,12 @@ class Popover(PopoverView):
 
         self.set_width(306)
 
-        self.delete_document_button = MenuBuilder.create_button(_('Delete Document'))
-        self.delete_document_button.set_action_name('win.delete-document')
-        self.add_closing_button(self.delete_document_button)
-
-        self.rename_document_button = MenuBuilder.create_button(_('Rename Document'), shortcut='F2')
-        self.rename_document_button.set_action_name('win.rename-document')
-        self.add_closing_button(self.rename_document_button)
+        self.delete_document_button = self.add_action_button(_('Delete Document'), 'win.delete-document')
+        self.rename_document_button = self.add_action_button(_('Rename Document'), 'win.rename-document', shortcut='F2')
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.export_document_button = MenuBuilder.create_button(_('Export Markdown...'))
-        self.export_document_button.set_action_name('win.export-markdown')
-        self.add_closing_button(self.export_document_button)
+        self.export_document_button = self.add_action_button(_('Export Markdown...'), 'win.export-markdown')
 
         self.key_controller = Gtk.EventControllerKey()
         self.key_controller.connect('key-pressed', self.on_keypress)

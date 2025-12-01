@@ -39,9 +39,7 @@ class Popover(PopoverView):
         entries.append(['h6', _('Heading 6'), 'placeholder', 'Ctrl+6'])
 
         for entry in entries:
-            button = MenuBuilder.create_button(entry[1], icon_name=entry[2], shortcut=entry[3])
-            button.set_detailed_action_name('win.set-paragraph-style::' + entry[0])
-            self.add_closing_button(button)
+            self.add_action_button(entry[1], 'win.set-paragraph-style', entry[0], icon=entry[2], shortcut=entry[3])
 
         self.add_widget(Gtk.Separator())
 
@@ -51,9 +49,7 @@ class Popover(PopoverView):
         entries.append(['cl', _('Checklist'), 'view-checklist-symbolic', 'Ctrl+9'])
 
         for entry in entries:
-            button = MenuBuilder.create_button(entry[1], icon_name=entry[2], shortcut=entry[3])
-            button.set_detailed_action_name('win.set-paragraph-style::' + entry[0])
-            self.add_closing_button(button)
+            self.add_action_button(entry[1], 'win.set-paragraph-style', entry[0], icon=entry[2], shortcut=entry[3])
 
     def on_popup(self):
         pass

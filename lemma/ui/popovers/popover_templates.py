@@ -109,11 +109,11 @@ class PopoverView(Gtk.Overlay):
         self.register_button_for_keyboard_navigation(button, 'main')
         self.add_widget(button)
 
-    def add_action_button(self, pagename, title, action_name, parameter=None, icon=None, shortcut=None):
+    def add_action_button(self, title, action_name, parameter=None, icon=None, shortcut=None, pagename='main'):
         button = MenuBuilder.create_button(title, icon_name=icon, shortcut=shortcut)
         button.set_action_name(action_name)
         if parameter != None:
-            button.set_action_target_value(parameter)
+            button.set_action_target_value(GLib.Variant('s', parameter))
         self.add_closing_button(button, pagename)
         return button
 
