@@ -20,6 +20,9 @@ def escape(text):
     escape_translation = str.maketrans({'<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;'})
     return text.translate(escape_translation)
 
+def unescape(text):
+    return text.replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&').replace('&apos;', "'").replace('&quot;', '"')
+
 def embellish_with_link_and_tags(xml, link, tags):
     if 'italic' in tags:
         xml = '<em>' + xml + '</em>'

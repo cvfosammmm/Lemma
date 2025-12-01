@@ -20,6 +20,7 @@ import io
 
 from lemma.document.ast import Paragraph, Node
 from lemma.widgets.image import Image
+import lemma.services.xml_helpers as xml_helpers
 
 
 class XMLParser(object):
@@ -62,7 +63,7 @@ class XMLParser(object):
         self.open_tags.append(tag)
 
         if tag == 'a' and 'href' in attrs:
-            self.current_link = attrs['href']
+            self.current_link = xml_helpers.unescape(attrs['href'])
         if tag == 'em':
             self.current_tags.add('italic')
         if tag == 'strong':
