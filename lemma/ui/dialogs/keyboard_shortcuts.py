@@ -68,6 +68,11 @@ class Dialog():
         section['items'].append({'title': 'Select Previous Placeholder', 'shortcut': '&lt;shift&gt;Tab'})
         data.append(section)
 
+        section = {'title': 'Actions', 'items': list()}
+        section['items'].append({'title': 'Activate Link', 'shortcut': 'Return'})
+        section['items'].append({'title': 'Toggle Checkbox', 'shortcut': '&lt;ctrl&gt;M'})
+        data.append(section)
+
         section = {'title': 'Formatting', 'items': list()}
         section['items'].append({'title': 'Bold Text', 'shortcut': '&lt;ctrl&gt;B'})
         section['items'].append({'title': 'Italic Text', 'shortcut': '&lt;ctrl&gt;I'})

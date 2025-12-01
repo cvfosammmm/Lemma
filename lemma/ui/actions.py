@@ -69,6 +69,7 @@ class Actions(object):
         self.add_simple_action('copy-link', self.copy_link)
 
         self.add_simple_action('set-paragraph-style', self.set_paragraph_style, GLib.VariantType('s'))
+        self.add_simple_action('toggle-checkbox', self.toggle_checkbox)
         self.add_simple_action('toggle-bold', self.toggle_bold)
         self.add_simple_action('toggle-italic', self.toggle_italic)
 
@@ -148,6 +149,7 @@ class Actions(object):
         self.actions['subscript'].set_enabled(self.model_state.has_active_doc)
         self.actions['superscript'].set_enabled(self.model_state.has_active_doc)
         self.actions['set-paragraph-style'].set_enabled(self.model_state.has_active_doc)
+        self.actions['toggle-checkbox'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-bold'].set_enabled(self.model_state.has_active_doc)
         self.actions['toggle-italic'].set_enabled(self.model_state.has_active_doc)
         self.actions['decrease-indent'].set_enabled(self.model_state.has_active_doc)
@@ -361,6 +363,11 @@ class Actions(object):
             style = 'p'
 
         UseCases.set_paragraph_style(style)
+
+    def toggle_checkbox(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
+        UseCases.toggle_checkbox_at_cursor()
 
     def toggle_bold(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
