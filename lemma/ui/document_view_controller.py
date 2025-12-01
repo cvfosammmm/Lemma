@@ -30,6 +30,7 @@ from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
 from lemma.services.layout_info import LayoutInfo
 from lemma.use_cases.use_cases import UseCases
+import lemma.services.timer as timer
 
 
 class DocumentViewController():
@@ -103,21 +104,15 @@ class DocumentViewController():
     def on_primary_button_press(self, controller, n_press, x, y):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
-        x = self.model.scrolling_position_x + x
-        y = self.model.scrolling_position_y + y
+        x += self.model.scrolling_position_x - LayoutInfo.get_document_padding_left()
+        y += self.model.scrolling_position_y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
-        self.model.selected_click_target = None
-
-        x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
+        self.model.selected_click_target = (x, y)
 
         if y > 0:
             link = document.get_link_at_xy(x, y)
             leaf_layout = document.get_leaf_layout_at_xy(x, y)
-            line_layout = document.get_line_layout_at_y(y)
-            paragraph_layout = line_layout['parent']
-            paragraph = paragraph_layout['node']
 
             if n_press == 1:
                 if int(keyboard_state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
@@ -131,10 +126,6 @@ class DocumentViewController():
                         UseCases.select_node(leaf_layout['node'])
                     else:
                         UseCases.move_cursor_to_xy(x, y, False)
-                    if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + 6 and y <= paragraph_layout['y'] + 23 and x >= 1 and x <= 18:
-                        UseCases.toggle_checkbox_at_cursor()
-                    elif link != None:
-                        self.model.selected_click_target = link
 
             else:
                 if link == None or int(keyboard_state & modifiers) != 0:
@@ -153,20 +144,35 @@ class DocumentViewController():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = self.model.document
-        x = self.model.scrolling_position_x + x
-        y = self.model.scrolling_position_y + y
+        x += self.model.scrolling_position_x - LayoutInfo.get_document_padding_left()
+        y += self.model.scrolling_position_y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if keyboard_state == 0:
-            x -= LayoutInfo.get_document_padding_left()
-            y -= LayoutInfo.get_normal_document_offset()
-
             if y >= -LayoutInfo.get_subtitle_height():
                 document = self.model.document
 
-                link = document.get_link_at_xy(x, y)
-                if link == self.model.selected_click_target:
-                    UseCases.open_link(link)
+                link_at_press = document.get_link_at_xy(*self.model.selected_click_target)
+                link_at_release = document.get_link_at_xy(x, y)
+
+                if link_at_press == link_at_release and link_at_release != None:
+                    UseCases.open_link(link_at_release)
+                    return
+
+                x_at_press, y_at_press = self.model.selected_click_target
+                line_layout_at_press = document.get_line_layout_at_y(y_at_press)
+                paragraph_layout_at_press = line_layout_at_press['parent']
+
+                line_layout_at_release = document.get_line_layout_at_y(y)
+                paragraph_layout_at_release = line_layout_at_release['parent']
+
+                if paragraph_layout_at_press != paragraph_layout_at_release: return
+                if paragraph_layout_at_release['node'].style != 'cl': return
+                if line_layout_at_release != paragraph_layout_at_release['children'][0]: return
+                if y < paragraph_layout_at_release['y'] + 6 or y > paragraph_layout_at_release['y'] + 23 or x < 1 or x > 18: return
+                if y_at_press < paragraph_layout_at_press['y'] + 6 or y_at_press > paragraph_layout_at_press['y'] + 23 or x_at_press < 1 or x_at_press > 18: return
+
+                UseCases.toggle_checkbox_at_cursor()
 
     def on_secondary_button_press(self, controller, n_press, x, y):
         if n_press % 3 != 1: return
