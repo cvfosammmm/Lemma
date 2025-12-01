@@ -29,10 +29,10 @@ class Workspace():
         self.in_draft_mode = False
 
     def set_active_document(self, document, update_history):
-        self.active_document = document
-
         if update_history and document != None:
             self.add_to_history(document.id)
+
+        self.active_document = document
 
     def enter_draft_mode(self):
         self.in_draft_mode = True
