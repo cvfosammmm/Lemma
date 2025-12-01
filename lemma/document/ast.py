@@ -65,6 +65,7 @@ class Root():
     def append_paragraph(self, paragraph):
         self.paragraphs[-1].style = paragraph.style
         self.paragraphs[-1].indentation_level = paragraph.indentation_level
+        self.paragraphs[-1].state = paragraph.state
 
         for node in paragraph.nodes:
             self.paragraphs[-1].nodes.insert(-1, node)
@@ -251,6 +252,7 @@ class Paragraph():
 
         self.style = 'p'
         self.indentation_level = 0
+        self.state = None
 
     def invalidate(self):
         self.layout = None

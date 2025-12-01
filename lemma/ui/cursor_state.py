@@ -45,7 +45,6 @@ class CursorState():
     @timer.timer
     def update(self):
         self.update_tags_and_link_at_cursor()
-        self.update_paragraph_style_at_cursor()
         self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
 
@@ -90,16 +89,5 @@ class CursorState():
                 button.add_css_class('checked')
             else:
                 button.remove_css_class('checked')
-
-    @timer.timer
-    def update_paragraph_style_at_cursor(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document == None: return
-
-        current_node = document.cursor.get_first_node()
-        paragraph_style_at_cursor = current_node.paragraph().style
-
-        labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List')}
-        self.toolbar.toolbar_main.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
 
 

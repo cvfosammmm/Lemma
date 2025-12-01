@@ -44,6 +44,7 @@ class ToolBars():
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'document_changed' in messages or 'app_state_changed' in messages or 'settings_changed' in messages:
             self.update()
+            self.update_paragraph_style()
 
     def update(self):
         active_document = WorkspaceRepo.get_workspace().get_active_document()
@@ -94,6 +95,16 @@ class ToolBars():
 
         self.update_button_visibility()
 
+    def update_paragraph_style(self):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
+
+        current_node = document.cursor.get_first_node()
+        paragraph_style_at_cursor = current_node.paragraph().style
+
+        labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List'), 'cl': _('Checklist')}
+        self.toolbar.toolbar_main.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
+
     def update_button_visibility(self):
         self.toolbar.toolbar_main.bold_button.set_visible(Settings.get_value('button_visible_bold'))
         self.toolbar.toolbar_main.italic_button.set_visible(Settings.get_value('button_visible_italic'))
@@ -101,13 +112,14 @@ class ToolBars():
         self.toolbar.toolbar_main.indent_more_button.set_visible(Settings.get_value('button_visible_increase_indent'))
         self.toolbar.toolbar_main.ul_button.set_visible(Settings.get_value('button_visible_ul'))
         self.toolbar.toolbar_main.ol_button.set_visible(Settings.get_value('button_visible_ol'))
+        self.toolbar.toolbar_main.cl_button.set_visible(Settings.get_value('button_visible_cl'))
         self.toolbar.toolbar_main.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
         self.toolbar.toolbar_main.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
 
         tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic')
         self.toolbar.toolbar_main.tag_buttons_separator.set_visible(tag_buttons_visible)
 
-        list_buttons_visible = Settings.get_value('button_visible_ul') or Settings.get_value('button_visible_ol')
+        list_buttons_visible = Settings.get_value('button_visible_ul') or Settings.get_value('button_visible_ol') or Settings.get_value('button_visible_cl')
         self.toolbar.toolbar_main.list_buttons_separator.set_visible(list_buttons_visible)
 
         indentation_buttons_visible = Settings.get_value('button_visible_decrease_indent') or Settings.get_value('button_visible_increase_indent')

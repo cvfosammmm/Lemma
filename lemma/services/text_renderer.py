@@ -35,6 +35,7 @@ from lemma.services.paths import Paths
 class TextRenderer():
 
     fonts = dict()
+    icon_cache = dict()
 
     def add_font(name, filename, size, ascend, descend):
         TextRenderer.fonts[name] = dict()
@@ -45,6 +46,36 @@ class TextRenderer():
         TextRenderer.fonts[name]['descend'] = -descend
         TextRenderer.fonts[name]['line_height'] = ascend + descend
         TextRenderer.fonts[name]['cache'] = dict()
+
+    def get_icon_surface(icon_name, scale=1, default_color=None, highlight_color=None):
+        if (icon_name, scale, default_color, highlight_color) not in TextRenderer.icon_cache:
+            TextRenderer.load_icon_surface(icon_name, scale, default_color, highlight_color)
+
+        return TextRenderer.icon_cache[(icon_name, scale, default_color, highlight_color)]
+
+    def load_icon_surface(icon_name, scale=1, default_color=None, highlight_color=None):
+        res_path = Paths.get_resources_folder()
+        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons_extra', icon_name + '.svg'))
+
+        if highlight_color == None:
+            highlight_color = default_color
+        if default_color != None:
+            rsvg_handle.set_stylesheet(b'path {fill: ' + default_color.encode() + b';}\npath.highlight {fill: ' + highlight_color.encode() + b';}')
+
+        size = rsvg_handle.get_intrinsic_size_in_pixels()
+        width, height = size[1] * scale, size[2] * scale
+
+        viewport = Rsvg.Rectangle()
+        viewport.x = 0
+        viewport.y = 0
+        viewport.width = width
+        viewport.height = height
+
+        surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width), int(height))
+        ctx = cairo.Context(surface)
+        rsvg_handle.render_document(ctx, viewport)
+
+        TextRenderer.icon_cache[(icon_name, scale, default_color, highlight_color)] = surface
 
     def get_glyph(char, fontname='book', color=None, scale=1):
         if (char, color, scale) not in TextRenderer.fonts[fontname]['cache']:

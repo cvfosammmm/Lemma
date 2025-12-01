@@ -36,6 +36,7 @@ class PageToolbars(object):
         self.button_list.append([])
         self.button_list[-1].append(['view-list-bullet-symbolic', 'button_visible_ul', 'Bullet List'])
         self.button_list[-1].append(['view-list-ordered-symbolic', 'button_visible_ol', 'Numbered List'])
+        self.button_list[-1].append(['view-checklist-symbolic', 'button_visible_cl', 'Checklist'])
         self.button_list.append([])
         self.button_list[-1].append(['indent-less-symbolic', 'button_visible_decrease_indent', 'Decrease Indent'])
         self.button_list[-1].append(['indent-more-symbolic', 'button_visible_increase_indent', 'Increase Indent'])

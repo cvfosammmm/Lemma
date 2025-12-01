@@ -54,6 +54,11 @@ class HTMLExporter(object):
                     self.html += '<' + paragraph.style + '><li>'
                 else:
                     self.html += '<li>'
+            elif paragraph.style == 'cl':
+                if i == 0 or paragraph.style != document.ast.paragraphs[i-1].style:
+                    self.html += '<ul><li>'
+                else:
+                    self.html += '<li>'
             else:
                 self.html += '<' + paragraph.style + '>'
 
@@ -65,6 +70,11 @@ class HTMLExporter(object):
             if paragraph.style in ['ul', 'ol']:
                 if i == len(document.ast.paragraphs) - 1 or paragraph.style != document.ast.paragraphs[i+1].style:
                     self.html += '</li></' + paragraph.style + '>'
+                else:
+                    self.html += '</li>'
+            elif paragraph.style == 'cl':
+                if i == len(document.ast.paragraphs) - 1 or paragraph.style != document.ast.paragraphs[i+1].style:
+                    self.html += '</li></ul>'
                 else:
                     self.html += '</li>'
             else:

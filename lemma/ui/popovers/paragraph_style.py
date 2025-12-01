@@ -48,6 +48,7 @@ class Popover(PopoverView):
         entries = list()
         entries.append(['ul', _('Bullet List'), 'view-list-bullet-symbolic', 'Ctrl+7'])
         entries.append(['ol', _('Numbered List'), 'view-list-ordered-symbolic', 'Ctrl+8'])
+        entries.append(['cl', _('Checklist'), 'view-checklist-symbolic', 'Ctrl+9'])
 
         for entry in entries:
             button = MenuBuilder.create_button(entry[1], icon_name=entry[2], shortcut=entry[3])

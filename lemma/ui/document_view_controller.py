@@ -107,14 +107,17 @@ class DocumentViewController():
         y = self.model.scrolling_position_y + y
         keyboard_state = controller.get_current_event_state() & modifiers
 
-        self.model.selected_link_target = None
+        self.model.selected_click_target = None
 
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
 
         if y > 0:
-            link = self.get_link_at_xy(x, y)
-            leaf_box = document.get_leaf_at_xy(x, y)
+            link = document.get_link_at_xy(x, y)
+            leaf_layout = document.get_leaf_layout_at_xy(x, y)
+            line_layout = document.get_line_layout_at_y(y)
+            paragraph_layout = line_layout['parent']
+            paragraph = paragraph_layout['node']
 
             if n_press == 1:
                 if int(keyboard_state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
@@ -124,12 +127,14 @@ class DocumentViewController():
                     UseCases.move_cursor_to_xy(x, y, False)
 
                 else:
-                    if leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
-                        UseCases.select_node(leaf_box['node'])
+                    if leaf_layout != None and NodeTypeDB.focus_on_click(leaf_layout['node']):
+                        UseCases.select_node(leaf_layout['node'])
                     else:
                         UseCases.move_cursor_to_xy(x, y, False)
-                    if link != None:
-                        self.model.selected_link_target = link
+                    if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + 6 and y <= paragraph_layout['y'] + 23 and x >= 1 and x <= 18:
+                        UseCases.toggle_checkbox_at_cursor()
+                    elif link != None:
+                        self.model.selected_click_target = link
 
             else:
                 if link == None or int(keyboard_state & modifiers) != 0:
@@ -159,8 +164,8 @@ class DocumentViewController():
             if y >= -LayoutInfo.get_subtitle_height():
                 document = self.model.document
 
-                link = self.get_link_at_xy(x, y)
-                if link == self.model.selected_link_target:
+                link = document.get_link_at_xy(x, y)
+                if link == self.model.selected_click_target:
                     UseCases.open_link(link)
 
     def on_secondary_button_press(self, controller, n_press, x, y):
@@ -174,9 +179,9 @@ class DocumentViewController():
 
         if y_offset > 0:
             if not document.cursor.has_selection():
-                leaf_box = document.get_leaf_at_xy(x_offset, y_offset)
-                if keyboard_state == 0 and leaf_box != None and NodeTypeDB.focus_on_click(leaf_box['node']):
-                    UseCases.select_node(leaf_box['node'])
+                leaf_layout = document.get_leaf_layout_at_xy(x_offset, y_offset)
+                if keyboard_state == 0 and leaf_layout != None and NodeTypeDB.focus_on_click(leaf_layout['node']):
+                    UseCases.select_node(leaf_layout['node'])
                 else:
                     UseCases.move_cursor_to_xy(x_offset, y_offset, False)
             self.model.application.context_menu_document.popup_at_cursor(x, y)
@@ -419,7 +424,7 @@ class DocumentViewController():
                     paragraph_style = insert_paragraph.style
                     indentation_level = insert_paragraph.indentation_level
 
-                    if paragraph_style in ['ul', 'ol']:
+                    if paragraph_style in ['ul', 'ol', 'cl']:
                         if len(insert_paragraph.nodes) == 1:
                             UseCases.set_paragraph_style('p')
                             if indentation_level != 0:
@@ -503,13 +508,5 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.model.set_cursor_position(None, None)
-
-    def get_link_at_xy(self, x, y):
-        layout = self.model.document.get_leaf_at_xy(x, y)
-
-        if layout != None:
-            return layout['node'].link
-        else:
-            return None
 
 

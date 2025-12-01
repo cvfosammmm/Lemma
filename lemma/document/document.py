@@ -79,7 +79,7 @@ class Document():
 
         if window_height <= 0:
             new_position = (0, 0)
-        elif self.get_absolute_xy(self.get_line_at_y(insert_position[1]))[1] == 0:
+        elif self.get_absolute_xy(self.get_line_layout_at_y(insert_position[1]))[1] == 0:
             new_position = (0, 0)
         elif insert_y < scrolling_offset_y:
             if insert_height > window_height:
@@ -98,6 +98,11 @@ class Document():
 
     def scroll_to_xy(self, x, y, animation_type=None):
         self.command_manager.add_command('scroll_to_xy', x, y, animation_type)
+
+    def toggle_checkbox_at_cursor(self):
+        paragraph = self.cursor.get_insert_node().paragraph()
+        new_state = 'checked' if paragraph.state == None else None
+        self.command_manager.add_command('set_paragraph_state', paragraph, new_state)
 
     def undo(self):
         self.command_manager.undo()
@@ -144,6 +149,14 @@ class Document():
     def get_current_scrolling_offsets(self):
         return self.clipping.get_current_offsets()
 
+    def get_link_at_xy(self, x, y):
+        layout = self.get_leaf_layout_at_xy(x, y)
+
+        if layout != None:
+            return layout['node'].link
+        else:
+            return None
+
     def get_ancestors(self, layout):
         ancestors = []
         while layout['parent'] != None:
@@ -151,8 +164,8 @@ class Document():
             layout = layout['parent']
         return ancestors
 
-    def get_leaf_at_xy(self, x, y):
-        line = self.get_line_at_y(y)
+    def get_leaf_layout_at_xy(self, x, y):
+        line = self.get_line_layout_at_y(y)
 
         if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
             for node in [node for node in self.layouter.flatten_layout(line) if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}]:
@@ -165,7 +178,7 @@ class Document():
         if y < 0: x = 0
         if y > self.get_height(): x = LayoutInfo.get_max_layout_width()
 
-        hbox = self.get_line_at_y(y)
+        hbox = self.get_line_layout_at_y(y)
         if y >= hbox['y'] + hbox['parent']['y'] and y < hbox['y'] + hbox['parent']['y'] + hbox['height']:
             for layout in self.layouter.flatten_layout(hbox):
                 if layout['type'] == 'hbox':
@@ -186,7 +199,7 @@ class Document():
 
         return closest_layout
 
-    def get_line_at_y(self, y):
+    def get_line_layout_at_y(self, y):
         if y < 0:
             return self.ast.paragraphs[0].layout['children'][0]
         elif y > self.get_height():

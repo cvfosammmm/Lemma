@@ -344,6 +344,14 @@ class UseCases():
 
         document.add_composite_command(*commands)
 
+        commands = []
+        for paragraph in paragraphs:
+            if paragraph.style == 'cl':
+                paragraph_in_ast = paragraph.nodes[0].paragraph()
+                commands.append(['set_paragraph_state', paragraph_in_ast, paragraph.state])
+        if commands != []:
+            document.add_composite_command(*commands)
+
         placeholder_found = False
         for node_list in [node.flatten() for node in nodes]:
             for node in node_list:
@@ -484,6 +492,16 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.add_command('set_paragraph_style', style)
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+
+    @timer.timer
+    def toggle_checkbox_at_cursor():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        document.toggle_checkbox_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')

@@ -42,7 +42,7 @@ class Layouter(object):
                 indentation = LayoutInfo.get_indentation(paragraph.style, paragraph.indentation_level)
                 width = LayoutInfo.get_max_layout_width() - indentation
 
-                layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph.nodes)
+                layout_tree = self.make_layout_tree_paragraph(self.document.ast, paragraph)
                 self.layout_paragraph(layout_tree, width, indentation)
                 paragraph.layout = layout_tree
             else:
@@ -51,10 +51,10 @@ class Layouter(object):
             y_offset += layout_tree['height']
 
     @timer.timer
-    def make_layout_tree_paragraph(self, root, nodes):
+    def make_layout_tree_paragraph(self, root, paragraph):
         layout_tree = {'type': 'paragraph',
                        'fixed': False,
-                       'node': root,
+                       'node': paragraph,
                        'parent': None,
                        'children': [],
                        'x': 0,
@@ -63,6 +63,7 @@ class Layouter(object):
                        'height': 0,
                        'fontname': None}
 
+        nodes = paragraph.nodes
         for child in self.group_words(nodes):
             if isinstance(child, list):
                 char_nodes = child

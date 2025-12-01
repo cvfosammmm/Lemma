@@ -44,7 +44,7 @@ class DocumentView():
         self.scrolling_position_x, self.scrolling_position_y = -1, -1
         self.ctrl_pressed = False
         self.scrolling_multiplier = 2.5
-        self.selected_link_target = None
+        self.selected_click_target = None
         self.link_target_at_cursor = None
         self.link_target_at_pointer = None
         self.last_cursor_or_scrolling_change = time.time()
@@ -132,9 +132,9 @@ class DocumentView():
             link = None
 
             if y > 0:
-                leaf_box = document.get_leaf_at_xy(x, y)
-                if leaf_box != None and leaf_box['node'] != None and leaf_box['node'].link != None:
-                    link = leaf_box['node'].link
+                leaf_layout = document.get_leaf_layout_at_xy(x, y)
+                if leaf_layout != None and leaf_layout['node'] != None and leaf_layout['node'].link != None:
+                    link = leaf_layout['node'].link
 
             self.set_link_target_at_pointer(link)
             self.update_pointer()
@@ -160,9 +160,16 @@ class DocumentView():
         y -= ApplicationState.get_value('title_buttons_height')
 
         if y > 0:
-            leaf_box = document.get_leaf_at_xy(x, y)
-            if leaf_box != None:
-                node = leaf_box['node']
+            link = document.get_link_at_xy(x, y)
+            leaf_layout = document.get_leaf_layout_at_xy(x, y)
+            line_layout = document.get_line_layout_at_y(y)
+            paragraph_layout = line_layout['parent']
+            paragraph = paragraph_layout['node']
+
+            if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + 6 and y <= paragraph_layout['y'] + 23 and x >= 1 and x <= 18:
+                self.view.content.set_cursor_from_name('default')
+            elif leaf_layout != None:
+                node = leaf_layout['node']
                 if node != None:
                     if node.link != None and not self.ctrl_pressed:
                         self.view.content.set_cursor_from_name('pointer')

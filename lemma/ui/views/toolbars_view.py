@@ -142,9 +142,15 @@ class ToolBarMain(Gtk.Box):
         self.ol_button.set_can_focus(False)
         self.ol_button.set_tooltip_text(_('Numbered List') + ' (Ctrl+8)')
 
+        self.cl_button = Gtk.Button.new_from_icon_name('view-checklist-symbolic')
+        self.cl_button.set_detailed_action_name('win.set-paragraph-style::cl')
+        self.cl_button.set_can_focus(False)
+        self.cl_button.set_tooltip_text(_('Checklist') + ' (Ctrl+9)')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.ul_button)
         box.append(self.ol_button)
+        box.append(self.cl_button)
         self.append(box)
 
         self.indentation_buttons_separator = Gtk.Separator()

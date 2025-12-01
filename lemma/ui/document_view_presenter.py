@@ -118,11 +118,13 @@ class DocumentViewPresenter():
         self.color_cache['description_color'] = ColorManager.get_ui_color('description_color')
         self.color_cache['border_1'] = ColorManager.get_ui_color('border_1')
         self.color_cache['cursor'] = ColorManager.get_ui_color('cursor')
+        self.color_cache['highlights'] = ColorManager.get_ui_color('highlights')
         self.color_cache['drop_cursor'] = ColorManager.get_ui_color('drop_color')
 
         self.color_cache['text_string'] = self.color_cache['text'].to_string()
         self.color_cache['links_string'] = self.color_cache['links'].to_string()
         self.color_cache['links_page_not_existing_string'] = self.color_cache['links_page_not_existing'].to_string()
+        self.color_cache['highlights_string'] = self.color_cache['highlights'].to_string()
         self.color_cache['bullets_string'] = ColorManager.get_ui_color('bullets').to_string()
 
     @timer.timer
@@ -138,9 +140,8 @@ class DocumentViewPresenter():
             surface, left, top = TextRenderer.get_glyph('-', fontname, fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_bullet_padding() - surface.get_width()
             bullet_measurement = TextShaper.measure_single('-')
-            if surface != None:
-                ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
-                ctx.paint()
+            ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
+            ctx.paint()
 
         elif paragraph.style == 'ol':
             layout = paragraph.layout
@@ -158,6 +159,18 @@ class DocumentViewPresenter():
                 bullet_measurement = TextShaper.measure_single(char)
                 ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
                 ctx.paint()
+
+        elif paragraph.style == 'cl':
+            layout = paragraph.layout
+            default_color = self.color_cache['text_string']
+            highlight_color = self.color_cache['highlights_string']
+
+            icon_name = 'checkbox-checked-symbolic' if paragraph.state == 'checked' else 'checkbox-unchecked-symbolic'
+            surface = TextRenderer.get_icon_surface(icon_name, self.hidpi_factor, default_color, highlight_color)
+            bullet_indent = 1
+            top = 6
+            ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor), self.device_offset_y + int((offset_y + layout['y'] + top) * self.hidpi_factor))
+            ctx.paint()
 
     @timer.timer
     def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):

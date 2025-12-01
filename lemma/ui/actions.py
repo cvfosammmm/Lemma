@@ -254,7 +254,7 @@ class Actions(object):
             del(nodes_by_paragraph[-1])
         for nodes in nodes_by_paragraph:
             paragraph = nodes[0].paragraph()
-            xml += XMLExporter.export_paragraph(nodes, paragraph.style, paragraph.indentation_level)
+            xml += XMLExporter.export_paragraph(nodes, paragraph.style, paragraph.indentation_level, paragraph.state)
         content_providers.append(Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode())))
 
         if len(subtree) == 1 and subtree[0].type == 'widget':

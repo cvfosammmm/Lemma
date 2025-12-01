@@ -47,6 +47,8 @@ class LayoutInfo():
             indentation = 48
         elif paragraph_style == 'ol':
             indentation = 48
+        elif paragraph_style == 'cl':
+            indentation = 48
         else:
             indentation = 0
         indentation += indentation_level * 48

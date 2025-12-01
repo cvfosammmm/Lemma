@@ -39,6 +39,7 @@ class XMLParser(object):
         self.current_tags = set()
         self.current_attributes = dict()
         self.current_indentation_level = 0
+        self.current_paragraph_state = 0
         self.widget_data = ''
         self.title = ''
 
@@ -67,9 +68,13 @@ class XMLParser(object):
         if tag == 'strong':
             self.current_tags.add('bold')
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl']:
             if 'indentation_level' in attrs:
                 self.current_indentation_level = int(attrs['indentation_level'])
+            if 'state' in attrs:
+                self.current_paragraph_state = attrs['state']
+            else:
+                self.current_paragraph_state = None
 
         node = None
         if tag == 'mathscript':
@@ -105,10 +110,11 @@ class XMLParser(object):
     def handle_endtag(self, tag):
         self.open_tags.pop()
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl']:
             new_paragraph = Paragraph(self.nodes)
             new_paragraph.style = tag
             new_paragraph.indentation_level = self.current_indentation_level
+            new_paragraph.state = self.current_paragraph_state
             self.paragraphs.append(new_paragraph)
             self.nodes = []
 
