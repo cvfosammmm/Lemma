@@ -63,11 +63,6 @@ class Popover(PopoverView):
         self.button_quit.set_action_name('win.quit')
         self.add_closing_button(self.button_quit)
 
-        self.key_controller = Gtk.EventControllerKey()
-        self.key_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.key_controller.connect('key-pressed', self.on_keypress)
-        self.add_controller(self.key_controller)
-
     def on_keypress(self, controller, keyval, keycode, state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
@@ -77,7 +72,7 @@ class Popover(PopoverView):
 
                 return True
 
-        return False
+        return super().on_keypress(controller, keyval, keycode, state)
 
     def on_popup(self):
         pass

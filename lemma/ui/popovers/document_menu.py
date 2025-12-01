@@ -64,6 +64,6 @@ class Popover(PopoverView):
 
                 return True
 
-        return False
+        return super().on_keypress(controller, keyval, keycode, state)
 
 
