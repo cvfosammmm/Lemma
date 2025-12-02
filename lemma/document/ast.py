@@ -32,13 +32,18 @@ class Root():
     @timer.timer
     def insert_before(self, child, nodes):
         paragraph_no, offset = self.paragraph_no_offset(child)
+        orig_offset = offset
 
         for node in nodes:
             if node.type == 'eol':
                 self.paragraphs[paragraph_no].nodes.insert(offset, node)
+
                 new_paragraph = Paragraph(self.paragraphs[paragraph_no].nodes[offset + 1:])
                 new_paragraph.style = self.paragraphs[paragraph_no].style
                 new_paragraph.indentation_level = self.paragraphs[paragraph_no].indentation_level
+                if orig_offset == 0:
+                    new_paragraph.state = self.paragraphs[paragraph_no].state
+
                 self.paragraphs.insert(paragraph_no + 1, new_paragraph)
                 del(self.paragraphs[paragraph_no].nodes[offset + 1:])
 
