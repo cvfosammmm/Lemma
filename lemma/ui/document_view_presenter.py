@@ -111,6 +111,7 @@ class DocumentViewPresenter():
 
     @timer.timer
     def setup_colors(self):
+        self.color_cache['background'] = ColorManager.get_ui_color('view_bg_color')
         self.color_cache['text'] = ColorManager.get_ui_color('text')
         self.color_cache['links'] = ColorManager.get_ui_color('links')
         self.color_cache['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
@@ -121,6 +122,7 @@ class DocumentViewPresenter():
         self.color_cache['highlights'] = ColorManager.get_ui_color('highlights')
         self.color_cache['drop_cursor'] = ColorManager.get_ui_color('drop_color')
 
+        self.color_cache['background_string'] = self.color_cache['background'].to_string()
         self.color_cache['text_string'] = self.color_cache['text'].to_string()
         self.color_cache['links_string'] = self.color_cache['links'].to_string()
         self.color_cache['links_page_not_existing_string'] = self.color_cache['links_page_not_existing'].to_string()
@@ -162,13 +164,16 @@ class DocumentViewPresenter():
 
         elif paragraph.style == 'cl':
             layout = paragraph.layout
+            background_color = self.color_cache['background_string']
             default_color = self.color_cache['text_string']
             highlight_color = self.color_cache['highlights_string']
 
-            icon_name = 'checkbox-checked-symbolic' if paragraph.state == 'checked' else 'checkbox-unchecked-symbolic'
-            surface = TextRenderer.get_icon_surface(icon_name, self.hidpi_factor, default_color, highlight_color)
+            if paragraph.state == 'checked':
+                surface = TextRenderer.get_icon_surface('checkbox-checked-symbolic', self.hidpi_factor, background_color, highlight_color)
+            else:
+                surface = TextRenderer.get_icon_surface('checkbox-unchecked-symbolic', self.hidpi_factor, default_color, highlight_color)
             bullet_indent = 1
-            top = 6
+            top = 5
             ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor), self.device_offset_y + int((offset_y + layout['y'] + top) * self.hidpi_factor))
             ctx.paint()
 

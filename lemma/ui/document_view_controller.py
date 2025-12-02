@@ -169,8 +169,8 @@ class DocumentViewController():
                 if paragraph_layout_at_press != paragraph_layout_at_release: return
                 if paragraph_layout_at_release['node'].style != 'cl': return
                 if line_layout_at_release != paragraph_layout_at_release['children'][0]: return
-                if y < paragraph_layout_at_release['y'] + 6 or y > paragraph_layout_at_release['y'] + 23 or x < 1 or x > 18: return
-                if y_at_press < paragraph_layout_at_press['y'] + 6 or y_at_press > paragraph_layout_at_press['y'] + 23 or x_at_press < 1 or x_at_press > 18: return
+                if y < paragraph_layout_at_release['y'] + 5 or y > paragraph_layout_at_release['y'] + 24 or x < 1 or x > 20: return
+                if y_at_press < paragraph_layout_at_press['y'] + 5 or y_at_press > paragraph_layout_at_press['y'] + 24 or x_at_press < 1 or x_at_press > 20: return
 
                 UseCases.toggle_checkbox_at_cursor()
 
