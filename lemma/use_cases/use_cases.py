@@ -465,6 +465,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.add_command('set_indentation_level', indentation_level, document.cursor.get_insert_node())
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -494,6 +495,7 @@ class UseCases():
             new_level = max(0, min(4, paragraph.indentation_level + difference))
             commands.append(['set_indentation_level', new_level, paragraph.nodes[0]])
         document.add_composite_command(*commands)
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
