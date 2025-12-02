@@ -17,10 +17,14 @@
 
 import time
 
+import lemma.services.xml_helpers as xml_helpers
+import lemma.services.xml_parser as xml_parser
+import lemma.services.xml_exporter as xml_exporter
 from lemma.document.ast import Root, Cursor
 from lemma.document.command_manager import CommandManager
 from lemma.document.layouter import Layouter
 from lemma.document.plaintext_scanner import PlaintextScanner
+from lemma.services.character_db import CharacterDB
 from lemma.document.links_scanner import LinksScanner
 from lemma.document.clipping import Clipping
 from lemma.document.xml_scanner import XMLScanner
@@ -60,6 +64,108 @@ class Document():
     def select_node(self, node):
         next_node = node.next_in_parent()
         self.add_command('move_cursor_to_node', node, next_node)
+
+    def insert_xml(self, xml):
+        parser = xml_parser.XMLParser()
+
+        if self.cursor.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
+            prev_selection = self.ast.get_subtree(*self.cursor.get_state())
+            if len([node for node in prev_selection if node.type == 'eol']) == 0:
+                prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
+                xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
+
+        nodes = []
+        paragraphs = parser.parse(xml)
+        for paragraph in paragraphs:
+            nodes += paragraph.nodes
+
+        selection_from = self.cursor.get_first_node()
+        selection_to = self.cursor.get_last_node()
+        commands = [['delete', selection_from, selection_to], ['insert', selection_to, nodes], ['move_cursor_to_node', selection_to]]
+
+        if len(nodes) == 0: return
+
+        node_before = selection_from.prev_in_parent()
+        node_after = selection_to
+        for paragraph in paragraphs:
+            if paragraph == paragraphs[0]:
+                if node_before != None and node_before.type != 'eol':
+                    continue
+                elif node_after.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                    continue
+            elif paragraph == paragraphs[-1]:
+                if node_after != 'eol':
+                    continue
+                elif node_before != None and node_before.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                    continue
+            if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and not paragraph.style.startswith('h'):
+                continue
+            if len(paragraphs) == 1 and len(paragraphs[-1].nodes) == 1 and paragraphs[-1].nodes[-1].type == 'eol':
+                continue
+
+            commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
+            commands.append(['set_indentation_level', paragraph.indentation_level, paragraph.nodes[0]])
+
+        root_copy = selection_to.parent.copy()
+        for node in nodes:
+            root_copy.append(node)
+        if not root_copy.validate():
+            return
+
+        self.add_composite_command(*commands)
+
+        commands = []
+        for paragraph in paragraphs:
+            if paragraph.style == 'cl':
+                paragraph_in_ast = paragraph.nodes[0].paragraph()
+                commands.append(['set_paragraph_state', paragraph_in_ast, paragraph.state])
+        if commands != []:
+            self.add_composite_command(*commands)
+
+        placeholder_found = False
+        for node_list in [node.flatten() for node in nodes]:
+            for node in node_list:
+                if node.type == 'placeholder':
+                    self.select_node(node)
+
+                    placeholder_found = True
+                    break
+            if placeholder_found:
+                break
+
+        self.add_command('update_implicit_x_position')
+
+    def replace_max_string_before_cursor(self):
+        last_node = self.cursor.get_insert_node().prev_in_parent()
+        first_node = last_node
+        for i in range(5):
+            prev_node = first_node.prev_in_parent()
+            if prev_node != None and prev_node.type == 'char':
+                first_node = prev_node
+            else:
+                break
+
+        subtree = self.ast.get_subtree(first_node.get_position(), last_node.get_position())
+        chars = ''.join([node.value for node in subtree])
+        if len(chars) >= 2:
+            for i in range(len(chars) - 1):
+                if CharacterDB.has_replacement(chars[i:]):
+                    length = len(chars) - i
+                    text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
+                    xml = xml_helpers.embellish_with_link_and_tags(text, None, first_node.tags)
+                    parser = xml_parser.XMLParser()
+
+                    nodes = []
+                    paragraphs = parser.parse(xml)
+                    for paragraph in paragraphs:
+                        nodes += paragraph.nodes
+
+                    commands = [['delete', last_node.prev_in_parent(length), last_node]]
+                    commands.append(['insert', last_node, nodes])
+                    commands.append(['move_cursor_to_node', last_node.next_in_parent()])
+
+                    self.add_composite_command(*commands)
+                    self.add_command('update_implicit_x_position')
 
     def delete_selection(self):
         node_from = self.cursor.get_first_node()

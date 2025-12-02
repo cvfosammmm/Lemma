@@ -428,27 +428,12 @@ class DocumentViewController():
                 elif not document.cursor.has_selection():
                     insert_paragraph = document.cursor.get_insert_node().paragraph()
                     paragraph_style = insert_paragraph.style
-                    indentation_level = insert_paragraph.indentation_level
 
-                    if paragraph_style in ['ul', 'ol', 'cl']:
-                        if len(insert_paragraph.nodes) == 1:
-                            UseCases.set_paragraph_style('p')
-                            if indentation_level != 0:
-                                UseCases.set_indentation_level(0)
-                        else:
-                            UseCases.insert_xml('\n')
-                            UseCases.set_paragraph_style(paragraph_style)
-                            if indentation_level != 0:
-                                UseCases.set_indentation_level(indentation_level)
-                    elif paragraph_style.startswith('h'):
-                        UseCases.insert_xml('\n')
-                        if len(document.cursor.get_insert_node().paragraph().nodes) == 1:
-                            UseCases.set_paragraph_style('p')
+                    if paragraph_style in ['ul', 'ol', 'cl'] and len(insert_paragraph.nodes) == 1:
+                        UseCases.set_paragraph_style('p')
+                        UseCases.set_indentation_level(0)
                     else:
-                        UseCases.insert_xml('\n')
-
-                    UseCases.replace_max_string_before_cursor()
-                    UseCases.scroll_insert_on_screen(animation_type='default')
+                        UseCases.add_newline()
                 else:
                     UseCases.insert_xml('\n')
                     UseCases.scroll_insert_on_screen(animation_type='default')
@@ -467,17 +452,7 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
 
     def on_im_commit(self, im_context, text):
-        document = self.model.document
-
-        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
-        link_at_cursor = ApplicationState.get_value('link_at_cursor')
-        xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
-
-        UseCases.insert_xml(xml)
-        if not document.cursor.has_selection() and text.isspace():
-            UseCases.replace_max_string_before_cursor()
-        UseCases.scroll_insert_on_screen(animation_type='default')
-        UseCases.signal_keyboard_input()
+        UseCases.im_commit(text)
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()

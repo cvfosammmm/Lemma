@@ -23,11 +23,9 @@ from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.xml_parser as xml_parser
-import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
-from lemma.services.character_db import CharacterDB
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.document.ast import Node
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -270,7 +268,22 @@ class UseCases():
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
 
-    def signal_keyboard_input():
+    @timer.timer
+    def im_commit(text):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+        link_at_cursor = ApplicationState.get_value('link_at_cursor')
+        xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
+
+        document.insert_xml(xml)
+        if not document.cursor.has_selection() and text.isspace():
+            document.replace_max_string_before_cursor()
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('keyboard_input')
 
     def replace_section(document, node_from, node_to, xml):
@@ -296,74 +309,35 @@ class UseCases():
     @timer.timer
     def insert_xml(xml):
         document = WorkspaceRepo.get_workspace().get_active_document()
-        parser = xml_parser.XMLParser()
 
-        if document.cursor.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
-            prev_selection = document.ast.get_subtree(*document.cursor.get_state())
-            if len([node for node in prev_selection if node.type == 'eol']) == 0:
-                prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
-                xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[3:-4])
+        document.insert_xml(xml)
 
-        nodes = []
-        paragraphs = parser.parse(xml)
-        for paragraph in paragraphs:
-            nodes += paragraph.nodes
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
 
-        selection_from = document.cursor.get_first_node()
-        selection_to = document.cursor.get_last_node()
-        commands = [['delete', selection_from, selection_to], ['insert', selection_to, nodes], ['move_cursor_to_node', selection_to]]
+    @timer.timer
+    def add_newline():
+        document = WorkspaceRepo.get_workspace().get_active_document()
 
-        if len(nodes) == 0: return
+        insert_paragraph = document.cursor.get_insert_node().paragraph()
+        paragraph_style = insert_paragraph.style
+        indentation_level = insert_paragraph.indentation_level
 
-        node_before = selection_from.prev_in_parent()
-        node_after = selection_to
-        for paragraph in paragraphs:
-            if paragraph == paragraphs[0]:
-                if node_before != None and node_before.type != 'eol':
-                    continue
-                elif node_after.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
-                    continue
-            elif paragraph == paragraphs[-1]:
-                if node_after != 'eol':
-                    continue
-                elif node_before != None and node_before.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
-                    continue
-            if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and not paragraph.style.startswith('h'):
-                continue
-            if len(paragraphs) == 1 and len(paragraphs[-1].nodes) == 1 and paragraphs[-1].nodes[-1].type == 'eol':
-                continue
+        if paragraph_style in ['ul', 'ol', 'cl']:
+            document.insert_xml('\n')
+            document.add_command('set_paragraph_style', paragraph_style)
+            if indentation_level != 0:
+                document.add_command('set_indentation_level', indentation_level, document.cursor.get_insert_node())
+        elif paragraph_style.startswith('h'):
+            document.insert_xml('\n')
+            if len(document.cursor.get_insert_node().paragraph().nodes) == 1:
+                document.add_command('set_paragraph_style', 'p')
+        else:
+            document.insert_xml('\n')
 
-            commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
-            commands.append(['set_indentation_level', paragraph.indentation_level, paragraph.nodes[0]])
-
-        root_copy = selection_to.parent.copy()
-        for node in nodes:
-            root_copy.append(node)
-        if not root_copy.validate():
-            return
-
-        document.add_composite_command(*commands)
-
-        commands = []
-        for paragraph in paragraphs:
-            if paragraph.style == 'cl':
-                paragraph_in_ast = paragraph.nodes[0].paragraph()
-                commands.append(['set_paragraph_state', paragraph_in_ast, paragraph.state])
-        if commands != []:
-            document.add_composite_command(*commands)
-
-        placeholder_found = False
-        for node_list in [node.flatten() for node in nodes]:
-            for node in node_list:
-                if node.type == 'placeholder':
-                    document.select_node(node)
-
-                    placeholder_found = True
-                    break
-            if placeholder_found:
-                break
-                    
-        document.add_command('update_implicit_x_position')
+        document.replace_max_string_before_cursor()
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -428,46 +402,6 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
-
-    @timer.timer
-    def replace_max_string_before_cursor():
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        last_node = document.cursor.get_insert_node().prev_in_parent()
-        first_node = last_node
-        for i in range(5):
-            prev_node = first_node.prev_in_parent()
-            if prev_node != None and prev_node.type == 'char':
-                first_node = prev_node
-            else:
-                break
-
-        subtree = document.ast.get_subtree(first_node.get_position(), last_node.get_position())
-        chars = ''.join([node.value for node in subtree])
-        if len(chars) >= 2:
-            for i in range(len(chars) - 1):
-                if CharacterDB.has_replacement(chars[i:]):
-                    length = len(chars) - i
-                    text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
-                    xml = xml_helpers.embellish_with_link_and_tags(text, None, first_node.tags)
-                    parser = xml_parser.XMLParser()
-
-                    nodes = []
-                    paragraphs = parser.parse(xml)
-                    for paragraph in paragraphs:
-                        nodes += paragraph.nodes
-
-                    commands = [['delete', last_node.prev_in_parent(length), last_node]]
-                    commands.append(['insert', last_node, nodes])
-                    commands.append(['move_cursor_to_node', last_node.next_in_parent()])
-
-                    document.add_composite_command(*commands)
-                    document.add_command('update_implicit_x_position')
-                    DocumentRepo.update(document)
-                    MessageBus.add_message('document_changed')
-                    MessageBus.add_message('document_ast_changed')
-                    return True
-        return False
 
     @timer.timer
     def resize_widget(new_width):
