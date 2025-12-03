@@ -48,7 +48,6 @@ class CursorState():
         self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
 
-    @timer.timer
     def update_tags_and_link_at_cursor(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
@@ -74,21 +73,17 @@ class CursorState():
         all_tagged = True
         if document.has_selection():
             selected_nodes = document.get_selected_nodes()
-            for node in [node for node in selected_nodes if node.type == 'char']:
+            for node in (node for node in selected_nodes if node.type == 'char'):
                 chars_selected = True
                 if tagname not in node.tags:
                     all_tagged = False
                     break
 
-        if chars_selected:
-            if all_tagged:
-                button.add_css_class('checked')
-            else:
-                button.remove_css_class('checked')
+        if chars_selected and all_tagged:
+            button.add_css_class('checked')
+        elif tagname in ApplicationState.get_value('tags_at_cursor'):
+            button.add_css_class('checked')
         else:
-            if tagname in ApplicationState.get_value('tags_at_cursor'):
-                button.add_css_class('checked')
-            else:
-                button.remove_css_class('checked')
+            button.remove_css_class('checked')
 
 
