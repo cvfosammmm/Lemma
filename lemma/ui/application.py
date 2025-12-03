@@ -40,7 +40,6 @@ import lemma.ui.actions as actions
 import lemma.ui.sidebar_emojis as sidebar_emojis
 import lemma.ui.sidebar_math as sidebar_math
 import lemma.ui.autocomplete as autocomplete
-import lemma.ui.model_state as model_state
 import lemma.ui.shortcuts as shortcuts
 
 
@@ -53,7 +52,6 @@ class Application(Adw.Application):
         Adw.Application.do_activate(self)
 
         self.main_window = main_window_view.MainWindow(self)
-        self.model_state = model_state.ModelState(self.main_window)
 
         ColorManager.init(self.main_window)
         self.main_window.add_widgets()
@@ -65,13 +63,13 @@ class Application(Adw.Application):
         self.document_view = document_view.DocumentView(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
         self.scrollbars = scrollbars.Scrollbars(self.main_window, self)
-        self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self.model_state, self)
+        self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
         self.toolbars = toolbars.ToolBars(self.main_window)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
         self.document_list = document_list.DocumentList(self.main_window)
-        self.backlinks = backlinks.Backlinks(self.main_window, self.model_state)
-        self.actions = actions.Actions(self.main_window, self, self.model_state)
+        self.backlinks = backlinks.Backlinks(self.main_window)
+        self.actions = actions.Actions(self.main_window, self)
         self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self)
         self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self)
         self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
@@ -85,7 +83,6 @@ class Application(Adw.Application):
 
     def animate(self, widget, frame_clock):
         self.colors.animate()
-        self.model_state.animate()
         self.actions.animate()
         self.shortcuts.animate()
         self.window_state.animate()

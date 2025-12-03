@@ -20,16 +20,16 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.services.message_bus import MessageBus
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 
 
 class Backlinks(object):
 
-    def __init__(self, main_window, model_state):
+    def __init__(self, main_window):
         self.main_window = main_window
         self.view = self.main_window.backlinks
-        self.model_state = model_state
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
 
@@ -46,12 +46,14 @@ class Backlinks(object):
             self.update()
 
     def update(self):
-        if self.model_state.has_active_doc:
-            backlinks = DocumentRepo.list_by_link_target(self.model_state.document.title)
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document != None:
+            backlinks = DocumentRepo.list_by_link_target(document.title)
             if len(backlinks) > 0:
                 self.view.show_backlinks(backlinks)
             else:
-                self.view.show_no_backlinks_page(self.model_state.document.title)
+                self.view.show_no_backlinks_page(document.title)
         else:
             self.view.show_no_open_documents_page()
 

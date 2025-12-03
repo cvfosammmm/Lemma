@@ -19,6 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.message_bus import MessageBus
 from lemma.ui.views.context_menu import ContextMenu
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
@@ -27,9 +28,8 @@ from lemma.ui.popovers.popover_templates import PopoverView
 
 class ContextMenuDocument():
 
-    def __init__(self, main_window, model_state, application):
+    def __init__(self, main_window, application):
         self.main_window = main_window
-        self.model_state = model_state
         self.application = application
 
         self.view_right_click = ContextMenuDocumentView(main_window.document_view)
@@ -47,27 +47,30 @@ class ContextMenuDocument():
             self.update()
 
     def update(self):
-        self.view_right_click.open_link_button.set_visible(self.model_state.open_link_active)
-        self.view_right_click.open_link_separator.set_visible(self.model_state.open_link_active)
-        self.view_right_click.copy_link_button.set_visible(self.model_state.copy_link_active)
-        self.view_right_click.remove_link_button.set_visible(self.model_state.remove_link_active)
-        self.view_right_click.edit_link_button.set_visible(self.model_state.edit_link_active)
-        self.view_right_click.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
-        hide_back_and_forward = self.model_state.remove_link_active or self.model_state.edit_link_active or self.model_state.open_link_active
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
+
+        self.view_right_click.open_link_button.set_visible(document.cursor_inside_link())
+        self.view_right_click.open_link_separator.set_visible(document.cursor_inside_link())
+        self.view_right_click.copy_link_button.set_visible(document.whole_selection_is_one_link() or document.cursor_inside_link())
+        self.view_right_click.remove_link_button.set_visible(document.links_inside_selection() or document.cursor_inside_link())
+        self.view_right_click.edit_link_button.set_visible(document.whole_selection_is_one_link() or document.cursor_inside_link())
+        self.view_right_click.link_buttons_separator.set_visible(document.links_inside_selection() or document.cursor_inside_link())
+        hide_back_and_forward = document.links_inside_selection() or document.cursor_inside_link()
         self.view_right_click.back_button.set_visible(not hide_back_and_forward)
         self.view_right_click.forward_button.set_visible(not hide_back_and_forward)
         self.view_right_click.back_forward_separator.set_visible(not hide_back_and_forward)
-        self.view_right_click.export_image_button.set_visible(self.model_state.widget_selected)
-        self.view_right_click.image_functions_separator.set_visible(self.model_state.widget_selected)
+        self.view_right_click.export_image_button.set_visible(document.widget_selected())
+        self.view_right_click.image_functions_separator.set_visible(document.widget_selected())
 
-        self.view_edit_menu.open_link_button.set_visible(self.model_state.open_link_active)
-        self.view_edit_menu.open_link_separator.set_visible(self.model_state.open_link_active)
-        self.view_edit_menu.copy_link_button.set_visible(self.model_state.copy_link_active)
-        self.view_edit_menu.remove_link_button.set_visible(self.model_state.remove_link_active)
-        self.view_edit_menu.edit_link_button.set_visible(self.model_state.edit_link_active)
-        self.view_edit_menu.link_buttons_separator.set_visible(self.model_state.remove_link_active or self.model_state.edit_link_active)
-        self.view_edit_menu.export_image_button.set_visible(self.model_state.widget_selected)
-        self.view_edit_menu.image_functions_separator.set_visible(self.model_state.widget_selected)
+        self.view_edit_menu.open_link_button.set_visible(document.cursor_inside_link())
+        self.view_edit_menu.open_link_separator.set_visible(document.cursor_inside_link())
+        self.view_edit_menu.copy_link_button.set_visible(document.whole_selection_is_one_link() or document.cursor_inside_link())
+        self.view_edit_menu.remove_link_button.set_visible(document.links_inside_selection() or document.cursor_inside_link())
+        self.view_edit_menu.edit_link_button.set_visible(document.whole_selection_is_one_link() or document.cursor_inside_link())
+        self.view_edit_menu.link_buttons_separator.set_visible(document.links_inside_selection() or document.cursor_inside_link())
+        self.view_edit_menu.export_image_button.set_visible(document.widget_selected())
+        self.view_edit_menu.image_functions_separator.set_visible(document.widget_selected())
 
     def popup_at_cursor(self, x, y):
         self.view_right_click.popup_at_cursor(x, y)

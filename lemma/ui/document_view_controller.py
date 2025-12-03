@@ -184,7 +184,7 @@ class DocumentViewController():
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if y_offset > 0:
-            if not document.cursor.has_selection():
+            if not document.has_selection():
                 leaf_layout = document.get_leaf_layout_at_xy(x_offset, y_offset)
                 if keyboard_state == 0 and leaf_layout != None and NodeTypeDB.focus_on_click(leaf_layout['node']):
                     UseCases.select_node(leaf_layout['node'])
@@ -404,28 +404,28 @@ class DocumentViewController():
                 UseCases.jump_right(True)
 
             case ('tab', 0):
-                if self.model.application.model_state.multiple_lines_selected:
+                if document.has_multiple_lines_selected():
                     UseCases.change_indentation_level(1)
-                elif not document.cursor.has_selection() and self.model.application.model_state.cursor_starts_paragraph:
+                elif not document.has_selection() and document.cursor_at_paragraph_start():
                     UseCases.change_indentation_level(1)
                 else:
                     UseCases.select_next_placeholder()
             case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK):
-                if self.model.application.model_state.multiple_lines_selected:
+                if document.has_multiple_lines_selected():
                     UseCases.change_indentation_level(-1)
-                elif not document.cursor.has_selection() and self.model.application.model_state.cursor_starts_paragraph:
+                elif not document.has_selection() and document.cursor_at_paragraph_start():
                     UseCases.change_indentation_level(-1)
                 else:
                     UseCases.select_prev_placeholder()
             case ('escape', _):
-                if document.cursor.has_selection():
+                if document.has_selection():
                     selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
                     if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget':
                         UseCases.remove_selection()
             case ('return', _):
-                if not document.cursor.has_selection() and document.cursor.get_insert_node().is_inside_link():
+                if not document.has_selection() and document.cursor.get_insert_node().is_inside_link():
                     UseCases.open_link(document.cursor.get_insert_node().link)
-                elif not document.cursor.has_selection():
+                elif not document.has_selection():
                     insert_paragraph = document.cursor.get_insert_node().paragraph()
                     paragraph_style = insert_paragraph.style
 

@@ -36,10 +36,9 @@ import lemma.services.timer as timer
 
 class Actions(object):
 
-    def __init__(self, main_window, application, model_state):
+    def __init__(self, main_window, application):
         self.main_window = main_window
         self.application = application
-        self.model_state = model_state
         self.last_data = None
 
         self.actions = dict()
@@ -122,42 +121,50 @@ class Actions(object):
 
     @timer.timer
     def update(self):
+        workspace = WorkspaceRepo.get_workspace()
+        document = workspace.get_active_document()
+
+        clipboard_formats = Gdk.Display.get_default().get_clipboard().get_formats().to_string()
+        text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
+        subtree_in_clipboard = 'lemma/ast' in clipboard_formats
+        image_in_clipboard = 'image/jpeg' in clipboard_formats or 'image/png' in clipboard_formats
+
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
-        self.actions['export-bulk'].set_enabled(self.model_state.has_active_doc)
-        self.actions['delete-document'].set_enabled(self.model_state.has_active_doc)
-        self.actions['rename-document'].set_enabled(self.model_state.has_active_doc)
-        self.actions['export-markdown'].set_enabled(self.model_state.has_active_doc)
-        self.actions['export-image'].set_enabled(self.model_state.widget_selected)
-        self.actions['go-back'].set_enabled(self.model_state.mode == 'draft' or self.model_state.prev_doc != None)
-        self.actions['go-forward'].set_enabled(self.model_state.next_doc != None)
-        self.actions['undo'].set_enabled(self.model_state.has_active_doc and self.model_state.can_undo)
-        self.actions['redo'].set_enabled(self.model_state.has_active_doc and self.model_state.can_redo)
-        self.actions['cut'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
-        self.actions['copy'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
-        self.actions['paste'].set_enabled(self.model_state.has_active_doc and (self.model_state.text_in_clipboard or self.model_state.subtree_in_clipboard or self.model_state.image_in_clipboard))
-        self.actions['delete'].set_enabled(self.model_state.mode == 'documents' and self.model_state.has_selection)
-        self.actions['select-all'].set_enabled(self.model_state.has_active_doc)
-        self.actions['remove-selection'].set_enabled(self.model_state.has_active_doc and self.model_state.has_selection)
-        self.actions['show-insert-image-dialog'].set_enabled(self.model_state.has_active_doc and self.model_state.insert_parent_is_root)
-        self.actions['widget-shrink'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_min)
-        self.actions['widget-enlarge'].set_enabled(self.model_state.has_active_doc and not self.model_state.selected_widget_is_max)
-        self.actions['open-link'].set_enabled(self.model_state.open_link_active)
-        self.actions['remove-link'].set_enabled(self.model_state.remove_link_active)
-        self.actions['show-link-popover'].set_enabled((self.model_state.has_active_doc and self.model_state.insert_parent_is_root) or self.model_state.edit_link_active)
-        self.actions['copy-link'].set_enabled(self.model_state.copy_link_active)
-        self.actions['subscript'].set_enabled(self.model_state.has_active_doc)
-        self.actions['superscript'].set_enabled(self.model_state.has_active_doc)
-        self.actions['set-paragraph-style'].set_enabled(self.model_state.has_active_doc)
-        self.actions['toggle-checkbox'].set_enabled(self.model_state.has_active_doc)
-        self.actions['toggle-bold'].set_enabled(self.model_state.has_active_doc)
-        self.actions['toggle-italic'].set_enabled(self.model_state.has_active_doc)
-        self.actions['decrease-indent'].set_enabled(self.model_state.has_active_doc)
-        self.actions['increase-indent'].set_enabled(self.model_state.has_active_doc)
+        self.actions['export-bulk'].set_enabled(document != None)
+        self.actions['delete-document'].set_enabled(document != None)
+        self.actions['rename-document'].set_enabled(document != None)
+        self.actions['export-markdown'].set_enabled(document != None)
+        self.actions['export-image'].set_enabled(document != None and document.widget_selected())
+        self.actions['go-back'].set_enabled(workspace.get_mode() == 'draft' or (document != None and workspace.get_prev_id_in_history(document.id) != None))
+        self.actions['go-forward'].set_enabled(document != None and workspace.get_next_id_in_history(document.id) != None)
+        self.actions['undo'].set_enabled(document != None and document.can_undo)
+        self.actions['redo'].set_enabled(document != None and document.can_redo)
+        self.actions['cut'].set_enabled(document != None and document.has_selection())
+        self.actions['copy'].set_enabled(document != None and document.has_selection())
+        self.actions['paste'].set_enabled(document != None and (text_in_clipboard or subtree_in_clipboard or image_in_clipboard))
+        self.actions['delete'].set_enabled(workspace.get_mode() == 'documents' and document.has_selection())
+        self.actions['select-all'].set_enabled(document != None)
+        self.actions['remove-selection'].set_enabled(document != None and document.has_selection())
+        self.actions['show-insert-image-dialog'].set_enabled(document != None and document.insert_parent_is_root())
+        self.actions['widget-shrink'].set_enabled(document != None and not document.selected_widget_is_min())
+        self.actions['widget-enlarge'].set_enabled(document != None and not document.selected_widget_is_max())
+        self.actions['open-link'].set_enabled(document != None and document.cursor_inside_link())
+        self.actions['remove-link'].set_enabled(document != None and (document.links_inside_selection() or document.cursor_inside_link()))
+        self.actions['show-link-popover'].set_enabled(document != None and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
+        self.actions['copy-link'].set_enabled(document != None and (document.whole_selection_is_one_link() or document.cursor_inside_link()))
+        self.actions['subscript'].set_enabled(document != None)
+        self.actions['superscript'].set_enabled(document != None)
+        self.actions['set-paragraph-style'].set_enabled(document != None)
+        self.actions['toggle-checkbox'].set_enabled(document != None)
+        self.actions['toggle-bold'].set_enabled(document != None)
+        self.actions['toggle-italic'].set_enabled(document != None)
+        self.actions['decrease-indent'].set_enabled(document != None)
+        self.actions['increase-indent'].set_enabled(document != None)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
-        self.actions['show-paragraph-style-menu'].set_enabled(self.model_state.has_active_doc)
-        self.actions['show-edit-menu'].set_enabled(self.model_state.has_active_doc)
-        self.actions['show-document-menu'].set_enabled(self.model_state.has_active_doc)
+        self.actions['show-paragraph-style-menu'].set_enabled(document != None)
+        self.actions['show-edit-menu'].set_enabled(document != None)
+        self.actions['show-document-menu'].set_enabled(document != None)
         self.actions['show-hamburger-menu'].set_enabled(True)
         self.actions['show-settings-dialog'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
@@ -332,7 +339,7 @@ class Actions(object):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
-        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
+        if not document.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
             xml = '<mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
@@ -345,7 +352,7 @@ class Actions(object):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
         prev_char = insert.prev_in_parent()
-        if not document.cursor.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
+        if not document.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
             xml = '<mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
@@ -373,7 +380,7 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        if document.cursor.has_selection():
+        if document.has_selection():
             UseCases.toggle_tag('bold')
         else:
             UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'bold'})
@@ -382,7 +389,7 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        if document.cursor.has_selection():
+        if document.has_selection():
             UseCases.toggle_tag('italic')
         else:
             UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
@@ -451,7 +458,7 @@ class Actions(object):
 
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        if document.cursor.has_selection():
+        if document.has_selection():
             bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
         elif document.cursor.get_insert_node().is_inside_link():
             bounds = document.cursor.get_insert_node().link_bounds()

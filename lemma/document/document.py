@@ -68,7 +68,7 @@ class Document():
     def insert_xml(self, xml):
         parser = xml_parser.XMLParser()
 
-        if self.cursor.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
+        if self.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
             prev_selection = self.ast.get_subtree(*self.cursor.get_state())
             if len([node for node in prev_selection if node.type == 'eol']) == 0:
                 prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
@@ -239,6 +239,43 @@ class Document():
         result = self.change_flag[client]
         self.change_flag[client] = False
         return result
+
+    def has_multiple_lines_selected(self):
+        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        return len([node for node in selected_nodes if node.type == 'eol']) > 0
+
+    def cursor_at_paragraph_start(self):
+        insert = self.cursor.get_insert_node()
+        return insert == insert.paragraph_start()
+
+    def cursor_inside_link(self):
+        return not self.has_selection() and self.cursor.get_insert_node().is_inside_link()
+
+    def links_inside_selection(self):
+        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        return len([node for node in selected_nodes if node.link != None]) > 0
+
+    def whole_selection_is_one_link(self):
+        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        return self.links_inside_selection() and (len(set([node.link for node in selected_nodes])) == 1)
+
+    def widget_selected(self):
+        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        return len(selected_nodes) == 1 and selected_nodes[0].type == 'widget'
+
+    def selected_widget_is_max(self):
+        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        return self.widget_selected() and (selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width() or not selected_nodes[0].value.is_resizable())
+
+    def selected_widget_is_min(self):
+        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        return self.widget_selected() and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable())
+
+    def insert_parent_is_root(self):
+        return self.cursor.get_insert_node().parent.type == 'root'
+
+    def has_selection(self):
+        return self.cursor.has_selection()
 
     def can_undo(self):
         return self.command_manager.can_undo()

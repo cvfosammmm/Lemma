@@ -80,7 +80,7 @@ class UseCases():
             orientation = 'top'
             y -= insert.layout['height'] - padding_top - padding_bottom
 
-        if not document.cursor.has_selection() and insert.is_inside_link():
+        if not document.has_selection() and insert.is_inside_link():
             document.add_command('move_cursor_to_node', *insert.link_bounds())
 
         ApplicationState.set_value('active_popover', 'link_ac')
@@ -277,7 +277,7 @@ class UseCases():
         xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
 
         document.insert_xml(xml)
-        if not document.cursor.has_selection() and text.isspace():
+        if not document.has_selection() and text.isspace():
             document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -348,7 +348,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
-        if document.cursor.has_selection():
+        if document.has_selection():
             document.delete_selection()
         elif not insert.is_first_in_parent():
             document.add_command('delete', document.cursor.prev_no_descent(insert), insert)
@@ -366,7 +366,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
-        if document.cursor.has_selection():
+        if document.has_selection():
             document.delete_selection()
         elif not insert.is_last_in_parent():
             insert_new = document.cursor.next_no_descent(insert)
@@ -406,7 +406,9 @@ class UseCases():
     @timer.timer
     def resize_widget(new_width):
         document = WorkspaceRepo.get_workspace().get_active_document()
+
         document.add_command('resize_widget', new_width)
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
@@ -475,7 +477,7 @@ class UseCases():
     def change_indentation_level(difference):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        if document.cursor.has_selection():
+        if document.has_selection():
             first_node = document.cursor.get_first_node().paragraph_start()
             next_to_last = document.cursor.get_last_node().prev_in_parent()
             if next_to_last != None:
@@ -509,7 +511,7 @@ class UseCases():
         selection = document.cursor.get_selection_node()
         if do_selection:
             document.add_command('move_cursor_to_node', document.cursor.prev_no_descent(insert), selection)
-        elif document.cursor.has_selection():
+        elif document.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_first_node())
         else:
             document.add_command('move_cursor_to_node', document.cursor.prev(insert))
@@ -536,7 +538,7 @@ class UseCases():
 
         if do_selection:
             document.add_command('move_cursor_to_node', insert_new, selection)
-        elif document.cursor.has_selection():
+        elif document.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_first_node())
         else:
             document.add_command('move_cursor_to_node', insert_new)
@@ -556,7 +558,7 @@ class UseCases():
         selection = document.cursor.get_selection_node()
         if do_selection:
             document.add_command('move_cursor_to_node', document.cursor.next_no_descent(insert), selection)
-        elif document.cursor.has_selection():
+        elif document.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
         else:
             document.add_command('move_cursor_to_node', document.cursor.next(insert))
@@ -582,7 +584,7 @@ class UseCases():
 
         if do_selection:
             document.add_command('move_cursor_to_node', insert_new, selection)
-        elif document.cursor.has_selection():
+        elif document.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
         else:
             document.add_command('move_cursor_to_node', insert_new)
@@ -817,7 +819,7 @@ class UseCases():
     @timer.timer
     def remove_selection():
         document = WorkspaceRepo.get_workspace().get_active_document()
-        if document.cursor.has_selection():
+        if document.has_selection():
             document.add_command('move_cursor_to_node', document.cursor.get_last_node())
             document.add_command('update_implicit_x_position')
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')

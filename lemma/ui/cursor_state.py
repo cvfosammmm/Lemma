@@ -72,7 +72,7 @@ class CursorState():
 
         chars_selected = False
         all_tagged = True
-        if document.cursor.has_selection():
+        if document.has_selection():
             for node in [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']:
                 chars_selected = True
                 if tagname not in node.tags:

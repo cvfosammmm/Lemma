@@ -98,7 +98,7 @@ class DocumentView():
             cursor_visible = False
         if ApplicationState.get_value('document_view_hide_cursor_on_unfocus') and not self.view.content.has_focus():
             cursor_visible = False
-        if self.document.cursor.has_selection():
+        if self.document.has_selection():
             cursor_visible = False
 
         if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
@@ -188,7 +188,7 @@ class DocumentView():
 
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None
-        if self.document != None and not self.document.cursor.has_selection():
+        if self.document != None and not self.document.has_selection():
             current_node = self.document.cursor.get_insert_node()
             prev_node = current_node.prev_in_parent()
             if prev_node != None and current_node.link == prev_node.link:

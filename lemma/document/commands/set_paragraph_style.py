@@ -30,7 +30,7 @@ class Command():
         if self.node != None:
             paragraphs = [self.node.paragraph()]
         else:
-            if document.cursor.has_selection():
+            if document.has_selection():
                 first_node = document.cursor.get_first_node().paragraph_start()
                 next_to_last = document.cursor.get_last_node().prev_in_parent()
                 if next_to_last != None:
