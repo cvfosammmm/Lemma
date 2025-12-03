@@ -447,7 +447,7 @@ class UseCases():
     def toggle_tag(tagname):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        char_nodes = [node for node in document.ast.get_subtree(*document.cursor.get_state()) if node.type == 'char']
+        char_nodes = [node for node in document.get_selected_nodes() if node.type == 'char']
         all_tagged = True
         for node in char_nodes:
             if tagname not in node.tags: all_tagged = False
@@ -751,7 +751,7 @@ class UseCases():
     def select_next_placeholder():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        selected_nodes = document.get_selected_nodes()
         insert = document.cursor.get_insert_node()
         node = insert
 
@@ -776,7 +776,7 @@ class UseCases():
     def select_prev_placeholder():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        selected_nodes = document.get_selected_nodes()
         insert = document.cursor.get_insert_node()
         node = insert
 

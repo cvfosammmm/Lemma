@@ -418,10 +418,8 @@ class DocumentViewController():
                 else:
                     UseCases.select_prev_placeholder()
             case ('escape', _):
-                if document.has_selection():
-                    selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
-                    if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget':
-                        UseCases.remove_selection()
+                if document.widget_selected():
+                    UseCases.remove_selection()
             case ('return', _):
                 if not document.has_selection() and document.cursor.get_insert_node().is_inside_link():
                     UseCases.open_link(document.cursor.get_insert_node().link)

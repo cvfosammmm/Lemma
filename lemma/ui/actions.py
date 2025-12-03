@@ -195,7 +195,7 @@ class Actions(object):
     def export_image(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        selected_nodes = document.get_selected_nodes()
         DialogLocator.get_dialog('export_image').run(selected_nodes[0].value)
 
     def go_back(self, action=None, parameter=''):
@@ -240,12 +240,10 @@ class Actions(object):
         content_providers = []
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        ast = document.ast
-        cursor = document.cursor
-        subtree = ast.get_subtree(*cursor.get_state())
+        selected_nodes = document.get_selected_nodes()
 
         chars = []
-        for node in subtree:
+        for node in selected_nodes:
             if node.type == 'char':
                 chars.append(node.value)
             elif node.type == 'eol':
@@ -255,7 +253,7 @@ class Actions(object):
 
         xml = ''
         nodes_by_paragraph = [[]]
-        for node in subtree:
+        for node in selected_nodes:
             nodes_by_paragraph[-1].append(node)
             if node.type == 'eol':
                 nodes_by_paragraph.append([])
@@ -266,8 +264,8 @@ class Actions(object):
             xml += XMLExporter.export_paragraph(nodes, paragraph.style, paragraph.indentation_level, paragraph.state)
         content_providers.append(Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode())))
 
-        if len(subtree) == 1 and subtree[0].type == 'widget':
-            data = subtree[0].value.get_data()
+        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget':
+            data = selected_nodes[0].value.get_data()
             content_providers.append(Gdk.ContentProvider.new_for_bytes('image/png', GLib.Bytes(data)))
 
         cp_union = Gdk.ContentProvider.new_union(content_providers)
@@ -414,7 +412,7 @@ class Actions(object):
 
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        selected_nodes = document.get_selected_nodes()
         UseCases.resize_widget(selected_nodes[0].value.get_width() - 1)
 
     def widget_enlarge(self, action=None, parameter=None):
@@ -422,7 +420,7 @@ class Actions(object):
 
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        selected_nodes = document.ast.get_subtree(*document.cursor.get_state())
+        selected_nodes = document.get_selected_nodes()
         UseCases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
     def open_link(self, action=None, parameter=''):

@@ -30,6 +30,7 @@ from lemma.document.clipping import Clipping
 from lemma.document.xml_scanner import XMLScanner
 from lemma.services.layout_info import LayoutInfo
 from lemma.application_state.application_state import ApplicationState
+import lemma.services.timer as timer
 
 
 class Document():
@@ -47,6 +48,7 @@ class Document():
         self.links = set()
 
         self.change_flag = dict()
+        self.query_cache = dict()
 
         self.command_manager = CommandManager(self)
         self.layouter = Layouter(self)
@@ -69,7 +71,7 @@ class Document():
         parser = xml_parser.XMLParser()
 
         if self.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
-            prev_selection = self.ast.get_subtree(*self.cursor.get_state())
+            prev_selection = self.get_selected_nodes()
             if len([node for node in prev_selection if node.type == 'eol']) == 0:
                 prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
                 xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
@@ -222,9 +224,11 @@ class Document():
 
         self.last_modified = time.time()
         self.last_cursor_movement = time.time()
+        self.query_cache = dict()
 
     def update_last_cursor_movement(self):
         self.last_cursor_movement = time.time()
+        self.query_cache = dict()
 
     def update(self):
         self.layouter.update()
@@ -241,7 +245,7 @@ class Document():
         return result
 
     def has_multiple_lines_selected(self):
-        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        selected_nodes = self.get_selected_nodes()
         return len([node for node in selected_nodes if node.type == 'eol']) > 0
 
     def cursor_at_paragraph_start(self):
@@ -252,27 +256,32 @@ class Document():
         return not self.has_selection() and self.cursor.get_insert_node().is_inside_link()
 
     def links_inside_selection(self):
-        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        selected_nodes = self.get_selected_nodes()
         return len([node for node in selected_nodes if node.link != None]) > 0
 
     def whole_selection_is_one_link(self):
-        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        selected_nodes = self.get_selected_nodes()
         return self.links_inside_selection() and (len(set([node.link for node in selected_nodes])) == 1)
 
     def widget_selected(self):
-        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        selected_nodes = self.get_selected_nodes()
         return len(selected_nodes) == 1 and selected_nodes[0].type == 'widget'
 
     def selected_widget_is_max(self):
-        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        selected_nodes = self.get_selected_nodes()
         return self.widget_selected() and (selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width() or not selected_nodes[0].value.is_resizable())
 
     def selected_widget_is_min(self):
-        selected_nodes = self.ast.get_subtree(*self.cursor.get_state())
+        selected_nodes = self.get_selected_nodes()
         return self.widget_selected() and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable())
 
     def insert_parent_is_root(self):
         return self.cursor.get_insert_node().parent.type == 'root'
+
+    def get_selected_nodes(self):
+        if 'selected_nodes' not in self.query_cache:
+            self.query_cache['selected_nodes'] = self.ast.get_subtree(*self.cursor.get_state())
+        return self.query_cache['selected_nodes']
 
     def has_selection(self):
         return self.cursor.has_selection()

@@ -53,7 +53,7 @@ class ToolBars():
         cursor_inside_link = active_document.cursor.get_insert_node().is_inside_link()
         edit_link_visible = ((not active_document.has_selection()) and cursor_inside_link)
 
-        selected_nodes = active_document.ast.get_subtree(*active_document.cursor.get_state())
+        selected_nodes = active_document.get_selected_nodes()
         if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.is_resizable():
             widget = selected_nodes[0].value
 

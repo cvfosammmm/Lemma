@@ -84,7 +84,7 @@ class Popover(PopoverView):
 
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document.has_selection():
-            nodes = document.ast.get_subtree(*document.cursor.get_state())
+            nodes = document.get_selected_nodes()
             first_node = nodes[0] if len(nodes) > 0 else None
             match_func = lambda x: (x != None and x.link != None and x.link == first_node.link)
             if len([node for node in nodes if match_func(node) == False]) > 0:
