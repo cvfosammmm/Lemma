@@ -266,7 +266,7 @@ class UseCases():
         DocumentRepo.update(document)
 
         MessageBus.add_message('document_changed')
-        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_title_changed')
 
     @timer.timer
     def im_commit(text):

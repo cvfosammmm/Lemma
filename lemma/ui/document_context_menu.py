@@ -24,6 +24,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.ui.views.context_menu import ContextMenu
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
+import lemma.services.timer as timer
 
 
 class ContextMenuDocument():
@@ -46,6 +47,7 @@ class ContextMenuDocument():
         if 'history_changed' in messages or 'document_changed' in messages or 'mode_set' in messages:
             self.update()
 
+    @timer.timer
     def update(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return

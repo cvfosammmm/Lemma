@@ -78,11 +78,13 @@ class DocumentList(object):
 
         self.update()
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
+        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
             self.update()
 
+    @timer.timer
     def update(self):
         self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
         self.view.scrolling_widget.set_size(1, max(len(self.document_stubs) * self.view.line_height, 1))
