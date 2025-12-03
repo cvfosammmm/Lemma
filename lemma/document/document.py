@@ -245,38 +245,56 @@ class Document():
         return result
 
     def has_multiple_lines_selected(self):
-        selected_nodes = self.get_selected_nodes()
-        return len([node for node in selected_nodes if node.type == 'eol']) > 0
+        if 'multiple_lines_selected' not in self.query_cache:
+            selected_nodes = self.get_selected_nodes()
+            self.query_cache['multiple_lines_selected'] = any((node.type == 'eol' for node in selected_nodes))
+        return self.query_cache['multiple_lines_selected']
 
     def cursor_at_paragraph_start(self):
-        insert = self.cursor.get_insert_node()
-        return insert == insert.paragraph_start()
+        if 'cursor_at_paragraph_start' not in self.query_cache:
+            insert = self.cursor.get_insert_node()
+            self.query_cache['cursor_at_paragraph_start'] = (insert == insert.paragraph_start())
+        return self.query_cache['cursor_at_paragraph_start']
 
     def cursor_inside_link(self):
-        return not self.has_selection() and self.cursor.get_insert_node().is_inside_link()
+        if 'cursor_inside_link' not in self.query_cache:
+            self.query_cache['cursor_inside_link'] = (not self.has_selection() and self.cursor.get_insert_node().is_inside_link())
+        return self.query_cache['cursor_inside_link']
 
     def links_inside_selection(self):
-        selected_nodes = self.get_selected_nodes()
-        return len([node for node in selected_nodes if node.link != None]) > 0
+        if 'links_inside_selection' not in self.query_cache:
+            selected_nodes = self.get_selected_nodes()
+            self.query_cache['links_inside_selection'] = any((node.link != None for node in selected_nodes))
+        return self.query_cache['links_inside_selection']
 
     def whole_selection_is_one_link(self):
-        selected_nodes = self.get_selected_nodes()
-        return self.links_inside_selection() and (len(set([node.link for node in selected_nodes])) == 1)
+        if 'whole_selection_is_one_link' not in self.query_cache:
+            selected_nodes = self.get_selected_nodes()
+            self.query_cache['whole_selection_is_one_link'] = self.links_inside_selection() and all((node.link == selected_nodes[0].link for node in selected_nodes))
+        return self.query_cache['whole_selection_is_one_link']
 
     def widget_selected(self):
-        selected_nodes = self.get_selected_nodes()
-        return len(selected_nodes) == 1 and selected_nodes[0].type == 'widget'
+        if 'widget_selected' not in self.query_cache:
+            selected_nodes = self.get_selected_nodes()
+            self.query_cache['widget_selected'] = (len(selected_nodes) == 1 and selected_nodes[0].type == 'widget')
+        return self.query_cache['widget_selected']
 
     def selected_widget_is_max(self):
-        selected_nodes = self.get_selected_nodes()
-        return self.widget_selected() and (selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width() or not selected_nodes[0].value.is_resizable())
+        if 'selected_widget_is_max' not in self.query_cache:
+            selected_nodes = self.get_selected_nodes()
+            self.query_cache['selected_widget_is_max'] = (self.widget_selected() and (selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width() or not selected_nodes[0].value.is_resizable()))
+        return self.query_cache['selected_widget_is_max']
 
     def selected_widget_is_min(self):
-        selected_nodes = self.get_selected_nodes()
-        return self.widget_selected() and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable())
+        if 'selected_widget_is_min' not in self.query_cache:
+            selected_nodes = self.get_selected_nodes()
+            self.query_cache['selected_widget_is_min'] = (self.widget_selected() and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable()))
+        return self.query_cache['selected_widget_is_min']
 
     def insert_parent_is_root(self):
-        return self.cursor.get_insert_node().parent.type == 'root'
+        if 'insert_parent_is_root' not in self.query_cache:
+            self.query_cache['insert_parent_is_root'] = (self.cursor.get_insert_node().parent.type == 'root')
+        return self.query_cache['insert_parent_is_root']
 
     def get_selected_nodes(self):
         if 'selected_nodes' not in self.query_cache:
@@ -284,16 +302,24 @@ class Document():
         return self.query_cache['selected_nodes']
 
     def has_selection(self):
-        return self.cursor.has_selection()
+        if 'has_selection' not in self.query_cache:
+            self.query_cache['has_selection'] = self.cursor.has_selection()
+        return self.query_cache['has_selection']
 
     def can_undo(self):
-        return self.command_manager.can_undo()
+        if 'can_undo' not in self.query_cache:
+            self.query_cache['can_undo'] = self.command_manager.can_undo()
+        return self.query_cache['can_undo']
 
     def can_redo(self):
-        return self.command_manager.can_redo()
+        if 'can_redo' not in self.query_cache:
+            self.query_cache['can_redo'] = self.command_manager.can_redo()
+        return self.query_cache['can_redo']
 
     def get_height(self):
-        return self.ast.paragraphs[-1].layout['y'] + self.ast.paragraphs[-1].layout['height']
+        if 'height' not in self.query_cache:
+            self.query_cache['height'] = self.ast.paragraphs[-1].layout['y'] + self.ast.paragraphs[-1].layout['height']
+        return self.query_cache['height']
 
     def get_width(self):
         return self.ast.paragraphs[0].layout['width']
