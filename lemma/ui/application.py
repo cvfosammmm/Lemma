@@ -22,6 +22,7 @@ from gi.repository import Adw
 from lemma.services.color_manager import ColorManager
 from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.ui.popovers.popover_manager import PopoverManager
+import lemma.services.timer as timer
 
 import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
@@ -81,6 +82,7 @@ class Application(Adw.Application):
 
         self.main_window.add_tick_callback(self.animate)
 
+    @timer.timer
     def animate(self, widget, frame_clock):
         self.colors.animate()
         self.actions.animate()

@@ -522,6 +522,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def jump_left(do_selection=False):
@@ -549,6 +550,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def right(do_selection=False):
@@ -569,6 +571,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def jump_right(do_selection=False):
@@ -595,6 +598,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def up(do_selection=False):
@@ -638,6 +642,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def down(do_selection=False):
@@ -681,6 +686,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def paragraph_start(do_selection=False):
@@ -703,6 +709,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def paragraph_end(do_selection=False):
@@ -725,6 +732,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def page(y, do_selection=False):
@@ -746,6 +754,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def select_next_placeholder():
@@ -771,6 +780,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def select_prev_placeholder():
@@ -796,6 +806,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def select_node(node):
@@ -806,6 +817,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def select_all():
@@ -815,6 +827,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def remove_selection():
@@ -826,6 +839,7 @@ class UseCases():
 
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
+            MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
@@ -835,6 +849,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def move_drop_cursor_to_xy(x, y):
@@ -874,6 +889,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     @timer.timer
     def extend_selection():
@@ -916,6 +932,7 @@ class UseCases():
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_cursor_changed')
 
     def scroll_insert_on_screen(animation_type='default'):
         document = WorkspaceRepo.get_workspace().get_active_document()

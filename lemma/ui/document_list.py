@@ -74,6 +74,7 @@ class DocumentList(object):
         MessageBus.subscribe(self, 'new_document')
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'document_ast_changed')
+        MessageBus.subscribe(self, 'document_title_changed')
         MessageBus.subscribe(self, 'mode_set')
 
         self.update()

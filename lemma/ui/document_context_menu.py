@@ -37,14 +37,15 @@ class ContextMenuDocument():
         self.view_edit_menu = application.popover_manager.popovers['edit_menu']
 
         MessageBus.subscribe(self, 'history_changed')
-        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'document_ast_changed')
+        MessageBus.subscribe(self, 'document_cursor_changed')
         MessageBus.subscribe(self, 'mode_set')
 
         self.update()
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_changed' in messages or 'mode_set' in messages:
+        if 'history_changed' in messages or 'document_ast_changed' in messages or 'document_cursor_changed' in messages or 'mode_set' in messages:
             self.update()
 
     @timer.timer

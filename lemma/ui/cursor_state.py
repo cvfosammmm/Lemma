@@ -28,14 +28,16 @@ class CursorState():
         self.toolbar = main_window.toolbar
 
         MessageBus.subscribe(self, 'history_changed')
-        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'document_ast_changed')
+        MessageBus.subscribe(self, 'document_cursor_changed')
         MessageBus.subscribe(self, 'app_state_changed')
 
         self.update()
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_changed' in messages:
+        if 'history_changed' in messages or 'document_ast_changed' in messages or 'document_cursor_changed' in messages:
             self.update()
 
         if 'app_state_changed' in messages:

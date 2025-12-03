@@ -52,7 +52,7 @@ class History(object):
         self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
 
         MessageBus.subscribe(self, 'history_changed')
-        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'document_title_changed')
         MessageBus.subscribe(self, 'mode_set')
 
         self.update()
