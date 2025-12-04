@@ -347,11 +347,11 @@ class Document():
         line = self.get_line_layout_at_y(y)
 
         if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
-            for node in self.layouter.flatten_layout(line):
-                if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
-                    node_x, node_y = self.get_absolute_xy(node)
-                    if x >= node_x and x <= node_x + node['width'] and y >= node_y and y <= node_y + node['height']:
-                        return node
+            for layout in self.layouter.flatten_layout(line):
+                if layout['node'] != None and layout['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
+                    layout_x, layout_y = self.get_absolute_xy(layout)
+                    if x >= layout_x and x <= layout_x + layout['width'] and y >= layout_y and y <= layout_y + layout['height']:
+                        return layout
         return None
 
     def get_cursor_holding_layout_close_to_xy(self, x, y):
