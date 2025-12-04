@@ -22,6 +22,7 @@ from gi.repository import Gtk, Gio, GLib
 from lemma.services.message_bus import MessageBus
 from lemma.ui.popovers.popover_manager import PopoverManager
 from lemma.application_state.application_state import ApplicationState
+import lemma.services.timer as timer
 
 
 class Shortcuts(object):
@@ -38,11 +39,13 @@ class Shortcuts(object):
 
         MessageBus.subscribe(self, 'app_state_changed')
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'app_state_changed' in messages:
             self.update()
 
+    @timer.timer
     def update(self):
         if ApplicationState.get_value('active_popover') != None:
             if self.shortcut_controller_app.get_widget() == self.main_window:

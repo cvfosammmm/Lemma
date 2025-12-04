@@ -26,6 +26,7 @@ from lemma.services.autocomplete_db import AutocompleteDB
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 from lemma.use_cases.use_cases import UseCases
+import lemma.services.timer as timer
 
 
 class Autocomplete():
@@ -59,6 +60,7 @@ class Autocomplete():
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'keyboard_input')
 
+    @timer.timer
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 

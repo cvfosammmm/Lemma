@@ -57,6 +57,7 @@ class SidebarEmojis(object):
 
         self.update()
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'mode_set' in messages or 'app_state_changed' in messages or 'sidebar_visibility_changed' in messages:

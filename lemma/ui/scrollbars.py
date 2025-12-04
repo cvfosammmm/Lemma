@@ -62,6 +62,7 @@ class Scrollbars():
 
         self.view.set_draw_func(self.draw)
 
+    @timer.timer
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return

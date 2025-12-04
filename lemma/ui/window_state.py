@@ -22,6 +22,7 @@ from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
+import lemma.services.timer as timer
 
 
 class WindowState(object):
@@ -46,11 +47,13 @@ class WindowState(object):
 
         self.update()
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'mode_set' in messages or 'settings_changed' in messages or 'sidebar_visibility_changed' in messages:
             self.update()
 
+    @timer.timer
     def update(self):
         workspace = WorkspaceRepo.get_workspace()
         mode = workspace.get_mode()

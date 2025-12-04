@@ -25,6 +25,7 @@ from lemma.application_state.application_state import ApplicationState
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
+import lemma.services.timer as timer
 
 
 class ToolBars():
@@ -40,12 +41,14 @@ class ToolBars():
         MessageBus.subscribe(self, 'app_state_changed')
         MessageBus.subscribe(self, 'settings_changed')
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'document_changed' in messages or 'app_state_changed' in messages or 'settings_changed' in messages:
             self.update()
             self.update_paragraph_style()
 
+    @timer.timer
     def update(self):
         active_document = WorkspaceRepo.get_workspace().get_active_document()
         if active_document == None: return

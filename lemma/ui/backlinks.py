@@ -23,6 +23,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
+import lemma.services.timer as timer
 
 
 class Backlinks(object):
@@ -30,6 +31,8 @@ class Backlinks(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.view = self.main_window.backlinks
+
+        self.current_backlink_ids = []
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
 
@@ -40,21 +43,29 @@ class Backlinks(object):
 
         self.update()
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
             self.update()
 
+    @timer.timer
     def update(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document != None:
             backlinks = DocumentRepo.list_by_link_target(document.title)
+            backlink_ids = [stub['id'] for stub in backlinks]
+
             if len(backlinks) > 0:
-                self.view.show_backlinks(backlinks)
+                if backlink_ids != self.current_backlink_ids:
+                    self.current_backlink_ids = backlink_ids
+                    self.view.show_backlinks(backlinks)
             else:
+                self.current_backlink_ids = []
                 self.view.show_no_backlinks_page(document.title)
         else:
+            self.current_backlink_ids = []
             self.view.show_no_open_documents_page()
 
     def on_row_activated(self, listbox, row):

@@ -25,6 +25,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
+import lemma.services.timer as timer
 
 
 class DocumentDraft():
@@ -50,11 +51,13 @@ class DocumentDraft():
 
         self.update()
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'mode_set' in messages:
             self.update()
 
+    @timer.timer
     def update(self):
         mode = WorkspaceRepo.get_workspace().get_mode()
         if mode == 'draft':

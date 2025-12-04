@@ -20,6 +20,7 @@ import os.path
 from lemma.services.message_bus import MessageBus
 from lemma.services.paths import Paths
 from lemma.services.settings import Settings
+import lemma.services.timer as timer
 
 
 class Colors(object):
@@ -33,11 +34,13 @@ class Colors(object):
 
         self.update()
 
+    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'settings_changed' in messages:
             self.update()
 
+    @timer.timer
     def update(self):
         color_scheme = Settings.get_value('color_scheme')
         if color_scheme == self.color_scheme: return
