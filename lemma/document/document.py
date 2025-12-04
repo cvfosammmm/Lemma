@@ -71,8 +71,8 @@ class Document():
         parser = xml_parser.XMLParser()
 
         if self.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
-            prev_selection = self.get_selected_nodes()
-            if all((node.type != 'eol' for node in prev_selection)):
+            if not self.has_multiple_lines_selected():
+                prev_selection = self.get_selected_nodes()
                 prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
                 xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
 
@@ -247,7 +247,7 @@ class Document():
     def has_multiple_lines_selected(self):
         if 'multiple_lines_selected' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()
-            self.query_cache['multiple_lines_selected'] = any((node.type == 'eol' for node in selected_nodes))
+            self.query_cache['multiple_lines_selected'] = any(node.type == 'eol' for node in selected_nodes)
         return self.query_cache['multiple_lines_selected']
 
     def cursor_at_paragraph_start(self):
@@ -264,13 +264,13 @@ class Document():
     def links_inside_selection(self):
         if 'links_inside_selection' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()
-            self.query_cache['links_inside_selection'] = any((node.link != None for node in selected_nodes))
+            self.query_cache['links_inside_selection'] = any(node.link != None for node in selected_nodes)
         return self.query_cache['links_inside_selection']
 
     def whole_selection_is_one_link(self):
         if 'whole_selection_is_one_link' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()
-            self.query_cache['whole_selection_is_one_link'] = self.links_inside_selection() and all((node.link == selected_nodes[0].link for node in selected_nodes))
+            self.query_cache['whole_selection_is_one_link'] = self.links_inside_selection() and all(node.link == selected_nodes[0].link for node in selected_nodes)
         return self.query_cache['whole_selection_is_one_link']
 
     def widget_selected(self):

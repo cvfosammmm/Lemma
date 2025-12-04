@@ -447,28 +447,28 @@ class Node():
     @timer.timer
     def validate(self):
         if self.type == 'root':
-            return all((child.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot'} for child in self.children)) \
-                and all((child.validate() for child in self.children))
+            return all(child.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot'} for child in self.children) \
+                and all(child.validate() for child in self.children)
 
         if self.type == 'mathscript':
             return len(self.children) == 2 \
-                and all((child.type == 'mathlist' for child in self.children)) \
-                and all((child.validate() for child in self.children))
+                and all(child.type == 'mathlist' for child in self.children) \
+                and all(child.validate() for child in self.children)
 
         if self.type == 'mathfraction':
             return len(self.children) == 2 \
-                and all((child.type == 'mathlist' for child in self.children)) \
-                and all((child.validate() for child in self.children))
+                and all(child.type == 'mathlist' for child in self.children) \
+                and all(child.validate() for child in self.children)
 
         if self.type == 'mathroot':
             return len(self.children) == 2 \
-                and all((child.type == 'mathlist' for child in self.children)) \
-                and all((child.validate() for child in self.children))
+                and all(child.type == 'mathlist' for child in self.children) \
+                and all(child.validate() for child in self.children)
 
         if self.type == 'mathlist':
             return len(self.children) == 0 \
-                or all((child.type in {'char', 'placeholder', 'end'} for child in self.children)) \
-                and all((child.validate() for child in self.children))
+                or all(child.type in {'char', 'placeholder', 'end'} for child in self.children) \
+                and all(child.validate() for child in self.children)
 
         if self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
             return len(self.children) == 0

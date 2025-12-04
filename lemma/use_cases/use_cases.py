@@ -461,8 +461,8 @@ class UseCases():
     def toggle_tag(tagname):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        has_char_nodes = any((node.type == 'char' for node in document.get_selected_nodes()))
-        has_untagged_char_nodes = any((node.type == 'char' and (tagname not in node.tags) for node in document.get_selected_nodes()))
+        has_char_nodes = any(node.type == 'char' for node in document.get_selected_nodes())
+        has_untagged_char_nodes = any(node.type == 'char' and (tagname not in node.tags) for node in document.get_selected_nodes())
 
         if has_char_nodes:
             if has_untagged_char_nodes:
