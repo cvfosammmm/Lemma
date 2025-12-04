@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="52" date="2025-12-4">
+            <description translatable="no">
+                <p>Add checklists, ...</p>
+            </description>
+        </release>
         ​<release version="51" date="2025-11-26">
             <description translatable="no">
                 <p>Bugfix, ...</p>
