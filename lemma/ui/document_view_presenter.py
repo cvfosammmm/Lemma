@@ -162,6 +162,7 @@ class DocumentViewPresenter():
 
         elif paragraph.style == 'cl':
             layout = paragraph.layout
+            line_layout = layout['children'][0]
             background_color = self.color_cache['background_string']
             default_color = self.color_cache['text_string']
             highlight_color = self.color_cache['highlights_string']
@@ -171,8 +172,8 @@ class DocumentViewPresenter():
             else:
                 surface = TextRenderer.get_icon_surface('checkbox-unchecked-symbolic', self.hidpi_factor, default_color, highlight_color)
             bullet_indent = 1
-            top = 5
-            ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor), self.device_offset_y + int((offset_y + layout['y'] + top) * self.hidpi_factor))
+            top = -23
+            ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor), self.device_offset_y + int((offset_y + layout['y'] + line_layout['height'] + top) * self.hidpi_factor))
             ctx.paint()
 
     @timer.timer

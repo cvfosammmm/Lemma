@@ -139,6 +139,7 @@ class DocumentView():
             leaf_layout = document.get_leaf_layout_at_xy(x, y)
             line_layout = document.get_line_layout_at_y(y)
             paragraph_layout = line_layout['parent']
+            line_layout = paragraph_layout['children'][0]
             paragraph = paragraph_layout['node']
 
             link = None
@@ -146,7 +147,7 @@ class DocumentView():
                 link = leaf_layout['node'].link
             self.set_link_target_at_pointer(link)
 
-            if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + 5 and y <= paragraph_layout['y'] + 24 and x >= 1 and x <= 20:
+            if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + line_layout['height'] - 23 and y <= paragraph_layout['y'] + line_layout['height'] - 4 and x >= 1 and x <= 20:
                 self.view.content.set_cursor_from_name('default')
             elif leaf_layout != None:
                 node = leaf_layout['node']
