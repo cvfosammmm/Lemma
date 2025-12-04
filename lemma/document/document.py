@@ -72,7 +72,7 @@ class Document():
 
         if self.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
             prev_selection = self.get_selected_nodes()
-            if len([node for node in prev_selection if node.type == 'eol']) == 0:
+            if all((node.type != 'eol' for node in prev_selection)):
                 prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
                 xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
 
@@ -125,7 +125,7 @@ class Document():
             self.add_composite_command(*commands)
 
         placeholder_found = False
-        for node_list in [node.flatten() for node in nodes]:
+        for node_list in (node.flatten() for node in nodes):
             for node in node_list:
                 if node.type == 'placeholder':
                     self.select_node(node)
@@ -346,10 +346,11 @@ class Document():
         line = self.get_line_layout_at_y(y)
 
         if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
-            for node in [node for node in self.layouter.flatten_layout(line) if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}]:
-                node_x, node_y = self.get_absolute_xy(node)
-                if x >= node_x and x <= node_x + node['width'] and y >= node_y and y <= node_y + node['height']:
-                    return node
+            for node in self.layouter.flatten_layout(line):
+                if node['node'] != None and node['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
+                    node_x, node_y = self.get_absolute_xy(node)
+                    if x >= node_x and x <= node_x + node['width'] and y >= node_y and y <= node_y + node['height']:
+                        return node
         return None
 
     def get_cursor_holding_layout_close_to_xy(self, x, y):

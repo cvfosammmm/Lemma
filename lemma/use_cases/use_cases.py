@@ -461,16 +461,14 @@ class UseCases():
     def toggle_tag(tagname):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        char_nodes = [node for node in document.get_selected_nodes() if node.type == 'char']
-        all_tagged = True
-        for node in char_nodes:
-            if tagname not in node.tags: all_tagged = False
+        has_char_nodes = any((node.type == 'char' for node in document.get_selected_nodes()))
+        has_untagged_char_nodes = any((node.type == 'char' and (tagname not in node.tags) for node in document.get_selected_nodes()))
 
-        if len(char_nodes) > 0:
-            if all_tagged:
-                document.add_command('remove_tag', tagname)
-            else:
+        if has_char_nodes:
+            if has_untagged_char_nodes:
                 document.add_command('add_tag', tagname)
+            else:
+                document.add_command('remove_tag', tagname)
 
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
