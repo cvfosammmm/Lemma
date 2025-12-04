@@ -474,18 +474,18 @@ class DocumentViewController():
         modifiers = Gtk.accelerator_get_default_mod_mask()
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
-        self.model.set_cursor_position(x, y)
+        self.model.set_pointer_position(x, y)
 
     def on_hover(self, controller, x, y):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
-        self.model.set_cursor_position(x, y)
+        self.model.set_pointer_position(x, y)
 
     def on_leave(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
-        self.model.set_cursor_position(None, None)
+        self.model.set_pointer_position(None, None)
 
 

@@ -117,38 +117,14 @@ class DocumentView():
     def reset_cursor_blink(self):
         self.cursor_blink_reset = time.time()
 
-    def set_cursor_position(self, x, y):
+    def set_pointer_position(self, x, y):
         if x != self.cursor_x or y != self.cursor_y:
             self.cursor_x, self.cursor_y = x, y
-            self.last_cursor_or_scrolling_change = time.time()
-
-            document = WorkspaceRepo.get_workspace().get_active_document()
-            if document == None: return
-
-            x = self.scrolling_position_x + (self.cursor_x if self.cursor_x != None else 0)
-            y = self.scrolling_position_y + (self.cursor_y if self.cursor_y != None else 0)
-            x -= LayoutInfo.get_document_padding_left()
-            y -= LayoutInfo.get_normal_document_offset()
-            link = None
-
-            if y > 0:
-                leaf_layout = document.get_leaf_layout_at_xy(x, y)
-                if leaf_layout != None and leaf_layout['node'] != None and leaf_layout['node'].link != None:
-                    link = leaf_layout['node'].link
-
-            self.set_link_target_at_pointer(link)
-            self.update_pointer()
-
-    def set_ctrl_pressed(self, is_pressed):
-        if is_pressed != self.ctrl_pressed:
-            self.ctrl_pressed = is_pressed
             self.last_cursor_or_scrolling_change = time.time()
             self.update_pointer()
 
     def update_pointer(self):
-        if self.document == None: return
-
-        document = self.document
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
             self.view.content.set_cursor_from_name('default')
             return
@@ -160,11 +136,15 @@ class DocumentView():
         y -= ApplicationState.get_value('title_buttons_height')
 
         if y > 0:
-            link = document.get_link_at_xy(x, y)
             leaf_layout = document.get_leaf_layout_at_xy(x, y)
             line_layout = document.get_line_layout_at_y(y)
             paragraph_layout = line_layout['parent']
             paragraph = paragraph_layout['node']
+
+            link = None
+            if leaf_layout != None and leaf_layout['node'] != None and leaf_layout['node'].link != None:
+                link = leaf_layout['node'].link
+            self.set_link_target_at_pointer(link)
 
             if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + 5 and y <= paragraph_layout['y'] + 24 and x >= 1 and x <= 20:
                 self.view.content.set_cursor_from_name('default')
@@ -185,6 +165,12 @@ class DocumentView():
                 self.view.content.set_cursor_from_name('text')
         else:
             self.view.content.set_cursor_from_name('default')
+
+    def set_ctrl_pressed(self, is_pressed):
+        if is_pressed != self.ctrl_pressed:
+            self.ctrl_pressed = is_pressed
+            self.last_cursor_or_scrolling_change = time.time()
+            self.update_pointer()
 
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None
