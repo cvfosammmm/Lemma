@@ -135,11 +135,10 @@ class DocumentViewPresenter():
             layout = paragraph.layout
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
-            fontname = first_char_layout['fontname']
-            baseline = TextShaper.get_ascend(fontname=fontname)
+            baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
             fg_color = self.color_cache['bullets_string']
 
-            surface, left, top = TextRenderer.get_glyph('-', fontname, fg_color, self.hidpi_factor)
+            surface, left, top = TextRenderer.get_glyph('-', 'book', fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_bullet_padding() - surface.get_width()
             bullet_measurement = TextShaper.measure_single('-')
             ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
@@ -149,14 +148,13 @@ class DocumentViewPresenter():
             layout = paragraph.layout
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
-            fontname = first_char_layout['fontname']
-            baseline = TextShaper.get_ascend(fontname=fontname)
+            baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
             fg_color = self.color_cache['bullets_string']
 
             text = '.' + ''.join(reversed(str(list_item_numbers[paragraph.indentation_level])))
             bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_bullet_padding()
-            for char, dim in zip(text, TextShaper.measure(text, fontname)):
-                surface, left, top = TextRenderer.get_glyph(char, fontname, fg_color, self.hidpi_factor)
+            for char, dim in zip(text, TextShaper.measure(text, 'book')):
+                surface, left, top = TextRenderer.get_glyph(char, 'book', fg_color, self.hidpi_factor)
                 bullet_indent -= dim[0]
                 bullet_measurement = TextShaper.measure_single(char)
                 ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
