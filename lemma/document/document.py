@@ -342,6 +342,7 @@ class Document():
             layout = layout['parent']
         return ancestors
 
+    @timer.timer
     def get_leaf_layout_at_xy(self, x, y):
         line = self.get_line_layout_at_y(y)
 
