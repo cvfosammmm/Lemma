@@ -17,6 +17,7 @@
 
 from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
@@ -42,11 +43,18 @@ class PinnedDocuments():
 
     @timer.timer
     def update(self):
-        self.update_button_visibility()
-
-    def update_button_visibility(self):
         workspace = WorkspaceRepo.get_workspace()
         pinned_documents = workspace.get_pinned_document_ids()
+
+        for i in range(len(pinned_documents)):
+            document_title = DocumentRepo.get_stub_by_id(pinned_documents[i])['title']
+            if document_title != None:
+                document_title = '"' + document_title + '"'
+            else:
+                document_title = 'Pinned Document ' + str(i + 1)
+
+            button = self.pin_buttons[i + 1]
+            button.set_tooltip_text('Activate ' + document_title + ' (Alt+' + str(i + 1) + ')')
 
         for i, button in self.pin_buttons.items():
             button.set_sensitive(len(pinned_documents) >= i)
