@@ -30,6 +30,9 @@ class HistoryView(Gtk.Overlay):
         self.add_css_class('history')
 
         self.scrolling_widget = ScrollingWidget()
+        self.scrolling_widget.scrollbar_x.set_can_target(False)
+        self.scrolling_widget.scrollbar_y.set_can_target(False)
+
         self.content = self.scrolling_widget.content
         self.set_child(self.scrolling_widget.view)
 
