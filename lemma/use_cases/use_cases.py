@@ -231,7 +231,10 @@ class UseCases():
     def set_active_document(document_id, update_history=True):
         workspace = WorkspaceRepo.get_workspace()
 
-        document = DocumentRepo.get_by_id(document_id)
+        if document_id != workspace.get_active_document_id():
+            document = DocumentRepo.get_by_id(document_id)
+        else:
+            document = workspace.get_active_document()
         workspace.set_active_document(document, update_history)
 
         WorkspaceRepo.update(workspace)
