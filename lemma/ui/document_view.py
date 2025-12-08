@@ -40,14 +40,13 @@ class DocumentView():
         self.main_window = main_window
         self.application = application
 
-        self.cursor_x, self.cursor_y = None, None
+        self.pointer_x, self.pointer_y = None, None
         self.scrolling_position_x, self.scrolling_position_y = -1, -1
         self.ctrl_pressed = False
         self.scrolling_multiplier = 2.5
         self.selected_click_target = None
         self.link_target_at_cursor = None
         self.link_target_at_pointer = None
-        self.last_cursor_or_scrolling_change = time.time()
 
         self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
         self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
@@ -118,9 +117,8 @@ class DocumentView():
         self.cursor_blink_reset = time.time()
 
     def set_pointer_position(self, x, y):
-        if x != self.cursor_x or y != self.cursor_y:
-            self.cursor_x, self.cursor_y = x, y
-            self.last_cursor_or_scrolling_change = time.time()
+        if x != self.pointer_x or y != self.pointer_y:
+            self.pointer_x, self.pointer_y = x, y
             self.update_pointer()
 
     def update_pointer(self):
@@ -129,8 +127,8 @@ class DocumentView():
             self.view.content.set_cursor_from_name('default')
             return
 
-        x = self.scrolling_position_x + (self.cursor_x if self.cursor_x != None else 0)
-        y = self.scrolling_position_y + (self.cursor_y if self.cursor_y != None else 0)
+        x = self.scrolling_position_x + (self.pointer_x if self.pointer_x != None else 0)
+        y = self.scrolling_position_y + (self.pointer_y if self.pointer_y != None else 0)
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
         y -= ApplicationState.get_value('title_buttons_height')
@@ -170,7 +168,6 @@ class DocumentView():
     def set_ctrl_pressed(self, is_pressed):
         if is_pressed != self.ctrl_pressed:
             self.ctrl_pressed = is_pressed
-            self.last_cursor_or_scrolling_change = time.time()
             self.update_pointer()
 
     def update_link_at_cursor(self):
