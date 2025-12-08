@@ -36,9 +36,13 @@ class WorkspaceRepo():
                     workspace_data = pickle.loads(file.read())
                 except EOFError: pass
                 else:
-                    WorkspaceRepo.workspace.history = workspace_data['history']
-                    document = DocumentRepo.get_by_id(workspace_data['active_document_id'])
-                    WorkspaceRepo.workspace.set_active_document(document, update_history=False)
+                    if 'history' in workspace_data:
+                        WorkspaceRepo.workspace.history = workspace_data['history']
+                    if 'pinned_document_ids' in workspace_data:
+                        WorkspaceRepo.workspace.pinned_document_ids = workspace_data['pinned_document_ids']
+                    if 'active_document_id' in workspace_data:
+                        document = DocumentRepo.get_by_id(workspace_data['active_document_id'])
+                        WorkspaceRepo.workspace.set_active_document(document, update_history=False)
 
     def get_workspace():
         return WorkspaceRepo.workspace
@@ -52,7 +56,8 @@ class WorkspaceRepo():
             active_document_id = workspace.active_document.id if workspace.active_document != None else None
             history_list = [document_id for document_id in workspace.history if document_id != None]
             data = {'active_document_id': active_document_id,
-                    'history': history_list}
+                    'history': history_list,
+                    'pinned_document_ids': workspace.pinned_document_ids}
             filehandle.write(pickle.dumps(data))
 
 

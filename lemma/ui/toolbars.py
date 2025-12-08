@@ -37,6 +37,7 @@ class ToolBars():
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
 
         MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'pinned_documents_changed')
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'app_state_changed')
         MessageBus.subscribe(self, 'settings_changed')

@@ -25,6 +25,7 @@ class Workspace():
 
         self.active_document = None
         self.history = []
+        self.pinned_document_ids = []
 
         self.in_draft_mode = False
 
@@ -54,6 +55,17 @@ class Workspace():
     def remove_from_history(self, document_id):
         if document_id in self.history:
             self.history.remove(document_id)
+
+    def pin_document(self, document_id):
+        if document_id == None: return
+        if document_id in self.pinned_document_ids: return
+
+        self.pinned_document_ids.append(document_id)
+
+    def unpin_document(self, document_id):
+        if document_id not in self.pinned_document_ids: return
+
+        self.pinned_document_ids.remove(document_id)
 
     def get_active_document(self):
         return self.active_document
@@ -86,5 +98,8 @@ class Workspace():
         index = self.history.index(document_id)
         if index == (len(self.history) - 1): return None
         else: return self.history[index + 1]
+
+    def get_pinned_document_ids(self):
+        return self.pinned_document_ids
 
 

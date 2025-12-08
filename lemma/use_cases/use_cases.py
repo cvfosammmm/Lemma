@@ -219,12 +219,14 @@ class UseCases():
             workspace.set_active_document(document, update_history=False)
 
         workspace.remove_from_history(document_id)
+        workspace.unpin_document(document_id)
 
         DocumentRepo.delete(document_id)
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('document_removed')
         MessageBus.add_message('history_changed')
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('pinned_documents_changed')
 
     def set_active_document(document_id, update_history=True):
         workspace = WorkspaceRepo.get_workspace()
@@ -235,6 +237,24 @@ class UseCases():
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('mode_set')
         MessageBus.add_message('history_changed')
+
+    def pin_active_document():
+        workspace = WorkspaceRepo.get_workspace()
+        active_document_id = workspace.get_active_document_id()
+
+        workspace.pin_document(active_document_id)
+
+        WorkspaceRepo.update(workspace)
+        MessageBus.add_message('pinned_documents_changed')
+
+    def unpin_active_document():
+        workspace = WorkspaceRepo.get_workspace()
+        active_document_id = workspace.get_active_document_id()
+
+        workspace.unpin_document(active_document_id)
+
+        WorkspaceRepo.update(workspace)
+        MessageBus.add_message('pinned_documents_changed')
 
     @timer.timer
     def undo():

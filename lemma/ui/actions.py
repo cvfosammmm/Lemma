@@ -47,6 +47,8 @@ class Actions(object):
         self.add_simple_action('export-bulk', self.export_bulk)
         self.add_simple_action('delete-document', self.delete_document)
         self.add_simple_action('rename-document', self.rename_document)
+        self.add_simple_action('pin-document', self.pin_document)
+        self.add_simple_action('unpin-document', self.unpin_document)
         self.add_simple_action('export-markdown', self.export_markdown)
         self.add_simple_action('export-image', self.export_image)
 
@@ -103,6 +105,7 @@ class Actions(object):
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'mode_set')
+        MessageBus.subscribe(self, 'pinned_documents_changed')
 
         self.update()
 
@@ -114,7 +117,7 @@ class Actions(object):
     @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_changed' in messages or 'mode_set' in messages:
+        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_changed' in messages or 'mode_set' in messages or 'pinned_documents_changed' in messages:
             self.update()
 
     def on_clipboard_changed(self, clipboard):
@@ -135,6 +138,8 @@ class Actions(object):
         self.actions['export-bulk'].set_enabled(document != None)
         self.actions['delete-document'].set_enabled(document != None)
         self.actions['rename-document'].set_enabled(document != None)
+        self.actions['pin-document'].set_enabled(document != None and document.id not in workspace.get_pinned_document_ids() and len(workspace.get_pinned_document_ids()) < 9)
+        self.actions['unpin-document'].set_enabled(document != None and document.id in workspace.get_pinned_document_ids())
         self.actions['export-markdown'].set_enabled(document != None)
         self.actions['export-image'].set_enabled(document != None and document.widget_selected())
         self.actions['go-back'].set_enabled(workspace.get_mode() == 'draft' or (document != None and workspace.get_prev_id_in_history(document.id) != None))
@@ -187,6 +192,12 @@ class Actions(object):
 
     def rename_document(self, action=None, parameter=''):
         self.application.document_title.init_renaming()
+
+    def pin_document(self, action=None, parameter=''):
+        UseCases.pin_active_document()
+
+    def unpin_document(self, action=None, parameter=''):
+        UseCases.unpin_active_document()
 
     def export_markdown(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()

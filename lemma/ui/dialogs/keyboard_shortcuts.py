@@ -30,8 +30,6 @@ class Dialog():
         section = {'title': 'Windows and Panels', 'items': list()}
         section['items'].append({'title': 'Show Global Menu', 'shortcut': 'F10'})
         section['items'].append({'title': 'Show Document Menu', 'shortcut': 'F12'})
-        section['items'].append({'title': 'Show Symbols Sidebar', 'shortcut': '&lt;alt&gt;1'})
-        section['items'].append({'title': 'Show Emojis Sidebar', 'shortcut': '&lt;alt&gt;2'})
         section['items'].append({'title': 'Show Keyboard Shortcuts', 'shortcut': '&lt;ctrl&gt;question'})
         section['items'].append({'title': 'Quit the Application', 'shortcut': '&lt;ctrl&gt;Q'})
         data.append(section)
@@ -45,6 +43,15 @@ class Dialog():
         section['items'].append({'title': 'Search', 'shortcut': '&lt;ctrl&gt;F'})
         section['items'].append({'title': 'Go Back', 'shortcut': '&lt;alt&gt;Left'})
         section['items'].append({'title': 'Go Forward', 'shortcut': '&lt;alt&gt;Right'})
+        section['items'].append({'title': 'Activate Pinned Document 1', 'shortcut': '&lt;alt&gt;1'})
+        section['items'].append({'title': 'Activate Pinned Document 2', 'shortcut': '&lt;alt&gt;2'})
+        section['items'].append({'title': 'Activate Pinned Document 3', 'shortcut': '&lt;alt&gt;3'})
+        section['items'].append({'title': 'Activate Pinned Document 4', 'shortcut': '&lt;alt&gt;4'})
+        section['items'].append({'title': 'Activate Pinned Document 5', 'shortcut': '&lt;alt&gt;5'})
+        section['items'].append({'title': 'Activate Pinned Document 6', 'shortcut': '&lt;alt&gt;6'})
+        section['items'].append({'title': 'Activate Pinned Document 7', 'shortcut': '&lt;alt&gt;7'})
+        section['items'].append({'title': 'Activate Pinned Document 8', 'shortcut': '&lt;alt&gt;8'})
+        section['items'].append({'title': 'Activate Pinned Document 9', 'shortcut': '&lt;alt&gt;9'})
         data.append(section)
 
         section = {'title': 'Undo and Redo', 'items': list()}
