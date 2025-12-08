@@ -83,7 +83,7 @@ class UseCases():
         if not document.has_selection() and insert.is_inside_link():
             document.add_command('move_cursor_to_node', *insert.link_bounds())
 
-        ApplicationState.set_value('active_popover', 'link_ac')
+        ApplicationState.set_value('active_popover', 'link_autocomplete')
         ApplicationState.set_value('popover_position', (x, y))
         ApplicationState.set_value('popover_orientation', orientation)
 

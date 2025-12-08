@@ -24,7 +24,7 @@ import lemma.ui.popovers.document_menu as document_menu
 from lemma.ui.document_context_menu import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
 import lemma.ui.popovers.paragraph_style as paragraph_style
-import lemma.ui.popovers.link_ac as link_ac
+import lemma.ui.popovers.link_autocomplete as link_autocomplete
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
@@ -50,7 +50,7 @@ class PopoverManager():
         self.popovers["edit_menu"] = EditMenu()
         self.popovers["hamburger_menu"] = hamburger_menu.Popover()
         self.popovers["paragraph_style"] = paragraph_style.Popover()
-        self.popovers["link_ac"] = link_ac.Popover()
+        self.popovers["link_autocomplete"] = link_autocomplete.Popover()
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'document_changed')
