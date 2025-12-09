@@ -20,6 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 from lemma.ui.popovers.popover_manager import PopoverManager
+from lemma.ui.views.pin_buttons import PinButtons
 
 
 class HeaderBar(Gtk.Paned):
@@ -78,26 +79,7 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.set_child(self.box)
 
-        self.pin_buttons = dict()
-        for i in range(1, 10):
-            button = Gtk.Button.new_from_icon_name(str(i) + '-symbolic')
-            button.set_can_focus(False)
-            button.add_css_class('flat')
-            button.set_tooltip_text('Activate Pinned Document 1 (Alt+' + str(i) + ')')
-            self.pin_buttons[i] = button
-
-        self.pin_buttons_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        self.pin_buttons_box.append(self.pin_buttons[1])
-        self.pin_buttons_box.append(self.pin_buttons[2])
-        self.pin_buttons_box.append(self.pin_buttons[3])
-        self.pin_buttons_box.append(self.pin_buttons[4])
-        self.pin_buttons_box.append(self.pin_buttons[5])
-        self.pin_buttons_box.append(self.pin_buttons[6])
-        self.pin_buttons_box.append(self.pin_buttons[7])
-        self.pin_buttons_box.append(self.pin_buttons[8])
-        self.pin_buttons_box.append(self.pin_buttons[9])
-        self.pin_buttons_box.add_css_class('linked')
-        self.pin_buttons_box.add_css_class('buttonbox')
+        self.pin_buttons_box = PinButtons()
         self.box.append(self.pin_buttons_box)
 
         self.back_button = Gtk.Button.new_from_icon_name('go-previous-symbolic')

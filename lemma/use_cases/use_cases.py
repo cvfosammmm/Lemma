@@ -259,6 +259,14 @@ class UseCases():
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('pinned_documents_changed')
 
+    def unpin_document(document_id):
+        workspace = WorkspaceRepo.get_workspace()
+
+        workspace.unpin_document(document_id)
+
+        WorkspaceRepo.update(workspace)
+        MessageBus.add_message('pinned_documents_changed')
+
     @timer.timer
     def undo():
         document = WorkspaceRepo.get_workspace().get_active_document()
