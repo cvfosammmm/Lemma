@@ -45,6 +45,16 @@ class PinnedDocuments():
 
         self.view.context_menu.unpin_button.connect('clicked', self.on_unpin_button_click)
 
+        wrapbox = self.view.context_menu.icon_wrapbox
+        for icon_name in ['user-home-symbolic', 'folder-visiting-symbolic', 'inbox-symbolic', 'outbox-symbolic', 'audio-x-generic-symbolic', 'folder-download-symbolic', 'folder-pictures-symbolic', 'folder-saved-search-symbolic', 'folder-videos-symbolic', 'file-cabinet-symbolic', 'bear-symbolic', 'cat-sleeping-symbolic', 'cat-symbolic', 'cow-symbolic', 'dog-symbolic', 'horse-symbolic', 'leaf-symbolic', 'penguin-alt-symbolic', 'penguin-symbolic', 'seal-symbolic', 'sprout-symbolic', 'bug-symbolic', 'archive-symbolic', 'image-alt-symbolic', 'dice3-symbolic', 'theater-symbolic', 'cafe-symbolic', 'soup-symbolic', 'ink-tool-symbolic', 'online-symbolic', 'address-book-symbolic', 'meeting-symbolic', 'briefcase-symbolic', 'map-marker-symbolic', 'museum-symbolic', 'non-emergency-healthcare-symbolic', 'restaurant-symbolic', 'school-symbolic', 'pin-symbolic', 'view-grid-symbolic', 'mail-attachment-symbolic', 'emoji-symbols-symbolic', 'emoji-body-symbolic', 'applications-graphics-symbolic', 'applications-multimedia-symbolic', 'applications-games-symbolic', 'accessories-dictionary-symbolic', 'x-office-calendar-symbolic', 'star-large-symbolic', 'heart-filled-symbolic', 'editor-symbolic', 'library-symbolic', 'rescue-symbolic', 'globe-symbolic', 'bank-symbolic', 'shopping-cart-symbolic', 'body-symbolic', 'steps-symbolic', 'tag-outline-symbolic', 'text-x-generic-symbolic', 'lightbulb-symbolic', 'puzzle-piece-symbolic', 'people-symbolic', 'license-symbolic']:
+            button = Gtk.Button.new_from_icon_name(icon_name)
+            button.set_can_focus(False)
+            button.add_css_class('flat')
+            button.connect('clicked', self.on_icon_button_click, icon_name)
+            wrapbox.append(button)
+
+        self.view.context_menu.no_icon_button.connect('clicked', self.on_icon_button_click, None)
+
         MessageBus.subscribe(self, 'pinned_documents_changed')
 
         self.update()
@@ -68,6 +78,7 @@ class PinnedDocuments():
                 document_title = 'Pinned Document ' + str(i + 1)
 
             button = self.pin_buttons[i]
+            button.set_icon_name(workspace.get_pin_icon_name(pinned_documents[i]))
             button.set_tooltip_text('Open ' + document_title + ' (Alt+' + str(i + 1) + ')')
 
         for i, button in enumerate(self.pin_buttons):
@@ -81,7 +92,7 @@ class PinnedDocuments():
         pinned_documents = workspace.get_pinned_document_ids()
 
         if len(pinned_documents) >= button_pos:
-            document_id = pinned_documents[button_pos - 1]
+            document_id = pinned_documents[button_pos]
             UseCases.set_active_document(document_id, update_history=True)
 
     def on_unpin_button_click(self, button):
@@ -91,6 +102,13 @@ class PinnedDocuments():
 
         self.view.context_menu.popover.popdown()
         UseCases.unpin_document(document_id)
+
+    def on_icon_button_click(self, button, icon_name):
+        workspace = WorkspaceRepo.get_workspace()
+        pinned_documents = workspace.get_pinned_document_ids()
+        document_id = pinned_documents[self.current_popover_index]
+
+        UseCases.set_pinned_document_icon(document_id, icon_name)
 
     def on_secondary_button_press(self, controller, n_press, x, y):
         if n_press % 3 != 1: return

@@ -40,6 +40,8 @@ class WorkspaceRepo():
                         WorkspaceRepo.workspace.history = workspace_data['history']
                     if 'pinned_document_ids' in workspace_data:
                         WorkspaceRepo.workspace.pinned_document_ids = workspace_data['pinned_document_ids']
+                    if 'pin_icon_names' in workspace_data:
+                        WorkspaceRepo.workspace.pin_icon_names = workspace_data['pin_icon_names']
                     if 'active_document_id' in workspace_data:
                         document = DocumentRepo.get_by_id(workspace_data['active_document_id'])
                         WorkspaceRepo.workspace.set_active_document(document, update_history=False)
@@ -57,7 +59,8 @@ class WorkspaceRepo():
             history_list = [document_id for document_id in workspace.history if document_id != None]
             data = {'active_document_id': active_document_id,
                     'history': history_list,
-                    'pinned_document_ids': workspace.pinned_document_ids}
+                    'pinned_document_ids': workspace.pinned_document_ids,
+                    'pin_icon_names': workspace.pin_icon_names}
             filehandle.write(pickle.dumps(data))
 
 

@@ -197,7 +197,9 @@ class Actions(object):
         UseCases.pin_active_document()
 
     def unpin_document(self, action=None, parameter=''):
-        UseCases.unpin_active_document()
+        active_document_id = WorkspaceRepo.get_workspace().get_active_document_id()
+
+        UseCases.unpin_document(active_document_id)
 
     def export_markdown(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()

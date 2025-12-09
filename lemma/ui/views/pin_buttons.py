@@ -17,7 +17,9 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
+gi.require_version('Adw', '1')
 from gi.repository import Gtk
+from gi.repository import Adw
 
 from lemma.ui.views.context_menu import ContextMenu
 
@@ -57,7 +59,30 @@ class PinButtonsContextMenu(ContextMenu):
         button_box.append(self.unpin_button_label)
 
         self.unpin_button = Gtk.Button()
+        self.unpin_button.set_can_focus(False)
         self.unpin_button.set_child(button_box)
         self.box.append(self.unpin_button)
+
+        self.box.append(Gtk.Separator())
+
+        self.icon_chooser_headline = Gtk.Label.new('Set Icon')
+        self.icon_chooser_headline.add_css_class('icon-chooser-header')
+        self.icon_chooser_headline.set_xalign(0)
+        self.box.append(self.icon_chooser_headline)
+
+        self.icon_wrapbox = Adw.WrapBox()
+        self.icon_wrapbox.set_line_spacing(0)
+        self.icon_wrapbox.set_natural_line_length(272)
+
+        self.box.append(self.icon_wrapbox)
+
+        self.no_icon_label = Gtk.Label.new('No Icon')
+        button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        button_box.append(self.no_icon_label)
+
+        self.no_icon_button = Gtk.Button()
+        self.no_icon_button.set_can_focus(False)
+        self.no_icon_button.set_child(button_box)
+        self.box.append(self.no_icon_button)
 
 

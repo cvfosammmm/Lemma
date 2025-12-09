@@ -26,6 +26,7 @@ class Workspace():
         self.active_document = None
         self.history = []
         self.pinned_document_ids = []
+        self.pin_icon_names = dict()
 
         self.in_draft_mode = False
 
@@ -66,6 +67,15 @@ class Workspace():
         if document_id not in self.pinned_document_ids: return
 
         self.pinned_document_ids.remove(document_id)
+        if document_id in self.pin_icon_names:
+            del(self.pin_icon_names[document_id])
+
+    def set_pinned_document_icon(self, document_id, icon_name):
+        if icon_name == None:
+            if document_id in self.pin_icon_names:
+                del(self.pin_icon_names[document_id])
+        else:
+            self.pin_icon_names[document_id] = icon_name
 
     def get_active_document(self):
         return self.active_document
@@ -101,5 +111,12 @@ class Workspace():
 
     def get_pinned_document_ids(self):
         return self.pinned_document_ids
+
+    def get_pin_icon_name(self, document_id):
+        if document_id in self.pin_icon_names:
+            return self.pin_icon_names[document_id]
+        else:
+            i = self.pinned_document_ids.index(document_id)
+            return str(i + 1) + '-symbolic'
 
 

@@ -797,4 +797,11 @@ label.explainer-bottom {
     font-weight: bold;
 }
 
+/* pinning buttons */
+
+label.icon-chooser-header {
+    font-weight: bold;
+    padding: 10px;
+}
+
 
