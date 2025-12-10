@@ -276,34 +276,34 @@ stack.tools-sidebar scrollbar slider {
 @keyframes popover-animation {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-11px);
     }
     to {
         opacity: 1;
-        transform: translateY(3px);
+        transform: translateY(2px);
     }
 }
 overlay.popover-bottom {
     animation-name: popover-animation;
     animation-duration: 0.2s;
     animation-timing-function: ease;
-    transform: translateY(3px);
+    transform: translateY(2px);
 }
 @keyframes popover-animation-top {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
     to {
         opacity: 1;
-        transform: translateY(-3px);
+        transform: translateY(-5px);
     }
 }
 overlay.popover-top {
     animation-name: popover-animation-top;
     animation-duration: 0.2s;
     animation-timing-function: ease;
-    transform: translateY(-3px);
+    transform: translateY(-5px);
 }
 overlay.popover .content {
     background: @popover_bg_color;
@@ -314,7 +314,7 @@ overlay.popover .content {
 }
 overlay.popover .arrow {
     min-width: 20px;
-    min-height: 16px;
+    min-height: 18px;
 }
 overlay.popover-bottom .arrow {
     color: @popover_arrow_color;
@@ -325,7 +325,7 @@ overlay.popover-top .arrow {
     background: -gtk-recolor(url('./icons/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
 }
 overlay.popover-bottom .content {
-    margin-top: 8px;
+    margin-top: 10px;
 }
 overlay.popover-top .content {
     margin-bottom: 8px;
