@@ -318,11 +318,11 @@ overlay.popover .arrow {
 }
 overlay.popover-bottom .arrow {
     color: @popover_arrow_color;
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
+    background: -gtk-recolor(url('./icons/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
 }
 overlay.popover-top .arrow {
     color: @popover_arrow_color;
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
+    background: -gtk-recolor(url('./icons/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
 }
 overlay.popover-bottom .content {
     margin-top: 8px;
@@ -413,14 +413,14 @@ popover.context-menu separator {
 /* welcome page */
 
 box.welcome {
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-bg-symbolic.svg'), success @welcome_fg, error @welcome_bg) left top;
+    background: -gtk-recolor(url('./icons/welcome-bg-symbolic.svg'), success @welcome_fg, error @welcome_bg) left top;
 }
 box.welcome > box {
     margin-top: 52px;
     margin-bottom: 152px;
 }
 box.welcome box.icon {
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg'), success @welcome_logo, error @welcome_logo_node) no-repeat left top;
+    background: -gtk-recolor(url('./icons/welcome-fg-symbolic.svg'), success @welcome_logo, error @welcome_logo_node) no-repeat left top;
     min-width: 240px;
     min-height: 240px;
     margin-bottom: 32px;

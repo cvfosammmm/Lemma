@@ -77,6 +77,13 @@ class Workspace():
         else:
             self.pin_icon_names[document_id] = icon_name
 
+    def move_document_pin(self, document_id, new_position):
+        if document_id not in self.pinned_document_ids: return
+        if new_position >= len(self.pinned_document_ids): return
+
+        self.pinned_document_ids.remove(document_id)
+        self.pinned_document_ids.insert(new_position, document_id)
+
     def get_active_document(self):
         return self.active_document
 

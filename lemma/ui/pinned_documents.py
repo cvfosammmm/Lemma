@@ -50,6 +50,8 @@ class PinnedDocuments():
             button.add_controller(secondary_click_controller)
 
         self.popover.unpin_button.connect('clicked', self.on_unpin_button_click)
+        self.popover.move_left_button.connect('clicked', self.move_pin_left)
+        self.popover.move_right_button.connect('clicked', self.move_pin_right)
 
         wrapbox = self.popover.icon_wrapbox
         for icon_name in ['user-home-symbolic', 'folder-visiting-symbolic', 'inbox-symbolic', 'outbox-symbolic', 'audio-x-generic-symbolic', 'folder-download-symbolic', 'folder-pictures-symbolic', 'folder-saved-search-symbolic', 'folder-videos-symbolic', 'file-cabinet-symbolic', 'bear-symbolic', 'cat-sleeping-symbolic', 'cat-symbolic', 'cow-symbolic', 'dog-symbolic', 'horse-symbolic', 'leaf-symbolic', 'penguin-alt-symbolic', 'penguin-symbolic', 'seal-symbolic', 'sprout-symbolic', 'bug-symbolic', 'archive-symbolic', 'image-alt-symbolic', 'dice3-symbolic', 'theater-symbolic', 'cafe-symbolic', 'soup-symbolic', 'ink-tool-symbolic', 'online-symbolic', 'address-book-symbolic', 'meeting-symbolic', 'briefcase-symbolic', 'map-marker-symbolic', 'museum-symbolic', 'non-emergency-healthcare-symbolic', 'restaurant-symbolic', 'school-symbolic', 'pin-symbolic', 'view-grid-symbolic', 'mail-attachment-symbolic', 'emoji-symbols-symbolic', 'emoji-body-symbolic', 'applications-graphics-symbolic', 'applications-multimedia-symbolic', 'applications-games-symbolic', 'accessories-dictionary-symbolic', 'x-office-calendar-symbolic', 'star-large-symbolic', 'heart-filled-symbolic', 'editor-symbolic', 'library-symbolic', 'rescue-symbolic', 'globe-symbolic', 'bank-symbolic', 'shopping-cart-symbolic', 'body-symbolic', 'steps-symbolic', 'tag-outline-symbolic', 'text-x-generic-symbolic', 'lightbulb-symbolic', 'puzzle-piece-symbolic', 'people-symbolic', 'license-symbolic']:
@@ -125,6 +127,24 @@ class PinnedDocuments():
 
         UseCases.hide_popovers()
         UseCases.unpin_document(document_id)
+
+    def move_pin_left(self, button=None, parameter=''):
+        workspace = WorkspaceRepo.get_workspace()
+        pinned_documents = workspace.get_pinned_document_ids()
+
+        new_index = max(0, self.current_popover_index - 1)
+
+        UseCases.move_document_pin(pinned_documents[self.current_popover_index], new_index)
+        self.popup_at_index(new_index)
+
+    def move_pin_right(self, button=None, parameter=''):
+        workspace = WorkspaceRepo.get_workspace()
+        pinned_documents = workspace.get_pinned_document_ids()
+
+        new_index = min(len(pinned_documents) - 1, self.current_popover_index + 1)
+
+        UseCases.move_document_pin(pinned_documents[self.current_popover_index], new_index)
+        self.popup_at_index(new_index)
 
     def on_icon_button_click(self, button, icon_name):
         workspace = WorkspaceRepo.get_workspace()

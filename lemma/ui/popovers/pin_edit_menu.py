@@ -33,7 +33,39 @@ class Popover(PopoverView):
 
         self.set_width(260)
 
+        self.position_headline = Gtk.Label.new('Change Position')
+        self.position_headline.add_css_class('icon-chooser-header')
+        self.position_headline.set_xalign(0)
+        self.add_widget(self.position_headline)
+
+        button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 8)
+        button_box.append(Gtk.Image.new_from_icon_name('move-left-symbolic'))
+        button_box.append(Gtk.Label.new('Move Left'))
+        self.move_left_button = Gtk.Button()
+        self.move_left_button.set_hexpand(True)
+        self.move_left_button.set_can_focus(False)
+        self.move_left_button.set_child(button_box)
+        self.move_left_button.add_css_class('action')
+
+        button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 8)
+        label = Gtk.Label.new('Move Right')
+        label.set_hexpand(True)
+        label.set_xalign(1)
+        button_box.append(label)
+        button_box.append(Gtk.Image.new_from_icon_name('move-right-symbolic'))
+        self.move_right_button = Gtk.Button()
+        self.move_right_button.set_hexpand(True)
+        self.move_right_button.set_can_focus(False)
+        self.move_right_button.set_child(button_box)
+        self.move_right_button.add_css_class('action')
+
+        position_button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        position_button_box.append(self.move_left_button)
+        position_button_box.append(self.move_right_button)
+        self.add_widget(position_button_box)
+
         self.icon_chooser_headline = Gtk.Label.new('Set Icon')
+        self.icon_chooser_headline.set_margin_top(18)
         self.icon_chooser_headline.add_css_class('icon-chooser-header')
         self.icon_chooser_headline.set_xalign(0)
         self.add_widget(self.icon_chooser_headline)
@@ -47,7 +79,6 @@ class Popover(PopoverView):
         self.no_icon_label = Gtk.Label.new('No Icon')
         button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         button_box.append(self.no_icon_label)
-
         self.no_icon_button = Gtk.Button()
         self.no_icon_button.set_can_focus(False)
         self.no_icon_button.set_child(button_box)

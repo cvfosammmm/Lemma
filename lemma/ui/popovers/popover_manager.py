@@ -70,13 +70,12 @@ class PopoverManager():
     def update(self):
         name = ApplicationState.get_value('active_popover')
 
-        if self.current_popover_name == name: return
-        if self.current_popover_name != None: self.popdown()
-        if name == None: return
-
-        x, y = ApplicationState.get_value('popover_position')
-        orientation = ApplicationState.get_value('popover_orientation')
-        self.popup(name, x, y, orientation)
+        if name == None:
+            self.popdown()
+        else:
+            x, y = ApplicationState.get_value('popover_position')
+            orientation = ApplicationState.get_value('popover_orientation')
+            self.popup(name, x, y, orientation)
 
     def popup(self, name, x, y, orientation):
         popover = self.popovers[name]
@@ -123,7 +122,9 @@ class PopoverManager():
             popover.arrow_box.set_halign(Gtk.Align.START)
             popover.add_overlay(popover.arrow_box)
 
-        self.remember_focus_widget()
+        if name != self.current_popover_name:
+            self.remember_focus_widget()
+
         self.current_popover_name = name
         self.popoverlay.add_overlay(popover)
         self.inbetween.set_can_target(True)

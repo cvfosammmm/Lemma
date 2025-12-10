@@ -265,6 +265,14 @@ class UseCases():
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('pinned_documents_changed')
 
+    def move_document_pin(document_id, new_position):
+        workspace = WorkspaceRepo.get_workspace()
+
+        workspace.move_document_pin(document_id, new_position)
+
+        WorkspaceRepo.update(workspace)
+        MessageBus.add_message('pinned_documents_changed')
+
     @timer.timer
     def undo():
         document = WorkspaceRepo.get_workspace().get_active_document()
