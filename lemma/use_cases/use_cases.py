@@ -241,11 +241,10 @@ class UseCases():
         MessageBus.add_message('mode_set')
         MessageBus.add_message('history_changed')
 
-    def pin_active_document():
+    def pin_document(document_id):
         workspace = WorkspaceRepo.get_workspace()
-        active_document_id = workspace.get_active_document_id()
 
-        workspace.pin_document(active_document_id)
+        workspace.pin_document(document_id)
 
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('pinned_documents_changed')

@@ -68,7 +68,7 @@ class Application(Adw.Application):
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
         self.toolbars = toolbars.ToolBars(self.main_window)
-        self.pinned_documents = pinned_documents.PinnedDocuments(self.main_window)
+        self.pinned_documents = pinned_documents.PinnedDocuments(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
         self.document_list = document_list.DocumentList(self.main_window)
         self.backlinks = backlinks.Backlinks(self.main_window)
