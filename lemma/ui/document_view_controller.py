@@ -420,7 +420,7 @@ class DocumentViewController():
             case ('escape', _):
                 if document.widget_selected():
                     UseCases.remove_selection()
-            case ('return', _):
+            case ('return', _) | ('kp_enter', _):
                 if not document.has_selection() and document.cursor.get_insert_node().is_inside_link():
                     UseCases.open_link(document.cursor.get_insert_node().link)
                 elif not document.has_selection():
