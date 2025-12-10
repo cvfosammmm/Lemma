@@ -186,6 +186,8 @@ class PinnedDocuments():
         pinned_documents = workspace.get_pinned_document_ids()
         document_title = DocumentRepo.get_stub_by_id(pinned_documents[index])['title']
         self.current_popover_index = index
+        self.popover.move_left_button.set_sensitive(self.current_popover_index != None and self.current_popover_index >= 1)
+        self.popover.move_right_button.set_sensitive(self.current_popover_index != None and self.current_popover_index < len(pinned_documents) - 1)
 
         self.popover.unpin_button_label.set_label('Unpin "' + document_title + '"')
         UseCases.show_popover('pin_edit_menu', x, y, 'bottom')
