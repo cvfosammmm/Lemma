@@ -34,7 +34,7 @@ import lemma.ui.scrollbars as scrollbars
 import lemma.ui.document_context_menu as context_menu_document
 import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
-import lemma.ui.pinned_documents as pinned_documents
+import lemma.ui.document_pinning as document_pinning
 import lemma.ui.document_list as document_list
 import lemma.ui.document_draft as document_draft
 import lemma.ui.backlinks as backlinks
@@ -68,7 +68,7 @@ class Application(Adw.Application):
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
         self.toolbars = toolbars.ToolBars(self.main_window)
-        self.pinned_documents = pinned_documents.PinnedDocuments(self.main_window, self)
+        self.document_pinning = document_pinning.DocumentPinning(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
         self.document_list = document_list.DocumentList(self.main_window)
         self.backlinks = backlinks.Backlinks(self.main_window)
@@ -102,7 +102,7 @@ class Application(Adw.Application):
         self.scrollbars.animate()
         self.cursor_state.animate()
         self.toolbars.animate()
-        self.pinned_documents.animate()
+        self.document_pinning.animate()
         self.sidebar_emojis.animate()
         self.sidebar_math.animate()
 

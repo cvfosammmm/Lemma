@@ -17,11 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
 from gi.repository import Gtk
-from gi.repository import Adw
-
-from lemma.ui.views.context_menu import ContextMenu
 
 
 class PinButtons(Gtk.Box):

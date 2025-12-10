@@ -26,7 +26,7 @@ from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
 
-class PinnedDocuments():
+class DocumentPinning():
 
     def __init__(self, main_window, application):
         self.main_window = main_window

@@ -73,6 +73,9 @@ class PopoverManager():
         if name == None:
             self.popdown()
         else:
+            if name != self.current_popover_name:
+                self.popdown()
+
             x, y = ApplicationState.get_value('popover_position')
             orientation = ApplicationState.get_value('popover_orientation')
             self.popup(name, x, y, orientation)
