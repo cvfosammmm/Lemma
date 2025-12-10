@@ -44,6 +44,12 @@ class PopoverManager():
         controller_click.connect('pressed', self.on_click_inbetween)
         controller_click.set_button(1)
         self.inbetween.add_controller(controller_click)
+
+        controller_click = Gtk.GestureClick()
+        controller_click.connect('pressed', self.on_click_inbetween)
+        controller_click.set_button(3)
+        self.inbetween.add_controller(controller_click)
+
         self.inbetween.set_can_target(False)
 
         self.popovers = dict()
