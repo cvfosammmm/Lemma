@@ -23,6 +23,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
+from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
 
 
@@ -65,6 +66,7 @@ class DocumentPinning():
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'pinned_documents_changed')
+        MessageBus.subscribe(self, 'app_state_changed')
 
         self.update_pin_buttons()
         self.update_document_menu()
@@ -77,6 +79,9 @@ class DocumentPinning():
 
         if 'pinned_documents_changed' in messages or 'history_changed' in messages:
             self.update_document_menu()
+
+        if 'app_state_changed' in messages:
+            self.update_toggle_states()
 
     @timer.timer
     def update_pin_buttons(self):
@@ -103,6 +108,20 @@ class DocumentPinning():
                 button.set_visible(False)
 
         self.view.set_visible(len(pinned_documents) > 0)
+
+    @timer.timer
+    def update_toggle_states(self):
+        name = ApplicationState.get_value('active_popover')
+        if name == 'pin_edit_menu':
+            index = self.current_popover_index
+        else:
+            index = None
+
+        for i, button in enumerate(self.pin_buttons):
+            if i == index:
+                button.add_css_class('checked')
+            else:
+                button.remove_css_class('checked')
 
     @timer.timer
     def update_document_menu(self):

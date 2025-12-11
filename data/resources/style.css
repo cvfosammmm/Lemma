@@ -48,6 +48,10 @@ overlay.history scrollbar {
     opacity: 0;
 }
 
+windowhandle.right button.checked {
+    background-color: @view_active_color;
+}
+
 /* link-overlay */
 
 label.link-overlay {
