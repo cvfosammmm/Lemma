@@ -69,15 +69,16 @@ class DocumentTitle():
 
     @timer.timer
     def animate(self):
-        messages = MessageBus.get_messages(self)
         document = WorkspaceRepo.get_workspace().get_active_document()
-        scrolling_position_x, scrolling_position_y = document.get_current_scrolling_offsets()
+        if document != None:
+            scrolling_position_x, scrolling_position_y = document.get_current_scrolling_offsets()
+            if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
+                self.scrolling_position_x = scrolling_position_x
+                self.scrolling_position_y = scrolling_position_y
+                self.update()
 
-        if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
-            self.scrolling_position_x = scrolling_position_x
-            self.scrolling_position_y = scrolling_position_y
-            self.update()
-        elif 'history_changed' in messages or 'document_changed' in messages:
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'document_changed' in messages:
             self.update()
 
     @timer.timer
