@@ -101,7 +101,8 @@ class Actions(object):
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'new_document')
         MessageBus.subscribe(self, 'document_removed')
-        MessageBus.subscribe(self, 'document_changed')
+        MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
+        MessageBus.subscribe(self, 'document_title_changed')
         MessageBus.subscribe(self, 'mode_set')
 
         self.update()
@@ -114,7 +115,7 @@ class Actions(object):
     @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_changed' in messages or 'mode_set' in messages:
+        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_or_cursor_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
             self.update()
 
     def on_clipboard_changed(self, clipboard):

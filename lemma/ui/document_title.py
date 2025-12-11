@@ -19,16 +19,13 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-import time, math, datetime
-from urllib.parse import urlparse
+import time, datetime
 
+from lemma.services.message_bus import MessageBus
 from lemma.services.settings import Settings
-from lemma.ui.document_view_controller import DocumentViewController
-from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
-from lemma.services.layout_info import LayoutInfo
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
@@ -43,6 +40,8 @@ class DocumentTitle():
 
         self.is_active = False
         self.document = None
+        self.scrolling_position_x = None
+        self.scrolling_position_y = None
 
         self.view.title_entry.connect('activate', self.on_entry_activate)
         self.view.submit_button.connect('clicked', self.on_submit_button_clicked)
@@ -63,8 +62,26 @@ class DocumentTitle():
 
         self.view.title_entry.connect('changed', self.on_title_entry_changed)
 
+        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'document_changed')
+
+        self.update()
+
     @timer.timer
     def animate(self):
+        messages = MessageBus.get_messages(self)
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        scrolling_position_x, scrolling_position_y = document.get_current_scrolling_offsets()
+
+        if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
+            self.scrolling_position_x = scrolling_position_x
+            self.scrolling_position_y = scrolling_position_y
+            self.update()
+        elif 'history_changed' in messages or 'document_changed' in messages:
+            self.update()
+
+    @timer.timer
+    def update(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         new_active_document = document != self.document
