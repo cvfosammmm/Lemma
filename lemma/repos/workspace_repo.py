@@ -37,14 +37,21 @@ class WorkspaceRepo():
                 except EOFError: pass
                 else:
                     if 'history' in workspace_data:
-                        WorkspaceRepo.workspace.history = workspace_data['history']
+                        for document_id in workspace_data['history']:
+                            if document_id in DocumentRepo.document_stubs_by_id:
+                                WorkspaceRepo.workspace.history.append(document_id)
                     if 'pinned_document_ids' in workspace_data:
-                        WorkspaceRepo.workspace.pinned_document_ids = workspace_data['pinned_document_ids']
+                        for document_id in workspace_data['pinned_document_ids']:
+                            if document_id in DocumentRepo.document_stubs_by_id:
+                                WorkspaceRepo.workspace.pinned_document_ids.append(document_id)
                     if 'pin_icon_names' in workspace_data:
-                        WorkspaceRepo.workspace.pin_icon_names = workspace_data['pin_icon_names']
+                        for document_id, icon_name in workspace_data['pin_icon_names'].items():
+                            if document_id in DocumentRepo.document_stubs_by_id:
+                                WorkspaceRepo.workspace.pin_icon_names[document_id] = icon_name
                     if 'active_document_id' in workspace_data:
-                        document = DocumentRepo.get_by_id(workspace_data['active_document_id'])
-                        WorkspaceRepo.workspace.set_active_document(document, update_history=False)
+                        if workspace_data['active_document_id'] in DocumentRepo.document_stubs_by_id:
+                            document = DocumentRepo.get_by_id(workspace_data['active_document_id'])
+                            WorkspaceRepo.workspace.set_active_document(document, update_history=False)
 
     def get_workspace():
         return WorkspaceRepo.workspace

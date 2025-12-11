@@ -334,7 +334,6 @@ class Document():
     def get_width(self):
         return self.ast.paragraphs[0].layout['width']
 
-    @timer.timer
     def get_current_scrolling_offsets(self):
         return self.clipping.get_current_offsets()
 
