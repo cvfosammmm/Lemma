@@ -529,12 +529,12 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.has_selection():
-            first_node = document.cursor.get_first_node().paragraph_start()
-            next_to_last = document.cursor.get_last_node().prev_in_parent()
+            first_node = document.get_first_selection_bound().paragraph_start()
+            next_to_last = document.get_last_selection_bound().prev_in_parent()
             if next_to_last != None:
                 last_node = next_to_last.paragraph_end()
             else:
-                last_node = document.cursor.get_last_node().paragraph_end()
+                last_node = document.get_last_selection_bound().paragraph_end()
 
             paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
             paragraphs = []
@@ -564,7 +564,7 @@ class UseCases():
         if do_selection:
             document.add_command('move_cursor_to_node', document.cursor.prev_no_descent(insert), selection)
         elif document.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_first_node())
+            document.add_command('move_cursor_to_node', document.get_first_selection_bound())
         else:
             document.add_command('move_cursor_to_node', document.cursor.prev(insert))
         document.add_command('update_implicit_x_position')
@@ -592,7 +592,7 @@ class UseCases():
         if do_selection:
             document.add_command('move_cursor_to_node', insert_new, selection)
         elif document.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_first_node())
+            document.add_command('move_cursor_to_node', document.get_first_selection_bound())
         else:
             document.add_command('move_cursor_to_node', insert_new)
         document.add_command('update_implicit_x_position')
@@ -613,7 +613,7 @@ class UseCases():
         if do_selection:
             document.add_command('move_cursor_to_node', document.cursor.next_no_descent(insert), selection)
         elif document.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+            document.add_command('move_cursor_to_node', document.get_last_selection_bound())
         else:
             document.add_command('move_cursor_to_node', document.cursor.next(insert))
         document.add_command('update_implicit_x_position')
@@ -640,7 +640,7 @@ class UseCases():
         if do_selection:
             document.add_command('move_cursor_to_node', insert_new, selection)
         elif document.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+            document.add_command('move_cursor_to_node', document.get_last_selection_bound())
         else:
             document.add_command('move_cursor_to_node', insert_new)
         document.add_command('update_implicit_x_position')
@@ -885,7 +885,7 @@ class UseCases():
     def remove_selection():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document.has_selection():
-            document.add_command('move_cursor_to_node', document.cursor.get_last_node())
+            document.add_command('move_cursor_to_node', document.get_last_selection_bound())
             document.add_command('update_implicit_x_position')
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -951,7 +951,7 @@ class UseCases():
         selection = document.cursor.get_selection_node()
 
         word_start, word_end = document.cursor.get_insert_node().word_bounds()
-        if word_start != None and word_end != None and (document.cursor.get_first_node().get_position() > word_start.get_position() or document.cursor.get_last_node().get_position() < word_end.get_position()):
+        if word_start != None and word_end != None and (document.get_first_selection_bound().get_position() > word_start.get_position() or document.get_last_selection_bound().get_position() < word_end.get_position()):
             new_insert = word_end
             new_selection = word_start
 
@@ -971,7 +971,7 @@ class UseCases():
 
                 if ancestor.type == 'root':
                     paragraph_start, paragraph_end = document.cursor.get_insert_node().paragraph_bounds()
-                    if paragraph_start != None and paragraph_end != None and (document.cursor.get_first_node().get_position() > paragraph_start.get_position() or document.cursor.get_last_node().get_position() < paragraph_end.get_position()):
+                    if paragraph_start != None and paragraph_end != None and (document.get_first_selection_bound().get_position() > paragraph_start.get_position() or document.get_last_selection_bound().get_position() < paragraph_end.get_position()):
                         new_insert = paragraph_end
                         new_selection = paragraph_start
                     else:

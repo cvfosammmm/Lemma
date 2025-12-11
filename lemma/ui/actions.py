@@ -365,7 +365,7 @@ class Actions(object):
         style = parameter.get_string()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        current_style = document.cursor.get_first_node().paragraph().style
+        current_style = document.get_first_selection_bound().paragraph().style
         if current_style == style:
             style = 'p'
 

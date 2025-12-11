@@ -620,32 +620,6 @@ class Cursor():
         else:
             return (self.node_selection, self.node_insert)
 
-    @timer.timer
-    def get_first_node(self):
-        if self.get_insert_position() < self.get_selection_position():
-            return self.node_insert
-        else:
-            return self.node_selection
-
-    @timer.timer
-    def get_last_node(self):
-        if self.get_insert_position() < self.get_selection_position():
-            return self.node_selection
-        else:
-            return self.node_insert
-
-    def get_first_cursor_pos(self):
-        if self.get_insert_position() < self.get_selection_position():
-            return self.get_insert_position()
-        else:
-            return self.get_selection_position()
-
-    def get_last_cursor_pos(self):
-        if self.get_insert_position() < self.get_selection_position():
-            return self.get_selection_position()
-        else:
-            return self.get_insert_position()
-
     def has_selection(self):
         return self.get_insert_node() != self.get_selection_node()
 

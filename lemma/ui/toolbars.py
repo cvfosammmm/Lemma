@@ -102,7 +102,7 @@ class ToolBars():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
-        current_node = document.cursor.get_first_node()
+        current_node = document.get_first_selection_bound()
         paragraph_style_at_cursor = current_node.paragraph().style
 
         labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List'), 'cl': _('Checklist')}

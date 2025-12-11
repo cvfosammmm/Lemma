@@ -59,7 +59,8 @@ class DocumentViewPresenter():
         content_offset_x = LayoutInfo.get_document_padding_left()
         content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') - self.model.scrolling_position_y
         title_offset_y = LayoutInfo.get_document_padding_top() - self.model.scrolling_position_y
-        self.first_selection_node, self.last_selection_node = document.cursor.get_first_and_last_node()
+        self.first_selection_node = document.get_first_selection_bound()
+        self.last_selection_node = document.get_last_selection_bound()
         first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
         last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
 

@@ -81,8 +81,8 @@ class Document():
         for paragraph in paragraphs:
             nodes += paragraph.nodes
 
-        selection_from = self.cursor.get_first_node()
-        selection_to = self.cursor.get_last_node()
+        selection_from = self.get_first_selection_bound()
+        selection_to = self.get_last_selection_bound()
         commands = [['delete', selection_from, selection_to], ['insert', selection_to, nodes], ['move_cursor_to_node', selection_to]]
 
         if len(nodes) == 0: return
@@ -170,8 +170,8 @@ class Document():
                     self.add_command('update_implicit_x_position')
 
     def delete_selection(self):
-        node_from = self.cursor.get_first_node()
-        node_to = self.cursor.get_last_node()
+        node_from = self.get_first_selection_bound()
+        node_to = self.get_last_selection_bound()
         self.add_command('delete', node_from, node_to)
         self.add_command('update_implicit_x_position')
 
@@ -296,15 +296,25 @@ class Document():
             self.query_cache['insert_parent_is_root'] = (self.cursor.get_insert_node().parent.type == 'root')
         return self.query_cache['insert_parent_is_root']
 
+    def has_selection(self):
+        if 'has_selection' not in self.query_cache:
+            self.query_cache['has_selection'] = self.cursor.has_selection()
+        return self.query_cache['has_selection']
+
     def get_selected_nodes(self):
         if 'selected_nodes' not in self.query_cache:
             self.query_cache['selected_nodes'] = self.ast.get_subtree(*self.cursor.get_state())
         return self.query_cache['selected_nodes']
 
-    def has_selection(self):
-        if 'has_selection' not in self.query_cache:
-            self.query_cache['has_selection'] = self.cursor.has_selection()
-        return self.query_cache['has_selection']
+    def get_first_selection_bound(self):
+        if 'selection_bounds' not in self.query_cache:
+            self.query_cache['selection_bounds'] = self.cursor.get_first_and_last_node()
+        return self.query_cache['selection_bounds'][0]
+
+    def get_last_selection_bound(self):
+        if 'selection_bounds' not in self.query_cache:
+            self.query_cache['selection_bounds'] = self.cursor.get_first_and_last_node()
+        return self.query_cache['selection_bounds'][1]
 
     def can_undo(self):
         if 'can_undo' not in self.query_cache:

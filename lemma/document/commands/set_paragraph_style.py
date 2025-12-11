@@ -31,12 +31,12 @@ class Command():
             paragraphs = [self.node.paragraph()]
         else:
             if document.has_selection():
-                first_node = document.cursor.get_first_node().paragraph_start()
-                next_to_last = document.cursor.get_last_node().prev_in_parent()
+                first_node = document.get_first_selection_bound().paragraph_start()
+                next_to_last = document.get_last_selection_bound().prev_in_parent()
                 if next_to_last != None:
                     last_node = next_to_last.paragraph_end()
                 else:
-                    last_node = document.cursor.get_last_node().paragraph_end()
+                    last_node = document.get_last_selection_bound().paragraph_end()
 
                 paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
                 paragraphs = []
