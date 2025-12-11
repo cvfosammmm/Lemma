@@ -26,7 +26,6 @@ class PinButtons(Gtk.Box):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
-        self.add_css_class('linked')
         self.add_css_class('buttonbox')
 
         self.pin_buttons = []
