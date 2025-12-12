@@ -43,7 +43,7 @@ class DocumentRepo():
         for direntry in os.scandir(Paths.get_notes_folder()):
             if direntry.is_file() and direntry.name.isdigit():
                 document_id = int(direntry.name)
-                if document_id in stubs and direntry.stat().st_mtime == stubs[document_id]['last_modified']:
+                if document_id in stubs and direntry.stat().st_mtime >= stubs[document_id]['last_modified']:
                     DocumentRepo.document_stubs_by_id[document_id] = stubs[document_id]
                     del(stubs[document_id])
                 else:
