@@ -28,6 +28,7 @@ from lemma.services.character_db import CharacterDB
 from lemma.document.links_scanner import LinksScanner
 from lemma.document.clipping import Clipping
 from lemma.document.xml_scanner import XMLScanner
+from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.layout_info import LayoutInfo
 from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
@@ -66,6 +67,22 @@ class Document():
     def select_node(self, node):
         next_node = node.next_in_parent()
         self.add_command('move_cursor_to_node', node, next_node)
+
+    def replace_section(self, node_from, node_to, xml):
+        parser = xml_parser.XMLParser()
+
+        nodes = []
+        paragraphs = parser.parse(xml)
+        for paragraph in paragraphs:
+            nodes += paragraph.nodes
+
+        commands = []
+        commands.append(['delete', node_from, node_to])
+        commands.append(['insert', node_to, nodes])
+        commands.append(['move_cursor_to_node', node_to])
+        self.add_composite_command(*commands)
+
+        self.add_command('update_implicit_x_position')
 
     def insert_xml(self, xml):
         parser = xml_parser.XMLParser()
@@ -106,7 +123,7 @@ class Document():
                 continue
 
             commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
-            commands.append(['set_indentation_level', paragraph.indentation_level, paragraph.nodes[0]])
+            commands.append(['set_indentation_level', paragraph.nodes[0].paragraph(), paragraph.indentation_level])
 
         root_copy = selection_to.parent.copy()
         for node in nodes:
@@ -136,6 +153,35 @@ class Document():
                 break
 
         self.add_command('update_implicit_x_position')
+
+    def insert_nodes(self, nodes):
+        insert = self.cursor.get_insert_node()
+        self.add_command('insert', insert, nodes)
+
+    def backspace(self):
+        insert = self.cursor.get_insert_node()
+
+        if self.has_selection():
+            self.delete_selected_nodes()
+        elif not insert.is_first_in_parent():
+            self.add_command('delete', self.cursor.prev_no_descent(insert), insert)
+            self.add_command('update_implicit_x_position')
+        elif len(insert.parent) == 1:
+            self.add_composite_command(['move_cursor_to_node', self.cursor.prev_no_descent(insert), insert])
+            self.add_command('update_implicit_x_position')
+
+    def delete(self):
+        insert = self.cursor.get_insert_node()
+
+        if self.has_selection():
+            self.delete_selected_nodes()
+        elif not insert.is_last_in_parent():
+            insert_new = self.cursor.next_no_descent(insert)
+            self.add_command('delete', insert, insert_new)
+            self.add_command('update_implicit_x_position')
+        elif len(insert.parent) == 1:
+            self.add_composite_command(['move_cursor_to_node', self.cursor.next_no_descent(insert), insert])
+            self.add_command('update_implicit_x_position')
 
     def replace_max_string_before_cursor(self):
         last_node = self.cursor.get_insert_node().prev_in_parent()
@@ -169,10 +215,104 @@ class Document():
                     self.add_composite_command(*commands)
                     self.add_command('update_implicit_x_position')
 
-    def delete_selection(self):
+    def delete_selected_nodes(self):
         node_from = self.get_first_selection_bound()
         node_to = self.get_last_selection_bound()
         self.add_command('delete', node_from, node_to)
+        self.add_command('update_implicit_x_position')
+
+    def resize_widget(self, node, new_width):
+        if node.type != 'widget': return
+
+        self.add_command('resize_widget', new_width)
+
+    def add_tag(self, tagname):
+        self.add_command('add_tag', tagname)
+
+    def remove_tag(self, tagname):
+        self.add_command('remove_tag', tagname)
+
+    def set_link(self, bounds, target):
+        pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
+        char_nodes = [node for node in self.ast.get_subtree(pos_1, pos_2) if node.type == 'char']
+
+        self.add_command('set_link', char_nodes, target)
+
+    def set_paragraph_style(self, style):
+        self.add_command('set_paragraph_style', style)
+
+    def set_indentation_level(self, paragraph, level):
+        self.add_command('set_indentation_level', paragraph, level)
+
+    def select_all(self):
+        self.add_composite_command(['move_cursor_to_node', self.ast[0], self.ast[-1]])
+        self.add_command('update_implicit_x_position')
+
+    def remove_selection(self):
+        self.add_command('move_cursor_to_node', self.get_last_selection_bound())
+        self.add_command('update_implicit_x_position')
+        self.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+
+    def set_insert_and_selection_node(self, new_insert, new_selection_bound=None):
+        self.add_command('move_cursor_to_node', new_insert, new_selection_bound)
+
+    def move_cursor_to_xy(self, x, y, do_selection):
+        self.add_command('move_cursor_to_xy', x, y, do_selection)
+
+    def move_cursor_to_parent_node(self):
+        insert = self.cursor.get_insert_node()
+        new_insert = None
+        for ancestor in reversed(insert.ancestors()):
+            if NodeTypeDB.can_hold_cursor(ancestor):
+                new_insert = ancestor
+                break
+            if (ancestor.type == 'mathlist' or ancestor.type == 'root') and insert != ancestor[0]:
+                new_insert = ancestor[0]
+                break
+
+        if new_insert != None:
+            self.add_command('move_cursor_to_node', new_insert, new_insert)
+            self.add_command('update_implicit_x_position')
+
+        self.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+
+    def extend_selection(self):
+        insert = self.cursor.get_insert_node()
+        selection = self.cursor.get_selection_node()
+
+        word_start, word_end = self.cursor.get_insert_node().word_bounds()
+        if word_start != None and word_end != None and (self.get_first_selection_bound().get_position() > word_start.get_position() or self.get_last_selection_bound().get_position() < word_end.get_position()):
+            new_insert = word_end
+            new_selection = word_start
+
+        else:
+            for ancestor in reversed(insert.ancestors()):
+                if NodeTypeDB.can_hold_cursor(ancestor):
+                    new_insert = ancestor
+                    new_selection = self.cursor.get_selection_node()
+                    break
+
+                if ancestor.type == 'mathlist':
+                    if insert == ancestor[0] and selection == ancestor[-1]: continue
+                    if insert == ancestor[-1] and selection == ancestor[0]: continue
+                    new_insert = ancestor[-1]
+                    new_selection = ancestor[0]
+                    break
+
+                if ancestor.type == 'root':
+                    paragraph_start, paragraph_end = self.cursor.get_insert_node().paragraph_bounds()
+                    if paragraph_start != None and paragraph_end != None and (self.get_first_selection_bound().get_position() > paragraph_start.get_position() or self.get_last_selection_bound().get_position() < paragraph_end.get_position()):
+                        new_insert = paragraph_end
+                        new_selection = paragraph_start
+                    else:
+                        new_insert = self.ast[0]
+                        new_selection = self.ast[-1]
+
+        self.add_command('move_cursor_to_node', new_insert, new_selection)
+        self.add_command('update_implicit_x_position')
+        self.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+
+    def update_implicit_x_position(self):
         self.add_command('update_implicit_x_position')
 
     def scroll_insert_on_screen(self, window_height, animation_type=None):

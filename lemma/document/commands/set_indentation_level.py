@@ -18,23 +18,22 @@
 
 class Command():
 
-    def __init__(self, new_level, node):
+    def __init__(self, paragraph, new_level):
+        self.paragraph = paragraph
         self.new_level = new_level
-        self.node = node
         self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):
-        paragraph = self.node.paragraph()
-
+        self.state['node'] = paragraph['nodes'][0]
         self.state['previous_level'] = paragraph.indentation_level
-        paragraph.indentation_level = self.new_level
-        paragraph.invalidate()
+        self.paragraph.indentation_level = self.new_level
+        self.paragraph.invalidate()
 
         document.update_last_modified()
 
     def undo(self, document):
-        paragraph = self.node.paragraph()
+        paragraph = self.state['node'].paragraph()
 
         paragraph.indentation_level = self.state['previous_level']
         paragraph.invalidate()
