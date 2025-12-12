@@ -162,6 +162,9 @@ paned.document-view separator.wide {
     color: @headerbar_fg_1;
     box-shadow: none;
 }
+.nav-toolbar button {
+    color: @sidebar_fg_3;
+}
 
 /* document list */
 
