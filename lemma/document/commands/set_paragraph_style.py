@@ -18,44 +18,23 @@
 
 class Command():
 
-    def __init__(self, paragraph_style, node=None):
-        self.paragraph_style = paragraph_style
-        self.node = node
+    def __init__(self, paragraph, style):
+        self.paragraph = paragraph
+        self.style = style
         self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):
-        self.state['paragraphs_and_previous_style'] = []
+        self.state['previous_style'] = self.paragraph.style
 
-        if self.node != None:
-            paragraphs = [self.node.paragraph()]
-        else:
-            if document.has_selection():
-                first_node = document.get_first_selection_bound().paragraph_start()
-                next_to_last = document.get_last_selection_bound().prev_in_parent()
-                if next_to_last != None:
-                    last_node = next_to_last.paragraph_end()
-                else:
-                    last_node = document.get_last_selection_bound().paragraph_end()
-
-                paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
-                paragraphs = []
-                for paragraph_no in paragraph_nos:
-                    paragraphs.append(document.ast.paragraphs[paragraph_no])
-            else:
-                paragraphs = [document.cursor.get_insert_node().paragraph()]
-
-        for paragraph in paragraphs:
-            self.state['paragraphs_and_previous_style'].append([paragraph, paragraph.style])
-            paragraph.style = self.paragraph_style
-            paragraph.invalidate()
+        self.paragraph.style = self.style
+        self.paragraph.invalidate()
 
         document.update_last_modified()
 
     def undo(self, document):
-        for paragraph, style in self.state['paragraphs_and_previous_style']:
-            paragraph.style = style
-            paragraph.invalidate()
+        self.paragraph.style = self.state['previous_style']
+        self.paragraph.invalidate()
 
         document.update_last_modified()
 

@@ -100,10 +100,11 @@ class Document():
 
         selection_from = self.get_first_selection_bound()
         selection_to = self.get_last_selection_bound()
-        commands = [['delete', selection_from, selection_to], ['insert', selection_to, nodes], ['move_cursor_to_node', selection_to]]
 
-        if len(nodes) == 0: return
+        self.delete_selected_nodes()
+        self.insert_nodes(nodes)
 
+        commands = []
         node_before = selection_from.prev_in_parent()
         node_after = selection_to
         for paragraph in paragraphs:
@@ -122,15 +123,8 @@ class Document():
             if len(paragraphs) == 1 and len(paragraphs[-1].nodes) == 1 and paragraphs[-1].nodes[-1].type == 'eol':
                 continue
 
-            commands.append(['set_paragraph_style', paragraph.style, paragraph.nodes[0]])
+            commands.append(['set_paragraph_style', paragraph.nodes[0].paragraph(), paragraph.style])
             commands.append(['set_indentation_level', paragraph.nodes[0].paragraph(), paragraph.indentation_level])
-
-        root_copy = selection_to.parent.copy()
-        for node in nodes:
-            root_copy.append(node)
-        if not root_copy.validate():
-            return
-
         self.add_composite_command(*commands)
 
         commands = []
@@ -197,7 +191,6 @@ class Document():
 
     def delete_nodes(self, node_from, node_to):
         self.add_command('delete', node_from, node_to)
-        self.add_command('update_implicit_x_position')
 
     def resize_widget(self, node, new_width):
         if node.type != 'widget': return
@@ -216,15 +209,11 @@ class Document():
 
         self.add_command('set_link', char_nodes, target)
 
-    def set_paragraph_style(self, style):
-        self.add_command('set_paragraph_style', style)
+    def set_paragraph_style(self, paragraph, style):
+        self.add_command('set_paragraph_style', paragraph, style)
 
     def set_indentation_level(self, paragraph, level):
         self.add_command('set_indentation_level', paragraph, level)
-
-    def select_all(self):
-        self.add_composite_command(['move_cursor_to_node', self.ast[0], self.ast[-1]])
-        self.add_command('update_implicit_x_position')
 
     def remove_selection(self):
         self.add_command('move_cursor_to_node', self.get_last_selection_bound())

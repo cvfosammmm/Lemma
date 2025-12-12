@@ -355,13 +355,15 @@ class UseCases():
 
         if paragraph_style in ['ul', 'ol', 'cl']:
             document.insert_xml('\n')
-            document.set_paragraph_style(paragraph_style)
+            paragraph = self.cursor.get_insert_node().paragraph()
+            document.set_paragraph_style(paragraph, paragraph_style)
             if indentation_level != 0:
                 document.set_indentation_level(document.cursor.get_insert_node().paragraph(), indentation_level)
         elif paragraph_style.startswith('h'):
             document.insert_xml('\n')
             if len(document.cursor.get_insert_node().paragraph().nodes) == 1:
-                document.set_paragraph_style('p')
+                paragraph = self.cursor.get_insert_node().paragraph()
+                document.set_paragraph_style(paragraph, 'p')
         else:
             document.insert_xml('\n')
 
@@ -383,10 +385,9 @@ class UseCases():
             document.delete_selected_nodes()
         elif not insert.is_first_in_parent():
             document.delete_nodes(document.cursor.prev_no_descent(insert), insert)
-            document.update_implicit_x_position()
         elif len(insert.parent) == 1:
             document.set_insert_and_selection_node(document.cursor.prev_no_descent(insert), insert)
-            document.update_implicit_x_position()
+        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -404,10 +405,9 @@ class UseCases():
         elif not insert.is_last_in_parent():
             insert_new = document.cursor.next_no_descent(insert)
             document.delete_nodes(insert, insert_new)
-            document.update_implicit_x_position()
         elif len(insert.parent) == 1:
             document.set_insert_and_selection_node(document.cursor.next_no_descent(insert), insert)
-            document.update_implicit_x_position()
+        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -419,6 +419,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.delete_selected_nodes()
+        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -465,7 +466,23 @@ class UseCases():
     def set_paragraph_style(style):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.set_paragraph_style(style)
+        if document.has_selection():
+            first_node = document.get_first_selection_bound().paragraph_start()
+            next_to_last = document.get_last_selection_bound().prev_in_parent()
+            if next_to_last != None:
+                last_node = next_to_last.paragraph_end()
+            else:
+                last_node = document.get_last_selection_bound().paragraph_end()
+
+            paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
+            paragraphs = []
+            for paragraph_no in paragraph_nos:
+                paragraphs.append(document.ast.paragraphs[paragraph_no])
+        else:
+            paragraphs = [document.cursor.get_insert_node().paragraph()]
+
+        for paragraph in paragraphs:
+            document.set_paragraph_style(paragraph, style)
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -862,7 +879,8 @@ class UseCases():
     def select_all():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.select_all()
+        document.set_insert_and_selection_node(document.ast[0], document.ast[-1])
+        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
