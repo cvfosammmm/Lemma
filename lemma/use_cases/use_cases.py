@@ -377,7 +377,16 @@ class UseCases():
     def backspace():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.backspace()
+        insert = document.cursor.get_insert_node()
+
+        if document.has_selection():
+            document.delete_selected_nodes()
+        elif not insert.is_first_in_parent():
+            document.delete_nodes(document.cursor.prev_no_descent(insert), insert)
+            document.update_implicit_x_position()
+        elif len(insert.parent) == 1:
+            document.set_insert_and_selection_node(document.cursor.prev_no_descent(insert), insert)
+            document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -388,7 +397,17 @@ class UseCases():
     def delete():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.delete()
+        insert = document.cursor.get_insert_node()
+
+        if document.has_selection():
+            document.delete_selected_nodes()
+        elif not insert.is_last_in_parent():
+            insert_new = document.cursor.next_no_descent(insert)
+            document.delete_nodes(insert, insert_new)
+            document.update_implicit_x_position()
+        elif len(insert.parent) == 1:
+            document.set_insert_and_selection_node(document.cursor.next_no_descent(insert), insert)
+            document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')

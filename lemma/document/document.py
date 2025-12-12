@@ -158,31 +158,6 @@ class Document():
         insert = self.cursor.get_insert_node()
         self.add_command('insert', insert, nodes)
 
-    def backspace(self):
-        insert = self.cursor.get_insert_node()
-
-        if self.has_selection():
-            self.delete_selected_nodes()
-        elif not insert.is_first_in_parent():
-            self.add_command('delete', self.cursor.prev_no_descent(insert), insert)
-            self.add_command('update_implicit_x_position')
-        elif len(insert.parent) == 1:
-            self.add_composite_command(['move_cursor_to_node', self.cursor.prev_no_descent(insert), insert])
-            self.add_command('update_implicit_x_position')
-
-    def delete(self):
-        insert = self.cursor.get_insert_node()
-
-        if self.has_selection():
-            self.delete_selected_nodes()
-        elif not insert.is_last_in_parent():
-            insert_new = self.cursor.next_no_descent(insert)
-            self.add_command('delete', insert, insert_new)
-            self.add_command('update_implicit_x_position')
-        elif len(insert.parent) == 1:
-            self.add_composite_command(['move_cursor_to_node', self.cursor.next_no_descent(insert), insert])
-            self.add_command('update_implicit_x_position')
-
     def replace_max_string_before_cursor(self):
         last_node = self.cursor.get_insert_node().prev_in_parent()
         first_node = last_node
@@ -218,6 +193,9 @@ class Document():
     def delete_selected_nodes(self):
         node_from = self.get_first_selection_bound()
         node_to = self.get_last_selection_bound()
+        self.delete_nodes(node_from, node_to)
+
+    def delete_nodes(self, node_from, node_to):
         self.add_command('delete', node_from, node_to)
         self.add_command('update_implicit_x_position')
 
