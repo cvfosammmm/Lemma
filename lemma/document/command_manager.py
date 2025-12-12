@@ -38,10 +38,6 @@ class CommandManager():
         command = eval(name + '.Command')(*parameters)
         self.run_command(command)
 
-    def add_composite_command(self, *command_specs):
-        commands = [eval(command_spec[0] + '.Command')(*command_spec[1:]) for command_spec in command_specs]
-        self.run_command(composite.Command(commands))
-
     def run_command(self, command):
         command.run(self.document)
         self.document.update()

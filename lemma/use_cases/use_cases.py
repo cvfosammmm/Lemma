@@ -327,7 +327,17 @@ class UseCases():
         MessageBus.add_message('keyboard_input')
 
     def replace_section(document, node_from, node_to, xml):
-        document.replace_section(node_from, node_to, xml)
+        parser = xml_parser.XMLParser()
+
+        nodes = []
+        paragraphs = parser.parse(xml)
+        for paragraph in paragraphs:
+            nodes += paragraph.nodes
+
+        document.delete_nodes(node_from, node_to)
+        document.insert_nodes(node_to, nodes)
+        document.set_insert_and_selection_node(node_to)
+        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -355,14 +365,14 @@ class UseCases():
 
         if paragraph_style in ['ul', 'ol', 'cl']:
             document.insert_xml('\n')
-            paragraph = self.cursor.get_insert_node().paragraph()
+            paragraph = document.cursor.get_insert_node().paragraph()
             document.set_paragraph_style(paragraph, paragraph_style)
             if indentation_level != 0:
                 document.set_indentation_level(document.cursor.get_insert_node().paragraph(), indentation_level)
         elif paragraph_style.startswith('h'):
             document.insert_xml('\n')
             if len(document.cursor.get_insert_node().paragraph().nodes) == 1:
-                paragraph = self.cursor.get_insert_node().paragraph()
+                paragraph = document.cursor.get_insert_node().paragraph()
                 document.set_paragraph_style(paragraph, 'p')
         else:
             document.insert_xml('\n')
@@ -891,7 +901,9 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.has_selection():
-            document.remove_selection()
+            document.set_insert_and_selection_node(document.get_last_selection_bound())
+            document.update_implicit_x_position()
+            document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -928,7 +940,21 @@ class UseCases():
     def move_cursor_to_parent():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.move_cursor_to_parent_node()
+        insert = document.cursor.get_insert_node()
+        new_insert = None
+        for ancestor in reversed(insert.ancestors()):
+            if NodeTypeDB.can_hold_cursor(ancestor):
+                new_insert = ancestor
+                break
+            if (ancestor.type == 'mathlist' or ancestor.type == 'root') and insert != ancestor[0]:
+                new_insert = ancestor[0]
+                break
+
+        if new_insert != None:
+            document.set_insert_and_selection_node(new_insert, new_insert)
+            document.update_implicit_x_position()
+
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -938,7 +964,40 @@ class UseCases():
     def extend_selection():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.extend_selection()
+        insert = document.cursor.get_insert_node()
+        selection = document.cursor.get_selection_node()
+
+        word_start, word_end = document.cursor.get_insert_node().word_bounds()
+        if word_start != None and word_end != None and (document.get_first_selection_bound().get_position() > word_start.get_position() or document.get_last_selection_bound().get_position() < word_end.get_position()):
+            new_insert = word_end
+            new_selection = word_start
+
+        else:
+            for ancestor in reversed(insert.ancestors()):
+                if NodeTypeDB.can_hold_cursor(ancestor):
+                    new_insert = ancestor
+                    new_selection = document.cursor.get_selection_node()
+                    break
+
+                if ancestor.type == 'mathlist':
+                    if insert == ancestor[0] and selection == ancestor[-1]: continue
+                    if insert == ancestor[-1] and selection == ancestor[0]: continue
+                    new_insert = ancestor[-1]
+                    new_selection = ancestor[0]
+                    break
+
+                if ancestor.type == 'root':
+                    paragraph_start, paragraph_end = document.cursor.get_insert_node().paragraph_bounds()
+                    if paragraph_start != None and paragraph_end != None and (document.get_first_selection_bound().get_position() > paragraph_start.get_position() or document.get_last_selection_bound().get_position() < paragraph_end.get_position()):
+                        new_insert = paragraph_end
+                        new_selection = paragraph_start
+                    else:
+                        new_insert = document.ast[0]
+                        new_selection = document.ast[-1]
+
+        document.set_insert_and_selection_node(new_insert, new_selection)
+        document.update_implicit_x_position()
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')

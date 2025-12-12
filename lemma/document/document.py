@@ -61,29 +61,6 @@ class Document():
     def add_command(self, name, *parameters):
         self.command_manager.add_command(name, *parameters)
 
-    def add_composite_command(self, *command_specs):
-        self.command_manager.add_composite_command(*command_specs)
-
-    def select_node(self, node):
-        next_node = node.next_in_parent()
-        self.add_command('move_cursor_to_node', node, next_node)
-
-    def replace_section(self, node_from, node_to, xml):
-        parser = xml_parser.XMLParser()
-
-        nodes = []
-        paragraphs = parser.parse(xml)
-        for paragraph in paragraphs:
-            nodes += paragraph.nodes
-
-        commands = []
-        commands.append(['delete', node_from, node_to])
-        commands.append(['insert', node_to, nodes])
-        commands.append(['move_cursor_to_node', node_to])
-        self.add_composite_command(*commands)
-
-        self.add_command('update_implicit_x_position')
-
     def insert_xml(self, xml):
         parser = xml_parser.XMLParser()
 
@@ -102,9 +79,8 @@ class Document():
         selection_to = self.get_last_selection_bound()
 
         self.delete_selected_nodes()
-        self.insert_nodes(nodes)
+        self.insert_nodes(self.cursor.get_insert_node(), nodes)
 
-        commands = []
         node_before = selection_from.prev_in_parent()
         node_after = selection_to
         for paragraph in paragraphs:
@@ -123,17 +99,13 @@ class Document():
             if len(paragraphs) == 1 and len(paragraphs[-1].nodes) == 1 and paragraphs[-1].nodes[-1].type == 'eol':
                 continue
 
-            commands.append(['set_paragraph_style', paragraph.nodes[0].paragraph(), paragraph.style])
-            commands.append(['set_indentation_level', paragraph.nodes[0].paragraph(), paragraph.indentation_level])
-        self.add_composite_command(*commands)
+            self.add_command('set_paragraph_style', paragraph.nodes[0].paragraph(), paragraph.style)
+            self.add_command('set_indentation_level', paragraph.nodes[0].paragraph(), paragraph.indentation_level)
 
-        commands = []
         for paragraph in paragraphs:
             if paragraph.style == 'cl':
                 paragraph_in_ast = paragraph.nodes[0].paragraph()
-                commands.append(['set_paragraph_state', paragraph_in_ast, paragraph.state])
-        if commands != []:
-            self.add_composite_command(*commands)
+                self.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
 
         placeholder_found = False
         for node_list in (node.flatten() for node in nodes):
@@ -148,9 +120,8 @@ class Document():
 
         self.add_command('update_implicit_x_position')
 
-    def insert_nodes(self, nodes):
-        insert = self.cursor.get_insert_node()
-        self.add_command('insert', insert, nodes)
+    def insert_nodes(self, cursor, nodes):
+        self.add_command('insert', cursor, nodes)
 
     def replace_max_string_before_cursor(self):
         last_node = self.cursor.get_insert_node().prev_in_parent()
@@ -177,11 +148,9 @@ class Document():
                     for paragraph in paragraphs:
                         nodes += paragraph.nodes
 
-                    commands = [['delete', last_node.prev_in_parent(length), last_node]]
-                    commands.append(['insert', last_node, nodes])
-                    commands.append(['move_cursor_to_node', last_node.next_in_parent()])
-
-                    self.add_composite_command(*commands)
+                    self.add_command('delete', last_node.prev_in_parent(length), last_node)
+                    self.add_command('insert', last_node, nodes)
+                    self.add_command('move_cursor_to_node', last_node.next_in_parent())
                     self.add_command('update_implicit_x_position')
 
     def delete_selected_nodes(self):
@@ -215,10 +184,10 @@ class Document():
     def set_indentation_level(self, paragraph, level):
         self.add_command('set_indentation_level', paragraph, level)
 
-    def remove_selection(self):
-        self.add_command('move_cursor_to_node', self.get_last_selection_bound())
-        self.add_command('update_implicit_x_position')
-        self.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+    def toggle_checkbox_at_cursor(self):
+        paragraph = self.cursor.get_insert_node().paragraph()
+        new_state = 'checked' if paragraph.state == None else None
+        self.command_manager.add_command('set_paragraph_state', paragraph, new_state)
 
     def set_insert_and_selection_node(self, new_insert, new_selection_bound=None):
         self.add_command('move_cursor_to_node', new_insert, new_selection_bound)
@@ -226,58 +195,9 @@ class Document():
     def move_cursor_to_xy(self, x, y, do_selection):
         self.add_command('move_cursor_to_xy', x, y, do_selection)
 
-    def move_cursor_to_parent_node(self):
-        insert = self.cursor.get_insert_node()
-        new_insert = None
-        for ancestor in reversed(insert.ancestors()):
-            if NodeTypeDB.can_hold_cursor(ancestor):
-                new_insert = ancestor
-                break
-            if (ancestor.type == 'mathlist' or ancestor.type == 'root') and insert != ancestor[0]:
-                new_insert = ancestor[0]
-                break
-
-        if new_insert != None:
-            self.add_command('move_cursor_to_node', new_insert, new_insert)
-            self.add_command('update_implicit_x_position')
-
-        self.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
-
-    def extend_selection(self):
-        insert = self.cursor.get_insert_node()
-        selection = self.cursor.get_selection_node()
-
-        word_start, word_end = self.cursor.get_insert_node().word_bounds()
-        if word_start != None and word_end != None and (self.get_first_selection_bound().get_position() > word_start.get_position() or self.get_last_selection_bound().get_position() < word_end.get_position()):
-            new_insert = word_end
-            new_selection = word_start
-
-        else:
-            for ancestor in reversed(insert.ancestors()):
-                if NodeTypeDB.can_hold_cursor(ancestor):
-                    new_insert = ancestor
-                    new_selection = self.cursor.get_selection_node()
-                    break
-
-                if ancestor.type == 'mathlist':
-                    if insert == ancestor[0] and selection == ancestor[-1]: continue
-                    if insert == ancestor[-1] and selection == ancestor[0]: continue
-                    new_insert = ancestor[-1]
-                    new_selection = ancestor[0]
-                    break
-
-                if ancestor.type == 'root':
-                    paragraph_start, paragraph_end = self.cursor.get_insert_node().paragraph_bounds()
-                    if paragraph_start != None and paragraph_end != None and (self.get_first_selection_bound().get_position() > paragraph_start.get_position() or self.get_last_selection_bound().get_position() < paragraph_end.get_position()):
-                        new_insert = paragraph_end
-                        new_selection = paragraph_start
-                    else:
-                        new_insert = self.ast[0]
-                        new_selection = self.ast[-1]
-
-        self.add_command('move_cursor_to_node', new_insert, new_selection)
-        self.add_command('update_implicit_x_position')
-        self.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+    def select_node(self, node):
+        next_node = node.next_in_parent()
+        self.add_command('move_cursor_to_node', node, next_node)
 
     def update_implicit_x_position(self):
         self.add_command('update_implicit_x_position')
@@ -313,11 +233,6 @@ class Document():
 
     def scroll_to_xy(self, x, y, animation_type=None):
         self.command_manager.add_command('scroll_to_xy', x, y, animation_type)
-
-    def toggle_checkbox_at_cursor(self):
-        paragraph = self.cursor.get_insert_node().paragraph()
-        new_state = 'checked' if paragraph.state == None else None
-        self.command_manager.add_command('set_paragraph_state', paragraph, new_state)
 
     def undo(self):
         self.command_manager.undo()
