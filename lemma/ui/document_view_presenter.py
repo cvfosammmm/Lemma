@@ -140,7 +140,7 @@ class DocumentViewPresenter():
             fg_color = self.color_cache['bullets_string']
 
             surface, left, top = TextRenderer.get_glyph('-', 'book', fg_color, self.hidpi_factor)
-            bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_bullet_padding() - surface.get_width()
+            bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_ul_bullet_padding() - surface.get_width()
             bullet_measurement = TextShaper.measure_single('-')
             ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
             ctx.paint()
@@ -153,7 +153,7 @@ class DocumentViewPresenter():
             fg_color = self.color_cache['bullets_string']
 
             text = '.' + ''.join(reversed(str(list_item_numbers[paragraph.indentation_level])))
-            bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_bullet_padding()
+            bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_ol_bullet_padding()
             for char, dim in zip(text, TextShaper.measure(text, 'book')):
                 surface, left, top = TextRenderer.get_glyph(char, 'book', fg_color, self.hidpi_factor)
                 bullet_indent -= dim[0]

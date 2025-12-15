@@ -44,19 +44,22 @@ class LayoutInfo():
 
     def get_indentation(paragraph_style, indentation_level=0):
         if paragraph_style == 'ul':
-            indentation = 48
+            indentation = 36
         elif paragraph_style == 'ol':
-            indentation = 48
+            indentation = 36
         elif paragraph_style == 'cl':
-            indentation = 48
+            indentation = 36
         else:
             indentation = 0
-        indentation += indentation_level * 48
+        indentation += indentation_level * 36
 
         return indentation
 
-    def get_bullet_padding():
+    def get_ul_bullet_padding():
         return 16
+
+    def get_ol_bullet_padding():
+        return 12
 
     def get_min_image_size():
         return 16
