@@ -437,10 +437,8 @@ class DocumentViewController():
                     UseCases.scroll_insert_on_screen(animation_type='default')
             case ('backspace', _):
                 UseCases.backspace()
-                UseCases.scroll_insert_on_screen(animation_type='default')
             case ('delete', _):
                 UseCases.delete()
-                UseCases.scroll_insert_on_screen(animation_type='default')
 
             case _: return False
         return True

@@ -47,14 +47,11 @@ class CommandManager():
 
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
-        self.run_command(command)
-
-    def run_command(self, command):
         command.run(self.document)
         self.document.update()
 
         if self.current_undoable_action == None:
-            if not command.is_undo_checkpoint and self.last_undoable_action >= 0 and len(self.undoable_actions[self.last_undoable_action]) > 0:
+            if self.last_undoable_action >= 0 and len(self.undoable_actions[self.last_undoable_action]) > 0:
                 self.undoable_actions[self.last_undoable_action].append(command)
             else:
                 self.start_undoable_action()

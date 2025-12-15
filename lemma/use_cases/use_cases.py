@@ -400,6 +400,7 @@ class UseCases():
         elif len(insert.parent) == 1:
             document.set_insert_and_selection_node(document.cursor.prev_no_descent(insert), insert)
         document.update_implicit_x_position()
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -409,9 +410,9 @@ class UseCases():
     @timer.timer
     def delete():
         document = WorkspaceRepo.get_workspace().get_active_document()
-
         insert = document.cursor.get_insert_node()
 
+        document.start_undoable_action()
         if document.has_selection():
             document.delete_selected_nodes()
         elif not insert.is_last_in_parent():
@@ -420,6 +421,8 @@ class UseCases():
         elif len(insert.parent) == 1:
             document.set_insert_and_selection_node(document.cursor.next_no_descent(insert), insert)
         document.update_implicit_x_position()
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -430,8 +433,11 @@ class UseCases():
     def delete_selection():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
+        document.start_undoable_action()
         document.delete_selected_nodes()
         document.update_implicit_x_position()
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -784,6 +790,8 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
+        document.start_undoable_action()
+
         layout = insert.layout
         while layout['parent']['parent'] != None:
             layout = layout['parent']
@@ -797,6 +805,8 @@ class UseCases():
 
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')

@@ -64,6 +64,18 @@ class Document():
     def end_undoable_action(self):
         self.command_manager.end_undoable_action()
 
+    def undoable_action(original_function):
+        def new_function(*args, **kwargs):
+            start_new_action = args[0].command_manager.current_undoable_action == None
+            if start_new_action:
+                args[0].command_manager.start_undoable_action()
+            original_function(*args, **kwargs)
+            if start_new_action:
+                args[0].command_manager.end_undoable_action()
+
+        return new_function
+
+    @undoable_action
     def insert_xml(self, xml):
         parser = xml_parser.XMLParser()
 
@@ -80,12 +92,12 @@ class Document():
 
         selection_from = self.get_first_selection_bound()
         selection_to = self.get_last_selection_bound()
+        node_before = selection_from.prev_in_parent()
+        node_after = selection_to
 
         self.delete_selected_nodes()
         self.insert_nodes(self.cursor.get_insert_node(), nodes)
 
-        node_before = selection_from.prev_in_parent()
-        node_after = selection_to
         for paragraph in paragraphs:
             if paragraph == paragraphs[0]:
                 if node_before != None and node_before.type != 'eol':
@@ -123,9 +135,11 @@ class Document():
 
         self.command_manager.add_command('update_implicit_x_position')
 
+    @undoable_action
     def insert_nodes(self, cursor, nodes):
         self.command_manager.add_command('insert', cursor, nodes)
 
+    @undoable_action
     def replace_max_string_before_cursor(self):
         last_node = self.cursor.get_insert_node().prev_in_parent()
         first_node = last_node
@@ -156,37 +170,46 @@ class Document():
                     self.command_manager.add_command('move_cursor_to_node', last_node.next_in_parent())
                     self.command_manager.add_command('update_implicit_x_position')
 
+    @undoable_action
     def delete_selected_nodes(self):
         node_from = self.get_first_selection_bound()
         node_to = self.get_last_selection_bound()
         self.delete_nodes(node_from, node_to)
 
+    @undoable_action
     def delete_nodes(self, node_from, node_to):
         self.command_manager.add_command('delete', node_from, node_to)
 
+    @undoable_action
     def resize_widget(self, node, new_width):
         if node.type != 'widget': return
 
         self.command_manager.add_command('resize_widget', new_width)
 
+    @undoable_action
     def add_tag(self, tagname):
         self.command_manager.add_command('add_tag', tagname)
 
+    @undoable_action
     def remove_tag(self, tagname):
         self.command_manager.add_command('remove_tag', tagname)
 
+    @undoable_action
     def set_link(self, bounds, target):
         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
         char_nodes = [node for node in self.ast.get_subtree(pos_1, pos_2) if node.type == 'char']
 
         self.command_manager.add_command('set_link', char_nodes, target)
 
+    @undoable_action
     def set_paragraph_style(self, paragraph, style):
         self.command_manager.add_command('set_paragraph_style', paragraph, style)
 
+    @undoable_action
     def set_indentation_level(self, paragraph, level):
         self.command_manager.add_command('set_indentation_level', paragraph, level)
 
+    @undoable_action
     def toggle_checkbox_at_cursor(self):
         paragraph = self.cursor.get_insert_node().paragraph()
         new_state = 'checked' if paragraph.state == None else None

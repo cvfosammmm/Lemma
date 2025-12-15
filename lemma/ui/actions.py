@@ -233,7 +233,6 @@ class Actions(object):
 
         self.copy()
         UseCases.delete_selection()
-        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def copy(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
