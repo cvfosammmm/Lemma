@@ -210,10 +210,8 @@ class Document():
         self.command_manager.add_command('set_indentation_level', paragraph, level)
 
     @undoable_action
-    def toggle_checkbox_at_cursor(self):
-        paragraph = self.cursor.get_insert_node().paragraph()
-        new_state = 'checked' if paragraph.state == None else None
-        self.command_manager.add_command('set_paragraph_state', paragraph, new_state)
+    def set_paragraph_state(self, paragraph, state):
+        self.command_manager.add_command('set_paragraph_state', paragraph, state)
 
     def set_insert_and_selection_node(self, new_insert, new_selection_bound=None):
         self.command_manager.add_command('move_cursor_to_node', new_insert, new_selection_bound)

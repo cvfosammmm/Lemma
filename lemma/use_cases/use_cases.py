@@ -521,7 +521,9 @@ class UseCases():
     def toggle_checkbox_at_cursor():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.toggle_checkbox_at_cursor()
+        paragraph = document.cursor.get_insert_node().paragraph()
+        new_state = 'checked' if paragraph.state == None else None
+        document.set_paragraph_state(paragraph, new_state)
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
