@@ -64,9 +64,6 @@ class Document():
     def end_undoable_action(self):
         self.command_manager.end_undoable_action()
 
-    def add_command(self, name, *parameters):
-        self.command_manager.add_command(name, *parameters)
-
     def insert_xml(self, xml):
         parser = xml_parser.XMLParser()
 
@@ -105,13 +102,13 @@ class Document():
             if len(paragraphs) == 1 and len(paragraphs[-1].nodes) == 1 and paragraphs[-1].nodes[-1].type == 'eol':
                 continue
 
-            self.add_command('set_paragraph_style', paragraph.nodes[0].paragraph(), paragraph.style)
-            self.add_command('set_indentation_level', paragraph.nodes[0].paragraph(), paragraph.indentation_level)
+            self.command_manager.add_command('set_paragraph_style', paragraph.nodes[0].paragraph(), paragraph.style)
+            self.command_manager.add_command('set_indentation_level', paragraph.nodes[0].paragraph(), paragraph.indentation_level)
 
         for paragraph in paragraphs:
             if paragraph.style == 'cl':
                 paragraph_in_ast = paragraph.nodes[0].paragraph()
-                self.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
+                self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
 
         placeholder_found = False
         for node_list in (node.flatten() for node in nodes):
@@ -124,10 +121,10 @@ class Document():
             if placeholder_found:
                 break
 
-        self.add_command('update_implicit_x_position')
+        self.command_manager.add_command('update_implicit_x_position')
 
     def insert_nodes(self, cursor, nodes):
-        self.add_command('insert', cursor, nodes)
+        self.command_manager.add_command('insert', cursor, nodes)
 
     def replace_max_string_before_cursor(self):
         last_node = self.cursor.get_insert_node().prev_in_parent()
@@ -154,10 +151,10 @@ class Document():
                     for paragraph in paragraphs:
                         nodes += paragraph.nodes
 
-                    self.add_command('delete', last_node.prev_in_parent(length), last_node)
-                    self.add_command('insert', last_node, nodes)
-                    self.add_command('move_cursor_to_node', last_node.next_in_parent())
-                    self.add_command('update_implicit_x_position')
+                    self.command_manager.add_command('delete', last_node.prev_in_parent(length), last_node)
+                    self.command_manager.add_command('insert', last_node, nodes)
+                    self.command_manager.add_command('move_cursor_to_node', last_node.next_in_parent())
+                    self.command_manager.add_command('update_implicit_x_position')
 
     def delete_selected_nodes(self):
         node_from = self.get_first_selection_bound()
@@ -165,30 +162,30 @@ class Document():
         self.delete_nodes(node_from, node_to)
 
     def delete_nodes(self, node_from, node_to):
-        self.add_command('delete', node_from, node_to)
+        self.command_manager.add_command('delete', node_from, node_to)
 
     def resize_widget(self, node, new_width):
         if node.type != 'widget': return
 
-        self.add_command('resize_widget', new_width)
+        self.command_manager.add_command('resize_widget', new_width)
 
     def add_tag(self, tagname):
-        self.add_command('add_tag', tagname)
+        self.command_manager.add_command('add_tag', tagname)
 
     def remove_tag(self, tagname):
-        self.add_command('remove_tag', tagname)
+        self.command_manager.add_command('remove_tag', tagname)
 
     def set_link(self, bounds, target):
         pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
         char_nodes = [node for node in self.ast.get_subtree(pos_1, pos_2) if node.type == 'char']
 
-        self.add_command('set_link', char_nodes, target)
+        self.command_manager.add_command('set_link', char_nodes, target)
 
     def set_paragraph_style(self, paragraph, style):
-        self.add_command('set_paragraph_style', paragraph, style)
+        self.command_manager.add_command('set_paragraph_style', paragraph, style)
 
     def set_indentation_level(self, paragraph, level):
-        self.add_command('set_indentation_level', paragraph, level)
+        self.command_manager.add_command('set_indentation_level', paragraph, level)
 
     def toggle_checkbox_at_cursor(self):
         paragraph = self.cursor.get_insert_node().paragraph()
@@ -196,17 +193,17 @@ class Document():
         self.command_manager.add_command('set_paragraph_state', paragraph, new_state)
 
     def set_insert_and_selection_node(self, new_insert, new_selection_bound=None):
-        self.add_command('move_cursor_to_node', new_insert, new_selection_bound)
+        self.command_manager.add_command('move_cursor_to_node', new_insert, new_selection_bound)
 
     def move_cursor_to_xy(self, x, y, do_selection):
-        self.add_command('move_cursor_to_xy', x, y, do_selection)
+        self.command_manager.add_command('move_cursor_to_xy', x, y, do_selection)
 
     def select_node(self, node):
         next_node = node.next_in_parent()
-        self.add_command('move_cursor_to_node', node, next_node)
+        self.command_manager.add_command('move_cursor_to_node', node, next_node)
 
     def update_implicit_x_position(self):
-        self.add_command('update_implicit_x_position')
+        self.command_manager.add_command('update_implicit_x_position')
 
     def scroll_insert_on_screen(self, window_height, animation_type=None):
         insert_node = self.cursor.get_insert_node()
