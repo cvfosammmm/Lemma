@@ -58,6 +58,12 @@ class Document():
         self.links_scanner = LinksScanner(self)
         self.xml_scanner = XMLScanner(self)
 
+    def start_undoable_action(self):
+        self.command_manager.start_undoable_action()
+
+    def end_undoable_action(self):
+        self.command_manager.end_undoable_action()
+
     def add_command(self, name, *parameters):
         self.command_manager.add_command(name, *parameters)
 

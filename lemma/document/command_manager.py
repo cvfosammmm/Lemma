@@ -30,9 +30,20 @@ class CommandManager():
     def __init__(self, document):
         self.document = document
 
-        self.commands = list()
-        self.commands_preedit = list()
+        self.undoable_actions = []
+        self.current_undoable_action = None
+        self.last_undoable_action = -1
+
+        self.commands = []
         self.last_command = -1
+
+    def start_undoable_action(self):
+        self.current_undoable_action = []
+
+    def end_undoable_action(self):
+        self.undoable_actions = self.undoable_actions[:self.last_undoable_action + 1] + [self.current_undoable_action]
+        self.last_undoable_action += 1
+        self.current_undoable_action = None
 
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
@@ -42,39 +53,38 @@ class CommandManager():
         command.run(self.document)
         self.document.update()
 
-        self.commands_preedit.append(command)
-
-        if command.is_undo_checkpoint:
-            self.commands = self.commands[:self.last_command + 1] + self.commands_preedit
-            self.last_command += len(self.commands_preedit)
-            self.commands_preedit = list()
+        if self.current_undoable_action == None:
+            if not command.is_undo_checkpoint and self.last_undoable_action >= 0 and len(self.undoable_actions[self.last_undoable_action]) > 0:
+                self.undoable_actions[self.last_undoable_action].append(command)
+            else:
+                self.start_undoable_action()
+                self.current_undoable_action.append(command)
+                self.end_undoable_action()
+        else:
+            self.current_undoable_action.append(command)
 
     def can_undo(self):
-        return self.last_command >= 0
+        return self.last_undoable_action >= 0
 
     def can_redo(self):
-        return self.last_command < len(self.commands) - 1
+        return self.last_undoable_action < len(self.undoable_actions) - 1
 
     def undo(self):
-        for command in reversed(self.commands_preedit):
+        undoable_action = self.undoable_actions[self.last_undoable_action]
+
+        for command in reversed(undoable_action):
             command.undo(self.document)
             self.document.update()
-        self.commands_preedit = list()
 
-        for command in reversed(self.commands[:self.last_command + 1]):
-            command.undo(self.document)
-            self.document.update()
-            self.last_command -= 1
-
-            if command.is_undo_checkpoint: break
+        self.last_undoable_action -= 1
 
     def redo(self):
-        for command in self.commands[self.last_command + 1:]:
+        undoable_action = self.undoable_actions[self.last_undoable_action + 1]
+
+        for command in undoable_action:
             command.run(self.document)
             self.document.update()
 
-            self.last_command += 1
-
-            if command.is_undo_checkpoint: break
+        self.last_undoable_action += 1
 
 

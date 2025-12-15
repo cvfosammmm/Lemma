@@ -334,10 +334,12 @@ class UseCases():
         for paragraph in paragraphs:
             nodes += paragraph.nodes
 
+        document.start_undoable_action()
         document.delete_nodes(node_from, node_to)
         document.insert_nodes(node_to, nodes)
         document.set_insert_and_selection_node(node_to)
         document.update_implicit_x_position()
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
