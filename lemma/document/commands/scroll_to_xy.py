@@ -22,7 +22,6 @@ class Command():
         self.x = x
         self.y = y
         self.animation_type = animation_type
-        self.is_undo_checkpoint = False
         self.state = dict()
 
     def run(self, document):

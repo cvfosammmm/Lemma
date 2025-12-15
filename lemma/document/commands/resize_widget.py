@@ -21,7 +21,6 @@ class Command():
     def __init__(self, node, width):
         self.node = node
         self.width = int(width)
-        self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):

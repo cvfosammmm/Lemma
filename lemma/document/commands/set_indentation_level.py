@@ -21,7 +21,6 @@ class Command():
     def __init__(self, paragraph, new_level):
         self.paragraph = paragraph
         self.new_level = new_level
-        self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):

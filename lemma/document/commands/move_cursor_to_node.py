@@ -21,7 +21,6 @@ class Command():
     def __init__(self, insert, selection_bound=None):
         self.insert = insert
         self.selection_bound = (selection_bound if selection_bound != None else insert)
-        self.is_undo_checkpoint = False
         self.state = dict()
 
     def run(self, document):

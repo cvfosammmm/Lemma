@@ -19,7 +19,6 @@
 class Command():
 
     def __init__(self):
-        self.is_undo_checkpoint = False
         self.state = dict()
 
     def run(self, document):

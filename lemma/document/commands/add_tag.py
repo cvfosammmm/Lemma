@@ -20,7 +20,6 @@ class Command():
 
     def __init__(self, tag_name):
         self.tag_name = tag_name
-        self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):

@@ -22,7 +22,6 @@ class Command():
         self.x = x
         self.y = y
         self.do_selection = do_selection
-        self.is_undo_checkpoint = False
         self.state = dict()
 
     def run(self, document):

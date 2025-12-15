@@ -21,7 +21,6 @@ class Command():
     def __init__(self, node_from, node_to):
         self.node_from = node_from
         self.node_to = node_to
-        self.is_undo_checkpoint = True
         self.state = dict()
 
     def run(self, document):
@@ -34,8 +33,6 @@ class Command():
         if self.node_from.parent == self.node_to.parent:
             self.state['deleted_nodes'] = self.node_from.parent.remove_range(self.node_from, self.node_to)
             document.cursor.set_insert_selection_nodes(self.node_to, self.node_to)
-
-        self.is_undo_checkpoint = (len(self.state['deleted_nodes']) > 0)
 
         document.update_last_modified()
 
