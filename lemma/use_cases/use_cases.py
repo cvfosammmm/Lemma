@@ -302,8 +302,8 @@ class UseCases():
         document.title = title
         document.update_last_modified()
         document.update()
-        DocumentRepo.update(document)
 
+        DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_title_changed')
 
@@ -315,10 +315,12 @@ class UseCases():
         link_at_cursor = ApplicationState.get_value('link_at_cursor')
         xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
 
+        document.start_undoable_action()
         document.insert_xml(xml)
         if not document.has_selection() and text.isspace():
             document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -365,6 +367,7 @@ class UseCases():
         paragraph_style = insert_paragraph.style
         indentation_level = insert_paragraph.indentation_level
 
+        document.start_undoable_action()
         if paragraph_style in ['ul', 'ol', 'cl']:
             document.insert_xml('\n')
             paragraph = document.cursor.get_insert_node().paragraph()
@@ -378,9 +381,9 @@ class UseCases():
                 document.set_paragraph_style(paragraph, 'p')
         else:
             document.insert_xml('\n')
-
         document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -390,9 +393,9 @@ class UseCases():
     @timer.timer
     def backspace():
         document = WorkspaceRepo.get_workspace().get_active_document()
-
         insert = document.cursor.get_insert_node()
 
+        document.start_undoable_action()
         if document.has_selection():
             document.delete_selected_nodes()
         elif not insert.is_first_in_parent():
@@ -401,6 +404,7 @@ class UseCases():
             document.set_insert_and_selection_node(document.cursor.prev_no_descent(insert), insert)
         document.update_implicit_x_position()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -447,10 +451,12 @@ class UseCases():
     def add_image(image):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
+        document.start_undoable_action()
         node = Node('widget', image)
         document.insert_nodes([node])
         document.update_implicit_x_position()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -472,8 +478,10 @@ class UseCases():
 
     @timer.timer
     def set_link(document, bounds, target):
+        document.start_undoable_action()
         document.set_link(bounds, target)
         document.set_insert_and_selection_node(bounds[1])
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -499,8 +507,10 @@ class UseCases():
         else:
             paragraphs = [document.cursor.get_insert_node().paragraph()]
 
+        document.start_undoable_action()
         for paragraph in paragraphs:
             document.set_paragraph_style(paragraph, style)
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -540,8 +550,10 @@ class UseCases():
     def set_indentation_level(indentation_level):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
+        document.start_undoable_action()
         document.set_indentation_level(document.cursor.get_insert_node().paragraph(), indentation_level)
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -567,10 +579,12 @@ class UseCases():
         else:
             paragraphs = [document.cursor.get_insert_node().paragraph()]
 
+        document.start_undoable_action()
         for paragraph in paragraphs:
             new_level = max(0, min(4, paragraph.indentation_level + difference))
             document.set_indentation_level(paragraph, new_level)
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -590,7 +604,6 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(document.cursor.prev(insert))
         document.update_implicit_x_position()
-
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -618,7 +631,6 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new)
         document.update_implicit_x_position()
-
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -632,6 +644,7 @@ class UseCases():
 
         insert = document.cursor.get_insert_node()
         selection = document.cursor.get_selection_node()
+
         if do_selection:
             document.set_insert_and_selection_node(document.cursor.next_no_descent(insert), selection)
         elif document.has_selection():
@@ -639,7 +652,6 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(document.cursor.next(insert))
         document.update_implicit_x_position()
-
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -666,7 +678,6 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new)
         document.update_implicit_x_position()
-
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -709,8 +720,8 @@ class UseCases():
             new_node = document.ast[0]
 
         selection_node = document.cursor.get_selection_node()
-        document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
 
+        document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -753,8 +764,8 @@ class UseCases():
             new_node = document.ast[-1]
 
         selection_node = document.cursor.get_selection_node()
-        document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
 
+        document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -775,9 +786,9 @@ class UseCases():
         new_node = layout['children'][0]['node']
 
         selection_node = document.cursor.get_selection_node()
+
         document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
         document.update_implicit_x_position()
-
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -790,8 +801,6 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.cursor.get_insert_node()
 
-        document.start_undoable_action()
-
         layout = insert.layout
         while layout['parent']['parent'] != None:
             layout = layout['parent']
@@ -800,13 +809,11 @@ class UseCases():
         new_node = layout['children'][-1]['node']
 
         selection_node = document.cursor.get_selection_node()
+
         document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
         document.update_implicit_x_position()
-
         if insert != document.cursor.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
-
-        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
