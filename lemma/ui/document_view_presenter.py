@@ -41,7 +41,6 @@ class DocumentViewPresenter():
         self.view = self.model.view.content
         self.view.set_draw_func(self.draw)
 
-        self.color_cache = dict()
         self.window_surface = None
         self.render_cache = dict()
 
@@ -54,7 +53,6 @@ class DocumentViewPresenter():
         self.width = self.view.get_allocated_width()
 
         self.setup_scaling_offsets()
-        self.setup_colors()
 
         content_offset_x = LayoutInfo.get_document_padding_left()
         content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') - self.model.scrolling_position_y
@@ -111,33 +109,13 @@ class DocumentViewPresenter():
         self.device_offset_y = 1 - ((allocation.get_y() + surface_transform.y) * self.hidpi_factor) % 1
 
     @timer.timer
-    def setup_colors(self):
-        self.color_cache['background'] = ColorManager.get_ui_color('view_bg_color')
-        self.color_cache['text'] = ColorManager.get_ui_color('text')
-        self.color_cache['links'] = ColorManager.get_ui_color('links')
-        self.color_cache['links_page_not_existing'] = ColorManager.get_ui_color('links_page_not_existing')
-        self.color_cache['selection_bg'] = ColorManager.get_ui_color('selection_bg')
-        self.color_cache['description_color'] = ColorManager.get_ui_color('description_color')
-        self.color_cache['border_1'] = ColorManager.get_ui_color('border_1')
-        self.color_cache['cursor'] = ColorManager.get_ui_color('cursor')
-        self.color_cache['highlights'] = ColorManager.get_ui_color('highlights')
-        self.color_cache['drop_cursor'] = ColorManager.get_ui_color('drop_color')
-
-        self.color_cache['background_string'] = self.color_cache['background'].to_string()
-        self.color_cache['text_string'] = self.color_cache['text'].to_string()
-        self.color_cache['links_string'] = self.color_cache['links'].to_string()
-        self.color_cache['links_page_not_existing_string'] = self.color_cache['links_page_not_existing'].to_string()
-        self.color_cache['highlights_string'] = self.color_cache['highlights'].to_string()
-        self.color_cache['bullets_string'] = ColorManager.get_ui_color('bullets').to_string()
-
-    @timer.timer
     def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
         if paragraph.style == 'ul':
             layout = paragraph.layout
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
-            fg_color = self.color_cache['bullets_string']
+            fg_color = ColorManager.get_ui_color_string('bullets')
 
             surface, left, top = TextRenderer.get_glyph('-', 'book', fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_ul_bullet_padding() - surface.get_width()
@@ -150,7 +128,7 @@ class DocumentViewPresenter():
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
-            fg_color = self.color_cache['bullets_string']
+            fg_color = ColorManager.get_ui_color_string('bullets')
 
             text = '.' + ''.join(reversed(str(list_item_numbers[paragraph.indentation_level])))
             bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_ol_bullet_padding()
@@ -164,14 +142,15 @@ class DocumentViewPresenter():
         elif paragraph.style == 'cl':
             layout = paragraph.layout
             line_layout = layout['children'][0]
-            background_color = self.color_cache['background_string']
-            default_color = self.color_cache['text_string']
-            highlight_color = self.color_cache['highlights_string']
+            outline_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_outline')
+            inner_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_inner')
+            outline_checked_color = ColorManager.get_ui_color_string('checkbox_checked_outline')
+            inner_checked_color = ColorManager.get_ui_color_string('checkbox_checked_inner')
 
             if paragraph.state == 'checked':
-                surface = TextRenderer.get_icon_surface('checkbox-checked-symbolic', self.hidpi_factor, background_color, highlight_color)
+                surface = TextRenderer.get_icon_surface('checkbox-checked-symbolic', self.hidpi_factor, inner_checked_color, outline_checked_color)
             else:
-                surface = TextRenderer.get_icon_surface('checkbox-unchecked-symbolic', self.hidpi_factor, default_color, highlight_color)
+                surface = TextRenderer.get_icon_surface('checkbox-unchecked-symbolic', self.hidpi_factor, outline_unchecked_color, inner_unchecked_color)
             bullet_indent = 1
             top = -23
             ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor), self.device_offset_y + int((offset_y + layout['y'] + line_layout['height'] + top) * self.hidpi_factor))
@@ -278,25 +257,25 @@ class DocumentViewPresenter():
             ctx.fill()
 
     def draw_selection(self, layout, ctx, offset_x, offset_y):
-        Gdk.cairo_set_source_rgba(ctx, self.color_cache['selection_bg'])
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
         ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
         ctx.fill()
 
     @timer.timer
     def get_fg_color_string_by_node(self, node):
         if node.link == None:
-            return self.color_cache['text_string']
+            return ColorManager.get_ui_color_string('text')
         if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
-            return self.color_cache['links_string']
-        return self.color_cache['links_page_not_existing_string']
+            return ColorManager.get_ui_color_string('links')
+        return ColorManager.get_ui_color_string('links_page_not_existing')
 
     @timer.timer
     def get_fg_color_by_node(self, node):
         if node.link == None:
-            return self.color_cache['text']
+            return ColorManager.get_ui_color('text')
         if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
-            return self.color_cache['links']
-        return self.color_cache['links_page_not_existing']
+            return ColorManager.get_ui_color('links')
+        return ColorManager.get_ui_color('links_page_not_existing')
 
     @timer.timer
     def draw_cursor(self, ctx, offset_x, offset_y):
@@ -309,7 +288,7 @@ class DocumentViewPresenter():
         padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
-        Gdk.cairo_set_source_rgba(ctx, self.color_cache['cursor'])
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('cursor'))
         ctx.rectangle(*cursor_coords)
         ctx.fill()
 
@@ -323,7 +302,7 @@ class DocumentViewPresenter():
         padding_bottom = 0
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
 
-        Gdk.cairo_set_source_rgba(ctx, self.color_cache['drop_cursor'])
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('drop_color'))
         ctx.rectangle(*cursor_coords)
         ctx.fill()
 

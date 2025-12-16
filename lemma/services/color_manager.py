@@ -27,4 +27,8 @@ class ColorManager(object):
         rgba = ColorManager.main_window.get_style_context().lookup_color(name)[1]
         return rgba
 
+    def get_ui_color_string(name):
+        rgba = ColorManager.main_window.get_style_context().lookup_color(name)[1]
+        return rgba.to_string()
+
 

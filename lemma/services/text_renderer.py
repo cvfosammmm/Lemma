@@ -48,6 +48,9 @@ class TextRenderer():
         TextRenderer.fonts[name]['cache'] = dict()
 
     def get_icon_surface(icon_name, scale=1, default_color=None, highlight_color=None):
+        if highlight_color == None:
+            highlight_color = default_color
+
         if (icon_name, scale, default_color, highlight_color) not in TextRenderer.icon_cache:
             TextRenderer.load_icon_surface(icon_name, scale, default_color, highlight_color)
 
@@ -55,12 +58,10 @@ class TextRenderer():
 
     def load_icon_surface(icon_name, scale=1, default_color=None, highlight_color=None):
         res_path = Paths.get_resources_folder()
-        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons_extra', icon_name + '.svg'))
+        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons', icon_name + '.svg'))
 
-        if highlight_color == None:
-            highlight_color = default_color
         if default_color != None:
-            rsvg_handle.set_stylesheet(b'path {fill: ' + default_color.encode() + b';}\npath.highlight {fill: ' + highlight_color.encode() + b';}')
+            rsvg_handle.set_stylesheet(b'path, rect {fill: ' + default_color.encode() + b';}\npath.highlight, rect.highlight {fill: ' + highlight_color.encode() + b';}')
 
         size = rsvg_handle.get_intrinsic_size_in_pixels()
         width, height = size[1] * scale, size[2] * scale

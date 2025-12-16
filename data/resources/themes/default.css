@@ -109,6 +109,12 @@
 @define-color drop_color @text;
 @define-color bullets @text;
 
+/* Checkboxes */
+@define-color checkbox_unchecked_outline @borders;
+@define-color checkbox_unchecked_inner @view_bg_color;
+@define-color checkbox_checked_outline #5aa90d;
+@define-color checkbox_checked_inner @view_bg_color;
+
 /* Scrollbars */
 @define-color scrollbar_bg #e5e5e5;
 @define-color scrollbar_default #c0c0c0;
