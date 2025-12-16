@@ -68,13 +68,16 @@ class DocumentRepo():
     def list():
         return [stub for stub in sorted(DocumentRepo.document_stubs_by_id.values(), key=lambda stub: -stub['last_modified'])]
 
+    @timer.timer
     def list_by_search_terms(terms, limit=None):
+        if len(terms) == 0:
+            return DocumentRepo.list()
+
         result = []
         for doc_stub in DocumentRepo.list():
-            if len(terms) == 0:
-                result.append(doc_stub)
-            elif min(map(lambda x: x in doc_stub['plaintext'] or x in doc_stub['title'], terms)):
-                result.append(doc_stub)
+            for term in terms:
+                if min(x.casefold() in doc_stub['plaintext'].casefold() or x.casefold() in doc_stub['title'] for x in terms):
+                    result.append(doc_stub)
         return result
 
     def list_by_link_target(title):
