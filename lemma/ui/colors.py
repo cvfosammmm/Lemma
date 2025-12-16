@@ -17,6 +17,7 @@
 
 import os.path
 
+from lemma.services.color_manager import ColorManager
 from lemma.services.message_bus import MessageBus
 from lemma.services.paths import Paths
 from lemma.services.settings import Settings
@@ -55,5 +56,7 @@ class Colors(object):
         self.main_window.main_box.queue_draw()
         self.main_window.document_view.content.queue_draw()
         self.main_window.document_list.content.queue_draw()
+
+        ColorManager.invalidate_cache()
 
 

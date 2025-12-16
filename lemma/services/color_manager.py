@@ -19,16 +19,24 @@
 class ColorManager(object):
 
     main_window = None
+    rgba_cache = dict()
+    string_cache = dict()
 
     def init(main_window):
         ColorManager.main_window = main_window
 
+    def invalidate_cache():
+        ColorManager.rgba_cache = dict()
+        ColorManager.string_cache = dict()
+
     def get_ui_color(name):
-        rgba = ColorManager.main_window.get_style_context().lookup_color(name)[1]
-        return rgba
+        if not name in ColorManager.rgba_cache:
+            ColorManager.rgba_cache[name] = ColorManager.main_window.get_style_context().lookup_color(name)[1]
+        return ColorManager.rgba_cache[name]
 
     def get_ui_color_string(name):
-        rgba = ColorManager.main_window.get_style_context().lookup_color(name)[1]
-        return rgba.to_string()
+        if not name in ColorManager.string_cache:
+            ColorManager.string_cache[name] = ColorManager.main_window.get_style_context().lookup_color(name)[1].to_string()
+        return ColorManager.string_cache[name]
 
 
