@@ -418,7 +418,7 @@ class SidebarMath(object):
 
         res_path = Paths.get_resources_folder()
         for data in symbols:
-            pic = Icon(os.path.join(res_path, 'icons_extra', 'sidebar-' + data[0] + '-symbolic.svg'))
+            pic = Icon(os.path.join(res_path, 'icons_sidebar', 'sidebar-' + data[0] + '-symbolic.svg'))
             button = Gtk.Button()
             button.set_child(pic)
             button.set_can_focus(False)
