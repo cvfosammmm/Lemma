@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+import math
+
 from lemma.use_cases.use_cases import UseCases
 from lemma.ui.views.autocomplete_view import AutocompleteView
 

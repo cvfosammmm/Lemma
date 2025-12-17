@@ -56,7 +56,7 @@ class DocumentViewPresenter():
 
         content_offset_x = LayoutInfo.get_document_padding_left()
         content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') - self.model.scrolling_position_y
-        title_offset_y = LayoutInfo.get_document_padding_top() - self.model.scrolling_position_y
+
         self.first_selection_node = document.get_first_selection_bound()
         self.last_selection_node = document.get_last_selection_bound()
         first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
@@ -83,7 +83,9 @@ class DocumentViewPresenter():
                     if (i,j) not in self.render_cache:
                         self.draw_line(ctx, i, j, line_layout, in_selection)
 
-                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(content_offset_x * self.hidpi_factor), self.device_offset_y + math.floor((content_offset_y + paragraph.layout['y'] + line_layout['y']) * self.hidpi_factor))
+                    line_x = self.device_offset_x + math.floor(content_offset_x) * self.hidpi_factor
+                    line_y = self.device_offset_y + math.floor(content_offset_y + paragraph.layout['y'] + line_layout['y']) * self.hidpi_factor
+                    ctx.set_source_surface(self.render_cache[(i,j)], line_x, line_y)
                     ctx.paint()
                 elif (i,j) in self.render_cache:
                     del(self.render_cache[(i,j)])
@@ -120,7 +122,10 @@ class DocumentViewPresenter():
             surface, left, top = TextRenderer.get_glyph('-', 'book', fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_ul_bullet_padding() - surface.get_width()
             bullet_measurement = TextShaper.measure_single('-')
-            ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
+
+            bullet_x = self.device_offset_x + math.floor(offset_x + bullet_indent) * self.hidpi_factor + left
+            bullet_y = self.device_offset_y + math.floor(offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top
+            ctx.set_source_surface(surface, bullet_x, bullet_y)
             ctx.paint()
 
         elif paragraph.style == 'ol':
@@ -136,7 +141,10 @@ class DocumentViewPresenter():
                 surface, left, top = TextRenderer.get_glyph(char, 'book', fg_color, self.hidpi_factor)
                 bullet_indent -= dim[0]
                 bullet_measurement = TextShaper.measure_single(char)
-                ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor + left), self.device_offset_y + int((offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top))
+
+                bullet_x = self.device_offset_x + math.floor(offset_x + bullet_indent) * self.hidpi_factor + left
+                bullet_y = self.device_offset_y + math.floor(offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top
+                ctx.set_source_surface(surface, bullet_x, bullet_y)
                 ctx.paint()
 
         elif paragraph.style == 'cl':
@@ -153,7 +161,10 @@ class DocumentViewPresenter():
                 surface = TextRenderer.get_icon_surface('checkbox-unchecked-symbolic', self.hidpi_factor, outline_unchecked_color, inner_unchecked_color)
             bullet_indent = 1
             top = -23
-            ctx.set_source_surface(surface, self.device_offset_x + int((offset_x + bullet_indent) * self.hidpi_factor), self.device_offset_y + int((offset_y + layout['y'] + line_layout['height'] + top) * self.hidpi_factor))
+
+            bullet_x = self.device_offset_x + math.floor(offset_x + bullet_indent) * self.hidpi_factor
+            bullet_y = self.device_offset_y + math.floor(offset_y + layout['y'] + line_layout['height'] + top) * self.hidpi_factor
+            ctx.set_source_surface(surface, bullet_x, bullet_y)
             ctx.paint()
 
     @timer.timer

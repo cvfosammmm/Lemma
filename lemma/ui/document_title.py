@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-import time, datetime
+import time, datetime, math
 
 from lemma.services.message_bus import MessageBus
 from lemma.services.settings import Settings
@@ -94,7 +94,7 @@ class DocumentTitle():
         if document == None:
             self.view.set_offset_y(0)
         else:
-            offset = document.get_current_scrolling_offsets()[1]
+            offset = math.floor(document.get_current_scrolling_offsets()[1])
             self.view.set_offset_y(offset)
         self.document_view.queue_allocate()
 
