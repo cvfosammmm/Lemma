@@ -29,11 +29,11 @@ class Command():
 
         document.clipping.set_target(int(self.x), int(self.y), self.animation_type)
 
-        document.update_last_cursor_movement()
+        document.update_last_scrolling_movement()
 
     def undo(self, document):
         document.clipping.set_state(self.state['clipping_state_before'])
 
-        document.update_last_cursor_movement()
+        document.update_last_scrolling_movement()
 
 

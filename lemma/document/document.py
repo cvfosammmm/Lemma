@@ -39,6 +39,7 @@ class Document():
     def __init__(self, id=None):
         self.last_modified = time.time()
         self.last_cursor_movement = time.time()
+        self.last_scrolling_movement = time.time()
 
         self.id = id
         self.title = ''
@@ -274,6 +275,10 @@ class Document():
 
     def update_last_cursor_movement(self):
         self.last_cursor_movement = time.time()
+        self.query_cache = dict()
+
+    def update_last_scrolling_movement(self):
+        self.last_scrolling_movement = time.time()
         self.query_cache = dict()
 
     def update(self):
