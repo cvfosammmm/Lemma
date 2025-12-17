@@ -83,7 +83,7 @@ class DocumentViewPresenter():
                     if (i,j) not in self.render_cache:
                         self.draw_line(ctx, i, j, line_layout, in_selection)
 
-                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(content_offset_x * self.hidpi_factor), self.device_offset_y + int((content_offset_y + paragraph.layout['y'] + line_layout['y']) * self.hidpi_factor))
+                    ctx.set_source_surface(self.render_cache[(i,j)], self.device_offset_x + int(content_offset_x * self.hidpi_factor), self.device_offset_y + math.floor((content_offset_y + paragraph.layout['y'] + line_layout['y']) * self.hidpi_factor))
                     ctx.paint()
                 elif (i,j) in self.render_cache:
                     del(self.render_cache[(i,j)])
