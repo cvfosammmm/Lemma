@@ -197,9 +197,7 @@ class DocumentList(object):
         self.view.scrolling_widget.scroll_to_position([0, y])
 
     def draw(self, widget, ctx, width, height):
-        bg_color = ColorManager.get_ui_color('sidebar_bg_1')
-
-        Gdk.cairo_set_source_rgba(ctx, bg_color)
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('sidebar_bg_1'))
         ctx.rectangle(0, 0, width, height)
         ctx.fill()
 
@@ -212,14 +210,6 @@ class DocumentList(object):
     def draw_documents(self, ctx, width, height):
         workspace = WorkspaceRepo.get_workspace()
 
-        sidebar_fg_1 = ColorManager.get_ui_color('sidebar_fg_1')
-        sidebar_fg_2 = ColorManager.get_ui_color('sidebar_fg_2')
-        bg_color = ColorManager.get_ui_color('sidebar_bg_1')
-        hover_color = ColorManager.get_ui_color('sidebar_hover')
-        selected_color = ColorManager.get_ui_color('sidebar_selection')
-        active_bg_color = ColorManager.get_ui_color('sidebar_active_bg')
-        active_fg_color = ColorManager.get_ui_color('sidebar_active_fg')
-
         scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
 
         first_item_no = int(scrolling_offset // self.view.line_height)
@@ -229,7 +219,7 @@ class DocumentList(object):
         self.view.layout_date.set_width((width - 30) * Pango.SCALE)
         self.view.layout_teaser.set_width((width - 30) * Pango.SCALE)
 
-        Gdk.cairo_set_source_rgba(ctx, sidebar_fg_1)
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('sidebar_fg_1'))
 
         new_render_cache = dict()
         for i, document_stub in enumerate(self.document_stubs[first_item_no:last_item_no]):
@@ -238,35 +228,35 @@ class DocumentList(object):
             highlight_active = (document_stub['id'] == workspace.get_active_document_id() and workspace.get_mode() == 'documents')
 
             if highlight_active:
-                title_color = active_fg_color
-                teaser_color = active_fg_color
-                date_color = active_fg_color
+                title_color = ColorManager.get_ui_color('sidebar_active_fg')
+                teaser_color = ColorManager.get_ui_color('sidebar_active_fg')
+                date_color = ColorManager.get_ui_color('sidebar_active_fg')
             else:
-                title_color = sidebar_fg_1
-                teaser_color = sidebar_fg_1
-                date_color = sidebar_fg_1
+                title_color = ColorManager.get_ui_color('sidebar_fg_1')
+                teaser_color = ColorManager.get_ui_color('sidebar_fg_1')
+                date_color = ColorManager.get_ui_color('sidebar_fg_1')
 
             title_text = document_stub['title']
             if len(document_stub['plaintext']) == 0:
                 teaser_text = '(' + _('empty') + ')'
-                teaser_color = sidebar_fg_2
+                teaser_color = ColorManager.get_ui_color('sidebar_fg_2')
             else:
                 teaser_text = ' '.join(document_stub['plaintext'].split())[:100].strip()
             date_text = self.get_last_modified_string(document_stub['last_modified'])
             key = title_text + teaser_text + date_text + str(width)
 
             if highlight_active:
-                Gdk.cairo_set_source_rgba(ctx, active_bg_color)
+                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('sidebar_active_bg'))
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
                 key += ':highlight_active'
             elif i == self.selected_index:
-                Gdk.cairo_set_source_rgba(ctx, selected_color)
+                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('sidebar_selection'))
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
                 key += ':selected'
             elif not highlight_active and i == self.focus_index:
-                Gdk.cairo_set_source_rgba(ctx, hover_color)
+                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('sidebar_hover'))
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
                 key += ':focus'
