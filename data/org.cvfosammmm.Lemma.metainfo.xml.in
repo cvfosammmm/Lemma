@@ -38,6 +38,11 @@
     </supports>
 
     <releases>
+        ​<release version="54" date="2025-12-17">
+            <description translatable="no">
+                <p>Case-insensitive search, ...</p>
+            </description>
+        </release>
         ​<release version="53" date="2025-12-11">
             <description translatable="no">
                 <p>Document pinning, ...</p>

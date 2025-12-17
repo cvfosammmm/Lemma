@@ -78,6 +78,7 @@ class DocumentRepo():
             for term in terms:
                 if min(x.casefold() in doc_stub['plaintext'].casefold() or x.casefold() in doc_stub['title'] for x in terms):
                     result.append(doc_stub)
+                    break
         return result
 
     def list_by_link_target(title):
