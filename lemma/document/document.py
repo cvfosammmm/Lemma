@@ -185,7 +185,7 @@ class Document():
     def resize_widget(self, node, new_width):
         if node.type != 'widget': return
 
-        self.command_manager.add_command('resize_widget', new_width)
+        self.command_manager.add_command('resize_widget', node, new_width)
 
     @undoable_action
     def add_tag(self, tagname):
