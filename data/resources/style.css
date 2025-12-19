@@ -423,15 +423,14 @@ box.welcome {
     background: -gtk-recolor(url('./icons/welcome-bg-symbolic.svg'), success @welcome_fg, error @welcome_bg) left top;
 }
 box.welcome > box {
-    margin-top: 52px;
+    margin-top: 120px;
     margin-bottom: 152px;
 }
 box.welcome box.icon {
-    background: -gtk-recolor(url('./icons/welcome-fg-symbolic.svg'), success @welcome_logo, error @welcome_logo_node) no-repeat left top;
-    min-width: 240px;
-    min-height: 240px;
+    background: url('./icons/welcome-fg-symbolic.svg') no-repeat left top;
+    min-width: 128px;
+    min-height: 128px;
     margin-bottom: 32px;
-    border-radius: 120px;
 }
 box.welcome label.header {
     margin-bottom: 25px;
