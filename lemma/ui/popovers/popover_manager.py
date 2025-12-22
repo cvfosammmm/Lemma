@@ -82,9 +82,9 @@ class PopoverManager():
             if name != self.current_popover_name:
                 self.popdown()
 
-            x, y = ApplicationState.get_value('popover_position')
-            orientation = ApplicationState.get_value('popover_orientation')
-            self.popup(name, x, y, orientation)
+                x, y = ApplicationState.get_value('popover_position')
+                orientation = ApplicationState.get_value('popover_orientation')
+                self.popup(name, x, y, orientation)
 
     def popup(self, name, x, y, orientation):
         popover = self.popovers[name]
