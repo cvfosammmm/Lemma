@@ -292,7 +292,7 @@ class DocumentViewPresenter():
     def draw_cursor(self, ctx, offset_x, offset_y):
         if not self.model.cursor_visible: return
 
-        insert = self.model.document.cursor.get_insert_node()
+        insert = self.model.document.get_insert_node()
         layout = insert.layout
         x, y = self.model.document.get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])

@@ -149,7 +149,11 @@ class Root():
     def get_position(self):
         return Position(*list())
 
-    def get_subtree(self, pos1, pos2):
+    @timer.timer
+    def get_subtree(self, node1, node2):
+        pos1 = node1.get_position()
+        pos2 = node2.get_position()
+
         pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
         parent = self.get_node_at_position(pos1[:-1])
 
@@ -428,6 +432,76 @@ class Node():
             return self.parent[index]
         return None
 
+    def prev(self):
+        node = self
+
+        if not node.is_first_in_parent():
+            node = node.parent[node.parent.index(node) - 1]
+            while not len(node.children) == 0:
+                node = node[-1]
+
+        elif not node.parent.type == 'root':
+            node = node.parent
+
+        if not NodeTypeDB.can_hold_cursor(node):
+            return node.prev()
+
+        return node
+
+    def next(self):
+        node = self
+
+        if not len(node.children) == 0:
+            node = node[0]
+
+        else:
+            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
+                node = node.parent
+            if not node.type == 'root':
+                node = node.parent[node.parent.index(node) + 1]
+            else:
+                node = node[-1]
+
+        if not NodeTypeDB.can_hold_cursor(node):
+            return node.next()
+
+        return node
+
+    def prev_no_descent(self):
+        node = self
+
+        if node != node.parent[0]:
+            index = node.parent.index(node) - 1
+            node = node.parent[index]
+
+        elif not node.parent.type == 'root':
+            node = node.parent
+
+        if not NodeTypeDB.can_hold_cursor(node):
+            return node.prev_no_descent()
+
+        return node
+
+    def next_no_descent(self):
+        node = self
+
+        if node != node.parent[-1]:
+            index = node.parent.index(node) + 1
+            node = node.parent[index]
+
+        else:
+            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
+                node = node.parent
+            if not node.type == 'root':
+                node = node.parent[node.parent.index(node) + 1]
+            else:
+                node = node[-1]
+
+        if not NodeTypeDB.can_hold_cursor(node):
+            return node.next_no_descent()
+
+        return node
+
     def flatten(self):
         result = [self]
         for child in self.children:
@@ -536,68 +610,7 @@ class Cursor():
     def update_implicit_x_position(self, x):
         self.implicit_x_position = x
 
-    def prev(self, node):
-        if not node.is_first_in_parent():
-            node = node.parent[node.parent.index(node) - 1]
-            while not len(node.children) == 0:
-                node = node[-1]
-
-        elif not node.parent.type == 'root':
-            node = node.parent
-
-        if not NodeTypeDB.can_hold_cursor(node):
-            return self.prev(node)
-
-        return node
-
-    def next(self, node):
-        if not len(node.children) == 0:
-            node = node[0]
-
-        else:
-            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
-                node = node.parent
-            if not node.type == 'root':
-                node = node.parent[node.parent.index(node) + 1]
-            else:
-                node = node[-1]
-
-        if not NodeTypeDB.can_hold_cursor(node):
-            return self.next(node)
-
-        return node
-
-    def prev_no_descent(self, node):
-        if node != node.parent[0]:
-            index = node.parent.index(node) - 1
-            node = node.parent[index]
-
-        elif not node.parent.type == 'root':
-            node = node.parent
-
-        if not NodeTypeDB.can_hold_cursor(node):
-            return self.prev_no_descent(node)
-
-        return node
-
-    def next_no_descent(self, node):
-        if node != node.parent[-1]:
-            index = node.parent.index(node) + 1
-            node = node.parent[index]
-
-        else:
-            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
-                node = node.parent
-            if not node.type == 'root':
-                node = node.parent[node.parent.index(node) + 1]
-            else:
-                node = node[-1]
-
-        if not NodeTypeDB.can_hold_cursor(node):
-            return self.next_no_descent(node)
-
-        return node
-
+    @timer.timer
     def get_state(self):
         return [self.get_insert_position(), self.get_selection_position()]
 

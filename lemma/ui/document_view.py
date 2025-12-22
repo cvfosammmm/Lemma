@@ -173,7 +173,7 @@ class DocumentView():
     def update_link_at_cursor(self):
         self.link_target_at_cursor = None
         if self.document != None and not self.document.has_selection():
-            current_node = self.document.cursor.get_insert_node()
+            current_node = self.document.get_insert_node()
             prev_node = current_node.prev_in_parent()
             if prev_node != None and current_node.link == prev_node.link:
                 self.link_target_at_cursor = current_node.link

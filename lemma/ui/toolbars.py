@@ -54,7 +54,7 @@ class ToolBars():
         active_document = WorkspaceRepo.get_workspace().get_active_document()
         if active_document == None: return
 
-        cursor_inside_link = active_document.cursor.get_insert_node().is_inside_link()
+        cursor_inside_link = active_document.get_insert_node().is_inside_link()
         edit_link_visible = ((not active_document.has_selection()) and cursor_inside_link)
 
         selected_nodes = active_document.get_selected_nodes()

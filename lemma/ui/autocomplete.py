@@ -173,7 +173,7 @@ class Autocomplete():
 
     def update_position(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.cursor.get_insert_node()
+        insert = document.get_insert_node()
         insert_x, insert_y = document.get_absolute_xy(insert.layout)
         content_offset = LayoutInfo.get_normal_document_offset()
         scrolling_offset_y = document.get_current_scrolling_offsets()[1]
@@ -199,7 +199,7 @@ class Autocomplete():
         # last backslash before the cursor to the cursor.
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        node = document.cursor.get_insert_node()
+        node = document.get_insert_node()
         command_at_cursor = ''
         first_command_node = None
         while True:
@@ -270,7 +270,7 @@ class Autocomplete():
         if len(self.suggestions) == 0: return
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.cursor.get_insert_node()
+        insert = document.get_insert_node()
         xml = AutocompleteDB.get_xml(self.view.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
         UseCases.scroll_insert_on_screen(animation_type='default')

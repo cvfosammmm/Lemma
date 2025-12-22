@@ -87,11 +87,11 @@ class Popover(PopoverView):
             nodes = document.get_selected_nodes()
             first_node = nodes[0] if len(nodes) > 0 else None
             if any((node == None or node.link == None or node.link != first_node.link) for node in nodes):
-                self.bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
+                self.bounds = [document.get_insert_node(), document.get_selection_node()]
                 self.entry_link_target.set_text('')
                 self.add_button.set_tooltip_text(_('Insert Link'))
             else:
-                self.bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
+                self.bounds = [document.get_insert_node(), document.get_selection_node()]
                 self.entry_link_target.set_text(first_node.link)
                 self.add_button.set_tooltip_text(_('Edit Link'))
         else:

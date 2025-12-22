@@ -129,8 +129,8 @@ class DocumentViewController():
 
             else:
                 if link == None or int(keyboard_state & modifiers) != 0:
-                    insert = document.cursor.get_insert_node()
-                    selection = document.cursor.get_selection_node()
+                    insert = document.get_insert_node()
+                    selection = document.get_selection_node()
                     paragraph_start, paragraph_end = insert.paragraph_bounds()
                     if insert == paragraph_start and selection == paragraph_end or insert == paragraph_end and selection == paragraph_start:
                         UseCases.move_cursor_to_xy(x, y, False)
@@ -421,10 +421,10 @@ class DocumentViewController():
                 if document.widget_selected():
                     UseCases.remove_selection()
             case ('return', _) | ('kp_enter', _):
-                if not document.has_selection() and document.cursor.get_insert_node().is_inside_link():
-                    UseCases.open_link(document.cursor.get_insert_node().link)
+                if not document.has_selection() and document.get_insert_node().is_inside_link():
+                    UseCases.open_link(document.get_insert_node().link)
                 elif not document.has_selection():
-                    insert_paragraph = document.cursor.get_insert_node().paragraph()
+                    insert_paragraph = document.get_insert_node().paragraph()
                     paragraph_style = insert_paragraph.style
 
                     if paragraph_style in ['ul', 'ol', 'cl'] and len(insert_paragraph.nodes) == 1:

@@ -336,7 +336,7 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.cursor.get_insert_node()
+        insert = document.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
             xml = '<mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
@@ -349,7 +349,7 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.cursor.get_insert_node()
+        insert = document.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
             xml = '<mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
@@ -429,7 +429,7 @@ class Actions(object):
 
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        UseCases.open_link(document.cursor.get_insert_node().link)
+        UseCases.open_link(document.get_insert_node().link)
 
     def show_link_popover(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -458,11 +458,11 @@ class Actions(object):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.has_selection():
-            bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
-        elif document.cursor.get_insert_node().is_inside_link():
-            bounds = document.cursor.get_insert_node().link_bounds()
+            bounds = [document.get_insert_node(), document.get_selection_node()]
+        elif document.get_insert_node().is_inside_link():
+            bounds = document.get_insert_node().link_bounds()
         else:
-            bounds = [document.cursor.get_insert_node(), document.cursor.get_selection_node()]
+            bounds = [document.get_insert_node(), document.get_selection_node()]
         UseCases.set_link(document, bounds, None)
 
     def start_global_search(self, action=None, parameter=''):

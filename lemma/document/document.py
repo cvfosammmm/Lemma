@@ -151,7 +151,7 @@ class Document():
             else:
                 break
 
-        subtree = self.ast.get_subtree(first_node.get_position(), last_node.get_position())
+        subtree = self.ast.get_subtree(first_node, last_node)
         chars = ''.join([node.value for node in subtree])
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
@@ -197,8 +197,7 @@ class Document():
 
     @undoable_action
     def set_link(self, bounds, target):
-        pos_1, pos_2 = bounds[0].get_position(), bounds[1].get_position()
-        char_nodes = [node for node in self.ast.get_subtree(pos_1, pos_2) if node.type == 'char']
+        char_nodes = [node for node in self.ast.get_subtree(*bounds) if node.type == 'char']
 
         self.command_manager.add_command('set_link', char_nodes, target)
 
@@ -342,6 +341,12 @@ class Document():
             self.query_cache['selected_widget_is_min'] = (self.widget_selected() and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable()))
         return self.query_cache['selected_widget_is_min']
 
+    def get_insert_node(self):
+        return self.cursor.get_insert_node()
+
+    def get_selection_node(self):
+        return self.cursor.get_selection_node()
+
     def insert_parent_is_root(self):
         if 'insert_parent_is_root' not in self.query_cache:
             self.query_cache['insert_parent_is_root'] = (self.cursor.get_insert_node().parent.type == 'root')
@@ -354,7 +359,8 @@ class Document():
 
     def get_selected_nodes(self):
         if 'selected_nodes' not in self.query_cache:
-            self.query_cache['selected_nodes'] = self.ast.get_subtree(*self.cursor.get_state())
+            bounds = self.get_insert_node(), self.get_selection_node()
+            self.query_cache['selected_nodes'] = self.ast.get_subtree(*bounds)
         return self.query_cache['selected_nodes']
 
     def get_first_selection_bound(self):
@@ -366,6 +372,9 @@ class Document():
         if 'selection_bounds' not in self.query_cache:
             self.query_cache['selection_bounds'] = self.cursor.get_first_and_last_node()
         return self.query_cache['selection_bounds'][1]
+
+    def get_implicit_x_position(self):
+        return self.cursor.implicit_x_position
 
     def can_undo(self):
         if 'can_undo' not in self.query_cache:
