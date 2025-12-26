@@ -21,8 +21,8 @@ I develop Lemma on Debian and that's what I tested it with. On Debian derivative
 
 3. cd to Lemma folder
 
-4. Run meson: `meson builddir`<br />
-Note: Some distributions may not include systemwide installations of Python modules which aren't installed from distribution packages. In this case, you want to install Lemma in your home directory with `meson builddir --prefix=~/.local`.
+4. Run meson: `meson setup builddir`<br />
+Note: Some distributions may not include systemwide installations of Python modules which aren't installed from distribution packages. In this case, you want to install Lemma in your home directory with `meson setup builddir --prefix=~/.local`.
 
 5. Install Lemma with: `ninja install -C builddir`<br />
 Or run it locally: `./scripts/lemma.dev`
