@@ -25,8 +25,8 @@ config.set('python_path', python_bin)
 
 config_dev = config
 config_dev.set('localedir_path', '/tmp/usr/share/locale') # this is a workaround
-config_dev.set('resources_path', join_paths(meson.source_root(), 'data', 'resources'))
-config_dev.set('app_icons_path', join_paths(meson.source_root(), 'data'))
+config_dev.set('resources_path', join_paths(meson.project_source_root(), 'data', 'resources'))
+config_dev.set('app_icons_path', join_paths(meson.project_source_root(), 'data'))
 
 # install translations
 subdir('po')

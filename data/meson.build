@@ -16,7 +16,7 @@ metainfo_file = i18n.merge_file(
   input:  files('org.cvfosammmm.Lemma.metainfo.xml.in'),
   output: 'org.cvfosammmm.Lemma.metainfo.xml',
   type: 'xml',
-  po_dir: join_paths(meson.source_root(), 'po'),
+  po_dir: join_paths(meson.project_source_root(), 'po'),
   install: true,
   install_dir: join_paths(datadir, 'metainfo'),
 )
