@@ -6,12 +6,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
@@ -625,6 +625,10 @@ class UseCases():
             insert_new = insert_prev.word_bounds()[0]
         else:
             insert_new = insert.prev_no_descent()
+            while insert_new != None and NodeTypeDB.is_whitespace(insert_new) and insert_new.prev_no_descent() != insert_new:
+                insert_new = insert_new.prev_no_descent()
+            if insert_new != None and insert_new.type == 'char' and not NodeTypeDB.is_whitespace(insert_new):
+                insert_new = insert_new.word_bounds()[0]
 
         if do_selection:
             document.set_insert_and_selection_node(insert_new, selection)
@@ -672,6 +676,10 @@ class UseCases():
             insert_new = insert.word_bounds()[1]
         else:
             insert_new = insert.next_no_descent()
+            while insert_new != None and NodeTypeDB.is_whitespace(insert_new) and insert_new.next_no_descent() != insert_new:
+                insert_new = insert_new.next_no_descent()
+            if insert_new != None and not NodeTypeDB.is_whitespace(insert_new):
+                insert_new = insert_new.word_bounds()[1]
 
         if do_selection:
             document.set_insert_and_selection_node(insert_new, selection)
@@ -1057,5 +1065,3 @@ class UseCases():
         document.scroll_to_xy(x, y, 'decelerate')
 
         MessageBus.add_message('document_changed')
-
-
