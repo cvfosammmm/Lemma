@@ -617,7 +617,13 @@ class UseCases():
     def jump_left(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        insert = document.get_insert_node()
+        original_insert = document.get_insert_node()
+        insert = original_insert
+        while insert != None and NodeTypeDB.is_whitespace(insert):
+            insert_prev = insert.prev_no_descent()
+            if insert_prev == insert:
+                break
+            insert = insert_prev
         selection = document.get_selection_node()
 
         insert_prev = insert.prev_in_parent()
@@ -625,10 +631,6 @@ class UseCases():
             insert_new = insert_prev.word_bounds()[0]
         else:
             insert_new = insert.prev_no_descent()
-            while insert_new != None and NodeTypeDB.is_whitespace(insert_new) and insert_new.prev_no_descent() != insert_new:
-                insert_new = insert_new.prev_no_descent()
-            if insert_new != None and insert_new.type == 'char' and not NodeTypeDB.is_whitespace(insert_new):
-                insert_new = insert_new.word_bounds()[0]
 
         if do_selection:
             document.set_insert_and_selection_node(insert_new, selection)
@@ -637,7 +639,7 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new)
         document.update_implicit_x_position()
-        if insert != document.get_insert_node():
+        if original_insert != document.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
@@ -669,17 +671,19 @@ class UseCases():
     def jump_right(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        insert = document.get_insert_node()
+        original_insert = document.get_insert_node()
+        insert = original_insert
+        while insert != None and NodeTypeDB.is_whitespace(insert):
+            insert_next = insert.next_no_descent()
+            if insert_next == insert:
+                break
+            insert = insert_next
         selection = document.get_selection_node()
 
         if insert != None and insert.type == 'char' and not NodeTypeDB.is_whitespace(insert):
             insert_new = insert.word_bounds()[1]
         else:
             insert_new = insert.next_no_descent()
-            while insert_new != None and NodeTypeDB.is_whitespace(insert_new) and insert_new.next_no_descent() != insert_new:
-                insert_new = insert_new.next_no_descent()
-            if insert_new != None and not NodeTypeDB.is_whitespace(insert_new):
-                insert_new = insert_new.word_bounds()[1]
 
         if do_selection:
             document.set_insert_and_selection_node(insert_new, selection)
@@ -688,7 +692,7 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new)
         document.update_implicit_x_position()
-        if insert != document.get_insert_node():
+        if original_insert != document.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
