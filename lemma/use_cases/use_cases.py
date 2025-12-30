@@ -6,12 +6,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
@@ -617,7 +617,13 @@ class UseCases():
     def jump_left(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        insert = document.get_insert_node()
+        original_insert = document.get_insert_node()
+        insert = original_insert
+        while insert != None and NodeTypeDB.is_whitespace(insert):
+            insert_prev = insert.prev_no_descent()
+            if insert_prev == insert:
+                break
+            insert = insert_prev
         selection = document.get_selection_node()
 
         insert_prev = insert.prev_in_parent()
@@ -633,7 +639,7 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new)
         document.update_implicit_x_position()
-        if insert != document.get_insert_node():
+        if original_insert != document.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
@@ -665,7 +671,13 @@ class UseCases():
     def jump_right(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        insert = document.get_insert_node()
+        original_insert = document.get_insert_node()
+        insert = original_insert
+        while insert != None and NodeTypeDB.is_whitespace(insert):
+            insert_next = insert.next_no_descent()
+            if insert_next == insert:
+                break
+            insert = insert_next
         selection = document.get_selection_node()
 
         if insert != None and insert.type == 'char' and not NodeTypeDB.is_whitespace(insert):
@@ -680,7 +692,7 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new)
         document.update_implicit_x_position()
-        if insert != document.get_insert_node():
+        if original_insert != document.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
         DocumentRepo.update(document)
@@ -1057,5 +1069,3 @@ class UseCases():
         document.scroll_to_xy(x, y, 'decelerate')
 
         MessageBus.add_message('document_changed')
-
-
