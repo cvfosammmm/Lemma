@@ -609,18 +609,16 @@ class UseCases():
     def jump_left(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
+        selection = document.get_selection_node()
         original_insert = document.get_insert_node()
         insert = original_insert
-        while insert != None and NodeTypeDB.is_whitespace(insert):
-            insert_prev = insert.prev_no_descent()
-            if insert_prev == insert:
+        while NodeTypeDB.is_whitespace(insert.prev_no_descent()):
+            if insert == insert.prev_no_descent():
                 break
-            insert = insert_prev
-        selection = document.get_selection_node()
+            insert = insert.prev_no_descent()
 
-        insert_prev = insert.prev_in_parent()
-        if insert_prev != None and insert_prev.type == 'char' and not NodeTypeDB.is_whitespace(insert_prev):
-            insert_new = insert_prev.word_bounds()[0]
+        if not NodeTypeDB.is_whitespace(insert.prev_no_descent()):
+            insert_new = insert.prev_no_descent().word_bounds()[0]
         else:
             insert_new = insert.prev_no_descent()
 
@@ -663,19 +661,18 @@ class UseCases():
     def jump_right(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
+        selection = document.get_selection_node()
         original_insert = document.get_insert_node()
         insert = original_insert
-        while insert != None and NodeTypeDB.is_whitespace(insert):
-            insert_next = insert.next_no_descent()
-            if insert_next == insert:
+        while NodeTypeDB.is_whitespace(insert):
+            if insert == insert.next_no_descent():
                 break
-            insert = insert_next
-        selection = document.get_selection_node()
+            insert = insert.next_no_descent()
 
-        if insert != None and insert.type == 'char' and not NodeTypeDB.is_whitespace(insert):
+        if not NodeTypeDB.is_whitespace(insert):
             insert_new = insert.word_bounds()[1]
         else:
-            insert_new = insert.next_no_descent()
+            insert_new = insert
 
         if do_selection:
             document.set_insert_and_selection_node(insert_new, selection)
