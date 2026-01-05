@@ -147,11 +147,11 @@ class DocumentTitle():
             backlinks = DocumentRepo.list_by_link_target(prev_title)
             for document_stub in reversed(backlinks):
                 linking_doc = DocumentRepo.get_by_id(document_stub['id'])
-                links = linking_doc.ast.get_link_bounds_and_targets()
+                links = linking_doc.get_link_bounds_and_targets()
                 for link in links:
                     bounds, target = link
                     if target == prev_title:
-                        char_nodes = [node.value for node in linking_doc.ast.get_subtree(*bounds) if node.type == 'char']
+                        char_nodes = [node.value for node in linking_doc.get_subtree(*bounds) if node.type == 'char']
                         if ''.join(char_nodes) == target:
                             xml = '<a href="' + xml_helpers.escape(title) + '">' + xml_helpers.escape(title) + '</a>'
                             UseCases.replace_section(linking_doc, bounds[0], bounds[1], xml)

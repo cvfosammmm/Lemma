@@ -165,8 +165,8 @@ class UseCases():
         else:
             document.title = os.path.basename(path)[:-3]
 
-        document.ast = parser.composite
-        document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
+        document.ast = parser.root
+        document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
         document.update_last_modified()
         document.update()
 
@@ -398,7 +398,7 @@ class UseCases():
         document.start_undoable_action()
         if document.has_selection():
             document.delete_selected_nodes()
-        elif not insert.is_first_in_parent():
+        elif not insert.is_first_in_parent() or (insert.parent.type == 'paragraph' and not insert.parent.is_first_in_parent()):
             document.delete_nodes(insert.prev_no_descent(), insert)
         elif len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.prev_no_descent(), insert)
@@ -419,7 +419,7 @@ class UseCases():
         document.start_undoable_action()
         if document.has_selection():
             document.delete_selected_nodes()
-        elif not insert.is_last_in_parent():
+        elif not insert.is_last_in_parent() or (insert.parent.type == 'paragraph' and not insert.parent.is_last_in_parent()):
             insert_new = insert.next_no_descent()
             document.delete_nodes(insert, insert_new)
         elif len(insert.parent) == 1:
@@ -493,17 +493,13 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.has_selection():
-            first_node = document.get_first_selection_bound().paragraph_start()
-            next_to_last = document.get_last_selection_bound().prev_in_parent()
-            if next_to_last != None:
-                last_node = next_to_last.paragraph_end()
-            else:
-                last_node = document.get_last_selection_bound().paragraph_end()
+            first_paragraph = document.get_first_selection_bound().paragraph()
+            last_paragraph = document.get_last_selection_bound().prev().paragraph()
 
-            paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
+            paragraph_nos = range(document.ast.index(first_paragraph), document.ast.index(last_paragraph) + 1)
             paragraphs = []
             for paragraph_no in paragraph_nos:
-                paragraphs.append(document.ast.paragraphs[paragraph_no])
+                paragraphs.append(document.ast[paragraph_no])
         else:
             paragraphs = [document.get_insert_node().paragraph()]
 
@@ -567,17 +563,13 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.has_selection():
-            first_node = document.get_first_selection_bound().paragraph_start()
-            next_to_last = document.get_last_selection_bound().prev_in_parent()
-            if next_to_last != None:
-                last_node = next_to_last.paragraph_end()
-            else:
-                last_node = document.get_last_selection_bound().paragraph_end()
+            first_paragraph = document.get_first_selection_bound().paragraph()
+            last_paragraph = document.get_last_selection_bound().prev().paragraph()
 
-            paragraph_nos = range(document.ast.paragraph_no_offset(first_node)[0], document.ast.paragraph_no_offset(last_node)[0] + 1)
+            paragraph_nos = range(document.ast.index(first_paragraph), document.ast.index(last_paragraph) + 1)
             paragraphs = []
             for paragraph_no in paragraph_nos:
-                paragraphs.append(document.ast.paragraphs[paragraph_no])
+                paragraphs.append(document.ast[paragraph_no])
         else:
             paragraphs = [document.get_insert_node().paragraph()]
 
@@ -717,7 +709,7 @@ class UseCases():
                     prev_hboxes = box['children'][:j]
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
-                    for paragraph in document.ast.paragraphs:
+                    for paragraph in document.ast:
                         for hbox in paragraph.layout['children']:
                             if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
@@ -731,7 +723,7 @@ class UseCases():
                                 new_node = layout['node']
                                 min_distance = distance
         if new_node == None:
-            new_node = document.ast[0]
+            new_node = document.ast[0][0]
 
         selection_node = document.get_selection_node()
 
@@ -761,7 +753,7 @@ class UseCases():
                     prev_hboxes = box['children'][j + 1:]
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
-                    for paragraph in document.ast.paragraphs:
+                    for paragraph in document.ast:
                         for hbox in paragraph.layout['children']:
                             if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
@@ -775,7 +767,7 @@ class UseCases():
                                 new_node = layout['node']
                                 min_distance = distance
         if new_node == None:
-            new_node = document.ast[-1]
+            new_node = document.ast[-1][-1]
 
         selection_node = document.get_selection_node()
 
@@ -867,8 +859,8 @@ class UseCases():
             node = node.next()
 
         while not node.type == 'placeholder':
-            if node == document.ast[-1]:
-                node = document.ast[0]
+            if node == document.ast[-1][-1]:
+                node = document.ast[0][0]
             else:
                 node = node.next()
             if node == insert: break
@@ -893,8 +885,8 @@ class UseCases():
             node = node.prev()
 
         while not node.type == 'placeholder':
-            if node == document.ast[0]:
-                node = document.ast[-1]
+            if node == document.ast[0][0]:
+                node = document.ast[-1][-1]
             else:
                 node = node.prev()
             if node == insert: break
@@ -922,7 +914,7 @@ class UseCases():
     def select_all():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.set_insert_and_selection_node(document.ast[0], document.ast[-1])
+        document.set_insert_and_selection_node(document.ast[0][0], document.ast[-1][-1])
         document.update_implicit_x_position()
 
         DocumentRepo.update(document)
@@ -979,9 +971,6 @@ class UseCases():
             if NodeTypeDB.can_hold_cursor(ancestor):
                 new_insert = ancestor
                 break
-            if (ancestor.type == 'mathlist' or ancestor.type == 'root') and insert != ancestor[0]:
-                new_insert = ancestor[0]
-                break
 
         if new_insert != None:
             document.set_insert_and_selection_node(new_insert, new_insert)
@@ -1025,8 +1014,8 @@ class UseCases():
                         new_insert = paragraph_end
                         new_selection = paragraph_start
                     else:
-                        new_insert = document.ast[0]
-                        new_selection = document.ast[-1]
+                        new_insert = document.ast[0][0]
+                        new_selection = document.ast[-1][-1]
 
         document.set_insert_and_selection_node(new_insert, new_selection)
         document.update_implicit_x_position()

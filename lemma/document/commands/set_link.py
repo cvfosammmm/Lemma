@@ -32,19 +32,19 @@ class Command():
             node.link = self.target
         self.state['nodes_and_prev_target'] = list(zip(self.nodes, prev_links))
 
-        if len(self.nodes) > 0:
-            for paragraph_no in range(document.ast.paragraph_no_offset(self.nodes[0])[0], document.ast.paragraph_no_offset(self.nodes[-1])[0] + 1):
-                document.ast.paragraphs[paragraph_no].invalidate()
-            document.update_last_modified()
+        for node in self.nodes:
+            node.paragraph().invalidate()
+
+        document.update_last_modified()
 
     def undo(self, document):
         for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]
         document.cursor.set_state(self.state['cursor_state_before'])
 
-        if len(self.nodes) > 0:
-            for paragraph_no in range(document.ast.paragraph_no_offset(self.nodes[0])[0], document.ast.paragraph_no_offset(self.nodes[-1])[0] + 1):
-                document.ast.paragraphs[paragraph_no].invalidate()
-            document.update_last_modified()
+        for item in self.state['nodes_and_prev_target']:
+            item[0].paragraph().invalidate()
+
+        document.update_last_modified()
 
 

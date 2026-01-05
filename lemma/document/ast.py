@@ -23,238 +23,54 @@ class Root():
 
     def __init__(self):
         self.parent = None
-        end_node = Node('end')
-        end_node.set_parent(self)
-        self.paragraphs = [Paragraph([end_node])]
+        self.paragraphs = []
         self.type = 'root'
-        self.current_iter_index = -1
 
-    @timer.timer
-    def insert_before(self, child, nodes):
-        paragraph_no, offset = self.paragraph_no_offset(child)
-        orig_offset = offset
+        paragraph = Paragraph()
+        paragraph.append(Node('end'))
+        self.append(paragraph)
 
-        for node in nodes:
-            if node.type == 'eol':
-                self.paragraphs[paragraph_no].nodes.insert(offset, node)
+    def insert(self, offset, paragraph):
+        self.paragraphs.insert(offset, paragraph)
+        paragraph.set_parent(self)
 
-                new_paragraph = Paragraph(self.paragraphs[paragraph_no].nodes[offset + 1:])
-                new_paragraph.style = self.paragraphs[paragraph_no].style
-                new_paragraph.indentation_level = self.paragraphs[paragraph_no].indentation_level
-                if orig_offset == 0:
-                    new_paragraph.state = self.paragraphs[paragraph_no].state
+    def append(self, paragraph):
+        self.paragraphs.append(paragraph)
+        paragraph.set_parent(self)
 
-                self.paragraphs.insert(paragraph_no + 1, new_paragraph)
-                del(self.paragraphs[paragraph_no].nodes[offset + 1:])
+    def remove(self, paragraph):
+        self.paragraphs.remove(paragraph)
 
-                paragraph_no += 1
-                offset = 0
-            else:
-                self.paragraphs[paragraph_no].nodes.insert(offset, node)
-
-                offset += 1
-
-            node.set_parent(self)
-
-    @timer.timer
-    def append(self, node):
-        self.paragraphs[-1].nodes.insert(-1, node)
-        if node.type == 'eol':
-            new_paragraph = Paragraph([self.paragraphs[-1].nodes[-1]])
-            self.paragraphs.append(new_paragraph)
-            del(self.paragraphs[-2].nodes[-1])
-
-        node.set_parent(self)
-
-    @timer.timer
-    def append_paragraph(self, paragraph):
-        self.paragraphs[-1].style = paragraph.style
-        self.paragraphs[-1].indentation_level = paragraph.indentation_level
-        self.paragraphs[-1].state = paragraph.state
-
-        for node in paragraph.nodes:
-            self.paragraphs[-1].nodes.insert(-1, node)
-            node.set_parent(self)
-            if node.type == 'eol':
-                self.paragraphs.append(Paragraph([self.paragraphs[-1].nodes[-1]]))
-                del(self.paragraphs[-2].nodes[-1])
-
-    @timer.timer
-    def remove(self, nodes):
-        for node in nodes:
-            for i, paragraph in enumerate(self.paragraphs):
-                if node in paragraph.nodes:
-                    paragraph.nodes.remove(node)
-                    if node.type == 'eol':
-                        if len(self.paragraphs[i].nodes) == 0:
-                            self.paragraphs[i].style = self.paragraphs[i + 1].style
-                            self.paragraphs[i].indentation_level = self.paragraphs[i + 1].indentation_level
-                        self.paragraphs[i] = Paragraph(paragraph.nodes + self.paragraphs[i + 1].nodes)
-                        del(self.paragraphs[i + 1])
-                    elif len(self.paragraphs[i].nodes) == 0:
-                        del(self.paragraphs[i])
-                    break
-
-    @timer.timer
-    def remove_range(self, first_node, last_node):
-        paragraph_no_1, offset_1 = self.paragraph_no_offset(first_node)
-        paragraph_no_2, offset_2 = self.paragraph_no_offset(last_node)
-        if paragraph_no_1 != paragraph_no_2:
-            nodes = []
-            nodes += self.paragraphs[paragraph_no_1].nodes[offset_1:]
-            for paragraph in self.paragraphs[paragraph_no_1 + 1:paragraph_no_2]:
-                nodes += paragraph.nodes
-            nodes += self.paragraphs[paragraph_no_2].nodes[:offset_2]
-
-            self.paragraphs[paragraph_no_1].nodes = self.paragraphs[paragraph_no_1].nodes[:offset_1] + self.paragraphs[paragraph_no_2].nodes[offset_2:]
-
-            if offset_1 == 0:
-                self.paragraphs[paragraph_no_1].style = self.paragraphs[paragraph_no_2].style
-                self.paragraphs[paragraph_no_1].indentation_level = self.paragraphs[paragraph_no_2].indentation_level
-
-            del(self.paragraphs[paragraph_no_1 + 1:paragraph_no_2 + 1])
-        else:
-            nodes = self.paragraphs[paragraph_no_1].nodes[offset_1:offset_2]
-            del(self.paragraphs[paragraph_no_1].nodes[offset_1:offset_2])
-
-        return nodes
-
-    @timer.timer
-    def index(self, node):
-        count = 0
-        for paragraph in self.paragraphs:
-            if node in paragraph.nodes:
-                count += paragraph.nodes.index(node)
-                return count
-            count += len(paragraph.nodes)
-
-    def paragraph_no_offset(self, node):
-        count = 0
-        for i, paragraph in enumerate(self.paragraphs):
-            if node in paragraph.nodes:
-                return i, paragraph.nodes.index(node)
-
-    def index_to_paragraph_no_offset(self, index):
-        if index == 0: return 0, 0
-
-        if index < 0:
-            index += len(self)
-
-        for i, paragraph in enumerate(self.paragraphs):
-            if index < len(paragraph.nodes):
-                return i, index
-            index -= len(paragraph.nodes)
-        return 0, 0
+    def index(self, paragraph):
+        return self.paragraphs.index(paragraph)
 
     def get_position(self):
         return Position(*list())
 
-    @timer.timer
-    def get_subtree(self, node1, node2):
-        pos1 = node1.get_position()
-        pos2 = node2.get_position()
-
-        pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
-        parent = self.get_node_at_position(pos1[:-1])
-
-        return parent[pos1[-1]:pos2[-1]]
-
-    def copy(self):
-        return Root()
-
-    def __len__(self):
-        return sum([len(paragraph.nodes) for paragraph in self.paragraphs])
-
-    def __iter__(self):
-        self.current_iter_index = [0, -1]
-        return self
-
-    def __next__(self):
-        self.current_iter_index[1] += 1
-        if self.current_iter_index[1] >= len(self.paragraphs[self.current_iter_index[0]].nodes):
-            self.current_iter_index[0] += 1
-            self.current_iter_index[1] = 0
-        if self.current_iter_index[0] >= len(self.paragraphs):
-            raise StopIteration
-        return self.paragraphs[self.current_iter_index[0]].nodes[self.current_iter_index[1]]
+    def __len__(self): return len(self.paragraphs)
+    def __iter__(self): return self.paragraphs.__iter__()
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            if len(range(len(self))[key]) > 0:
-                index_1 = key.start
-                index_2 = key.stop
-                paragraph_no_1, offset_1 = self.index_to_paragraph_no_offset(index_1)
-                paragraph_no_2, offset_2 = self.index_to_paragraph_no_offset(index_2)
-
-                if paragraph_no_1 != paragraph_no_2:
-                    nodes = []
-                    nodes += self.paragraphs[paragraph_no_1].nodes[offset_1:]
-                    for paragraph in self.paragraphs[paragraph_no_1 + 1:paragraph_no_2]:
-                        nodes += paragraph.nodes
-                    nodes += self.paragraphs[paragraph_no_2].nodes[:offset_2]
-                else:
-                    nodes = self.paragraphs[paragraph_no_1].nodes[offset_1:offset_2]
-                return nodes
-            else:
-                return []
+            return self.paragraphs.__getitem__(key)
         else:
-            paragraph_no, offset = self.index_to_paragraph_no_offset(key)
-            return self.paragraphs[paragraph_no].nodes.__getitem__(offset)
+            return self.paragraphs.__getitem__(key)
 
     def ancestors(self):
         return []
 
-    @timer.timer
-    def flatten(self):
-        result = [self]
-        for paragraph in self.paragraphs:
-            for child in paragraph.nodes:
-                result += child.flatten()
-        return result
-
-    @timer.timer
-    def get_node_at_position(self, pos):
-        node = self
-        for index in pos:
-            node = node[index]
-        return node
-
-    @timer.timer
-    def get_link_bounds_and_targets(self):
-        current_target = None
-        current_bounds = [None, None]
-        result = list()
-        for node in self:
-            current_bounds[1] = node
-            if current_target != node.link:
-                if current_bounds[0] != None and current_target != None:
-                    result.append([[current_bounds[0], current_bounds[1]], current_target])
-                current_bounds[0] = node
-            current_target = node.link
-        if current_bounds[0] != None and current_target != None:
-            result.append([[current_bounds[0], current_bounds[1]], current_target])
-
-        return result
-
     def __str__(self):
         return 'root'
-
-    def validate(self):
-        for paragraph in self.paragraphs:
-            for child in paragraph.nodes:
-                if child.type not in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}:
-                    return False
-                if not child.validate():
-                    return False
-        return True
 
 
 class Paragraph():
 
-    def __init__(self, nodes=[]):
-        self.nodes = nodes
+    def __init__(self):
+        self.parent = None
+        self.nodes = []
         self.layout = None
         self.xml = None
+        self.type = 'paragraph'
 
         self.style = 'p'
         self.indentation_level = 0
@@ -263,6 +79,56 @@ class Paragraph():
     def invalidate(self):
         self.layout = None
         self.xml = None
+
+    def set_parent(self, parent):
+        self.parent = parent
+
+    def insert(self, offset, node):
+        self.nodes.insert(offset, node)
+        node.set_parent(self)
+
+    def append(self, node):
+        self.nodes.append(node)
+        node.set_parent(self)
+
+    def remove(self, node):
+        self.nodes.remove(node)
+
+    def index(self, node):
+        return self.nodes.index(node)
+
+    def get_position(self):
+        return Position(self.parent.index(self))
+
+    def ancestors(self):
+        return [node.parent]
+
+    def is_first_in_parent(self):
+        return self == self.parent[0]
+
+    def is_last_in_parent(self):
+        return self == self.parent[-1]
+
+    def prev_in_parent(self):
+        if not self.is_first_in_parent():
+            index = self.parent.index(self) - 1
+            return self.parent[index]
+        return None
+
+    def next_in_parent(self):
+        if not self.is_last_in_parent():
+            index = self.parent.index(self) + 1
+            return self.parent[index]
+        return None
+
+    def __len__(self): return len(self.nodes)
+    def __iter__(self): return self.nodes.__iter__()
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.nodes.__getitem__(key)
+        else:
+            return self.nodes.__getitem__(key)
 
 
 class Node():
@@ -279,27 +145,16 @@ class Node():
     def set_parent(self, parent):
         self.parent = parent
 
-    def insert_before(self, child, nodes):
-        for node in nodes:
-            index = self.index(child)
-            self.children.insert(index, node)
-            node.set_parent(self)
-
-    def append(self, node):
-        self.children.insert(len(self.children), node)
+    def insert(self, offset, node):
+        self.children.insert(offset, node)
         node.set_parent(self)
 
-    def remove(self, nodes):
-        for node in nodes:
-            self.children.remove(node)
+    def append(self, node):
+        self.children.append(node)
+        node.set_parent(self)
 
-    def remove_range(self, first_node, last_node):
-        index_1 = self.index(first_node)
-        index_2 = self.index(last_node)
-        nodes = self.children[index_1:index_2]
-        del(self.children[index_1:index_2])
-
-        return nodes
+    def remove(self, node):
+        self.children.remove(node)
 
     def index(self, node):
         return self.children.index(node)
@@ -312,21 +167,6 @@ class Node():
             node = node.parent
 
         return Position(*position)
-
-    def copy(self):
-        node = Node(self.type, self.value)
-        node.tags = self.tags
-        node.link = self.link
-        return node
-
-    def __len__(self): return len(self.children)
-    def __iter__(self): return self.children.__iter__()
-
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return self.children.__getitem__(key)
-        else:
-            return self.children.__getitem__(key)
 
     def ancestors(self):
         node = self
@@ -342,20 +182,6 @@ class Node():
 
     def is_last_in_parent(self):
         return self == self.parent[-1]
-
-    def is_first_in_paragraph(self):
-        if not self.parent.type == 'root': return False
-        if self.is_first_in_parent(): return True
-        if self.prev_in_parent().type == 'eol': return True
-
-        return False
-
-    def is_last_in_paragraph(self):
-        if not self.parent.type == 'root': return False
-        if self.is_last_in_parent(): return True
-        if self.type == 'eol': return True
-
-        return False
 
     def is_inside_link(self):
         if self.link == None: return False
@@ -408,27 +234,23 @@ class Node():
                 node1 = prev_node
         return (node1, node2)
 
-    def paragraph_bounds(self):
-        return (self.paragraph_start(), self.paragraph_end())
-
     def paragraph(self):
         node = self
 
-        while not node.parent.type == 'root':
+        while not node.type == 'paragraph':
             node = node.parent
 
-        paragraph_no, offset = node.parent.paragraph_no_offset(node)
-        return node.parent.paragraphs[paragraph_no]
+        return node
 
-    def prev_in_parent(self, steps=1):
-        if self != self.parent[0]:
-            index = self.parent.index(self) - steps
+    def prev_in_parent(self):
+        if not self.is_first_in_parent():
+            index = self.parent.index(self) - 1
             return self.parent[index]
         return None
 
-    def next_in_parent(self, steps=1):
-        if self != self.parent[-1]:
-            index = self.parent.index(self) + steps
+    def next_in_parent(self):
+        if not self.is_last_in_parent():
+            index = self.parent.index(self) + 1
             return self.parent[index]
         return None
 
@@ -440,8 +262,11 @@ class Node():
             while not len(node.children) == 0:
                 node = node[-1]
 
-        elif not node.parent.type == 'root':
+        elif not node.parent.type == 'paragraph':
             node = node.parent
+
+        elif not node.parent.is_first_in_parent():
+            node = node.parent.prev_in_parent()[-1]
 
         if not NodeTypeDB.can_hold_cursor(node):
             return node.prev()
@@ -455,10 +280,12 @@ class Node():
             node = node[0]
 
         else:
-            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
+            while not node.type == 'paragraph' and node.parent.index(node) == len(node.parent) - 1:
                 node = node.parent
-            if not node.type == 'root':
+            if not node.type == 'paragraph':
                 node = node.parent[node.parent.index(node) + 1]
+            elif not node.is_last_in_parent():
+                node = node.next_in_parent()[0]
             else:
                 node = node[-1]
 
@@ -470,12 +297,15 @@ class Node():
     def prev_no_descent(self):
         node = self
 
-        if node != node.parent[0]:
+        if not node.is_first_in_parent():
             index = node.parent.index(node) - 1
             node = node.parent[index]
 
-        elif not node.parent.type == 'root':
+        elif not node.parent.type == 'paragraph':
             node = node.parent
+
+        elif not node.parent.is_first_in_parent():
+            node = node.parent.prev_in_parent()[-1]
 
         if not NodeTypeDB.can_hold_cursor(node):
             return node.prev_no_descent()
@@ -485,15 +315,17 @@ class Node():
     def next_no_descent(self):
         node = self
 
-        if node != node.parent[-1]:
+        if not node.is_last_in_parent():
             index = node.parent.index(node) + 1
             node = node.parent[index]
 
         else:
-            while not node.type == 'root' and node.parent.index(node) == len(node.parent) - 1:
+            while not node.type == 'paragraph' and node.parent.index(node) == len(node.parent) - 1:
                 node = node.parent
-            if not node.type == 'root':
+            if not node.type == 'paragraph':
                 node = node.parent[node.parent.index(node) + 1]
+            elif not node.is_last_in_parent():
+                node = node.next_in_parent()[0]
             else:
                 node = node[-1]
 
@@ -502,11 +334,8 @@ class Node():
 
         return node
 
-    def flatten(self):
-        result = [self]
-        for child in self.children:
-            result += child.flatten()
-        return result
+    def paragraph_bounds(self):
+        return (self.paragraph_start(), self.paragraph_end())
 
     def paragraph_start(self):
         return self.paragraph().nodes[0]
@@ -514,38 +343,27 @@ class Node():
     def paragraph_end(self):
         return self.paragraph().nodes[-1]
 
+    def flatten(self):
+        result = [self]
+        for child in self.children:
+            result += child.flatten()
+        return result
+
+    def __len__(self):
+        return len(self.children)
+
+    def __iter__(self):
+        return self.children.__iter__()
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.children.__getitem__(key)
+        else:
+            return self.children.__getitem__(key)
+
     def __str__(self):
         string = self.type + ':' + str(self.value)
         return string
-
-    @timer.timer
-    def validate(self):
-        if self.type == 'root':
-            return all(child.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot'} for child in self.children) \
-                and all(child.validate() for child in self.children)
-
-        if self.type == 'mathscript':
-            return len(self.children) == 2 \
-                and all(child.type == 'mathlist' for child in self.children) \
-                and all(child.validate() for child in self.children)
-
-        if self.type == 'mathfraction':
-            return len(self.children) == 2 \
-                and all(child.type == 'mathlist' for child in self.children) \
-                and all(child.validate() for child in self.children)
-
-        if self.type == 'mathroot':
-            return len(self.children) == 2 \
-                and all(child.type == 'mathlist' for child in self.children) \
-                and all(child.validate() for child in self.children)
-
-        if self.type == 'mathlist':
-            return len(self.children) == 0 \
-                or all(child.type in {'char', 'placeholder', 'end'} for child in self.children) \
-                and all(child.validate() for child in self.children)
-
-        if self.type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
-            return len(self.children) == 0
 
 
 class Position(object):
@@ -589,6 +407,7 @@ class Cursor():
         self.node_selection = node_selection
         self.implicit_x_position = 0
 
+    @timer.timer
     def set_insert_selection_nodes(self, node_insert, node_selection):
         self.node_insert = node_insert
         self.node_selection = node_selection
@@ -604,8 +423,8 @@ class Cursor():
             self.restore_selection_invariant()
 
     def set_state(self, position):
-        self.node_insert = self.document.ast.get_node_at_position(position[0])
-        self.node_selection = self.document.ast.get_node_at_position(position[1])
+        self.node_insert = self.document.get_node_at_position(position[0])
+        self.node_selection = self.document.get_node_at_position(position[1])
 
     def update_implicit_x_position(self, x):
         self.implicit_x_position = x
@@ -636,39 +455,45 @@ class Cursor():
     def has_selection(self):
         return self.get_insert_node() != self.get_selection_node()
 
-    # restore the invariant that both the insert and the selection bound have the same parent.
+    # restore the invariant that both the insert and the selection bound
+    # have either the same parent or their parents are paragraphs.
+    @timer.timer
     def restore_selection_invariant(self):
 
         # special cases where the invariant already holds
         if not self.has_selection(): return
         if self.node_insert.parent == self.node_selection.parent: return
+        if self.node_insert.parent.type == 'paragraph' and self.node_selection.parent.type == 'paragraph': return
+
+        first_node, last_node = self.get_first_and_last_node()
 
         # compute the smallest common ancestor of both the insert and the selection node.
-        ancestors = list(zip(self.node_insert.ancestors() + [self.node_insert], self.node_selection.ancestors() + [self.node_selection]))
-        common_ancestors_and_their_children = [(node_1, node_2) for (node_1, node_2) in list(ancestors) if node_1.parent == node_2.parent or node_1.type == 'root']
+        ancestors = list(zip(first_node.ancestors() + [first_node], last_node.ancestors() + [last_node]))
 
-        # if the children of the sca can't hold the cursor, go up some more
-        for node_1, node_2 in reversed(common_ancestors_and_their_children):
-            if NodeTypeDB.can_hold_cursor(node_1) and NodeTypeDB.can_hold_cursor(node_2):
-                sca = node_1.parent
+        common_ancestors_and_their_children = list()
+        for (node_1, node_2) in ancestors:
+            if node_1.type == 'root' or node_1.parent.type in ['root', 'paragraph'] or node_1.parent == node_2.parent and NodeTypeDB.can_hold_cursor(node_1):
+                common_ancestors_and_their_children.append((node_1, node_2))
+            else:
                 break
 
         # compute the new positions
-        sca_pos = sca.get_position()
-        pos1, pos2 = self.get_selection_position(), self.get_insert_position()
-        pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
-        if len(pos1) > len(sca_pos) + 1:
-            pos1 = pos1[:len(sca_pos) + 1]
-        if len(pos2) > len(sca_pos) + 1:
-            pos2 = pos2[:len(sca_pos) + 1]
+        pos1, pos2 = first_node.get_position(), last_node.get_position()
+        ancestor_1_pos = pos1[:len(common_ancestors_and_their_children) - 2]
+        ancestor_2_pos = pos2[:len(common_ancestors_and_their_children) - 2]
+
+        if len(pos1) > len(ancestor_1_pos) + 1:
+            pos1 = pos1[:len(ancestor_1_pos) + 1]
+        if len(pos2) > len(ancestor_2_pos) + 1:
+            pos2 = pos2[:len(ancestor_2_pos) + 1]
             pos2[-1] += 1
 
-        # move both insert and selection bound to the sca
-        if self.get_insert_position() < self.get_selection_position():
-            self.node_insert = self.document.ast.get_node_at_position(pos1)
-            self.node_selection = self.document.ast.get_node_at_position(pos2)
+        # move both insert and selection bound to either a common ancestor or a paragraph
+        if self.get_insert_node() == first_node:
+            self.node_insert = self.document.get_node_at_position(pos1)
+            self.node_selection = self.document.get_node_at_position(pos2)
         else:
-            self.node_insert = self.document.ast.get_node_at_position(pos2)
-            self.node_selection = self.document.ast.get_node_at_position(pos1)
+            self.node_insert = self.document.get_node_at_position(pos2)
+            self.node_selection = self.document.get_node_at_position(pos1)
 
 

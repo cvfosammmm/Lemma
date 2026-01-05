@@ -53,7 +53,7 @@ class Dialog(object):
         else:
             if file != None:
                 document = WorkspaceRepo.get_workspace().get_active_document()
-                if document.get_insert_node().parent.type == 'root':
+                if document.insert_parent_is_root():
                     filename = file.get_path()
                     texture = Gdk.Texture.new_from_filename(filename)
                     data = texture.save_to_png_bytes().unref_to_data()

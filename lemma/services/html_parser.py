@@ -18,7 +18,7 @@
 import urllib.parse, os.path
 from html.parser import HTMLParser as HTMLParserLib
 
-from lemma.document.ast import Root, Node
+from lemma.document.ast import Root, Paragraph, Node
 from lemma.widgets.image import Image
 from lemma.services.layout_info import LayoutInfo
 
@@ -34,7 +34,6 @@ class HTMLParser(HTMLParserLib):
         self.open_tags = list()
         self.tags = set()
         self.link_target = None
-        self.paragraph_style = 'p'
 
         self.title = None
         self.root = None
@@ -43,7 +42,8 @@ class HTMLParser(HTMLParserLib):
 
     def run(self):
         self.root = Root()
-        self.composite = self.root
+        self.composite = Paragraph()
+        self.root.append(self.composite)
 
         start, divider, rest = self.html.partition('<body>')
         if rest != '':
@@ -58,8 +58,7 @@ class HTMLParser(HTMLParserLib):
         body = body.strip()
         if body != '':
             self.feed(body)
-            self.composite[-2].parent.remove([self.composite[-2]])
-            self.composite[-1].paragraph_style = self.paragraph_style
+            self.root[-1].append(Node('end'))
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)
@@ -67,7 +66,10 @@ class HTMLParser(HTMLParserLib):
         if tag == 'br':
             node = Node('eol')
             self.composite.append(node)
-            self.root.paragraphs[-2].style = self.paragraph_style
+            self.composite_prev = self.composite
+            self.composite = Paragraph()
+            self.composite.style = self.composite_prev.style
+            self.root.append(self.composite)
 
         if tag == 'strong': self.tags.add('bold')
         if tag == 'em': self.tags.add('italic')
@@ -76,7 +78,7 @@ class HTMLParser(HTMLParserLib):
                 if name == 'href':
                     self.link_target = urllib.parse.unquote_plus(value)
         if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol']:
-            self.paragraph_style = tag
+            self.composite.style = tag
         if tag == 'img':
             width = LayoutInfo.get_max_layout_width()
             for name, value in attrs:
@@ -126,7 +128,10 @@ class HTMLParser(HTMLParserLib):
         if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'li']:
             node = Node('eol')
             self.composite.append(node)
-            self.root.paragraphs[-2].style = self.paragraph_style
+            self.composite_prev = self.composite
+            self.composite = Paragraph()
+            self.composite.style = self.composite_prev.style
+            self.root.append(self.composite)
 
         if tag == 'strong': self.tags.discard('bold')
         if tag == 'em': self.tags.discard('italic')

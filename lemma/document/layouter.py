@@ -35,7 +35,7 @@ class Layouter(object):
     @timer.timer
     def update_layout(self):
         y_offset = 0
-        for paragraph in self.document.ast.paragraphs:
+        for paragraph in self.document.ast:
             if paragraph.layout == None:
                 self.paragraph_style = paragraph.style
 

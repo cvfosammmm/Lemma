@@ -48,14 +48,14 @@ class HTMLExporter(object):
         self.html += '<body>\n'
         self.html += '<h1>' + document.title + '</h1>\n'
 
-        for i, paragraph in enumerate(document.ast.paragraphs):
+        for i, paragraph in enumerate(document.ast):
             if paragraph.style in ['ul', 'ol']:
-                if i == 0 or paragraph.style != document.ast.paragraphs[i-1].style:
+                if i == 0 or paragraph.style != document.ast[i-1].style:
                     self.html += '<' + paragraph.style + '><li>'
                 else:
                     self.html += '<li>'
             elif paragraph.style == 'cl':
-                if i == 0 or paragraph.style != document.ast.paragraphs[i-1].style:
+                if i == 0 or paragraph.style != document.ast[i-1].style:
                     self.html += '<ul><li>'
                 else:
                     self.html += '<li>'
@@ -68,12 +68,12 @@ class HTMLExporter(object):
                 self.process_list(node_list)
 
             if paragraph.style in ['ul', 'ol']:
-                if i == len(document.ast.paragraphs) - 1 or paragraph.style != document.ast.paragraphs[i+1].style:
+                if i == len(document.ast) - 1 or paragraph.style != document.ast[i+1].style:
                     self.html += '</li></' + paragraph.style + '>'
                 else:
                     self.html += '</li>'
             elif paragraph.style == 'cl':
-                if i == len(document.ast.paragraphs) - 1 or paragraph.style != document.ast.paragraphs[i+1].style:
+                if i == len(document.ast) - 1 or paragraph.style != document.ast[i+1].style:
                     self.html += '</li></ul>'
                 else:
                     self.html += '</li>'
@@ -125,13 +125,13 @@ class HTMLExporter(object):
 
     def process_node(self, node):
         if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '<math>'
             self.html += node.value
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '</math>'
         elif node.type == 'mathscript':
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '<math>'
             self.html += '<msubsup>'
             self.html += '<mn>'
@@ -141,10 +141,10 @@ class HTMLExporter(object):
             self.process_node(node[1])
             self.html += '</mn>'
             self.html += '</msubsup>'
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '</math>'
         elif node.type == 'mathfraction':
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '<math>'
             self.html += '<mfrac>'
             self.html += '<mn>'
@@ -154,10 +154,10 @@ class HTMLExporter(object):
             self.process_node(node[1])
             self.html += '</mn>'
             self.html += '</mfrac>'
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '</math>'
         elif node.type == 'mathroot':
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '<math>'
             self.html += '<mroot>'
             self.html += '<mtext>'
@@ -167,7 +167,7 @@ class HTMLExporter(object):
             self.process_node(node[1])
             self.html += '</mtext>'
             self.html += '</mroot>'
-            if node.parent.type == 'root':
+            if node.parent.type == 'paragraph':
                 self.html += '</math>'
         elif node.type == 'mathlist':
             for child in node:

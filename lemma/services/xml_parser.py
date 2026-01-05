@@ -56,7 +56,10 @@ class XMLParser(object):
             return None
         else:
             if len(self.paragraphs) == 0 and len(self.nodes) > 0:
-                self.paragraphs.append(Paragraph(self.nodes))
+                new_paragraph = Paragraph()
+                for node in self.nodes:
+                    new_paragraph.append(node)
+                self.paragraphs.append(new_paragraph)
             return self.paragraphs
 
     def handle_starttag(self, tag, attrs):
@@ -112,7 +115,9 @@ class XMLParser(object):
         self.open_tags.pop()
 
         if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl']:
-            new_paragraph = Paragraph(self.nodes)
+            new_paragraph = Paragraph()
+            for node in self.nodes:
+                new_paragraph.append(node)
             new_paragraph.style = tag
             new_paragraph.indentation_level = self.current_indentation_level
             new_paragraph.state = self.current_paragraph_state

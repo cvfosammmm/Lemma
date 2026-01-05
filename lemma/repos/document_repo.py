@@ -18,6 +18,7 @@
 import os.path, os, pickle
 
 from lemma.document.document import Document
+from lemma.document.ast import Paragraph
 from lemma.services.xml_parser import XMLParser
 from lemma.services.paths import Paths
 import lemma.services.xml_helpers as xml_helpers
@@ -123,10 +124,20 @@ class DocumentRepo():
         paragraphs = parser.parse(xml)
         if paragraphs != None:
             for paragraph in paragraphs:
-                document.ast.append_paragraph(paragraph)
+                document.ast[-1].style = paragraph.style
+                document.ast[-1].indentation_level = paragraph.indentation_level
+                document.ast[-1].state = paragraph.state
+
+                for node in paragraph.nodes:
+                    document.ast[-1].insert(-1, node)
+                    if node.type == 'eol':
+                        new_paragraph = Paragraph()
+                        new_paragraph.insert(0, document.ast[-1].nodes[-1])
+                        document.ast.append(new_paragraph)
+                        del(document.ast[-2].nodes[-1])
 
         document.title = parser.title
-        document.cursor.set_state([document.ast[0].get_position(), document.ast[0].get_position()])
+        document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
         document.update()
         document.change_flag[DocumentRepo] = False
 

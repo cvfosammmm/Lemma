@@ -19,7 +19,7 @@
 class NodeTypeDB(object):
 
     def can_hold_cursor(node):
-        return node.type != 'mathlist' and node.type != 'list' and node.type != 'root'
+        return node.type != 'mathlist' and node.type != 'paragraph' and node.type != 'root'
 
     def focus_on_click(node):
         return node.type in {'widget', 'placeholder'}
@@ -28,15 +28,11 @@ class NodeTypeDB(object):
         return node.type == 'eol' or (node.type == 'char' and node.value.isspace())
 
     def is_subscript(node):
-        if node.parent.type == 'root': return False
-
         if node.parent.parent.type == 'mathscript':
             return node.parent == node.parent.parent[0]
         return False
 
     def is_superscript(node):
-        if node.parent.type == 'root': return False
-
         if node.parent.parent.type == 'mathscript':
             return node.parent == node.parent.parent[1]
         if node.parent.parent.type == 'mathroot':
@@ -44,7 +40,6 @@ class NodeTypeDB(object):
         return False
 
     def in_fraction(node):
-        if node.parent.type == 'root': return False
         return node.parent.parent.type == 'mathfraction'
 
 

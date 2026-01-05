@@ -32,8 +32,8 @@ class Command():
                 node.tags.remove(self.tag_name)
 
         if len(char_nodes) > 0:
-            for paragraph_no in range(document.ast.paragraph_no_offset(char_nodes[0])[0], document.ast.paragraph_no_offset(char_nodes[-1])[0] + 1):
-                document.ast.paragraphs[paragraph_no].invalidate()
+            for paragraph_no in range(document.ast.index(char_nodes[0].paragraph()), document.ast.index(char_nodes[-1].paragraph()) + 1):
+                document.ast[paragraph_no].invalidate()
             document.update_last_modified()
 
     def undo(self, document):
@@ -41,8 +41,8 @@ class Command():
             node.tags.add(self.tag_name)
 
         if len(self.state['affected_nodes']) > 0:
-            for paragraph_no in range(document.ast.paragraph_no_offset(self.state['affected_nodes'][0])[0], document.ast.paragraph_no_offset(self.state['affected_nodes'][-1])[0] + 1):
-                document.ast.paragraphs[paragraph_no].invalidate()
+            for paragraph_no in range(document.ast.index(self.state['affected_nodes'][0].paragraph()), document.ast.index(self.state['affected_nodes'][-1].paragraph()) + 1):
+                document.ast[paragraph_no].invalidate()
             document.update_last_modified()
 
 

@@ -67,7 +67,7 @@ class DocumentViewPresenter():
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
         list_item_numbers = [0, 0, 0, 0, 0]
-        for i, paragraph in enumerate(document.ast.paragraphs):
+        for i, paragraph in enumerate(document.ast):
             if paragraph.style == 'ol':
                 list_item_numbers[paragraph.indentation_level] += 1
                 if paragraph.indentation_level < 4:

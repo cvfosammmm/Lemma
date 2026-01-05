@@ -44,7 +44,7 @@ class Document():
         self.id = id
         self.title = ''
         self.ast = Root()
-        self.cursor = Cursor(self, self.ast[0], self.ast[0])
+        self.cursor = Cursor(self, self.ast[0][0], self.ast[0][0])
         self.plaintext = None
         self.xml = None
         self.links = set()
@@ -101,14 +101,14 @@ class Document():
 
         for paragraph in paragraphs:
             if paragraph == paragraphs[0]:
-                if node_before != None and node_before.type != 'eol':
+                if node_before != None:
                     continue
                 elif node_after.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
                     continue
             elif paragraph == paragraphs[-1]:
                 if node_after != 'eol':
                     continue
-                elif node_before != None and node_before.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                elif node_before != None and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
                     continue
             if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and not paragraph.style.startswith('h'):
                 continue
@@ -142,7 +142,8 @@ class Document():
 
     @undoable_action
     def replace_max_string_before_cursor(self):
-        last_node = self.cursor.get_insert_node().prev_in_parent()
+        insert_node = self.cursor.get_insert_node()
+        last_node = insert_node.prev()
         first_node = last_node
         for i in range(5):
             prev_node = first_node.prev_in_parent()
@@ -151,7 +152,7 @@ class Document():
             else:
                 break
 
-        subtree = self.ast.get_subtree(first_node, last_node)
+        subtree = self.get_subtree(first_node, last_node)
         chars = ''.join([node.value for node in subtree])
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
@@ -160,15 +161,18 @@ class Document():
                     text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
                     xml = xml_helpers.embellish_with_link_and_tags(text, None, first_node.tags)
                     parser = xml_parser.XMLParser()
+                    start_node = last_node
+                    for i in range(length):
+                        start_node = start_node.prev_in_parent()
 
                     nodes = []
                     paragraphs = parser.parse(xml)
                     for paragraph in paragraphs:
                         nodes += paragraph.nodes
 
-                    self.command_manager.add_command('delete', last_node.prev_in_parent(length), last_node)
+                    self.command_manager.add_command('delete', start_node, last_node)
                     self.command_manager.add_command('insert', last_node, nodes)
-                    self.command_manager.add_command('move_cursor_to_node', last_node.next_in_parent())
+                    self.command_manager.add_command('move_cursor_to_node', insert_node)
                     self.command_manager.add_command('update_implicit_x_position')
 
     @undoable_action
@@ -197,7 +201,7 @@ class Document():
 
     @undoable_action
     def set_link(self, bounds, target):
-        char_nodes = [node for node in self.ast.get_subtree(*bounds) if node.type == 'char']
+        char_nodes = [node for node in self.get_subtree(*bounds) if node.type == 'char']
 
         self.command_manager.add_command('set_link', char_nodes, target)
 
@@ -213,6 +217,7 @@ class Document():
     def set_paragraph_state(self, paragraph, state):
         self.command_manager.add_command('set_paragraph_state', paragraph, state)
 
+    @timer.timer
     def set_insert_and_selection_node(self, new_insert, new_selection_bound=None):
         self.command_manager.add_command('move_cursor_to_node', new_insert, new_selection_bound)
 
@@ -280,6 +285,7 @@ class Document():
         self.last_scrolling_movement = time.time()
         self.query_cache = dict()
 
+    @timer.timer
     def update(self):
         self.layouter.update()
         self.plaintext_scanner.update()
@@ -349,7 +355,7 @@ class Document():
 
     def insert_parent_is_root(self):
         if 'insert_parent_is_root' not in self.query_cache:
-            self.query_cache['insert_parent_is_root'] = (self.cursor.get_insert_node().parent.type == 'root')
+            self.query_cache['insert_parent_is_root'] = (self.cursor.get_insert_node().parent.type == 'paragraph')
         return self.query_cache['insert_parent_is_root']
 
     def has_selection(self):
@@ -360,8 +366,32 @@ class Document():
     def get_selected_nodes(self):
         if 'selected_nodes' not in self.query_cache:
             bounds = self.get_insert_node(), self.get_selection_node()
-            self.query_cache['selected_nodes'] = self.ast.get_subtree(*bounds)
+            self.query_cache['selected_nodes'] = self.get_subtree(*bounds)
         return self.query_cache['selected_nodes']
+
+    @timer.timer
+    def get_subtree(self, node1, node2):
+        pos1 = node1.get_position()
+        pos2 = node2.get_position()
+
+        pos1, pos2 = min(pos1, pos2), max(pos1, pos2)
+        parent1, parent2 = self.get_node_at_position(pos1[:-1]), self.get_node_at_position(pos2[:-1])
+
+        # this can happen, when the selection stretches over multiple paragraphs
+        if parent1 != parent2:
+            result = parent1[pos1[-1]:]
+            for paragraph in self.ast[pos1[0] + 1:pos2[0]]:
+                result += paragraph.nodes
+            result += parent2[:pos2[-1]]
+            return result
+        else:
+            return parent1[pos1[-1]:pos2[-1]]
+
+    def get_node_at_position(self, pos):
+        node = self.ast
+        for index in pos:
+            node = node[index]
+        return node
 
     def get_first_selection_bound(self):
         if 'selection_bounds' not in self.query_cache:
@@ -388,11 +418,11 @@ class Document():
 
     def get_height(self):
         if 'height' not in self.query_cache:
-            self.query_cache['height'] = self.ast.paragraphs[-1].layout['y'] + self.ast.paragraphs[-1].layout['height']
+            self.query_cache['height'] = self.ast[-1].layout['y'] + self.ast[-1].layout['height']
         return self.query_cache['height']
 
     def get_width(self):
-        return self.ast.paragraphs[0].layout['width']
+        return self.ast[0].layout['width']
 
     def get_current_scrolling_offsets(self):
         return self.clipping.get_current_offsets()
@@ -404,6 +434,22 @@ class Document():
             return layout['node'].link
         else:
             return None
+
+    def get_link_bounds_and_targets(self):
+        current_target = None
+        current_bounds = [None, None]
+        result = list()
+        for paragraph in self.ast:
+            for node in paragraph:
+                current_bounds[1] = node
+                if current_target != node.link:
+                    if current_bounds[0] != None and current_target != None:
+                        result.append([[current_bounds[0], current_bounds[1]], current_target])
+                    current_bounds[0] = node
+                current_target = node.link
+        if current_bounds[0] != None and current_target != None:
+            result.append([[current_bounds[0], current_bounds[1]], current_target])
+        return result
 
     def get_ancestors(self, layout):
         ancestors = []
@@ -451,11 +497,11 @@ class Document():
 
     def get_line_layout_at_y(self, y):
         if y < 0:
-            return self.ast.paragraphs[0].layout['children'][0]
+            return self.ast[0].layout['children'][0]
         elif y > self.get_height():
-            return self.ast.paragraphs[-1].layout['children'][-1]
+            return self.ast[-1].layout['children'][-1]
         else:
-            for paragraph in self.ast.paragraphs:
+            for paragraph in self.ast:
                 if y >= paragraph.layout['y'] and y < paragraph.layout['y'] + paragraph.layout['height']:
                     y -= paragraph.layout['y']
                     for line in paragraph.layout['children']:
