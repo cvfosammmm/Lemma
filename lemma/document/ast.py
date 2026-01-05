@@ -27,7 +27,7 @@ class Root():
         self.type = 'root'
 
         paragraph = Paragraph()
-        paragraph.append(Node('end'))
+        paragraph.append(Node('eol'))
         self.append(paragraph)
 
     def insert(self, offset, paragraph):

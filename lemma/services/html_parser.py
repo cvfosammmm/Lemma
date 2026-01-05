@@ -58,7 +58,7 @@ class HTMLParser(HTMLParserLib):
         body = body.strip()
         if body != '':
             self.feed(body)
-            self.root[-1].append(Node('end'))
+            self.root[-1].append(Node('eol'))
 
     def handle_starttag(self, tag, attrs):
         self.open_tags.append(tag)

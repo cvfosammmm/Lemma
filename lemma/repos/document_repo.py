@@ -124,17 +124,10 @@ class DocumentRepo():
         paragraphs = parser.parse(xml)
         if paragraphs != None:
             for paragraph in paragraphs:
-                document.ast[-1].style = paragraph.style
-                document.ast[-1].indentation_level = paragraph.indentation_level
-                document.ast[-1].state = paragraph.state
-
-                for node in paragraph.nodes:
-                    document.ast[-1].insert(-1, node)
-                    if node.type == 'eol':
-                        new_paragraph = Paragraph()
-                        new_paragraph.insert(0, document.ast[-1].nodes[-1])
-                        document.ast.append(new_paragraph)
-                        del(document.ast[-2].nodes[-1])
+                if len(paragraph) > 0 and paragraph[-1].type == 'eol':
+                    document.ast.append(paragraph)
+        if len(document.ast) > 1:
+            document.ast.remove(document.ast[0])
 
         document.title = parser.title
         document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
