@@ -77,41 +77,18 @@ class Document():
 
     @undoable_action
     def insert_paragraphs(self, paragraphs):
-        nodes = []
         for paragraph in paragraphs:
-            nodes += paragraph.children
+            insert_node = self.get_insert_node()
+            if insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
+                self.insert_nodes(paragraph.children)
 
-        self.insert_nodes(nodes)
-
-        node_after = self.get_insert_node()
-        node_before = node_after.prev_in_parent()
-
-        for paragraph in paragraphs:
-            if paragraph == paragraphs[0]:
-                if node_before != None:
-                    continue
-                elif node_after.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1][-1].type != 'eol':
-                    continue
-            elif paragraph == paragraphs[-1]:
-                if node_after != 'eol':
-                    continue
-                elif node_before != None and len(paragraphs) == 1 and paragraphs[-1][-1].type != 'eol':
-                    continue
-            if len(paragraphs) == 1 and paragraphs[-1][-1].type != 'eol' and not paragraph.style.startswith('h'):
-                continue
-            if len(paragraphs) == 1 and len(paragraphs[-1]) == 1 and paragraphs[-1][-1].type == 'eol':
-                continue
-
-            self.command_manager.add_command('set_paragraph_style', paragraph[0].paragraph(), paragraph.style)
-            self.command_manager.add_command('set_indentation_level', paragraph[0].paragraph(), paragraph.indentation_level)
-
-        for paragraph in paragraphs:
-            if paragraph.style == 'cl':
                 paragraph_in_ast = paragraph[0].paragraph()
-                self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
-
-        self.select_placeholder_in_range(nodes[0], node_after)
-        self.command_manager.add_command('update_implicit_x_position')
+                self.command_manager.add_command('set_paragraph_style', paragraph_in_ast, paragraph.style)
+                self.command_manager.add_command('set_indentation_level', paragraph_in_ast, paragraph.indentation_level)
+                if paragraph.style == 'cl':
+                    self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
+            else:
+                self.insert_nodes(paragraph.children)
 
     @undoable_action
     def insert_nodes(self, nodes, insert=None):

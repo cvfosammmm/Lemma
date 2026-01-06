@@ -324,6 +324,7 @@ class UseCases():
         if not document.has_selection() and text.isspace():
             document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -368,6 +369,8 @@ class UseCases():
         document.start_undoable_action()
         document.delete_selected_nodes()
         document.insert_paragraphs(paragraphs)
+        document.select_placeholder_in_range(paragraphs[0][0], document.get_insert_node())
+        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
