@@ -79,12 +79,13 @@ class DocumentViewController():
         self.scroll_on_drop_callback_id = None
         self.drop_cursor_x, self.drop_cursor_y = None, None
         self.drop_target = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
+        self.drop_target.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.drop_target.set_gtypes([Gdk.FileList, str, Gdk.Texture])
         self.drop_target.connect('drop', self.on_drop)
         self.drop_target.connect('enter', self.on_drop_enter)
         self.drop_target.connect('motion', self.on_drop_hover)
         self.drop_target.connect('leave', self.on_drop_leave)
-        self.content.add_controller(self.drop_target)
+        self.view.add_controller(self.drop_target)
 
         self.motion_controller = Gtk.EventControllerMotion()
         self.motion_controller.connect('enter', self.on_enter)
@@ -96,7 +97,7 @@ class DocumentViewController():
         self.scrolling_controller.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
         self.scrolling_controller.connect('scroll', self.on_scroll)
         self.scrolling_controller.connect('decelerate', self.on_decelerate)
-        self.content.add_controller(self.scrolling_controller)
+        self.view.add_controller(self.scrolling_controller)
 
     def on_realize(self, content, data=None):
         self.model.reset_cursor_blink()
@@ -236,6 +237,7 @@ class DocumentViewController():
         y += self.model.scrolling_position_y
 
         self.handle_drop(value, x, y)
+        controller.reset()
 
     def handle_drop(self, value, x, y):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -282,6 +284,7 @@ class DocumentViewController():
     def on_drop_enter(self, controller, x, y):
         self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)
 
+        controller.reset()
         return Gdk.DragAction.COPY
 
     def on_drop_hover(self, controller, x, y):
@@ -293,6 +296,7 @@ class DocumentViewController():
 
         UseCases.move_drop_cursor_to_xy(x, y)
 
+        controller.reset()
         return Gdk.DragAction.COPY
 
     def on_drop_leave(self, controller):
@@ -301,6 +305,7 @@ class DocumentViewController():
             self.scroll_on_drop_callback_id = None
 
         UseCases.reset_drop_cursor()
+        controller.reset()
 
     def scroll_on_drop_callback(self, widget, frame_clock):
         x, y = self.drop_cursor_x, self.drop_cursor_y
