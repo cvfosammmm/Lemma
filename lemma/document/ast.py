@@ -67,7 +67,7 @@ class Paragraph():
 
     def __init__(self):
         self.parent = None
-        self.nodes = []
+        self.children = []
         self.layout = None
         self.xml = None
         self.type = 'paragraph'
@@ -84,18 +84,18 @@ class Paragraph():
         self.parent = parent
 
     def insert(self, offset, node):
-        self.nodes.insert(offset, node)
+        self.children.insert(offset, node)
         node.set_parent(self)
 
     def append(self, node):
-        self.nodes.append(node)
+        self.children.append(node)
         node.set_parent(self)
 
     def remove(self, node):
-        self.nodes.remove(node)
+        self.children.remove(node)
 
     def index(self, node):
-        return self.nodes.index(node)
+        return self.children.index(node)
 
     def get_position(self):
         return Position(self.parent.index(self))
@@ -121,14 +121,14 @@ class Paragraph():
             return self.parent[index]
         return None
 
-    def __len__(self): return len(self.nodes)
-    def __iter__(self): return self.nodes.__iter__()
+    def __len__(self): return len(self.children)
+    def __iter__(self): return self.children.__iter__()
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return self.nodes.__getitem__(key)
+            return self.children.__getitem__(key)
         else:
-            return self.nodes.__getitem__(key)
+            return self.children.__getitem__(key)
 
 
 class Node():

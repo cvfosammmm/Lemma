@@ -37,7 +37,7 @@ class Command():
             next_node = node.next_no_descent()
             node.parent.remove(node)
             if node.type == 'eol':
-                for node_to_move in reversed(node.paragraph().nodes):
+                for node_to_move in reversed(node.paragraph()):
                     self.node_to.paragraph().insert(0, node_to_move)
                 document.ast.remove(node.paragraph())
             self.state['deleted_nodes'].append(node)
@@ -60,13 +60,13 @@ class Command():
                 paragraph_no = document.ast.index(paragraph)
 
                 new_paragraph = Paragraph()
-                for node in document.ast[paragraph_no].nodes[offset + 1:]:
+                for node in document.ast[paragraph_no][offset + 1:]:
                     new_paragraph.append(node)
                 new_paragraph.style = document.ast[paragraph_no].style
                 new_paragraph.indentation_level = document.ast[paragraph_no].indentation_level
 
                 document.ast.insert(paragraph_no + 1, new_paragraph)
-                del(document.ast[paragraph_no].nodes[offset + 1:])
+                del(document.ast[paragraph_no].children[offset + 1:])
 
                 paragraph_no += 1
                 offset = 0

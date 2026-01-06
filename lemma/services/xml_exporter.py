@@ -100,7 +100,7 @@ class XMLExporter():
         if node.type == 'eol':
             xml = '\n'
 
-        if node.type == 'end' and node.parent.type != 'root':
+        if node.type == 'end':
             xml = '<end/>'
 
         xml = xml_helpers.embellish_with_link_and_tags(xml, node.link, node.tags)

@@ -89,7 +89,7 @@ class Document():
         nodes = []
         paragraphs = parser.parse(xml)
         for paragraph in paragraphs:
-            nodes += paragraph.nodes
+            nodes += paragraph.children
 
         selection_from = self.get_first_selection_bound()
         selection_to = self.get_last_selection_bound()
@@ -103,24 +103,24 @@ class Document():
             if paragraph == paragraphs[0]:
                 if node_before != None:
                     continue
-                elif node_after.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                elif node_after.type != 'eol' and len(paragraphs) == 1 and paragraphs[-1][-1].type != 'eol':
                     continue
             elif paragraph == paragraphs[-1]:
                 if node_after != 'eol':
                     continue
-                elif node_before != None and len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol':
+                elif node_before != None and len(paragraphs) == 1 and paragraphs[-1][-1].type != 'eol':
                     continue
-            if len(paragraphs) == 1 and paragraphs[-1].nodes[-1].type != 'eol' and not paragraph.style.startswith('h'):
+            if len(paragraphs) == 1 and paragraphs[-1][-1].type != 'eol' and not paragraph.style.startswith('h'):
                 continue
-            if len(paragraphs) == 1 and len(paragraphs[-1].nodes) == 1 and paragraphs[-1].nodes[-1].type == 'eol':
+            if len(paragraphs) == 1 and len(paragraphs[-1]) == 1 and paragraphs[-1][-1].type == 'eol':
                 continue
 
-            self.command_manager.add_command('set_paragraph_style', paragraph.nodes[0].paragraph(), paragraph.style)
-            self.command_manager.add_command('set_indentation_level', paragraph.nodes[0].paragraph(), paragraph.indentation_level)
+            self.command_manager.add_command('set_paragraph_style', paragraph[0].paragraph(), paragraph.style)
+            self.command_manager.add_command('set_indentation_level', paragraph[0].paragraph(), paragraph.indentation_level)
 
         for paragraph in paragraphs:
             if paragraph.style == 'cl':
-                paragraph_in_ast = paragraph.nodes[0].paragraph()
+                paragraph_in_ast = paragraph[0].paragraph()
                 self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
 
         placeholder_found = False
@@ -168,7 +168,7 @@ class Document():
                     nodes = []
                     paragraphs = parser.parse(xml)
                     for paragraph in paragraphs:
-                        nodes += paragraph.nodes
+                        nodes += paragraph.children
 
                     self.command_manager.add_command('delete', start_node, last_node)
                     self.command_manager.add_command('insert', last_node, nodes)
@@ -381,7 +381,7 @@ class Document():
         if parent1 != parent2:
             result = parent1[pos1[-1]:]
             for paragraph in self.ast[pos1[0] + 1:pos2[0]]:
-                result += paragraph.nodes
+                result += paragraph.children
             result += parent2[:pos2[-1]]
             return result
         else:

@@ -334,7 +334,7 @@ class UseCases():
         nodes = []
         paragraphs = parser.parse(xml)
         for paragraph in paragraphs:
-            nodes += paragraph.nodes
+            nodes += paragraph.children
 
         document.start_undoable_action()
         document.delete_nodes(node_from, node_to)
@@ -376,7 +376,7 @@ class UseCases():
                 document.set_indentation_level(document.get_insert_node().paragraph(), indentation_level)
         elif paragraph_style.startswith('h'):
             document.insert_xml('\n')
-            if len(document.get_insert_node().paragraph().nodes) == 1:
+            if len(document.get_insert_node().paragraph()) == 1:
                 paragraph = document.get_insert_node().paragraph()
                 document.set_paragraph_style(paragraph, 'p')
         else:

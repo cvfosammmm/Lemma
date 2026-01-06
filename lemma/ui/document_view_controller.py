@@ -427,7 +427,7 @@ class DocumentViewController():
                     insert_paragraph = document.get_insert_node().paragraph()
                     paragraph_style = insert_paragraph.style
 
-                    if paragraph_style in ['ul', 'ol', 'cl'] and len(insert_paragraph.nodes) == 1:
+                    if paragraph_style in ['ul', 'ol', 'cl'] and len(insert_paragraph) == 1:
                         UseCases.set_paragraph_style('p')
                         UseCases.set_indentation_level(0)
                     else:

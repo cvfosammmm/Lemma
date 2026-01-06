@@ -63,8 +63,7 @@ class Layouter(object):
                        'height': 0,
                        'fontname': None}
 
-        nodes = paragraph.nodes
-        for child in self.group_words(nodes):
+        for child in self.group_words(paragraph.children):
             if isinstance(child, list):
                 char_nodes = child
                 text = ''.join([char.value for char in char_nodes])

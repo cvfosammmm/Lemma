@@ -62,7 +62,7 @@ class HTMLExporter(object):
             else:
                 self.html += '<' + paragraph.style + '>'
 
-            node_lists = self.group_by_node_type(paragraph.nodes)
+            node_lists = self.group_by_node_type(paragraph.children)
 
             for node_list in node_lists:
                 self.process_list(node_list)

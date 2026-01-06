@@ -24,7 +24,7 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['node'] = self.paragraph.nodes[0]
+        self.state['node'] = self.paragraph[0]
         self.state['previous_level'] = self.paragraph.indentation_level
         self.paragraph.indentation_level = self.new_level
         self.paragraph.invalidate()
