@@ -77,7 +77,6 @@ class DocumentViewController():
         self.content.add_controller(self.drag_controller)
 
         self.scroll_on_drop_callback_id = None
-        self.drop_cursor_x, self.drop_cursor_y = None, None
         self.drop_target = Gtk.DropTarget.new(GObject.TYPE_NONE, Gdk.DragAction.COPY)
         self.drop_target.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.drop_target.set_gtypes([Gdk.FileList, str, Gdk.Texture])
@@ -242,7 +241,7 @@ class DocumentViewController():
     def handle_drop(self, value, x, y):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        ApplicationState.set_value('drop_cursor_position', None)
+        self.model.set_drop_cursor_position(-1, -1)
 
         if isinstance(value, Gdk.FileList):
             for file in value.get_files():
@@ -288,13 +287,7 @@ class DocumentViewController():
         return Gdk.DragAction.COPY
 
     def on_drop_hover(self, controller, x, y):
-        self.drop_cursor_x, self.drop_cursor_y = x, y
-
-        x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
-        y += self.model.scrolling_position_y
-
-        UseCases.move_drop_cursor_to_xy(x, y)
+        self.model.set_drop_cursor_position(x, y)
 
         controller.reset()
         return Gdk.DragAction.COPY
@@ -303,12 +296,12 @@ class DocumentViewController():
         if self.scroll_on_drop_callback_id != None:
             self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
             self.scroll_on_drop_callback_id = None
+        self.model.set_drop_cursor_position(-1, -1)
 
-        UseCases.reset_drop_cursor()
         controller.reset()
 
     def scroll_on_drop_callback(self, widget, frame_clock):
-        x, y = self.drop_cursor_x, self.drop_cursor_y
+        x, y = self.model.drop_cursor_x, self.model.drop_cursor_y
 
         if y < 56:
             new_x = self.model.scrolling_position_x

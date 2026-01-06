@@ -93,7 +93,7 @@ class DocumentViewPresenter():
                 if not in_selection and line_layout['y'] + line_layout['parent']['y'] == first_selection_line['y'] + first_selection_line['parent']['y']: in_selection = True
                 if in_selection and line_layout['y'] + line_layout['parent']['y'] == last_selection_line['y'] + last_selection_line['parent']['y']: in_selection = False
 
-        if ApplicationState.get_value('drop_cursor_position') != None:
+        if self.model.drop_cursor_x != -1 and self.model.drop_cursor_y != -1:
             self.draw_drop_cursor(ctx, content_offset_x, content_offset_y)
         else:
             self.draw_cursor(ctx, content_offset_x, content_offset_y)
@@ -305,7 +305,11 @@ class DocumentViewPresenter():
 
     @timer.timer
     def draw_drop_cursor(self, ctx, offset_x, offset_y):
-        x, y = ApplicationState.get_value('drop_cursor_position')
+        x, y = self.model.drop_cursor_x, self.model.drop_cursor_y
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
+        y += self.model.scrolling_position_y
+
         layout = self.model.document.get_cursor_holding_layout_close_to_xy(x, y)
 
         x, y = self.model.document.get_absolute_xy(layout)

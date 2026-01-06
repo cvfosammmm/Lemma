@@ -943,22 +943,6 @@ class UseCases():
         MessageBus.add_message('document_ast_or_cursor_changed')
 
     @timer.timer
-    def move_drop_cursor_to_xy(x, y):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        ApplicationState.set_value('drop_cursor_position', (x, y))
-
-        DocumentRepo.update(document)
-        MessageBus.add_message('document_changed')
-
-    @timer.timer
-    def reset_drop_cursor():
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        ApplicationState.set_value('drop_cursor_position', None)
-
-        DocumentRepo.update(document)
-        MessageBus.add_message('document_changed')
-
-    @timer.timer
     def move_cursor_to_parent():
         document = WorkspaceRepo.get_workspace().get_active_document()
 

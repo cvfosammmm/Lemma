@@ -42,6 +42,7 @@ class DocumentView():
 
         self.pointer_x, self.pointer_y = None, None
         self.scrolling_position_x, self.scrolling_position_y = -1, -1
+        self.drop_cursor_x, self.drop_cursor_y = -1, -1
         self.ctrl_pressed = False
         self.scrolling_multiplier = 2.5
         self.selected_click_target = None
@@ -72,6 +73,7 @@ class DocumentView():
 
         if self.document == None:
             self.scrolling_position_x, self.scrolling_position_y = -1, -1
+            self.drop_cursor_x, self.drop_cursor_y = -1, -1
             return True
 
         document_changed = max(document.last_cursor_movement, document.last_modified) > self.last_cache_reset
@@ -120,6 +122,11 @@ class DocumentView():
         if x != self.pointer_x or y != self.pointer_y:
             self.pointer_x, self.pointer_y = x, y
             self.update_pointer()
+
+    def set_drop_cursor_position(self, x, y):
+        self.drop_cursor_x = x
+        self.drop_cursor_y = y
+        self.view.content.queue_draw()
 
     def update_pointer(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
