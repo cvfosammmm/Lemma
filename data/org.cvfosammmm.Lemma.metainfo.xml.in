@@ -25,6 +25,7 @@
 
     <url type="homepage">https://www.cvfosammmm.org/lemma/</url>
     <url type="bugtracker">https://github.com/cvfosammmm/Lemma/issues</url>
+    <url type="vcs-browser">https://github.com/cvfosammmm/Lemma</url>
     <url type="donation">https://www.cvfosammmm.org/lemma/donate.html</url>
 
     <provides>
@@ -38,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="55" date="2026-1-6">
+            <description translatable="no">
+                <p>New app icon, nicer cursor jumping, ...</p>
+            </description>
+        </release>
         ​<release version="54" date="2025-12-17">
             <description translatable="no">
                 <p>Case-insensitive search, ...</p>
