@@ -319,6 +319,7 @@ class UseCases():
         paragraphs = parser.parse(xml)
 
         document.start_undoable_action()
+        document.delete_selected_nodes()
         document.insert_paragraphs(paragraphs)
         if not document.has_selection() and text.isspace():
             document.replace_max_string_before_cursor()
@@ -363,7 +364,11 @@ class UseCases():
 
         parser = xml_parser.XMLParser()
         paragraphs = parser.parse(xml)
+
+        document.start_undoable_action()
+        document.delete_selected_nodes()
         document.insert_paragraphs(paragraphs)
+        document.end_undoable_action()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -374,12 +379,13 @@ class UseCases():
     def add_newline():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
+        document.start_undoable_action()
+        document.delete_selected_nodes()
+
         insert_paragraph = document.get_insert_node().paragraph()
         paragraph_style = insert_paragraph.style
         indentation_level = insert_paragraph.indentation_level
 
-        document.start_undoable_action()
-        document.delete_selected_nodes()
         document.insert_nodes([Node('eol')])
 
         if paragraph_style in ['ul', 'ol', 'cl']:

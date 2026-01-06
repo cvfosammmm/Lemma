@@ -37,9 +37,15 @@ class Command():
             next_node = node.next_no_descent()
             node.parent.remove(node)
             if node.type == 'eol':
-                for node_to_move in reversed(node.paragraph()):
-                    self.node_to.paragraph().insert(0, node_to_move)
-                document.ast.remove(node.paragraph())
+                current_paragraph = node.parent
+                next_paragraph = current_paragraph.next_in_parent()
+
+                if len(current_paragraph) == 0 and len(next_paragraph) > 1:
+                    document.ast.remove(current_paragraph)
+                else:
+                    for node_to_move in next_paragraph:
+                        node.parent.append(node_to_move)
+                    document.ast.remove(next_paragraph)
             self.state['deleted_nodes'].append(node)
 
             node = next_node

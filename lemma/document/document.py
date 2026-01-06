@@ -81,14 +81,10 @@ class Document():
         for paragraph in paragraphs:
             nodes += paragraph.children
 
-        selection_from = self.get_first_selection_bound()
-        selection_to = self.get_last_selection_bound()
-        node_before = selection_from.prev_in_parent()
-        node_after = selection_to
-
-        if self.has_selection():
-            self.delete_selected_nodes()
         self.insert_nodes(nodes)
+
+        node_after = self.get_insert_node()
+        node_before = node_after.prev_in_parent()
 
         for paragraph in paragraphs:
             if paragraph == paragraphs[0]:
@@ -160,9 +156,10 @@ class Document():
 
     @undoable_action
     def delete_selected_nodes(self):
-        node_from = self.get_first_selection_bound()
-        node_to = self.get_last_selection_bound()
-        self.delete_nodes(node_from, node_to)
+        if self.has_selection():
+            node_from = self.get_first_selection_bound()
+            node_to = self.get_last_selection_bound()
+            self.delete_nodes(node_from, node_to)
 
     @undoable_action
     def delete_nodes(self, node_from, node_to):
