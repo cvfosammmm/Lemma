@@ -19,7 +19,6 @@ import time
 
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.xml_parser as xml_parser
-import lemma.services.xml_exporter as xml_exporter
 from lemma.document.ast import Root, Cursor
 from lemma.document.command_manager import CommandManager
 from lemma.document.layouter import Layouter
@@ -77,17 +76,8 @@ class Document():
         return new_function
 
     @undoable_action
-    def insert_xml(self, xml):
-        parser = xml_parser.XMLParser()
-
-        if self.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
-            if not self.has_multiple_lines_selected():
-                prev_selection = self.get_selected_nodes()
-                prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
-                xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
-
+    def insert_paragraphs(self, paragraphs):
         nodes = []
-        paragraphs = parser.parse(xml)
         for paragraph in paragraphs:
             nodes += paragraph.children
 
@@ -96,8 +86,9 @@ class Document():
         node_before = selection_from.prev_in_parent()
         node_after = selection_to
 
-        self.delete_selected_nodes()
-        self.insert_nodes(self.cursor.get_insert_node(), nodes)
+        if self.has_selection():
+            self.delete_selected_nodes()
+        self.insert_nodes(nodes)
 
         for paragraph in paragraphs:
             if paragraph == paragraphs[0]:
@@ -123,26 +114,18 @@ class Document():
                 paragraph_in_ast = paragraph[0].paragraph()
                 self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
 
-        placeholder_found = False
-        for node_list in (node.flatten() for node in nodes):
-            for node in node_list:
-                if node.type == 'placeholder':
-                    self.select_node(node)
-
-                    placeholder_found = True
-                    break
-            if placeholder_found:
-                break
-
+        self.select_placeholder_in_range(nodes[0], node_after)
         self.command_manager.add_command('update_implicit_x_position')
 
     @undoable_action
-    def insert_nodes(self, cursor, nodes):
-        self.command_manager.add_command('insert', cursor, nodes)
+    def insert_nodes(self, nodes, insert=None):
+        if insert == None:
+            insert = self.get_insert_node()
+        self.command_manager.add_command('insert', insert, nodes)
 
     @undoable_action
     def replace_max_string_before_cursor(self):
-        insert_node = self.cursor.get_insert_node()
+        insert_node = self.get_insert_node()
         last_node = insert_node.prev()
         first_node = last_node
         for i in range(5):
@@ -224,6 +207,15 @@ class Document():
     def move_cursor_to_xy(self, x, y, do_selection):
         self.command_manager.add_command('move_cursor_to_xy', x, y, do_selection)
 
+    def select_placeholder_in_range(self, first_node, last_node):
+        placeholder_found = False
+        node = first_node
+        while node != last_node:
+            if node.type == 'placeholder':
+                self.select_node(node)
+                break
+            node = node.next()
+
     def select_node(self, node):
         next_node = node.next_in_parent()
         self.command_manager.add_command('move_cursor_to_node', node, next_node)
@@ -232,7 +224,7 @@ class Document():
         self.command_manager.add_command('update_implicit_x_position')
 
     def scroll_insert_on_screen(self, window_height, animation_type=None):
-        insert_node = self.cursor.get_insert_node()
+        insert_node = self.get_insert_node()
         insert_position = self.get_absolute_xy(insert_node.layout)
 
         content_offset = LayoutInfo.get_normal_document_offset()
@@ -308,13 +300,13 @@ class Document():
 
     def cursor_at_paragraph_start(self):
         if 'cursor_at_paragraph_start' not in self.query_cache:
-            insert = self.cursor.get_insert_node()
+            insert = self.get_insert_node()
             self.query_cache['cursor_at_paragraph_start'] = (insert == insert.paragraph_start())
         return self.query_cache['cursor_at_paragraph_start']
 
     def cursor_inside_link(self):
         if 'cursor_inside_link' not in self.query_cache:
-            self.query_cache['cursor_inside_link'] = (not self.has_selection() and self.cursor.get_insert_node().is_inside_link())
+            self.query_cache['cursor_inside_link'] = (not self.has_selection() and self.get_insert_node().is_inside_link())
         return self.query_cache['cursor_inside_link']
 
     def links_inside_selection(self):
@@ -355,7 +347,7 @@ class Document():
 
     def insert_parent_is_root(self):
         if 'insert_parent_is_root' not in self.query_cache:
-            self.query_cache['insert_parent_is_root'] = (self.cursor.get_insert_node().parent.type == 'paragraph')
+            self.query_cache['insert_parent_is_root'] = (self.get_insert_node().parent.type == 'paragraph')
         return self.query_cache['insert_parent_is_root']
 
     def has_selection(self):

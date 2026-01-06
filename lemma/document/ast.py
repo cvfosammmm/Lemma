@@ -338,10 +338,10 @@ class Node():
         return (self.paragraph_start(), self.paragraph_end())
 
     def paragraph_start(self):
-        return self.paragraph().nodes[0]
+        return self.paragraph()[0]
 
     def paragraph_end(self):
-        return self.paragraph().nodes[-1]
+        return self.paragraph()[-1]
 
     def flatten(self):
         result = [self]

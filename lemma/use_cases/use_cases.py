@@ -23,6 +23,7 @@ from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.xml_parser as xml_parser
+import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
@@ -314,9 +315,11 @@ class UseCases():
         tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
         link_at_cursor = ApplicationState.get_value('link_at_cursor')
         xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
+        parser = xml_parser.XMLParser()
+        paragraphs = parser.parse(xml)
 
         document.start_undoable_action()
-        document.insert_xml(xml)
+        document.insert_paragraphs(paragraphs)
         if not document.has_selection() and text.isspace():
             document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
@@ -338,7 +341,7 @@ class UseCases():
 
         document.start_undoable_action()
         document.delete_nodes(node_from, node_to)
-        document.insert_nodes(node_to, nodes)
+        document.insert_nodes(nodes, node_to)
         document.set_insert_and_selection_node(node_to)
         document.update_implicit_x_position()
         document.end_undoable_action()
@@ -352,7 +355,15 @@ class UseCases():
     def insert_xml(xml):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.insert_xml(xml)
+        if document.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
+            if not document.has_multiple_lines_selected():
+                prev_selection = document.get_selected_nodes()
+                prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
+                xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
+
+        parser = xml_parser.XMLParser()
+        paragraphs = parser.parse(xml)
+        document.insert_paragraphs(paragraphs)
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -368,19 +379,19 @@ class UseCases():
         indentation_level = insert_paragraph.indentation_level
 
         document.start_undoable_action()
+        document.delete_selected_nodes()
+        document.insert_nodes([Node('eol')])
+
         if paragraph_style in ['ul', 'ol', 'cl']:
-            document.insert_xml('\n')
             paragraph = document.get_insert_node().paragraph()
             document.set_paragraph_style(paragraph, paragraph_style)
             if indentation_level != 0:
                 document.set_indentation_level(document.get_insert_node().paragraph(), indentation_level)
         elif paragraph_style.startswith('h'):
-            document.insert_xml('\n')
             if len(document.get_insert_node().paragraph()) == 1:
                 paragraph = document.get_insert_node().paragraph()
                 document.set_paragraph_style(paragraph, 'p')
-        else:
-            document.insert_xml('\n')
+
         document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
         document.end_undoable_action()
@@ -452,6 +463,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.start_undoable_action()
+        document.delete_selected_nodes()
         node = Node('widget', image)
         document.insert_nodes([node])
         document.update_implicit_x_position()
