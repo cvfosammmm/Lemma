@@ -410,6 +410,7 @@ class UseCases():
 
         document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)

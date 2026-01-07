@@ -124,7 +124,6 @@ class Document():
                     self.command_manager.add_command('delete', start_node, last_node)
                     self.command_manager.add_command('insert', last_node, nodes)
                     self.command_manager.add_command('move_cursor_to_node', insert_node)
-                    self.command_manager.add_command('update_implicit_x_position')
 
     @undoable_action
     def delete_selected_nodes(self):
