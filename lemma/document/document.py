@@ -76,19 +76,14 @@ class Document():
         return new_function
 
     @undoable_action
-    def insert_paragraphs(self, paragraphs):
-        for paragraph in paragraphs:
-            insert_node = self.get_insert_node()
-            if insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
-                self.insert_nodes(paragraph.children)
+    def insert_paragraph(self, paragraph):
+        self.insert_nodes(paragraph.children)
 
-                paragraph_in_ast = paragraph[0].paragraph()
-                self.command_manager.add_command('set_paragraph_style', paragraph_in_ast, paragraph.style)
-                self.command_manager.add_command('set_indentation_level', paragraph_in_ast, paragraph.indentation_level)
-                if paragraph.style == 'cl':
-                    self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
-            else:
-                self.insert_nodes(paragraph.children)
+        paragraph_in_ast = paragraph[0].paragraph()
+        self.command_manager.add_command('set_paragraph_style', paragraph_in_ast, paragraph.style)
+        self.command_manager.add_command('set_indentation_level', paragraph_in_ast, paragraph.indentation_level)
+        if paragraph.style == 'cl':
+            self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
 
     @undoable_action
     def insert_nodes(self, nodes, insert=None):

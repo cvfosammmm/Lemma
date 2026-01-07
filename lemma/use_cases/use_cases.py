@@ -320,7 +320,7 @@ class UseCases():
 
         document.start_undoable_action()
         document.delete_selected_nodes()
-        document.insert_paragraphs(paragraphs)
+        document.insert_nodes(paragraphs[0].children)
         if not document.has_selection() and text.isspace():
             document.replace_max_string_before_cursor()
         document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
@@ -368,7 +368,14 @@ class UseCases():
 
         document.start_undoable_action()
         document.delete_selected_nodes()
-        document.insert_paragraphs(paragraphs)
+
+        for paragraph in paragraphs:
+            insert_node = document.get_insert_node()
+            if insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
+                document.insert_paragraph(paragraph)
+            else:
+                document.insert_nodes(paragraph.children)
+
         document.select_placeholder_in_range(paragraphs[0][0], document.get_insert_node())
         document.update_implicit_x_position()
         document.end_undoable_action()
