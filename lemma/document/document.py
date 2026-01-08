@@ -134,6 +134,7 @@ class Document():
         if node_from.parent == node_to.parent:
             self.command_manager.add_command('delete_nodes', node_from, node_to)
         else:
+            node_from_index = node_from.parent.index(node_from)
             paragraph_index_from = self.ast.index(node_from.parent)
             paragraph_index_to = self.ast.index(node_to.parent)
 
@@ -148,7 +149,7 @@ class Document():
                 self.command_manager.add_command('delete_nodes', node_to, node_to.last_in_parent())
                 self.command_manager.add_command('delete_paragraphs', paragraph_index_from + 1, paragraph_index_to + 1)
                 self.command_manager.add_command('insert_nodes', end_of_first_paragraph, copy_nodes)
-                self.command_manager.add_command('move_cursor_to_node', copy_nodes[0], copy_nodes[0])
+                self.command_manager.add_command('move_cursor_to_node', self.ast[paragraph_index_from][node_from_index], self.ast[paragraph_index_from][node_from_index])
 
     @undoable_action
     def resize_widget(self, node, new_width):
