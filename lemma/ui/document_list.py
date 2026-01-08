@@ -237,7 +237,7 @@ class DocumentList(object):
                 date_color = ColorManager.get_ui_color('sidebar_fg_1')
 
             title_text = document_stub['title']
-            if len(document_stub['plaintext']) == 0:
+            if len(document_stub['plaintext'].strip()) == 0:
                 teaser_text = '(' + _('empty') + ')'
                 teaser_color = ColorManager.get_ui_color('sidebar_fg_2')
             else:
