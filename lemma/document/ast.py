@@ -263,6 +263,12 @@ class Node():
             return self.parent[index]
         return None
 
+    def first_in_parent(self):
+        return self.parent[0]
+
+    def last_in_parent(self):
+        return self.parent[-1]
+
     def prev(self):
         node = self
 
