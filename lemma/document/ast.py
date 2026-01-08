@@ -283,9 +283,10 @@ class Node():
 
         elif not node.parent.type == 'paragraph':
             node = node.parent
-
         elif not node.parent.is_first_in_parent():
             node = node.parent.prev_in_parent()[-1]
+        else:
+            return None
 
         if not NodeTypeDB.can_hold_cursor(node):
             return node.prev()
@@ -306,7 +307,7 @@ class Node():
             elif not node.is_last_in_parent():
                 node = node.next_in_parent()[0]
             else:
-                node = node[-1]
+                return None
 
         if not NodeTypeDB.can_hold_cursor(node):
             return node.next()
@@ -317,14 +318,13 @@ class Node():
         node = self
 
         if not node.is_first_in_parent():
-            index = node.parent.index(node) - 1
-            node = node.parent[index]
-
+            node = node.prev_in_parent()
         elif not node.parent.type == 'paragraph':
             node = node.parent
-
         elif not node.parent.is_first_in_parent():
             node = node.parent.prev_in_parent()[-1]
+        else:
+            return None
 
         if not NodeTypeDB.can_hold_cursor(node):
             return node.prev_no_descent()
@@ -335,18 +335,17 @@ class Node():
         node = self
 
         if not node.is_last_in_parent():
-            index = node.parent.index(node) + 1
-            node = node.parent[index]
+            node = node.next_in_parent()
 
         else:
             while not node.type == 'paragraph' and node.parent.index(node) == len(node.parent) - 1:
                 node = node.parent
             if not node.type == 'paragraph':
-                node = node.parent[node.parent.index(node) + 1]
+                node = node.next_in_parent()
             elif not node.is_last_in_parent():
                 node = node.next_in_parent()[0]
             else:
-                node = node[-1]
+                return None
 
         if not NodeTypeDB.can_hold_cursor(node):
             return node.next_no_descent()

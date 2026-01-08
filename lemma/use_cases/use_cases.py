@@ -426,7 +426,9 @@ class UseCases():
         document.start_undoable_action()
         if document.has_selection():
             document.delete_selected_nodes()
-        elif not insert.is_first_in_parent() or (insert.parent.type == 'paragraph' and not insert.parent.is_first_in_parent()):
+        elif not insert.is_first_in_parent():
+            document.delete_nodes(insert.prev_in_parent(), insert)
+        elif insert.parent.type == 'paragraph' and not insert.parent.is_first_in_parent():
             document.delete_nodes(insert.prev_no_descent(), insert)
         elif len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.prev_no_descent(), insert)
@@ -447,9 +449,10 @@ class UseCases():
         document.start_undoable_action()
         if document.has_selection():
             document.delete_selected_nodes()
-        elif not insert.is_last_in_parent() or (insert.parent.type == 'paragraph' and not insert.parent.is_last_in_parent()):
-            insert_new = insert.next_no_descent()
-            document.delete_nodes(insert, insert_new)
+        elif not insert.is_last_in_parent():
+            document.delete_nodes(insert, insert.next_in_parent())
+        elif insert.parent.type == 'paragraph' and not insert.parent.is_last_in_parent():
+            document.delete_nodes(insert, insert.next())
         elif len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.next_no_descent(), insert)
         document.update_implicit_x_position()
@@ -620,12 +623,18 @@ class UseCases():
 
         insert = document.get_insert_node()
         selection = document.get_selection_node()
+
         if do_selection:
-            document.set_insert_and_selection_node(insert.prev_no_descent(), selection)
+            new_insert = insert.prev_no_descent()
+            if new_insert != None:
+                document.set_insert_and_selection_node(new_insert, selection)
         elif document.has_selection():
             document.set_insert_and_selection_node(document.get_first_selection_bound())
         else:
-            document.set_insert_and_selection_node(insert.prev())
+            next_insert = insert.prev()
+            if next_insert != None:
+                document.set_insert_and_selection_node(next_insert)
+
         document.update_implicit_x_position()
         if insert != document.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
@@ -641,15 +650,15 @@ class UseCases():
         selection = document.get_selection_node()
         original_insert = document.get_insert_node()
         insert = original_insert
-        while NodeTypeDB.is_whitespace(insert.prev_no_descent()):
-            if insert == insert.prev_no_descent():
-                break
-            insert = insert.prev_no_descent()
+        prev_insert = insert.prev_no_descent()
+        while prev_insert != None and NodeTypeDB.is_whitespace(prev_insert):
+            insert = prev_insert
+            prev_insert = insert.prev_no_descent()
 
-        if not NodeTypeDB.is_whitespace(insert.prev_no_descent()):
+        if prev_insert != None:
             insert_new = insert.prev_no_descent().word_bounds()[0]
         else:
-            insert_new = insert.prev_no_descent()
+            insert_new = insert
 
         if do_selection:
             document.set_insert_and_selection_node(insert_new, selection)
@@ -673,11 +682,16 @@ class UseCases():
         selection = document.get_selection_node()
 
         if do_selection:
-            document.set_insert_and_selection_node(insert.next_no_descent(), selection)
+            new_insert = insert.next_no_descent()
+            if new_insert != None:
+                document.set_insert_and_selection_node(new_insert, selection)
         elif document.has_selection():
             document.set_insert_and_selection_node(document.get_last_selection_bound())
         else:
-            document.set_insert_and_selection_node(insert.next())
+            next_insert = insert.next()
+            if next_insert != None:
+                document.set_insert_and_selection_node(next_insert)
+
         document.update_implicit_x_position()
         if insert != document.get_insert_node():
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
@@ -694,9 +708,10 @@ class UseCases():
         original_insert = document.get_insert_node()
         insert = original_insert
         while NodeTypeDB.is_whitespace(insert):
-            if insert == insert.next_no_descent():
+            next_insert = insert.next_no_descent()
+            if next_insert == None:
                 break
-            insert = insert.next_no_descent()
+            insert = next_insert
 
         if not NodeTypeDB.is_whitespace(insert):
             insert_new = insert.word_bounds()[1]
@@ -878,20 +893,21 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.get_selected_nodes()
-        insert = document.get_insert_node()
-        node = insert
+        node = document.get_first_selection_bound()
+        start_node = node
 
         if len(selected_nodes) == 1 and selected_nodes[0].type == 'placeholder':
             node = node.next()
 
-        while not node.type == 'placeholder':
+        while node != None and not node.type == 'placeholder':
             if node == document.ast[-1][-1]:
                 node = document.ast[0][0]
             else:
                 node = node.next()
-            if node == insert: break
+            if node == start_node:
+                break
 
-        if node.type == 'placeholder':
+        if node != None and node.type == 'placeholder':
             document.select_node(node)
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 
@@ -904,20 +920,18 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.get_selected_nodes()
-        insert = document.get_insert_node()
-        node = insert
+        node = document.get_first_selection_bound()
+        start_node = node
 
-        if insert.type == 'placeholder' or (len(selected_nodes) == 1 and selected_nodes[0].type == 'placeholder'):
-            node = node.prev()
-
-        while not node.type == 'placeholder':
+        while node != None and not node.type == 'placeholder':
             if node == document.ast[0][0]:
                 node = document.ast[-1][-1]
             else:
                 node = node.prev()
-            if node == insert: break
+            if node == start_node:
+                break
 
-        if node.type == 'placeholder':
+        if node != None and node.type == 'placeholder':
             document.select_node(node)
             document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
 

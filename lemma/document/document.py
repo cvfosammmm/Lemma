@@ -89,6 +89,9 @@ class Document():
     def replace_max_string_before_cursor(self):
         insert_node = self.get_insert_node()
         last_node = insert_node.prev()
+
+        if last_node == None: return
+
         first_node = last_node
         for i in range(5):
             prev_node = first_node.prev_in_parent()

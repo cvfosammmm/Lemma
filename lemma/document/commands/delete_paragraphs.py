@@ -32,7 +32,7 @@ class Command():
         if not last_paragraph.is_last_in_parent():
             document.cursor.set_insert_selection_nodes(last_paragraph.next_in_parent()[0], last_paragraph.next_in_parent()[0])
         else:
-            document.cursor.set_insert_selection_nodes(first_paragraph.prev_in_parent()[-1], first_paragraph.prev_in_parent[-1])
+            document.cursor.set_insert_selection_nodes(first_paragraph.prev_in_parent()[-1], first_paragraph.prev_in_parent()[-1])
 
         document.ast.remove_range(self.index_from, self.index_to)
 
