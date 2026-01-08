@@ -24,8 +24,6 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
-
         prev_links = []
         for node in self.nodes:
             prev_links.append(node.link)
@@ -40,7 +38,6 @@ class Command():
     def undo(self, document):
         for item in self.state['nodes_and_prev_target']:
             item[0].link = item[1]
-        document.cursor.set_state(self.state['cursor_state_before'])
 
         for item in self.state['nodes_and_prev_target']:
             item[0].paragraph().invalidate()

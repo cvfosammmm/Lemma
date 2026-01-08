@@ -26,8 +26,6 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
-
         self.position_node.paragraph().invalidate()
 
         offset = self.position_node.parent.index(self.position_node)
@@ -67,8 +65,6 @@ class Command():
                     paragraph_1.append(next_line_node)
                 document.ast.remove(paragraph_2)
             node.parent.remove(node)
-
-        document.cursor.set_state(self.state['cursor_state_before'])
 
         document.update_last_modified()
 

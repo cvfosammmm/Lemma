@@ -18,36 +18,18 @@
 
 class Command():
 
-    def __init__(self, node_from, node_to):
-        self.node_from = node_from
-        self.node_to = node_to
+    def __init__(self, index, paragraph):
+        self.index = index
+        self.paragraph = paragraph
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
-        self.state['deleted_nodes'] = []
-
-        self.node_from.paragraph().invalidate()
-
-        parent = self.node_from.parent
-        index_from = parent.index(self.node_from)
-        index_to = parent.index(self.node_to)
-        self.state['deleted_nodes'] = parent[index_from:index_to]
-        parent.remove_range(index_from, index_to)
-
-        document.cursor.set_insert_selection_nodes(self.node_to, self.node_to)
+        document.ast.insert(self.index, self.paragraph)
 
         document.update_last_modified()
 
     def undo(self, document):
-        self.node_to.paragraph().invalidate()
-
-        offset = self.node_to.parent.index(self.node_to)
-        for node in self.state['deleted_nodes']:
-            self.node_to.parent.insert(offset, node)
-            offset += 1
-
-        document.cursor.set_state(self.state['cursor_state_before'])
+        document.ast.remove_range(self.index, self.index + 1)
 
         document.update_last_modified()
 

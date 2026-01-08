@@ -372,7 +372,7 @@ class UseCases():
         for paragraph in paragraphs:
             insert_node = document.get_insert_node()
             if insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
-                document.insert_paragraph(paragraph)
+                document.insert_paragraph(paragraph, document.ast.index(insert_node.paragraph()))
             else:
                 document.insert_nodes(paragraph.children)
 

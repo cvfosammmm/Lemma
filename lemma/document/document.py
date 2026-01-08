@@ -76,20 +76,14 @@ class Document():
         return new_function
 
     @undoable_action
-    def insert_paragraph(self, paragraph):
-        self.insert_nodes(paragraph.children)
-
-        paragraph_in_ast = paragraph[0].paragraph()
-        self.command_manager.add_command('set_paragraph_style', paragraph_in_ast, paragraph.style)
-        self.command_manager.add_command('set_indentation_level', paragraph_in_ast, paragraph.indentation_level)
-        if paragraph.style == 'cl':
-            self.command_manager.add_command('set_paragraph_state', paragraph_in_ast, paragraph.state)
+    def insert_paragraph(self, paragraph, index):
+        self.command_manager.add_command('insert_paragraph', index, paragraph)
 
     @undoable_action
     def insert_nodes(self, nodes, insert=None):
         if insert == None:
             insert = self.get_insert_node()
-        self.command_manager.add_command('insert', insert, nodes)
+        self.command_manager.add_command('insert_nodes', insert, nodes)
 
     @undoable_action
     def replace_max_string_before_cursor(self):
@@ -150,7 +144,7 @@ class Document():
                 self.command_manager.add_command('delete_nodes', node_from, end_of_first_paragraph)
                 self.command_manager.add_command('delete_nodes', node_to, node_to.last_in_parent())
                 self.command_manager.add_command('delete_paragraphs', paragraph_index_from + 1, paragraph_index_to + 1)
-                self.command_manager.add_command('insert', end_of_first_paragraph, copy_nodes)
+                self.command_manager.add_command('insert_nodes', end_of_first_paragraph, copy_nodes)
                 self.command_manager.add_command('move_cursor_to_node', copy_nodes[0], copy_nodes[0])
 
     @undoable_action
