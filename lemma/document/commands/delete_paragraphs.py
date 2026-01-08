@@ -20,27 +20,32 @@ from lemma.document.ast import Paragraph
 
 class Command():
 
-    def __init__(self, paragraph):
-        self.paragraph = paragraph
+    def __init__(self, index_from, index_to):
+        self.index_from = index_from
+        self.index_to = index_to
         self.state = dict()
 
     def run(self, document):
-        index = self.paragraph.parent.index(self.paragraph)
-        self.state['index'] = index
         self.state['cursor_state_before'] = document.cursor.get_state()
+        self.state['deleted_paragraphs'] = document.ast[self.index_from:self.index_to]
 
-        if not self.paragraph.is_last_in_parent():
-            document.cursor.set_insert_selection_nodes(self.paragraph.next_in_parent()[0], self.paragraph.next_in_parent()[0])
+        first_paragraph = document.ast[self.index_from]
+        last_paragraph = document.ast[self.index_to - 1]
+        if not last_paragraph.is_last_in_parent():
+            document.cursor.set_insert_selection_nodes(last_paragraph.next_in_parent()[0], last_paragraph.next_in_parent()[0])
         else:
-            document.cursor.set_insert_selection_nodes(self.paragraph.prev_in_parent()[-1], self.paragraph.prev_in_parent[-1])
-        self.paragraph.parent.remove_range(index, index + 1)
+            document.cursor.set_insert_selection_nodes(first_paragraph.prev_in_parent()[-1], first_paragraph.prev_in_parent[-1])
+
+        document.ast.remove_range(self.index_from, self.index_to)
 
         document.update_last_modified()
 
     def undo(self, document):
-        self.paragraph.parent.insert(self.state['index'], self.paragraph)
+        for paragraph in reversed(self.state['deleted_paragraphs']):
+            document.ast.insert(self.index_from, paragraph)
 
         document.cursor.set_state(self.state['cursor_state_before'])
+
         document.update_last_modified()
 
 

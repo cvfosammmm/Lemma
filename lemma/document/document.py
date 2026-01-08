@@ -135,26 +135,21 @@ class Document():
     @undoable_action
     def delete_nodes(self, node_from, node_to):
         if node_from.parent == node_to.parent:
-            self.command_manager.add_command('delete', node_from, node_to)
+            self.command_manager.add_command('delete_nodes', node_from, node_to)
         else:
             paragraph_index_from = self.ast.index(node_from.parent)
             paragraph_index_to = self.ast.index(node_to.parent)
 
             if node_from.is_first_in_parent():
-                for paragraph in self.ast[paragraph_index_from:paragraph_index_to]:
-                    self.command_manager.add_command('delete_paragraph', paragraph)
-
-                self.command_manager.add_command('delete', node_to.first_in_parent(), node_to)
+                self.command_manager.add_command('delete_paragraphs', paragraph_index_from, paragraph_index_to)
+                self.command_manager.add_command('delete_nodes', node_to.first_in_parent(), node_to)
             else:
-                for paragraph in self.ast[paragraph_index_from + 1:paragraph_index_to]:
-                    self.command_manager.add_command('delete_paragraph', paragraph)
-
                 copy_nodes = node_to.parent[node_to.parent.index(node_to):node_to.parent.index(node_to.last_in_parent())]
                 end_of_first_paragraph = node_from.last_in_parent()
                 last_paragraph = node_to.parent
-                self.command_manager.add_command('delete', node_from, end_of_first_paragraph)
-                self.command_manager.add_command('delete', node_to, node_to.last_in_parent())
-                self.command_manager.add_command('delete_paragraph', last_paragraph)
+                self.command_manager.add_command('delete_nodes', node_from, end_of_first_paragraph)
+                self.command_manager.add_command('delete_nodes', node_to, node_to.last_in_parent())
+                self.command_manager.add_command('delete_paragraphs', paragraph_index_from + 1, paragraph_index_to + 1)
                 self.command_manager.add_command('insert', end_of_first_paragraph, copy_nodes)
                 self.command_manager.add_command('move_cursor_to_node', copy_nodes[0], copy_nodes[0])
 
