@@ -30,15 +30,19 @@ class PlaintextScanner(object):
 
     @timer.timer
     def update_pal(self):
-        text = ''
+        plaintext = ''
 
         for paragraph in self.document.ast:
-            for node in paragraph:
-                if node.type == 'char':
-                    text += node.value
-                elif node.type == 'eol':
-                    text += '\n'
+            if paragraph.plaintext == None:
+                text = ''
+                for node in paragraph:
+                    if node.type == 'char':
+                        text += node.value
+                    elif node.type == 'eol':
+                        text += '\n'
+                paragraph.plaintext = text
+            plaintext += paragraph.plaintext
 
-        self.document.plaintext = text
+        self.document.plaintext = plaintext
 
 

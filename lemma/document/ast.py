@@ -73,6 +73,7 @@ class Paragraph():
         self.children = []
         self.layout = None
         self.xml = None
+        self.plaintext = None
         self.type = 'paragraph'
 
         self.style = 'p'
@@ -82,6 +83,7 @@ class Paragraph():
     def invalidate(self):
         self.layout = None
         self.xml = None
+        self.plaintext = None
 
     def set_parent(self, parent):
         self.parent = parent
