@@ -41,6 +41,9 @@ class Root():
     def remove(self, paragraph):
         self.paragraphs.remove(paragraph)
 
+    def remove_range(self, index_from, index_to):
+        del(self.paragraphs[index_from:index_to])
+
     def index(self, paragraph):
         return self.paragraphs.index(paragraph)
 
@@ -93,6 +96,9 @@ class Paragraph():
 
     def remove(self, node):
         self.children.remove(node)
+
+    def remove_range(self, index_from, index_to):
+        del(self.children[index_from:index_to])
 
     def index(self, node):
         return self.children.index(node)
@@ -155,6 +161,9 @@ class Node():
 
     def remove(self, node):
         self.children.remove(node)
+
+    def remove_range(self, index_from, index_to):
+        del(self.children[index_from:index_to])
 
     def index(self, node):
         return self.children.index(node)
