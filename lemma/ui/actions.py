@@ -473,6 +473,8 @@ class Actions(object):
         UseCases.toggle_tools_sidebar(parameter.get_string())
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
+        if ApplicationState.get_value('active_popover') == 'paragraph_style': return
+
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
@@ -481,6 +483,8 @@ class Actions(object):
         UseCases.show_popover('paragraph_style', x, y, 'top')
 
     def show_edit_menu(self, action=None, parameter=''):
+        if ApplicationState.get_value('active_popover') == 'edit_menu': return
+
         button = self.main_window.toolbar.toolbar_right.edit_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
@@ -489,6 +493,8 @@ class Actions(object):
         UseCases.show_popover('edit_menu', x, y, 'top')
 
     def show_document_menu(self, action=None, parameter=''):
+        if ApplicationState.get_value('active_popover') == 'document_menu': return
+
         button = self.main_window.headerbar.hb_right.document_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
@@ -497,6 +503,8 @@ class Actions(object):
         UseCases.show_popover('document_menu', x, y, 'bottom')
 
     def show_hamburger_menu(self, action=None, parameter=''):
+        if ApplicationState.get_value('active_popover') == 'hamburger_menu': return
+
         button = self.main_window.headerbar.hb_left.hamburger_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 

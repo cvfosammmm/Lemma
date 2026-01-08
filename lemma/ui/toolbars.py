@@ -30,11 +30,36 @@ import lemma.services.timer as timer
 
 class ToolBars():
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, application):
+        self.application = application
         self.headerbar = main_window.headerbar
         self.toolbar = main_window.toolbar
 
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
+
+        controller = Gtk.GestureClick()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.set_button(1)
+        controller.connect('pressed', self.on_menu_button_press, 'show-hamburger-menu')
+        self.headerbar.hb_left.hamburger_menu_button.add_controller(controller)
+
+        controller = Gtk.GestureClick()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.set_button(1)
+        controller.connect('pressed', self.on_menu_button_press, 'show-document-menu')
+        self.headerbar.hb_right.document_menu_button.add_controller(controller)
+
+        controller = Gtk.GestureClick()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.set_button(1)
+        controller.connect('pressed', self.on_menu_button_press, 'show-paragraph-style-menu')
+        self.toolbar.toolbar_main.paragraph_style_menu_button.add_controller(controller)
+
+        controller = Gtk.GestureClick()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.set_button(1)
+        controller.connect('pressed', self.on_menu_button_press, 'show-edit-menu')
+        self.toolbar.toolbar_right.edit_menu_button.add_controller(controller)
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'pinned_documents_changed')
@@ -48,6 +73,10 @@ class ToolBars():
         if 'history_changed' in messages or 'document_changed' in messages or 'app_state_changed' in messages or 'settings_changed' in messages:
             self.update()
             self.update_paragraph_style()
+
+    def on_menu_button_press(self, controller, n_press, x, y, action_name):
+        self.application.actions.actions[action_name].activate()
+        controller.reset()
 
     @timer.timer
     def update(self):
