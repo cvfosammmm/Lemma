@@ -29,13 +29,16 @@ class LinksScanner(object):
 
     @timer.timer
     def update_links(self):
-        links = []
+        links = set()
 
         for paragraph in self.document.ast:
-            for node in paragraph:
-                if node.link != None and node.type == 'char':
-                    links.append(node.link)
+            if paragraph.links == None:
+                paragraph.links = set()
+                for node in paragraph:
+                    if node.link != None and node.type == 'char':
+                        paragraph.links.add(node.link)
+            links |= paragraph.links
 
-        self.document.links = set(links)
+        self.document.links = links
 
 
