@@ -369,6 +369,7 @@ class UseCases():
         document.start_undoable_action()
         document.delete_selected_nodes()
 
+        insert_position = document.get_insert_node().get_position()
         for paragraph in paragraphs:
             insert_node = document.get_insert_node()
             if insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
@@ -376,7 +377,7 @@ class UseCases():
             else:
                 document.insert_nodes(paragraph.children)
 
-        document.select_placeholder_in_range(paragraphs[0][0], document.get_insert_node())
+        document.select_placeholder_in_range(document.get_node_at_position(insert_position), document.get_insert_node())
         document.update_implicit_x_position()
         document.end_undoable_action()
 
