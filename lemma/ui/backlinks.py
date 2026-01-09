@@ -61,6 +61,7 @@ class Backlinks(object):
                 if backlink_ids != self.current_backlink_ids:
                     self.current_backlink_ids = backlink_ids
                     self.view.show_backlinks(backlinks)
+                    self.view.scrolled_window.get_vadjustment().set_value(0)
             else:
                 self.current_backlink_ids = []
                 self.view.show_no_backlinks_page(document.title)
