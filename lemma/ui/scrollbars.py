@@ -47,12 +47,20 @@ class Scrollbars():
         self.pointer_entry_time = None
         self.drag_in_progress = False
         self.visibility_timeout = False
+        self.last_pointer_movement = 0
+        self.is_visible = False
 
         self.motion_controller = Gtk.EventControllerMotion()
         self.motion_controller.connect('enter', self.on_enter)
         self.motion_controller.connect('motion', self.on_hover)
         self.motion_controller.connect('leave', self.on_hover)
         self.view.add_controller(self.motion_controller)
+
+        self.motion_controller_document = Gtk.EventControllerMotion()
+        self.motion_controller_document.connect('enter', self.on_enter_document)
+        self.motion_controller_document.connect('motion', self.on_hover_document)
+        self.motion_controller_document.connect('leave', self.on_leave_document)
+        self.main_window.document_view.add_controller(self.motion_controller_document)
 
         self.drag_controller = Gtk.GestureDrag()
         self.drag_controller.connect('drag-begin', self.on_drag_begin)
@@ -77,14 +85,16 @@ class Scrollbars():
         slider_offset = slider_pos_fraction * (height - slider_height)
         drag_in_progress = (drag_pos != None)
         visibility_timeout = self.pointer_entry_time != None and (time.time() - self.pointer_entry_time > 0.1)
+        is_visible = pointer_pos != None or time.time() - self.last_pointer_movement < 2
 
-        if self.slider_offset != slider_offset or self.slider_height != slider_height or self.pointer_pos != pointer_pos or self.drag_in_progress != drag_in_progress or self.view_height != height or self.visibility_timeout != visibility_timeout:
+        if self.slider_offset != slider_offset or self.slider_height != slider_height or self.pointer_pos != pointer_pos or self.drag_in_progress != drag_in_progress or self.view_height != height or self.visibility_timeout != visibility_timeout or is_visible != self.is_visible:
             self.slider_offset = slider_offset
             self.slider_height = slider_height
             self.pointer_pos = pointer_pos
             self.drag_in_progress = drag_in_progress
             self.view_height = height
             self.visibility_timeout = visibility_timeout
+            self.is_visible = is_visible
 
             self.view.set_can_target(slider_height < height)
             self.view.queue_draw()
@@ -95,6 +105,15 @@ class Scrollbars():
 
     def on_hover(self, controller, x=None, y=None):
         self.pointer_x, self.pointer_y = (x, y)
+
+    def on_enter_document(self, controller, x=None, y=None):
+        self.last_pointer_movement = time.time()
+
+    def on_hover_document(self, controller, x=None, y=None):
+        self.last_pointer_movement = time.time()
+
+    def on_leave_document(self, controller, x=None, y=None):
+        self.last_pointer_movement = time.time()
 
     def on_drag_begin(self, gesture, x, y, data=None):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -135,6 +154,7 @@ class Scrollbars():
 
         visible_width = 8 if expand_width else 3
 
+        if not self.is_visible: return
         if self.slider_height >= self.view_height: return
 
         if expand_width:
