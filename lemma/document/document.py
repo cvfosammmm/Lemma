@@ -27,6 +27,7 @@ from lemma.services.character_db import CharacterDB
 from lemma.document.links_scanner import LinksScanner
 from lemma.document.clipping import Clipping
 from lemma.document.xml_scanner import XMLScanner
+from lemma.services.ast_validator import ASTValidator
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.layout_info import LayoutInfo
 from lemma.application_state.application_state import ApplicationState
@@ -77,12 +78,19 @@ class Document():
 
     @undoable_action
     def insert_paragraph(self, paragraph, index):
+        if not ASTValidator.validate_paragraph(paragraph): return
+
         self.command_manager.add_command('insert_paragraph', index, paragraph)
 
     @undoable_action
     def insert_nodes(self, nodes, insert=None):
         if insert == None:
             insert = self.get_insert_node()
+
+        for node in nodes:
+            if not ASTValidator.validate_node_for_parent_type(node, insert.parent.type): return
+            if not ASTValidator.validate_node(node): return
+
         self.command_manager.add_command('insert_nodes', insert, nodes)
 
     @undoable_action
