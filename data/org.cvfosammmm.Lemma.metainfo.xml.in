@@ -39,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="56" date="2026-1-9">
+            <description translatable="no">
+                <p>Show popover menus on button press, ...</p>
+            </description>
+        </release>
         ​<release version="55" date="2026-1-6">
             <description translatable="no">
                 <p>New app icon, nicer cursor jumping, ...</p>
