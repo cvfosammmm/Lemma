@@ -303,7 +303,7 @@ class DocumentList(object):
         viewport.height = 72
 
         res_path = Paths.get_resources_folder()
-        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons/no-results-symbolic.svg'))
+        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons/hicolor/scalable/actions/no-results-symbolic.svg'))
         rsvg_handle.set_stylesheet(b'rect,path,ellipse,circle { fill: ' + sidebar_fg_4.to_string().encode() + b' !important; }')
         rsvg_handle.render_document(ctx, viewport)
 

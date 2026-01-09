@@ -58,7 +58,7 @@ class TextRenderer():
 
     def load_icon_surface(icon_name, scale=1, default_color=None, highlight_color=None):
         res_path = Paths.get_resources_folder()
-        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons', icon_name + '.svg'))
+        rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons', 'hicolor', 'scalable', 'actions', icon_name + '.svg'))
 
         if default_color != None:
             rsvg_handle.set_stylesheet(b'path, rect {fill: ' + default_color.encode() + b';}\npath.highlight, rect.highlight {fill: ' + highlight_color.encode() + b';}')
