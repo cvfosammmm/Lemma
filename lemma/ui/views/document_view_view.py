@@ -19,10 +19,9 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-import math
-
 from lemma.use_cases.use_cases import UseCases
 from lemma.ui.views.autocomplete_view import AutocompleteView
+from lemma.ui.views.scrollbars import ScrollbarVertical
 
 
 class DocumentView(Gtk.Widget):
@@ -37,7 +36,7 @@ class DocumentView(Gtk.Widget):
         self.content = DocumentViewDrawingArea()
         self.content.set_parent(self)
 
-        self.scrollbar_vertical = ScrollbarViewVertical()
+        self.scrollbar_vertical = ScrollbarVertical()
         self.scrollbar_vertical.set_parent(self)
 
         self.title_widget = TitleWidget()
@@ -104,27 +103,6 @@ class DocumentViewDrawingArea(Gtk.Widget):
 
     def do_size_allocate(self, width, height, baseline):
         UseCases.app_state_set_values({'document_view_width': width, 'document_view_height': height})
-
-
-class ScrollbarViewVertical(Gtk.Widget):
-
-    def __init__(self):
-        Gtk.Widget.__init__(self)
-        self.add_css_class('scrollbar-vertical')
-
-        self.set_size_request(20, -1)
-
-        self.set_halign(Gtk.Align.END)
-        self.set_valign(Gtk.Align.FILL)
-        self.set_can_target(False)
-
-        self.draw_func = lambda: None
-
-    def do_snapshot(self, snapshot):
-        self.draw_func(snapshot)
-
-    def set_draw_func(self, draw_func):
-        self.draw_func = draw_func
 
 
 class TitleWidget(Gtk.Box):

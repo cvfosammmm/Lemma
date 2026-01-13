@@ -90,6 +90,14 @@ class DocumentView():
                 do_draw = True
 
         scrolling_position_x, scrolling_position_y = self.document.get_current_scrolling_offsets()
+        total_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
+
+        self.view.scrollbar_vertical.set_total_height(total_height)
+        self.view.scrollbar_vertical.set_scrolling_offset(scrolling_position_y)
+        if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
+            self.scrolling_position_x = scrolling_position_x
+            self.scrolling_position_y = scrolling_position_y
+            do_draw = True
 
         time_since_blink_start = time.time() - self.cursor_blink_reset
         time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
@@ -104,11 +112,6 @@ class DocumentView():
 
         if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
             self.cursor_visible = cursor_visible
-            do_draw = True
-
-        if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
-            self.scrolling_position_x = scrolling_position_x
-            self.scrolling_position_y = scrolling_position_y
             do_draw = True
 
         if do_draw:

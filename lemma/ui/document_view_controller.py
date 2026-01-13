@@ -98,6 +98,8 @@ class DocumentViewController():
         self.scrolling_controller.connect('decelerate', self.on_decelerate)
         self.view.add_controller(self.scrolling_controller)
 
+        self.view.scrollbar_vertical.observe('dragged', self.on_scrollbar_drag)
+
     def on_realize(self, content, data=None):
         self.model.reset_cursor_blink()
 
@@ -344,6 +346,9 @@ class DocumentViewController():
 
         UseCases.decelerate_scrolling(self.model.scrolling_position_x, self.model.scrolling_position_y, vel_x, vel_y)
 
+    def on_scrollbar_drag(self, widget, new_y):
+        UseCases.scroll_to_xy(0, new_y, animation_type=None)
+
     def on_keypress_content(self, controller, keyval, keycode, keyboard_state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
@@ -471,17 +476,20 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.model.set_pointer_position(x, y)
+        self.view.scrollbar_vertical.ping()
 
     def on_hover(self, controller, x, y):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.model.set_pointer_position(x, y)
+        self.view.scrollbar_vertical.ping()
 
     def on_leave(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
 
         self.model.set_pointer_position(None, None)
+        self.view.scrollbar_vertical.ping()
 
 

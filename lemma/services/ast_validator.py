@@ -57,7 +57,6 @@ class ASTValidator():
             return node.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}
         if parent_type == 'mathlist':
             return node.type in {'char', 'placeholder', 'end'}
-        print(node.type, parent_type)
         return False
 
 

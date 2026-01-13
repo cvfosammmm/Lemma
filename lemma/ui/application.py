@@ -30,7 +30,6 @@ import lemma.ui.views.main_window_view as main_window_view
 import lemma.ui.history as history
 import lemma.ui.document_view as document_view
 import lemma.ui.document_title as document_title
-import lemma.ui.scrollbars as scrollbars
 import lemma.ui.document_context_menu as context_menu_document
 import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
@@ -64,7 +63,6 @@ class Application(Adw.Application):
         self.history = history.History(self.main_window)
         self.document_view = document_view.DocumentView(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
-        self.scrollbars = scrollbars.Scrollbars(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)
         self.toolbars = toolbars.ToolBars(self.main_window, self)
@@ -99,7 +97,6 @@ class Application(Adw.Application):
         self.document_title.animate()
         self.context_menu_document.animate()
         self.autocomplete.animate()
-        self.scrollbars.animate()
         self.cursor_state.animate()
         self.toolbars.animate()
         self.document_pinning.animate()

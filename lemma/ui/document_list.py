@@ -48,10 +48,10 @@ class DocumentList(object):
         self.focus_index = None
         self.selected_index = None
 
-        self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
-        self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
-        self.view.scrolling_widget.connect('secondary_button_press', self.on_secondary_button_press)
-        self.view.scrolling_widget.connect('hover_state_changed', self.on_hover_state_changed)
+        self.view.scrolling_widget.observe('primary_button_press', self.on_primary_button_press)
+        self.view.scrolling_widget.observe('primary_button_release', self.on_primary_button_release)
+        self.view.scrolling_widget.observe('secondary_button_press', self.on_secondary_button_press)
+        self.view.scrolling_widget.observe('hover_state_changed', self.on_hover_state_changed)
 
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
         self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)

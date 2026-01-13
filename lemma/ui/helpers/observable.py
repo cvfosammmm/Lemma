@@ -35,16 +35,10 @@ class Observable(object):
                 else:
                     callback(self)
 
-    def connect(self, change_code, callback):
+    def observe(self, change_code, callback):
         if change_code in self.connected_functions:
             self.connected_functions[change_code].add(callback)
         else:
             self.connected_functions[change_code] = {callback}
-
-    def disconnect(self, change_code, callback):
-        if change_code in self.connected_functions:
-            self.connected_functions[change_code].discard(callback)
-            if len(self.connected_functions[change_code]) == 0:
-                del(self.connected_functions[change_code])
 
 

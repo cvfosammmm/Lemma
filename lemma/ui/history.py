@@ -48,8 +48,8 @@ class History(object):
         self.size_cache = dict()
 
         self.view.content.set_draw_func(self.draw)
-        self.view.scrolling_widget.connect('primary_button_press', self.on_primary_button_press)
-        self.view.scrolling_widget.connect('primary_button_release', self.on_primary_button_release)
+        self.view.scrolling_widget.observe('primary_button_press', self.on_primary_button_press)
+        self.view.scrolling_widget.observe('primary_button_release', self.on_primary_button_release)
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'document_title_changed')
