@@ -42,20 +42,33 @@ class DocumentList(object):
         self.view = main_window.document_list
 
         self.render_cache = dict()
+        self.content_height = 0
 
         self.search_terms = []
         self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
         self.focus_index = None
         self.selected_index = None
 
-        self.view.scrolling_widget.observe('primary_button_press', self.on_primary_button_press)
-        self.view.scrolling_widget.observe('primary_button_release', self.on_primary_button_release)
-        self.view.scrolling_widget.observe('secondary_button_press', self.on_secondary_button_press)
-        self.view.scrolling_widget.observe('hover_state_changed', self.on_hover_state_changed)
-
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
         self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)
         self.main_window.headerbar.hb_left.search_entry.connect('activate', self.activate_selected_button)
+
+        self.motion_controller = Gtk.EventControllerMotion()
+        self.motion_controller.connect('enter', self.on_enter)
+        self.motion_controller.connect('motion', self.on_hover)
+        self.motion_controller.connect('leave', self.on_leave)
+        self.view.content.add_controller(self.motion_controller)
+
+        self.primary_click_controller = Gtk.GestureClick()
+        self.primary_click_controller.set_button(1)
+        self.primary_click_controller.connect('pressed', self.on_primary_button_press)
+        self.primary_click_controller.connect('released', self.on_primary_button_release)
+        self.view.content.add_controller(self.primary_click_controller)
+
+        self.secondary_click_controller = Gtk.GestureClick()
+        self.secondary_click_controller.set_button(3)
+        self.secondary_click_controller.connect('pressed', self.on_secondary_button_press)
+        self.view.content.add_controller(self.secondary_click_controller)
 
         self.shortcuts_controller = ShortcutController()
         self.shortcuts_controller.add_with_callback('Escape', self.stop_search)
@@ -64,6 +77,8 @@ class DocumentList(object):
         self.shortcuts_controller.add_with_callback('Tab', self.select_next_button)
         self.shortcuts_controller.add_with_callback('<Shift>Tab', self.select_previous_button)
         self.main_window.headerbar.hb_left.search_entry.add_controller(self.shortcuts_controller)
+
+        self.view.scrollbar_vertical.observe('dragged', self.on_scrollbar_drag)
 
         self.view.content.set_draw_func(self.draw)
 
@@ -81,16 +96,23 @@ class DocumentList(object):
 
     @timer.timer
     def animate(self):
+        self.update()
+
+    def update(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
-            self.update()
+            self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
 
-    @timer.timer
-    def update(self):
-        self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
-        self.view.scrolling_widget.set_size(1, max(len(self.document_stubs) * self.view.line_height, 1))
+        content_height = max(len(self.document_stubs) * self.view.line_height, 1)
+        scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
 
-        self.view.scrolling_widget.queue_draw()
+        self.view.scrollbar_vertical.set_content_height(content_height)
+        self.view.scrollbar_vertical.set_scrolling_offset(scrolling_offset)
+
+        if content_height != self.content_height:
+            self.content_height = content_height
+            self.view.scrolling_widget.set_size(1, content_height)
+            self.view.scrolling_widget.queue_draw()
 
     def set_focus_index(self, index):
         if index != self.focus_index:
@@ -106,36 +128,48 @@ class DocumentList(object):
         UseCases.set_active_document(self.document_stubs[index]['id'])
         UseCases.scroll_to_xy(0, 0, animation_type=None)
 
-    def on_primary_button_press(self, scrolling_widget, data):
-        x_offset, y_offset, state = data
+    def on_primary_button_press(self, controller, n_press, x, y):
+        if n_press != 1: return
 
-        if state == 0:
-            item_num = self.get_item_at_cursor()
-            if item_num != None and item_num < len(self.document_stubs):
-                self.set_selected_index(item_num)
+        item_num = self.get_item_at_cursor()
+        if item_num != None and item_num < len(self.document_stubs):
+            self.set_selected_index(item_num)
 
-    def on_primary_button_release(self, scrolling_widget, data):
-        x_offset, y_offset, state = data
+    def on_primary_button_release(self, controller, n_press, x, y):
+        if n_press != 1: return
 
         item_num = self.get_item_at_cursor()
         if item_num != None and item_num == self.selected_index:
             self.activate_item(item_num)
         self.set_selected_index(None)
 
-    def on_secondary_button_press(self, content, data):
-        x, y, state = data
+    def on_secondary_button_press(self, controller, n_press, x, y):
+        if n_press != 1: return
 
-        if state == 0:
-            item_num = self.get_item_at_cursor()
-            if item_num != None and item_num < len(self.document_stubs):
-                self.set_selected_index(item_num)
-                self.view.context_menu.popup_at_cursor(x - content.scrolling_offset_x, y - content.scrolling_offset_y)
+        item_num = self.get_item_at_cursor()
+        if item_num != None and item_num < len(self.document_stubs):
+            self.set_selected_index(item_num)
+            self.view.context_menu.popup_at_cursor(x, y)
 
         return True
 
-    def on_hover_state_changed(self, scrolling_widget):
+    def on_scrollbar_drag(self, widget, new_y):
+        self.view.scrolling_widget.adjustment_y.set_value(new_y)
+
+    def on_enter(self, controller, x, y):
         item_num = self.get_item_at_cursor()
         self.set_focus_index(item_num)
+        self.view.scrollbar_vertical.ping()
+
+    def on_hover(self, controller, x, y):
+        item_num = self.get_item_at_cursor()
+        self.set_focus_index(item_num)
+        self.view.scrollbar_vertical.ping()
+
+    def on_leave(self, controller):
+        item_num = self.get_item_at_cursor()
+        self.set_focus_index(item_num)
+        self.view.scrollbar_vertical.ping()
 
     def on_context_menu_close(self, popover):
         self.set_selected_index(None)

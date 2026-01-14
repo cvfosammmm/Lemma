@@ -122,6 +122,12 @@
 @define-color scrollbar_active #777777;
 @define-color scrollbar_thin #d1d1d1;
 
+@define-color sidebar_scrollbar_bg #444;
+@define-color sidebar_scrollbar_default #666;
+@define-color sidebar_scrollbar_hover #999;
+@define-color sidebar_scrollbar_active #bbb;
+@define-color sidebar_scrollbar_thin #555;
+
 /* Toolbar */
 @define-color toolbar_fg #000000ff;
 

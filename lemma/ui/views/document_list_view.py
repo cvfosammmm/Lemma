@@ -21,6 +21,7 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, Pango
 
 from lemma.ui.views.scrolling_widget import ScrollingWidget
+from lemma.ui.views.scrollbars import ScrollbarVertical
 from lemma.ui.views.context_menu import ContextMenu
 
 
@@ -59,6 +60,10 @@ class DocumentListView(Gtk.Overlay):
         self.scrolling_widget = ScrollingWidget()
         self.content = self.scrolling_widget.content
         self.set_child(self.scrolling_widget.view)
+
+        self.scrollbar_vertical = ScrollbarVertical()
+        self.scrollbar_vertical.add_css_class('sidebar')
+        self.add_overlay(self.scrollbar_vertical)
 
         self.context_menu = ContextMenuDocumentList(self.content)
 

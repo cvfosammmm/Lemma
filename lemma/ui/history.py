@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gdk, Pango, PangoCairo
+from gi.repository import Gtk, Gdk, Pango, PangoCairo
 
 from lemma.services.message_bus import MessageBus
 from lemma.services.color_manager import ColorManager
@@ -50,6 +50,12 @@ class History(object):
         self.view.content.set_draw_func(self.draw)
         self.view.scrolling_widget.observe('primary_button_press', self.on_primary_button_press)
         self.view.scrolling_widget.observe('primary_button_release', self.on_primary_button_release)
+
+        self.primary_click_controller = Gtk.GestureClick()
+        self.primary_click_controller.set_button(1)
+        self.primary_click_controller.connect('pressed', self.on_primary_button_press)
+        self.primary_click_controller.connect('released', self.on_primary_button_release)
+        self.view.content.add_controller(self.primary_click_controller)
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'document_title_changed')
@@ -111,16 +117,15 @@ class History(object):
                 self.view.scrolling_widget.scroll_to_position((document_offset - self.view.scrolling_widget.width - 1, 0))
                 return
 
-    def on_primary_button_press(self, scrolling_widget, data):
-        x_offset, y_offset, state = data
+    def on_primary_button_press(self, controller, n_press, x, y):
+        if n_press != 1: return
 
-        if state == 0:
-            hover_index = self.get_hover_index()
-            if hover_index != None:
-                self.set_selected_index(hover_index)
+        hover_index = self.get_hover_index()
+        if hover_index != None:
+            self.set_selected_index(hover_index)
 
-    def on_primary_button_release(self, scrolling_widget, data):
-        x_offset, y_offset, state = data
+    def on_primary_button_release(self, controller, n_press, x, y):
+        if n_press != 1: return
 
         hover_index = self.get_hover_index()
         if hover_index != None and hover_index == self.selected_index:

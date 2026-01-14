@@ -41,7 +41,7 @@ class ScrollbarVertical(Gtk.Widget, Observable):
         self.pointer_pos = None
         self.view_width = 20
         self.view_height = 0
-        self.total_height = 1
+        self.content_height = 1
         self.scrolling_offset = 0
         self.drag_in_progress = False
         self.drag_start_x, self.drag_start_y = (None, None)
@@ -80,12 +80,13 @@ class ScrollbarVertical(Gtk.Widget, Observable):
         self.set_pointer_pos(y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
+        self.ping()
         self.set_drag_in_progress(True)
 
         view_height = self.view_height
-        slider_height = max(60, min(view_height, view_height * view_height / self.total_height))
-        slider_pos_fraction = self.scrolling_offset / (self.total_height - view_height)
-        slider_offset = slider_pos_fraction * (view_height - max(60, min(view_height, view_height * view_height / self.total_height)))
+        slider_height = max(60, min(view_height, view_height * view_height / self.content_height))
+        slider_pos_fraction = self.scrolling_offset / (self.content_height - view_height)
+        slider_offset = slider_pos_fraction * (view_height - max(60, min(view_height, view_height * view_height / self.content_height)))
 
         if y < slider_offset or y > slider_offset + slider_height:
             new_y = self.get_y_offset(y)
@@ -96,6 +97,8 @@ class ScrollbarVertical(Gtk.Widget, Observable):
             self.drag_start_x, self.drag_start_y = (x, slider_offset + slider_height / 2)
 
     def on_drag_update(self, gesture, x, y, data=None):
+        self.ping()
+
         y += self.drag_start_y
         new_y = self.get_y_offset(y)
         self.add_change_code('dragged', new_y)
@@ -121,15 +124,15 @@ class ScrollbarVertical(Gtk.Widget, Observable):
         if view_height != self.view_height:
             self.view_height = view_height
 
-            slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.total_height))
+            slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.content_height))
             self.set_can_target(slider_height < self.view_height)
             self.queue_draw()
 
-    def set_total_height(self, total_height):
-        if total_height != self.total_height:
-            self.total_height = total_height
+    def set_content_height(self, content_height):
+        if content_height != self.content_height:
+            self.content_height = content_height
 
-            slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.total_height))
+            slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.content_height))
             self.set_can_target(slider_height < self.view_height)
             self.queue_draw()
 
@@ -152,41 +155,54 @@ class ScrollbarVertical(Gtk.Widget, Observable):
         self.last_ping = time.time()
 
     def get_y_offset(self, y):
-        slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.total_height))
+        slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.content_height))
         y_in_range = max(slider_height / 2, min(self.view_height - slider_height / 2, y)) - slider_height / 2
         y_fraction = y_in_range / (self.view_height - slider_height)
-        return int(y_fraction * (self.total_height - self.view_height))
+        return int(y_fraction * (self.content_height - self.view_height))
 
     def do_snapshot(self, snapshot):
         expand_width = self.pointer_pos != None and self.visibility_timeout == True
 
         visible_width = 8 if expand_width else 3
-        slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.total_height))
-        slider_pos_fraction = self.scrolling_offset / (self.total_height - self.view_height)
-        slider_offset = slider_pos_fraction * (self.view_height - max(60, min(self.view_height, self.view_height * self.view_height / self.total_height)))
+        slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.content_height))
+        slider_pos_fraction = self.scrolling_offset / (self.content_height - self.view_height)
+        slider_offset = slider_pos_fraction * (self.view_height - max(60, min(self.view_height, self.view_height * self.view_height / self.content_height)))
 
         if not self.is_visible: return
         if slider_height >= self.view_height: return
+
+        pointer_hovers_slider = self.pointer_pos != None and self.pointer_pos > slider_offset and self.pointer_pos < slider_offset + slider_height
+
+        if self.has_css_class('sidebar'):
+            bg_color = ColorManager.get_ui_color('sidebar_scrollbar_bg')
+            if expand_width:
+                if self.drag_in_progress:
+                    slider_color = ColorManager.get_ui_color('sidebar_scrollbar_active')
+                elif pointer_hovers_slider:
+                    slider_color = ColorManager.get_ui_color('sidebar_scrollbar_hover')
+                else:
+                    slider_color = ColorManager.get_ui_color('sidebar_scrollbar_default')
+            else:
+                slider_color = ColorManager.get_ui_color('sidebar_scrollbar_thin')
+        else:
+            bg_color = ColorManager.get_ui_color('scrollbar_bg')
+            if expand_width:
+                if self.drag_in_progress:
+                    slider_color = ColorManager.get_ui_color('scrollbar_active')
+                elif pointer_hovers_slider:
+                    slider_color = ColorManager.get_ui_color('scrollbar_hover')
+                else:
+                    slider_color = ColorManager.get_ui_color('scrollbar_default')
+            else:
+                slider_color = ColorManager.get_ui_color('scrollbar_thin')
 
         if expand_width:
             rect = Graphene.Rect().init(self.view_width - 6 - visible_width, 6, visible_width, self.view_height - 12)
             rounded_rect = Gsk.RoundedRect()
             rounded_rect.init_from_rect(rect, 20)
             snapshot.push_rounded_clip(rounded_rect)
-            snapshot.append_color(ColorManager.get_ui_color('scrollbar_bg'), rect)
+            snapshot.append_color(bg_color, rect)
             snapshot.pop()
-
-        pointer_hovers_slider = self.pointer_pos != None and self.pointer_pos > slider_offset and self.pointer_pos < slider_offset + slider_height
-
-        if expand_width:
-            if self.drag_in_progress:
-                slider_color = ColorManager.get_ui_color('scrollbar_active')
-            elif pointer_hovers_slider:
-                slider_color = ColorManager.get_ui_color('scrollbar_hover')
-            else:
-                slider_color = ColorManager.get_ui_color('scrollbar_default')
-        else:
-            slider_color = ColorManager.get_ui_color('scrollbar_thin')
 
         rect = Graphene.Rect().init(self.view_width - 6 - visible_width, slider_offset + 6, visible_width, slider_height - 12)
         rounded_rect = Gsk.RoundedRect()

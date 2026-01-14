@@ -33,7 +33,6 @@ class ScrollingWidget(Observable):
         self.width, self.height = 0, 0
         self.cursor_x, self.cursor_y = None, None
         self.scrolling_multiplier = 2.5
-        self.last_cursor_scrolling_change = time.time()
         self.scrolling_job = None
 
         self.view = Gtk.Overlay()
@@ -41,18 +40,10 @@ class ScrollingWidget(Observable):
         self.view.set_child(self.content)
 
         self.scrollbar_x = Gtk.Scrollbar.new(Gtk.Orientation.HORIZONTAL)
-        self.scrollbar_x.set_valign(Gtk.Align.END)
-        self.scrollbar_x.add_css_class('bottom')
-        self.scrollbar_x.add_css_class('overlay-indicator')
         self.adjustment_x = self.scrollbar_x.get_adjustment()
-        self.view.add_overlay(self.scrollbar_x)
 
         self.scrollbar_y = Gtk.Scrollbar.new(Gtk.Orientation.VERTICAL)
-        self.scrollbar_y.set_halign(Gtk.Align.END)
-        self.scrollbar_y.add_css_class('right')
-        self.scrollbar_y.add_css_class('overlay-indicator')
         self.adjustment_y = self.scrollbar_y.get_adjustment()
-        self.view.add_overlay(self.scrollbar_y)
 
         self.scrolling_controller = Gtk.EventControllerScroll()
         self.scrolling_controller.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
@@ -71,17 +62,6 @@ class ScrollingWidget(Observable):
         self.motion_controller.connect('motion', self.on_hover)
         self.motion_controller.connect('leave', self.on_leave)
         self.view.add_controller(self.motion_controller)
-
-        self.primary_click_controller = Gtk.GestureClick()
-        self.primary_click_controller.set_button(1)
-        self.primary_click_controller.connect('pressed', self.on_primary_button_press)
-        self.primary_click_controller.connect('released', self.on_primary_button_release)
-        self.content.add_controller(self.primary_click_controller)
-
-        self.secondary_click_controller = Gtk.GestureClick()
-        self.secondary_click_controller.set_button(3)
-        self.secondary_click_controller.connect('pressed', self.on_secondary_button_press)
-        self.content.add_controller(self.secondary_click_controller)
 
     def queue_draw(self):
         self.content.queue_draw()
@@ -137,13 +117,6 @@ class ScrollingWidget(Observable):
             self.adjustment_x.set_value(self.adjustment_x.get_value() + dx)
             self.adjustment_y.set_value(self.adjustment_y.get_value() + dy)
 
-        if controller.get_current_event_state() & modifiers == Gdk.ModifierType.CONTROL_MASK:
-            if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
-                zoom_amount = dy * 0.1
-            else:
-                zoom_amount = (dy + dx) * 0.005
-            self.add_change_code('zoom_request', zoom_amount)
-
     def on_decelerate(self, controller, vel_x, vel_y):
         if abs(vel_x) > 0 and abs(vel_y / vel_x) >= 1: vel_x = 0
         if abs(vel_y) > 0 and abs(vel_x / vel_y) >  1: vel_y = 0
@@ -185,42 +158,12 @@ class ScrollingWidget(Observable):
         if self.scrolling_offset_y > self.adjustment_y.get_upper() - self.height:
             self.adjustment_y.set_value(self.adjustment_y.get_upper())
 
-        self.add_change_code('size_changed')
-        self.last_cursor_scrolling_change = time.time()
-        self.update_scrollbars()
         self.content.queue_draw()
 
     def on_adjustment_changed(self, adjustment):
         self.scrolling_offset_y = self.adjustment_y.get_value()
         self.scrolling_offset_x = self.adjustment_x.get_value()
-        self.add_change_code('scrolling_offset_changed')
-        self.last_cursor_scrolling_change = time.time()
-        self.update_scrollbars()
         self.content.queue_draw()
-
-    def on_primary_button_press(self, controller, n_press, x, y):
-        if n_press != 1: return
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-
-        x = self.scrolling_offset_x + x
-        y = self.scrolling_offset_y + y
-        self.add_change_code('primary_button_press', (x, y, controller.get_current_event_state() & modifiers))
-
-    def on_primary_button_release(self, controller, n_press, x, y):
-        if n_press != 1: return
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-
-        x = self.scrolling_offset_x + x
-        y = self.scrolling_offset_y + y
-        self.add_change_code('primary_button_release', (x, y, controller.get_current_event_state() & modifiers))
-
-    def on_secondary_button_press(self, controller, n_press, x, y):
-        if n_press != 1: return
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-
-        x = self.scrolling_offset_x + x
-        y = self.scrolling_offset_y + y
-        self.add_change_code('secondary_button_press', (x, y, controller.get_current_event_state() & modifiers))
 
     def on_enter(self, controller, x, y):
         self.set_cursor_position(x, y)
@@ -234,7 +177,6 @@ class ScrollingWidget(Observable):
     def set_size(self, x, y):
         self.adjustment_x.set_upper(x)
         self.adjustment_y.set_upper(y)
-        self.update_scrollbars()
         if self.scrolling_offset_y > max(0, y - self.height):
             self.scrolling_job = {'from': (self.scrolling_offset_x, self.scrolling_offset_y), 'to': (self.scrolling_offset_x, max(0, y - self.height)), 'starting_time': time.time(), 'duration': 0}
             self.scroll_now()
@@ -242,36 +184,6 @@ class ScrollingWidget(Observable):
     def set_cursor_position(self, x, y):
         if x != self.cursor_x or y != self.cursor_y:
             self.cursor_x, self.cursor_y = x, y
-            self.last_cursor_scrolling_change = time.time()
-            self.add_change_code('hover_state_changed')
-            self.update_scrollbars()
             self.content.queue_draw()
-
-    def update_scrollbars(self):
-        self.scrollbar_x.set_visible(self.adjustment_x.get_upper() - self.adjustment_x.get_page_size() >= 1)
-        self.scrollbar_y.set_visible(self.adjustment_y.get_upper() - self.adjustment_y.get_page_size() >= 1)
-
-        if self.cursor_x != None and self.cursor_x > self.width - 24:
-            self.scrollbar_y.add_css_class('hovering')
-        else:
-            self.scrollbar_y.remove_css_class('hovering')
-            if self.last_cursor_scrolling_change < time.time() - 1.5:
-                self.scrollbar_x.add_css_class('hidden')
-                self.scrollbar_y.add_css_class('hidden')
-            else:
-                self.scrollbar_x.remove_css_class('hidden')
-                self.scrollbar_y.remove_css_class('hidden')
-
-        if self.cursor_y != None and self.cursor_y > self.height - 24:
-            self.scrollbar_x.add_css_class('hovering')
-        else:
-            self.scrollbar_x.remove_css_class('hovering')
-            if self.last_cursor_scrolling_change < time.time() - 1.5:
-                self.scrollbar_x.add_css_class('hidden')
-            else:
-                self.scrollbar_x.remove_css_class('hidden')
-
-        GObject.timeout_add(1750, self.update_scrollbars)
-        return False
 
 

@@ -44,9 +44,6 @@ windowhandle.right > box > box.buttonbox {
     margin-left: 6px;
     margin-right: 6px;
 }
-overlay.history scrollbar {
-    opacity: 0;
-}
 
 windowhandle.right button.checked {
     background-color: @view_active_color;
@@ -164,12 +161,6 @@ paned.document-view separator.wide {
 }
 .nav-toolbar button {
     color: @sidebar_fg_3;
-}
-
-/* document list */
-
-overlay.document-list scrollbar slider {
-    min-height: 48px;
 }
 
 /* backlinks */
