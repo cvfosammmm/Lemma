@@ -85,12 +85,20 @@ class XMLParser(object):
         node = None
         if tag == 'mathscript':
             node = Node('mathscript')
+            node.link = self.current_link
+            node.tags = self.current_tags.copy()
         if tag == 'mathfraction':
             node = Node('mathfraction')
+            node.link = self.current_link
+            node.tags = self.current_tags.copy()
         if tag == 'mathroot':
             node = Node('mathroot')
+            node.link = self.current_link
+            node.tags = self.current_tags.copy()
         if tag == 'mathlist':
             node = Node('mathlist')
+            node.link = self.current_link
+            node.tags = self.current_tags.copy()
         if tag == 'end':
             node = Node('end')
             node.link = self.current_link

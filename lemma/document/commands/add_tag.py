@@ -23,16 +23,15 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        char_nodes = [node for node in document.get_selected_nodes() if node.type == 'char']
-
         self.state['affected_nodes'] = list()
-        for node in char_nodes:
-            if self.tag_name not in node.tags:
-                self.state['affected_nodes'].append(node)
-                node.tags.add(self.tag_name)
 
-        if len(char_nodes) > 0:
-            for paragraph_no in range(document.ast.index(char_nodes[0].paragraph()), document.ast.index(char_nodes[-1].paragraph()) + 1):
+        if document.has_selection():
+            for node in document.get_selected_nodes():
+                if self.tag_name not in node.tags:
+                    self.state['affected_nodes'].append(node)
+                    node.tags.add(self.tag_name)
+
+            for paragraph_no in range(document.ast.index(document.get_first_selection_bound().paragraph()), document.ast.index(document.get_last_selection_bound().paragraph()) + 1):
                 document.ast[paragraph_no].invalidate()
             document.update_last_modified()
 

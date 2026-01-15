@@ -170,16 +170,37 @@ class DocumentViewPresenter():
     @timer.timer
     def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
         surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int((layout['x'] + layout['width']) * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
-        self.draw_layout(layout, cairo.Context(surface), 0, -layout['y'], in_selection)
+        self.draw_highlight_bg(layout, cairo.Context(surface), 0, -layout['y'])
+        self.draw_selection_bg(layout, cairo.Context(surface), 0, -layout['y'], in_selection)
+        self.draw_layout(layout, cairo.Context(surface), 0, -layout['y'])
         self.render_cache[(paragraph_no, line_no)] = surface
 
-    def draw_layout(self, layout, ctx, offset_x, offset_y, in_selection):
-        if layout['type'] == 'char':
-            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
-            if in_selection:
-                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
-                in_selection = False
+    def draw_highlight_bg(self, layout, ctx, offset_x, offset_y):
+        if layout['node'] != None and 'highlight' in layout['node'].tags:
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('highlight_bg'))
+            ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
+            ctx.fill()
 
+        else:
+            for child in layout['children']:
+                self.draw_highlight_bg(child, ctx, offset_x + layout['x'], offset_y + layout['y'])
+
+    def draw_selection_bg(self, layout, ctx, offset_x, offset_y, in_selection):
+        if in_selection:
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
+            ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
+            ctx.fill()
+
+        else:
+            for child in layout['children']:
+                if child['node'] != None and child['node'] == self.first_selection_node:
+                    in_selection = True
+                if child['node'] != None and child['node'] == self.last_selection_node:
+                    in_selection = False
+                self.draw_selection_bg(child, ctx, offset_x + layout['x'], offset_y + layout['y'], in_selection)
+
+    def draw_layout(self, layout, ctx, offset_x, offset_y):
+        if layout['type'] == 'char':
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
 
@@ -196,11 +217,6 @@ class DocumentViewPresenter():
                     ctx.paint()
 
         if layout['type'] == 'widget':
-            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
-            if in_selection:
-                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
-                in_selection = False
-
             widget = layout['node'].value
             surface = widget.get_cairo_surface()
             fontname = layout['fontname']
@@ -217,11 +233,6 @@ class DocumentViewPresenter():
             ctx.set_matrix(matrix)
 
         if layout['type'] == 'placeholder':
-            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
-            if in_selection:
-                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
-                in_selection = False
-
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
 
@@ -231,30 +242,8 @@ class DocumentViewPresenter():
             ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
             ctx.paint()
 
-        if layout['type'] == 'mathroot':
-            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
-            if in_selection:
-                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
-                in_selection = False
-
-        if layout['type'] == 'mathfraction':
-            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
-            if in_selection:
-                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
-                in_selection = False
-
-        if layout['type'] == 'mathscript':
-            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
-            if in_selection:
-                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
-                in_selection = False
-
         for child in layout['children']:
-            if not in_selection and child['node'] != None and child['node'] == self.first_selection_node:
-                in_selection = True
-            if in_selection and child['node'] != None and child['node'] == self.last_selection_node:
-                in_selection = False
-            self.draw_layout(child, ctx, offset_x + layout['x'], offset_y + layout['y'], in_selection)
+            self.draw_layout(child, ctx, offset_x + layout['x'], offset_y + layout['y'])
 
         if layout['type'] == 'mathroot':
             fg_color = self.get_fg_color_by_node(layout['node'])
@@ -284,16 +273,6 @@ class DocumentViewPresenter():
 
             ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
             ctx.fill()
-
-    def draw_highlight_bg(self, layout, ctx, offset_x, offset_y):
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('highlight_bg'))
-        ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
-        ctx.fill()
-
-    def draw_selection_bg(self, layout, ctx, offset_x, offset_y):
-        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-        ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
-        ctx.fill()
 
     @timer.timer
     def get_fg_color_string_by_node(self, node):
