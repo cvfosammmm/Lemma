@@ -59,8 +59,8 @@ class DocumentViewPresenter():
 
         self.first_selection_node = document.get_first_selection_bound()
         self.last_selection_node = document.get_last_selection_bound()
-        first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
-        last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
+        self.first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
+        self.last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
 
         ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
 
@@ -90,8 +90,8 @@ class DocumentViewPresenter():
                 elif (i,j) in self.render_cache:
                     del(self.render_cache[(i,j)])
 
-                if not in_selection and line_layout['y'] + line_layout['parent']['y'] == first_selection_line['y'] + first_selection_line['parent']['y']: in_selection = True
-                if in_selection and line_layout['y'] + line_layout['parent']['y'] == last_selection_line['y'] + last_selection_line['parent']['y']: in_selection = False
+                if not in_selection and line_layout['y'] + line_layout['parent']['y'] == self.first_selection_line['y'] + self.first_selection_line['parent']['y']: in_selection = True
+                if in_selection and line_layout['y'] + line_layout['parent']['y'] == self.last_selection_line['y'] + self.last_selection_line['parent']['y']: in_selection = False
 
         if self.model.drop_cursor_x != -1 and self.model.drop_cursor_y != -1:
             self.draw_drop_cursor(ctx, content_offset_x, content_offset_y)
@@ -185,8 +185,9 @@ class DocumentViewPresenter():
             for child in layout['children']:
                 self.draw_highlight_bg(child, ctx, offset_x + layout['x'], offset_y + layout['y'])
 
+    @timer.timer
     def draw_selection_bg(self, layout, ctx, offset_x, offset_y, in_selection):
-        if in_selection:
+        if in_selection and layout != self.first_selection_line and layout != self.last_selection_line:
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
             ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
             ctx.fill()
