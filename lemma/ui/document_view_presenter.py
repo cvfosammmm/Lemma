@@ -176,7 +176,9 @@ class DocumentViewPresenter():
     def draw_layout(self, layout, ctx, offset_x, offset_y, in_selection):
         if layout['type'] == 'char':
             if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
-            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+            if in_selection:
+                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+                in_selection = False
 
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
@@ -194,7 +196,10 @@ class DocumentViewPresenter():
                     ctx.paint()
 
         if layout['type'] == 'widget':
-            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
+            if in_selection:
+                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+                in_selection = False
 
             widget = layout['node'].value
             surface = widget.get_cairo_surface()
@@ -212,7 +217,10 @@ class DocumentViewPresenter():
             ctx.set_matrix(matrix)
 
         if layout['type'] == 'placeholder':
-            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
+            if in_selection:
+                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+                in_selection = False
 
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
@@ -224,13 +232,22 @@ class DocumentViewPresenter():
             ctx.paint()
 
         if layout['type'] == 'mathroot':
-            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
+            if in_selection:
+                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+                in_selection = False
 
         if layout['type'] == 'mathfraction':
-            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
+            if in_selection:
+                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+                in_selection = False
 
         if layout['type'] == 'mathscript':
-            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
+            if in_selection:
+                self.draw_selection_bg(layout, ctx, offset_x, offset_y)
+                in_selection = False
 
         for child in layout['children']:
             if not in_selection and child['node'] != None and child['node'] == self.first_selection_node:
