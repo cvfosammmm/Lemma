@@ -48,6 +48,7 @@ class Settings():
 
         Settings.defaults['button_visible_bold'] = True
         Settings.defaults['button_visible_italic'] = True
+        Settings.defaults['button_visible_highlight'] = True
         Settings.defaults['button_visible_ul'] = False
         Settings.defaults['button_visible_ol'] = False
         Settings.defaults['button_visible_cl'] = False

@@ -42,12 +42,14 @@ class CursorState():
         if 'app_state_changed' in messages:
             self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
             self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
+            self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
 
     @timer.timer
     def update(self):
         self.update_tags_and_link_at_cursor()
         self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
+        self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
 
     def update_tags_and_link_at_cursor(self):
         document = WorkspaceRepo.get_workspace().get_active_document()

@@ -118,6 +118,8 @@ class HTMLExporter(object):
             text = '<em>' + text + '</em>'
         if 'bold' in node.tags:
             text = '<strong>' + text + '</strong>'
+        if 'highlight' in node.tags:
+            text = '<mark>' + text + '</mark>'
         if node.link != None:
             text = '<a href="' + urllib.parse.quote(node.link) + '.html">' + text + '</a>'
 

@@ -71,6 +71,8 @@ class XMLParser(object):
             self.current_tags.add('italic')
         if tag == 'strong':
             self.current_tags.add('bold')
+        if tag == 'mark':
+            self.current_tags.add('highlight')
 
         if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl']:
             if 'indentation_level' in attrs:
@@ -130,6 +132,8 @@ class XMLParser(object):
             self.current_tags.discard('italic')
         if tag == 'strong':
             self.current_tags.discard('bold')
+        if tag == 'mark':
+            self.current_tags.discard('highlight')
 
         if tag == 'widget' and self.current_node.type == 'widget':
             if self.current_attributes['type'] == 'image':

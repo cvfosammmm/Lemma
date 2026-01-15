@@ -28,6 +28,8 @@ def embellish_with_link_and_tags(xml, link, tags):
         xml = '<em>' + xml + '</em>'
     if 'bold' in tags:
         xml = '<strong>' + xml + '</strong>'
+    if 'highlight' in tags:
+        xml = '<mark>' + xml + '</mark>'
     if link != None:
         xml = '<a href="' + escape(link) + '">' + xml + '</a>'
     return xml

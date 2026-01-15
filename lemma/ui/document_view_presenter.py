@@ -175,7 +175,8 @@ class DocumentViewPresenter():
 
     def draw_layout(self, layout, ctx, offset_x, offset_y, in_selection):
         if layout['type'] == 'char':
-            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
+            if 'highlight' in layout['node'].tags: self.draw_highlight_bg(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
 
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
@@ -193,7 +194,7 @@ class DocumentViewPresenter():
                     ctx.paint()
 
         if layout['type'] == 'widget':
-            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
 
             widget = layout['node'].value
             surface = widget.get_cairo_surface()
@@ -211,7 +212,7 @@ class DocumentViewPresenter():
             ctx.set_matrix(matrix)
 
         if layout['type'] == 'placeholder':
-            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
 
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
@@ -223,13 +224,13 @@ class DocumentViewPresenter():
             ctx.paint()
 
         if layout['type'] == 'mathroot':
-            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
 
         if layout['type'] == 'mathfraction':
-            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
 
         if layout['type'] == 'mathscript':
-            if in_selection: self.draw_selection(layout, ctx, offset_x, offset_y)
+            if in_selection: self.draw_selection_bg(layout, ctx, offset_x, offset_y)
 
         for child in layout['children']:
             if not in_selection and child['node'] != None and child['node'] == self.first_selection_node:
@@ -267,7 +268,12 @@ class DocumentViewPresenter():
             ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
             ctx.fill()
 
-    def draw_selection(self, layout, ctx, offset_x, offset_y):
+    def draw_highlight_bg(self, layout, ctx, offset_x, offset_y):
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('highlight_bg'))
+        ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
+        ctx.fill()
+
+    def draw_selection_bg(self, layout, ctx, offset_x, offset_y):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
         ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
         ctx.fill()

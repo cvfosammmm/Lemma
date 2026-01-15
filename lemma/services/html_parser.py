@@ -73,6 +73,7 @@ class HTMLParser(HTMLParserLib):
 
         if tag == 'strong': self.tags.add('bold')
         if tag == 'em': self.tags.add('italic')
+        if tag == 'mark': self.tags.add('highlight')
         if tag == 'a':
             for name, value in attrs:
                 if name == 'href':
@@ -135,6 +136,7 @@ class HTMLParser(HTMLParserLib):
 
         if tag == 'strong': self.tags.discard('bold')
         if tag == 'em': self.tags.discard('italic')
+        if tag == 'mark': self.tags.discard('highlight')
         if tag == 'a': self.link_target = None
         if tag == 'msubsup':
             self.composite = self.composite.parent
