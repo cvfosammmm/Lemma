@@ -124,7 +124,13 @@ class ToolBarMain(Gtk.Box):
         self.italic_button.set_can_focus(False)
         self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
 
-        self.highlight_button = Gtk.Button.new_from_icon_name('highlight-text-symbolic')
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.add_css_class('highlight-tag-button')
+        box.append(Gtk.Image.new_from_icon_name('highlight-text-symbolic'))
+
+        self.highlight_button = Gtk.Button()
+        self.highlight_button.set_child(box)
+        self.highlight_button.add_css_class('flat')
         self.highlight_button.set_action_name('win.toggle-highlight')
         self.highlight_button.set_can_focus(False)
         self.highlight_button.set_tooltip_text(_('Highlight') + ' (Ctrl+U)')

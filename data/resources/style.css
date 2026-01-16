@@ -214,6 +214,9 @@ paned.document-view separator.wide {
     min-width: 86px;
     font-weight: normal;
 }
+.toolbar button > box.highlight-tag-button {
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/highlight-text-bg-symbolic.svg'), success @highlight_bg) left bottom no-repeat;
+}
 .toolbar box {
     background: @view_bg_color;
     box-shadow: none;
