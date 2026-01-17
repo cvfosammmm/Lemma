@@ -64,7 +64,7 @@ class Dialog(object):
         self.view.select_all_button.set_active(True)
 
     def observe_view(self):
-        self.view.file_chooser_button.connect('file-set', self.on_file_chosen)
+        self.view.file_chooser_button.observe('file-set', self.on_file_chosen)
 
         for row in self.view.list:
             row.button.connect('toggled', self.on_document_button_toggled, row.document_id)
