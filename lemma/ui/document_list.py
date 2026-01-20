@@ -42,12 +42,12 @@ class DocumentList(object):
         self.view = main_window.document_list
 
         self.render_cache = dict()
-        self.content_height = 0
 
         self.search_terms = []
         self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
         self.focus_index = None
         self.selected_index = None
+        self.active_document_id = None
 
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
         self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)
@@ -92,15 +92,25 @@ class DocumentList(object):
         MessageBus.subscribe(self, 'document_title_changed')
         MessageBus.subscribe(self, 'mode_set')
 
-        self.update()
+        self.update_active_document()
+        self.update_document_list()
 
     def animate(self):
-        self.update()
-
-    def update(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
-            self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
+        if 'history_changed' in messages or 'mode_set' in messages:
+            self.update_active_document()
+
+        if 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'document_title_changed' in messages:
+            self.update_document_list()
+
+    @timer.timer
+    def update_active_document(self):
+        workspace = WorkspaceRepo.get_workspace()
+        self.set_active_document_id(workspace.get_active_document_id())
+
+    @timer.timer
+    def update_document_list(self):
+        self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
 
         content_height = max(len(self.document_stubs) * self.view.line_height, 1)
         scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
@@ -108,10 +118,8 @@ class DocumentList(object):
         self.view.scrollbar_vertical.set_content_height(content_height)
         self.view.scrollbar_vertical.set_scrolling_offset(scrolling_offset)
 
-        if content_height != self.content_height:
-            self.content_height = content_height
-            self.view.scrolling_widget.set_size(1, content_height)
-            self.view.scrolling_widget.queue_draw()
+        self.view.scrolling_widget.set_size(1, content_height)
+        self.view.scrolling_widget.queue_draw()
 
     def set_focus_index(self, index):
         if index != self.focus_index:
@@ -121,6 +129,11 @@ class DocumentList(object):
     def set_selected_index(self, index):
         if index != self.selected_index:
             self.selected_index = index
+            self.view.content.queue_draw()
+
+    def set_active_document_id(self, document_id):
+        if document_id != self.active_document_id:
+            self.active_document_id = document_id
             self.view.content.queue_draw()
 
     def activate_item(self, index):
@@ -189,7 +202,7 @@ class DocumentList(object):
         self.set_focus_index(None)
         self.set_selected_index(None)
         self.scroll_index_on_screen(0)
-        self.update()
+        self.update_document_list()
 
     def on_search_entry_icon_released(self, entry, icon_pos, data=None):
         if icon_pos == Gtk.EntryIconPosition.SECONDARY:
@@ -258,9 +271,7 @@ class DocumentList(object):
         for i, document_stub in enumerate(self.document_stubs[first_item_no:last_item_no]):
             i += first_item_no
 
-            highlight_active = (document_stub['id'] == workspace.get_active_document_id() and workspace.get_mode() == 'documents')
-
-            if highlight_active:
+            if document_stub['id'] == self.active_document_id:
                 title_color = ColorManager.get_ui_color('sidebar_active_fg')
                 teaser_color = ColorManager.get_ui_color('sidebar_active_fg')
                 date_color = ColorManager.get_ui_color('sidebar_active_fg')
@@ -278,7 +289,7 @@ class DocumentList(object):
             date_text = self.get_last_modified_string(document_stub['last_modified'])
             key = title_text + teaser_text + date_text + str(width)
 
-            if highlight_active:
+            if document_stub['id'] == self.active_document_id:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('sidebar_active_bg'))
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
@@ -288,7 +299,7 @@ class DocumentList(object):
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
                 key += ':selected'
-            elif not highlight_active and i == self.focus_index:
+            elif i == self.focus_index:
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('sidebar_hover'))
                 ctx.rectangle(0, self.view.line_height * i - scrolling_offset, width, self.view.line_height)
                 ctx.fill()
