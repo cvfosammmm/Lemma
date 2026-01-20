@@ -43,7 +43,6 @@ class Backlinks(object):
 
         self.update()
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:

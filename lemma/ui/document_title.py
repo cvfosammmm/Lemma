@@ -67,7 +67,6 @@ class DocumentTitle():
 
         self.update()
 
-    @timer.timer
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document != None:

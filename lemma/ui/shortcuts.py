@@ -41,7 +41,6 @@ class Shortcuts(object):
 
         MessageBus.subscribe(self, 'app_state_changed')
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'app_state_changed' in messages:

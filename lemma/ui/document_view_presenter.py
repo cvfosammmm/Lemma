@@ -110,7 +110,6 @@ class DocumentViewPresenter():
         self.device_offset_x = 1 - ((allocation.get_x() + surface_transform.x) * self.hidpi_factor) % 1
         self.device_offset_y = 1 - ((allocation.get_y() + surface_transform.y) * self.hidpi_factor) % 1
 
-    @timer.timer
     def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
         if paragraph.style == 'ul':
             layout = paragraph.layout
@@ -185,7 +184,6 @@ class DocumentViewPresenter():
             for child in layout['children']:
                 self.draw_highlight_bg(child, ctx, offset_x + layout['x'], offset_y + layout['y'])
 
-    @timer.timer
     def draw_selection_bg(self, layout, ctx, offset_x, offset_y, in_selection):
         if in_selection and layout != self.first_selection_line and layout != self.last_selection_line:
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
@@ -275,7 +273,6 @@ class DocumentViewPresenter():
             ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
             ctx.fill()
 
-    @timer.timer
     def get_fg_color_string_by_node(self, node):
         if node.link == None:
             return ColorManager.get_ui_color_string('text')
@@ -283,7 +280,6 @@ class DocumentViewPresenter():
             return ColorManager.get_ui_color_string('links')
         return ColorManager.get_ui_color_string('links_page_not_existing')
 
-    @timer.timer
     def get_fg_color_by_node(self, node):
         if node.link == None:
             return ColorManager.get_ui_color('text')
@@ -291,7 +287,6 @@ class DocumentViewPresenter():
             return ColorManager.get_ui_color('links')
         return ColorManager.get_ui_color('links_page_not_existing')
 
-    @timer.timer
     def draw_cursor(self, ctx, offset_x, offset_y):
         if not self.model.cursor_visible: return
 
@@ -306,7 +301,6 @@ class DocumentViewPresenter():
         ctx.rectangle(*cursor_coords)
         ctx.fill()
 
-    @timer.timer
     def draw_drop_cursor(self, ctx, offset_x, offset_y):
         x, y = self.model.drop_cursor_x, self.model.drop_cursor_y
         x -= LayoutInfo.get_document_padding_left()

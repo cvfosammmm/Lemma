@@ -113,7 +113,6 @@ class Actions(object):
         self.main_window.add_action(self.actions[name])
         self.actions[name].connect('activate', callback)
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_or_cursor_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:

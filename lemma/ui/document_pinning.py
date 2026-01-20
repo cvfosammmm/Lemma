@@ -71,7 +71,6 @@ class DocumentPinning():
         self.update_pin_buttons()
         self.update_document_menu()
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'pinned_documents_changed' in messages:

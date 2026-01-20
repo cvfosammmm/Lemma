@@ -51,7 +51,6 @@ class DocumentDraft():
 
         self.update()
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'mode_set' in messages:

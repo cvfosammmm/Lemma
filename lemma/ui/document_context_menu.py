@@ -42,7 +42,6 @@ class ContextMenuDocument():
 
         self.update()
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages or 'mode_set' in messages:

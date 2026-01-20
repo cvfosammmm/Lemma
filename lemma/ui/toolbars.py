@@ -67,7 +67,6 @@ class ToolBars():
         MessageBus.subscribe(self, 'app_state_changed')
         MessageBus.subscribe(self, 'settings_changed')
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'document_changed' in messages or 'app_state_changed' in messages or 'settings_changed' in messages:

@@ -94,7 +94,6 @@ class DocumentList(object):
 
         self.update()
 
-    @timer.timer
     def animate(self):
         self.update()
 

@@ -35,7 +35,6 @@ class Colors(object):
 
         self.update()
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'settings_changed' in messages:

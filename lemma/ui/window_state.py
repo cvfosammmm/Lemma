@@ -47,7 +47,6 @@ class WindowState(object):
 
         self.update()
 
-    @timer.timer
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'mode_set' in messages or 'settings_changed' in messages or 'sidebar_visibility_changed' in messages:

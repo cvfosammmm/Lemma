@@ -60,7 +60,6 @@ class Autocomplete():
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'keyboard_input')
 
-    @timer.timer
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
