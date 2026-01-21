@@ -572,6 +572,10 @@ label.settings-header {
 label.settings-text-data-display {
     margin-left: 17px;
 }
+label.settings-info {
+    margin-left: 17px;
+    margin-right: 17px;
+}
 .settings-margin-box {
     margin-left: 17px;
     margin-right: 17px;

@@ -97,28 +97,41 @@ class PageFontColorView(Gtk.Box):
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.get_style_context().add_class('settings-page')
 
-        self.explainer = Gtk.Label()
-        self.explainer.set_markup('<b>Note:</b>  If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming.html">https://www.cvfosammmm.org/lemma/book/theming.html</a>.')
-        self.explainer.set_wrap(True)
-        self.explainer.set_xalign(0)
-        self.explainer.set_halign(Gtk.Align.FILL)
-        self.explainer.add_css_class('explainer-bottom')
+        self.color_theme_header = Gtk.Label.new(_('Color Theme'))
+        self.color_theme_header.add_css_class('settings-header')
+        self.color_theme_header.set_xalign(0)
+        self.color_theme_header.set_margin_top(21)
 
         self.style_switcher = StyleSwitcher()
         self.style_switcher_wrapper = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.style_switcher_wrapper.append(self.style_switcher)
 
+        self.custom_themes_header = Gtk.Label.new(_('Adding Custom Themes'))
+        self.custom_themes_header.add_css_class('settings-header')
+        self.custom_themes_header.set_xalign(0)
+        self.custom_themes_header.set_margin_top(21)
+
+        self.explainer = Gtk.Label()
+        self.explainer.set_markup('If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming.html">https://www.cvfosammmm.org/lemma/book/theming.html</a>.')
+        self.explainer.set_wrap(True)
+        self.explainer.set_xalign(0)
+        self.explainer.set_margin_top(18)
+        self.explainer.set_margin_bottom(18)
+        self.explainer.add_css_class('settings-info')
+
+        self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.vbox.append(self.color_theme_header)
+        self.vbox.append(self.style_switcher_wrapper)
+        self.vbox.append(self.custom_themes_header)
+        self.vbox.append(self.explainer)
+
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_propagate_natural_height(True)
         self.scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.scrolled_window.set_child(self.style_switcher_wrapper)
         self.scrolled_window.set_vexpand(True)
+        self.scrolled_window.set_child(self.vbox)
 
-        self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.vbox.append(self.scrolled_window)
-        self.vbox.append(self.explainer)
-
-        self.append(self.vbox)
+        self.append(self.scrolled_window)
 
 
 class StyleSwitcher(Gtk.FlowBox):
