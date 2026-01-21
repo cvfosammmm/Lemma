@@ -546,7 +546,7 @@ window.settings flowboxchild checkbutton {
     margin-left: -1px;
 }
 window.settings checkbutton.single {
-    margin-left: 14px;
+    margin-left: 13px;
     margin-right: 14px;
 }
 window.settings checkbutton.single check {
@@ -554,6 +554,7 @@ window.settings checkbutton.single check {
 }
 window.settings .settings-page-toolbars checkbutton {
     margin-bottom: 2px;
+    margin-left: 14px;
 }
 window.settings .settings-page-toolbars checkbutton image {
     margin-right: 9px;

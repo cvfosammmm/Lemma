@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import gi
+gi.require_version('Adw', '1')
+from gi.repository import Adw
+
 import os.path
 
 from lemma.services.color_manager import ColorManager
@@ -30,26 +34,30 @@ class Colors(object):
         self.main_window = main_window
 
         self.color_scheme = None
+        self.style_manager = Adw.StyleManager.get_default()
+        self.is_dark = self.style_manager.get_dark()
 
-        MessageBus.subscribe(self, 'settings_changed')
-
-        self.update()
+        self.update_color_scheme()
 
     def animate(self):
-        messages = MessageBus.get_messages(self)
-        if 'settings_changed' in messages:
-            self.update()
+        self.update_color_scheme()
+
+    def update_color_scheme(self):
+        if Settings.get_value('separate_dark_color_scheme') and self.style_manager.get_dark():
+            color_scheme = Settings.get_value('color_scheme_dark')
+        else:
+            color_scheme = Settings.get_value('color_scheme')
+
+        if color_scheme != self.color_scheme:
+            self.color_scheme = color_scheme
+            self.update_colors()
 
     @timer.timer
-    def update(self):
-        color_scheme = Settings.get_value('color_scheme')
-        if color_scheme == self.color_scheme: return
-
-        self.color_scheme = Settings.get_value('color_scheme')
+    def update_colors(self):
         if self.color_scheme == 'default':
             path = os.path.join(Paths.get_resources_folder(), 'themes', 'default.css')
         else:
-            path = Settings.get_value('color_scheme')
+            path = self.color_scheme
 
         self.main_window.css_provider_colors.load_from_path(path)
         self.main_window.main_box.queue_draw()

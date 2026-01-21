@@ -72,7 +72,7 @@ class PageToolbarsView(Gtk.Box):
         self.visible_buttons_header.add_css_class('settings-header')
         self.visible_buttons_header.set_xalign(0)
         self.visible_buttons_header.set_margin_top(21)
-        self.visible_buttons_header.set_margin_bottom(20)
+        self.visible_buttons_header.set_margin_bottom(19)
 
         self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.vbox.set_margin_bottom(18)

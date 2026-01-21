@@ -36,13 +36,24 @@ class PageColors(object):
         self.view = PageFontColorView()
         self.settings = settings
         self.main_window = main_window
-        self.style_previews = dict()
+        self.style_previews_single = dict()
+        self.style_previews_light = dict()
+        self.style_previews_dark = dict()
 
     def init(self):
         self.update_switchers()
 
+        self.view.checkbox_darkmode.set_active(Settings.get_value('separate_dark_color_scheme'))
+        self.view.checkbox_darkmode.connect('toggled', self.on_dm_checkbutton_toggled, 'separate_dark_color_scheme')
+
+        stack_child = 'double' if Settings.get_value('separate_dark_color_scheme') else 'single'
+        self.view.style_switcher_stack.set_visible_child_name(stack_child)
+
     def update_switchers(self):
-        self.style_previews = dict()
+        self.style_previews_single = dict()
+        self.style_previews_light = dict()
+        self.style_previews_dark = dict()
+
         dirname = os.path.join(Paths.get_resources_folder(), 'themes')
 
         self.add_theme_choice(os.path.join(dirname, 'default.css'), 0)
@@ -60,8 +71,16 @@ class PageColors(object):
             count += 1
 
         active_id = Settings.get_value('color_scheme')
-        if active_id in self.style_previews: self.style_previews[active_id].checkbutton.set_active(True)
-        else: self.style_previews['default'].checkbutton.set_active(True)
+        if active_id in self.style_previews_single: self.style_previews_single[active_id].checkbutton.set_active(True)
+        else: self.style_previews_single['default'].checkbutton.set_active(True)
+
+        active_id = Settings.get_value('color_scheme')
+        if active_id in self.style_previews_light: self.style_previews_light[active_id].checkbutton.set_active(True)
+        else: self.style_previews_light['default'].checkbutton.set_active(True)
+
+        active_id = Settings.get_value('color_scheme_dark')
+        if active_id in self.style_previews_dark: self.style_previews_dark[active_id].checkbutton.set_active(True)
+        else: self.style_previews_dark['default'].checkbutton.set_active(True)
 
     def add_theme_choice(self, filename, count):
         with open(filename, 'r') as file:
@@ -71,23 +90,46 @@ class PageColors(object):
             Gtk.StyleContext.add_provider_for_display(self.main_window.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def add_chooser(self, identifier, name, count, link_to_default = False):
-        self.style_previews[identifier] = StylePreview(name, count)
-        self.style_previews[identifier].checkbutton.connect('toggled', self.on_checkbutton_toggled, identifier)
-        self.style_previews[identifier].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, identifier)
-        self.view.style_switcher.append(self.style_previews[identifier])
-
+        self.style_previews_single[identifier] = StylePreview(name, count)
+        self.style_previews_single[identifier].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, identifier)
+        self.view.style_switcher_single.append(self.style_previews_single[identifier])
         if link_to_default:
-            self.style_previews[identifier].checkbutton.set_group(self.style_previews['default'].checkbutton)
+            self.style_previews_single[identifier].checkbutton.set_group(self.style_previews_single['default'].checkbutton)
 
-    def on_checkbutton_toggled(self, button, name):
-        if button.get_active():
-            UseCases.settings_set_value('color_scheme', name)
-            button.get_parent().add_css_class('selected')
-        else:
-            button.get_parent().remove_css_class('selected')
+        self.style_previews_light[identifier] = StylePreview(name, count)
+        self.style_previews_light[identifier].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, identifier)
+        self.view.style_switcher_light.append(self.style_previews_light[identifier])
+        if link_to_default:
+            self.style_previews_light[identifier].checkbutton.set_group(self.style_previews_light['default'].checkbutton)
+
+        self.style_previews_dark[identifier] = StylePreview(name, count)
+        self.style_previews_dark[identifier].wrapperbutton.connect('clicked', self.on_dark_wrapperbutton_clicked, identifier)
+        self.view.style_switcher_dark.append(self.style_previews_dark[identifier])
+        if link_to_default:
+            self.style_previews_dark[identifier].checkbutton.set_group(self.style_previews_dark['default'].checkbutton)
+
+    def on_dm_checkbutton_toggled(self, button, key):
+        UseCases.settings_set_value(key, button.get_active())
+
+        stack_child = 'double' if button.get_active() else 'single'
+        self.view.style_switcher_stack.set_visible_child_name(stack_child)
 
     def on_wrapperbutton_clicked(self, button, name):
-        button.get_parent().checkbutton.set_active(True)
+        self.set_light_theme(name)
+
+    def on_dark_wrapperbutton_clicked(self, button, name):
+        self.set_dark_theme(name)
+
+    def set_light_theme(self, name):
+        UseCases.settings_set_value('color_scheme', name)
+
+        self.style_previews_light[name].checkbutton.set_active(True)
+        self.style_previews_single[name].checkbutton.set_active(True)
+
+    def set_dark_theme(self, name):
+        UseCases.settings_set_value('color_scheme_dark', name)
+
+        self.style_previews_dark[name].checkbutton.set_active(True)
 
 
 class PageFontColorView(Gtk.Box):
@@ -97,14 +139,61 @@ class PageFontColorView(Gtk.Box):
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.get_style_context().add_class('settings-page')
 
+        self.options_header = Gtk.Label.new(_('Options'))
+        self.options_header.add_css_class('settings-header')
+        self.options_header.set_xalign(0)
+        self.options_header.set_margin_top(21)
+
+        self.checkbox_darkmode = Gtk.CheckButton.new_with_label(_('Change color theme when dark mode is activated in the operating system'))
+        self.checkbox_darkmode.add_css_class('single')
+        self.checkbox_darkmode.set_margin_top(18)
+
         self.color_theme_header = Gtk.Label.new(_('Color Theme'))
         self.color_theme_header.add_css_class('settings-header')
         self.color_theme_header.set_xalign(0)
-        self.color_theme_header.set_margin_top(21)
+        self.color_theme_header.set_margin_top(36)
 
-        self.style_switcher = StyleSwitcher()
-        self.style_switcher_wrapper = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.style_switcher_wrapper.append(self.style_switcher)
+        self.style_switcher_single = StyleSwitcher()
+        self.style_switcher_single.set_max_children_per_line(2)
+
+        self.switcher_box_single = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.switcher_box_single.append(self.color_theme_header)
+        self.switcher_box_single.append(self.style_switcher_single)
+
+        self.light_theme_header = Gtk.Label.new(_('Light Theme'))
+        self.light_theme_header.add_css_class('settings-header')
+        self.light_theme_header.set_xalign(0)
+        self.light_theme_header.set_margin_top(36)
+
+        self.style_switcher_light = StyleSwitcher()
+        self.style_switcher_light.set_max_children_per_line(1)
+
+        self.light_theme_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.light_theme_box.append(self.light_theme_header)
+        self.light_theme_box.append(self.style_switcher_light)
+
+        self.dark_theme_header = Gtk.Label.new(_('Dark Theme'))
+        self.dark_theme_header.add_css_class('settings-header')
+        self.dark_theme_header.set_xalign(0)
+        self.dark_theme_header.set_margin_top(36)
+
+        self.style_switcher_dark = StyleSwitcher()
+        self.style_switcher_dark.set_max_children_per_line(1)
+
+        self.dark_theme_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.dark_theme_box.append(self.dark_theme_header)
+        self.dark_theme_box.append(self.style_switcher_dark)
+
+        self.switcher_box_double = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.switcher_box_double.append(self.light_theme_box)
+        self.switcher_box_double.append(self.dark_theme_box)
+
+        self.style_switcher_stack = Gtk.Stack()
+        self.style_switcher_stack.set_transition_type(Gtk.StackTransitionType.NONE)
+        self.style_switcher_stack.set_interpolate_size(True)
+        self.style_switcher_stack.set_vhomogeneous(False)
+        self.style_switcher_stack.add_named(self.switcher_box_single, 'single')
+        self.style_switcher_stack.add_named(self.switcher_box_double, 'double')
 
         self.custom_themes_header = Gtk.Label.new(_('Adding Custom Themes'))
         self.custom_themes_header.add_css_class('settings-header')
@@ -120,8 +209,9 @@ class PageFontColorView(Gtk.Box):
         self.explainer.add_css_class('settings-info')
 
         self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.vbox.append(self.color_theme_header)
-        self.vbox.append(self.style_switcher_wrapper)
+        self.vbox.append(self.options_header)
+        self.vbox.append(self.checkbox_darkmode)
+        self.vbox.append(self.style_switcher_stack)
         self.vbox.append(self.custom_themes_header)
         self.vbox.append(self.explainer)
 
@@ -140,7 +230,6 @@ class StyleSwitcher(Gtk.FlowBox):
         Gtk.FlowBox.__init__(self)
         self.set_selection_mode(Gtk.SelectionMode.NONE)
         self.set_homogeneous(True)
-        self.set_max_children_per_line(2)
         self.set_row_spacing(0)
         self.set_hexpand(True)
         self.get_style_context().add_class('theme_previews')
