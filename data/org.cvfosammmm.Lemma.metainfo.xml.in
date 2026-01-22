@@ -39,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="58" date="2026-1-22">
+            <description translatable="no">
+                <p>Dark mode support, ...</p>
+            </description>
+        </release>
         ​<release version="57" date="2026-1-16">
             <description translatable="no">
                 <p>Text highlighting, ...</p>
