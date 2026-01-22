@@ -534,13 +534,10 @@ window.settings flowboxchild {
 }
 window.settings flowboxchild button.color-preview-wrapper {
     border: 1px solid @borders;
-    border-radius: 4px;
+    border-radius: 5px;
     margin-bottom: 3px;
-    padding: 2px;
+    padding: 0px;
     background: none;
-}
-window.settings flowboxchild box.selected button.color-preview-wrapper {
-    border: 1px solid @accent_color;
 }
 window.settings flowboxchild checkbutton {
     margin-left: -1px;

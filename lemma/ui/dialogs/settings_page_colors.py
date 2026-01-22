@@ -248,7 +248,7 @@ class StylePreview(Gtk.Box):
         self.drawing_area.set_size_request(-1, 84)
         self.drawing_area.set_draw_func(self.draw)
 
-        self.wrapperbutton = Gtk.Button()#.new(Gtk.Orientation.VERTICAL, 0)
+        self.wrapperbutton = Gtk.Button()
         self.wrapperbutton.add_css_class('color-preview-wrapper')
         self.wrapperbutton.set_child(self.drawing_area)
         self.checkbutton = Gtk.CheckButton.new_with_label(' ' + name)
@@ -263,7 +263,7 @@ class StylePreview(Gtk.Box):
         color_fg_1 = ColorManager.get_ui_color(color_prefix + 'sidebar_fg_1')
 
         Gdk.cairo_set_source_rgba(ctx, color_bg_1)
-        rounded_rectangle(ctx, 0, 0, width, height, 2)
+        rounded_rectangle(ctx, 0, 0, width, height, 4)
         ctx.fill()
 
         Gdk.cairo_set_source_rgba(ctx, color_bg_2)
