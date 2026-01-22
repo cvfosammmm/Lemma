@@ -102,6 +102,7 @@ class DocumentList(object):
 
         if 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'document_title_changed' in messages:
             self.update_document_list()
+        self.update_scrolling_offset()
 
     @timer.timer
     def update_active_document(self):
@@ -113,13 +114,14 @@ class DocumentList(object):
         self.document_stubs = DocumentRepo.list_by_search_terms(self.search_terms)
 
         content_height = max(len(self.document_stubs) * self.view.line_height, 1)
-        scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
-
         self.view.scrollbar_vertical.set_content_height(content_height)
-        self.view.scrollbar_vertical.set_scrolling_offset(scrolling_offset)
 
         self.view.scrolling_widget.set_size(1, content_height)
         self.view.scrolling_widget.queue_draw()
+
+    def update_scrolling_offset(self):
+        scrolling_offset = self.view.scrolling_widget.adjustment_y.get_value()
+        self.view.scrollbar_vertical.set_scrolling_offset(scrolling_offset)
 
     def set_focus_index(self, index):
         if index != self.focus_index:
@@ -179,8 +181,7 @@ class DocumentList(object):
         self.view.scrollbar_vertical.ping()
 
     def on_leave(self, controller):
-        item_num = self.get_item_at_cursor()
-        self.set_focus_index(item_num)
+        self.set_focus_index(None)
         self.view.scrollbar_vertical.ping()
 
     def on_context_menu_close(self, popover):
