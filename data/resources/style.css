@@ -520,9 +520,12 @@ window.settings flowbox {
     padding: 9px 8px;
 }
 window.settings flowboxchild {
+    padding: 0px;
+}
+window.settings flowboxchild > button {
     padding: 9px 8px;
 }
-window.settings flowboxchild button.color-preview-wrapper {
+window.settings flowboxchild .preview-drawing {
     border: 1px solid @borders;
     border-radius: 5px;
     margin-bottom: 3px;

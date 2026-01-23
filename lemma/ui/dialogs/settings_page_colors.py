@@ -91,19 +91,19 @@ class PageColors(object):
 
     def add_chooser(self, identifier, name, count, link_to_default = False):
         self.style_previews_single[identifier] = StylePreview(name, count)
-        self.style_previews_single[identifier].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, identifier)
+        self.style_previews_single[identifier].connect('clicked', self.on_wrapperbutton_clicked, identifier)
         self.view.style_switcher_single.append(self.style_previews_single[identifier])
         if link_to_default:
             self.style_previews_single[identifier].checkbutton.set_group(self.style_previews_single['default'].checkbutton)
 
         self.style_previews_light[identifier] = StylePreview(name, count)
-        self.style_previews_light[identifier].wrapperbutton.connect('clicked', self.on_wrapperbutton_clicked, identifier)
+        self.style_previews_light[identifier].connect('clicked', self.on_wrapperbutton_clicked, identifier)
         self.view.style_switcher_light.append(self.style_previews_light[identifier])
         if link_to_default:
             self.style_previews_light[identifier].checkbutton.set_group(self.style_previews_light['default'].checkbutton)
 
         self.style_previews_dark[identifier] = StylePreview(name, count)
-        self.style_previews_dark[identifier].wrapperbutton.connect('clicked', self.on_dark_wrapperbutton_clicked, identifier)
+        self.style_previews_dark[identifier].connect('clicked', self.on_dark_wrapperbutton_clicked, identifier)
         self.view.style_switcher_dark.append(self.style_previews_dark[identifier])
         if link_to_default:
             self.style_previews_dark[identifier].checkbutton.set_group(self.style_previews_dark['default'].checkbutton)
@@ -232,14 +232,14 @@ class StyleSwitcher(Gtk.FlowBox):
         self.set_homogeneous(True)
         self.set_row_spacing(0)
         self.set_hexpand(True)
-        self.get_style_context().add_class('theme_previews')
 
 
-class StylePreview(Gtk.Box):
+class StylePreview(Gtk.Button):
 
     def __init__(self, name, count):
-        Gtk.Box.__init__(self)
-        self.set_orientation(Gtk.Orientation.VERTICAL)
+        Gtk.Button.__init__(self)
+
+        self.add_css_class('flat')
 
         self.name = name
         self.count = count
@@ -247,14 +247,15 @@ class StylePreview(Gtk.Box):
         self.drawing_area = Gtk.DrawingArea()
         self.drawing_area.set_size_request(-1, 84)
         self.drawing_area.set_draw_func(self.draw)
+        self.drawing_area.add_css_class('preview-drawing')
 
-        self.wrapperbutton = Gtk.Button()
-        self.wrapperbutton.add_css_class('color-preview-wrapper')
-        self.wrapperbutton.set_child(self.drawing_area)
         self.checkbutton = Gtk.CheckButton.new_with_label(' ' + name)
 
-        self.append(self.wrapperbutton)
-        self.append(self.checkbutton)
+        self.box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.box.append(self.drawing_area)
+        self.box.append(self.checkbutton)
+
+        self.set_child(self.box)
 
     def draw(self, widget, ctx, width, height):
         color_prefix = 'theme_' + str(self.count) + '_'

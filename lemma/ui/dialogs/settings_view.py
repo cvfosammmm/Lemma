@@ -87,6 +87,8 @@ class Settings(Adw.Window):
         self.navbar.append(navbutton)
 
     def set_visible_page(self, page_name):
+        self.stack.get_child_by_name(page_name).scrolled_window.get_vadjustment().set_value(0)
+
         self.stack.set_visible_child_name(page_name)
         self.title_stack.set_visible_child_name(page_name)
 
