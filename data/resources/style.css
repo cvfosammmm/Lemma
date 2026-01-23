@@ -521,9 +521,11 @@ window.settings flowbox {
 }
 window.settings flowboxchild {
     padding: 0px;
+    background: none;
 }
 window.settings flowboxchild > button {
     padding: 9px 8px;
+    background: none;
 }
 window.settings flowboxchild .preview-drawing {
     border: 1px solid @borders;
