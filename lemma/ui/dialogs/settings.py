@@ -37,43 +37,20 @@ class Dialog(object):
         self.setup()
         self.view.present()
 
-    def setup(self):
+    def setup(self, visible_page_name='Colors'):
         self.view = view.Settings(self.main_window)
 
-        self.page_colors = page_colors.PageColors(self, self.main_window)
-        self.page_workspace = page_workspace.PageWorkspace(self, self.main_window)
-        self.page_toolbars = page_toolbars.PageToolbars(self, self.main_window)
-        self.page_autocomplete = page_autocomplete.PageAutocomplete(self, self.main_window)
-        self.page_storage = page_storage.PageStorage(self, self.main_window)
+        self.pages = []
+        self.pages.append(['Colors', 'preferences-color-symbolic', page_colors.PageColors(self, self.main_window)])
+        self.pages.append(['Workspace', 'overlapping-windows-symbolic', page_workspace.PageWorkspace(self, self.main_window)])
+        self.pages.append(['Toolbars', 'preferences-system-symbolic', page_toolbars.PageToolbars(self, self.main_window)])
+        self.pages.append(['Autocomplete', 'completion-snippet-symbolic', page_autocomplete.PageAutocomplete(self, self.main_window)])
+        self.pages.append(['Storage', 'drawer-symbolic', page_storage.PageStorage(self, self.main_window)])
 
-        self.view.notebook.append_page(self.page_colors.view, Gtk.Label.new(_('Colors')))
-        self.view.notebook.append_page(self.page_workspace.view, Gtk.Label.new(_('Workspace')))
-        self.view.notebook.append_page(self.page_toolbars.view, Gtk.Label.new(_('Toolbars')))
-        self.view.notebook.append_page(self.page_autocomplete.view, Gtk.Label.new(_('Autocomplete')))
-        self.view.notebook.append_page(self.page_storage.view, Gtk.Label.new(_('Storage')))
+        for title, icon_name, page in self.pages:
+            self.view.add_page(title, icon_name, page.view)
+            page.init()
 
-        self.page_colors.init()
-        self.page_workspace.init()
-        self.page_toolbars.init()
-        self.page_autocomplete.init()
-        self.page_storage.init()
-
-    def on_check_button_toggle(self, button, setting_name):
-        UseCases.settings_set_value(setting_name, button.get_active())
-        
-    def on_radio_button_toggle(self, button, setting_name, value):
-        UseCases.settings_set_value(setting_name, value)
-
-    def spin_button_changed(self, button, setting_name):
-        UseCases.settings_set_value(setting_name, button.get_value_as_int())
-
-    def text_deleted(self, buffer, position, n_chars, setting_name):
-        UseCases.settings_set_value(setting_name, buffer.get_text())
-
-    def text_inserted(self, buffer, position, chars, n_chars, setting_name):
-        UseCases.settings_set_value(setting_name, buffer.get_text())
-
-    def on_interpreter_changed(self, button, setting_name, value):
-        UseCases.settings_set_value(setting_name, value)
+        self.view.set_visible_page(visible_page_name)
 
 

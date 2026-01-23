@@ -484,30 +484,20 @@ window.action-dialog checkbutton.radio-group label {
 
 /* settings dialog */
 
-window.settings notebook {
-    border: none;
+window.settings .navbar {
+    background: @dialog_sidebar_bg_color;
+    border-right: 1px solid @borders;
+}
+window.settings .navbar button {
+    font-weight: normal;
+    padding: 9px 15px;
+    border-radius: 0px;
+}
+window.settings stack {
     background: @dialog_bg_color;
-}
-window.settings notebook stack {
-    background: @dialog_bg_color;
-}
-window.settings notebook header {
-    padding-left: 0px;
-}
-window.settings notebook tabs {
-    background: @dialog_bg_color;
-    border-bottom: 1px solid @borders;
-    padding-top: 6px;
-    padding-left: 0px;
-}
-window.settings notebook tab {
-    min-height: 45px;
-    margin: 0px;
-    padding-left: 18px;
-    padding-right: 18px;
 }
 window.settings headerbar {
-    background: @dialog_bg_color;
+    background: none;
     color: @dialog_fg_color;
     border-bottom: none;
     box-shadow: none;

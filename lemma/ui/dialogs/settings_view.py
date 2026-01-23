@@ -17,25 +17,84 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+gi.require_version('Adw', '1')
+from gi.repository import Gtk, Adw
 
-from lemma.ui.dialogs.dialog_view import DialogView
+from lemma.ui.shortcuts import ShortcutController
 
 
-class Settings(DialogView):
+class Settings(Adw.Window):
 
     def __init__(self, main_window):
-        DialogView.__init__(self, main_window)
+        Adw.Window.__init__(self)
         self.add_css_class('settings')
 
+        self.set_modal(True)
+        self.set_transient_for(main_window)
+        self.set_destroy_with_parent(True)
         self.set_can_focus(False)
         self.set_default_size(500, 600)
-        self.headerbar.pack_start(Gtk.Label.new(_('Settings')))
+
+        self.shortcuts_controller = ShortcutController()
+        self.shortcuts_controller.add_with_callback('Escape', self.close)
+        self.add_controller(self.shortcuts_controller)
+
+        self.navbar = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.navbar.set_size_request(250, -1)
+        self.navbar.add_css_class('navbar')
+        self.navbuttons = dict()
+
+        self.title_stack = Gtk.Stack()
+
+        self.headerbar = Gtk.HeaderBar()
+        self.headerbar.pack_start(self.title_stack)
         self.headerbar.set_title_widget(Gtk.Label.new(''))
 
-        self.notebook = Gtk.Notebook()
-        self.notebook.set_show_tabs(True)
-        self.notebook.set_vexpand(True)
-        self.topbox.append(self.notebook)
+        self.stack = Gtk.Stack()
+        self.stack.set_vexpand(True)
+
+        self.content = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.content.append(self.headerbar)
+        self.content.append(self.stack)
+
+        self.topbox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.topbox.append(self.navbar)
+        self.topbox.append(self.content)
+
+        self.set_content(self.topbox)
+
+    def add_page(self, title, icon_name, widget):
+        self.stack.add_named(widget, title)
+
+        title_widget = Gtk.Label.new(_(title))
+        title_widget.set_xalign(0)
+        self.title_stack.add_named(title_widget, title)
+
+        button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 12)
+        button_box.append(Gtk.Image.new_from_icon_name(icon_name))
+        button_box.append(Gtk.Label.new(title))
+        navbutton = Gtk.Button()
+        navbutton.set_child(button_box)
+        navbutton.add_css_class('flat')
+
+        controller = Gtk.GestureClick()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.set_button(1)
+        controller.connect('pressed', self.on_navbutton_pressed, title)
+        navbutton.add_controller(controller)
+
+        self.navbuttons[title] = navbutton
+        self.navbar.append(navbutton)
+
+    def set_visible_page(self, page_name):
+        self.stack.set_visible_child_name(page_name)
+        self.title_stack.set_visible_child_name(page_name)
+
+        for button in self.navbuttons.values():
+            button.remove_css_class('active')
+        self.navbuttons[page_name].add_css_class('active')
+
+    def on_navbutton_pressed(self, button, n_press, x, y, page_name):
+        self.set_visible_page(page_name)
 
 
