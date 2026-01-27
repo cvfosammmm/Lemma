@@ -122,11 +122,11 @@
 @define-color checkbox_checked_inner @view_bg_color;
 
 /* Scrollbars */
-@define-color scrollbar_bg #e5e5e5;
-@define-color scrollbar_default #c0c0c0;
-@define-color scrollbar_hover #9b9b9b;
-@define-color scrollbar_active #777777;
-@define-color scrollbar_thin #d1d1d1;
+@define-color scrollbar_bg #333;
+@define-color scrollbar_default #5c5c5c;
+@define-color scrollbar_hover #8c8c8c;
+@define-color scrollbar_active #b2b2b2;
+@define-color scrollbar_thin #4a4a4a;
 
 @define-color sidebar_scrollbar_bg #444;
 @define-color sidebar_scrollbar_default #666;
