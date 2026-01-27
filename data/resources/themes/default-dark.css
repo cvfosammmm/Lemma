@@ -108,8 +108,7 @@
 @define-color text #f9f9f9;
 @define-color links #37e;
 @define-color links_page_not_existing #d33;
-@define-color selection_fg @text;
-@define-color selection_bg #7cb8fc66;
+@define-color selection_bg #ffffff44;
 @define-color cursor #fff;
 @define-color highlight_bg #1f641f;
 @define-color drop_color @text;
