@@ -57,6 +57,8 @@
 @define-color popover_shade_color rgba(0, 0, 0, 0.07);
 @define-color popover_shadow_1 mix(black, transparent, .91);
 @define-color popover_shadow_2 mix(black, transparent, .95);
+@define-color popover_hover_bg #00000011;
+@define-color popover_active_bg #00000022;
 @define-color menu_shortcut_color #888888;
 
 /* Thumbnails */
@@ -67,8 +69,16 @@
 @define-color headerbar_bg_1 #333;
 @define-color headerbar_fg_1 #fff;
 @define-color headerbar_bg_2 #f9f9f9;
+@define-color headerbar_fg_2 rgba(0, 0, 0, 0.8);
 @define-color header_border_bottom_1 #000;
 @define-color header_border_bottom_2 #00000033;
+@define-color history_hover #00000011;
+@define-color history_active_bg #00000022;
+
+/* Toolbar */
+@define-color toolbar_fg #000000ff;
+@define-color toolbar_border #00000030;
+@define-color toolbar_bg @view_bg_color;
 
 /* Sidebar */
 @define-color sidebar_bg_1 #333;
@@ -92,11 +102,6 @@
 /* Borders */
 @define-color borders #ccc;
 @define-color border_1 #00000030;
-
-/* History */
-@define-color history_fg #000000ff;
-@define-color history_hover #00000011;
-@define-color history_active_bg #00000022;
 
 /* Document View */
 @define-color title_color #222f;
@@ -128,9 +133,6 @@
 @define-color sidebar_scrollbar_hover #999;
 @define-color sidebar_scrollbar_active #bbb;
 @define-color sidebar_scrollbar_thin #555;
-
-/* Toolbar */
-@define-color toolbar_fg #000000ff;
 
 /* Welcome Page */
 @define-color welcome_fg #ddd;

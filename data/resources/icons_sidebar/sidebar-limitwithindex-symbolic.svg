@@ -56,24 +56,24 @@
   <g
      id="surface1">
     <g
-       style="fill:#000000;fill-opacity:1"
+       style="fill-opacity:1"
        id="g14">
       <rect
-         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7"
          width="4"
          height="5"
          x="21.499701"
          y="10.5" />
       <rect
-         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-9"
          width="4"
          height="5"
          x="34.499699"
          y="10.5" />
       <rect
-         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:1;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-9-2"
          width="5"
          height="7"
@@ -81,7 +81,7 @@
          y="4.5" />
       <text
          xml:space="preserve"
-         style="font-variant:normal;font-weight:normal;font-size:14.5455px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333"
+         style="font-variant:normal;font-weight:normal;font-size:14.5455px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333"
          id="text686"
          x="-22.021111"
          y="10.239788"><tspan

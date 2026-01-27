@@ -32,6 +32,7 @@ entry.search image.right {
 
 windowhandle.right {
     background-color: @headerbar_bg_2;
+    color: @headerbar_fg_2;
     border-bottom: 1px solid @header_border_bottom_2;
     padding-right: 6px;
 }
@@ -198,7 +199,7 @@ paned.document-view separator.wide {
 /* toolbar */
 
 .toolbar {
-    border-top: 1px solid @border_1;
+    border-top: 1px solid @toolbar_border;
     padding: 0px;
 }
 .toolbar button {
@@ -218,7 +219,7 @@ paned.document-view separator.wide {
     background: -gtk-recolor(url('./icons/hicolor/scalable/actions/highlight-text-bg-symbolic.svg'), success @highlight_bg) left bottom no-repeat;
 }
 .toolbar box {
-    background: @view_bg_color;
+    background: @toolbar_bg;
     box-shadow: none;
 }
 .toolbar separator {
@@ -336,20 +337,20 @@ overlay.popover button.action, overlay.popover button.menu, overlay.popover butt
     font-weight: normal;
 }
 overlay.popover button.action:hover, overlay.popover button.menu:hover, overlay.popover button.header:hover {
-    background: @view_hover_color;
+    background: @popover_hover_bg;
     transition: none;
 }
 overlay.popover button.action:active, overlay.popover button.menu:active, overlay.popover button.header:active {
-    background: @borders;
+    background: @popover_active_bg;
 }
 overlay.popover button.header {
     font-weight: bold;
 }
 overlay.popover button.highlight:not(:disabled) {
-    background: @view_hover_color;
+    background: @popover_hover_bg;
 }
 overlay.popover button.highlight:active {
-    background: @borders;
+    background: @popover_active_bg;
 }
 overlay.popover button label.shortcut {
     color: @menu_shortcut_color;
@@ -388,16 +389,17 @@ button.sidebar:active {
 
 popover.context-menu contents {
     background: @popover_bg_color;
+    color: @popover_fg_color;
 }
 popover.context-menu button {
     background: none;
     font-weight: normal;
 }
 popover.context-menu button:hover {
-    background: @view_hover_color;
+    background: @popover_hover_bg;
 }
 popover.context-menu button:active, popover button:focus {
-    background: @borders;
+    background: @popover_active_bg;
 }
 popover.context-menu button label.shortcut {
     color: @menu_shortcut_color;
@@ -414,11 +416,12 @@ popover.context-menu separator {
 /* welcome page */
 
 box.welcome {
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-bg-symbolic.svg'), success @welcome_fg, error @welcome_bg) left top;
+    background: @welcome_bg;
 }
 box.welcome > box {
     margin-top: 120px;
     margin-bottom: 152px;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/welcome-bg-symbolic.svg'), success @welcome_fg, error @welcome_bg) left top;
 }
 box.welcome box.icon {
     background: url('./icons/hicolor/scalable/actions/welcome-fg-symbolic.svg') no-repeat left top;
@@ -486,12 +489,15 @@ window.action-dialog checkbutton.radio-group label {
 
 window.settings .navbar {
     background: @dialog_sidebar_bg_color;
-    border-right: 1px solid @borders;
+    border-right: 1px solid @dialog_list_border;
 }
 window.settings .navbar button {
     font-weight: normal;
     padding: 9px 15px;
     border-radius: 0px;
+}
+window.settings {
+    background: @dialog_bg_color;
 }
 window.settings stack {
     background: @dialog_bg_color;
@@ -597,6 +603,9 @@ label.settings-info {
 
 /* shortcuts dialog */
 
+window.shortcuts {
+    background: @dialog_bg_color;
+}
 window.shortcuts label.keycap {
     color: @keycap_fg;
     background: @keycap_bg;
@@ -633,21 +642,22 @@ overlay.insert-link-popover list {
     padding-top: 0px;
     padding-bottom: 0px;
     background: none;
+    color: @popover_fg_color;
 }
 overlay.insert-link-popover row {
     padding: 8px 12px 8px 12px;
 }
 overlay.insert-link-popover row:selected, overlay.insert-link-popover row:hover {
-    background: @view_hover_color;
+    background: @popover_hover_bg;
 }
 overlay.insert-link-popover row:active {
-    background: @borders;
+    background: @popover_active_bg;
 }
 overlay.insert-link-popover scrollbar slider {
     min-height: 18px;
 }
 
-/* insert link dialog */
+/* autocomplete */
 
 scrolledwindow.autocomplete {
     background: @link_ac_bg;
@@ -660,15 +670,16 @@ scrolledwindow.autocomplete list {
     padding-top: 0px;
     padding-bottom: 0px;
     background: none;
+    color: @popover_fg_color;
 }
 scrolledwindow.autocomplete row {
     padding: 8px 12px 8px 12px;
 }
 scrolledwindow.autocomplete row:selected, scrolledwindow.autocomplete row:hover {
-    background: @view_hover_color;
+    background: @popover_hover_bg;
 }
 scrolledwindow.autocomplete row:active {
-    background: @borders;
+    background: @popover_active_bg;
 }
 scrolledwindow.autocomplete scrollbar slider {
     min-height: 18px;
@@ -755,6 +766,7 @@ window.export-bulk-dialog list {
 window.export-bulk-dialog list row {
     padding: 0px;
     background: none;
+    color: @dialog_fg_color;
 }
 window.export-bulk-dialog list row checkbutton {
     padding: 4px 9px 4px 7px;

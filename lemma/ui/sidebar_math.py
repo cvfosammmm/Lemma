@@ -25,6 +25,7 @@ from gi.repository import Rsvg
 
 import os.path
 
+from lemma.services.color_manager import ColorManager
 from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.paths import Paths
@@ -447,6 +448,8 @@ class Icon(Gtk.DrawingArea):
         self.set_draw_func(self.draw)
 
     def draw(self, widget, ctx, width, height):
+        toolbar_fg = ColorManager.get_ui_color_string('toolbar_fg')
+        self.rsvg_handle.set_stylesheet(b'path, rect, text {fill: ' + toolbar_fg.encode() + b'; stroke: ' + toolbar_fg.encode() + b';}')
         self.rsvg_handle.render_cairo(ctx)
 
 

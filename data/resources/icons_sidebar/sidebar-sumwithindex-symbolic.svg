@@ -97,17 +97,17 @@
            d="M 5.1090385,-1.875009 H 0.87670526 v 1 H 5.1090385 Z"
            id="path4501-6"
            sodipodi:nodetypes="ccccc"
-           style="fill:#000000;fill-opacity:1" />
+           style="fill-opacity:1" />
       </g>
       <rect
-         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-1"
          width="4"
          height="5"
          x="15.499994"
          y="0.5" />
       <rect
-         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:1;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-9-2"
          width="5"
          height="7"

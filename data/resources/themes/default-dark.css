@@ -22,22 +22,22 @@
 @define-color error_color #c01c28;
 
 /* Window */
-@define-color window_bg_color #f9f9f9;
-@define-color window_fg_color rgba(0, 0, 0, 0.8);
+@define-color window_bg_color #333;
+@define-color window_fg_color #eee;
 
 /* Views - e.g. text view or tree view */
-@define-color view_bg_color #f9f9f9;
-@define-color view_fg_color #000000;
+@define-color view_bg_color #222;
+@define-color view_fg_color #eee;
 @define-color view_hover_color rgba(0, 0, 0, 0.07);
 @define-color view_active_color rgba(0, 0, 0, 0.16);
 
 /* Dialogs */
-@define-color dialog_bg_color #fafafa;
-@define-color dialog_fg_color rgba(0, 0, 0, 0.8);
-@define-color dialog_border #ddd;
-@define-color dialog_list_bg #fff;
-@define-color dialog_list_border #ddd;
-@define-color dialog_sidebar_bg_color #ddd;
+@define-color dialog_bg_color #333;
+@define-color dialog_fg_color #eee;
+@define-color dialog_border #666;
+@define-color dialog_list_bg #222;
+@define-color dialog_list_border #666;
+@define-color dialog_sidebar_bg_color #333;
 
 /* Settings Dialog */
 
@@ -47,18 +47,18 @@
 
 /* Shortcuts Dialog */
 
-@define-color keycap_fg rgba(0, 0, 0, 0.8);
+@define-color keycap_fg rgba(0, 0, 0, 0.9);
 @define-color keycap_bg #ddd;
 
 /* Popovers */
-@define-color popover_bg_color #fafafa;
-@define-color popover_fg_color rgba(0, 0, 0, 0.8);
+@define-color popover_bg_color #333;
+@define-color popover_fg_color #eee;
 @define-color popover_arrow_color #000000;
 @define-color popover_shade_color rgba(0, 0, 0, 0.07);
 @define-color popover_shadow_1 mix(black, transparent, .91);
 @define-color popover_shadow_2 mix(black, transparent, .95);
-@define-color popover_hover_bg #00000011;
-@define-color popover_active_bg #00000022;
+@define-color popover_hover_bg #3a3a3a;
+@define-color popover_active_bg #414141;
 @define-color menu_shortcut_color #888888;
 
 /* Thumbnails */
@@ -66,30 +66,30 @@
 @define-color thumbnail_fg_color rgba(0, 0, 0, 0.8);
 
 /* Headerbar */
-@define-color headerbar_bg_1 #3e804b;
-@define-color headerbar_bg_2 #f9f9f9;
+@define-color headerbar_bg_1 #333;
 @define-color headerbar_fg_1 #fff;
-@define-color headerbar_fg_2 rgba(0, 0, 0, 0.8);
-@define-color header_border_bottom_1 #2f6139;
-@define-color header_border_bottom_2 #00000033;
-@define-color history_hover #00000011;
-@define-color history_active_bg #00000022;
+@define-color headerbar_bg_2 #333;
+@define-color headerbar_fg_2 #eee;
+@define-color header_border_bottom_1 #666;
+@define-color header_border_bottom_2 #666;
+@define-color history_hover #3a3a3a;
+@define-color history_active_bg #414141;
 
 /* Toolbar */
-@define-color toolbar_fg #000000ff;
-@define-color toolbar_border #00000030;
-@define-color toolbar_bg @view_bg_color;
+@define-color toolbar_fg #eee;
+@define-color toolbar_border #666;
+@define-color toolbar_bg #333;
 
 /* Sidebar */
-@define-color sidebar_bg_1 #3e804b;
+@define-color sidebar_bg_1 #333;
 @define-color sidebar_fg_1 #fffd;
 @define-color sidebar_fg_2 #fff7;
 @define-color sidebar_fg_3 #fffc;
 @define-color sidebar_fg_4 #929292;
 @define-color sidebar_active_fg #fffc;
-@define-color sidebar_active_bg #002b36;
-@define-color sidebar_hover #00000011;
-@define-color sidebar_selection #00000022;
+@define-color sidebar_active_bg #222;
+@define-color sidebar_hover #3a3a3a;
+@define-color sidebar_selection #414141;
 
 /* Paneds */
 @define-color headerpaned_border_1 #666;
@@ -101,24 +101,24 @@
 
 /* Borders */
 @define-color borders #ccc;
-@define-color border_1 #00000030;
+@define-color border_1 #666;
 
 /* Document View */
-@define-color title_color green;
-@define-color text #222f;
+@define-color title_color #f9f9f9;
+@define-color text #f9f9f9;
 @define-color links #37e;
 @define-color links_page_not_existing #d33;
-@define-color selection_fg #fff;
+@define-color selection_fg @text;
 @define-color selection_bg #7cb8fc66;
-@define-color cursor #000000ff;
-@define-color highlight_bg #ffff00;
+@define-color cursor #fff;
+@define-color highlight_bg #1f641f;
 @define-color drop_color @text;
 @define-color bullets @text;
 
 /* Checkboxes */
-@define-color checkbox_unchecked_outline @borders;
+@define-color checkbox_unchecked_outline #bbb;
 @define-color checkbox_unchecked_inner @view_bg_color;
-@define-color checkbox_checked_outline #5aa90d;
+@define-color checkbox_checked_outline #bbb;
 @define-color checkbox_checked_inner @view_bg_color;
 
 /* Scrollbars */
@@ -135,13 +135,13 @@
 @define-color sidebar_scrollbar_thin #555;
 
 /* Welcome Page */
-@define-color welcome_fg #ddd;
-@define-color welcome_bg @window_bg_color;
+@define-color welcome_fg #333;
+@define-color welcome_bg #222;
 @define-color welcome_logo #444;
 @define-color welcome_logo_node #d2b9d8;
 
 /* Link Dialog */
-@define-color link_ac_bg #e4dfc5;
+@define-color link_ac_bg @view_bg_color;
 @define-color link_ac_border #898361;
 @define-color link_entry_bg #fff;
 @define-color link_entry_border #ddd;

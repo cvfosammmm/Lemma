@@ -56,17 +56,17 @@
   <g
      id="surface1">
     <g
-       style="fill:#000000;fill-opacity:1"
+       style="fill-opacity:1"
        id="g14">
       <rect
-         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7"
          width="4"
          height="5"
          x="15.500004"
          y="10.5" />
       <rect
-         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-9"
          width="4"
          height="5"
@@ -86,14 +86,13 @@
            style="fill:#000000;fill-opacity:1" />
       </g>
       <rect
-         style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-1"
          width="4"
          height="5"
          x="15.500004"
          y="0.5" />
       <g
-         fill="#000000"
          fill-opacity="1"
          id="g985"
          transform="matrix(1.4490566,0,0,1.6050157,-182.10352,-311.38107)">
@@ -106,7 +105,7 @@
         </g>
       </g>
       <rect
-         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill-opacity:1;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          id="rect383-7-9-2"
          width="5"
          height="7"

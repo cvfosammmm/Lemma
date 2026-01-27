@@ -143,9 +143,6 @@ class History(object):
 
         hover_index = self.get_hover_index()
         scrolling_offset = int(self.view.scrolling_widget.scrolling_offset_x) + 1
-        hover_color = ColorManager.get_ui_color('history_hover')
-        selected_color = ColorManager.get_ui_color('history_active_bg')
-        fg_color = ColorManager.get_ui_color('history_fg')
 
         draft_offset = 0
 
@@ -157,9 +154,9 @@ class History(object):
 
                     if i == hover_index:
                         if i == self.selected_index:
-                            Gdk.cairo_set_source_rgba(ctx, selected_color)
+                            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('history_active_bg'))
                         else:
-                            Gdk.cairo_set_source_rgba(ctx, hover_color)
+                            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('history_hover'))
                         rounded_rectangle(ctx, document_offset - scrolling_offset, 6, document_width, 35, 6)
                         ctx.fill()
 
@@ -167,7 +164,7 @@ class History(object):
                     self.layout.set_font_description(font_desc)
                     self.layout.set_width(document_width * Pango.SCALE)
                     self.layout.set_text(str(document_stub['title']))
-                    Gdk.cairo_set_source_rgba(ctx, fg_color)
+                    Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('headerbar_fg_2'))
                     PangoCairo.show_layout(ctx, self.layout)
                     self.draw_divider(ctx, document_offset - scrolling_offset, height)
 
@@ -181,7 +178,7 @@ class History(object):
             self.layout.set_font_description(self.font_desc_bold)
             self.layout.set_width(extents.width + 37 * Pango.SCALE)
             self.layout.set_text('New Document')
-            Gdk.cairo_set_source_rgba(ctx, fg_color)
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('headerbar_fg_2'))
             PangoCairo.show_layout(ctx, self.layout)
 
             if draft_offset > 0:
