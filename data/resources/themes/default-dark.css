@@ -26,7 +26,7 @@
 @define-color window_fg_color #eee;
 
 /* Views - e.g. text view or tree view */
-@define-color view_bg_color #191919;
+@define-color view_bg_color #222;
 @define-color view_fg_color #eee;
 @define-color view_hover_color rgba(0, 0, 0, 0.07);
 @define-color view_active_color rgba(0, 0, 0, 0.16);
@@ -71,14 +71,14 @@
 @define-color headerbar_fg_1 #fff;
 @define-color headerbar_bg_2 #333;
 @define-color headerbar_fg_2 #eee;
-@define-color header_border_bottom_1 #666;
-@define-color header_border_bottom_2 #666;
+@define-color header_border_bottom_1 #555;
+@define-color header_border_bottom_2 #555;
 @define-color history_hover #3a3a3a;
 @define-color history_active_bg #414141;
 
 /* Toolbar */
 @define-color toolbar_fg #eee;
-@define-color toolbar_border #666;
+@define-color toolbar_border #555;
 @define-color toolbar_bg #333;
 
 /* Sidebar */
@@ -99,7 +99,7 @@
 @define-color bodypaned_border_1 #666;
 @define-color bodypaned_border_2 #666;
 @define-color bodypaned_bg #666;
-@define-color navbar_separator #666;
+@define-color navbar_separator #555;
 
 /* Borders */
 @define-color borders #ccc;
