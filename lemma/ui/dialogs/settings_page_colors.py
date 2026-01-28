@@ -58,9 +58,11 @@ class PageColors(object):
 
         self.add_theme_choice(os.path.join(dirname, 'default.css'), 0)
         self.add_chooser('default', 'default', 0, False)
+        self.add_theme_choice(os.path.join(dirname, 'default-dark.css'), 1)
+        self.add_chooser('default-dark', 'default-dark', 1, True)
 
-        count = 1
-        for name in [file[:-4] for file in os.listdir(dirname) if file != 'default.css']:
+        count = 2
+        for name in [file[:-4] for file in os.listdir(dirname) if file != 'default.css' and file != 'default-dark.css']:
             self.add_theme_choice(os.path.join(dirname, name + '.css'), count)
             self.add_chooser(os.path.join(dirname, name + '.css'), name, count, True)
             count += 1
@@ -80,7 +82,7 @@ class PageColors(object):
 
         active_id = Settings.get_value('color_scheme_dark')
         if active_id in self.style_previews_dark: self.style_previews_dark[active_id].checkbutton.set_active(True)
-        else: self.style_previews_dark['default'].checkbutton.set_active(True)
+        else: self.style_previews_dark['default-dark'].checkbutton.set_active(True)
 
     def add_theme_choice(self, filename, count):
         with open(filename, 'r') as file:

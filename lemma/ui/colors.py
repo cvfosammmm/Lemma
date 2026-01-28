@@ -73,8 +73,16 @@ class Colors(object):
     def update_colors(self):
         if self.color_scheme == 'default':
             path = os.path.join(Paths.get_resources_folder(), 'themes', 'default.css')
+        elif self.color_scheme == 'default-dark':
+            path = os.path.join(Paths.get_resources_folder(), 'themes', 'default-dark.css')
         else:
             path = self.color_scheme
+
+            if not os.path.isfile(path):
+                Settings.set_value('color_scheme', 'default')
+                Settings.set_value('color_scheme_dark', 'default-dark')
+                self.update_color_scheme()
+                return
 
         self.main_window.css_provider_colors.load_from_path(path)
         ColorManager.invalidate_cache()
