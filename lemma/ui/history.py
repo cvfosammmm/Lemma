@@ -154,7 +154,7 @@ class History(object):
 
                     if i == hover_index:
                         if i == self.selected_index:
-                            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('history_active_bg'))
+                            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('toolbar_selected_bg'))
                         else:
                             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('history_hover'))
                         rounded_rectangle(ctx, document_offset - scrolling_offset, 6, document_width, 35, 6)

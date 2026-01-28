@@ -47,7 +47,7 @@ windowhandle.right > box > box.buttonbox {
 }
 
 windowhandle.right button.checked {
-    background-color: @view_active_color;
+    background-color: @toolbar_active_bg;
 }
 
 /* link-overlay */
@@ -163,6 +163,9 @@ paned.document-view separator.wide {
 .nav-toolbar button {
     color: @sidebar_fg_3;
 }
+.nav-toolbar button:checked {
+    background: @sidebar_toolbar_button_active;
+}
 
 /* backlinks */
 
@@ -206,7 +209,7 @@ paned.document-view separator.wide {
     color: @toolbar_fg;
 }
 .toolbar button.checked {
-    background-color: @view_active_color;
+    background-color: @toolbar_active_bg;
 }
 .toolbar button > box {
     background: None;
@@ -373,16 +376,16 @@ overlay.popover label.explaination-header {
     font-weight: bold;
 }
 button.active {
-    background: @view_active_color;
+    background: @toolbar_active_bg;
 }
 button.active.sidebar {
-    background: @sidebar_selection;
+    background: @sidebar_toolbar_button_active;
 }
 button.sidebar:hover {
-    background: @sidebar_hover;
+    background: @sidebar_toolbar_button_hover;
 }
 button.sidebar:active {
-    background: @sidebar_selection;
+    background: @sidebar_toolbar_button_active;
 }
 
 /* context menus */

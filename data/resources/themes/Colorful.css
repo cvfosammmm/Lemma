@@ -28,8 +28,6 @@
 /* Views - e.g. text view or tree view */
 @define-color view_bg_color #f9f9f9;
 @define-color view_fg_color #000000;
-@define-color view_hover_color rgba(0, 0, 0, 0.07);
-@define-color view_active_color rgba(0, 0, 0, 0.16);
 
 /* Dialogs */
 @define-color dialog_bg_color #fafafa;
@@ -74,12 +72,13 @@
 @define-color header_border_bottom_1 #2f6139;
 @define-color header_border_bottom_2 #00000033;
 @define-color history_hover #00000011;
-@define-color history_active_bg #00000022;
 
 /* Toolbar */
 @define-color toolbar_fg #000000ff;
 @define-color toolbar_border #00000030;
 @define-color toolbar_bg @view_bg_color;
+@define-color toolbar_selected_bg rgba(0, 0, 0, 0.16);
+@define-color toolbar_active_bg rgba(0, 0, 0, 0.16);
 
 /* Sidebar */
 @define-color sidebar_bg_1 #3e804b;
@@ -91,6 +90,8 @@
 @define-color sidebar_active_bg #002b36;
 @define-color sidebar_hover #00000011;
 @define-color sidebar_selection #00000022;
+@define-color sidebar_toolbar_button_hover #3e3e3e;
+@define-color sidebar_toolbar_button_active #434343;
 
 /* Paneds */
 @define-color headerpaned_border_1 #666;
