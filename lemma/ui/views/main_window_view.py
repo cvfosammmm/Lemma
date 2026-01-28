@@ -105,9 +105,9 @@ class MainWindow(Adw.ApplicationWindow):
         Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
         self.css_provider_colors_default = Gtk.CssProvider()
         self.css_provider_colors_default.load_from_path(os.path.join(resources_folder, 'themes', 'default.css'))
-        Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors_default, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors_default, 400)
         self.css_provider_colors = Gtk.CssProvider()
-        Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors, 800)
 
         resources_folder = Paths.get_resources_folder()
         icon_theme = Gtk.IconTheme.get_for_display(self.get_display())

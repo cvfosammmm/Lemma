@@ -16,8 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import gi
+gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-from gi.repository import Adw
+from gi.repository import Gtk, Adw
 
 import os.path
 
@@ -35,16 +36,20 @@ class Colors(object):
         self.application = application
 
         self.color_scheme = None
+        self.dark_mode_active = False
         self.style_manager = Adw.StyleManager.get_default()
-        self.is_dark = self.style_manager.get_dark()
+        self.css_provider_dark = Gtk.CssProvider()
+        self.css_provider_dark.load_from_path(os.path.join(Paths.get_resources_folder(), 'themes', 'default-dark.css'))
 
+        self.update_dark_mode()
         self.update_color_scheme()
 
     def animate(self):
+        self.update_dark_mode()
         self.update_color_scheme()
 
     def update_color_scheme(self):
-        if Settings.get_value('separate_dark_color_scheme') and self.style_manager.get_dark():
+        if self.dark_mode_active:
             color_scheme = Settings.get_value('color_scheme_dark')
         else:
             color_scheme = Settings.get_value('color_scheme')
@@ -52,6 +57,17 @@ class Colors(object):
         if color_scheme != self.color_scheme:
             self.color_scheme = color_scheme
             self.update_colors()
+
+    def update_dark_mode(self):
+        dark_mode_active = Settings.get_value('separate_dark_color_scheme') and self.style_manager.get_dark()
+
+        if dark_mode_active != self.dark_mode_active:
+            self.dark_mode_active = dark_mode_active
+
+            if dark_mode_active:
+                Gtk.StyleContext.add_provider_for_display(self.main_window.get_display(), self.css_provider_dark, 600)
+            else:
+                Gtk.StyleContext.remove_provider_for_display(self.main_window.get_display(), self.css_provider_dark)
 
     @timer.timer
     def update_colors(self):
