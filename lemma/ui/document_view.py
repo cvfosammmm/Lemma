@@ -80,7 +80,7 @@ class DocumentView():
 
         if self.document != None:
             if new_active_document or document_changed:
-                self.presenter.render_cache = dict()
+                self.presenter.clear_render_cache()
                 self.last_cache_reset = time.time()
                 self.reset_cursor_blink()
 

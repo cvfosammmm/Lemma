@@ -44,6 +44,9 @@ class DocumentViewPresenter():
         self.window_surface = None
         self.render_cache = dict()
 
+    def clear_render_cache(self):
+        self.render_cache = dict()
+
     @timer.timer
     def draw(self, snapshot):
         if self.model.document == None: return

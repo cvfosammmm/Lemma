@@ -58,10 +58,10 @@ class Application(Adw.Application):
         self.main_window.add_widgets()
         DialogLocator.init_dialogs(self.main_window)
 
-        self.colors = colors.Colors(self.main_window)
         self.popover_manager = PopoverManager(self.main_window)
         self.history = history.History(self.main_window)
         self.document_view = document_view.DocumentView(self.main_window, self)
+        self.colors = colors.Colors(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
         self.cursor_state = cursor_state.CursorState(self.main_window)

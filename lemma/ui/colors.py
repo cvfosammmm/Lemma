@@ -30,8 +30,9 @@ import lemma.services.timer as timer
 
 class Colors(object):
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, application):
         self.main_window = main_window
+        self.application = application
 
         self.color_scheme = None
         self.style_manager = Adw.StyleManager.get_default()
@@ -60,10 +61,11 @@ class Colors(object):
             path = self.color_scheme
 
         self.main_window.css_provider_colors.load_from_path(path)
+        ColorManager.invalidate_cache()
+        self.application.document_view.presenter.clear_render_cache()
+
         self.main_window.main_box.queue_draw()
         self.main_window.document_view.content.queue_draw()
         self.main_window.document_list.content.queue_draw()
-
-        ColorManager.invalidate_cache()
 
 
