@@ -6,7 +6,7 @@
    version="1.1"
    id="svg17"
    sodipodi:docname="sidebar-prodwithindex-symbolic.svg"
-   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -23,7 +23,7 @@
      inkscape:document-units="px"
      showgrid="false"
      inkscape:zoom="18.17824"
-     inkscape:cx="18.511143"
+     inkscape:cx="18.538648"
      inkscape:cy="10.479562"
      inkscape:window-width="1440"
      inkscape:window-height="831"
@@ -74,16 +74,18 @@
          y="10.5" />
       <g
          id="use975"
-         transform="matrix(1.4176577,0,0,1,19.757135,15.375009)">
+         transform="matrix(1.4176577,0,0,1,19.757135,15.375009)"
+         style="stroke-width:0;stroke-dasharray:none">
         <path
            d="M 5.1090385,-3.875009 H 0.87670526 v 1 H 5.1090385 Z"
            id="path4501"
-           sodipodi:nodetypes="ccccc" />
+           sodipodi:nodetypes="ccccc"
+           style="stroke-width:0;stroke-dasharray:none" />
         <path
            d="M 5.1090385,-1.875009 H 0.87670526 v 1 H 5.1090385 Z"
            id="path4501-6"
            sodipodi:nodetypes="ccccc"
-           style="fill:#000000;fill-opacity:1" />
+           style="fill:#000000;fill-opacity:1;stroke-width:0;stroke-dasharray:none" />
       </g>
       <rect
          style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
@@ -95,13 +97,16 @@
       <g
          fill-opacity="1"
          id="g985"
-         transform="matrix(1.4490566,0,0,1.6050157,-182.10352,-311.38107)">
+         transform="matrix(1.4490566,0,0,1.6050157,-182.10352,-311.38107)"
+         style="stroke-width:0;stroke-dasharray:none">
         <g
            id="use983"
-           transform="translate(125.798,194.005)">
+           transform="translate(125.798,194.005)"
+           style="stroke-width:0;stroke-dasharray:none">
           <path
              d="M 8.84375,9.96875 V 9.5625 C 7.8125,9.5625 7.8125,9.078125 7.8125,8.78125 V 1.1875 c 0,-0.296875 0,-0.78125 1.03125,-0.78125 V 0 H 0.5625 v 0.40625 c 1.015625,0 1.015625,0.484375 1.015625,0.78125 v 7.59375 c 0,0.296875 0,0.78125 -1.015625,0.78125 V 9.96875 H 3.578125 V 9.5625 c -1.03125,0 -1.03125,-0.484375 -1.03125,-0.78125 v -8.375 H 6.84375 v 8.375 c 0,0.296875 0,0.78125 -1.015625,0.78125 v 0.40625 z m 0,0"
-             id="path18819" />
+             id="path18819"
+             style="stroke-width:0;stroke-dasharray:none" />
         </g>
       </g>
       <rect

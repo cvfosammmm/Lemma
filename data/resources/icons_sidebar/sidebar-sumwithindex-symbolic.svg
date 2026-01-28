@@ -6,7 +6,7 @@
    version="1.1"
    id="svg17"
    sodipodi:docname="sidebar-sumwithindex-symbolic.svg"
-   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -75,28 +75,33 @@
       <g
          fill-opacity="1"
          id="g581"
-         transform="matrix(1.5896285,0,0,1.5896285,-199.66792,-211.38442)">
+         transform="matrix(1.5896285,0,0,1.5896285,-199.66792,-211.38442)"
+         style="stroke-width:0;stroke-dasharray:none">
         <g
            id="use579"
-           transform="matrix(1.0020465,0,0,1.0081835,125.67208,132.97726)">
+           transform="matrix(1.0020465,0,0,1.0081835,125.67208,132.97726)"
+           style="stroke-width:0;stroke-dasharray:none">
           <path
              d="m 8.0960165,7.5044483 h -0.25 c -0.25,0.75 -0.049843,1.3540826 -0.9092181,1.6353326 -0.15625,0.0625 -0.8437653,0.3035885 -2.3125,0.296875 L 1.390625,9.421875 4.859375,5.140625 C 4.921875,5.046875 4.9375,5.03125 4.9375,4.984375 4.9375,4.9375 4.9375,4.9375 4.875,4.84375 L 1.640625,0.40625 4.5774234,0.4210309 c 1.1406106,0.005741 2.5810931,0.0677924 3.2685931,1.9271674 h 0.25 L 8.0930484,0.01478092 0.84375,0 C 0.56250058,-5.7345209e-4 0.5625,0.015625 0.5625,0.3125 l 3.640625,5.015625 -3.546875,4.375 C 0.578125,9.796875 0.5625,9.8125 0.5625,9.859375 c 0,0.109375 0.09375,0.109375 0.28125,0.109375 l 7.2492984,0.014781 z"
              id="path747"
-             sodipodi:nodetypes="cccsccsccscccscccsscc" />
+             sodipodi:nodetypes="cccsccsccscccscccsscc"
+             style="stroke-width:0;stroke-dasharray:none" />
         </g>
       </g>
       <g
          id="use975"
-         transform="matrix(1.4176577,0,0,1,19.757126,15.375009)">
+         transform="matrix(1.4176577,0,0,1,19.757126,15.375009)"
+         style="stroke-width:0;stroke-dasharray:none">
         <path
            d="M 5.1090385,-3.875009 H 0.87670526 v 1 H 5.1090385 Z"
            id="path4501"
-           sodipodi:nodetypes="ccccc" />
+           sodipodi:nodetypes="ccccc"
+           style="stroke-width:0;stroke-dasharray:none" />
         <path
            d="M 5.1090385,-1.875009 H 0.87670526 v 1 H 5.1090385 Z"
            id="path4501-6"
            sodipodi:nodetypes="ccccc"
-           style="fill-opacity:1" />
+           style="fill-opacity:1;stroke-width:0;stroke-dasharray:none" />
       </g>
       <rect
          style="fill-opacity:0;stroke-width:1;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"

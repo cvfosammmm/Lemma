@@ -6,7 +6,7 @@
    version="1.1"
    id="svg17"
    sodipodi:docname="sidebar-limitwithindex-symbolic.svg"
-   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -23,8 +23,8 @@
      inkscape:document-units="px"
      showgrid="false"
      inkscape:zoom="12.341469"
-     inkscape:cx="25.969355"
-     inkscape:cy="1.1749006"
+     inkscape:cx="25.928842"
+     inkscape:cy="1.1749007"
      inkscape:window-width="1440"
      inkscape:window-height="831"
      inkscape:window-x="0"
@@ -92,12 +92,13 @@
       <g
          aria-label="−→"
          id="text698"
-         style="font-style:italic;font-size:9.52821px;font-family:LMMathSymbols10;-inkscape-font-specification:LMMathSymbols10-Regular;stroke-width:0.873414"
+         style="font-style:italic;font-size:9.52821px;font-family:LMMathSymbols10;-inkscape-font-specification:LMMathSymbols10-Regular;stroke-width:0;stroke-dasharray:none"
          transform="translate(0.9996997)">
         <path
            d="m 32,13 v 1 L 30.139633,15.5 29.5,14.737616 30.66536,13.999798 26,14.000202 V 13 h 4.66536 L 29.5,12 30.257045,11.401868 Z"
            id="path1194"
-           sodipodi:nodetypes="ccccccccccc" />
+           sodipodi:nodetypes="ccccccccccc"
+           style="stroke-width:0;stroke-dasharray:none" />
       </g>
     </g>
   </g>
