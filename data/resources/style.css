@@ -142,7 +142,7 @@ paned.document-view separator.wide {
     background-color: @border_1;
 }
 .navbar paned separator {
-    background-color: @headerpaned_bg;
+    background-color: @navbar_separator;
 }
 
 /* nav-toolbar */
@@ -311,7 +311,7 @@ overlay.popover .content {
     background: @popover_bg_color;
     padding: 6px;
     border-radius: 10px;
-    border: 1px solid @borders;
+    border: 1px solid @popover_borders;
     box-shadow: 0 1px 5px 1px @popover_shadow_1, 0 2px 14px 3px @popover_shadow_2;
 }
 overlay.popover .arrow {
@@ -320,11 +320,11 @@ overlay.popover .arrow {
 }
 overlay.popover-bottom .arrow {
     color: @popover_arrow_color;
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @popover_borders) left top no-repeat;
 }
 overlay.popover-top .arrow {
     color: @popover_arrow_color;
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @borders) left top no-repeat;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-up-symbolic.svg'), success @popover_bg_color, error @popover_borders) left top no-repeat;
 }
 overlay.popover-bottom .content {
     margin-top: 10px;

@@ -57,6 +57,7 @@
 @define-color popover_shade_color rgba(0, 0, 0, 0.07);
 @define-color popover_shadow_1 mix(black, transparent, .91);
 @define-color popover_shadow_2 mix(black, transparent, .95);
+@define-color popover_borders #ccc;
 @define-color popover_hover_bg #00000011;
 @define-color popover_active_bg #00000022;
 @define-color menu_shortcut_color #888888;
@@ -98,6 +99,7 @@
 @define-color bodypaned_border_1 #666;
 @define-color bodypaned_border_2 #666;
 @define-color bodypaned_bg #666;
+@define-color navbar_separator #666;
 
 /* Borders */
 @define-color borders #ccc;

@@ -26,7 +26,7 @@
 @define-color window_fg_color #eee;
 
 /* Views - e.g. text view or tree view */
-@define-color view_bg_color #222;
+@define-color view_bg_color #191919;
 @define-color view_fg_color #eee;
 @define-color view_hover_color rgba(0, 0, 0, 0.07);
 @define-color view_active_color rgba(0, 0, 0, 0.16);
@@ -57,6 +57,7 @@
 @define-color popover_shade_color rgba(0, 0, 0, 0.07);
 @define-color popover_shadow_1 mix(black, transparent, .91);
 @define-color popover_shadow_2 mix(black, transparent, .95);
+@define-color popover_borders #666;
 @define-color popover_hover_bg #3a3a3a;
 @define-color popover_active_bg #414141;
 @define-color menu_shortcut_color #888888;
@@ -98,6 +99,7 @@
 @define-color bodypaned_border_1 #666;
 @define-color bodypaned_border_2 #666;
 @define-color bodypaned_bg #666;
+@define-color navbar_separator #666;
 
 /* Borders */
 @define-color borders #ccc;
@@ -106,8 +108,8 @@
 /* Document View */
 @define-color title_color #f9f9f9;
 @define-color text #f9f9f9;
-@define-color links #37e;
-@define-color links_page_not_existing #d33;
+@define-color links #69f;
+@define-color links_page_not_existing #e66;
 @define-color selection_bg #ffffff44;
 @define-color cursor #fff;
 @define-color highlight_bg #1f641f;
