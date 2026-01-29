@@ -164,6 +164,8 @@ class ScrollbarVertical(Gtk.Widget, Observable):
         expand_width = self.pointer_pos != None and self.visibility_timeout == True
 
         visible_width = 8 if expand_width else 3
+        padding_right = 6 if expand_width else 3
+        padding_top = 6 if expand_width else 3
         slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.content_height))
         slider_pos_fraction = self.scrolling_offset / (self.content_height - self.view_height)
         slider_offset = slider_pos_fraction * (self.view_height - max(60, min(self.view_height, self.view_height * self.view_height / self.content_height)))
@@ -197,14 +199,14 @@ class ScrollbarVertical(Gtk.Widget, Observable):
                 slider_color = ColorManager.get_ui_color('scrollbar_thin')
 
         if expand_width:
-            rect = Graphene.Rect().init(self.view_width - 6 - visible_width, 6, visible_width, self.view_height - 12)
+            rect = Graphene.Rect().init(self.view_width - padding_right - visible_width, padding_top, visible_width, self.view_height - 2 * padding_top)
             rounded_rect = Gsk.RoundedRect()
             rounded_rect.init_from_rect(rect, 20)
             snapshot.push_rounded_clip(rounded_rect)
             snapshot.append_color(bg_color, rect)
             snapshot.pop()
 
-        rect = Graphene.Rect().init(self.view_width - 6 - visible_width, slider_offset + 6, visible_width, slider_height - 12)
+        rect = Graphene.Rect().init(self.view_width - padding_right - visible_width, slider_offset + padding_top, visible_width, slider_height - 2 * padding_top)
         rounded_rect = Gsk.RoundedRect()
         rounded_rect.init_from_rect(rect, 20)
         snapshot.push_rounded_clip(rounded_rect)
