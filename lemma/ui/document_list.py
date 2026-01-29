@@ -173,7 +173,6 @@ class DocumentList(object):
     def on_enter(self, controller, x, y):
         item_num = self.get_item_at_cursor()
         self.set_focus_index(item_num)
-        self.view.scrollbar_vertical.ping()
 
     def on_hover(self, controller, x, y):
         item_num = self.get_item_at_cursor()
@@ -182,7 +181,6 @@ class DocumentList(object):
 
     def on_leave(self, controller):
         self.set_focus_index(None)
-        self.view.scrollbar_vertical.ping()
 
     def on_context_menu_close(self, popover):
         self.set_selected_index(None)
