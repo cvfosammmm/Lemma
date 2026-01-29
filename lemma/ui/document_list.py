@@ -79,6 +79,7 @@ class DocumentList(object):
         self.main_window.headerbar.hb_left.search_entry.add_controller(self.shortcuts_controller)
 
         self.view.scrollbar_vertical.observe('dragged', self.on_scrollbar_drag)
+        self.view.scrolling_widget.adjustment_y.connect('value-changed', self.on_adjustment_changed)
 
         self.view.content.set_draw_func(self.draw)
 
@@ -169,6 +170,9 @@ class DocumentList(object):
 
     def on_scrollbar_drag(self, widget, new_y):
         self.view.scrolling_widget.adjustment_y.set_value(new_y)
+
+    def on_adjustment_changed(self, adjustment):
+        self.view.scrollbar_vertical.ping()
 
     def on_enter(self, controller, x, y):
         item_num = self.get_item_at_cursor()
