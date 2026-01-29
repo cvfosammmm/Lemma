@@ -49,7 +49,7 @@ class ScrollingWidget(Observable):
         self.scrolling_controller.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
         self.scrolling_controller.connect('scroll', self.on_scroll)
         self.scrolling_controller.connect('decelerate', self.on_decelerate)
-        self.content.add_controller(self.scrolling_controller)
+        self.view.add_controller(self.scrolling_controller)
 
         self.adjustment_x.connect('changed', self.on_adjustment_changed)
         self.adjustment_x.connect('value-changed', self.on_adjustment_changed)

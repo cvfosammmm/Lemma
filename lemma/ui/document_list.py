@@ -81,6 +81,12 @@ class DocumentList(object):
         self.view.scrollbar_vertical.observe('dragged', self.on_scrollbar_drag)
         self.view.scrolling_widget.adjustment_y.connect('value-changed', self.on_adjustment_changed)
 
+        scrolling_controller_scrollbar = Gtk.EventControllerScroll()
+        scrolling_controller_scrollbar.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
+        scrolling_controller_scrollbar.connect('scroll', self.view.scrolling_widget.on_scroll)
+        scrolling_controller_scrollbar.connect('decelerate', self.view.scrolling_widget.on_decelerate)
+        self.view.scrollbar_vertical.add_controller(scrolling_controller_scrollbar)
+
         self.view.content.set_draw_func(self.draw)
 
         self.view.context_menu.delete_document_button.connect('clicked', self.on_delete_document_clicked)
