@@ -112,9 +112,13 @@ class Popover(PopoverView):
         self.register_button_for_keyboard_navigation(self.done_editing_button)
         self.add_widget(self.done_editing_button)
 
-        self.bookmark_document_button = MenuBuilder.create_button(_('Bookmark Current Document'), icon_name='bookmark-new-symbolic')
+        self.bookmark_document_button = MenuBuilder.create_button(_('Bookmark Current Document'))
         self.register_button_for_keyboard_navigation(self.bookmark_document_button)
         self.add_widget(self.bookmark_document_button)
+
+        self.unbookmark_document_button = MenuBuilder.create_button(_('Remove Current Document'))
+        self.register_button_for_keyboard_navigation(self.unbookmark_document_button)
+        self.add_widget(self.unbookmark_document_button)
 
     def on_popup(self):
         self.edit_mode = False

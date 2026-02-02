@@ -48,6 +48,7 @@ class Bookmarks():
         self.popover.edit_bookmarks_button.connect('clicked', self.on_edit_bookmarks_button_clicked)
         self.popover.done_editing_button.connect('clicked', self.on_done_editing_button_clicked)
         self.popover.bookmark_document_button.connect('clicked', self.bookmark_document)
+        self.popover.unbookmark_document_button.connect('clicked', self.unbookmark_document)
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'bookmarks_changed')
@@ -90,6 +91,9 @@ class Bookmarks():
         current_document_has_no_bookmark = (document != None and document.id not in workspace.get_bookmarked_document_ids())
         space_available = (len(workspace.get_bookmarked_document_ids()) < 9)
         self.popover.bookmark_document_button.set_sensitive(current_document_has_no_bookmark and space_available)
+        self.popover.bookmark_document_button.set_visible(current_document_has_no_bookmark and space_available)
+        self.popover.unbookmark_document_button.set_sensitive(document != None and not current_document_has_no_bookmark)
+        self.popover.unbookmark_document_button.set_visible(document != None and not current_document_has_no_bookmark)
 
         self.popover.edit_bookmarks_button.set_sensitive(len(workspace.get_bookmarked_document_ids()) > 0 and not self.popover.edit_mode)
         self.popover.edit_bookmarks_button.set_visible(len(workspace.get_bookmarked_document_ids()) > 0 and not self.popover.edit_mode)
@@ -153,5 +157,10 @@ class Bookmarks():
         active_document_id = WorkspaceRepo.get_workspace().get_active_document_id()
 
         UseCases.bookmark_document(active_document_id)
+
+    def unbookmark_document(self, button=None, parameter=''):
+        active_document_id = WorkspaceRepo.get_workspace().get_active_document_id()
+
+        UseCases.unbookmark_document(active_document_id)
 
 
