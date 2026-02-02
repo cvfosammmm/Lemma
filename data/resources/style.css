@@ -809,11 +809,16 @@ label.explainer-bottom {
     font-weight: bold;
 }
 
-/* pinning buttons */
+/* bookmarks dialog */
 
-label.icon-chooser-header {
-    font-weight: bold;
-    padding: 10px;
+.bookmarks label.title-2 {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 19px;
+}
+.bookmarks .drag-handle {
+    margin-left: 9px;
+    margin-right: 9px;
 }
 
 

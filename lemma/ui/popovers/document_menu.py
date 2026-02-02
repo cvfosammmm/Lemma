@@ -36,11 +36,6 @@ class Popover(PopoverView):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.pin_document_button = self.add_action_button(_('Pin Document'), 'win.pin-document')
-        self.unpin_document_button = self.add_action_button(_('Unpin Document'), 'win.unpin-document')
-
-        self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
-
         self.export_document_button = self.add_action_button(_('Export Markdown...'), 'win.export-markdown')
 
         self.key_controller = Gtk.EventControllerKey()

@@ -98,14 +98,14 @@ class ShortcutControllerApp(ShortcutController):
         self.add_with_callback('F12', self.application.actions.actions['show-document-menu'].activate)
 
         for i in range(1, 10):
-            self.add_with_callback('<Alt>' + str(i), self.activate_pinned_document, i)
+            self.add_with_callback('<Alt>' + str(i), self.activate_bookmark, i)
 
-    def activate_pinned_document(self, button_pos):
+    def activate_bookmark(self, button_pos):
         workspace = WorkspaceRepo.get_workspace()
-        pinned_documents = workspace.get_pinned_document_ids()
+        bookmarks = workspace.get_bookmarked_document_ids()
 
-        if len(pinned_documents) >= button_pos:
-            document_id = pinned_documents[button_pos - 1]
+        if len(bookmarks) >= button_pos:
+            document_id = bookmarks[button_pos - 1]
             UseCases.set_active_document(document_id, update_history=True)
 
 

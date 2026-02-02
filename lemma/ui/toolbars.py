@@ -46,6 +46,12 @@ class ToolBars():
         controller = Gtk.GestureClick()
         controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         controller.set_button(1)
+        controller.connect('pressed', self.on_menu_button_press, 'show-bookmarks')
+        self.headerbar.hb_right.bookmarks_button.add_controller(controller)
+
+        controller = Gtk.GestureClick()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.set_button(1)
         controller.connect('pressed', self.on_menu_button_press, 'show-document-menu')
         self.headerbar.hb_right.document_menu_button.add_controller(controller)
 
@@ -62,7 +68,6 @@ class ToolBars():
         self.toolbar.toolbar_right.edit_menu_button.add_controller(controller)
 
         MessageBus.subscribe(self, 'history_changed')
-        MessageBus.subscribe(self, 'pinned_documents_changed')
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'app_state_changed')
         MessageBus.subscribe(self, 'settings_changed')
@@ -114,6 +119,7 @@ class ToolBars():
 
         button_popover_rel = list()
         button_popover_rel.append([self.headerbar.hb_left.hamburger_menu_button, 'hamburger_menu'])
+        button_popover_rel.append([self.headerbar.hb_right.bookmarks_button, 'bookmarks'])
         button_popover_rel.append([self.headerbar.hb_right.document_menu_button, 'document_menu'])
         button_popover_rel.append([self.toolbar.toolbar_main.paragraph_style_menu_button, 'paragraph_style'])
         button_popover_rel.append([self.toolbar.toolbar_right.edit_menu_button, 'edit_menu'])

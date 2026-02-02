@@ -20,7 +20,6 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 from lemma.ui.popovers.popover_manager import PopoverManager
-from lemma.ui.views.pin_buttons import PinButtons
 
 
 class HeaderBar(Gtk.Paned):
@@ -79,8 +78,11 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.set_child(self.box)
 
-        self.pin_buttons_box = PinButtons()
-        self.box.append(self.pin_buttons_box)
+        self.bookmarks_button = Gtk.Button.new_from_icon_name('library-symbolic')
+        self.bookmarks_button.set_can_focus(False)
+        self.bookmarks_button.set_tooltip_text(_('Bookmarks'))
+        self.bookmarks_button.add_css_class('flat')
+        self.bookmarks_button.set_action_name('win.show-bookmarks')
 
         self.back_button = Gtk.Button.new_from_icon_name('go-previous-symbolic')
         self.back_button.set_tooltip_text('Back (Alt+Left Arrow)')
@@ -97,7 +99,7 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.back_forward_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.back_forward_box.append(self.back_button)
         self.back_forward_box.append(self.forward_button)
-        self.back_forward_box.add_css_class('linked')
+        self.back_forward_box.append(self.bookmarks_button)
         self.back_forward_box.add_css_class('buttonbox')
         self.box.append(self.back_forward_box)
 

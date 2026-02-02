@@ -112,6 +112,5 @@ class MainWindow(Adw.ApplicationWindow):
         resources_folder = Paths.get_resources_folder()
         icon_theme = Gtk.IconTheme.get_for_display(self.get_display())
         icon_theme.add_search_path(os.path.join(resources_folder, 'icons'))
-        icon_theme.add_search_path(os.path.join(resources_folder, 'icons_for_pinned_documents'))
 
 

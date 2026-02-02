@@ -40,14 +40,10 @@ class WorkspaceRepo():
                         for document_id in workspace_data['history']:
                             if document_id in DocumentRepo.document_stubs_by_id:
                                 WorkspaceRepo.workspace.history.append(document_id)
-                    if 'pinned_document_ids' in workspace_data:
-                        for document_id in workspace_data['pinned_document_ids']:
+                    if 'bookmarks' in workspace_data:
+                        for document_id in workspace_data['bookmarks']:
                             if document_id in DocumentRepo.document_stubs_by_id:
-                                WorkspaceRepo.workspace.pinned_document_ids.append(document_id)
-                    if 'pin_icon_names' in workspace_data:
-                        for document_id, icon_name in workspace_data['pin_icon_names'].items():
-                            if document_id in DocumentRepo.document_stubs_by_id:
-                                WorkspaceRepo.workspace.pin_icon_names[document_id] = icon_name
+                                WorkspaceRepo.workspace.bookmarked_document_ids.append(document_id)
                     if 'active_document_id' in workspace_data:
                         if workspace_data['active_document_id'] in DocumentRepo.document_stubs_by_id:
                             document = DocumentRepo.get_by_id(workspace_data['active_document_id'])
@@ -66,8 +62,7 @@ class WorkspaceRepo():
             history_list = [document_id for document_id in workspace.history if document_id != None]
             data = {'active_document_id': active_document_id,
                     'history': history_list,
-                    'pinned_document_ids': workspace.pinned_document_ids,
-                    'pin_icon_names': workspace.pin_icon_names}
+                    'bookmarks': workspace.bookmarked_document_ids}
             filehandle.write(pickle.dumps(data))
 
 

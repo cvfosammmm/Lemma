@@ -25,8 +25,7 @@ class Workspace():
 
         self.active_document = None
         self.history = []
-        self.pinned_document_ids = []
-        self.pin_icon_names = dict()
+        self.bookmarked_document_ids = []
 
         self.in_draft_mode = False
 
@@ -57,32 +56,23 @@ class Workspace():
         if document_id in self.history:
             self.history.remove(document_id)
 
-    def pin_document(self, document_id):
+    def bookmark_document(self, document_id):
         if document_id == None: return
-        if document_id in self.pinned_document_ids: return
+        if document_id in self.bookmarked_document_ids: return
 
-        self.pinned_document_ids.append(document_id)
+        self.bookmarked_document_ids.append(document_id)
 
-    def unpin_document(self, document_id):
-        if document_id not in self.pinned_document_ids: return
+    def unbookmark_document(self, document_id):
+        if document_id not in self.bookmarked_document_ids: return
 
-        self.pinned_document_ids.remove(document_id)
-        if document_id in self.pin_icon_names:
-            del(self.pin_icon_names[document_id])
+        self.bookmarked_document_ids.remove(document_id)
 
-    def set_pinned_document_icon(self, document_id, icon_name):
-        if icon_name == None:
-            if document_id in self.pin_icon_names:
-                del(self.pin_icon_names[document_id])
-        else:
-            self.pin_icon_names[document_id] = icon_name
+    def move_bookmark(self, document_id, new_position):
+        if document_id not in self.bookmarked_document_ids: return
+        if new_position >= len(self.bookmarked_document_ids): return
 
-    def move_document_pin(self, document_id, new_position):
-        if document_id not in self.pinned_document_ids: return
-        if new_position >= len(self.pinned_document_ids): return
-
-        self.pinned_document_ids.remove(document_id)
-        self.pinned_document_ids.insert(new_position, document_id)
+        self.bookmarked_document_ids.remove(document_id)
+        self.bookmarked_document_ids.insert(new_position, document_id)
 
     def get_active_document(self):
         return self.active_document
@@ -116,14 +106,7 @@ class Workspace():
         if index == (len(self.history) - 1): return None
         else: return self.history[index + 1]
 
-    def get_pinned_document_ids(self):
-        return self.pinned_document_ids
-
-    def get_pin_icon_name(self, document_id):
-        if document_id in self.pin_icon_names:
-            return self.pin_icon_names[document_id]
-        else:
-            i = self.pinned_document_ids.index(document_id)
-            return str(i + 1) + '-symbolic'
+    def get_bookmarked_document_ids(self):
+        return self.bookmarked_document_ids
 
 

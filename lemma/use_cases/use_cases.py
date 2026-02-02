@@ -220,14 +220,14 @@ class UseCases():
             workspace.set_active_document(document, update_history=False)
 
         workspace.remove_from_history(document_id)
-        workspace.unpin_document(document_id)
+        workspace.unbookmark_document(document_id)
 
         DocumentRepo.delete(document_id)
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('document_removed')
         MessageBus.add_message('history_changed')
         MessageBus.add_message('document_changed')
-        MessageBus.add_message('pinned_documents_changed')
+        MessageBus.add_message('bookmarks_changed')
 
     def set_active_document(document_id, update_history=True):
         workspace = WorkspaceRepo.get_workspace()
@@ -242,37 +242,29 @@ class UseCases():
         MessageBus.add_message('mode_set')
         MessageBus.add_message('history_changed')
 
-    def pin_document(document_id):
+    def bookmark_document(document_id):
         workspace = WorkspaceRepo.get_workspace()
 
-        workspace.pin_document(document_id)
+        workspace.bookmark_document(document_id)
 
         WorkspaceRepo.update(workspace)
-        MessageBus.add_message('pinned_documents_changed')
+        MessageBus.add_message('bookmarks_changed')
 
-    def unpin_document(document_id):
+    def unbookmark_document(document_id):
         workspace = WorkspaceRepo.get_workspace()
 
-        workspace.unpin_document(document_id)
+        workspace.unbookmark_document(document_id)
 
         WorkspaceRepo.update(workspace)
-        MessageBus.add_message('pinned_documents_changed')
+        MessageBus.add_message('bookmarks_changed')
 
-    def set_pinned_document_icon(document_id, icon_name=None):
+    def move_bookmark(document_id, new_position):
         workspace = WorkspaceRepo.get_workspace()
 
-        workspace.set_pinned_document_icon(document_id, icon_name)
+        workspace.move_bookmark(document_id, new_position)
 
         WorkspaceRepo.update(workspace)
-        MessageBus.add_message('pinned_documents_changed')
-
-    def move_document_pin(document_id, new_position):
-        workspace = WorkspaceRepo.get_workspace()
-
-        workspace.move_document_pin(document_id, new_position)
-
-        WorkspaceRepo.update(workspace)
-        MessageBus.add_message('pinned_documents_changed')
+        MessageBus.add_message('bookmarks_changed')
 
     @timer.timer
     def undo():

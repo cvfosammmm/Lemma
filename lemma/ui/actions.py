@@ -89,6 +89,7 @@ class Actions(object):
         self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
         self.add_simple_action('show-edit-menu', self.show_edit_menu)
         self.add_simple_action('show-document-menu', self.show_document_menu)
+        self.add_simple_action('show-bookmarks', self.show_bookmarks)
         self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
         self.add_simple_action('show-settings-dialog', self.show_settings_dialog)
         self.add_simple_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
@@ -168,6 +169,7 @@ class Actions(object):
         self.actions['show-paragraph-style-menu'].set_enabled(document != None)
         self.actions['show-edit-menu'].set_enabled(document != None)
         self.actions['show-document-menu'].set_enabled(document != None)
+        self.actions['show-bookmarks'].set_enabled(True)
         self.actions['show-hamburger-menu'].set_enabled(True)
         self.actions['show-settings-dialog'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
@@ -511,6 +513,16 @@ class Actions(object):
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y + allocation.size.height
         UseCases.show_popover('document_menu', x, y, 'bottom')
+
+    def show_bookmarks(self, action=None, parameter=''):
+        if ApplicationState.get_value('active_popover') == 'bookmarks': return
+
+        button = self.main_window.headerbar.hb_right.bookmarks_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y + allocation.size.height
+        UseCases.show_popover('bookmarks', x, y, 'bottom')
 
     def show_hamburger_menu(self, action=None, parameter=''):
         if ApplicationState.get_value('active_popover') == 'hamburger_menu': return
