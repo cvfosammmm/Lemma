@@ -48,7 +48,22 @@ class Popover(PopoverView):
         self.headline = Gtk.Label.new('Bookmarks')
         self.headline.add_css_class('title-2')
         self.headline.set_xalign(0)
-        self.add_widget(self.headline)
+        self.headline.set_margin_bottom(2)
+
+        self.edit_bookmarks_button = Gtk.Button.new_from_icon_name('edit-symbolic')
+        self.edit_bookmarks_button.add_css_class('flat')
+        self.edit_bookmarks_button.set_can_focus(False)
+        self.done_editing_button = MenuBuilder.create_button(_('Done'))
+        edit_button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        edit_button_box.set_margin_top(4)
+        edit_button_box.append(self.edit_bookmarks_button)
+        edit_button_box.append(self.done_editing_button)
+
+        self.header_box = Gtk.CenterBox()
+        self.header_box.add_css_class('header-box')
+        self.header_box.set_start_widget(self.headline)
+        self.header_box.set_end_widget(edit_button_box)
+        self.add_widget(self.header_box)
 
         for i in range(9):
             title_label = Gtk.Label()
@@ -118,14 +133,6 @@ class Popover(PopoverView):
         self.add_widget(self.empty_state)
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
-
-        self.edit_bookmarks_button = MenuBuilder.create_button(_('Edit Bookmarks'), icon_name='edit-symbolic')
-        self.register_button_for_keyboard_navigation(self.edit_bookmarks_button)
-        self.add_widget(self.edit_bookmarks_button)
-
-        self.done_editing_button = MenuBuilder.create_button(_('Done Editing'), icon_name='check-plain-symbolic')
-        self.register_button_for_keyboard_navigation(self.done_editing_button)
-        self.add_widget(self.done_editing_button)
 
         self.bookmark_document_button = MenuBuilder.create_button(_('Bookmark Current Document'))
         self.register_button_for_keyboard_navigation(self.bookmark_document_button)

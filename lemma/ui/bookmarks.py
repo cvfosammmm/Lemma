@@ -71,6 +71,10 @@ class Bookmarks():
             document_title = DocumentRepo.get_stub_by_id(bookmarks[i])['title']
             self.popover.bookmark_button_labels[i].set_text(document_title)
 
+        for i, button in enumerate(self.popover.bookmark_buttons):
+            button.set_sensitive(len(bookmarks) > i)
+            button.set_visible(len(bookmarks) > i)
+
         for i, revealer in enumerate(self.popover.bookmark_revealers):
             revealer.set_reveal_child(len(bookmarks) > i)
 

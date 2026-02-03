@@ -814,7 +814,9 @@ label.explainer-bottom {
 .bookmarks label.title-2 {
     margin-left: 10px;
     margin-top: 10px;
-    margin-bottom: 19px;
+}
+.bookmarks box.header-box {
+    margin-bottom: 17px;
 }
 .bookmarks .drag-handle {
     margin-left: 9px;
