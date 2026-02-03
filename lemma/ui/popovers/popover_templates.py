@@ -28,6 +28,7 @@ class PopoverView(Gtk.Overlay):
     def __init__(self):
         Gtk.Overlay.__init__(self)
         self.set_focusable(True)
+        self.set_limit_events(True)
         self.add_css_class('popover')
 
         self.key_controller = Gtk.EventControllerKey()
