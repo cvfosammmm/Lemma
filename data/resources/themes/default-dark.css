@@ -118,10 +118,10 @@
 @define-color bullets @text;
 
 /* Checkboxes */
-@define-color checkbox_unchecked_outline #bbb;
+@define-color checkbox_unchecked_outline #666;
 @define-color checkbox_unchecked_inner @view_bg_color;
-@define-color checkbox_checked_outline #bbb;
-@define-color checkbox_checked_inner @view_bg_color;
+@define-color checkbox_checked_outline #666;
+@define-color checkbox_checked_inner @text;
 
 /* Scrollbars */
 @define-color scrollbar_bg #333;
