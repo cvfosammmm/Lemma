@@ -70,18 +70,9 @@ class Bookmarks():
         for i in range(len(bookmarks)):
             document_title = DocumentRepo.get_stub_by_id(bookmarks[i])['title']
             self.popover.bookmark_button_labels[i].set_text(document_title)
-            self.popover.bookmark_labels[i].set_text(document_title)
 
-        for i, button in enumerate(self.popover.bookmark_buttons):
-            button.set_sensitive(len(bookmarks) > i and not self.popover.edit_mode)
-            button.set_visible(len(bookmarks) > i and not self.popover.edit_mode)
-
-        for i, button in enumerate(self.popover.bookmark_labels):
-            button.set_sensitive(len(bookmarks) > i and self.popover.edit_mode)
-            button.set_visible(len(bookmarks) > i and self.popover.edit_mode)
-
-        for i, box in enumerate(self.popover.bookmark_button_boxes):
-            box.set_visible(len(bookmarks) > i)
+        for i, revealer in enumerate(self.popover.bookmark_revealers):
+            revealer.set_reveal_child(len(bookmarks) > i)
 
         self.popover.empty_state.set_visible(len(bookmarks) <= 0)
         self.popover.headline.set_visible(len(bookmarks) > 0)
@@ -100,13 +91,11 @@ class Bookmarks():
         self.popover.done_editing_button.set_sensitive(len(workspace.get_bookmarked_document_ids()) > 0 and self.popover.edit_mode)
         self.popover.done_editing_button.set_visible(len(workspace.get_bookmarked_document_ids()) > 0 and self.popover.edit_mode)
 
-        for i, button in enumerate(self.popover.bookmark_remove_buttons):
-            button.set_sensitive(self.popover.edit_mode)
-            button.set_visible(self.popover.edit_mode)
+        for i, revealer in enumerate(self.popover.bookmark_remove_button_revealers):
+            revealer.set_reveal_child(self.popover.edit_mode)
 
-        for i, handle in enumerate(self.popover.bookmark_drag_handles):
-            handle.set_sensitive(self.popover.edit_mode)
-            handle.set_visible(self.popover.edit_mode)
+        for i, revealer in enumerate(self.popover.bookmark_drag_handle_revealers):
+            revealer.set_reveal_child(self.popover.edit_mode)
 
     def on_bookmark_clicked(self, button, button_pos):
         workspace = WorkspaceRepo.get_workspace()

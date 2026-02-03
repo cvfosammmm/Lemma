@@ -37,11 +37,13 @@ class Popover(PopoverView):
 
         self.edit_mode = False
         self.bookmark_drag_handles = []
+        self.bookmark_drag_handle_revealers = []
         self.bookmark_buttons = []
         self.bookmark_button_labels = []
-        self.bookmark_labels = []
         self.bookmark_remove_buttons = []
+        self.bookmark_remove_button_revealers = []
         self.bookmark_button_boxes = []
+        self.bookmark_revealers = []
 
         self.headline = Gtk.Label.new('Bookmarks')
         self.headline.add_css_class('title-2')
@@ -54,6 +56,10 @@ class Popover(PopoverView):
             drag_handle = Gtk.Image.new_from_icon_name('drag-handle-symbolic')
             drag_handle.add_css_class('drag-handle')
             drag_handle.set_cursor_from_name('grab')
+
+            drag_handle_revealer = Gtk.Revealer()
+            drag_handle_revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_RIGHT)
+            drag_handle_revealer.set_child(drag_handle)
 
             shortcut_label = Gtk.Label.new(_('Alt') + '+' + str(i + 1))
             shortcut_label.add_css_class('shortcut')
@@ -79,20 +85,29 @@ class Popover(PopoverView):
             close_button.add_css_class('flat')
             close_button.set_can_focus(False)
 
-            button_box_outer = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-            button_box_outer.append(drag_handle)
-            button_box_outer.append(button)
-            button_box_outer.append(label)
-            button_box_outer.append(close_button)
+            close_button_revealer = Gtk.Revealer()
+            close_button_revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_LEFT)
+            close_button_revealer.set_child(close_button)
 
-            self.add_widget(button_box_outer)
+            button_box_outer = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+            button_box_outer.append(drag_handle_revealer)
+            button_box_outer.append(button)
+            button_box_outer.append(close_button_revealer)
+
+            revealer = Gtk.Revealer()
+            revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_DOWN)
+            revealer.set_child(button_box_outer)
+
+            self.add_widget(revealer)
 
             self.bookmark_drag_handles.append(drag_handle)
+            self.bookmark_drag_handle_revealers.append(drag_handle_revealer)
             self.bookmark_buttons.append(button)
             self.bookmark_button_labels.append(title_label)
-            self.bookmark_labels.append(label)
             self.bookmark_remove_buttons.append(close_button)
+            self.bookmark_remove_button_revealers.append(close_button_revealer)
             self.bookmark_button_boxes.append(button_box_outer)
+            self.bookmark_revealers.append(revealer)
 
         self.empty_state = Adw.StatusPage()
         self.empty_state.set_icon_name('library-symbolic')
