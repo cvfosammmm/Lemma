@@ -142,6 +142,17 @@ class Popover(PopoverView):
         self.register_button_for_keyboard_navigation(self.unbookmark_document_button)
         self.add_widget(self.unbookmark_document_button)
 
+    def on_keypress(self, controller, keyval, keycode, state):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+
+        if keyval == Gdk.keyval_from_name('0'):
+            if state & modifiers == Gdk.ModifierType.ALT_MASK:
+                UseCases.hide_popovers()
+
+                return True
+
+        return super().on_keypress(controller, keyval, keycode, state)
+
     def on_popup(self):
         self.edit_mode = False
 

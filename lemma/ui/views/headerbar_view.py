@@ -80,7 +80,7 @@ class HeaderBarRight(Gtk.WindowHandle):
 
         self.bookmarks_button = Gtk.Button.new_from_icon_name('library-symbolic')
         self.bookmarks_button.set_can_focus(False)
-        self.bookmarks_button.set_tooltip_text(_('Bookmarks'))
+        self.bookmarks_button.set_tooltip_text(_('Bookmarks') + ' (' + _('Alt') + '+0)')
         self.bookmarks_button.add_css_class('flat')
         self.bookmarks_button.set_action_name('win.show-bookmarks')
 

@@ -97,6 +97,7 @@ class ShortcutControllerApp(ShortcutController):
         self.add_with_callback('F10', self.application.actions.actions['show-hamburger-menu'].activate)
         self.add_with_callback('F12', self.application.actions.actions['show-document-menu'].activate)
 
+        self.add_with_callback('<Alt>0', self.application.actions.actions['show-bookmarks'].activate)
         for i in range(1, 10):
             self.add_with_callback('<Alt>' + str(i), self.activate_bookmark, i)
 
