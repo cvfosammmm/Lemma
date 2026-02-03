@@ -56,6 +56,7 @@ class Popover(PopoverView):
         self.done_editing_button = MenuBuilder.create_button(_('Done'))
         edit_button_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         edit_button_box.set_margin_top(4)
+        edit_button_box.set_margin_end(1)
         edit_button_box.append(self.edit_bookmarks_button)
         edit_button_box.append(self.done_editing_button)
 
