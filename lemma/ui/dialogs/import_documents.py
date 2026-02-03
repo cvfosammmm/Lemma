@@ -100,8 +100,8 @@ class Dialog(object):
             row.button.connect('clicked', self.remove_file_from_list)
             self.view.list.append(row)
 
-        self.view.submit_button.set_sensitive(True)
-        self.view.drop_stack.set_visible_child_name('files')
+            self.view.submit_button.set_sensitive(True)
+            self.view.drop_stack.set_visible_child_name('files')
 
     def remove_file_from_list(self, button):
         row = button.get_parent().get_parent()
