@@ -31,25 +31,22 @@ class CursorState():
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
         MessageBus.subscribe(self, 'app_state_changed')
 
-        self.update()
-
-    def animate(self):
-        messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages:
-            self.update()
-
-        if 'app_state_changed' in messages:
-            self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
-            self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
-            self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
-
-    @timer.timer
-    def update(self):
         self.update_tags_and_link_at_cursor()
         self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
         self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
 
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages:
+            self.update_tags_and_link_at_cursor()
+
+        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages or 'app_state_changed' in messages:
+            self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
+            self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
+            self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
+
+    @timer.timer
     def update_tags_and_link_at_cursor(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
@@ -67,6 +64,7 @@ class CursorState():
                 else:
                     UseCases.app_state_set_values({'tags_at_cursor': prev_node.tags.copy(), 'link_at_cursor': None})
 
+    @timer.timer
     def update_tag_toggle(self, button, tagname):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
@@ -83,7 +81,7 @@ class CursorState():
 
         if chars_selected and all_tagged:
             button.add_css_class('checked')
-        elif tagname in ApplicationState.get_value('tags_at_cursor'):
+        elif not chars_selected and tagname in ApplicationState.get_value('tags_at_cursor'):
             button.add_css_class('checked')
         else:
             button.remove_css_class('checked')
