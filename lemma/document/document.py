@@ -389,6 +389,11 @@ class Document():
     def get_implicit_x_position(self):
         return self.cursor.implicit_x_position
 
+    def get_cursor_state(self):
+        if 'cursor_state' not in self.query_cache:
+            self.query_cache['cursor_state'] = self.cursor.get_state()
+        return self.query_cache['cursor_state']
+
     def can_undo(self):
         if 'can_undo' not in self.query_cache:
             self.query_cache['can_undo'] = self.command_manager.can_undo()

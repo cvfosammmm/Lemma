@@ -25,7 +25,7 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
+        self.state['cursor_state_before'] = document.get_cursor_state()
 
         layout = document.get_cursor_holding_layout_close_to_xy(self.x, self.y)
 

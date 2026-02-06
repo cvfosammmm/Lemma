@@ -24,7 +24,7 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
+        self.state['cursor_state_before'] = document.get_cursor_state()
 
         document.cursor.set_insert_selection_nodes(self.insert, self.selection_bound)
 

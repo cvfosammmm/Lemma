@@ -24,7 +24,7 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.cursor.get_state()
+        self.state['cursor_state_before'] = document.get_cursor_state()
         self.state['deleted_paragraphs'] = document.ast[self.index_from:self.index_to]
 
         first_paragraph = document.ast[self.index_from]
