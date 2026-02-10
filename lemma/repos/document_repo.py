@@ -34,7 +34,8 @@ class DocumentRepo():
     document_stubs_by_id = dict()
     max_document_id = 0
     saving_schedule = dict()
-    saving_lock = threading.Lock()
+    document_saving_lock = threading.Lock()
+    stub_saving_lock = threading.Lock()
     threads = list()
 
     @timer.timer
@@ -167,13 +168,8 @@ class DocumentRepo():
     def add(document):
         if document.id in DocumentRepo.document_stubs_by_id: return
 
-        DocumentRepo.save_document(document, can_wait=False)
-
         DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
-        pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
-        with open(pathname, 'wb') as filehandle:
-            pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
-
+        DocumentRepo.save_document(document, can_wait=False)
         DocumentRepo.max_document_id = max(document.id, DocumentRepo.max_document_id)
 
     @timer.timer
@@ -195,12 +191,8 @@ class DocumentRepo():
     def update(document):
         if not document.has_changed(DocumentRepo): return
 
-        DocumentRepo.save_document(document, can_wait=True)
-
         DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
-        pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
-        with open(pathname, 'wb') as filehandle:
-            pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
+        DocumentRepo.save_document(document, can_wait=True)
 
     @timer.timer
     def save_document(document, can_wait):
@@ -209,7 +201,11 @@ class DocumentRepo():
         else:
             pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
             xml = document.get_xml()
-            DocumentRepo.write_to_disk(xml, pathname)
+            DocumentRepo.write_document_to_disk(xml, pathname)
+
+            pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
+            stub_file = pickle.dumps(DocumentRepo.document_stubs_by_id[document.id])
+            DocumentRepo.write_stub_to_disk(stub_file, pathname)
 
     def lazy_save_loop():
         ready_to_save = list()
@@ -225,21 +221,28 @@ class DocumentRepo():
 
             pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
             xml = document.get_xml()
-            thread = threading.Thread(target=DocumentRepo.write_to_disk, args=(xml, pathname))
+            thread = threading.Thread(target=DocumentRepo.write_document_to_disk, args=(xml, pathname))
+            thread.start()
+            DocumentRepo.threads.append(thread)
+
+            pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
+            stub_file = pickle.dumps(DocumentRepo.document_stubs_by_id[document.id])
+            thread = threading.Thread(target=DocumentRepo.write_stub_to_disk, args=(stub_file, pathname))
             thread.start()
             DocumentRepo.threads.append(thread)
 
         return True
 
-    @timer.timer
-    def write_to_disk(xml, pathname):
-        DocumentRepo.saving_lock.acquire()
-
-        try: filehandle = open(pathname, 'w')
-        except IOError: pass
-        else:
+    def write_document_to_disk(xml, pathname):
+        DocumentRepo.document_saving_lock.acquire()
+        with open(pathname, 'w') as filehandle:
             filehandle.write(xml)
+        DocumentRepo.document_saving_lock.release()
 
-        DocumentRepo.saving_lock.release()
+    def write_stub_to_disk(stub_file, pathname):
+        DocumentRepo.stub_saving_lock.acquire()
+        with open(pathname, 'wb') as filehandle:
+            filehandle.write(stub_file)
+        DocumentRepo.stub_saving_lock.release()
 
 
