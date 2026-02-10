@@ -19,8 +19,6 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gio, GLib, GObject, Gdk
 
-from urllib.parse import urlparse
-
 from lemma.services.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
 from lemma.ui.dialogs.dialog_locator import DialogLocator
@@ -302,23 +300,7 @@ class Actions(object):
     def on_paste_text(self, clipboard, result):
         text = clipboard.read_text_finish(result)
 
-        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
-        link_at_cursor = ApplicationState.get_value('link_at_cursor')
-
-        if len(text) < 2000:
-            stext = text.strip()
-            parsed_url = urlparse(stext)
-            if parsed_url.scheme in ['http', 'https'] and '.' in parsed_url.netloc:
-                text = xml_helpers.escape(stext)
-                xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
-                UseCases.insert_xml(xml)
-                UseCases.scroll_insert_on_screen(animation_type='default')
-                return
-
-        text = xml_helpers.escape(text)
-        xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
-        UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animation_type='default')
+        UseCases.insert_text(text)
 
     def delete(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()

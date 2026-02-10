@@ -19,6 +19,7 @@ from urllib.parse import urlparse
 import webbrowser
 import os.path
 import time, io
+import re
 from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
@@ -324,6 +325,36 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('keyboard_input')
+
+    @timer.timer
+    def insert_text(text):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+        link_at_cursor = ApplicationState.get_value('link_at_cursor')
+
+        document.start_undoable_action()
+        document.delete_selected_nodes()
+        for line in text.splitlines(keepends=True):
+            xml = xml_helpers.escape(line)
+            xml = re.sub(r'((?:http://|https://)[a-zA-Z0-9\.\/\&\?=\-_#]*)', r'<a href="\1">\1</a>', xml)
+
+            parser = xml_parser.XMLParser()
+            paragraph = parser.parse(xml)[0]
+
+            insert_node = document.get_insert_node()
+            if insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
+                document.insert_paragraph(paragraph, document.ast.index(insert_node.paragraph()))
+            else:
+                document.insert_nodes(paragraph.children)
+        document.scroll_insert_on_screen(ApplicationState.get_value('document_view_height'), animation_type='default')
+        document.update_implicit_x_position()
+        document.end_undoable_action()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
 
     def replace_section(document, node_from, node_to, xml):
         parser = xml_parser.XMLParser()
