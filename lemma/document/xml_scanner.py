@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 from lemma.services.xml_exporter import XMLExporter
-import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
 
@@ -31,15 +30,8 @@ class XMLScanner(object):
 
     @timer.timer
     def update_xml(self):
-        xml = '<head><title>' + xml_helpers.escape(self.document.title) + '</title></head>'
-
-        xml += '<root>'
         for paragraph in self.document.ast:
             if paragraph.xml == None:
                 paragraph.xml = XMLExporter.export_paragraph(paragraph.children, paragraph.style, paragraph.indentation_level, paragraph.state)
-            xml += paragraph.xml
-        xml += '</root>'
-
-        self.document.xml = xml
 
 

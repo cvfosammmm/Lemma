@@ -15,7 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import os.path, os, pickle
+import gi
+gi.require_version('Gtk', '4.0')
+from gi.repository import GObject
+
+import os.path, os, pickle, time
 
 from lemma.document.document import Document
 from lemma.document.ast import Paragraph
@@ -29,6 +33,7 @@ class DocumentRepo():
 
     document_stubs_by_id = dict()
     max_document_id = 0
+    saving_schedule = dict()
 
     @timer.timer
     def init():
@@ -65,6 +70,13 @@ class DocumentRepo():
             DocumentRepo.max_document_id = max(DocumentRepo.document_stubs_by_id)
         else:
             DocumentRepo.max_document_id = 0
+
+        GObject.timeout_add(1000, DocumentRepo.lazy_save_loop)
+
+    def wrap_up():
+        for document_id in list(DocumentRepo.saving_schedule):
+            DocumentRepo.save_document(DocumentRepo.saving_schedule[document_id][0], can_wait=False)
+            del(DocumentRepo.saving_schedule[document_id])
 
     def list():
         return [stub for stub in sorted(DocumentRepo.document_stubs_by_id.values(), key=lambda stub: -stub['last_modified'])]
@@ -111,6 +123,9 @@ class DocumentRepo():
 
     @timer.timer
     def get_by_id(document_id):
+        if document_id in DocumentRepo.saving_schedule:
+            return DocumentRepo.saving_schedule[document_id][0]
+
         pathname = os.path.join(Paths.get_notes_folder(), str(document_id))
         if not os.path.isfile(pathname): return None
 
@@ -144,13 +159,7 @@ class DocumentRepo():
     def add(document):
         if document.id in DocumentRepo.document_stubs_by_id: return
 
-        pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
-        xml = document.xml
-
-        try: filehandle = open(pathname, 'w')
-        except IOError: pass
-        else:
-            filehandle.write(xml)
+        DocumentRepo.save_document(document, can_wait=False)
 
         DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
         pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
@@ -178,17 +187,38 @@ class DocumentRepo():
     def update(document):
         if not document.has_changed(DocumentRepo): return
 
-        pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
-        xml = document.xml
-
-        try: filehandle = open(pathname, 'w')
-        except IOError: pass
-        else:
-            filehandle.write(xml)
+        DocumentRepo.save_document(document, can_wait=True)
 
         DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
         pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
         with open(pathname, 'wb') as filehandle:
             pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
+
+    def lazy_save_loop():
+        ready_to_save = list()
+        for document_id, data in DocumentRepo.saving_schedule.items():
+            if data[0].last_modified > data[1]: return True
+            if time.time() - data[1] < 5: return True
+
+            ready_to_save.append(document_id)
+
+        for document_id in ready_to_save:
+            DocumentRepo.save_document(DocumentRepo.saving_schedule[document_id][0], can_wait=False)
+            del(DocumentRepo.saving_schedule[document_id])
+
+        return True
+
+    @timer.timer
+    def save_document(document, can_wait):
+        if can_wait:
+            DocumentRepo.saving_schedule[document.id] = (document, document.last_modified)
+        else:
+            pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
+            xml = document.get_xml()
+
+            try: filehandle = open(pathname, 'w')
+            except IOError: pass
+            else:
+                filehandle.write(xml)
 
 

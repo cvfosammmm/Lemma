@@ -46,7 +46,6 @@ class Document():
         self.ast = Root()
         self.cursor = Cursor(self, self.ast[0][0], self.ast[0][0])
         self.plaintext = None
-        self.xml = None
         self.links = set()
 
         self.change_flag = dict()
@@ -505,5 +504,17 @@ class Document():
             layout = layout['parent']
 
         return x, y
+
+    @timer.timer
+    def get_xml(self):
+        if 'xml' not in self.query_cache:
+            xml = '<head><title>' + xml_helpers.escape(self.title) + '</title></head>'
+            xml += '<root>'
+            for paragraph in self.ast:
+                xml += paragraph.xml
+            xml += '</root>'
+
+            self.query_cache['xml'] = xml
+        return self.query_cache['xml']
 
 

@@ -79,4 +79,6 @@ if do_time: sys.argv.remove('--time')
 view = application.Application()
 view.run(sys.argv)
 
+DocumentRepo.wrap_up()
+
 if do_time: Timer.print()
