@@ -176,6 +176,13 @@ class DocumentRepo():
     def delete(document_id):
         if document_id not in DocumentRepo.document_stubs_by_id: return
 
+        if document_id in DocumentRepo.saving_schedule:
+            DocumentRepo.document_saving_lock.acquire()
+            DocumentRepo.stub_saving_lock.acquire()
+            del(DocumentRepo.saving_schedule[document_id])
+            DocumentRepo.stub_saving_lock.release()
+            DocumentRepo.document_saving_lock.release()
+
         pathname = os.path.join(Paths.get_notes_folder(), str(document_id))
         try:
             os.remove(pathname)
