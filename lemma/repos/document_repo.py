@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import GObject
 
-import os.path, os, pickle, time
+import os.path, os, pickle, time, threading
 
 from lemma.document.document import Document
 from lemma.document.ast import Paragraph
@@ -34,6 +34,8 @@ class DocumentRepo():
     document_stubs_by_id = dict()
     max_document_id = 0
     saving_schedule = dict()
+    saving_lock = threading.Lock()
+    threads = list()
 
     @timer.timer
     def init():
@@ -73,10 +75,16 @@ class DocumentRepo():
 
         GObject.timeout_add(1000, DocumentRepo.lazy_save_loop)
 
+    @timer.timer
     def wrap_up():
         for document_id in list(DocumentRepo.saving_schedule):
-            DocumentRepo.save_document(DocumentRepo.saving_schedule[document_id][0], can_wait=False)
+            document = DocumentRepo.saving_schedule[document_id][0]
             del(DocumentRepo.saving_schedule[document_id])
+
+            DocumentRepo.save_document(document, can_wait=False)
+
+        for thread in DocumentRepo.threads:
+            thread.join()
 
     def list():
         return [stub for stub in sorted(DocumentRepo.document_stubs_by_id.values(), key=lambda stub: -stub['last_modified'])]
@@ -194,6 +202,15 @@ class DocumentRepo():
         with open(pathname, 'wb') as filehandle:
             pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
 
+    @timer.timer
+    def save_document(document, can_wait):
+        if can_wait:
+            DocumentRepo.saving_schedule[document.id] = (document, document.last_modified)
+        else:
+            pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
+            xml = document.get_xml()
+            DocumentRepo.write_to_disk(xml, pathname)
+
     def lazy_save_loop():
         ready_to_save = list()
         for document_id, data in DocumentRepo.saving_schedule.items():
@@ -203,22 +220,26 @@ class DocumentRepo():
             ready_to_save.append(document_id)
 
         for document_id in ready_to_save:
-            DocumentRepo.save_document(DocumentRepo.saving_schedule[document_id][0], can_wait=False)
+            document = DocumentRepo.saving_schedule[document_id][0]
             del(DocumentRepo.saving_schedule[document_id])
+
+            pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
+            xml = document.get_xml()
+            thread = threading.Thread(target=DocumentRepo.write_to_disk, args=(xml, pathname))
+            thread.start()
+            DocumentRepo.threads.append(thread)
 
         return True
 
     @timer.timer
-    def save_document(document, can_wait):
-        if can_wait:
-            DocumentRepo.saving_schedule[document.id] = (document, document.last_modified)
-        else:
-            pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
-            xml = document.get_xml()
+    def write_to_disk(xml, pathname):
+        DocumentRepo.saving_lock.acquire()
 
-            try: filehandle = open(pathname, 'w')
-            except IOError: pass
-            else:
-                filehandle.write(xml)
+        try: filehandle = open(pathname, 'w')
+        except IOError: pass
+        else:
+            filehandle.write(xml)
+
+        DocumentRepo.saving_lock.release()
 
 
