@@ -19,13 +19,13 @@ from urllib.parse import urlparse
 import webbrowser
 import os.path
 import time, io
-import re
 from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.xml_parser as xml_parser
 import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
+from lemma.services.regex import RegexService
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
@@ -337,7 +337,7 @@ class UseCases():
         document.delete_selected_nodes()
         for line in text.splitlines(keepends=True):
             xml = xml_helpers.escape(line)
-            xml = re.sub(r'((?:http://|https://)[a-zA-Z0-9\.\/\&\?=\-_#]*)', r'<a href="\1">\1</a>', xml)
+            xml = RegexService.get_regex(r'((?:http://|https://)[a-zA-Z0-9\.\/\&\?=\-_#]*)').sub(r'<a href="\1">\1</a>', xml)
 
             parser = xml_parser.XMLParser()
             paragraph = parser.parse(xml)[0]
