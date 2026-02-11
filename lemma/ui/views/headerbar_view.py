@@ -78,12 +78,6 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.set_child(self.box)
 
-        self.bookmarks_button = Gtk.Button.new_from_icon_name('library-symbolic')
-        self.bookmarks_button.set_can_focus(False)
-        self.bookmarks_button.set_tooltip_text(_('Bookmarks') + ' (' + _('Alt') + '+0)')
-        self.bookmarks_button.add_css_class('flat')
-        self.bookmarks_button.set_action_name('win.show-bookmarks')
-
         self.back_button = Gtk.Button.new_from_icon_name('go-previous-symbolic')
         self.back_button.set_tooltip_text('Back (Alt+Left Arrow)')
         self.back_button.set_action_name('win.go-back')
@@ -99,7 +93,6 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.back_forward_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.back_forward_box.append(self.back_button)
         self.back_forward_box.append(self.forward_button)
-        self.back_forward_box.append(self.bookmarks_button)
         self.back_forward_box.add_css_class('buttonbox')
         self.box.append(self.back_forward_box)
 
@@ -112,6 +105,12 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.add_document_button.set_tooltip_text(_('New Document') + ' (' + _('Ctrl') + '+N)')
         self.add_document_button.add_css_class('flat')
 
+        self.bookmarks_button = Gtk.Button.new_from_icon_name('library-symbolic')
+        self.bookmarks_button.set_can_focus(False)
+        self.bookmarks_button.set_tooltip_text(_('Bookmarks') + ' (' + _('Alt') + '+0)')
+        self.bookmarks_button.add_css_class('flat')
+        self.bookmarks_button.set_action_name('win.show-bookmarks')
+
         self.document_menu_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
         self.document_menu_button.set_can_focus(False)
         self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (F12)')
@@ -120,6 +119,7 @@ class HeaderBarRight(Gtk.WindowHandle):
 
         self.add_docmenu_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.add_docmenu_box.append(self.add_document_button)
+        self.add_docmenu_box.append(self.bookmarks_button)
         self.add_docmenu_box.append(self.document_menu_button)
         self.add_docmenu_box.add_css_class('buttonbox')
         self.box.append(self.add_docmenu_box)
