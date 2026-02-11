@@ -36,7 +36,6 @@ class DocumentRepo():
     saving_schedule = dict()
     document_saving_lock = threading.Lock()
     stub_saving_lock = threading.Lock()
-    threads = list()
 
     @timer.timer
     def init():
@@ -84,8 +83,11 @@ class DocumentRepo():
 
             DocumentRepo.save_document(document, can_wait=False)
 
-        for thread in DocumentRepo.threads:
-            thread.join()
+        for thread in threading.enumerate():
+            try:
+                thread.join()
+            except RuntimeError:
+                pass
 
     def list():
         return [stub for stub in sorted(DocumentRepo.document_stubs_by_id.values(), key=lambda stub: -stub['last_modified'])]
@@ -230,13 +232,11 @@ class DocumentRepo():
             xml = document.get_xml()
             thread = threading.Thread(target=DocumentRepo.write_document_to_disk, args=(xml, pathname))
             thread.start()
-            DocumentRepo.threads.append(thread)
 
             pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
             stub_file = pickle.dumps(DocumentRepo.document_stubs_by_id[document.id])
             thread = threading.Thread(target=DocumentRepo.write_stub_to_disk, args=(stub_file, pathname))
             thread.start()
-            DocumentRepo.threads.append(thread)
 
         return True
 
