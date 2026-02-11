@@ -39,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="61" date="2026-2-11">
+            <description translatable="no">
+                <p>Faster autosave, ...</p>
+            </description>
+        </release>
         ​<release version="60" date="2026-2-6">
             <description translatable="no">
                 <p>New bookmarks dialog, ...</p>
