@@ -145,6 +145,7 @@ class ToolBars():
     def update_button_visibility(self):
         self.toolbar.toolbar_main.bold_button.set_visible(Settings.get_value('button_visible_bold'))
         self.toolbar.toolbar_main.italic_button.set_visible(Settings.get_value('button_visible_italic'))
+        self.toolbar.toolbar_main.verbatim_button.set_visible(Settings.get_value('button_visible_verbatim'))
         self.toolbar.toolbar_main.highlight_button.set_visible(Settings.get_value('button_visible_highlight'))
         self.toolbar.toolbar_main.indent_less_button.set_visible(Settings.get_value('button_visible_decrease_indent'))
         self.toolbar.toolbar_main.indent_more_button.set_visible(Settings.get_value('button_visible_increase_indent'))
@@ -154,7 +155,7 @@ class ToolBars():
         self.toolbar.toolbar_main.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
         self.toolbar.toolbar_main.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
 
-        tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic') or Settings.get_value('button_visible_highlight')
+        tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic') or Settings.get_value('button_visible_verbatim') or Settings.get_value('button_visible_highlight')
         self.toolbar.toolbar_main.tag_buttons_separator.set_visible(tag_buttons_visible)
 
         list_buttons_visible = Settings.get_value('button_visible_ul') or Settings.get_value('button_visible_ol') or Settings.get_value('button_visible_cl')

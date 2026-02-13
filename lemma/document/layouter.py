@@ -411,6 +411,7 @@ class Layouter(object):
         if self.paragraph_style.startswith('h'):
             return self.paragraph_style
 
+        if 'verbatim' in node.tags: return 'mono'
         if 'bold' in node.tags and 'italic' not in node.tags: return 'bold'
         if 'bold' in node.tags and 'italic' in node.tags: return 'bolditalic'
         if 'bold' not in node.tags and 'italic' in node.tags: return 'italic'

@@ -33,6 +33,7 @@ class PageToolbars(object):
         self.button_list.append([])
         self.button_list[-1].append(['bold-text-symbolic', 'button_visible_bold', 'Bold'])
         self.button_list[-1].append(['italic-text-symbolic', 'button_visible_italic', 'Italic'])
+        self.button_list[-1].append(['verbatim-text-symbolic', 'button_visible_verbatim', 'Verbatim'])
         self.button_list[-1].append(['highlight-text-symbolic', 'button_visible_highlight', 'Highlight'])
         self.button_list.append([])
         self.button_list[-1].append(['view-list-bullet-symbolic', 'button_visible_ul', 'Bullet List'])

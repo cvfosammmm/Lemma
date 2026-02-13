@@ -73,6 +73,7 @@ class HTMLParser(HTMLParserLib):
 
         if tag == 'strong': self.tags.add('bold')
         if tag == 'em': self.tags.add('italic')
+        if tag == 'code': self.tags.add('verbatim')
         if tag == 'mark': self.tags.add('highlight')
         if tag == 'a':
             for name, value in attrs:
@@ -136,6 +137,7 @@ class HTMLParser(HTMLParserLib):
 
         if tag == 'strong': self.tags.discard('bold')
         if tag == 'em': self.tags.discard('italic')
+        if tag == 'code': self.tags.discard('verbatim')
         if tag == 'mark': self.tags.discard('highlight')
         if tag == 'a': self.link_target = None
         if tag == 'msubsup':

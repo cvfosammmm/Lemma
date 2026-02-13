@@ -124,6 +124,11 @@ class ToolBarMain(Gtk.Box):
         self.italic_button.set_can_focus(False)
         self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
 
+        self.verbatim_button = Gtk.Button.new_from_icon_name('verbatim-text-symbolic')
+        self.verbatim_button.set_action_name('win.toggle-verbatim')
+        self.verbatim_button.set_can_focus(False)
+        self.verbatim_button.set_tooltip_text(_('Verbatim') + ' (Ctrl+E)')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.add_css_class('highlight-tag-button')
         box.append(Gtk.Image.new_from_icon_name('highlight-text-symbolic'))
@@ -138,6 +143,7 @@ class ToolBarMain(Gtk.Box):
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.bold_button)
         box.append(self.italic_button)
+        box.append(self.verbatim_button)
         box.append(self.highlight_button)
         self.append(box)
 

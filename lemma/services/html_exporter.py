@@ -118,6 +118,8 @@ class HTMLExporter(object):
             text = '<em>' + text + '</em>'
         if 'bold' in node.tags:
             text = '<strong>' + text + '</strong>'
+        if 'verbatim' in node.tags:
+            text = '<code>' + text + '</code>'
         if 'highlight' in node.tags:
             text = '<mark>' + text + '</mark>'
         if node.link != None:

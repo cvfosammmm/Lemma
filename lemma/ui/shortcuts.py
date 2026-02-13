@@ -120,6 +120,7 @@ class ShortcutControllerDocument(ShortcutController):
 
         self.add_with_callback('<Control>b', self.application.actions.actions['toggle-bold'].activate)
         self.add_with_callback('<Control>i', self.application.actions.actions['toggle-italic'].activate)
+        self.add_with_callback('<Control>e', self.application.actions.actions['toggle-verbatim'].activate)
         self.add_with_callback('<Control>u', self.application.actions.actions['toggle-highlight'].activate)
         self.add_with_callback('<Control>l', self.application.actions.actions['show-link-popover'].activate)
         self.add_with_callback('<Control>minus', self.application.actions.actions['subscript'].activate)

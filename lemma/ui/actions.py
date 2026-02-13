@@ -69,6 +69,7 @@ class Actions(object):
         self.add_simple_action('toggle-checkbox', self.toggle_checkbox)
         self.add_simple_action('toggle-bold', self.toggle_bold)
         self.add_simple_action('toggle-italic', self.toggle_italic)
+        self.add_simple_action('toggle-verbatim', self.toggle_verbatim)
         self.add_simple_action('toggle-highlight', self.toggle_highlight)
 
         self.add_simple_action('decrease-indent', self.decrease_indent)
@@ -160,6 +161,7 @@ class Actions(object):
         self.actions['toggle-checkbox'].set_enabled(document != None)
         self.actions['toggle-bold'].set_enabled(document != None)
         self.actions['toggle-italic'].set_enabled(document != None)
+        self.actions['toggle-verbatim'].set_enabled(document != None)
         self.actions['toggle-highlight'].set_enabled(document != None)
         self.actions['decrease-indent'].set_enabled(document != None)
         self.actions['increase-indent'].set_enabled(document != None)
@@ -377,6 +379,15 @@ class Actions(object):
             UseCases.toggle_tag('italic')
         else:
             UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
+
+    def toggle_verbatim(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document.has_selection():
+            UseCases.toggle_tag('verbatim')
+        else:
+            UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'verbatim'})
 
     def toggle_highlight(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()

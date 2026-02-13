@@ -34,6 +34,7 @@ class CursorState():
         self.update_tags_and_link_at_cursor()
         self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
         self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
+        self.update_tag_toggle(self.toolbar.toolbar_main.verbatim_button, 'verbatim')
         self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
 
     def animate(self):
@@ -44,6 +45,7 @@ class CursorState():
         if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages or 'app_state_changed' in messages:
             self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
             self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
+            self.update_tag_toggle(self.toolbar.toolbar_main.verbatim_button, 'verbatim')
             self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
 
     @timer.timer

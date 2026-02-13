@@ -76,6 +76,8 @@ class XMLParser(object):
             self.current_tags[self.level].add('italic')
         if tag == 'strong':
             self.current_tags[self.level].add('bold')
+        if tag == 'code':
+            self.current_tags[self.level].add('verbatim')
         if tag == 'mark':
             self.current_tags[self.level].add('highlight')
 
@@ -135,6 +137,8 @@ class XMLParser(object):
             self.current_tags[self.level].discard('italic')
         if tag == 'strong':
             self.current_tags[self.level].discard('bold')
+        if tag == 'code':
+            self.current_tags[self.level].discard('verbatim')
         if tag == 'mark':
             self.current_tags[self.level].discard('highlight')
 
