@@ -436,7 +436,7 @@ class DocumentViewController():
                     else:
                         UseCases.add_newline()
                 else:
-                    UseCases.insert_xml('\n')
+                    UseCases.im_commit('\n')
                     UseCases.scroll_insert_on_screen(animation_type='default')
             case ('backspace', _):
                 UseCases.backspace()

@@ -330,9 +330,6 @@ class UseCases():
     def insert_text(text):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
-        link_at_cursor = ApplicationState.get_value('link_at_cursor')
-
         document.start_undoable_action()
         document.delete_selected_nodes()
         for line in text.splitlines(keepends=True):
@@ -420,7 +417,12 @@ class UseCases():
         paragraph_style = insert_paragraph.style
         indentation_level = insert_paragraph.indentation_level
 
-        document.insert_nodes([Node('eol')])
+        node = Node('eol')
+        if ApplicationState.get_value('tags_at_cursor') != None:
+            node.tags = ApplicationState.get_value('tags_at_cursor').copy()
+        if ApplicationState.get_value('link_at_cursor') != None:
+            node.link = ApplicationState.get_value('link_at_cursor').copy()
+        document.insert_nodes([node])
 
         if paragraph_style in ['ul', 'ol', 'cl']:
             paragraph = document.get_insert_node().paragraph()

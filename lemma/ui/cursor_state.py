@@ -56,7 +56,11 @@ class CursorState():
             UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
         else:
             node = document.get_insert_node()
-            prev_node = node.prev_in_parent()
+
+            if node.parent.type == 'paragraph':
+                prev_node = node.prev_no_descent()
+            else:
+                prev_node = node.prev_in_parent()
 
             if node == None or prev_node == None:
                 UseCases.app_state_set_values({'tags_at_cursor': set(), 'link_at_cursor': None})
