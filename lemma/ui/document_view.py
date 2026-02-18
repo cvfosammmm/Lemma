@@ -88,7 +88,7 @@ class DocumentView():
 
                 do_draw = True
 
-        scrolling_position_x, scrolling_position_y = self.document.get_current_scrolling_offsets()
+        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
         content_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
 
         self.view.scrollbar_vertical.set_content_height(content_height)

@@ -70,7 +70,7 @@ class DocumentTitle():
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document != None:
-            scrolling_position_x, scrolling_position_y = document.get_current_scrolling_offsets()
+            scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
             if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
                 self.scrolling_position_x = scrolling_position_x
                 self.scrolling_position_y = scrolling_position_y
@@ -93,7 +93,7 @@ class DocumentTitle():
         if document == None:
             self.view.set_offset_y(0)
         else:
-            offset = math.floor(document.get_current_scrolling_offsets()[1])
+            offset = math.floor(self.application.scrolling.get_current_scrolling_offsets()[1])
             self.view.set_offset_y(offset)
         self.document_view.queue_allocate()
 
@@ -113,7 +113,7 @@ class DocumentTitle():
             self.validate_title()
             self.view.button_revealer.set_reveal_child(True)
             UseCases.app_state_set_value('title_buttons_height', 50)
-            UseCases.scroll_to_xy(0, 0, animation_type='default')
+            self.application.scrolling.scroll_to_xy(0, 0, animation_type='default')
 
     def on_content_focus_in(self, controller):
         self.cancel()

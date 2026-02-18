@@ -75,7 +75,7 @@ class Autocomplete():
         if 'keyboard_input' in messages:
             self.on_keyboard_input()
 
-        scrolling_position_x, scrolling_position_y = document.get_current_scrolling_offsets()
+        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
         if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
             self.scrolling_position_x = scrolling_position_x
             self.scrolling_position_y = scrolling_position_y
@@ -175,7 +175,7 @@ class Autocomplete():
         insert = document.get_insert_node()
         insert_x, insert_y = document.get_absolute_xy(insert.layout)
         content_offset = LayoutInfo.get_normal_document_offset()
-        scrolling_offset_y = document.get_current_scrolling_offsets()[1]
+        scrolling_offset_y = self.application.scrolling.get_current_scrolling_offsets()[1]
         insert_y += content_offset - scrolling_offset_y
         insert_height = insert.layout['height']
         insert_x += LayoutInfo.get_document_padding_left()
@@ -272,7 +272,6 @@ class Autocomplete():
         insert = document.get_insert_node()
         xml = AutocompleteDB.get_xml(self.view.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
-        UseCases.scroll_insert_on_screen(animation_type='default')
 
         self.deactivate()
 

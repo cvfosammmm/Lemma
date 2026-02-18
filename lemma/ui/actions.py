@@ -291,7 +291,6 @@ class Actions(object):
 
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def on_paste_image(self, clipboard, result):
         texture = clipboard.read_texture_finish(result)
@@ -330,7 +329,6 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def superscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -343,7 +341,6 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        UseCases.scroll_insert_on_screen(animation_type='default')
 
     def set_paragraph_style(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
@@ -438,9 +435,34 @@ class Actions(object):
 
     def show_link_popover(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
+        self.application.scrolling.scroll_insert_on_screen(animation_type=None)
 
-        UseCases.scroll_insert_on_screen(animation_type=None)
-        UseCases.show_link_popover(self.main_window)
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
+
+        insert = document.get_insert_node()
+        x, y = document.get_absolute_xy(insert.layout)
+        x -= scrolling_position_x
+        y -= scrolling_position_y
+        document_view = self.main_window.document_view
+        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
+        x += document_view_allocation.origin.x
+        y += document_view_allocation.origin.y
+        x += LayoutInfo.get_document_padding_left()
+        y += LayoutInfo.get_normal_document_offset()
+        fontname = insert.layout['fontname']
+        padding_top = TextShaper.get_padding_top(fontname)
+        padding_bottom = TextShaper.get_padding_bottom(fontname)
+        y += insert.layout['height'] - padding_top - padding_bottom
+
+        orientation = 'bottom'
+        if y + 260 > document_view_allocation.size.height:
+            orientation = 'top'
+            y -= insert.layout['height'] - padding_top - padding_bottom
+
+        if not document.has_selection() and insert.is_inside_link():
+            UseCases.select_section(*insert.link_bounds())
+        UseCases.show_popover('link_autocomplete', x, y, orientation)
 
     def copy_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()

@@ -25,12 +25,10 @@ from lemma.document.layouter import Layouter
 from lemma.document.plaintext_scanner import PlaintextScanner
 from lemma.services.character_db import CharacterDB
 from lemma.document.links_scanner import LinksScanner
-from lemma.document.clipping import Clipping
 from lemma.document.xml_scanner import XMLScanner
 from lemma.services.ast_validator import ASTValidator
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.layout_info import LayoutInfo
-from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
 
 
@@ -39,7 +37,6 @@ class Document():
     def __init__(self, id=None):
         self.last_modified = time.time()
         self.last_cursor_movement = time.time()
-        self.last_scrolling_movement = time.time()
 
         self.id = id
         self.title = ''
@@ -53,7 +50,6 @@ class Document():
 
         self.command_manager = CommandManager(self)
         self.layouter = Layouter(self)
-        self.clipping = Clipping(self)
         self.plaintext_scanner = PlaintextScanner(self)
         self.links_scanner = LinksScanner(self)
         self.xml_scanner = XMLScanner(self)
@@ -213,38 +209,6 @@ class Document():
     def update_implicit_x_position(self):
         self.command_manager.add_command('update_implicit_x_position')
 
-    def scroll_insert_on_screen(self, window_height, animation_type=None):
-        insert_node = self.get_insert_node()
-        insert_position = self.get_absolute_xy(insert_node.layout)
-
-        content_offset = LayoutInfo.get_normal_document_offset()
-        insert_y = insert_position[1] + content_offset
-        insert_height = insert_node.layout['height']
-        scrolling_offset_y = self.get_current_scrolling_offsets()[1]
-        content_height = self.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
-
-        if window_height <= 0:
-            new_position = (0, 0)
-        elif self.get_absolute_xy(self.get_line_layout_at_y(insert_position[1]))[1] == 0:
-            new_position = (0, 0)
-        elif insert_y < scrolling_offset_y:
-            if insert_height > window_height:
-                new_position = (0, insert_y - window_height + insert_height)
-            else:
-                new_position = (0, insert_y)
-        elif insert_position[1] >= self.get_height() - insert_height and content_height >= window_height:
-            new_position = (0, self.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height)
-        elif insert_y > scrolling_offset_y - insert_height + window_height:
-            new_position = (0, insert_y - window_height + insert_height)
-        else:
-            new_position = self.clipping.get_target_offsets()
-
-        if new_position[0] != self.clipping.target_x or new_position[1] != self.clipping.target_y:
-            self.command_manager.add_command('scroll_to_xy', *new_position, animation_type)
-
-    def scroll_to_xy(self, x, y, animation_type=None):
-        self.command_manager.add_command('scroll_to_xy', x, y, animation_type)
-
     def undo(self):
         self.command_manager.undo()
 
@@ -261,10 +225,6 @@ class Document():
 
     def update_last_cursor_movement(self):
         self.last_cursor_movement = time.time()
-        self.query_cache = dict()
-
-    def update_last_scrolling_movement(self):
-        self.last_scrolling_movement = time.time()
         self.query_cache = dict()
 
     @timer.timer
@@ -410,9 +370,6 @@ class Document():
 
     def get_width(self):
         return self.ast[0].layout['width']
-
-    def get_current_scrolling_offsets(self):
-        return self.clipping.get_current_offsets()
 
     def get_link_at_xy(self, x, y):
         layout = self.get_leaf_layout_at_xy(x, y)

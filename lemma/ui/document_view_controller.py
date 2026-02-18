@@ -211,13 +211,13 @@ class DocumentViewController():
         if y < 0:
             new_x = self.model.scrolling_position_x
             new_y = max(0, self.model.scrolling_position_y + y)
-            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
+            self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - ApplicationState.get_value('document_view_height') > 0:
             height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
             new_x = self.model.scrolling_position_x
             new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.scrolling_position_y + y - ApplicationState.get_value('document_view_height'))
-            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
+            self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
@@ -273,7 +273,6 @@ class DocumentViewController():
 
             UseCases.move_cursor_to_xy(x, y)
             UseCases.insert_xml(xml)
-            UseCases.scroll_insert_on_screen(animation_type='default')
 
         elif isinstance(value, Gdk.Texture):
             data = value.save_to_png_bytes().unref_to_data()
@@ -308,13 +307,13 @@ class DocumentViewController():
         if y < 56:
             new_x = self.model.scrolling_position_x
             new_y = max(0, self.model.scrolling_position_y + y - 56)
-            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
+            self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - ApplicationState.get_value('document_view_height') > -56:
             height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
             new_x = self.model.scrolling_position_x
             new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.scrolling_position_y + y - ApplicationState.get_value('document_view_height') + 56)
-            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
+            self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         return True
 
@@ -337,17 +336,17 @@ class DocumentViewController():
             x = min(0, max(0, self.model.scrolling_position_x + dx))
             y = min(max(0, height - ApplicationState.get_value('document_view_height')), max(0, self.model.scrolling_position_y + dy))
 
-            UseCases.scroll_to_xy(x, y, animation_type=None)
+            self.model.application.scrolling.scroll_to_xy(x, y, animation_type=None)
         return
 
     def on_decelerate(self, controller, vel_x, vel_y):
         if abs(vel_x) > 0 and abs(vel_y / vel_x) >= 1: vel_x = 0
         if abs(vel_y) > 0 and abs(vel_x / vel_y) >  1: vel_y = 0
 
-        UseCases.decelerate_scrolling(self.model.scrolling_position_x, self.model.scrolling_position_y, vel_x, vel_y)
+        self.model.application.scrolling.decelerate(self.model.scrolling_position_x, self.model.scrolling_position_y, vel_x, vel_y)
 
     def on_scrollbar_drag(self, widget, new_y):
-        UseCases.scroll_to_xy(0, new_y, animation_type=None)
+        self.model.application.scrolling.scroll_to_xy(0, new_y, animation_type=None)
 
     def on_keypress_content(self, controller, keyval, keycode, keyboard_state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
@@ -437,7 +436,6 @@ class DocumentViewController():
                         UseCases.add_newline()
                 else:
                     UseCases.im_commit('\n')
-                    UseCases.scroll_insert_on_screen(animation_type='default')
             case ('backspace', _):
                 UseCases.backspace()
             case ('delete', _):

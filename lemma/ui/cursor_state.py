@@ -32,21 +32,11 @@ class CursorState():
         MessageBus.subscribe(self, 'app_state_changed')
 
         self.update_tags_and_link_at_cursor()
-        self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
-        self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
-        self.update_tag_toggle(self.toolbar.toolbar_main.verbatim_button, 'verbatim')
-        self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
 
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages:
             self.update_tags_and_link_at_cursor()
-
-        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages or 'app_state_changed' in messages:
-            self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
-            self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
-            self.update_tag_toggle(self.toolbar.toolbar_main.verbatim_button, 'verbatim')
-            self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
 
     @timer.timer
     def update_tags_and_link_at_cursor(self):
@@ -69,27 +59,5 @@ class CursorState():
                     UseCases.app_state_set_values({'tags_at_cursor': prev_node.tags.copy(), 'link_at_cursor': node.link})
                 else:
                     UseCases.app_state_set_values({'tags_at_cursor': prev_node.tags.copy(), 'link_at_cursor': None})
-
-    @timer.timer
-    def update_tag_toggle(self, button, tagname):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document == None: return
-
-        chars_selected = False
-        all_tagged = True
-        if document.has_selection():
-            selected_nodes = document.get_selected_nodes()
-            for node in (node for node in selected_nodes if node.type == 'char'):
-                chars_selected = True
-                if tagname not in node.tags:
-                    all_tagged = False
-                    break
-
-        if chars_selected and all_tagged:
-            button.add_css_class('checked')
-        elif not chars_selected and tagname in ApplicationState.get_value('tags_at_cursor'):
-            button.add_css_class('checked')
-        else:
-            button.remove_css_class('checked')
 
 
