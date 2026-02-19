@@ -19,24 +19,23 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.services.message_bus import MessageBus
 import lemma.ui.popovers.document_menu as document_menu
 from lemma.ui.document_context_menu import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
 import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_autocomplete as link_autocomplete
 import lemma.ui.popovers.bookmarks as bookmarks
-from lemma.application_state.application_state import ApplicationState
-from lemma.use_cases.use_cases import UseCases
-import lemma.services.timer as timer
 
 
 class PopoverManager():
 
-    def __init__(self, main_window):
+    def __init__(self, main_window, application):
         self.current_popover_name = None
         self.prev_focus_widget = None
         self.main_window = main_window
+        self.headerbar = main_window.headerbar
+        self.toolbar = main_window.toolbar
+        self.application = application
         self.popoverlay = main_window.popoverlay
         self.inbetween = main_window.inbetween
 
@@ -53,38 +52,26 @@ class PopoverManager():
         self.inbetween.set_can_target(False)
 
         self.popovers = dict()
-        self.popovers["document_menu"] = document_menu.Popover()
-        self.popovers["edit_menu"] = EditMenu()
-        self.popovers["hamburger_menu"] = hamburger_menu.Popover()
-        self.popovers["paragraph_style"] = paragraph_style.Popover()
-        self.popovers["link_autocomplete"] = link_autocomplete.Popover()
-        self.popovers["bookmarks"] = bookmarks.Popover()
+        self.popovers["document_menu"] = document_menu.Popover(self)
+        self.popovers["edit_menu"] = EditMenu(self)
+        self.popovers["hamburger_menu"] = hamburger_menu.Popover(self)
+        self.popovers["paragraph_style"] = paragraph_style.Popover(self)
+        self.popovers["link_autocomplete"] = link_autocomplete.Popover(self)
+        self.popovers["bookmarks"] = bookmarks.Popover(self)
 
-        MessageBus.subscribe(self, 'history_changed')
-        MessageBus.subscribe(self, 'document_changed')
-        MessageBus.subscribe(self, 'mode_set')
-        MessageBus.subscribe(self, 'app_state_changed')
+    def show_popover(self, name, x, y, orientation='bottom'):
+        if name == self.current_popover_name: return
 
-        self.update()
+        self.popdown()
+        self.popup(name, x, y, orientation)
+        self.update_popover_buttons()
+
+    def hide_popovers(self):
+        self.popdown()
+        self.update_popover_buttons()
 
     def animate(self):
-        messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_changed' in messages or 'mode_set' in messages or 'app_state_changed' in messages:
-            self.update()
-
-    @timer.timer
-    def update(self):
-        name = ApplicationState.get_value('active_popover')
-
-        if name == None:
-            self.popdown()
-        else:
-            if name != self.current_popover_name:
-                self.popdown()
-
-                x, y = ApplicationState.get_value('popover_position')
-                orientation = ApplicationState.get_value('popover_orientation')
-                self.popup(name, x, y, orientation)
+        pass
 
     def popup(self, name, x, y, orientation):
         popover = self.popovers[name]
@@ -157,6 +144,20 @@ class PopoverManager():
 
         popover.on_popdown()
 
+    def update_popover_buttons(self):
+        button_popover_rel = list()
+        button_popover_rel.append([self.headerbar.hb_left.hamburger_menu_button, 'hamburger_menu'])
+        button_popover_rel.append([self.headerbar.hb_right.bookmarks_button, 'bookmarks'])
+        button_popover_rel.append([self.headerbar.hb_right.document_menu_button, 'document_menu'])
+        button_popover_rel.append([self.toolbar.toolbar_main.paragraph_style_menu_button, 'paragraph_style'])
+        button_popover_rel.append([self.toolbar.toolbar_right.edit_menu_button, 'edit_menu'])
+
+        for button, popover_name in button_popover_rel:
+            if self.current_popover_name == popover_name:
+                button.add_css_class('active')
+            else:
+                button.remove_css_class('active')
+
     def remember_focus_widget(self):
         widget = self.main_window
         while widget.get_focus_child() != None:
@@ -164,6 +165,6 @@ class PopoverManager():
         self.prev_focus_widget = widget
 
     def on_click_inbetween(self, controller, n_press, x, y):
-        UseCases.hide_popovers()
+        self.hide_popovers()
 
 

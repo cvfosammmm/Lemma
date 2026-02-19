@@ -29,7 +29,6 @@ from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.services.color_manager import ColorManager
 from lemma.ui.shortcuts import ShortcutController
-from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.paths import Paths
 import lemma.services.timer as timer

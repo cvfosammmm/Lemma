@@ -19,7 +19,6 @@ import os.path
 
 from lemma.services.message_bus import MessageBus
 from lemma.services.settings import Settings
-from lemma.application_state.application_state import ApplicationState
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer

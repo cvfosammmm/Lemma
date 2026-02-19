@@ -24,15 +24,15 @@ import os
 from lemma.ui.popovers.popover_templates import PopoverView
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
-from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.xml_helpers as xml_helpers
 
 
 class Popover(PopoverView):
 
-    def __init__(self):
-        PopoverView.__init__(self)
+    def __init__(self, manager):
+        PopoverView.__init__(self, manager)
+        self.application = manager.application
 
         self.current_values = dict()
         self.bounds = None
@@ -78,8 +78,6 @@ class Popover(PopoverView):
         self.listbox.connect('selected-rows-changed', self.on_selected_rows_changed)
 
     def on_popup(self):
-        UseCases.app_state_set_value('document_view_hide_cursor_on_unfocus', False)
-
         self.init_current_values()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -103,7 +101,7 @@ class Popover(PopoverView):
         self.update_list()
 
     def on_popdown(self):
-        UseCases.app_state_set_value('document_view_hide_cursor_on_unfocus', True)
+        pass
 
     def init_current_values(self):
         self.current_values['link_target'] = ''
@@ -113,7 +111,7 @@ class Popover(PopoverView):
 
         if keyval == Gdk.keyval_from_name('Escape'):
             if state & modifiers == 0:
-                UseCases.hide_popovers()
+                self.manager.hide_popovers()
                 return True
 
         if keyval == Gdk.keyval_from_name('Up'):
@@ -196,7 +194,7 @@ class Popover(PopoverView):
 
         if self.current_values['link_target'] != '':
             if self.bounds == None:
-                tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
+                tags_at_cursor = self.application.toolbars.tags_at_cursor
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
@@ -205,7 +203,7 @@ class Popover(PopoverView):
         elif self.bounds != None:
             UseCases.set_link(document, self.bounds, None)
 
-        UseCases.hide_popovers()
+        self.manager.hide_popovers()
 
 
 class ACItem(Gtk.ListBoxRow):

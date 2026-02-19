@@ -25,7 +25,6 @@ import time
 import lemma.services.xml_helpers as xml_helpers
 from lemma.widgets.image import Image
 from lemma.repos.workspace_repo import WorkspaceRepo
-from lemma.application_state.application_state import ApplicationState
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
 from lemma.services.layout_info import LayoutInfo
@@ -213,10 +212,10 @@ class DocumentViewController():
             new_y = max(0, self.model.scrolling_position_y + y)
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
-        if y - ApplicationState.get_value('document_view_height') > 0:
-            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
+        if y - self.model.document_view_height > 0:
+            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
             new_x = self.model.scrolling_position_x
-            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.scrolling_position_y + y - ApplicationState.get_value('document_view_height'))
+            new_y = min(max(0, height - self.model.document_view_height), self.model.scrolling_position_y + y - self.model.document_view_height)
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         x -= LayoutInfo.get_document_padding_left()
@@ -260,16 +259,13 @@ class DocumentViewController():
                     UseCases.add_image(image)
 
         elif isinstance(value, str):
-            tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
-            link_at_cursor = ApplicationState.get_value('link_at_cursor')
             text = value
 
             if len(text) < 2000 and urlparse(text.strip()).scheme in ['http', 'https'] and '.' in urlparse(text.strip()).netloc:
                 text = xml_helpers.escape(text.strip())
-                xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
+                xml = xml_helpers.embellish_with_link_and_tags(text, text, set())
             else:
-                text = xml_helpers.escape(text)
-                xml = xml_helpers.embellish_with_link_and_tags(text, link_at_cursor, tags_at_cursor)
+                xml = xml_helpers.escape(text)
 
             UseCases.move_cursor_to_xy(x, y)
             UseCases.insert_xml(xml)
@@ -309,10 +305,10 @@ class DocumentViewController():
             new_y = max(0, self.model.scrolling_position_y + y - 56)
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
-        if y - ApplicationState.get_value('document_view_height') > -56:
-            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
+        if y - self.model.document_view_height > -56:
+            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
             new_x = self.model.scrolling_position_x
-            new_y = min(max(0, height - ApplicationState.get_value('document_view_height')), self.model.scrolling_position_y + y - ApplicationState.get_value('document_view_height') + 56)
+            new_y = min(max(0, height - self.model.document_view_height), self.model.scrolling_position_y + y - self.model.document_view_height + 56)
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         return True
@@ -325,16 +321,16 @@ class DocumentViewController():
 
         if controller.get_current_event_state() & modifiers == 0:
             document = self.model.document
-            height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
+            height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
 
             if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
-                dx *= ApplicationState.get_value('document_view_width') ** (2/3)
-                dy *= ApplicationState.get_value('document_view_height') ** (2/3)
+                dx *= self.model.document_view_width ** (2/3)
+                dy *= self.model.document_view_height ** (2/3)
             else:
                 dy *= self.model.scrolling_multiplier
                 dx *= self.model.scrolling_multiplier
             x = min(0, max(0, self.model.scrolling_position_x + dx))
-            y = min(max(0, height - ApplicationState.get_value('document_view_height')), max(0, self.model.scrolling_position_y + dy))
+            y = min(max(0, height - self.model.document_view_height), max(0, self.model.scrolling_position_y + dy))
 
             self.model.application.scrolling.scroll_to_xy(x, y, animation_type=None)
         return
@@ -371,9 +367,9 @@ class DocumentViewController():
             case ('end', 0):
                 UseCases.paragraph_end()
             case ('page_up', 0):
-                UseCases.page(-ApplicationState.get_value('document_view_height') + 100)
+                UseCases.page(-self.model.document_view_height + 100)
             case ('page_down', 0):
-                UseCases.page(ApplicationState.get_value('document_view_height') - 100)
+                UseCases.page(self.model.document_view_height - 100)
 
             case ('left', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.left(True)
@@ -388,9 +384,9 @@ class DocumentViewController():
             case ('end', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.paragraph_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(-ApplicationState.get_value('document_view_height') + 100, True)
+                UseCases.page(-self.model.document_view_height + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(ApplicationState.get_value('document_view_height') - 100, True)
+                UseCases.page(self.model.document_view_height - 100, True)
 
             case ('up', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.move_cursor_to_parent()
@@ -433,9 +429,11 @@ class DocumentViewController():
                         UseCases.set_paragraph_style('p')
                         UseCases.set_indentation_level(0)
                     else:
-                        UseCases.add_newline()
+                        tags_at_cursor = self.model.application.toolbars.tags_at_cursor
+                        UseCases.add_newline(tags_at_cursor)
                 else:
-                    UseCases.im_commit('\n')
+                    tags_at_cursor = self.model.application.toolbars.tags_at_cursor
+                    UseCases.add_newline(tags_at_cursor)
             case ('backspace', _):
                 UseCases.backspace()
             case ('delete', _):
@@ -449,7 +447,8 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
 
     def on_im_commit(self, im_context, text):
-        UseCases.im_commit(text)
+        tags_at_cursor = self.model.application.toolbars.tags_at_cursor
+        UseCases.im_commit(text, tags_at_cursor)
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()

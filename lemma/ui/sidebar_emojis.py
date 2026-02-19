@@ -52,14 +52,13 @@ class SidebarEmojis(object):
         self.populate()
 
         MessageBus.subscribe(self, 'mode_set')
-        MessageBus.subscribe(self, 'app_state_changed')
         MessageBus.subscribe(self, 'sidebar_visibility_changed')
 
         self.update()
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'mode_set' in messages or 'app_state_changed' in messages or 'sidebar_visibility_changed' in messages:
+        if 'mode_set' in messages or 'sidebar_visibility_changed' in messages:
             self.update()
 
     @timer.timer

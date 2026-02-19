@@ -25,8 +25,8 @@ from lemma.ui.popovers.popover_templates import PopoverView
 
 class Popover(PopoverView):
 
-    def __init__(self):
-        PopoverView.__init__(self)
+    def __init__(self, manager):
+        PopoverView.__init__(self, manager)
 
         self.set_width(252)
 

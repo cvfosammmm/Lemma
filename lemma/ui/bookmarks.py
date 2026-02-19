@@ -23,7 +23,6 @@ from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
-from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
 
 
@@ -52,13 +51,12 @@ class Bookmarks():
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'bookmarks_changed')
-        MessageBus.subscribe(self, 'app_state_changed')
 
         self.update_bookmark_buttons()
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'bookmarks_changed' in messages or 'history_changed' in messages or 'app_state_changed' in messages:
+        if 'bookmarks_changed' in messages or 'history_changed' in messages:
             self.update_bookmark_buttons()
 
     @timer.timer
@@ -108,7 +106,7 @@ class Bookmarks():
         if len(bookmarks) >= button_pos:
             document_id = bookmarks[button_pos]
             UseCases.set_active_document(document_id, update_history=True)
-            UseCases.hide_popovers()
+            self.application.popover_manager.hide_popovers()
 
     def on_bookmark_remove_clicked(self, button, button_pos):
         workspace = WorkspaceRepo.get_workspace()

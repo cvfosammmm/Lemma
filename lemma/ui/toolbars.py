@@ -21,7 +21,6 @@ from gi.repository import Gtk, Pango
 
 from lemma.services.message_bus import MessageBus
 from lemma.services.layout_info import LayoutInfo
-from lemma.application_state.application_state import ApplicationState
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
@@ -34,6 +33,8 @@ class ToolBars():
         self.application = application
         self.headerbar = main_window.headerbar
         self.toolbar = main_window.toolbar
+
+        self.tags_at_cursor = set()
 
         self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
 
@@ -70,25 +71,20 @@ class ToolBars():
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
         MessageBus.subscribe(self, 'document_changed')
-        MessageBus.subscribe(self, 'app_state_changed')
         MessageBus.subscribe(self, 'settings_changed')
 
-        self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
-        self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
-        self.update_tag_toggle(self.toolbar.toolbar_main.verbatim_button, 'verbatim')
-        self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
+        self.update_tags_at_cursor()
+        self.update()
+        self.update_paragraph_style()
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_changed' in messages or 'app_state_changed' in messages or 'settings_changed' in messages:
+        if 'history_changed' in messages or 'document_changed' in messages or 'settings_changed' in messages:
             self.update()
             self.update_paragraph_style()
 
-        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages or 'app_state_changed' in messages:
-            self.update_tag_toggle(self.toolbar.toolbar_main.bold_button, 'bold')
-            self.update_tag_toggle(self.toolbar.toolbar_main.italic_button, 'italic')
-            self.update_tag_toggle(self.toolbar.toolbar_main.verbatim_button, 'verbatim')
-            self.update_tag_toggle(self.toolbar.toolbar_main.highlight_button, 'highlight')
+        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages:
+            self.update_tags_at_cursor()
 
     def on_menu_button_press(self, controller, n_press, x, y, action_name):
         self.application.actions.actions[action_name].activate()
@@ -128,19 +124,6 @@ class ToolBars():
                 self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
 
             self.toolbar.mode_stack.set_visible_child_name('main')
-
-        button_popover_rel = list()
-        button_popover_rel.append([self.headerbar.hb_left.hamburger_menu_button, 'hamburger_menu'])
-        button_popover_rel.append([self.headerbar.hb_right.bookmarks_button, 'bookmarks'])
-        button_popover_rel.append([self.headerbar.hb_right.document_menu_button, 'document_menu'])
-        button_popover_rel.append([self.toolbar.toolbar_main.paragraph_style_menu_button, 'paragraph_style'])
-        button_popover_rel.append([self.toolbar.toolbar_right.edit_menu_button, 'edit_menu'])
-
-        for button, popover_name in button_popover_rel:
-            if ApplicationState.get_value('active_popover') == popover_name:
-                button.add_css_class('active')
-            else:
-                button.remove_css_class('active')
 
         self.update_button_visibility()
 
@@ -183,7 +166,38 @@ class ToolBars():
         self.toolbar.toolbar_main.link_buttons_separator.set_visible(link_buttons_visible)
 
     @timer.timer
-    def update_tag_toggle(self, button, tagname):
+    def update_tags_at_cursor(self):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document == None:
+            self.tags_at_cursor = set()
+        else:
+            node = document.get_insert_node()
+
+            if node.parent.type == 'paragraph':
+                prev_node = node.prev_no_descent()
+            else:
+                prev_node = node.prev_in_parent()
+
+            if node == None or prev_node == None:
+                self.tags_at_cursor = set()
+            else:
+                self.tags_at_cursor = prev_node.tags.copy()
+
+        self.update_tag_toggle('bold')
+        self.update_tag_toggle('italic')
+        self.update_tag_toggle('verbatim')
+        self.update_tag_toggle('highlight')
+
+    def toggle_tag(self, tagname):
+        self.tags_at_cursor ^= {tagname}
+        self.update_tag_toggle(tagname)
+
+    @timer.timer
+    def update_tag_toggle(self, tagname):
+        button_dict = {'bold': self.toolbar.toolbar_main.bold_button, 'italic': self.toolbar.toolbar_main.italic_button, 'verbatim': self.toolbar.toolbar_main.verbatim_button, 'highlight': self.toolbar.toolbar_main.highlight_button}
+        button = button_dict[tagname]
+
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
@@ -199,7 +213,7 @@ class ToolBars():
 
         if chars_selected and all_tagged:
             button.add_css_class('checked')
-        elif not chars_selected and tagname in ApplicationState.get_value('tags_at_cursor'):
+        elif not chars_selected and tagname in self.tags_at_cursor:
             button.add_css_class('checked')
         else:
             button.remove_css_class('checked')

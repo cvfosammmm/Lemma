@@ -20,7 +20,6 @@ import time
 from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
-from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 import lemma.services.timer as timer
 
@@ -65,7 +64,7 @@ class DocumentScrolling():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
-        window_height = ApplicationState.get_value('document_view_height')
+        window_height = self.application.document_view.document_view_height
         insert_node = document.get_insert_node()
         insert_position = document.get_absolute_xy(insert_node.layout)
 
@@ -73,7 +72,7 @@ class DocumentScrolling():
         insert_y = insert_position[1] + content_offset
         insert_height = insert_node.layout['height']
         scrolling_offset_y = self.get_current_scrolling_offsets()[1]
-        content_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
+        content_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
 
         if window_height <= 0:
             new_position = (0, 0)
@@ -99,8 +98,8 @@ class DocumentScrolling():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') + document.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.get_value('document_view_height'))
-        max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_width() - ApplicationState.get_value('document_view_width'))
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height + document.get_height() + LayoutInfo.get_document_padding_bottom() - self.application.document_view.document_view_height)
+        max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_width() - self.application.document_view.document_view_width)
 
         vel_x *= 0.4
         vel_y *= 0.4
@@ -139,8 +138,8 @@ class DocumentScrolling():
             x = self.target_x
             y = self.target_y
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') + document.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.get_value('document_view_height'))
-        max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_width() - ApplicationState.get_value('document_view_width'))
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height + document.get_height() + LayoutInfo.get_document_padding_bottom() - self.application.document_view.document_view_height)
+        max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_width() - self.application.document_view.document_view_width)
 
         x = min(max_x, max(0, x))
         y = min(max_y, max(0, y))

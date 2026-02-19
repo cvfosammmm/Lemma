@@ -28,7 +28,6 @@ from lemma.ui.document_view_presenter import DocumentViewPresenter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
-from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -42,6 +41,7 @@ class DocumentView():
 
         self.pointer_x, self.pointer_y = None, None
         self.scrolling_position_x, self.scrolling_position_y = -1, -1
+        self.document_view_width, self.document_view_height = 0, 0
         self.drop_cursor_x, self.drop_cursor_y = -1, -1
         self.ctrl_pressed = False
         self.scrolling_multiplier = 2.5
@@ -60,6 +60,8 @@ class DocumentView():
         self.view = main_window.document_view
         self.controller = DocumentViewController(self)
         self.presenter = DocumentViewPresenter(self)
+
+        self.view.content.set_allocate_func(self.set_view_size)
 
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -89,7 +91,7 @@ class DocumentView():
                 do_draw = True
 
         scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
-        content_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height')
+        content_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
 
         self.view.scrollbar_vertical.set_content_height(content_height)
         self.view.scrollbar_vertical.set_scrolling_offset(scrolling_position_y)
@@ -104,7 +106,7 @@ class DocumentView():
         cursor_visible = True
         if time_since_blink_start <= 10 and time_in_cycle > 0.6:
             cursor_visible = False
-        if ApplicationState.get_value('document_view_hide_cursor_on_unfocus') and not self.view.content.has_focus():
+        if self.application.popover_manager.current_popover_name != 'link_autocomplete' and not self.view.content.has_focus():
             cursor_visible = False
         if self.document.has_selection():
             cursor_visible = False
@@ -125,6 +127,10 @@ class DocumentView():
             self.pointer_x, self.pointer_y = x, y
             self.update_pointer()
 
+    def set_view_size(self, width, height, baseline):
+        if width != self.document_view_width or height != self.document_view_height:
+            self.document_view_width, self.document_view_height = width, height
+
     def set_drop_cursor_position(self, x, y):
         self.drop_cursor_x = x
         self.drop_cursor_y = y
@@ -140,7 +146,7 @@ class DocumentView():
         y = self.scrolling_position_y + (self.pointer_y if self.pointer_y != None else 0)
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y -= ApplicationState.get_value('title_buttons_height')
+        y -= self.application.document_title.title_buttons_height
 
         if y > 0:
             leaf_layout = document.get_leaf_layout_at_xy(x, y)
@@ -180,13 +186,10 @@ class DocumentView():
             self.update_pointer()
 
     def update_link_at_cursor(self):
-        self.link_target_at_cursor = None
-        if self.document != None and not self.document.has_selection():
-            current_node = self.document.get_insert_node()
-            prev_node = current_node.prev_in_parent()
-            if prev_node != None and current_node.link == prev_node.link:
-                self.link_target_at_cursor = current_node.link
-
+        if self.document == None:
+            self.link_target_at_cursor = None
+        else:
+            self.link_target_at_cursor = self.document.get_link_at_cursor()
         self.update_link_overlay_text()
 
     def set_link_target_at_pointer(self, link):

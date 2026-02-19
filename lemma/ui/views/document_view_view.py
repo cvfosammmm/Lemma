@@ -94,15 +94,19 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.set_vexpand(True)
 
         self.draw_func = lambda: None
+        self.allocate_func = lambda: None
 
     def set_draw_func(self, draw_func):
         self.draw_func = draw_func
+
+    def set_allocate_func(self, allocate_func):
+        self.allocate_func = allocate_func
 
     def do_snapshot(self, snapshot):
         self.draw_func(snapshot)
 
     def do_size_allocate(self, width, height, baseline):
-        UseCases.app_state_set_values({'document_view_width': width, 'document_view_height': height})
+        self.allocate_func(width, height, baseline)
 
 
 class TitleWidget(Gtk.Box):

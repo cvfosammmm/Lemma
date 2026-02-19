@@ -27,19 +27,18 @@ import lemma.ui.dialogs.settings as settings
 
 class DialogLocator():
 
-    dialogs = dict()
+    def __init__(self, main_window):
+        self.dialogs = dict()
+        self.dialogs['about'] = about.Dialog(main_window)
+        self.dialogs['export_bulk'] = export_bulk.Dialog(main_window)
+        self.dialogs['export_markdown'] = export_markdown.Dialog(main_window)
+        self.dialogs['export_image'] = export_image.Dialog(main_window)
+        self.dialogs['import_documents'] = import_documents.Dialog(main_window)
+        self.dialogs['insert_image'] = insert_image.Dialog(main_window)
+        self.dialogs['keyboard_shortcuts'] = keyboard_shortcuts.Dialog(main_window)
+        self.dialogs['settings'] = settings.Dialog(main_window)
 
-    def init_dialogs(main_window):
-        DialogLocator.dialogs['about'] = about.Dialog(main_window)
-        DialogLocator.dialogs['export_bulk'] = export_bulk.Dialog(main_window)
-        DialogLocator.dialogs['export_markdown'] = export_markdown.Dialog(main_window)
-        DialogLocator.dialogs['export_image'] = export_image.Dialog(main_window)
-        DialogLocator.dialogs['import_documents'] = import_documents.Dialog(main_window)
-        DialogLocator.dialogs['insert_image'] = insert_image.Dialog(main_window)
-        DialogLocator.dialogs['keyboard_shortcuts'] = keyboard_shortcuts.Dialog(main_window)
-        DialogLocator.dialogs['settings'] = settings.Dialog(main_window)
-
-    def get_dialog(dialog_type):
-        return DialogLocator.dialogs[dialog_type]
+    def get_dialog(self, dialog_type):
+        return self.dialogs[dialog_type]
 
 

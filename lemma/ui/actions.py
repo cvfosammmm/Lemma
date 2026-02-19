@@ -20,14 +20,13 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gio, GLib, GObject, Gdk
 
 from lemma.services.message_bus import MessageBus
-from lemma.application_state.application_state import ApplicationState
-from lemma.ui.dialogs.dialog_locator import DialogLocator
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.widgets.image import Image
 from lemma.services.xml_exporter import XMLExporter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
+from lemma.services.text_shaper import TextShaper
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
@@ -179,10 +178,10 @@ class Actions(object):
         UseCases.enter_draft_mode()
 
     def import_markdown_files(self, action=None, paramenter=''):
-        DialogLocator.get_dialog('import_documents').run()
+        self.application.dialog_locator.get_dialog('import_documents').run()
 
     def export_bulk(self, action=None, paramenter=''):
-        DialogLocator.get_dialog('export_bulk').run()
+        self.application.dialog_locator.get_dialog('export_bulk').run()
 
     def delete_document(self, action=None, parameter=''):
         document_id = WorkspaceRepo.get_workspace().get_active_document_id()
@@ -195,13 +194,13 @@ class Actions(object):
     def export_markdown(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        DialogLocator.get_dialog('export_markdown').run(document)
+        self.application.dialog_locator.get_dialog('export_markdown').run(document)
 
     def export_image(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         selected_nodes = document.get_selected_nodes()
-        DialogLocator.get_dialog('export_image').run(selected_nodes[0].value)
+        self.application.dialog_locator.get_dialog('export_image').run(selected_nodes[0].value)
 
     def go_back(self, action=None, parameter=''):
         workspace = WorkspaceRepo.get_workspace()
@@ -366,7 +365,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('bold')
         else:
-            UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'bold'})
+            self.application.toolbars.toggle_tag('bold')
 
     def toggle_italic(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -375,7 +374,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('italic')
         else:
-            UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'italic'})
+            self.application.toolbars.toggle_tag('italic')
 
     def toggle_verbatim(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -384,7 +383,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('verbatim')
         else:
-            UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'verbatim'})
+            self.application.toolbars.toggle_tag('verbatim')
 
     def toggle_highlight(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -393,7 +392,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('highlight')
         else:
-            UseCases.app_state_set_value('tags_at_cursor', ApplicationState.get_value('tags_at_cursor') ^ {'highlight'})
+            self.application.toolbars.toggle_tag('highlight')
 
     def decrease_indent(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -408,7 +407,7 @@ class Actions(object):
     def show_insert_image_dialog(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
-        DialogLocator.get_dialog('insert_image').run()
+        self.application.dialog_locator.get_dialog('insert_image').run()
 
     def widget_shrink(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
@@ -462,7 +461,7 @@ class Actions(object):
 
         if not document.has_selection() and insert.is_inside_link():
             UseCases.select_section(*insert.link_bounds())
-        UseCases.show_popover('link_autocomplete', x, y, orientation)
+        self.application.popover_manager.show_popover('link_autocomplete', x, y, orientation)
 
     def copy_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -500,62 +499,54 @@ class Actions(object):
         UseCases.toggle_tools_sidebar(parameter.get_string())
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
-        if ApplicationState.get_value('active_popover') == 'paragraph_style': return
-
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y
-        UseCases.show_popover('paragraph_style', x, y, 'top')
+        self.application.popover_manager.show_popover('paragraph_style', x, y, 'top')
 
     def show_edit_menu(self, action=None, parameter=''):
-        if ApplicationState.get_value('active_popover') == 'edit_menu': return
-
         button = self.main_window.toolbar.toolbar_right.edit_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y
-        UseCases.show_popover('edit_menu', x, y, 'top')
+        self.application.popover_manager.show_popover('edit_menu', x, y, 'top')
 
     def show_document_menu(self, action=None, parameter=''):
-        if ApplicationState.get_value('active_popover') == 'document_menu': return
-
         button = self.main_window.headerbar.hb_right.document_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y + allocation.size.height
-        UseCases.show_popover('document_menu', x, y, 'bottom')
+        self.application.popover_manager.show_popover('document_menu', x, y, 'bottom')
 
     def show_bookmarks(self, action=None, parameter=''):
-        if ApplicationState.get_value('active_popover') == 'bookmarks': return
-
         button = self.main_window.headerbar.hb_right.bookmarks_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y + allocation.size.height
-        UseCases.show_popover('bookmarks', x, y, 'bottom')
+        self.application.popover_manager.show_popover('bookmarks', x, y, 'bottom')
+
+        self.application.bookmarks.update_bookmark_buttons()
 
     def show_hamburger_menu(self, action=None, parameter=''):
-        if ApplicationState.get_value('active_popover') == 'hamburger_menu': return
-
         button = self.main_window.headerbar.hb_left.hamburger_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
 
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y + allocation.size.height
-        UseCases.show_popover('hamburger_menu', x, y, 'bottom')
+        self.application.popover_manager.show_popover('hamburger_menu', x, y, 'bottom')
 
     def show_settings_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('settings').run()
+        self.application.dialog_locator.get_dialog('settings').run()
 
     def show_shortcuts_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('keyboard_shortcuts').run()
+        self.application.dialog_locator.get_dialog('keyboard_shortcuts').run()
 
     def show_about_dialog(self, action=None, parameter=''):
-        DialogLocator.get_dialog('about').run()
+        self.application.dialog_locator.get_dialog('about').run()
 
 

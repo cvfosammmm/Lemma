@@ -21,7 +21,6 @@ from gi.repository import Gtk, Gdk, Pango, PangoCairo
 
 from lemma.services.message_bus import MessageBus
 from lemma.services.color_manager import ColorManager
-from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo

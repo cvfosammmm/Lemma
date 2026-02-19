@@ -40,6 +40,7 @@ class DocumentTitle():
 
         self.is_active = False
         self.document = None
+        self.title_buttons_height = 0
         self.scrolling_position_x = None
         self.scrolling_position_y = None
 
@@ -64,8 +65,6 @@ class DocumentTitle():
 
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'document_changed')
-
-        self.update()
 
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -112,7 +111,7 @@ class DocumentTitle():
             self.reset_title()
             self.validate_title()
             self.view.button_revealer.set_reveal_child(True)
-            UseCases.app_state_set_value('title_buttons_height', 50)
+            self.set_title_buttons_height(50)
             self.application.scrolling.scroll_to_xy(0, 0, animation_type='default')
 
     def on_content_focus_in(self, controller):
@@ -158,7 +157,7 @@ class DocumentTitle():
                             UseCases.set_link(linking_doc, bounds, title)
 
         self.view.button_revealer.set_reveal_child(False)
-        UseCases.app_state_set_value('title_buttons_height', 0)
+        self.set_title_buttons_height(0)
         self.document_view.content.grab_focus()
 
         self.is_active = False
@@ -167,7 +166,7 @@ class DocumentTitle():
         self.reset_title()
 
         self.view.button_revealer.set_reveal_child(False)
-        UseCases.app_state_set_value('title_buttons_height', 0)
+        self.set_title_buttons_height(0)
         self.document_view.content.grab_focus()
 
         self.is_active = False
@@ -214,5 +213,8 @@ class DocumentTitle():
             self.view.subtext.set_text('Please enter a name for this document.')
             self.view.subtext.remove_css_class('error')
             self.view.title_entry.remove_css_class('error')
+
+    def set_title_buttons_height(self, height):
+        self.title_buttons_height = height
 
 

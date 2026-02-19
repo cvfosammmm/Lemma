@@ -29,10 +29,10 @@ from lemma.use_cases.use_cases import UseCases
 
 class Popover(PopoverView):
 
-    def __init__(self):
-        PopoverView.__init__(self)
-        self.add_css_class('bookmarks')
+    def __init__(self, manager):
+        PopoverView.__init__(self, manager)
 
+        self.add_css_class('bookmarks')
         self.set_width(306)
 
         self.edit_mode = False
@@ -148,7 +148,7 @@ class Popover(PopoverView):
 
         if keyval == Gdk.keyval_from_name('0'):
             if state & modifiers == Gdk.ModifierType.ALT_MASK:
-                UseCases.hide_popovers()
+                self.manager.hide_popovers()
 
                 return True
 

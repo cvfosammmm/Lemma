@@ -259,6 +259,15 @@ class Document():
             self.query_cache['cursor_inside_link'] = (not self.has_selection() and self.get_insert_node().is_inside_link())
         return self.query_cache['cursor_inside_link']
 
+    def get_link_at_cursor(self):
+        if self.has_selection(): return None
+
+        current_node = self.get_insert_node()
+        prev_node = current_node.prev_in_parent()
+        if prev_node != None and current_node.link == prev_node.link:
+            return current_node.link
+        return None
+
     def links_inside_selection(self):
         if 'links_inside_selection' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()

@@ -26,7 +26,6 @@ import lemma.services.xml_parser as xml_parser
 import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
 from lemma.services.regex import RegexService
-from lemma.application_state.application_state import ApplicationState
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.document.ast import Node
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -34,7 +33,6 @@ from lemma.repos.document_repo import DocumentRepo
 from lemma.document.document import Document
 from lemma.services.message_bus import MessageBus
 from lemma.services.html_parser import HTMLParser
-from lemma.services.text_shaper import TextShaper
 import lemma.services.timer as timer
 
 
@@ -45,30 +43,6 @@ class UseCases():
 
         Settings.save()
         MessageBus.add_message('settings_changed')
-
-    def app_state_set_value(item, value):
-        ApplicationState.set_value(item, value)
-
-        MessageBus.add_message('app_state_changed')
-
-    def app_state_set_values(values):
-        for key, value in values.items():
-            ApplicationState.set_value(key, value)
-
-        MessageBus.add_message('app_state_changed')
-
-    def show_popover(name, x, y, orientation='bottom'):
-        ApplicationState.set_value('active_popover', name)
-        ApplicationState.set_value('popover_position', (x, y))
-        ApplicationState.set_value('popover_orientation', orientation)
-
-        MessageBus.add_message('app_state_changed')
-
-    def hide_popovers():
-        ApplicationState.set_value('active_popover', None)
-        ApplicationState.set_value('popover_position', (0, 0))
-
-        MessageBus.add_message('app_state_changed')
 
     def toggle_tools_sidebar(name):
         if Settings.get_value('show_tools_sidebar') and Settings.get_value('tools_sidebar_active_tab') == name:
@@ -270,12 +244,11 @@ class UseCases():
         MessageBus.add_message('document_title_changed')
 
     @timer.timer
-    def im_commit(text):
+    def im_commit(text, tags=set()):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        tags_at_cursor = ApplicationState.get_value('tags_at_cursor')
-        link_at_cursor = ApplicationState.get_value('link_at_cursor')
-        xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags_at_cursor)
+        link_at_cursor = document.get_link_at_cursor()
+        xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags.copy())
         parser = xml_parser.XMLParser()
         paragraphs = parser.parse(xml)
 
@@ -293,6 +266,42 @@ class UseCases():
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
         MessageBus.add_message('keyboard_input')
+
+    @timer.timer
+    def add_newline(tags=set()):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        document.start_undoable_action()
+        document.delete_selected_nodes()
+
+        insert_paragraph = document.get_insert_node().paragraph()
+        paragraph_style = insert_paragraph.style
+        indentation_level = insert_paragraph.indentation_level
+
+        node = Node('eol')
+        node.tags = tags.copy()
+        node.link = document.get_link_at_cursor()
+        document.insert_nodes([node])
+
+        if paragraph_style in ['ul', 'ol', 'cl']:
+            paragraph = document.get_insert_node().paragraph()
+            document.set_paragraph_style(paragraph, paragraph_style)
+            if indentation_level != 0:
+                document.set_indentation_level(document.get_insert_node().paragraph(), indentation_level)
+        elif paragraph_style.startswith('h'):
+            if len(document.get_insert_node().paragraph()) == 1:
+                paragraph = document.get_insert_node().paragraph()
+                document.set_paragraph_style(paragraph, 'p')
+
+        document.replace_max_string_before_cursor()
+        document.update_implicit_x_position()
+        document.end_undoable_action()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
 
     @timer.timer
     def insert_text(text):
@@ -367,44 +376,6 @@ class UseCases():
                 document.insert_nodes(paragraph.children)
 
         document.select_placeholder_in_range(document.get_node_at_position(insert_position), document.get_insert_node())
-        document.update_implicit_x_position()
-        document.end_undoable_action()
-
-        DocumentRepo.update(document)
-        MessageBus.add_message('document_changed')
-        MessageBus.add_message('document_ast_changed')
-        MessageBus.add_message('document_ast_or_cursor_changed')
-        MessageBus.add_message('cursor_movement')
-
-    @timer.timer
-    def add_newline():
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        document.start_undoable_action()
-        document.delete_selected_nodes()
-
-        insert_paragraph = document.get_insert_node().paragraph()
-        paragraph_style = insert_paragraph.style
-        indentation_level = insert_paragraph.indentation_level
-
-        node = Node('eol')
-        if ApplicationState.get_value('tags_at_cursor') != None:
-            node.tags = ApplicationState.get_value('tags_at_cursor').copy()
-        if ApplicationState.get_value('link_at_cursor') != None:
-            node.link = ApplicationState.get_value('link_at_cursor').copy()
-        document.insert_nodes([node])
-
-        if paragraph_style in ['ul', 'ol', 'cl']:
-            paragraph = document.get_insert_node().paragraph()
-            document.set_paragraph_style(paragraph, paragraph_style)
-            if indentation_level != 0:
-                document.set_indentation_level(document.get_insert_node().paragraph(), indentation_level)
-        elif paragraph_style.startswith('h'):
-            if len(document.get_insert_node().paragraph()) == 1:
-                paragraph = document.get_insert_node().paragraph()
-                document.set_paragraph_style(paragraph, 'p')
-
-        document.replace_max_string_before_cursor()
         document.update_implicit_x_position()
         document.end_undoable_action()
 

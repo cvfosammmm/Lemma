@@ -19,9 +19,6 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio, GLib
 
-from lemma.services.message_bus import MessageBus
-from lemma.ui.popovers.popover_manager import PopoverManager
-from lemma.application_state.application_state import ApplicationState
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
@@ -39,21 +36,8 @@ class Shortcuts(object):
         self.main_window.add_controller(self.shortcut_controller_app)
         self.main_window.document_view.content.add_controller(self.shortcut_controller_document)
 
-        MessageBus.subscribe(self, 'app_state_changed')
-
     def animate(self):
-        messages = MessageBus.get_messages(self)
-        if 'app_state_changed' in messages:
-            self.update()
-
-    @timer.timer
-    def update(self):
-        if ApplicationState.get_value('active_popover') != None:
-            if self.shortcut_controller_app.get_widget() == self.main_window:
-                self.main_window.remove_controller(self.shortcut_controller_app)
-        else:
-            if self.shortcut_controller_app.get_widget() == None:
-                self.main_window.add_controller(self.shortcut_controller_app)
+        pass
 
 
 class ShortcutController(Gtk.ShortcutController):

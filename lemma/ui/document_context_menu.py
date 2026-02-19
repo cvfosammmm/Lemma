@@ -152,8 +152,8 @@ class ContextMenuDocumentView(ContextMenu):
 
 class EditMenu(PopoverView):
 
-    def __init__(self):
-        PopoverView.__init__(self)
+    def __init__(self, manager):
+        PopoverView.__init__(self, manager)
 
         self.set_width(306)
 

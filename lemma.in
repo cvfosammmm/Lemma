@@ -26,7 +26,6 @@ from lemma.repos.document_repo import DocumentRepo
 from lemma.services.timer import Timer
 import lemma.ui.application as application
 from lemma.services.settings import Settings
-from lemma.application_state.application_state import ApplicationState
 
 # setup gettext
 gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
@@ -71,7 +70,6 @@ TextRenderer.add_font('h6', os.path.join(font_path, 'newcomputermodern/otf/NewCM
 TextRenderer.add_font('emojis', os.path.join(font_path, 'Noto_Color_Emoji/NotoColorEmoji-Regular.ttf'), 19.407, 21, 7)
 
 Settings.init()
-ApplicationState.init()
 DocumentRepo.init()
 WorkspaceRepo.init(DocumentRepo)
 

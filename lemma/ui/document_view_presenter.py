@@ -30,7 +30,6 @@ from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
 from lemma.services.layout_info import LayoutInfo
 from lemma.repos.document_repo import DocumentRepo
-from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
 
 
@@ -58,7 +57,7 @@ class DocumentViewPresenter():
         self.setup_scaling_offsets()
 
         content_offset_x = LayoutInfo.get_document_padding_left()
-        content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_value('title_buttons_height') - self.model.scrolling_position_y
+        content_offset_y = LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height - self.model.scrolling_position_y
 
         self.first_selection_node = document.get_first_selection_bound()
         self.last_selection_node = document.get_last_selection_bound()

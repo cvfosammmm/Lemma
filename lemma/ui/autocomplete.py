@@ -23,7 +23,6 @@ from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.settings import Settings
 from lemma.services.autocomplete_db import AutocompleteDB
-from lemma.application_state.application_state import ApplicationState
 from lemma.services.layout_info import LayoutInfo
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
@@ -179,8 +178,8 @@ class Autocomplete():
         insert_y += content_offset - scrolling_offset_y
         insert_height = insert.layout['height']
         insert_x += LayoutInfo.get_document_padding_left()
-        window_height = ApplicationState.get_value('document_view_height')
-        window_width = ApplicationState.get_value('document_view_width')
+        window_height = self.application.document_view.document_view_height
+        window_width = self.application.document_view.document_view_width
 
         self.view.x = min(insert_x, window_width - self.view.width - 18)
         if insert_y + insert_height + self.view.max_height > window_height:
