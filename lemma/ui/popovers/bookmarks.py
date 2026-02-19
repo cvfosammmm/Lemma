@@ -18,8 +18,7 @@
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-from gi.repository import Gtk, Gdk
-from gi.repository import Adw
+from gi.repository import Gtk, Gdk, Pango, Adw
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
@@ -33,7 +32,7 @@ class Popover(PopoverView):
         PopoverView.__init__(self, manager)
 
         self.add_css_class('bookmarks')
-        self.set_width(306)
+        self.set_width(342)
 
         self.edit_mode = False
         self.bookmark_drag_handles = []
@@ -68,6 +67,7 @@ class Popover(PopoverView):
 
         for i in range(9):
             title_label = Gtk.Label()
+            title_label.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
 
             drag_handle = Gtk.Image.new_from_icon_name('drag-handle-symbolic')
             drag_handle.add_css_class('drag-handle')
