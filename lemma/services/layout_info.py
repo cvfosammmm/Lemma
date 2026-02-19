@@ -61,6 +61,9 @@ class LayoutInfo():
     def get_ol_bullet_padding():
         return 12
 
+    def get_cl_bullet_padding():
+        return 16
+
     def get_min_image_size():
         return 16
 

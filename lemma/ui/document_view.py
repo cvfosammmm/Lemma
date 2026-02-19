@@ -160,7 +160,10 @@ class DocumentView():
                 link = leaf_layout['node'].link
             self.set_link_target_at_pointer(link)
 
-            if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + line_layout['height'] - 23 and y <= paragraph_layout['y'] + line_layout['height'] - 4 and x >= 1 and x <= 20:
+            indentation = LayoutInfo.get_indentation('cl', paragraph_layout['node'].indentation_level)
+            x_start = indentation - 35
+            x_end = indentation - 16
+            if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + line_layout['height'] - 23 and y <= paragraph_layout['y'] + line_layout['height'] - 4 and x >= x_start and x <= x_end:
                 self.view.content.set_cursor_from_name('default')
             elif leaf_layout != None:
                 node = leaf_layout['node']

@@ -170,8 +170,13 @@ class DocumentViewController():
                 if paragraph_layout_at_press != paragraph_layout_at_release: return
                 if paragraph_layout_at_release['node'].style != 'cl': return
                 if line_layout_at_release != paragraph_layout_at_release['children'][0]: return
-                if y < paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 23 or y > paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 4 or x < 1 or x > 20: return
-                if y_at_press < paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 23 or y_at_press > paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 4 or x_at_press < 1 or x_at_press > 20: return
+
+                indentation = LayoutInfo.get_indentation('cl', paragraph_layout_at_release['node'].indentation_level)
+                x_start = indentation - 35
+                x_end = indentation - 16
+
+                if y < paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 23 or y > paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 4 or x < x_start or x > x_end: return
+                if y_at_press < paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 23 or y_at_press > paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 4 or x_at_press < x_start or x_at_press > x_end: return
 
                 UseCases.toggle_checkbox_at_cursor()
 

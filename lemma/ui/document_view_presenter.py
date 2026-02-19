@@ -160,7 +160,7 @@ class DocumentViewPresenter():
                 surface = TextRenderer.get_icon_surface('checkbox-checked-symbolic', self.hidpi_factor, inner_checked_color, outline_checked_color)
             else:
                 surface = TextRenderer.get_icon_surface('checkbox-unchecked-symbolic', self.hidpi_factor, outline_unchecked_color, inner_unchecked_color)
-            bullet_indent = 1
+            bullet_indent = LayoutInfo.get_indentation('cl', paragraph.indentation_level) - LayoutInfo.get_cl_bullet_padding() - surface.get_width()
             top = -23
 
             bullet_x = self.device_offset_x + math.floor(offset_x + bullet_indent) * self.hidpi_factor
