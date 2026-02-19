@@ -55,7 +55,7 @@ class Autocomplete():
         focus_controller.connect('leave', self.on_focus_out)
         self.document_view.content.add_controller(focus_controller)
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'keyboard_input')
 
@@ -67,8 +67,8 @@ class Autocomplete():
             return
 
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages:
-            self.on_history_changed()
+        if 'new_active_document' in messages:
+            self.on_new_active_document()
         if 'document_changed' in messages:
             self.on_document_changed()
         if 'keyboard_input' in messages:
@@ -90,7 +90,7 @@ class Autocomplete():
         self.update_command_at_cursor()
         self.update()
 
-    def on_history_changed(self):
+    def on_new_active_document(self):
         self.update_command_at_cursor()
         self.update()
 

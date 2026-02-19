@@ -49,14 +49,14 @@ class Bookmarks():
         self.popover.bookmark_document_button.connect('clicked', self.bookmark_document)
         self.popover.unbookmark_document_button.connect('clicked', self.unbookmark_document)
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'bookmarks_changed')
 
         self.update_bookmark_buttons()
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'bookmarks_changed' in messages or 'history_changed' in messages:
+        if 'bookmarks_changed' in messages or 'new_active_document' in messages:
             self.update_bookmark_buttons()
 
     @timer.timer

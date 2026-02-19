@@ -36,7 +36,7 @@ class ContextMenuDocument():
         self.view_right_click = ContextMenuDocumentView(main_window.document_view)
         self.view_edit_menu = application.popover_manager.popovers['edit_menu']
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
         MessageBus.subscribe(self, 'mode_set')
 
@@ -44,7 +44,7 @@ class ContextMenuDocument():
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages or 'mode_set' in messages:
+        if 'new_active_document' in messages or 'document_ast_or_cursor_changed' in messages or 'mode_set' in messages:
             self.update()
 
     @timer.timer

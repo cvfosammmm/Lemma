@@ -36,7 +36,7 @@ class Backlinks(object):
 
         self.view.listbox.connect('row-activated', self.on_row_activated)
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'document_ast_changed')
         MessageBus.subscribe(self, 'mode_set')
@@ -45,7 +45,7 @@ class Backlinks(object):
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
+        if 'new_active_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
             self.update()
 
     @timer.timer

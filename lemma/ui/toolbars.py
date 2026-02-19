@@ -68,7 +68,7 @@ class ToolBars():
         controller.connect('pressed', self.on_menu_button_press, 'show-edit-menu')
         self.toolbar.toolbar_right.edit_menu_button.add_controller(controller)
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'settings_changed')
@@ -79,11 +79,11 @@ class ToolBars():
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_changed' in messages or 'settings_changed' in messages:
+        if 'new_active_document' in messages or 'document_changed' in messages or 'settings_changed' in messages:
             self.update()
             self.update_paragraph_style()
 
-        if 'history_changed' in messages or 'document_ast_or_cursor_changed' in messages:
+        if 'new_active_document' in messages or 'document_ast_or_cursor_changed' in messages:
             self.update_tags_at_cursor()
 
     def on_menu_button_press(self, controller, n_press, x, y, action_name):

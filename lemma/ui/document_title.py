@@ -63,7 +63,7 @@ class DocumentTitle():
 
         self.view.title_entry.connect('changed', self.on_title_entry_changed)
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_changed')
 
     def animate(self):
@@ -76,7 +76,7 @@ class DocumentTitle():
                 self.update()
 
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_changed' in messages:
+        if 'new_active_document' in messages or 'document_changed' in messages:
             self.update()
 
     @timer.timer
