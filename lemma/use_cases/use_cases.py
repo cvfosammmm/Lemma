@@ -219,6 +219,7 @@ class UseCases():
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('undo_executed')
 
     @timer.timer
     def redo():
@@ -230,6 +231,7 @@ class UseCases():
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('redo_executed')
 
     @timer.timer
     def set_title(title):
