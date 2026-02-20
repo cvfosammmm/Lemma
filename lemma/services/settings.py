@@ -30,6 +30,7 @@ class Settings():
         Settings.defaults['color_scheme'] = 'default'
         Settings.defaults['color_scheme_dark'] = 'default-dark'
         Settings.defaults['separate_dark_color_scheme'] = False
+        Settings.defaults['font_theme'] = 'default'
         Settings.defaults['update_backlinks'] = True
         Settings.defaults['stylized_latex_autocomplete'] = True
 

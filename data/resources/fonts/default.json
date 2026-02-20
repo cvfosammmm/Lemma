@@ -1,0 +1,137 @@
+[
+    {
+        "name": "book",
+        "path": "newcomputermodern/otf/NewCM10-Book.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    },
+    {
+        "name": "bold",
+        "path": "newcomputermodern/otf/NewCM10-Bold.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    },
+    {
+        "name": "bolditalic",
+        "path": "newcomputermodern/otf/NewCM10-BoldItalic.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    },
+    {
+        "name": "italic",
+        "path": "newcomputermodern/otf/NewCM10-Italic.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    },
+    {
+        "name": "mono",
+        "path": "newcomputermodern/otf/NewCMMono10-Book.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    },
+    {
+        "name": "math",
+        "path": "newcomputermodern/otf/NewCMMath-Book.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    },
+    {
+        "name": "math_small",
+        "path": "newcomputermodern/otf/NewCMMath-Book.otf",
+        "size": 14,
+        "ascend": 12,
+        "descend": 2,
+        "padding_top": 0,
+        "padding_bottom": 0
+    },
+    {
+        "name": "teaser",
+        "path": "newcomputermodern/otf/NewCM08-Book.otf",
+        "size": 14,
+        "ascend": 16,
+        "descend": 4,
+        "padding_top": 0,
+        "padding_bottom": 0
+    },
+    {
+        "name": "h1",
+        "path": "newcomputermodern/otf/NewCMSans10-Bold.otf",
+        "size": 32,
+        "ascend": 38,
+        "descend": 11,
+        "padding_top": 4,
+        "padding_bottom": 4
+    },
+    {
+        "name": "h2",
+        "path": "newcomputermodern/otf/NewCMSans10-Bold.otf",
+        "size": 28,
+        "ascend": 33,
+        "descend": 11,
+        "padding_top": 4,
+        "padding_bottom": 3
+    },
+    {
+        "name": "h3",
+        "path": "newcomputermodern/otf/NewCMSans10-Bold.otf",
+        "size": 24,
+        "ascend": 27,
+        "descend": 8,
+        "padding_top": 3,
+        "padding_bottom": 2
+    },
+    {
+        "name": "h4",
+        "path": "newcomputermodern/otf/NewCMSans10-Book.otf",
+        "size": 24,
+        "ascend": 27,
+        "descend": 8,
+        "padding_top": 3,
+        "padding_bottom": 2
+    },
+    {
+        "name": "h5",
+        "path": "newcomputermodern/otf/NewCMSans10-BookOblique.otf",
+        "size": 24,
+        "ascend": 27,
+        "descend": 8,
+        "padding_top": 3,
+        "padding_bottom": 2
+    },
+    {
+        "name": "h6",
+        "path": "newcomputermodern/otf/NewCMSans10-Book.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    },
+    {
+        "name": "emojis",
+        "path": "Noto_Color_Emoji/NotoColorEmoji-Regular.ttf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
+    }
+]

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import sys, os.path, gettext
+import sys, os.path, gettext, json
 
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
@@ -34,42 +34,16 @@ gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
 AppInfo.init_lemma_version('@lemma_version@')
 Paths.init('@resources_path@')
 
+Settings.init()
+
 # setup fonts
 font_path = os.path.join(Paths.get_resources_folder(), 'fonts')
+font_theme = Settings.get_value('font_theme')
+with open(os.path.join(font_path, font_theme + '.json'), 'r') as file:
+    for data in json.load(file):
+        TextShaper.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
+        TextRenderer.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
 
-TextShaper.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), 19.407, 21, 7, 0, 1)
-TextShaper.add_font('bold', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Bold.otf'), 19.407, 21, 7, 0, 1)
-TextShaper.add_font('bolditalic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-BoldItalic.otf'), 19.407, 21, 7, 0, 1)
-TextShaper.add_font('italic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Italic.otf'), 19.407, 21, 7, 0, 1)
-TextShaper.add_font('mono', os.path.join(font_path, 'newcomputermodern/otf/NewCMMono10-Book.otf'), 19.407, 21, 7, 0, 1)
-TextShaper.add_font('math', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), 19.407, 21, 7, 0, 1)
-TextShaper.add_font('math_small', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), 14, 12, 2, 0, 0)
-TextShaper.add_font('teaser', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'), 14, 16, 4, 0, 0)
-TextShaper.add_font('h1', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), 32, 38, 11, 4, 4)
-TextShaper.add_font('h2', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), 28, 33, 11, 4, 3)
-TextShaper.add_font('h3', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), 24, 27, 8, 3, 2)
-TextShaper.add_font('h4', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), 24, 27, 8, 3, 2)
-TextShaper.add_font('h5', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-BookOblique.otf'), 24, 27, 8, 3, 2)
-TextShaper.add_font('h6', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), 19.407, 21, 7, 0, 1)
-TextShaper.add_font('emojis', os.path.join(font_path, 'Noto_Color_Emoji/NotoColorEmoji-Regular.ttf'), 19.407, 21, 7, 0, 1)
-
-TextRenderer.add_font('book', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Book.otf'), 19.407, 21, 7)
-TextRenderer.add_font('bold', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Bold.otf'), 19.407, 21, 7)
-TextRenderer.add_font('bolditalic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-BoldItalic.otf'), 19.407, 21, 7)
-TextRenderer.add_font('italic', os.path.join(font_path, 'newcomputermodern/otf/NewCM10-Italic.otf'), 19.407, 21, 7)
-TextRenderer.add_font('mono', os.path.join(font_path, 'newcomputermodern/otf/NewCMMono10-Book.otf'), 19.407, 21, 7)
-TextRenderer.add_font('math', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), 19.407, 21, 7)
-TextRenderer.add_font('math_small', os.path.join(font_path, 'newcomputermodern/otf/NewCMMath-Book.otf'), 14, 12, 2)
-TextRenderer.add_font('teaser', os.path.join(font_path, 'newcomputermodern/otf/NewCM08-Book.otf'), 14, 16, 4)
-TextRenderer.add_font('h1', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), 32, 38, 11)
-TextRenderer.add_font('h2', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), 28, 33, 11)
-TextRenderer.add_font('h3', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Bold.otf'), 24, 27, 8)
-TextRenderer.add_font('h4', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), 24, 27, 8)
-TextRenderer.add_font('h5', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-BookOblique.otf'), 24, 27, 8)
-TextRenderer.add_font('h6', os.path.join(font_path, 'newcomputermodern/otf/NewCMSans10-Book.otf'), 19.407, 21, 7)
-TextRenderer.add_font('emojis', os.path.join(font_path, 'Noto_Color_Emoji/NotoColorEmoji-Regular.ttf'), 19.407, 21, 7)
-
-Settings.init()
 DocumentRepo.init()
 WorkspaceRepo.init(DocumentRepo)
 
