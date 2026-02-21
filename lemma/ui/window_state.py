@@ -39,7 +39,7 @@ class WindowState(object):
 
         self.restore_window_state()
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'mode_set')
         MessageBus.subscribe(self, 'settings_changed')
         MessageBus.subscribe(self, 'sidebar_visibility_changed')
@@ -48,7 +48,7 @@ class WindowState(object):
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'mode_set' in messages or 'settings_changed' in messages or 'sidebar_visibility_changed' in messages:
+        if 'new_active_document' in messages or 'mode_set' in messages or 'settings_changed' in messages or 'sidebar_visibility_changed' in messages:
             self.update()
 
     @timer.timer

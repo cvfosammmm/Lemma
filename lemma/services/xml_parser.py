@@ -36,6 +36,7 @@ class XMLParser(object):
         self.nodes = []
         self.current_node = None
         self.open_xml_tags = []
+        self.meta = dict()
 
         self.level = 0
         self.current_link = [None for i in range(20)]
@@ -80,6 +81,13 @@ class XMLParser(object):
             self.current_tags[self.level].add('verbatim')
         if tag == 'mark':
             self.current_tags[self.level].add('highlight')
+
+        if tag == 'meta' and 'name' in attrs and 'content' in attrs:
+            try:
+                value = float(attrs['content'])
+            except ValueError:
+                value = attrs['content']
+            self.meta[attrs['name']] = value
 
         if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl']:
             if 'indentation_level' in attrs:

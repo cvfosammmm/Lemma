@@ -91,7 +91,7 @@ class DocumentList(object):
         self.view.context_menu.delete_document_button.connect('clicked', self.on_delete_document_clicked)
         self.view.context_menu.popover.connect('closed', self.on_context_menu_close)
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'new_document')
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'document_ast_changed')
@@ -103,7 +103,7 @@ class DocumentList(object):
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'mode_set' in messages:
+        if 'new_active_document' in messages or 'mode_set' in messages:
             self.update_active_document()
 
         if 'new_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'document_title_changed' in messages:

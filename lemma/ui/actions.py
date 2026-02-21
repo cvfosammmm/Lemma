@@ -98,7 +98,7 @@ class Actions(object):
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
 
-        MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'new_document')
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
@@ -114,7 +114,7 @@ class Actions(object):
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_or_cursor_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
+        if 'new_active_document' in messages or 'new_document' in messages or 'document_removed' in messages or 'document_ast_or_cursor_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
             self.update()
 
     def on_clipboard_changed(self, clipboard):

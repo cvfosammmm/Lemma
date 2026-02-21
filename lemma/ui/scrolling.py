@@ -21,6 +21,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.services.layout_info import LayoutInfo
+from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
 
@@ -46,11 +47,22 @@ class DocumentScrolling():
         MessageBus.subscribe(self, 'undo_executed')
         MessageBus.subscribe(self, 'redo_executed')
         MessageBus.subscribe(self, 'new_active_document')
+        MessageBus.subscribe(self, 'history_changed')
 
     def animate(self):
         messages = MessageBus.get_messages(self)
+
         if 'new_active_document' in messages:
-            self.scroll_to_xy(0, 0, animation_type=None)
+            if 'history_changed' in messages:
+                self.scroll_to_xy(0, 0, animation_type=None)
+            else:
+                document = WorkspaceRepo.get_workspace().get_active_document()
+
+                if 'scrolling_position_x' in document.meta and 'scrolling_position_y' in document.meta:
+                    self.scroll_to_xy(document.meta['scrolling_position_x'], document.meta['scrolling_position_y'], animation_type=None)
+                else:
+                    self.scroll_to_xy(0, 0, animation_type=None)
+
         if 'cursor_movement' in messages or 'undo_executed' in messages or 'redo_executed' in messages:
             self.scroll_insert_on_screen(animation_type='default')
 
@@ -119,6 +131,9 @@ class DocumentScrolling():
 
         self.last_scroll_scheduled = time.time()
         self.last_scroll_animation_type = animation_type
+
+        UseCases.set_metadata('scrolling_position_x', x)
+        UseCases.set_metadata('scrolling_position_y', y)
 
     def get_current_scrolling_offsets(self):
         document = WorkspaceRepo.get_workspace().get_active_document()

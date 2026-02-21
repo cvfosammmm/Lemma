@@ -44,6 +44,7 @@ class Document():
         self.cursor = Cursor(self, self.ast[0][0], self.ast[0][0])
         self.plaintext = None
         self.links = set()
+        self.meta = dict()
 
         self.change_flag = dict()
         self.query_cache = dict()
@@ -473,14 +474,16 @@ class Document():
 
     @timer.timer
     def get_xml(self):
-        if 'xml' not in self.query_cache:
-            xml = '<head><title>' + xml_helpers.escape(self.title) + '</title></head>'
-            xml += '<root>'
-            for paragraph in self.ast:
-                xml += paragraph.xml
-            xml += '</root>'
+        xml = '<head>'
+        for key, value in self.meta.items():
+            xml += '<meta name="' + key + '" content="' + str(value) + '" />'
+        xml += '<title>' + xml_helpers.escape(self.title) + '</title>'
+        xml += '</head>'
+        xml += '<root>'
+        for paragraph in self.ast:
+            xml += paragraph.xml
+        xml += '</root>'
 
-            self.query_cache['xml'] = xml
-        return self.query_cache['xml']
+        return xml
 
 

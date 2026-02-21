@@ -57,6 +57,7 @@ class History(object):
         self.view.content.add_controller(self.primary_click_controller)
 
         MessageBus.subscribe(self, 'history_changed')
+        MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_title_changed')
         MessageBus.subscribe(self, 'mode_set')
 
@@ -64,7 +65,7 @@ class History(object):
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'history_changed' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
+        if 'history_changed' in messages or 'new_active_document' in messages or 'document_title_changed' in messages or 'mode_set' in messages:
             self.update()
 
     @timer.timer

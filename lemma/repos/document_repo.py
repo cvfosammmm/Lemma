@@ -156,6 +156,7 @@ class DocumentRepo():
             document.ast.remove(document.ast[0])
 
         document.title = parser.title
+        document.meta = parser.meta
         document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
         document.update()
         document.change_flag[DocumentRepo] = False

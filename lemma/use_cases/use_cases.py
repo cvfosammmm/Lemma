@@ -182,7 +182,8 @@ class UseCases():
 
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('mode_set')
-        MessageBus.add_message('history_changed')
+        if update_history:
+            MessageBus.add_message('history_changed')
         MessageBus.add_message('new_active_document')
 
     def bookmark_document(document_id):
@@ -244,6 +245,16 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_title_changed')
+
+    @timer.timer
+    def set_metadata(key, value):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        document.meta[key] = value
+        document.update_last_modified()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
 
     @timer.timer
     def im_commit(text, tags=set()):
