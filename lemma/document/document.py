@@ -72,6 +72,15 @@ class Document():
 
         return new_function
 
+    def set_title(self, title):
+        self.title = title
+        self.update_last_modified()
+        self.update()
+
+    def set_metadata(self, key, value):
+        self.meta[key] = value
+        self.update_last_modified()
+
     @undoable_action
     def insert_paragraph(self, paragraph, index):
         if not ASTValidator.validate_paragraph(paragraph): return

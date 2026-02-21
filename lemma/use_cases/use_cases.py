@@ -238,9 +238,7 @@ class UseCases():
     def set_title(title):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.title = title
-        document.update_last_modified()
-        document.update()
+        document.set_title(title)
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -250,8 +248,7 @@ class UseCases():
     def set_metadata(key, value):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.meta[key] = value
-        document.update_last_modified()
+        document.set_metadata(key, value)
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
