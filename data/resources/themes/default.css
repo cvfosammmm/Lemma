@@ -74,7 +74,7 @@
 @define-color history_hover #00000011;
 
 /* Toolbar */
-@define-color toolbar_fg #000000ff;
+@define-color toolbar_fg rgba(0, 0, 0, 0.8);
 @define-color toolbar_border #00000030;
 @define-color toolbar_bg @view_bg_color;
 @define-color toolbar_selected_bg rgba(0, 0, 0, 0.16);
