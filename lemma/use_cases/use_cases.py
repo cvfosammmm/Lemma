@@ -211,6 +211,13 @@ class UseCases():
         MessageBus.add_message('bookmarks_changed')
 
     @timer.timer
+    def cache_scrolling_position(x, y):
+        workspace = WorkspaceRepo.get_workspace()
+        document = workspace.get_active_document()
+
+        workspace.cache_scrolling_position(document.id, x, y)
+
+    @timer.timer
     def undo():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
@@ -243,15 +250,6 @@ class UseCases():
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_title_changed')
-
-    @timer.timer
-    def set_metadata(key, value):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        document.set_metadata(key, value)
-
-        DocumentRepo.update(document)
-        MessageBus.add_message('document_changed')
 
     @timer.timer
     def im_commit(text, tags=set()):

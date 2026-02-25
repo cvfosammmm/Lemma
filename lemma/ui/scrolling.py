@@ -56,10 +56,11 @@ class DocumentScrolling():
             if 'history_changed' in messages:
                 self.scroll_to_xy(0, 0, animation_type=None)
             else:
-                document = WorkspaceRepo.get_workspace().get_active_document()
-
-                if 'scrolling_position_x' in document.meta and 'scrolling_position_y' in document.meta:
-                    self.scroll_to_xy(document.meta['scrolling_position_x'], document.meta['scrolling_position_y'], animation_type=None)
+                workspace = WorkspaceRepo.get_workspace()
+                document = workspace.get_active_document()
+                pos = workspace.get_scrolling_position(document.id)
+                if pos != None:
+                    self.scroll_to_xy(pos[0], pos[1], animation_type=None)
                 else:
                     self.scroll_to_xy(0, 0, animation_type=None)
 
@@ -132,8 +133,7 @@ class DocumentScrolling():
         self.last_scroll_scheduled = time.time()
         self.last_scroll_animation_type = animation_type
 
-        UseCases.set_metadata('scrolling_position_x', x)
-        UseCases.set_metadata('scrolling_position_y', y)
+        UseCases.cache_scrolling_position(x, y)
 
     def get_current_scrolling_offsets(self):
         document = WorkspaceRepo.get_workspace().get_active_document()

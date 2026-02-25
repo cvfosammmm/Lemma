@@ -25,6 +25,8 @@ class Workspace():
 
         self.active_document = None
         self.history = []
+        self.scrolling_positions = dict()
+        
         self.bookmarked_document_ids = []
 
         self.in_draft_mode = False
@@ -34,6 +36,9 @@ class Workspace():
             self.add_to_history(document.id)
 
         self.active_document = document
+
+    def cache_scrolling_position(self, document_id, x, y):
+        self.scrolling_positions[document_id] = (x, y)
 
     def enter_draft_mode(self):
         self.in_draft_mode = True
@@ -79,6 +84,11 @@ class Workspace():
 
     def get_active_document_id(self):
         return self.active_document.id if self.active_document != None else None
+
+    def get_scrolling_position(self, document_id):
+        if document_id in self.scrolling_positions:
+            return self.scrolling_positions[document_id]
+        return None
 
     def get_mode(self):
         if self.in_draft_mode:
