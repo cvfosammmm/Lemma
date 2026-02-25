@@ -227,7 +227,7 @@ class Autocomplete():
         # Triggered on tab, if ac is inactive,
         # also when nodes are inserted in the document ast.
 
-        if len(self.command_at_cursor) >= 2:
+        if len(self.command_at_cursor) >= 1:
             self.is_active = True
             self.session_first_node = self.command_at_cursor_first_node
 
