@@ -129,6 +129,7 @@ class Document():
                     self.delete_nodes(start_node, last_node)
                     self.insert_nodes(nodes, last_node)
                     self.set_insert_and_selection_node(insert_node)
+                    return
 
     @undoable_action
     def delete_selected_nodes(self):
