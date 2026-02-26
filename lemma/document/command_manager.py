@@ -68,20 +68,30 @@ class CommandManager():
 
     def undo(self):
         undoable_action = self.undoable_actions[self.last_undoable_action]
+        self.last_undoable_action -= 1
+        if len(undoable_action) == 1:
+            command_type = type(undoable_action[0])
+            if command_type == resize_widget.Command:
+                while self.can_undo() and len(self.undoable_actions[self.last_undoable_action]) == 1 and type(self.undoable_actions[self.last_undoable_action][0]) == command_type:
+                    undoable_action = self.undoable_actions[self.last_undoable_action] + undoable_action
+                    self.last_undoable_action -= 1
 
         for command in reversed(undoable_action):
             command.undo(self.document)
             self.document.update()
 
-        self.last_undoable_action -= 1
-
     def redo(self):
         undoable_action = self.undoable_actions[self.last_undoable_action + 1]
+        self.last_undoable_action += 1
+        if len(undoable_action) == 1:
+            command_type = type(undoable_action[0])
+            if command_type == resize_widget.Command:
+                while self.can_redo() and len(self.undoable_actions[self.last_undoable_action + 1]) == 1 and type(self.undoable_actions[self.last_undoable_action + 1][0]) == command_type:
+                    undoable_action = undoable_action + self.undoable_actions[self.last_undoable_action + 1]
+                    self.last_undoable_action += 1
 
         for command in undoable_action:
             command.run(self.document)
             self.document.update()
-
-        self.last_undoable_action += 1
 
 
