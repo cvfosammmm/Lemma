@@ -212,7 +212,10 @@ class Document():
         self.command_manager.add_command('move_cursor_to_node', node, next_node)
 
     def update_implicit_x_position(self):
-        self.command_manager.add_command('update_implicit_x_position')
+        x, y = self.get_absolute_xy(self.cursor.get_insert_node().layout)
+        self.cursor.update_implicit_x_position(x)
+
+        self.update_last_cursor_movement()
 
     def undo(self):
         self.command_manager.undo()
