@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.services.node_type_db import NodeTypeDB
 import os.path
 
 
@@ -69,12 +70,15 @@ class CommandManager():
     def undo(self):
         undoable_action = self.undoable_actions[self.last_undoable_action]
         self.last_undoable_action -= 1
-        if len(undoable_action) == 1:
-            command_type = type(undoable_action[0])
-            if command_type == resize_widget.Command:
-                while self.can_undo() and len(self.undoable_actions[self.last_undoable_action]) == 1 and type(self.undoable_actions[self.last_undoable_action][0]) == command_type:
-                    undoable_action = self.undoable_actions[self.last_undoable_action] + undoable_action
-                    self.last_undoable_action -= 1
+
+        if self.resize_group_match(undoable_action):
+            while self.can_undo() and self.resize_group_match(self.undoable_actions[self.last_undoable_action]):
+                undoable_action = self.undoable_actions[self.last_undoable_action] + undoable_action
+                self.last_undoable_action -= 1
+        elif self.word_group_match(undoable_action):
+            while self.can_undo() and self.word_group_match(self.undoable_actions[self.last_undoable_action]):
+                undoable_action = self.undoable_actions[self.last_undoable_action] + undoable_action
+                self.last_undoable_action -= 1
 
         for command in reversed(undoable_action):
             command.undo(self.document)
@@ -83,15 +87,24 @@ class CommandManager():
     def redo(self):
         undoable_action = self.undoable_actions[self.last_undoable_action + 1]
         self.last_undoable_action += 1
-        if len(undoable_action) == 1:
-            command_type = type(undoable_action[0])
-            if command_type == resize_widget.Command:
-                while self.can_redo() and len(self.undoable_actions[self.last_undoable_action + 1]) == 1 and type(self.undoable_actions[self.last_undoable_action + 1][0]) == command_type:
-                    undoable_action = undoable_action + self.undoable_actions[self.last_undoable_action + 1]
-                    self.last_undoable_action += 1
+
+        if self.resize_group_match(undoable_action):
+            while self.can_redo() and self.resize_group_match(self.undoable_actions[self.last_undoable_action + 1]):
+                undoable_action = undoable_action + self.undoable_actions[self.last_undoable_action + 1]
+                self.last_undoable_action += 1
+        elif self.word_group_match(undoable_action):
+            while self.can_redo() and self.word_group_match(self.undoable_actions[self.last_undoable_action + 1]):
+                undoable_action = undoable_action + self.undoable_actions[self.last_undoable_action + 1]
+                self.last_undoable_action += 1
 
         for command in undoable_action:
             command.run(self.document)
             self.document.update()
+
+    def resize_group_match(self, undoable_action):
+        return (len(undoable_action) == 1 and type(undoable_action[0]) == resize_widget.Command)
+
+    def word_group_match(self, undoable_action):
+        return (len(undoable_action) == 1 and type(undoable_action[0]) == insert_nodes.Command and len(undoable_action[0].nodes) == 1 and undoable_action[0].nodes[0].type == 'char' and not NodeTypeDB.is_whitespace(undoable_action[0].nodes[0]))
 
 
