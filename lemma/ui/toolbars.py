@@ -107,7 +107,7 @@ class ToolBars():
             self.toolbar.toolbar_widget_resizable.status_label.set_text(widget.get_status_text())
             layout = Pango.Layout(self.toolbar.toolbar_widget_resizable.status_label.get_pango_context())
             layout.set_text(widget.get_longest_possible_status_text())
-            self.toolbar.toolbar_widget_resizable.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 20, -1)
+            self.toolbar.toolbar_widget_resizable.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 30, -1)
 
             self.toolbar.toolbar_widget_resizable.scale.set_range(widget.get_minimum_width(), LayoutInfo.get_max_layout_width())
 
