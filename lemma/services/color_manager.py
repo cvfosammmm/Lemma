@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class ColorManager(object):
+class ColorManager():
 
     main_window = None
     rgba_cache = dict()

@@ -25,8 +25,6 @@ import urllib.parse
 import html2text
 from PIL import Image as PIL_Image
 
-from lemma.services.html_exporter import HTMLExporter
-from lemma.services.paths import Paths
 from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 

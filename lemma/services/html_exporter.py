@@ -21,66 +21,63 @@ import os, os.path, shutil
 from lemma.services.character_db import CharacterDB
 
 
-class HTMLExporter(object):
+class HTMLExporter():
 
-    def __init__(self):
-        self.files_folder = None
-        self.document_id = None
-        self.html = ''
+    files_folder = None
+    html = ''
 
-    def export_document(self, document, filename):
-        self.document_id = document.id
-        self.files_folder = filename[:-3] + '_files'
+    def export_document(document, filename):
+        HTMLExporter.files_folder = filename[:-3] + '_files'
 
-        if os.path.exists(self.files_folder): shutil.rmtree(self.files_folder)
-        os.mkdir(self.files_folder)
+        if os.path.exists(HTMLExporter.files_folder): shutil.rmtree(HTMLExporter.files_folder)
+        os.mkdir(HTMLExporter.files_folder)
 
-        self.html = '<html>\n'
+        HTMLExporter.html = '<html>\n'
 
-        self.html += '<head>\n'
-        self.html += '<title>' + document.title + '</title>\n'
-        self.html += '</head>\n'
+        HTMLExporter.html += '<head>\n'
+        HTMLExporter.html += '<title>' + document.title + '</title>\n'
+        HTMLExporter.html += '</head>\n'
 
-        self.html += '<body>\n'
-        self.html += '<h1>' + document.title + '</h1>\n'
+        HTMLExporter.html += '<body>\n'
+        HTMLExporter.html += '<h1>' + document.title + '</h1>\n'
 
         for i, paragraph in enumerate(document.ast):
             if paragraph.style in ['ul', 'ol']:
                 if i == 0 or paragraph.style != document.ast[i-1].style:
-                    self.html += '<' + paragraph.style + '><li>'
+                    HTMLExporter.html += '<' + paragraph.style + '><li>'
                 else:
-                    self.html += '<li>'
+                    HTMLExporter.html += '<li>'
             elif paragraph.style == 'cl':
                 if i == 0 or paragraph.style != document.ast[i-1].style:
-                    self.html += '<ul><li>'
+                    HTMLExporter.html += '<ul><li>'
                 else:
-                    self.html += '<li>'
+                    HTMLExporter.html += '<li>'
             else:
-                self.html += '<' + paragraph.style + '>'
+                HTMLExporter.html += '<' + paragraph.style + '>'
 
-            node_lists = self.group_by_node_type(paragraph.children)
+            node_lists = HTMLExporter.group_by_node_type(paragraph.children)
 
             for node_list in node_lists:
-                self.process_list(node_list)
+                HTMLExporter.process_list(node_list)
 
             if paragraph.style in ['ul', 'ol']:
                 if i == len(document.ast) - 1 or paragraph.style != document.ast[i+1].style:
-                    self.html += '</li></' + paragraph.style + '>'
+                    HTMLExporter.html += '</li></' + paragraph.style + '>'
                 else:
-                    self.html += '</li>'
+                    HTMLExporter.html += '</li>'
             elif paragraph.style == 'cl':
                 if i == len(document.ast) - 1 or paragraph.style != document.ast[i+1].style:
-                    self.html += '</li></ul>'
+                    HTMLExporter.html += '</li></ul>'
                 else:
-                    self.html += '</li>'
+                    HTMLExporter.html += '</li>'
             else:
-                self.html += '</' + paragraph.style + '>\n'
-        self.html += '</body>\n'
+                HTMLExporter.html += '</' + paragraph.style + '>\n'
+        HTMLExporter.html += '</body>\n'
 
-        self.html += '</html>'
-        return self.html
+        HTMLExporter.html += '</html>'
+        return HTMLExporter.html
 
-    def group_by_node_type(self, node_list):
+    def group_by_node_type(node_list):
         last_type = None
         last_tags = set()
         last_link = None
@@ -95,14 +92,14 @@ class HTMLExporter(object):
 
         return result
 
-    def process_list(self, node_list):
+    def process_list(node_list):
         if node_list[0].type == 'char':
-            self.process_word(node_list)
+            HTMLExporter.process_word(node_list)
         else:
             for node in node_list:
-                self.process_node(node)
+                HTMLExporter.process_node(node)
 
-    def process_word(self, node_list):
+    def process_word(node_list):
         if len(node_list) == 0: return
 
         text = ''
@@ -121,64 +118,64 @@ class HTMLExporter(object):
         if node.link != None:
             text = '<a href="' + urllib.parse.quote(node.link) + '.html">' + text + '</a>'
 
-        self.html += text
+        HTMLExporter.html += text
 
-    def process_node(self, node):
+    def process_node(node):
         if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
             if node.parent.type == 'paragraph':
-                self.html += '<math>'
-            self.html += node.value
+                HTMLExporter.html += '<math>'
+            HTMLExporter.html += node.value
             if node.parent.type == 'paragraph':
-                self.html += '</math>'
+                HTMLExporter.html += '</math>'
         elif node.type == 'mathscript':
             if node.parent.type == 'paragraph':
-                self.html += '<math>'
-            self.html += '<msubsup>'
-            self.html += '<mn>'
-            self.process_node(node[0])
-            self.html += '</mn>'
-            self.html += '<mn>'
-            self.process_node(node[1])
-            self.html += '</mn>'
-            self.html += '</msubsup>'
+                HTMLExporter.html += '<math>'
+            HTMLExporter.html += '<msubsup>'
+            HTMLExporter.html += '<mn>'
+            HTMLExporter.process_node(node[0])
+            HTMLExporter.html += '</mn>'
+            HTMLExporter.html += '<mn>'
+            HTMLExporter.process_node(node[1])
+            HTMLExporter.html += '</mn>'
+            HTMLExporter.html += '</msubsup>'
             if node.parent.type == 'paragraph':
-                self.html += '</math>'
+                HTMLExporter.html += '</math>'
         elif node.type == 'mathfraction':
             if node.parent.type == 'paragraph':
-                self.html += '<math>'
-            self.html += '<mfrac>'
-            self.html += '<mn>'
-            self.process_node(node[0])
-            self.html += '</mn>'
-            self.html += '<mn>'
-            self.process_node(node[1])
-            self.html += '</mn>'
-            self.html += '</mfrac>'
+                HTMLExporter.html += '<math>'
+            HTMLExporter.html += '<mfrac>'
+            HTMLExporter.html += '<mn>'
+            HTMLExporter.process_node(node[0])
+            HTMLExporter.html += '</mn>'
+            HTMLExporter.html += '<mn>'
+            HTMLExporter.process_node(node[1])
+            HTMLExporter.html += '</mn>'
+            HTMLExporter.html += '</mfrac>'
             if node.parent.type == 'paragraph':
-                self.html += '</math>'
+                HTMLExporter.html += '</math>'
         elif node.type == 'mathroot':
             if node.parent.type == 'paragraph':
-                self.html += '<math>'
-            self.html += '<mroot>'
-            self.html += '<mtext>'
-            self.process_node(node[0])
-            self.html += '</mtext>'
-            self.html += '<mtext>'
-            self.process_node(node[1])
-            self.html += '</mtext>'
-            self.html += '</mroot>'
+                HTMLExporter.html += '<math>'
+            HTMLExporter.html += '<mroot>'
+            HTMLExporter.html += '<mtext>'
+            HTMLExporter.process_node(node[0])
+            HTMLExporter.html += '</mtext>'
+            HTMLExporter.html += '<mtext>'
+            HTMLExporter.process_node(node[1])
+            HTMLExporter.html += '</mtext>'
+            HTMLExporter.html += '</mroot>'
             if node.parent.type == 'paragraph':
-                self.html += '</math>'
+                HTMLExporter.html += '</math>'
         elif node.type == 'mathlist':
             for child in node:
-                self.process_node(child)
+                HTMLExporter.process_node(child)
         elif node.type == 'char':
-            self.html += node.value
+            HTMLExporter.html += node.value
         elif node.type == 'placeholder':
-            self.html += '<placeholder value="' + node.value + '"/>'
+            HTMLExporter.html += '<placeholder value="' + node.value + '"/>'
         elif node.type == 'widget':
-            self.html += node.value.to_html(self.files_folder)
+            HTMLExporter.html += node.value.to_html(HTMLExporter.files_folder)
         elif node.type == 'end':
-            self.html += '<end/>'
+            HTMLExporter.html += '<end/>'
 
 

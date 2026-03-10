@@ -71,9 +71,7 @@ class Dialog(object):
                 if not filename.endswith('.md'):
                     filename += '.md'
 
-                exporter = HTMLExporter()
-                html = exporter.export_document(self.document, filename)
-
+                html = HTMLExporter.export_document(self.document, filename)
                 html = html.replace('.html">', '.md">')
                 markdown = html2text.html2text(html)
 

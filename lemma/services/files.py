@@ -21,12 +21,12 @@ import os.path, shutil, subprocess
 from lemma.services.paths import Paths
 
 
-class Files(object):
+class Files():
 
     image_format_dict = {'BLP': '.blp', 'BMP': '.bmp', 'DIB': '.dib', 'BUFR': '.bufr', 'CUR': '.cur', 'PCX': '.pcx', 'DCX': '.dcx', 'DDS': '.dds', 'EPS': '.eps', 'FITS': '.fit', 'FLI': '.flc', 'FPX': '.fpx', 'FTEX': '.ftc', 'GBR': '.gbr', 'GIF': '.gif', 'GRIB': '.grib', 'HDF5': '.hdf', 'PNG': '.png', 'JPEG2000': '.jp2', 'ICNS': '.icns', 'ICO': '.ico', 'IM': '.im', 'IPTC': '.iim', 'JPEG': '.jpg', 'TIFF': '.tif', 'MIC': '.mic', 'MPEG': '.mpg', 'MSP': '.msp', 'PCD': '.pcd', 'PIXAR': '.pxr', 'PPM': '.ppm', 'PSD': '.psd', 'QOI': '.qoi', 'SGI': '.sgi', 'SUN': '.ras', 'TGA': '.tga', 'WEBP': '.webp', 'WMF': '.wmf', 'XBM': '.xbm', 'XPM': '.xpm'}
 
     def get_extension_from_image_format(image_format):
-        return FileFormatDB.image_format_dict[image_format]
+        return Files.image_format_dict[image_format]
 
     def add_file_with_distinct_name(document, origin):
         target = os.path.join(Paths.get_notes_folder(), str(document.id) + '_files/' + os.path.basename(origin))

@@ -115,9 +115,7 @@ class Dialog(object):
                 document = DocumentRepo.get_by_id(document_id)
                 filename = os.path.join(temp_dir, str(document.id) + '.md')
 
-                exporter = HTMLExporter()
-                html = exporter.export_document(document, filename)
-
+                html = HTMLExporter.export_document(document, filename)
                 html = html.replace('.html">', '.md">')
                 markdown = html2text.html2text(html)
 

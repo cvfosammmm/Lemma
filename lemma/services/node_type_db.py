@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class NodeTypeDB(object):
+class NodeTypeDB():
 
     def can_hold_cursor(node):
         return node.type != 'mathlist' and node.type != 'paragraph' and node.type != 'root'

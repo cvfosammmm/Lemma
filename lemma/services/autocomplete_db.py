@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 
-class AutocompleteDB(object):
+class AutocompleteDB():
 
     stylized_latex_to_xml = {
         'textendash': '–',
