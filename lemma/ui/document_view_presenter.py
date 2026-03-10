@@ -219,19 +219,11 @@ class DocumentViewPresenter():
 
         if layout['type'] == 'widget':
             widget = layout['node'].value
-            surface = widget.get_cairo_surface()
+
             fontname = layout['fontname']
             top = -TextShaper.get_descend(fontname=fontname)
 
-            matrix = ctx.get_matrix()
-            widget_factor_x = widget.get_width() * self.hidpi_factor / widget.get_original_width()
-            widget_factor_y = widget.get_height() * self.hidpi_factor / widget.get_original_height()
-            ctx.scale(widget_factor_x, widget_factor_y)
-
-            ctx.set_source_surface(surface, (offset_x + layout['x']) * self.hidpi_factor / widget_factor_x, (offset_y + layout['y'] + top) * self.hidpi_factor / widget_factor_y)
-            ctx.paint()
-
-            ctx.set_matrix(matrix)
+            widget.draw(ctx, offset_x + layout['x'], offset_y + layout['y'] + top, self.hidpi_factor, fontname)
 
         if layout['type'] == 'placeholder':
             fontname = layout['fontname']

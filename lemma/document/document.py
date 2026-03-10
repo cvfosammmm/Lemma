@@ -25,6 +25,7 @@ from lemma.document.layouter import Layouter
 from lemma.document.plaintext_scanner import PlaintextScanner
 from lemma.services.character_db import CharacterDB
 from lemma.document.links_scanner import LinksScanner
+from lemma.document.files_scanner import FilesScanner
 from lemma.document.xml_scanner import XMLScanner
 from lemma.services.ast_validator import ASTValidator
 from lemma.services.node_type_db import NodeTypeDB
@@ -44,6 +45,7 @@ class Document():
         self.cursor = Cursor(self, self.ast[0][0], self.ast[0][0])
         self.plaintext = None
         self.links = set()
+        self.files = set()
 
         self.change_flag = dict()
         self.query_cache = dict()
@@ -52,6 +54,7 @@ class Document():
         self.layouter = Layouter(self)
         self.plaintext_scanner = PlaintextScanner(self)
         self.links_scanner = LinksScanner(self)
+        self.files_scanner = FilesScanner(self)
         self.xml_scanner = XMLScanner(self)
 
     def start_undoable_action(self):
@@ -241,6 +244,7 @@ class Document():
         self.layouter.update()
         self.plaintext_scanner.update()
         self.links_scanner.update()
+        self.files_scanner.update()
         self.xml_scanner.update()
 
     def has_changed(self, client):
@@ -298,13 +302,13 @@ class Document():
     def selected_widget_is_max(self):
         if 'selected_widget_is_max' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()
-            self.query_cache['selected_widget_is_max'] = (self.widget_selected() and (selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width() or not selected_nodes[0].value.is_resizable()))
+            self.query_cache['selected_widget_is_max'] = (self.widget_selected() and (not selected_nodes[0].value.is_resizable() or selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width()))
         return self.query_cache['selected_widget_is_max']
 
     def selected_widget_is_min(self):
         if 'selected_widget_is_min' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()
-            self.query_cache['selected_widget_is_min'] = (self.widget_selected() and (selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width() or not selected_nodes[0].value.is_resizable()))
+            self.query_cache['selected_widget_is_min'] = (self.widget_selected() and (not selected_nodes[0].value.is_resizable() or selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width()))
         return self.query_cache['selected_widget_is_min']
 
     def get_insert_node(self):

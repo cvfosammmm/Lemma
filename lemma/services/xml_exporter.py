@@ -88,11 +88,7 @@ class XMLExporter():
             xml = '<char>' + xml_helpers.escape(node.value) + '</char>'
 
         if node.type == 'widget':
-            data = node.value.get_data()
-            attributes = ''
-            for key, value in node.value.get_attributes().items():
-                attributes += ' ' + key + '="' + value + '"'
-            xml = '<widget' + attributes + '><![CDATA[' + str(data) + ']]></widget>'
+            xml = node.value.to_xml()
 
         if node.type == 'placeholder':
             xml = '<placeholder/>'

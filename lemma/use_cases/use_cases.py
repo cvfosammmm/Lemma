@@ -26,6 +26,8 @@ import lemma.services.xml_parser as xml_parser
 import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
 from lemma.services.regex import RegexService
+from lemma.services.paths import Paths
+from lemma.services.files import Files
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.document.ast import Node
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -377,6 +379,13 @@ class UseCases():
 
         insert_position = document.get_insert_node().get_position()
         for paragraph in paragraphs:
+            for node in paragraph:
+                if node.type == 'widget':
+                    for filename in node.value.get_filenames():
+                        origin = os.path.join(Paths.get_notes_folder(), filename)
+                        new_name = Files.add_file_with_distinct_name(document, origin)
+                        node.value.change_filename(filename, new_name)
+
             insert_node = document.get_insert_node()
             if insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
                 document.insert_paragraph(paragraph, document.ast.index(insert_node.paragraph()))
@@ -454,12 +463,12 @@ class UseCases():
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
 
-    def add_image(image):
+    def add_widget(widget):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.start_undoable_action()
         document.delete_selected_nodes()
-        node = Node('widget', image)
+        node = Node('widget', widget)
         document.insert_nodes([node])
         document.update_implicit_x_position()
         document.end_undoable_action()

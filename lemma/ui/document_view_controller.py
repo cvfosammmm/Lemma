@@ -115,7 +115,12 @@ class DocumentViewController():
             link = document.get_link_at_xy(x, y)
             leaf_layout = document.get_leaf_layout_at_xy(x, y)
 
-            if n_press == 1:
+            if leaf_layout != None and leaf_layout['node'].type == 'widget':
+                leaf_layout['node'].value.on_primary_button_press(n_press, x, y)
+                if n_press == 1:
+                    UseCases.select_node(leaf_layout['node'])
+
+            elif n_press == 1:
                 if int(keyboard_state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
                     UseCases.move_cursor_to_xy(x, y, True)
 
@@ -261,7 +266,7 @@ class DocumentViewController():
                     image = Image(data)
 
                     UseCases.move_cursor_to_xy(x, y)
-                    UseCases.add_image(image)
+                    UseCases.add_widget(image)
 
         elif isinstance(value, str):
             text = value
@@ -280,7 +285,7 @@ class DocumentViewController():
             image = Image(data)
 
             UseCases.move_cursor_to_xy(x, y)
-            UseCases.add_image(image)
+            UseCases.add_widget(image)
 
     def on_drop_enter(self, controller, x, y):
         self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)

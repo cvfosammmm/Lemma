@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import lemma.ui.dialogs.about as about
+import lemma.ui.dialogs.attach_files as attach_files
 import lemma.ui.dialogs.export_bulk as export_bulk
 import lemma.ui.dialogs.export_markdown as export_markdown
 import lemma.ui.dialogs.export_image as export_image
@@ -30,6 +31,7 @@ class DialogLocator():
     def __init__(self, main_window):
         self.dialogs = dict()
         self.dialogs['about'] = about.Dialog(main_window)
+        self.dialogs['attach_files'] = attach_files.Dialog(main_window)
         self.dialogs['export_bulk'] = export_bulk.Dialog(main_window)
         self.dialogs['export_markdown'] = export_markdown.Dialog(main_window)
         self.dialogs['export_image'] = export_image.Dialog(main_window)

@@ -19,10 +19,10 @@ import urllib.parse
 import os.path, io
 from PIL import Image as PIL_Image
 import cairo
-import math
 
 from lemma.services.layout_info import LayoutInfo
-from lemma.services.file_format_db import FileFormatDB
+from lemma.services.files import Files
+from lemma.services.text_shaper import TextShaper
 import lemma.services.timer as timer
 
 
@@ -30,6 +30,8 @@ class Image(object):
 
     @timer.timer
     def __init__(self, data, attributes=dict()):
+        self.allocation = (0, 0)
+
         self.data = data
         self.width = None
         self.height = None
@@ -49,62 +51,81 @@ class Image(object):
         else:
             self.set_width(min(self.original_width, LayoutInfo.get_max_layout_width()))
 
+    def get_type(self):
+        return 'image'
+
+    def get_filenames(self):
+        return set()
+
+    def change_filename(self, name_from, name_to):
+        pass
+
     def set_width(self, width):
         self.width = width
-        self.height = int((width / self.original_width) * self.original_height)
+        self.height = int((self.width / self.original_width) * self.original_height)
 
-    def get_width(self):
-        return self.width
+    def allocate_size(self, fontname):
+        self.allocation = (self.width, self.height - 2 * TextShaper.get_descend(fontname))
 
-    def get_minimum_width(self):
-        return LayoutInfo.get_min_image_size()
+    def get_allocation(self):
+        return self.allocation
 
-    def get_height(self):
-        return self.height
+    def draw(self, ctx, offset_x, offset_y, hidpi_factor, fontname):
+        matrix = ctx.get_matrix()
+        scaling_factor_x = self.width * hidpi_factor / self.original_width
+        scaling_factor_y = self.height * hidpi_factor / self.original_height
+        ctx.scale(scaling_factor_x, scaling_factor_y)
 
-    def get_original_width(self):
-        return self.original_width
+        ctx.set_source_surface(self.cairo_surface, offset_x * hidpi_factor / scaling_factor_x, offset_y * hidpi_factor / scaling_factor_y)
+        ctx.paint()
 
-    def get_original_height(self):
-        return self.original_height
-
-    def get_format(self):
-        return self.format
-
-    def get_cairo_surface(self):
-        return self.cairo_surface
+        ctx.set_matrix(matrix)
 
     def get_cursor_name(self):
         return 'default'
 
-    def get_status_text(self):
-        size_string = str(self.get_width()) + ' × ' + str(self.get_height())
-        return self.get_format() + _(' Image') + ' (' + size_string + ')'
-
-    def get_longest_possible_status_text(self):
-        max_width = LayoutInfo.get_max_layout_width()
-        max_height = int((max_width / self.get_original_width()) * self.get_original_height())
-        max_digits = len(str(max_width)) + len(str(max_height))
-        return self.get_format() + _(' Image') + ' ( × ' + max_digits * '0' + ')'
+    def on_primary_button_press(self, n_press, x, y):
+        pass
 
     def is_resizable(self):
         return True
 
+    def to_xml(self):
+        return '<widget type="image" width="' + str(self.width) + '"><![CDATA[' + str(self.data) + ']]></widget>'
+
+    def to_html(self, data_folder_dest):
+        with PIL_Image.open(io.BytesIO(self.data)) as pil_image:
+            file_no = len(os.listdir(data_folder_dest))
+            file_ending = Files.get_extension_from_image_format(pil_image.format)
+            filename = os.path.join(data_folder_dest, str(file_no) + file_ending)
+            pil_image.save(filename)
+        return '<img src="' + urllib.parse.quote(os.path.split(os.path.dirname(filename))[-1] + '/' + os.path.basename(filename)) + '" width="' + str(self.width) + '" />'
+
+    # image specific functions below
+
+    def get_status_text(self):
+        size_string = str(self.width) + ' × ' + str(self.height)
+        return self.format + _(' Image') + ' (' + size_string + ')'
+
+    def get_longest_possible_status_text(self):
+        max_width = LayoutInfo.get_max_layout_width()
+        max_height = int((max_width / self.original_width) * self.original_height)
+        max_digits = len(str(max_width)) + len(str(max_height))
+        return self.format + _(' Image') + ' ( × ' + max_digits * '0' + ')'
+
+    def get_width(self):
+        return self.width
+
+    def get_height(self):
+        return self.height
+
     def get_data(self):
         return self.data
 
-    def get_attributes(self):
-        return {'type': 'image', 'width': str(self.get_width())}
+    def get_minimum_width(self):
+        return LayoutInfo.get_min_image_size()
 
-    def to_html(self, data_location_prefix):
-        with PIL_Image.open(io.BytesIO(self.data)) as pil_image:
-            file_ending = FileFormatDB.get_ending_from_format_name(pil_image.format)
-            filename = data_location_prefix + file_ending
-            pil_image.save(filename)
-        return '<img src="' + urllib.parse.quote(os.path.split(os.path.dirname(filename))[1] + '/' + os.path.basename(filename)) + '" width="' + str(self.get_width()) + '" />'
-
-    def save_as(self, filename):
-        with PIL_Image.open(io.BytesIO(self.data)) as pil_image:
-            pil_image.save(filename)
+    def get_original_width(self):
+        return self.original_width
 
 

@@ -75,6 +75,7 @@ class Actions(object):
         self.add_simple_action('increase-indent', self.increase_indent)
 
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
+        self.add_simple_action('show-attach-files-dialog', self.show_attach_files_dialog)
 
         self.add_simple_action('widget-shrink', self.widget_shrink)
         self.add_simple_action('widget-enlarge', self.widget_enlarge)
@@ -148,6 +149,7 @@ class Actions(object):
         self.actions['select-all'].set_enabled(document != None)
         self.actions['remove-selection'].set_enabled(document != None and document.has_selection())
         self.actions['show-insert-image-dialog'].set_enabled(document != None and document.insert_parent_is_root())
+        self.actions['show-attach-files-dialog'].set_enabled(document != None and document.insert_parent_is_root())
         self.actions['widget-shrink'].set_enabled(document != None and not document.selected_widget_is_min())
         self.actions['widget-enlarge'].set_enabled(document != None and not document.selected_widget_is_max())
         self.actions['open-link'].set_enabled(document != None and document.cursor_inside_link())
@@ -267,7 +269,7 @@ class Actions(object):
             xml += XMLExporter.export_paragraph(nodes, paragraph.style, paragraph.indentation_level, paragraph.state)
         content_providers.append(Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode())))
 
-        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget':
+        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.get_type() == 'image':
             data = selected_nodes[0].value.get_data()
             content_providers.append(Gdk.ContentProvider.new_for_bytes('image/png', GLib.Bytes(data)))
 
@@ -295,7 +297,7 @@ class Actions(object):
         texture = clipboard.read_texture_finish(result)
         data = texture.save_to_png_bytes().unref_to_data()
         image = Image(data)
-        UseCases.add_image(image)
+        UseCases.add_widget(image)
 
     def on_paste_text(self, clipboard, result):
         text = clipboard.read_text_finish(result)
@@ -408,6 +410,11 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         self.application.dialog_locator.get_dialog('insert_image').run()
+
+    def show_attach_files_dialog(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+
+        self.application.dialog_locator.get_dialog('attach_files').run()
 
     def widget_shrink(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()

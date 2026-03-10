@@ -32,8 +32,8 @@ class ToolBarsView(Gtk.ActionBar):
         self.toolbar_main = ToolBarMain()
         self.mode_stack.add_named(self.toolbar_main, 'main')
 
-        self.toolbar_widget_resizable = ToolBarWidgetResizable()
-        self.mode_stack.add_named(self.toolbar_widget_resizable, 'widget_resizable')
+        self.toolbar_image = ToolBarImage()
+        self.mode_stack.add_named(self.toolbar_image, 'image')
 
         self.toolbar_right = ToolBarRight()
         self.pack_end(self.toolbar_right)
@@ -194,8 +194,14 @@ class ToolBarMain(Gtk.Box):
         self.image_button.set_can_focus(False)
         self.image_button.set_tooltip_text(_('Insert Image'))
 
+        self.files_button = Gtk.Button.new_from_icon_name('attach-files-symbolic')
+        self.files_button.set_action_name('win.show-attach-files-dialog')
+        self.files_button.set_can_focus(False)
+        self.files_button.set_tooltip_text(_('Attach File(s)'))
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.image_button)
+        box.append(self.files_button)
         self.append(box)
 
         self.link_buttons_separator = Gtk.Separator()
@@ -213,7 +219,7 @@ class ToolBarMain(Gtk.Box):
         self.append(box)
 
 
-class ToolBarWidgetResizable(Gtk.Box):
+class ToolBarImage(Gtk.Box):
 
     def __init__(self):
         Gtk.Box.__init__(self)

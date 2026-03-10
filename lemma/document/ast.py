@@ -75,6 +75,7 @@ class Paragraph():
         self.xml = None
         self.plaintext = None
         self.links = None
+        self.files = None
         self.type = 'paragraph'
 
         self.style = 'p'
@@ -86,6 +87,7 @@ class Paragraph():
         self.xml = None
         self.plaintext = None
         self.links = None
+        self.files = None
 
     def set_parent(self, parent):
         self.parent = parent

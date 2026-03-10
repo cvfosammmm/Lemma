@@ -20,6 +20,7 @@ import io
 
 from lemma.document.ast import Paragraph, Node
 from lemma.widgets.image import Image
+from lemma.widgets.attachment import Attachment
 import lemma.services.xml_helpers as xml_helpers
 
 
@@ -146,6 +147,8 @@ class XMLParser(object):
             if tag == 'widget' and self.current_node.type == 'widget':
                 if self.current_attributes['type'] == 'image':
                     self.current_node.value = Image(eval(self.widget_data), attributes=self.current_attributes)
+                elif self.current_attributes['type'] == 'attachment' and 'filename' in self.current_attributes:
+                    self.current_node.value = Attachment(self.current_attributes['filename'])
 
             if self.current_node.parent != None:
                 self.current_node = self.current_node.parent

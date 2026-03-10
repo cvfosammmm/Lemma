@@ -19,14 +19,12 @@ import urllib.parse
 import os, os.path, shutil
 
 from lemma.services.character_db import CharacterDB
-from lemma.services.paths import Paths
 
 
 class HTMLExporter(object):
 
     def __init__(self):
         self.files_folder = None
-        self.file_no = 0
         self.document_id = None
         self.html = ''
 
@@ -36,8 +34,6 @@ class HTMLExporter(object):
 
         if os.path.exists(self.files_folder): shutil.rmtree(self.files_folder)
         os.mkdir(self.files_folder)
-
-        self.file_no = 0
 
         self.html = '<html>\n'
 
@@ -181,8 +177,7 @@ class HTMLExporter(object):
         elif node.type == 'placeholder':
             self.html += '<placeholder value="' + node.value + '"/>'
         elif node.type == 'widget':
-            self.html += node.value.to_html(os.path.join(self.files_folder, str(self.file_no)))
-            self.file_no += 1
+            self.html += node.value.to_html(self.files_folder)
         elif node.type == 'end':
             self.html += '<end/>'
 

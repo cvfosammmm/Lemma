@@ -22,7 +22,7 @@ class NodeTypeDB(object):
         return node.type != 'mathlist' and node.type != 'paragraph' and node.type != 'root'
 
     def focus_on_click(node):
-        return node.type in {'widget', 'placeholder'}
+        return node.type in {'placeholder'}
 
     def is_whitespace(node):
         return node.type == 'eol' or (node.type == 'char' and node.value.isspace())

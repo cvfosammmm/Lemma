@@ -36,7 +36,7 @@ class ToolBars():
 
         self.tags_at_cursor = set()
 
-        self.toolbar.toolbar_widget_resizable.scale.connect('change-value', self.on_widget_scale_change_value)
+        self.toolbar.toolbar_image.scale.connect('change-value', self.on_widget_scale_change_value)
 
         controller = Gtk.GestureClick()
         controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
@@ -99,24 +99,24 @@ class ToolBars():
         edit_link_visible = ((not active_document.has_selection()) and cursor_inside_link)
 
         selected_nodes = active_document.get_selected_nodes()
-        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.is_resizable():
+        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.get_type() == 'image':
             widget = selected_nodes[0].value
 
-            self.toolbar.mode_stack.set_visible_child_name('widget_resizable')
+            self.toolbar.mode_stack.set_visible_child_name('image')
 
-            self.toolbar.toolbar_widget_resizable.status_label.set_text(widget.get_status_text())
-            layout = Pango.Layout(self.toolbar.toolbar_widget_resizable.status_label.get_pango_context())
+            self.toolbar.toolbar_image.status_label.set_text(widget.get_status_text())
+            layout = Pango.Layout(self.toolbar.toolbar_image.status_label.get_pango_context())
             layout.set_text(widget.get_longest_possible_status_text())
-            self.toolbar.toolbar_widget_resizable.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 30, -1)
+            self.toolbar.toolbar_image.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 30, -1)
 
-            self.toolbar.toolbar_widget_resizable.scale.set_range(widget.get_minimum_width(), LayoutInfo.get_max_layout_width())
+            self.toolbar.toolbar_image.scale.set_range(widget.get_minimum_width(), LayoutInfo.get_max_layout_width())
 
-            self.toolbar.toolbar_widget_resizable.scale.set_value(widget.get_width())
-            self.toolbar.toolbar_widget_resizable.scale.clear_marks()
+            self.toolbar.toolbar_image.scale.set_value(widget.get_width())
+            self.toolbar.toolbar_image.scale.clear_marks()
 
             orig_width = widget.get_original_width()
             if orig_width > widget.get_minimum_width() and orig_width < LayoutInfo.get_max_layout_width():
-                self.toolbar.toolbar_widget_resizable.scale.add_mark(orig_width, Gtk.PositionType.TOP)
+                self.toolbar.toolbar_image.scale.add_mark(orig_width, Gtk.PositionType.TOP)
         else:
             if edit_link_visible:
                 self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Edit Link') + ' (Ctrl+L)')
@@ -148,6 +148,7 @@ class ToolBars():
         self.toolbar.toolbar_main.ol_button.set_visible(Settings.get_value('button_visible_ol'))
         self.toolbar.toolbar_main.cl_button.set_visible(Settings.get_value('button_visible_cl'))
         self.toolbar.toolbar_main.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
+        self.toolbar.toolbar_main.files_button.set_visible(Settings.get_value('button_visible_attach_files'))
         self.toolbar.toolbar_main.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
 
         tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic') or Settings.get_value('button_visible_verbatim') or Settings.get_value('button_visible_highlight')
@@ -159,7 +160,7 @@ class ToolBars():
         indentation_buttons_visible = Settings.get_value('button_visible_decrease_indent') or Settings.get_value('button_visible_increase_indent')
         self.toolbar.toolbar_main.indentation_buttons_separator.set_visible(indentation_buttons_visible)
 
-        insert_buttons_visible = Settings.get_value('button_visible_insert_image')
+        insert_buttons_visible = Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files')
         self.toolbar.toolbar_main.insert_buttons_separator.set_visible(insert_buttons_visible)
 
         link_buttons_visible = Settings.get_value('button_visible_insert_link')

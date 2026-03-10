@@ -20,9 +20,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gio, GLib
 
-import os.path, shutil, os
+import os.path, shutil, os, io
 import urllib.parse
 import html2text
+from PIL import Image as PIL_Image
 
 from lemma.services.html_exporter import HTMLExporter
 from lemma.services.paths import Paths
@@ -71,6 +72,7 @@ class Dialog(object):
                 if not filename.endswith('.png'):
                     filename += '.png'
 
-                self.image.save_as(filename)
+                with PIL_Image.open(io.BytesIO(self.image.data)) as pil_image:
+                    pil_image.save(filename)
 
 

@@ -59,6 +59,7 @@ class Settings():
         Settings.defaults['button_visible_decrease_indent'] = False
         Settings.defaults['button_visible_increase_indent'] = False
         Settings.defaults['button_visible_insert_image'] = True
+        Settings.defaults['button_visible_attach_files'] = True
         Settings.defaults['button_visible_insert_link'] = True
 
         Settings.data = Settings.defaults
