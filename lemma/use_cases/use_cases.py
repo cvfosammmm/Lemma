@@ -377,7 +377,7 @@ class UseCases():
                 if node.type == 'widget':
                     for filename in node.value.get_filenames():
                         origin = os.path.join(Files.get_notes_folder(), filename)
-                        new_name = Files.add_file_with_distinct_name(document, origin)
+                        new_name = Files.add_file_to_doc_folder_with_distinct_name(document, origin)
                         node.value.change_filename(filename, new_name)
 
             insert_node = document.get_insert_node()

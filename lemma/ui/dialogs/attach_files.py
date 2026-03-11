@@ -51,7 +51,7 @@ class Dialog(object):
         else:
             for file in files:
                 origin = file.get_path()
-                filename = Files.add_file_with_distinct_name(document, origin)
+                filename = Files.add_file_to_doc_folder_with_distinct_name(document, origin)
 
                 widget = Attachment(filename)
                 UseCases.add_widget(widget)

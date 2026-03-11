@@ -56,7 +56,7 @@ class DocumentRepo():
                     del(stubs[document_id])
                 else:
                     document = DocumentRepo.get_by_id(document_id)
-                    DocumentRepo.document_stubs_by_id[document_id] = {'id': document_id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
+                    DocumentRepo.document_stubs_by_id[document_id] = {'id': document_id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links, 'files': document.files}
                     pathname = os.path.join(Files.get_stubs_folder(), str(document.id))
                     with open(pathname, 'wb') as filehandle:
                         pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
@@ -82,6 +82,14 @@ class DocumentRepo():
             del(DocumentRepo.saving_schedule[document_id])
 
             DocumentRepo.save_document(document, can_wait=False)
+
+        for stub in DocumentRepo.document_stubs_by_id.values():
+            if 'files' in stub and len(stub['files']) > 0:
+                for filename in Files.get_document_files_list(stub['id']):
+                    if filename not in stub['files']:
+                        Files.delete_document_file(filename)
+            else:
+                Files.delete_document_files(stub['id'])
 
         for thread in threading.enumerate():
             try:
@@ -169,7 +177,7 @@ class DocumentRepo():
     def add(document):
         if document.id in DocumentRepo.document_stubs_by_id: return
 
-        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
+        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links, 'files': document.files}
         DocumentRepo.save_document(document, can_wait=False)
         DocumentRepo.max_document_id = max(document.id, DocumentRepo.max_document_id)
 
@@ -195,11 +203,13 @@ class DocumentRepo():
             os.remove(pathname)
         except FileNotFoundError: pass
 
+        Files.delete_document_files(document_id)
+
     @timer.timer
     def update(document):
         if not document.has_changed(DocumentRepo): return
 
-        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
+        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links, 'files': document.files}
         DocumentRepo.save_document(document, can_wait=True)
 
     @timer.timer
