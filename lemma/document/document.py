@@ -18,7 +18,7 @@
 import time
 
 import lemma.services.xml_helpers as xml_helpers
-import lemma.services.xml_parser as xml_parser
+from lemma.services.xml_parser import XMLParser
 from lemma.document.ast import Root, Cursor
 from lemma.document.command_manager import CommandManager
 from lemma.document.layouter import Layouter
@@ -119,13 +119,12 @@ class Document():
                     length = len(chars) - i
                     text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
                     xml = xml_helpers.embellish_with_link_and_tags(text, None, first_node.tags)
-                    parser = xml_parser.XMLParser()
                     start_node = last_node
                     for i in range(length):
                         start_node = start_node.prev_in_parent()
 
                     nodes = []
-                    paragraphs = parser.parse(xml)
+                    title, paragraphs = XMLParser.parse(xml)
                     for paragraph in paragraphs:
                         nodes += paragraph.children
 

@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import xml.parsers.expat
-import io
 
 from lemma.document.ast import Paragraph, Node
 from lemma.widgets.image import Image
@@ -24,7 +23,16 @@ from lemma.widgets.attachment import Attachment
 import lemma.services.xml_helpers as xml_helpers
 
 
-class XMLParser(object):
+class XMLParser():
+
+    def parse(xml_string):
+        parser = XMLParserObject()
+        paragraphs = parser.parse(xml_string)
+
+        return parser.title, paragraphs
+
+
+class XMLParserObject(object):
 
     def __init__(self):
         self.expat_parser = None

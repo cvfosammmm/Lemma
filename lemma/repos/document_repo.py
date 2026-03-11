@@ -146,8 +146,7 @@ class DocumentRepo():
         with open(pathname, 'r') as file:
             xml = file.read()
 
-        parser = XMLParser()
-        paragraphs = parser.parse(xml)
+        title, paragraphs = XMLParser.parse(xml)
         if paragraphs != None:
             for paragraph in paragraphs:
                 if len(paragraph) > 0 and paragraph[-1].type == 'eol':
@@ -155,7 +154,7 @@ class DocumentRepo():
         if len(document.ast) > 1:
             document.ast.remove(document.ast[0])
 
-        document.title = parser.title
+        document.title = title
         document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
         document.update()
         document.change_flag[DocumentRepo] = False

@@ -22,8 +22,8 @@ import time, io
 from markdown_it import MarkdownIt
 
 import lemma.services.xml_helpers as xml_helpers
-import lemma.services.xml_parser as xml_parser
 import lemma.services.xml_exporter as xml_exporter
+from lemma.services.xml_parser import XMLParser
 from lemma.services.settings import Settings
 from lemma.services.regex import RegexService
 from lemma.services.files import Files
@@ -257,8 +257,7 @@ class UseCases():
 
         link_at_cursor = document.get_link_at_cursor()
         xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags.copy())
-        parser = xml_parser.XMLParser()
-        paragraphs = parser.parse(xml)
+        title, paragraphs = XMLParser.parse(xml)
 
         document.start_undoable_action()
         document.delete_selected_nodes()
@@ -321,8 +320,8 @@ class UseCases():
             xml = xml_helpers.escape(line)
             xml = RegexService.get_regex(r'((?:http://|https://)[a-zA-Z0-9\.\/\&\?=\-_#]*)').sub(r'<a href="\1">\1</a>', xml)
 
-            parser = xml_parser.XMLParser()
-            paragraph = parser.parse(xml)[0]
+            title, paragraphs = XMLParser.parse(xml)
+            paragraph = paragraphs[0]
 
             insert_node = document.get_insert_node()
             if insert_node.parent.type == 'paragraph' and insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
@@ -339,10 +338,8 @@ class UseCases():
         MessageBus.add_message('cursor_movement')
 
     def replace_section(document, node_from, node_to, xml):
-        parser = xml_parser.XMLParser()
-
         nodes = []
-        paragraphs = parser.parse(xml)
+        title, paragraphs = XMLParser.parse(xml)
         for paragraph in paragraphs:
             nodes += paragraph.children
 
@@ -369,8 +366,7 @@ class UseCases():
                 prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
                 xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
 
-        parser = xml_parser.XMLParser()
-        paragraphs = parser.parse(xml)
+        title, paragraphs = XMLParser.parse(xml)
 
         document.start_undoable_action()
         document.delete_selected_nodes()
