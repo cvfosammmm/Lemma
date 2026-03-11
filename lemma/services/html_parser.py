@@ -25,7 +25,7 @@ from lemma.services.layout_info import LayoutInfo
 
 class HTMLParser():
 
-    def run(html, path):
+    def parse(html, path):
         parser = HTMLParserObject(html, path)
         parser.run()
 

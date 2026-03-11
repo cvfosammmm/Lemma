@@ -97,7 +97,7 @@ class UseCases():
         html = mdi.render(markdown)
         html = html.replace('.md">', '">')
 
-        title, ast = HTMLParser.run(html, os.path.dirname(path))
+        title, ast = HTMLParser.parse(html, os.path.dirname(path))
 
         if title != None:
             document.title = title
