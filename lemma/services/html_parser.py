@@ -23,7 +23,16 @@ from lemma.widgets.image import Image
 from lemma.services.layout_info import LayoutInfo
 
 
-class HTMLParser(HTMLParserLib):
+class HTMLParser():
+
+    def run(html, path):
+        parser = HTMLParserObject(html, path)
+        parser.run()
+
+        return parser.title, parser.root
+
+
+class HTMLParserObject(HTMLParserLib):
 
     def __init__(self, html, path):
         HTMLParserLib.__init__(self)

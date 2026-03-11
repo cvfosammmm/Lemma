@@ -97,15 +97,14 @@ class UseCases():
         html = mdi.render(markdown)
         html = html.replace('.md">', '">')
 
-        parser = HTMLParser(html, os.path.dirname(path))
-        parser.run()
+        title, ast = HTMLParser.run(html, os.path.dirname(path))
 
-        if parser.title != None:
-            document.title = parser.title
+        if title != None:
+            document.title = title
         else:
             document.title = os.path.basename(path)[:-3]
 
-        document.ast = parser.root
+        document.ast = ast
         document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
         document.update_last_modified()
         document.update()
