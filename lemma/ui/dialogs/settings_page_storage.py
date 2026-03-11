@@ -22,7 +22,7 @@ from gi.repository import Gtk, Gdk, Graphene
 import os, shutil
 
 from lemma.services.color_manager import ColorManager
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 import lemma.services.timer as timer
 
 
@@ -35,10 +35,10 @@ class PageStorage(object):
 
     @timer.timer
     def init(self):
-        self.view.folder_label.set_text(Paths.get_notes_folder())
+        self.view.folder_label.set_text(Files.get_notes_folder())
 
-        lemma_disk_space = sum([file.stat().st_size for file in os.scandir(Paths.get_notes_folder())])
-        total_disk_space, used_disk_space, free_disk_space = shutil.disk_usage(Paths.get_notes_folder())
+        lemma_disk_space = sum([file.stat().st_size for file in os.scandir(Files.get_notes_folder())])
+        total_disk_space, used_disk_space, free_disk_space = shutil.disk_usage(Files.get_notes_folder())
         system_disk_space = used_disk_space - lemma_disk_space
 
         self.view.disk_used_label.set_text('{0:.2f} GB Used'.format(used_disk_space / 1024 / 1024 / 1024))

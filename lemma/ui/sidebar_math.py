@@ -28,7 +28,7 @@ import os.path
 from lemma.services.color_manager import ColorManager
 from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 from lemma.services.character_db import CharacterDB
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
@@ -415,7 +415,7 @@ class SidebarMath(object):
         wrapbox = Adw.WrapBox()
         wrapbox.set_line_spacing(0)
 
-        res_path = Paths.get_resources_folder()
+        res_path = Files.get_resources_folder()
         for data in symbols:
             pic = Icon(os.path.join(res_path, 'icons_sidebar', 'sidebar-' + data[0] + '-symbolic.svg'))
             button = Gtk.Button()

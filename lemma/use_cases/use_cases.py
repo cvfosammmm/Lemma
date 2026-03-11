@@ -26,7 +26,6 @@ import lemma.services.xml_parser as xml_parser
 import lemma.services.xml_exporter as xml_exporter
 from lemma.services.settings import Settings
 from lemma.services.regex import RegexService
-from lemma.services.paths import Paths
 from lemma.services.files import Files
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.document.ast import Node
@@ -382,7 +381,7 @@ class UseCases():
             for node in paragraph:
                 if node.type == 'widget':
                     for filename in node.value.get_filenames():
-                        origin = os.path.join(Paths.get_notes_folder(), filename)
+                        origin = os.path.join(Files.get_notes_folder(), filename)
                         new_name = Files.add_file_with_distinct_name(document, origin)
                         node.value.change_filename(filename, new_name)
 

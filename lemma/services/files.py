@@ -16,20 +16,50 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 import os.path, shutil, subprocess
-
-
-from lemma.services.paths import Paths
+from xdg.BaseDirectory import xdg_config_home
 
 
 class Files():
 
+    resources_folder = None
+
     image_format_dict = {'BLP': '.blp', 'BMP': '.bmp', 'DIB': '.dib', 'BUFR': '.bufr', 'CUR': '.cur', 'PCX': '.pcx', 'DCX': '.dcx', 'DDS': '.dds', 'EPS': '.eps', 'FITS': '.fit', 'FLI': '.flc', 'FPX': '.fpx', 'FTEX': '.ftc', 'GBR': '.gbr', 'GIF': '.gif', 'GRIB': '.grib', 'HDF5': '.hdf', 'PNG': '.png', 'JPEG2000': '.jp2', 'ICNS': '.icns', 'ICO': '.ico', 'IM': '.im', 'IPTC': '.iim', 'JPEG': '.jpg', 'TIFF': '.tif', 'MIC': '.mic', 'MPEG': '.mpg', 'MSP': '.msp', 'PCD': '.pcd', 'PIXAR': '.pxr', 'PPM': '.ppm', 'PSD': '.psd', 'QOI': '.qoi', 'SGI': '.sgi', 'SUN': '.ras', 'TGA': '.tga', 'WEBP': '.webp', 'WMF': '.wmf', 'XBM': '.xbm', 'XPM': '.xpm'}
+
+    def init(resources_folder):
+        Files.resources_folder = resources_folder
+
+        pathname = Files.get_user_themes_folder()
+        if not os.path.exists(pathname): os.makedirs(pathname)
+
+        pathname = Files.get_notes_folder()
+        if not os.path.exists(pathname): os.makedirs(pathname)
+
+        pathname = Files.get_stubs_folder()
+        if not os.path.exists(pathname): os.makedirs(pathname)
+
+        pathname = Files.get_config_folder()
+        if not os.path.isdir(pathname): os.makedirs(pathname)
+
+    def get_config_folder():
+        return os.path.join(xdg_config_home, 'lemma')
+
+    def get_user_themes_folder():
+        return os.path.expanduser(Files.get_config_folder() + '/themes')
+
+    def get_resources_folder():
+        return Files.resources_folder
 
     def get_extension_from_image_format(image_format):
         return Files.image_format_dict[image_format]
 
-    def add_file_with_distinct_name(document, origin):
-        target = os.path.join(Paths.get_notes_folder(), str(document.id) + '_files/' + os.path.basename(origin))
+    def get_notes_folder():
+        return os.path.expanduser(Files.get_config_folder() + '/notes')
+
+    def get_stubs_folder():
+        return os.path.expanduser(Files.get_config_folder() + '/stubs')
+
+    def add_file_to_doc_folder_with_distinct_name(document, origin):
+        target = os.path.join(Files.get_notes_folder(), str(document.id) + '_files/' + os.path.basename(origin))
         target_full = target
 
         count = 0
@@ -45,10 +75,10 @@ class Files():
             shutil.copyfile(origin, target_full)
         except shutil.SameFileError: pass
 
-        return os.path.relpath(target_full, Paths.get_notes_folder())
+        return os.path.relpath(target_full, Files.get_notes_folder())
 
     def open(filename):
-        path = os.path.join(Paths.get_notes_folder(), filename)
+        path = os.path.join(Files.get_notes_folder(), filename)
         subprocess.call(['xdg-open', path])
 
 

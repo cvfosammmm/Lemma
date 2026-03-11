@@ -29,7 +29,7 @@ import os.path
 import lib.freetype2.freetype2 as freetype2
 import lemma.services.timer as timer
 
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 
 
 class TextRenderer():
@@ -57,7 +57,7 @@ class TextRenderer():
         return TextRenderer.icon_cache[(icon_name, scale, default_color, highlight_color)]
 
     def load_icon_surface(icon_name, scale=1, default_color=None, highlight_color=None):
-        res_path = Paths.get_resources_folder()
+        res_path = Files.get_resources_folder()
         rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons', 'hicolor', 'scalable', 'actions', icon_name + '.svg'))
 
         if default_color != None:
@@ -109,7 +109,7 @@ class TextRenderer():
         surface = cairo.ImageSurface(cairo.Format.ARGB32, int(width), int(height))
         ctx = cairo.Context(surface)
 
-        res_path = Paths.get_resources_folder()
+        res_path = Files.get_resources_folder()
         filename = 'emoji_u' + hex(ord(char))[2:] + '.svg'
         rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/svg', filename))
         rsvg_handle.render_document(ctx, viewport)

@@ -24,7 +24,7 @@ import os.path, os, pickle, time, threading
 from lemma.document.document import Document
 from lemma.document.ast import Paragraph
 from lemma.services.xml_parser import XMLParser
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
@@ -40,7 +40,7 @@ class DocumentRepo():
     @timer.timer
     def init():
         stubs = dict()
-        for direntry in os.scandir(Paths.get_stubs_folder()):
+        for direntry in os.scandir(Files.get_stubs_folder()):
             with open(direntry.path, 'rb') as file:
                 try:
                     stub = pickle.load(file)
@@ -48,7 +48,7 @@ class DocumentRepo():
                 else:
                     stubs[int(direntry.name)] = stub
 
-        for direntry in os.scandir(Paths.get_notes_folder()):
+        for direntry in os.scandir(Files.get_notes_folder()):
             if direntry.is_file() and direntry.name.isdigit():
                 document_id = int(direntry.name)
                 if document_id in stubs and direntry.stat().st_mtime >= stubs[document_id]['last_modified']:
@@ -57,7 +57,7 @@ class DocumentRepo():
                 else:
                     document = DocumentRepo.get_by_id(document_id)
                     DocumentRepo.document_stubs_by_id[document_id] = {'id': document_id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links}
-                    pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
+                    pathname = os.path.join(Files.get_stubs_folder(), str(document.id))
                     with open(pathname, 'wb') as filehandle:
                         pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
 
@@ -65,7 +65,7 @@ class DocumentRepo():
                         del(stubs[document_id])
 
         for document_id in stubs:
-            pathname = os.path.join(Paths.get_stubs_folder(), str(document_id))
+            pathname = os.path.join(Files.get_stubs_folder(), str(document_id))
             os.remove(pathname)
 
         if len(DocumentRepo.document_stubs_by_id) > 0:
@@ -137,7 +137,7 @@ class DocumentRepo():
         if document_id in DocumentRepo.saving_schedule:
             return DocumentRepo.saving_schedule[document_id][0]
 
-        pathname = os.path.join(Paths.get_notes_folder(), str(document_id))
+        pathname = os.path.join(Files.get_notes_folder(), str(document_id))
         if not os.path.isfile(pathname): return None
 
         document = Document(document_id)
@@ -185,13 +185,13 @@ class DocumentRepo():
             DocumentRepo.stub_saving_lock.release()
             DocumentRepo.document_saving_lock.release()
 
-        pathname = os.path.join(Paths.get_notes_folder(), str(document_id))
+        pathname = os.path.join(Files.get_notes_folder(), str(document_id))
         try:
             os.remove(pathname)
         except FileNotFoundError: pass
 
         del(DocumentRepo.document_stubs_by_id[document_id])
-        pathname = os.path.join(Paths.get_stubs_folder(), str(document_id))
+        pathname = os.path.join(Files.get_stubs_folder(), str(document_id))
         try:
             os.remove(pathname)
         except FileNotFoundError: pass
@@ -208,11 +208,11 @@ class DocumentRepo():
         if can_wait:
             DocumentRepo.saving_schedule[document.id] = (document, document.last_modified)
         else:
-            pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
+            pathname = os.path.join(Files.get_notes_folder(), str(document.id))
             xml = document.get_xml()
             DocumentRepo.write_document_to_disk(xml, pathname)
 
-            pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
+            pathname = os.path.join(Files.get_stubs_folder(), str(document.id))
             stub_file = pickle.dumps(DocumentRepo.document_stubs_by_id[document.id])
             DocumentRepo.write_stub_to_disk(stub_file, pathname)
 
@@ -228,12 +228,12 @@ class DocumentRepo():
             document = DocumentRepo.saving_schedule[document_id][0]
             del(DocumentRepo.saving_schedule[document_id])
 
-            pathname = os.path.join(Paths.get_notes_folder(), str(document.id))
+            pathname = os.path.join(Files.get_notes_folder(), str(document.id))
             xml = document.get_xml()
             thread = threading.Thread(target=DocumentRepo.write_document_to_disk, args=(xml, pathname))
             thread.start()
 
-            pathname = os.path.join(Paths.get_stubs_folder(), str(document.id))
+            pathname = os.path.join(Files.get_stubs_folder(), str(document.id))
             stub_file = pickle.dumps(DocumentRepo.document_stubs_by_id[document.id])
             thread = threading.Thread(target=DocumentRepo.write_stub_to_disk, args=(stub_file, pathname))
             thread.start()

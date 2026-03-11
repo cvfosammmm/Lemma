@@ -24,7 +24,7 @@ import os.path
 
 from lemma.services.color_manager import ColorManager
 from lemma.services.message_bus import MessageBus
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 from lemma.services.settings import Settings
 import lemma.services.timer as timer
 
@@ -39,7 +39,7 @@ class Colors(object):
         self.dark_mode_active = False
         self.style_manager = Adw.StyleManager.get_default()
         self.css_provider_dark = Gtk.CssProvider()
-        self.css_provider_dark.load_from_path(os.path.join(Paths.get_resources_folder(), 'themes', 'default-dark.css'))
+        self.css_provider_dark.load_from_path(os.path.join(Files.get_resources_folder(), 'themes', 'default-dark.css'))
 
         self.update_dark_mode()
         self.update_color_scheme()
@@ -72,9 +72,9 @@ class Colors(object):
     @timer.timer
     def update_colors(self):
         if self.color_scheme == 'default':
-            path = os.path.join(Paths.get_resources_folder(), 'themes', 'default.css')
+            path = os.path.join(Files.get_resources_folder(), 'themes', 'default.css')
         elif self.color_scheme == 'default-dark':
-            path = os.path.join(Paths.get_resources_folder(), 'themes', 'default-dark.css')
+            path = os.path.join(Files.get_resources_folder(), 'themes', 'default-dark.css')
         else:
             path = self.color_scheme
 

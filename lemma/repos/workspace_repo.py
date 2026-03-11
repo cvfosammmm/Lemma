@@ -18,7 +18,7 @@
 import os.path, os, pickle
 
 from lemma.workspace.workspace import Workspace
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 
 
 class WorkspaceRepo():
@@ -28,7 +28,7 @@ class WorkspaceRepo():
     def init(DocumentRepo):
         WorkspaceRepo.workspace = Workspace()
 
-        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
+        pathname = os.path.join(Files.get_notes_folder(), 'workspace')
         workspace_data = None
         if os.path.isfile(pathname):
             with open(pathname, 'rb') as file:
@@ -53,7 +53,7 @@ class WorkspaceRepo():
         return WorkspaceRepo.workspace
 
     def update(workspace):
-        pathname = os.path.join(Paths.get_notes_folder(), 'workspace')
+        pathname = os.path.join(Files.get_notes_folder(), 'workspace')
 
         try: filehandle = open(pathname, 'wb')
         except IOError: pass

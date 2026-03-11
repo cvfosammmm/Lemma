@@ -27,7 +27,6 @@ import os.path, os
 import lemma.ui.dialogs.export_bulk_view as view
 from lemma.services.html_exporter import HTMLExporter
 from lemma.services.settings import Settings
-from lemma.services.paths import Paths
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 

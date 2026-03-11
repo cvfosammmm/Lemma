@@ -25,7 +25,7 @@ import os.path
 
 from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
 import lemma.services.timer as timer
@@ -100,7 +100,7 @@ class SidebarEmojis(object):
         wrapbox.set_line_spacing(0)
         wrapbox.add_css_class('emoji')
 
-        res_path = Paths.get_resources_folder()
+        res_path = Files.get_resources_folder()
         for symbol in symbols:
             filename = 'emoji_u' + hex(ord(symbol))[2:] + '.png'
             pic = Gtk.Image.new_from_file(os.path.join(res_path, 'fonts/Noto_Color_Emoji/png', filename))

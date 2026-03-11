@@ -17,7 +17,7 @@
 
 import os, os.path, pickle
 
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 
 
 class Settings():
@@ -64,7 +64,7 @@ class Settings():
 
         Settings.data = Settings.defaults
 
-        try: filehandle = open(os.path.join(Paths.get_config_folder(), 'settings.pickle'), 'rb')
+        try: filehandle = open(os.path.join(Files.get_config_folder(), 'settings.pickle'), 'rb')
         except IOError: return False
         else:
             try: Settings.data = pickle.load(filehandle)
@@ -82,7 +82,7 @@ class Settings():
         Settings.data[item] = value
 
     def save():
-        try: filehandle = open(os.path.join(Paths.get_config_folder(), 'settings.pickle'), 'wb')
+        try: filehandle = open(os.path.join(Files.get_config_folder(), 'settings.pickle'), 'wb')
         except IOError: return False
         else: pickle.dump(Settings.data, filehandle)
 

@@ -20,7 +20,7 @@ import sys, os.path, gettext, json
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.app_info import AppInfo
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.services.timer import Timer
@@ -32,12 +32,12 @@ gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
 
 # init static variables
 AppInfo.init_lemma_version('@lemma_version@')
-Paths.init('@resources_path@')
+Files.init('@resources_path@')
 
 Settings.init()
 
 # setup fonts
-font_path = os.path.join(Paths.get_resources_folder(), 'fonts')
+font_path = os.path.join(Files.get_resources_folder(), 'fonts')
 font_theme = Settings.get_value('font_theme')
 with open(os.path.join(font_path, font_theme + '.json'), 'r') as file:
     for data in json.load(file):

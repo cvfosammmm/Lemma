@@ -18,7 +18,6 @@
 import urllib.parse
 import os.path, shutil
 
-from lemma.services.paths import Paths
 from lemma.services.files import Files
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
@@ -75,7 +74,7 @@ class Attachment(object):
         return '<widget type="attachment" filename="' + self.filename + '" />'
 
     def to_html(self, data_folder_dest):
-        path_origin = os.path.join(Paths.get_notes_folder(), self.filename)
+        path_origin = os.path.join(Files.get_notes_folder(), self.filename)
         path_dest = os.path.join(data_folder_dest, os.path.basename(self.filename))
 
         if not os.path.exists(data_folder_dest): os.makedirs(data_folder_dest)

@@ -30,7 +30,7 @@ from lemma.repos.document_repo import DocumentRepo
 from lemma.services.color_manager import ColorManager
 from lemma.ui.shortcuts import ShortcutController
 from lemma.use_cases.use_cases import UseCases
-from lemma.services.paths import Paths
+from lemma.services.files import Files
 import lemma.services.timer as timer
 
 
@@ -353,7 +353,7 @@ class DocumentList(object):
         viewport.width = 72
         viewport.height = 72
 
-        res_path = Paths.get_resources_folder()
+        res_path = Files.get_resources_folder()
         rsvg_handle = Rsvg.Handle.new_from_file(os.path.join(res_path, 'icons/hicolor/scalable/actions/no-results-symbolic.svg'))
         rsvg_handle.set_stylesheet(b'rect,path,ellipse,circle { fill: ' + sidebar_fg_4.to_string().encode() + b' !important; }')
         rsvg_handle.render_document(ctx, viewport)
