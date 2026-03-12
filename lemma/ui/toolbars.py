@@ -95,35 +95,21 @@ class ToolBars():
         active_document = WorkspaceRepo.get_workspace().get_active_document()
         if active_document == None: return
 
+        selected_nodes = active_document.get_selected_nodes()
         cursor_inside_link = active_document.get_insert_node().is_inside_link()
         edit_link_visible = ((not active_document.has_selection()) and cursor_inside_link)
 
-        selected_nodes = active_document.get_selected_nodes()
-        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.get_type() == 'image':
+        if active_document.widget_selected() and selected_nodes[0].value.has_toolbar():
             widget = selected_nodes[0].value
 
-            self.toolbar.mode_stack.set_visible_child_name('image')
-
-            self.toolbar.toolbar_image.status_label.set_text(widget.get_status_text())
-            layout = Pango.Layout(self.toolbar.toolbar_image.status_label.get_pango_context())
-            layout.set_text(widget.get_longest_possible_status_text())
-            self.toolbar.toolbar_image.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 30, -1)
-
-            self.toolbar.toolbar_image.scale.set_range(widget.get_minimum_width(), LayoutInfo.get_max_layout_width())
-
-            self.toolbar.toolbar_image.scale.set_value(widget.get_width())
-            self.toolbar.toolbar_image.scale.clear_marks()
-
-            orig_width = widget.get_original_width()
-            if orig_width > widget.get_minimum_width() and orig_width < LayoutInfo.get_max_layout_width():
-                self.toolbar.toolbar_image.scale.add_mark(orig_width, Gtk.PositionType.TOP)
+            self.toolbar.mode_stack.set_visible_child_name(widget.get_type())
+            widget.update_toolbar(self.toolbar.mode_stack.get_visible_child())
         else:
+            self.toolbar.mode_stack.set_visible_child_name('main')
             if edit_link_visible:
                 self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Edit Link') + ' (Ctrl+L)')
             else:
                 self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
-
-            self.toolbar.mode_stack.set_visible_child_name('main')
 
         self.update_button_visibility()
 

@@ -31,7 +31,7 @@ class Files():
         pathname = Files.get_user_themes_folder()
         if not os.path.exists(pathname): os.makedirs(pathname)
 
-        pathname = Files.get_notes_folder()
+        pathname = Files.get_documents_folder()
         if not os.path.exists(pathname): os.makedirs(pathname)
 
         pathname = Files.get_stubs_folder()
@@ -52,21 +52,21 @@ class Files():
     def get_extension_from_image_format(image_format):
         return Files.image_format_dict[image_format]
 
-    def get_notes_folder():
+    def get_documents_folder():
         return os.path.expanduser(Files.get_config_folder() + '/notes')
 
     def get_stubs_folder():
         return os.path.expanduser(Files.get_config_folder() + '/stubs')
 
     def get_document_files_list(document_id):
-        folder = os.path.join(Files.get_notes_folder(), str(document_id) + '_files')
+        folder = os.path.join(Files.get_documents_folder(), str(document_id) + '_files')
         if not os.path.exists(folder):
             return []
         else:
             return [str(document_id) + '_files/' + direntry.name for direntry in os.scandir(folder)]
 
     def add_file_to_doc_folder_with_distinct_name(document, origin):
-        target = os.path.join(Files.get_notes_folder(), str(document.id) + '_files/' + os.path.basename(origin))
+        target = os.path.join(Files.get_documents_folder(), str(document.id) + '_files/' + os.path.basename(origin))
         target_full = target
 
         count = 0
@@ -82,20 +82,26 @@ class Files():
             shutil.copyfile(origin, target_full)
         except shutil.SameFileError: pass
 
-        return os.path.relpath(target_full, Files.get_notes_folder())
+        return os.path.relpath(target_full, Files.get_documents_folder())
 
-    def open(filename):
-        path = os.path.join(Files.get_notes_folder(), filename)
+    def open_document_file(filename):
+        path = os.path.join(Files.get_documents_folder(), filename)
         subprocess.call(['xdg-open', path])
 
+    def get_document_file_size(filename):
+        path = os.path.join(Files.get_documents_folder(), filename)
+        try:
+            return os.path.getsize(path)
+        except FileNotFoundError: return 0
+
     def delete_document_file(filename):
-        path = os.path.join(Files.get_notes_folder(), filename)
+        path = os.path.join(Files.get_documents_folder(), filename)
         try:
             os.remove(path)
         except FileNotFoundError: pass
 
     def delete_document_files(document_id):
-        folder = os.path.join(Files.get_notes_folder(), str(document_id) + '_files')
+        folder = os.path.join(Files.get_documents_folder(), str(document_id) + '_files')
         if os.path.exists(folder):
             shutil.rmtree(folder)
 

@@ -35,6 +35,9 @@ class ToolBarsView(Gtk.ActionBar):
         self.toolbar_image = ToolBarImage()
         self.mode_stack.add_named(self.toolbar_image, 'image')
 
+        self.toolbar_attachment = ToolBarAttachment()
+        self.mode_stack.add_named(self.toolbar_attachment, 'attachment')
+
         self.toolbar_right = ToolBarRight()
         self.pack_end(self.toolbar_right)
 
@@ -254,6 +257,31 @@ class ToolBarImage(Gtk.Box):
         box.append(self.shrink_button)
         box.append(self.scale)
         box.append(self.enlarge_button)
+        self.append(box)
+        self.append(Gtk.Separator())
+
+        self.escape_button = Gtk.Button.new_from_icon_name('remove-selection-symbolic')
+        self.escape_button.set_action_name('win.remove-selection')
+        self.escape_button.set_can_focus(False)
+        self.escape_button.set_tooltip_text(_('Remove Selection (Esc)'))
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.escape_button)
+        self.append(box)
+
+
+class ToolBarAttachment(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+
+        self.status_label = Gtk.Label.new('')
+        self.status_label.set_xalign(0)
+        self.status_label.add_css_class('status')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.status_label)
         self.append(box)
         self.append(Gtk.Separator())
 

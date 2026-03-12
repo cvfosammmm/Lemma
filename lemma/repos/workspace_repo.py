@@ -28,7 +28,7 @@ class WorkspaceRepo():
     def init(DocumentRepo):
         WorkspaceRepo.workspace = Workspace()
 
-        pathname = os.path.join(Files.get_notes_folder(), 'workspace')
+        pathname = os.path.join(Files.get_documents_folder(), 'workspace')
         workspace_data = None
         if os.path.isfile(pathname):
             with open(pathname, 'rb') as file:
@@ -53,7 +53,7 @@ class WorkspaceRepo():
         return WorkspaceRepo.workspace
 
     def update(workspace):
-        pathname = os.path.join(Files.get_notes_folder(), 'workspace')
+        pathname = os.path.join(Files.get_documents_folder(), 'workspace')
 
         try: filehandle = open(pathname, 'wb')
         except IOError: pass

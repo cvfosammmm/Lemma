@@ -19,6 +19,7 @@ import urllib.parse
 import os.path, shutil
 
 from lemma.services.files import Files
+from lemma.services.helpers import Helpers
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
@@ -65,16 +66,24 @@ class Attachment(object):
 
     def on_primary_button_press(self, n_press, x, y):
         if n_press == 2:
-            Files.open(self.filename)
+            Files.open_document_file(self.filename)
 
     def is_resizable(self):
         return False
+
+    def has_toolbar(self):
+        return True
+
+    def update_toolbar(self, toolbar):
+        status_text = os.path.basename(self.filename)
+        status_text += ' (' + Helpers.filesize_to_string(Files.get_document_file_size(self.filename)) + ')'
+        toolbar.status_label.set_text(status_text)
 
     def to_xml(self):
         return '<widget type="attachment" filename="' + self.filename + '" />'
 
     def to_html(self, data_folder_dest):
-        path_origin = os.path.join(Files.get_notes_folder(), self.filename)
+        path_origin = os.path.join(Files.get_documents_folder(), self.filename)
         path_dest = os.path.join(data_folder_dest, os.path.basename(self.filename))
 
         if not os.path.exists(data_folder_dest): os.makedirs(data_folder_dest)

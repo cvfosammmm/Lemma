@@ -48,7 +48,7 @@ class DocumentRepo():
                 else:
                     stubs[int(direntry.name)] = stub
 
-        for direntry in os.scandir(Files.get_notes_folder()):
+        for direntry in os.scandir(Files.get_documents_folder()):
             if direntry.is_file() and direntry.name.isdigit():
                 document_id = int(direntry.name)
                 if document_id in stubs and direntry.stat().st_mtime >= stubs[document_id]['last_modified']:
@@ -145,7 +145,7 @@ class DocumentRepo():
         if document_id in DocumentRepo.saving_schedule:
             return DocumentRepo.saving_schedule[document_id][0]
 
-        pathname = os.path.join(Files.get_notes_folder(), str(document_id))
+        pathname = os.path.join(Files.get_documents_folder(), str(document_id))
         if not os.path.isfile(pathname): return None
 
         document = Document(document_id)
@@ -192,7 +192,7 @@ class DocumentRepo():
             DocumentRepo.stub_saving_lock.release()
             DocumentRepo.document_saving_lock.release()
 
-        pathname = os.path.join(Files.get_notes_folder(), str(document_id))
+        pathname = os.path.join(Files.get_documents_folder(), str(document_id))
         try:
             os.remove(pathname)
         except FileNotFoundError: pass
@@ -217,7 +217,7 @@ class DocumentRepo():
         if can_wait:
             DocumentRepo.saving_schedule[document.id] = (document, document.last_modified)
         else:
-            pathname = os.path.join(Files.get_notes_folder(), str(document.id))
+            pathname = os.path.join(Files.get_documents_folder(), str(document.id))
             xml = document.get_xml()
             DocumentRepo.write_document_to_disk(xml, pathname)
 
@@ -237,7 +237,7 @@ class DocumentRepo():
             document = DocumentRepo.saving_schedule[document_id][0]
             del(DocumentRepo.saving_schedule[document_id])
 
-            pathname = os.path.join(Files.get_notes_folder(), str(document.id))
+            pathname = os.path.join(Files.get_documents_folder(), str(document.id))
             xml = document.get_xml()
             thread = threading.Thread(target=DocumentRepo.write_document_to_disk, args=(xml, pathname))
             thread.start()
