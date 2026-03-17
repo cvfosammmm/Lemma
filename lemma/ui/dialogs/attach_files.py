@@ -22,7 +22,7 @@ from gi.repository import Gtk, Gdk
 import os.path
 
 from lemma.use_cases.use_cases import UseCases
-from lemma.widgets.attachment import Attachment
+from lemma.document.attachment import Attachment
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.files import Files
 

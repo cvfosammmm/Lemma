@@ -171,7 +171,7 @@ class DocumentView():
                     if node.link != None and not self.ctrl_pressed:
                         self.view.content.set_cursor_from_name('pointer')
                     elif node.type == 'widget':
-                        self.view.content.set_cursor_from_name(node.value.get_cursor_name())
+                        self.view.content.set_cursor_from_name(self.application.widget_manager.get_cursor_name(node.value))
                     elif node.type == 'placeholder':
                         self.view.content.set_cursor_from_name('default')
                     else:

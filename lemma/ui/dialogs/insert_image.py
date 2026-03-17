@@ -22,7 +22,7 @@ from gi.repository import Gtk, Gdk
 from PIL import Image as PIL_Image
 
 from lemma.use_cases.use_cases import UseCases
-from lemma.widgets.image import Image
+from lemma.document.image import Image
 from lemma.repos.workspace_repo import WorkspaceRepo
 
 

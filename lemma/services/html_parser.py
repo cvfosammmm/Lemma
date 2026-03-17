@@ -19,7 +19,7 @@ import urllib.parse, os.path
 from html.parser import HTMLParser as HTMLParserLib
 
 from lemma.document.ast import Root, Paragraph, Node
-from lemma.widgets.image import Image
+from lemma.document.image import Image
 from lemma.services.layout_info import LayoutInfo
 
 

@@ -27,7 +27,7 @@ from lemma.services.settings import Settings
 import lemma.services.timer as timer
 
 
-class ToolBars():
+class Toolbars():
 
     def __init__(self, main_window, application):
         self.application = application
@@ -35,8 +35,6 @@ class ToolBars():
         self.toolbar = main_window.toolbar
 
         self.tags_at_cursor = set()
-
-        self.toolbar.toolbar_image.scale.connect('change-value', self.on_widget_scale_change_value)
 
         controller = Gtk.GestureClick()
         controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
@@ -99,11 +97,14 @@ class ToolBars():
         cursor_inside_link = active_document.get_insert_node().is_inside_link()
         edit_link_visible = ((not active_document.has_selection()) and cursor_inside_link)
 
-        if active_document.widget_selected() and selected_nodes[0].value.has_toolbar():
+        if active_document.widget_selected() and self.application.widget_manager.has_toolbar(selected_nodes[0].value):
             widget = selected_nodes[0].value
 
+            if self.toolbar.mode_stack.get_child_by_name(widget.get_type()) == None:
+                self.toolbar.mode_stack.add_named(self.application.widget_manager.get_toolbar(widget), widget.get_type())
+
             self.toolbar.mode_stack.set_visible_child_name(widget.get_type())
-            widget.update_toolbar(self.toolbar.mode_stack.get_visible_child())
+            self.application.widget_manager.update_toolbar(widget)
         else:
             self.toolbar.mode_stack.set_visible_child_name('main')
             if edit_link_visible:
@@ -204,9 +205,5 @@ class ToolBars():
             button.add_css_class('checked')
         else:
             button.remove_css_class('checked')
-
-    def on_widget_scale_change_value(self, scale, scroll, value):
-        UseCases.resize_widget(value)
-        return True
 
 

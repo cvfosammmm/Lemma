@@ -28,7 +28,7 @@ from lemma.ui.views.headerbar_view import HeaderBar
 from lemma.ui.views.history_view import HistoryView
 from lemma.ui.views.document_list_view import DocumentListView
 from lemma.ui.views.backlinks_view import BacklinksView
-from lemma.ui.views.toolbars_view import ToolBarsView
+from lemma.ui.views.toolbars_view import ToolbarsView
 from lemma.ui.views.document_view_view import DocumentView
 from lemma.ui.views.navigation_sidebar_view import NavigationSidebar
 from lemma.ui.views.document_draft_view import DocumentDraftView
@@ -50,7 +50,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.headerbar = HeaderBar()
         self.history_view = HistoryView()
         self.headerbar.hb_right.history_overlay.set_child(self.history_view)
-        self.toolbar = ToolBarsView()
+        self.toolbar = ToolbarsView()
 
         self.document_list = DocumentListView()
         self.backlinks = BacklinksView()

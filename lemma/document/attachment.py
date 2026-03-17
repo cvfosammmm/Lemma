@@ -50,34 +50,8 @@ class Attachment(object):
     def get_allocation(self):
         return self.allocation
 
-    def draw(self, ctx, offset_x, offset_y, hidpi_factor, fontname):
-        baseline = TextShaper.get_ascend(fontname) + TextShaper.get_descend(fontname)
-        fg_color = ColorManager.get_ui_color_string('links')
-
-        for char, dims in zip(os.path.basename(self.filename), self.dimensions):
-            surface, left, top = TextRenderer.get_glyph(char, fontname, fg_color, hidpi_factor)
-            if surface != None:
-                ctx.set_source_surface(surface, int((offset_x) * hidpi_factor + left), int((offset_y + baseline) * hidpi_factor + top))
-                ctx.paint()
-            offset_x += dims[0]
-
-    def get_cursor_name(self):
-        return 'pointer'
-
-    def on_primary_button_press(self, n_press, x, y):
-        if n_press == 2:
-            Files.open_document_file(self.filename)
-
     def is_resizable(self):
         return False
-
-    def has_toolbar(self):
-        return True
-
-    def update_toolbar(self, toolbar):
-        status_text = os.path.basename(self.filename)
-        status_text += ' (' + Helpers.filesize_to_string(Files.get_document_file_size(self.filename)) + ')'
-        toolbar.status_label.set_text(status_text)
 
     def to_xml(self):
         return '<widget type="attachment" filename="' + self.filename + '" />'

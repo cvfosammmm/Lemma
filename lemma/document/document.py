@@ -298,18 +298,6 @@ class Document():
             self.query_cache['widget_selected'] = (len(selected_nodes) == 1 and selected_nodes[0].type == 'widget')
         return self.query_cache['widget_selected']
 
-    def selected_widget_is_max(self):
-        if 'selected_widget_is_max' not in self.query_cache:
-            selected_nodes = self.get_selected_nodes()
-            self.query_cache['selected_widget_is_max'] = (self.widget_selected() and (not selected_nodes[0].value.is_resizable() or selected_nodes[0].value.get_width() == LayoutInfo.get_max_layout_width()))
-        return self.query_cache['selected_widget_is_max']
-
-    def selected_widget_is_min(self):
-        if 'selected_widget_is_min' not in self.query_cache:
-            selected_nodes = self.get_selected_nodes()
-            self.query_cache['selected_widget_is_min'] = (self.widget_selected() and (not selected_nodes[0].value.is_resizable() or selected_nodes[0].value.get_width() == selected_nodes[0].value.get_minimum_width()))
-        return self.query_cache['selected_widget_is_min']
-
     def get_insert_node(self):
         return self.cursor.get_insert_node()
 

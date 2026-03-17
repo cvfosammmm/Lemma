@@ -223,7 +223,7 @@ class DocumentViewPresenter():
             fontname = layout['fontname']
             top = -TextShaper.get_descend(fontname=fontname)
 
-            widget.draw(ctx, offset_x + layout['x'], offset_y + layout['y'] + top, self.hidpi_factor, fontname)
+            self.model.application.widget_manager.draw(widget, ctx, offset_x + layout['x'], offset_y + layout['y'] + top, self.hidpi_factor, fontname)
 
         if layout['type'] == 'placeholder':
             fontname = layout['fontname']

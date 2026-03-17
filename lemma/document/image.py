@@ -15,10 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import gi
-gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Pango
-
 import urllib.parse
 import os.path, io
 from PIL import Image as PIL_Image
@@ -74,43 +70,8 @@ class Image(object):
     def get_allocation(self):
         return self.allocation
 
-    def draw(self, ctx, offset_x, offset_y, hidpi_factor, fontname):
-        matrix = ctx.get_matrix()
-        scaling_factor_x = self.width * hidpi_factor / self.original_width
-        scaling_factor_y = self.height * hidpi_factor / self.original_height
-        ctx.scale(scaling_factor_x, scaling_factor_y)
-
-        ctx.set_source_surface(self.cairo_surface, offset_x * hidpi_factor / scaling_factor_x, offset_y * hidpi_factor / scaling_factor_y)
-        ctx.paint()
-
-        ctx.set_matrix(matrix)
-
-    def get_cursor_name(self):
-        return 'default'
-
-    def on_primary_button_press(self, n_press, x, y):
-        pass
-
     def is_resizable(self):
         return True
-
-    def has_toolbar(self):
-        return True
-
-    def update_toolbar(self, toolbar):
-        toolbar.status_label.set_text(self.get_status_text())
-        layout = Pango.Layout(toolbar.status_label.get_pango_context())
-        layout.set_text(self.get_longest_possible_status_text())
-        toolbar.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 30, -1)
-
-        toolbar.scale.set_range(self.get_minimum_width(), LayoutInfo.get_max_layout_width())
-
-        toolbar.scale.set_value(self.get_width())
-        toolbar.scale.clear_marks()
-
-        orig_width = self.get_original_width()
-        if orig_width > self.get_minimum_width() and orig_width < LayoutInfo.get_max_layout_width():
-            toolbar.scale.add_mark(orig_width, Gtk.PositionType.TOP)
 
     def to_xml(self):
         return '<widget type="image" width="' + str(self.width) + '"><![CDATA[' + str(self.data) + ']]></widget>'
@@ -125,16 +86,6 @@ class Image(object):
 
     # image specific functions below
 
-    def get_status_text(self):
-        size_string = str(self.width) + ' × ' + str(self.height)
-        return self.format + _(' Image') + ' (' + size_string + ')'
-
-    def get_longest_possible_status_text(self):
-        max_width = LayoutInfo.get_max_layout_width()
-        max_height = int((max_width / self.original_width) * self.original_height)
-        max_digits = len(str(max_width)) + len(str(max_height))
-        return self.format + _(' Image') + ' ( × ' + max_digits * '0' + ')'
-
     def get_width(self):
         return self.width
 
@@ -143,9 +94,6 @@ class Image(object):
 
     def get_data(self):
         return self.data
-
-    def get_minimum_width(self):
-        return LayoutInfo.get_min_image_size()
 
     def get_original_width(self):
         return self.original_width

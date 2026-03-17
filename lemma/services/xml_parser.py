@@ -18,8 +18,8 @@
 import xml.parsers.expat
 
 from lemma.document.ast import Paragraph, Node
-from lemma.widgets.image import Image
-from lemma.widgets.attachment import Attachment
+from lemma.document.image import Image
+from lemma.document.attachment import Attachment
 import lemma.services.xml_helpers as xml_helpers
 
 

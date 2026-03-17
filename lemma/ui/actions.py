@@ -22,7 +22,7 @@ from gi.repository import Gio, GLib, GObject, Gdk
 from lemma.services.message_bus import MessageBus
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
-from lemma.widgets.image import Image
+from lemma.document.image import Image
 from lemma.services.xml_exporter import XMLExporter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
@@ -76,9 +76,6 @@ class Actions(object):
 
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
         self.add_simple_action('show-attach-files-dialog', self.show_attach_files_dialog)
-
-        self.add_simple_action('widget-shrink', self.widget_shrink)
-        self.add_simple_action('widget-enlarge', self.widget_enlarge)
 
         self.add_simple_action('subscript', self.subscript)
         self.add_simple_action('superscript', self.superscript)
@@ -150,8 +147,6 @@ class Actions(object):
         self.actions['remove-selection'].set_enabled(document != None and document.has_selection())
         self.actions['show-insert-image-dialog'].set_enabled(document != None and document.insert_parent_is_root())
         self.actions['show-attach-files-dialog'].set_enabled(document != None and document.insert_parent_is_root())
-        self.actions['widget-shrink'].set_enabled(document != None and not document.selected_widget_is_min())
-        self.actions['widget-enlarge'].set_enabled(document != None and not document.selected_widget_is_max())
         self.actions['open-link'].set_enabled(document != None and document.cursor_inside_link())
         self.actions['remove-link'].set_enabled(document != None and (document.links_inside_selection() or document.cursor_inside_link()))
         self.actions['show-link-popover'].set_enabled(document != None and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
@@ -415,22 +410,6 @@ class Actions(object):
         self.application.document_view.view.content.grab_focus()
 
         self.application.dialog_locator.get_dialog('attach_files').run()
-
-    def widget_shrink(self, action=None, parameter=None):
-        self.application.document_view.view.content.grab_focus()
-
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        selected_nodes = document.get_selected_nodes()
-        UseCases.resize_widget(selected_nodes[0].value.get_width() - 1)
-
-    def widget_enlarge(self, action=None, parameter=None):
-        self.application.document_view.view.content.grab_focus()
-
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        selected_nodes = document.get_selected_nodes()
-        UseCases.resize_widget(selected_nodes[0].value.get_width() + 1)
 
     def open_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()

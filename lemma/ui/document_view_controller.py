@@ -23,7 +23,7 @@ from urllib.parse import urlparse
 import time
 
 import lemma.services.xml_helpers as xml_helpers
-from lemma.widgets.image import Image
+from lemma.document.image import Image
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
@@ -116,7 +116,7 @@ class DocumentViewController():
             leaf_layout = document.get_leaf_layout_at_xy(x, y)
 
             if leaf_layout != None and leaf_layout['node'].type == 'widget':
-                leaf_layout['node'].value.on_primary_button_press(n_press, x, y)
+                self.model.application.widget_manager.on_primary_button_press(leaf_layout['node'].value, n_press, x, y)
                 if n_press == 1:
                     UseCases.select_node(leaf_layout['node'])
 

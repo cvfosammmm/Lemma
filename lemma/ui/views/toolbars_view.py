@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib
 
 
-class ToolBarsView(Gtk.ActionBar):
+class ToolbarsView(Gtk.ActionBar):
 
     def __init__(self):
         Gtk.ActionBar.__init__(self)
@@ -29,20 +29,14 @@ class ToolBarsView(Gtk.ActionBar):
         self.mode_stack = Gtk.Stack()
         self.pack_start(self.mode_stack)
 
-        self.toolbar_main = ToolBarMain()
+        self.toolbar_main = ToolbarMain()
         self.mode_stack.add_named(self.toolbar_main, 'main')
 
-        self.toolbar_image = ToolBarImage()
-        self.mode_stack.add_named(self.toolbar_image, 'image')
-
-        self.toolbar_attachment = ToolBarAttachment()
-        self.mode_stack.add_named(self.toolbar_attachment, 'attachment')
-
-        self.toolbar_right = ToolBarRight()
+        self.toolbar_right = ToolbarRight()
         self.pack_end(self.toolbar_right)
 
 
-class ToolBarRight(Gtk.Box):
+class ToolbarRight(Gtk.Box):
 
     def __init__(self):
         Gtk.Box.__init__(self)
@@ -89,7 +83,7 @@ class ToolBarRight(Gtk.Box):
         self.append(box)
 
 
-class ToolBarMain(Gtk.Box):
+class ToolbarMain(Gtk.Box):
 
     def __init__(self):
         Gtk.Box.__init__(self)
@@ -219,79 +213,6 @@ class ToolBarMain(Gtk.Box):
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.insert_link_button)
-        self.append(box)
-
-
-class ToolBarImage(Gtk.Box):
-
-    def __init__(self):
-        Gtk.Box.__init__(self)
-        self.set_orientation(Gtk.Orientation.HORIZONTAL)
-
-        self.status_label = Gtk.Label.new('')
-        self.status_label.set_xalign(0)
-        self.status_label.add_css_class('status')
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.status_label)
-        self.append(box)
-        self.append(Gtk.Separator())
-
-        self.shrink_button = Gtk.Button.new_from_icon_name('value-decrease-symbolic')
-        self.shrink_button.set_action_name('win.widget-shrink')
-        self.shrink_button.set_can_focus(False)
-        self.shrink_button.set_tooltip_text(_('Shrink'))
-
-        self.enlarge_button = Gtk.Button.new_from_icon_name('value-increase-symbolic')
-        self.enlarge_button.set_action_name('win.widget-enlarge')
-        self.enlarge_button.set_can_focus(False)
-        self.enlarge_button.set_tooltip_text(_('Enlarge'))
-
-        self.scale = Gtk.Scale()
-        self.scale.set_increments(1, 1)
-        self.scale.set_show_fill_level(False)
-        self.scale.set_can_focus(False)
-        self.scale.set_size_request(218, -1)
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.shrink_button)
-        box.append(self.scale)
-        box.append(self.enlarge_button)
-        self.append(box)
-        self.append(Gtk.Separator())
-
-        self.escape_button = Gtk.Button.new_from_icon_name('remove-selection-symbolic')
-        self.escape_button.set_action_name('win.remove-selection')
-        self.escape_button.set_can_focus(False)
-        self.escape_button.set_tooltip_text(_('Remove Selection (Esc)'))
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.escape_button)
-        self.append(box)
-
-
-class ToolBarAttachment(Gtk.Box):
-
-    def __init__(self):
-        Gtk.Box.__init__(self)
-        self.set_orientation(Gtk.Orientation.HORIZONTAL)
-
-        self.status_label = Gtk.Label.new('')
-        self.status_label.set_xalign(0)
-        self.status_label.add_css_class('status')
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.status_label)
-        self.append(box)
-        self.append(Gtk.Separator())
-
-        self.escape_button = Gtk.Button.new_from_icon_name('remove-selection-symbolic')
-        self.escape_button.set_action_name('win.remove-selection')
-        self.escape_button.set_can_focus(False)
-        self.escape_button.set_tooltip_text(_('Remove Selection (Esc)'))
-
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.escape_button)
         self.append(box)
 
 

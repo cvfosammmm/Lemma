@@ -22,6 +22,7 @@ from gi.repository import Adw
 from lemma.services.color_manager import ColorManager
 from lemma.ui.dialog_locator import DialogLocator
 from lemma.ui.popover_manager import PopoverManager
+from lemma.ui.widget_manager import WidgetManager
 import lemma.services.timer as timer
 
 import lemma.ui.colors as colors
@@ -57,6 +58,7 @@ class Application(Adw.Application):
         ColorManager.init(self.main_window)
         self.main_window.add_widgets()
 
+        self.widget_manager = WidgetManager(self.main_window, self)
         self.popover_manager = PopoverManager(self.main_window, self)
         self.dialog_locator = DialogLocator(self.main_window)
         self.history = history.History(self.main_window)
@@ -65,7 +67,7 @@ class Application(Adw.Application):
         self.scrolling = scrolling.DocumentScrolling(self.main_window, self)
         self.colors = colors.Colors(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
-        self.toolbars = toolbars.ToolBars(self.main_window, self)
+        self.toolbars = toolbars.Toolbars(self.main_window, self)
         self.bookmarks = bookmarks.Bookmarks(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
         self.document_list = document_list.DocumentList(self.main_window)
@@ -88,6 +90,7 @@ class Application(Adw.Application):
         self.actions.animate()
         self.shortcuts.animate()
         self.window_state.animate()
+        self.widget_manager.animate()
         self.popover_manager.animate()
         self.document_list.animate()
         self.history.animate()
