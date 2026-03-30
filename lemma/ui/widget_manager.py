@@ -118,9 +118,15 @@ class ToolbarAttachment(Gtk.Box):
         self.rename_button.add_css_class('flat')
         self.rename_button.set_can_focus(False)
 
+        self.more_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
+        self.more_button.add_css_class('flat')
+        self.more_button.set_can_focus(False)
+        self.more_button.set_tooltip_text(_('More Actions'))
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.open_button)
         box.append(self.rename_button)
+        box.append(self.more_button)
         self.append(box)
         self.append(Gtk.Separator())
 
@@ -134,6 +140,11 @@ class ToolbarAttachment(Gtk.Box):
         self.append(box)
 
         self.open_button.connect('clicked', self.on_open_button_clicked)
+        controller = Gtk.GestureClick()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        controller.set_button(1)
+        controller.connect('pressed', self.on_more_button_press)
+        self.more_button.add_controller(controller)
 
         self.filename = None
 
@@ -146,6 +157,9 @@ class ToolbarAttachment(Gtk.Box):
     def on_open_button_clicked(self, button):
         if self.filename != None:
             Files.open_document_file(self.filename)
+
+    def on_more_button_press(self, controller, n_press, x, y):
+        self.application.popover_manager.show_popover_at_button('paragraph_style', self.more_button, 'top')
 
 
 class ToolbarImage(Gtk.Box):

@@ -106,7 +106,7 @@ class DocumentView():
         cursor_visible = True
         if time_since_blink_start <= 10 and time_in_cycle > 0.6:
             cursor_visible = False
-        if self.application.popover_manager.current_popover_name != 'link_autocomplete' and not self.view.content.has_focus():
+        if not self.view.content.has_focus():
             cursor_visible = False
         if self.document.has_selection():
             cursor_visible = False

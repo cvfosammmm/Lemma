@@ -31,7 +31,7 @@ import lemma.ui.popovers.bookmarks as bookmarks
 class PopoverManager():
 
     def __init__(self, main_window, application):
-        self.current_popover_name = None
+        self.current_popover = None
         self.active_popover_button = None
         self.prev_focus_widget = None
         self.main_window = main_window
@@ -63,7 +63,8 @@ class PopoverManager():
         self.popovers["bookmarks"] = bookmarks.Popover(self)
 
     def show_popover_at_button(self, name, button, orientation='bottom'):
-        if name == self.current_popover_name: return
+        popover = self.popovers[name]
+        if popover == self.current_popover: return
 
         allocation = button.compute_bounds(self.main_window).out_bounds
 
@@ -72,16 +73,17 @@ class PopoverManager():
         y += allocation.size.height if orientation == 'bottom' else 0
 
         self.popdown()
-        self.popup(name, x, y, orientation)
+        self.popup(popover, x, y, orientation)
 
         self.active_popover_button = button
         self.active_popover_button.add_css_class('active')
 
     def show_popover_at_xy(self, name, x, y, orientation='bottom'):
-        if name == self.current_popover_name: return
+        popover = self.popovers[name]
+        if popover == self.current_popover: return
 
         self.popdown()
-        self.popup(name, x, y, orientation)
+        self.popup(popover, x, y, orientation)
 
     def hide_popovers(self):
         self.popdown()
@@ -93,8 +95,7 @@ class PopoverManager():
     def animate(self):
         pass
 
-    def popup(self, name, x, y, orientation):
-        popover = self.popovers[name]
+    def popup(self, popover, x, y, orientation):
         popover.show_page(None, 'main', Gtk.StackTransitionType.NONE)
 
         window_width = self.main_window.get_width()
@@ -138,10 +139,10 @@ class PopoverManager():
             popover.arrow_box.set_halign(Gtk.Align.START)
             popover.add_overlay(popover.arrow_box)
 
-        if name != self.current_popover_name:
+        if popover != self.current_popover:
             self.remember_focus_widget()
 
-        self.current_popover_name = name
+        self.current_popover = popover
         self.popoverlay.add_overlay(popover)
         self.inbetween.set_can_target(True)
 
@@ -149,17 +150,16 @@ class PopoverManager():
         popover.on_popup()
 
     def popdown(self):
-        if self.current_popover_name == None: return
+        if self.current_popover == None: return
 
-        name = self.current_popover_name
-        popover = self.popovers[name]
+        popover = self.current_popover
 
         if popover.is_focus() or popover.get_focus_child() != None and self.prev_focus_widget != None:
             self.prev_focus_widget.grab_focus()
             self.prev_focus_widget = None
 
         self.popoverlay.remove_overlay(popover)
-        self.current_popover_name = None
+        self.current_popover = None
         self.inbetween.set_can_target(False)
 
         popover.on_popdown()
