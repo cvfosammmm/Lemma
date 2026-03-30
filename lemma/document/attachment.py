@@ -28,41 +28,42 @@ from lemma.services.color_manager import ColorManager
 class Attachment(object):
 
     def __init__(self, filename):
+        self.attributes = {'filename': filename}
         self.allocation = (0, 0)
-
-        self.filename = filename
-        self.dimensions = []
 
     def get_type(self):
         return 'attachment'
 
+    def get_attribute(self, key):
+        return self.attributes[key]
+
     def get_filenames(self):
-        return {self.filename}
+        return {self.attributes['filename']}
+
+    def set_attribute(self, key, value):
+        self.attributes[key] = value
 
     def change_filename(self, name_from, name_to):
-        if self.filename == name_from:
-            self.filename = name_to
+        if self.attributes['filename'] == name_from:
+            self.attributes['filename'] = name_to
 
     def allocate_size(self, fontname):
-        self.dimensions = TextShaper.measure(os.path.basename(self.filename), fontname)
-        self.allocation = (sum(metric[0] for metric in self.dimensions), max(metric[1] for metric in self.dimensions))
+        dimensions = TextShaper.measure(os.path.basename(self.attributes['filename']), fontname)
+        self.allocation = (sum(metric[0] for metric in dimensions), max(metric[1] for metric in dimensions))
 
     def get_allocation(self):
         return self.allocation
 
-    def is_resizable(self):
-        return False
-
     def to_xml(self):
-        return '<widget type="attachment" filename="' + self.filename + '" />'
+        return '<widget type="attachment" filename="' + self.attributes['filename'] + '" />'
 
     def to_html(self, data_folder_dest):
-        path_origin = os.path.join(Files.get_documents_folder(), self.filename)
-        path_dest = os.path.join(data_folder_dest, os.path.basename(self.filename))
+        path_origin = os.path.join(Files.get_documents_folder(), self.attributes['filename'])
+        path_dest = os.path.join(data_folder_dest, os.path.basename(self.attributes['filename']))
 
         if not os.path.exists(data_folder_dest): os.makedirs(data_folder_dest)
         shutil.copyfile(path_origin, path_dest)
 
-        return '<a href="' + urllib.parse.quote(os.path.split(data_folder_dest)[-1] + '/' + os.path.basename(self.filename)) + '">' + os.path.basename(self.filename) + '</a>'
+        return '<a href="' + urllib.parse.quote(os.path.split(data_folder_dest)[-1] + '/' + os.path.basename(self.attributes['filename'])) + '">' + os.path.basename(self.attributes['filename']) + '</a>'
 
 

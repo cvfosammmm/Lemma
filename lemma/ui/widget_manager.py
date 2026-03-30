@@ -58,7 +58,9 @@ class WidgetManager():
             baseline = TextShaper.get_ascend(fontname) + TextShaper.get_descend(fontname)
             fg_color = ColorManager.get_ui_color_string('links')
 
-            for char, dims in zip(os.path.basename(widget.filename), widget.dimensions):
+            filename = os.path.basename(widget.get_attribute('filename'))
+            dimensions = TextShaper.measure(filename, fontname)
+            for char, dims in zip(filename, dimensions):
                 surface, left, top = TextRenderer.get_glyph(char, fontname, fg_color, hidpi_factor)
                 if surface != None:
                     ctx.set_source_surface(surface, int((offset_x) * hidpi_factor + left), int((offset_y + baseline) * hidpi_factor + top))
@@ -87,7 +89,7 @@ class WidgetManager():
     def on_primary_button_press(self, widget, n_press, x, y):
         if widget.get_type() == 'attachment':
             if n_press == 2:
-                Files.open_document_file(widget.filename)
+                Files.open_document_file(widget.get_attribute('filename'))
 
 
 class ToolbarAttachment(Gtk.Box):
@@ -110,10 +112,15 @@ class ToolbarAttachment(Gtk.Box):
         self.open_button = Gtk.Button.new_with_label('Open')
         self.open_button.add_css_class('flat')
         self.open_button.set_can_focus(False)
-        self.open_button.set_tooltip_text(_('Open') + ' (Return)')
+
+        self.rename_button = Gtk.Button.new_with_label('Rename')
+        self.rename_button.set_action_name('win.show-rename-file-popover')
+        self.rename_button.add_css_class('flat')
+        self.rename_button.set_can_focus(False)
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.open_button)
+        box.append(self.rename_button)
         self.append(box)
         self.append(Gtk.Separator())
 
@@ -131,9 +138,9 @@ class ToolbarAttachment(Gtk.Box):
         self.filename = None
 
     def update(self, widget):
-        self.filename = widget.filename
-        status_text = os.path.basename(widget.filename)
-        status_text += ' (' + Helpers.filesize_to_string(Files.get_document_file_size(widget.filename)) + ')'
+        self.filename = widget.get_attribute('filename')
+        status_text = os.path.basename(self.filename)
+        status_text += ' (' + Helpers.filesize_to_string(Files.get_document_file_size(self.filename)) + ')'
         self.status_label.set_text(status_text)
 
     def on_open_button_clicked(self, button):

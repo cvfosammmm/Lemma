@@ -89,7 +89,7 @@ class DocumentRepo():
                     if filename not in stub['files']:
                         Files.delete_document_file(filename)
             else:
-                Files.delete_document_files(stub['id'])
+                Files.delete_all_document_files(stub['id'])
 
         for thread in threading.enumerate():
             try:
@@ -203,7 +203,7 @@ class DocumentRepo():
             os.remove(pathname)
         except FileNotFoundError: pass
 
-        Files.delete_document_files(document_id)
+        Files.delete_all_document_files(document_id)
 
     @timer.timer
     def update(document):

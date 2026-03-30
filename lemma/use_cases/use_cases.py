@@ -478,8 +478,20 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         selected_nodes = document.get_selected_nodes()
 
-        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.is_resizable():
-            document.resize_widget(selected_nodes[0], new_width)
+        document.resize_widget(selected_nodes[0], new_width)
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+
+    @timer.timer
+    def set_widget_attribute_filename(key, value):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        selected_nodes = document.get_selected_nodes()
+
+        Files.change_document_file_name(selected_nodes[0].value.get_attribute(key), value)
+        document.set_widget_attribute(selected_nodes[0], key, value)
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')

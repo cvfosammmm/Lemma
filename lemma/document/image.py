@@ -30,6 +30,7 @@ class Image(object):
 
     @timer.timer
     def __init__(self, data, attributes=dict()):
+        self.attributes = attributes
         self.allocation = (0, 0)
 
         self.data = data
@@ -54,8 +55,14 @@ class Image(object):
     def get_type(self):
         return 'image'
 
+    def get_attribute(self, key):
+        return self.attributes[key]
+
     def get_filenames(self):
         return set()
+
+    def set_attribute(self, key, value):
+        self.attributes[key] = value
 
     def change_filename(self, name_from, name_to):
         pass
@@ -69,9 +76,6 @@ class Image(object):
 
     def get_allocation(self):
         return self.allocation
-
-    def is_resizable(self):
-        return True
 
     def to_xml(self):
         return '<widget type="image" width="' + str(self.width) + '"><![CDATA[' + str(self.data) + ']]></widget>'

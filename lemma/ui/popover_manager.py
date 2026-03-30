@@ -24,6 +24,7 @@ from lemma.ui.document_context_menu import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
 import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_autocomplete as link_autocomplete
+import lemma.ui.popovers.rename_file as rename_file
 import lemma.ui.popovers.bookmarks as bookmarks
 
 
@@ -31,6 +32,7 @@ class PopoverManager():
 
     def __init__(self, main_window, application):
         self.current_popover_name = None
+        self.active_popover_button = None
         self.prev_focus_widget = None
         self.main_window = main_window
         self.headerbar = main_window.headerbar
@@ -57,18 +59,36 @@ class PopoverManager():
         self.popovers["hamburger_menu"] = hamburger_menu.Popover(self)
         self.popovers["paragraph_style"] = paragraph_style.Popover(self)
         self.popovers["link_autocomplete"] = link_autocomplete.Popover(self)
+        self.popovers["rename_file"] = rename_file.Popover(self)
         self.popovers["bookmarks"] = bookmarks.Popover(self)
 
-    def show_popover(self, name, x, y, orientation='bottom'):
+    def show_popover_at_button(self, name, button, orientation='bottom'):
+        if name == self.current_popover_name: return
+
+        allocation = button.compute_bounds(self.main_window).out_bounds
+
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y
+        y += allocation.size.height if orientation == 'bottom' else 0
+
+        self.popdown()
+        self.popup(name, x, y, orientation)
+
+        self.active_popover_button = button
+        self.active_popover_button.add_css_class('active')
+
+    def show_popover_at_xy(self, name, x, y, orientation='bottom'):
         if name == self.current_popover_name: return
 
         self.popdown()
         self.popup(name, x, y, orientation)
-        self.update_popover_buttons()
 
     def hide_popovers(self):
         self.popdown()
-        self.update_popover_buttons()
+
+        if self.active_popover_button != None:
+            self.active_popover_button.remove_css_class('active')
+            self.active_popover_button = None
 
     def animate(self):
         pass
@@ -143,20 +163,6 @@ class PopoverManager():
         self.inbetween.set_can_target(False)
 
         popover.on_popdown()
-
-    def update_popover_buttons(self):
-        button_popover_rel = list()
-        button_popover_rel.append([self.headerbar.hb_left.hamburger_menu_button, 'hamburger_menu'])
-        button_popover_rel.append([self.headerbar.hb_right.bookmarks_button, 'bookmarks'])
-        button_popover_rel.append([self.headerbar.hb_right.document_menu_button, 'document_menu'])
-        button_popover_rel.append([self.toolbar.toolbar_main.paragraph_style_menu_button, 'paragraph_style'])
-        button_popover_rel.append([self.toolbar.toolbar_right.edit_menu_button, 'edit_menu'])
-
-        for button, popover_name in button_popover_rel:
-            if self.current_popover_name == popover_name:
-                button.add_css_class('active')
-            else:
-                button.remove_css_class('active')
 
     def remember_focus_widget(self):
         widget = self.main_window

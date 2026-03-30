@@ -90,16 +90,13 @@ class Toolbars():
 
     @timer.timer
     def update(self):
-        active_document = WorkspaceRepo.get_workspace().get_active_document()
-        if active_document == None: return
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
 
-        selected_nodes = active_document.get_selected_nodes()
-        cursor_inside_link = active_document.get_insert_node().is_inside_link()
-        edit_link_visible = ((not active_document.has_selection()) and cursor_inside_link)
+        cursor_inside_link = document.get_insert_node().is_inside_link()
+        edit_link_visible = ((not document.has_selection()) and cursor_inside_link)
 
-        if active_document.widget_selected() and self.application.widget_manager.has_toolbar(selected_nodes[0].value):
-            widget = selected_nodes[0].value
-
+        if (widget := document.get_selected_widget()) != None and self.application.widget_manager.has_toolbar(widget):
             if self.toolbar.mode_stack.get_child_by_name(widget.get_type()) == None:
                 self.toolbar.mode_stack.add_named(self.application.widget_manager.get_toolbar(widget), widget.get_type())
 

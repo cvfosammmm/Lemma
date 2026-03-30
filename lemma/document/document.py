@@ -163,12 +163,6 @@ class Document():
                 self.command_manager.add_command('move_cursor_to_node', self.ast[paragraph_index_from][node_from_index], self.ast[paragraph_index_from][node_from_index])
 
     @undoable_action
-    def resize_widget(self, node, new_width):
-        if node.type != 'widget': return
-
-        self.command_manager.add_command('resize_widget', node, new_width)
-
-    @undoable_action
     def add_tag(self, tagname):
         self.command_manager.add_command('add_tag', tagname)
 
@@ -197,6 +191,18 @@ class Document():
     @timer.timer
     def set_insert_and_selection_node(self, new_insert, new_selection_bound=None):
         self.command_manager.add_command('move_cursor_to_node', new_insert, new_selection_bound)
+
+    @undoable_action
+    def resize_widget(self, node, new_width):
+        if node.type != 'widget': return
+
+        self.command_manager.add_command('resize_widget', node, new_width)
+
+    @undoable_action
+    def set_widget_attribute(self, node, key, value):
+        if node.type != 'widget': return
+
+        self.command_manager.add_command('set_widget_attribute', node, key, value)
 
     def move_cursor_to_xy(self, x, y, do_selection):
         self.command_manager.add_command('move_cursor_to_xy', x, y, do_selection)
@@ -292,11 +298,14 @@ class Document():
             self.query_cache['whole_selection_is_one_link'] = self.links_inside_selection() and all(node.link == selected_nodes[0].link for node in selected_nodes)
         return self.query_cache['whole_selection_is_one_link']
 
-    def widget_selected(self):
-        if 'widget_selected' not in self.query_cache:
+    def get_selected_widget(self):
+        if 'selected_widget' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()
-            self.query_cache['widget_selected'] = (len(selected_nodes) == 1 and selected_nodes[0].type == 'widget')
-        return self.query_cache['widget_selected']
+            if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget':
+                self.query_cache['selected_widget'] = selected_nodes[0].value
+            else:
+                self.query_cache['selected_widget'] = None
+        return self.query_cache['selected_widget']
 
     def get_insert_node(self):
         return self.cursor.get_insert_node()

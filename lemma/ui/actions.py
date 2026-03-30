@@ -76,6 +76,7 @@ class Actions(object):
 
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
         self.add_simple_action('show-attach-files-dialog', self.show_attach_files_dialog)
+        self.add_simple_action('show-rename-file-popover', self.show_rename_file_popover)
 
         self.add_simple_action('subscript', self.subscript)
         self.add_simple_action('superscript', self.superscript)
@@ -127,6 +128,9 @@ class Actions(object):
         text_in_clipboard = 'text/plain;charset=utf-8' in clipboard_formats
         subtree_in_clipboard = 'lemma/ast' in clipboard_formats
         image_in_clipboard = 'image/jpeg' in clipboard_formats or 'image/png' in clipboard_formats
+        selected_widget = None if document == None else document.get_selected_widget()
+        image_selected = selected_widget != None and selected_widget.get_type() == 'image'
+        attachment_selected = selected_widget != None and selected_widget.get_type() == 'attachment'
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -134,7 +138,7 @@ class Actions(object):
         self.actions['delete-document'].set_enabled(document != None)
         self.actions['rename-document'].set_enabled(document != None)
         self.actions['export-markdown'].set_enabled(document != None)
-        self.actions['export-image'].set_enabled(document != None and document.widget_selected())
+        self.actions['export-image'].set_enabled(image_selected)
         self.actions['go-back'].set_enabled(workspace.get_mode() == 'draft' or (document != None and workspace.get_prev_id_in_history(document.id) != None))
         self.actions['go-forward'].set_enabled(document != None and workspace.get_next_id_in_history(document.id) != None)
         self.actions['undo'].set_enabled(document != None and document.can_undo())
@@ -147,6 +151,7 @@ class Actions(object):
         self.actions['remove-selection'].set_enabled(document != None and document.has_selection())
         self.actions['show-insert-image-dialog'].set_enabled(document != None and document.insert_parent_is_root())
         self.actions['show-attach-files-dialog'].set_enabled(document != None and document.insert_parent_is_root())
+        self.actions['show-rename-file-popover'].set_enabled(attachment_selected)
         self.actions['open-link'].set_enabled(document != None and document.cursor_inside_link())
         self.actions['remove-link'].set_enabled(document != None and (document.links_inside_selection() or document.cursor_inside_link()))
         self.actions['show-link-popover'].set_enabled(document != None and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
@@ -196,8 +201,7 @@ class Actions(object):
     def export_image(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        selected_nodes = document.get_selected_nodes()
-        self.application.dialog_locator.get_dialog('export_image').run(selected_nodes[0].value)
+        self.application.dialog_locator.get_dialog('export_image').run(document.get_selected_widget())
 
     def go_back(self, action=None, parameter=''):
         workspace = WorkspaceRepo.get_workspace()
@@ -447,7 +451,7 @@ class Actions(object):
 
         if not document.has_selection() and insert.is_inside_link():
             UseCases.select_section(*insert.link_bounds())
-        self.application.popover_manager.show_popover('link_autocomplete', x, y, orientation)
+        self.application.popover_manager.show_popover_at_xy('link_autocomplete', x, y, orientation)
 
     def copy_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -486,45 +490,58 @@ class Actions(object):
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
-        allocation = button.compute_bounds(self.main_window).out_bounds
 
-        x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y
-        self.application.popover_manager.show_popover('paragraph_style', x, y, 'top')
+        self.application.popover_manager.show_popover_at_button('paragraph_style', button, 'top')
 
     def show_edit_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_right.edit_menu_button
-        allocation = button.compute_bounds(self.main_window).out_bounds
 
-        x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y
-        self.application.popover_manager.show_popover('edit_menu', x, y, 'top')
+        self.application.popover_manager.show_popover_at_button('edit_menu', button, 'top')
 
     def show_document_menu(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_right.document_menu_button
-        allocation = button.compute_bounds(self.main_window).out_bounds
 
-        x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y + allocation.size.height
-        self.application.popover_manager.show_popover('document_menu', x, y, 'bottom')
+        self.application.popover_manager.show_popover_at_button('document_menu', button, 'bottom')
 
     def show_bookmarks(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_right.bookmarks_button
-        allocation = button.compute_bounds(self.main_window).out_bounds
 
-        x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y + allocation.size.height
-        self.application.popover_manager.show_popover('bookmarks', x, y, 'bottom')
-
-        self.application.bookmarks.update_bookmark_buttons()
+        self.application.popover_manager.show_popover_at_button('bookmarks', button, 'bottom')
 
     def show_hamburger_menu(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_left.hamburger_menu_button
-        allocation = button.compute_bounds(self.main_window).out_bounds
 
-        x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y + allocation.size.height
-        self.application.popover_manager.show_popover('hamburger_menu', x, y, 'bottom')
+        self.application.popover_manager.show_popover_at_button('hamburger_menu', button, 'bottom')
+
+    def show_rename_file_popover(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+        self.application.scrolling.scroll_insert_on_screen(animation_type=None)
+
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
+
+        insert = document.get_insert_node()
+        x, y = document.get_absolute_xy(insert.layout)
+        x -= scrolling_position_x
+        y -= scrolling_position_y
+        document_view = self.main_window.document_view
+        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
+        x += document_view_allocation.origin.x
+        y += document_view_allocation.origin.y
+        x += LayoutInfo.get_document_padding_left()
+        y += LayoutInfo.get_normal_document_offset()
+        fontname = insert.layout['fontname']
+        padding_top = TextShaper.get_padding_top(fontname)
+        padding_bottom = TextShaper.get_padding_bottom(fontname)
+        y += insert.layout['height'] - padding_top - padding_bottom
+        x += insert.layout['width'] / 2
+
+        orientation = 'bottom'
+        if y + 260 > document_view_allocation.size.height:
+            orientation = 'top'
+            y -= insert.layout['height'] - padding_top - padding_bottom
+
+        self.application.popover_manager.show_popover_at_xy('rename_file', x, y, orientation)
 
     def show_settings_dialog(self, action=None, parameter=''):
         self.application.dialog_locator.get_dialog('settings').run()

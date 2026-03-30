@@ -94,13 +94,21 @@ class Files():
             return os.path.getsize(path)
         except FileNotFoundError: return 0
 
+    def change_document_file_name(name_from, name_to):
+        origin = os.path.join(Files.get_documents_folder(), name_from)
+        new_name = os.path.join(Files.get_documents_folder(), name_to)
+
+        try:
+            shutil.copyfile(origin, new_name)
+        except shutil.SameFileError: pass
+
     def delete_document_file(filename):
         path = os.path.join(Files.get_documents_folder(), filename)
         try:
             os.remove(path)
         except FileNotFoundError: pass
 
-    def delete_document_files(document_id):
+    def delete_all_document_files(document_id):
         folder = os.path.join(Files.get_documents_folder(), str(document_id) + '_files')
         if os.path.exists(folder):
             shutil.rmtree(folder)

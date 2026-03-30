@@ -52,6 +52,8 @@ class ContextMenuDocument():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
+        image_selected = (widget := document.get_selected_widget()) != None and widget.get_type() == 'image'
+
         self.view_right_click.open_link_button.set_visible(document.cursor_inside_link())
         self.view_right_click.open_link_separator.set_visible(document.cursor_inside_link())
         self.view_right_click.copy_link_button.set_visible(document.whole_selection_is_one_link() or document.cursor_inside_link())
@@ -62,8 +64,9 @@ class ContextMenuDocument():
         self.view_right_click.back_button.set_visible(not hide_back_and_forward)
         self.view_right_click.forward_button.set_visible(not hide_back_and_forward)
         self.view_right_click.back_forward_separator.set_visible(not hide_back_and_forward)
-        self.view_right_click.export_image_button.set_visible(document.widget_selected())
-        self.view_right_click.image_functions_separator.set_visible(document.widget_selected())
+
+        self.view_right_click.export_image_button.set_visible(image_selected)
+        self.view_right_click.image_functions_separator.set_visible(image_selected)
 
         self.view_edit_menu.open_link_button.set_visible(document.cursor_inside_link())
         self.view_edit_menu.open_link_separator.set_visible(document.cursor_inside_link())
@@ -71,8 +74,9 @@ class ContextMenuDocument():
         self.view_edit_menu.remove_link_button.set_visible(document.links_inside_selection() or document.cursor_inside_link())
         self.view_edit_menu.edit_link_button.set_visible(document.whole_selection_is_one_link() or document.cursor_inside_link())
         self.view_edit_menu.link_buttons_separator.set_visible(document.links_inside_selection() or document.cursor_inside_link())
-        self.view_edit_menu.export_image_button.set_visible(document.widget_selected())
-        self.view_edit_menu.image_functions_separator.set_visible(document.widget_selected())
+
+        self.view_edit_menu.export_image_button.set_visible(image_selected)
+        self.view_edit_menu.image_functions_separator.set_visible(image_selected)
 
     def popup_at_cursor(self, x, y):
         self.view_right_click.popup_at_cursor(x, y)
