@@ -48,6 +48,8 @@ class Settings():
         Settings.defaults['last_image_export_folder'] = None
         Settings.defaults['last_bulk_export_folder'] = None
         Settings.defaults['last_import_folder'] = None
+        Settings.defaults['last_image_import_folder'] = None
+        Settings.defaults['last_file_import_folder'] = None
 
         Settings.defaults['button_visible_bold'] = True
         Settings.defaults['button_visible_italic'] = True

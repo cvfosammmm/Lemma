@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib, Gio
 
 import os.path
 
@@ -25,6 +25,7 @@ from lemma.use_cases.use_cases import UseCases
 from lemma.widgets.factory import WidgetFactory
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.files import Files
+from lemma.services.settings import Settings
 
 
 class Dialog(object):
@@ -41,6 +42,12 @@ class Dialog(object):
         self.view.set_modal(True)
         self.view.set_title(_('Attach File(s)'))
 
+        folder_preset = Settings.get_value('last_file_import_folder')
+        if folder_preset == None or not os.path.exists(folder_preset) or not os.path.isdir(folder_preset):
+            folder_preset = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
+        if folder_preset != None:
+            self.view.set_initial_folder(Gio.File.new_for_path(folder_preset))
+
     def dialog_process_response(self, dialog, result):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if not document.insert_parent_is_root(): return
@@ -52,6 +59,8 @@ class Dialog(object):
             for file in files:
                 origin = file.get_path()
                 filename = Files.add_file_to_doc_folder_with_distinct_name(document, origin)
+
+                UseCases.settings_set_value('last_file_import_folder', os.path.dirname(origin))
 
                 widget = WidgetFactory.make_widget('attachment', {'filename': filename})
                 UseCases.add_widget(widget)
