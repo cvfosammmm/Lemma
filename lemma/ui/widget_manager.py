@@ -36,6 +36,8 @@ from lemma.ui.popovers.popover_templates import PopoverView
 class WidgetManager():
 
     def __init__(self, main_window, application):
+        self.application = application
+
         self.toolbars = dict()
         self.toolbars['attachment'] = ToolbarAttachment(main_window, application)
         self.toolbars['image'] = ToolbarImage(main_window, application)
@@ -103,6 +105,15 @@ class WidgetManager():
             match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
                 case ('return', _) | ('kp_enter', _):
                     Files.open_document_file(widget.get_attribute('filename'))
+                    return True
+                case ('f2', _):
+                    self.application.document_view.view.content.grab_focus()
+                    self.application.scrolling.scroll_insert_on_screen(animation_type=None)
+
+                    document = WorkspaceRepo.get_workspace().get_active_document()
+                    node = document.get_selected_nodes()[0]
+                    popover = self.application.popover_manager.get_popover('rename_file')
+                    self.application.popover_manager.show_popover_at_node(popover, document, node)
                     return True
 
 
@@ -173,31 +184,9 @@ class ToolbarAttachment(Gtk.Box):
         self.application.scrolling.scroll_insert_on_screen(animation_type=None)
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
-
-        insert = document.get_insert_node()
-        x, y = document.get_absolute_xy(insert.layout)
-        x -= scrolling_position_x
-        y -= scrolling_position_y
-        document_view = self.main_window.document_view
-        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
-        x += document_view_allocation.origin.x
-        y += document_view_allocation.origin.y
-        x += LayoutInfo.get_document_padding_left()
-        y += LayoutInfo.get_normal_document_offset()
-        fontname = insert.layout['fontname']
-        padding_top = TextShaper.get_padding_top(fontname)
-        padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += insert.layout['height'] - padding_top - padding_bottom
-        x += insert.layout['width'] / 2
-
-        orientation = 'bottom'
-        if y + 260 > document_view_allocation.size.height:
-            orientation = 'top'
-            y -= insert.layout['height'] - padding_top - padding_bottom
-
+        node = document.get_selected_nodes()[0]
         popover = self.application.popover_manager.get_popover('rename_file')
-        self.application.popover_manager.show_popover_at_xy(popover, x, y, orientation)
+        self.application.popover_manager.show_popover_at_node(popover, document, node)
 
 
 class ToolbarImage(Gtk.Box):

@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
+from lemma.services.layout_info import LayoutInfo
+from lemma.services.text_shaper import TextShaper
 import lemma.ui.popovers.document_menu as document_menu
 from lemma.ui.document_context_menu import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
@@ -79,6 +81,34 @@ class PopoverManager():
 
         self.active_popover_button = button
         self.active_popover_button.add_css_class('active')
+
+    def show_popover_at_node(self, popover, document, node):
+        if popover == self.current_popover: return
+
+        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
+
+        x, y = document.get_absolute_xy(node.layout)
+        x -= scrolling_position_x
+        y -= scrolling_position_y
+        document_view = self.main_window.document_view
+        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
+        x += document_view_allocation.origin.x
+        y += document_view_allocation.origin.y
+        x += LayoutInfo.get_document_padding_left()
+        y += LayoutInfo.get_normal_document_offset()
+        fontname = node.layout['fontname']
+        padding_top = TextShaper.get_padding_top(fontname)
+        padding_bottom = TextShaper.get_padding_bottom(fontname)
+        y += node.layout['height'] - padding_top - padding_bottom
+        x += node.layout['width'] / 2
+
+        orientation = 'bottom'
+        if y + 260 > document_view_allocation.size.height:
+            orientation = 'top'
+            y -= node.layout['height'] - padding_top - padding_bottom
+
+        self.popdown()
+        self.popup(popover, x, y, orientation)
 
     def show_popover_at_xy(self, popover, x, y, orientation='bottom'):
         if popover == self.current_popover: return

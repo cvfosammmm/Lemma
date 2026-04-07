@@ -369,6 +369,8 @@ class DocumentViewController():
                 return
 
         match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
+            case ('f2', _):
+                self.model.application.actions.actions['rename-document'].activate()
             case ('left', 0):
                 UseCases.left()
             case ('right', 0):

@@ -76,7 +76,6 @@ class ShortcutControllerApp(ShortcutController):
         self.add_with_callback('<Control>f', self.application.actions.actions['start-global-search'].activate)
         self.add_with_callback('<Alt>Left', self.application.actions.actions['go-back'].activate)
         self.add_with_callback('<Alt>Right', self.application.actions.actions['go-forward'].activate)
-        self.add_with_callback('F2', self.application.actions.actions['rename-document'].activate)
         self.add_with_callback('<Control>question', self.application.actions.actions['show-shortcuts-dialog'].activate)
         self.add_with_callback('F10', self.application.actions.actions['show-hamburger-menu'].activate)
         self.add_with_callback('F12', self.application.actions.actions['show-document-menu'].activate)
