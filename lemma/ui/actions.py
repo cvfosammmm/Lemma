@@ -282,6 +282,8 @@ class Actions(object):
             Gdk.Display.get_default().get_clipboard().read_async(['lemma/ast'], 0, None, self.on_paste_ast)
         elif clipboard.get_formats().contain_mime_type('image/png') or clipboard.get_formats().contain_mime_type('image/jpeg'):
             Gdk.Display.get_default().get_clipboard().read_texture_async(None, self.on_paste_image)
+        elif clipboard.get_formats().contain_mime_type('text/uri-list'):
+            Gdk.Display.get_default().get_clipboard().read_text_async(None, self.on_paste_files)
         elif clipboard.get_formats().contain_mime_type('text/plain;charset=utf-8') or clipboard.get_formats().contain_mime_type('text/plain'):
             Gdk.Display.get_default().get_clipboard().read_text_async(None, self.on_paste_text)
 
@@ -299,6 +301,15 @@ class Actions(object):
         texture.save_to_png(Files.abspath_for_document_file(filename))
         image = WidgetFactory.make_widget('image', {'filename': filename})
         UseCases.add_widget(image)
+
+    def on_paste_files(self, clipboard, result):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        text = clipboard.read_text_finish(result)
+        for origin in text.splitlines():
+            filename = Files.add_file_to_doc_folder_with_distinct_name(document, origin)
+            widget = WidgetFactory.make_widget('attachment', {'filename': filename})
+            UseCases.add_widget(widget)
 
     def on_paste_text(self, clipboard, result):
         text = clipboard.read_text_finish(result)
