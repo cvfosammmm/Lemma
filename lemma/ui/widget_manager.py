@@ -122,9 +122,15 @@ class ToolbarAttachment(Gtk.Box):
         self.rename_button.add_css_class('flat')
         self.rename_button.set_can_focus(False)
 
+        self.copy_button = Gtk.Button.new_with_label('Copy')
+        self.copy_button.set_action_name('win.copy')
+        self.copy_button.add_css_class('flat')
+        self.copy_button.set_can_focus(False)
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.open_button)
         box.append(self.rename_button)
+        box.append(self.copy_button)
         self.append(box)
         self.append(Gtk.Separator())
 
