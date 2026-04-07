@@ -127,8 +127,7 @@ class Layouter(object):
             layout_tree['fixed'] = True
             layout_tree['fontname'] = self.get_fontname_from_node(node)
             node.layout = layout_tree
-            layout_tree['node'].value.allocate_size(layout_tree['fontname'])
-            width, height = layout_tree['node'].value.get_allocation()
+            width, height = layout_tree['node'].value.get_allocation(layout_tree['fontname'])
             layout_tree['width'] = width
             layout_tree['height'] = height
         elif node.type == 'mathscript':

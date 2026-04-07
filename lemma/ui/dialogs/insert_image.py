@@ -22,8 +22,9 @@ from gi.repository import Gtk, Gdk
 from PIL import Image as PIL_Image
 
 from lemma.use_cases.use_cases import UseCases
-from lemma.document.image import Image
+from lemma.widgets.factory import WidgetFactory
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.services.files import Files
 
 
 class Dialog(object):
@@ -47,17 +48,18 @@ class Dialog(object):
         self.view.set_default_filter(file_filter)
 
     def dialog_process_response(self, dialog, result):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if not document.insert_parent_is_root(): return
+
         try:
             file = dialog.open_finish(result)
         except Exception: pass
         else:
             if file != None:
-                document = WorkspaceRepo.get_workspace().get_active_document()
-                if document.insert_parent_is_root():
-                    filename = file.get_path()
-                    texture = Gdk.Texture.new_from_filename(filename)
-                    data = texture.save_to_png_bytes().unref_to_data()
-                    image = Image(data)
-                    UseCases.add_widget(image)
+                origin = file.get_path()
+                filename = Files.add_file_to_doc_folder_with_distinct_name(document, origin)
+
+                widget = WidgetFactory.make_widget('image', {'filename': filename})
+                UseCases.add_widget(widget)
 
 

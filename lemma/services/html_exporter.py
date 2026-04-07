@@ -18,6 +18,9 @@
 import urllib.parse
 import os, os.path, shutil
 
+from PIL import Image as PIL_Image
+
+from lemma.services.files import Files
 from lemma.services.character_db import CharacterDB
 
 

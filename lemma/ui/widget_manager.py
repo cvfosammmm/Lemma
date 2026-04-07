@@ -27,7 +27,10 @@ from lemma.services.layout_info import LayoutInfo
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
+from lemma.ui.popovers.popover_menu_builder import MenuBuilder
+from lemma.ui.popovers.popover_templates import PopoverView
 
 
 class WidgetManager():
@@ -69,11 +72,12 @@ class WidgetManager():
 
         elif widget.get_type() == 'image':
             matrix = ctx.get_matrix()
-            scaling_factor_x = widget.width * hidpi_factor / widget.original_width
-            scaling_factor_y = widget.height * hidpi_factor / widget.original_height
+            width, height = widget.get_size()
+            scaling_factor_x = width * hidpi_factor / widget.cache['original_width']
+            scaling_factor_y = height * hidpi_factor / widget.cache['original_height']
             ctx.scale(scaling_factor_x, scaling_factor_y)
 
-            ctx.set_source_surface(widget.cairo_surface, offset_x * hidpi_factor / scaling_factor_x, offset_y * hidpi_factor / scaling_factor_y)
+            ctx.set_source_surface(widget.cache['cairo_surface'], offset_x * hidpi_factor / scaling_factor_x, offset_y * hidpi_factor / scaling_factor_y)
             ctx.paint()
 
             ctx.set_matrix(matrix)
@@ -98,6 +102,7 @@ class ToolbarAttachment(Gtk.Box):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
+        self.main_window = main_window
         self.application = application
 
         self.status_label = Gtk.Label.new('')
@@ -114,19 +119,12 @@ class ToolbarAttachment(Gtk.Box):
         self.open_button.set_can_focus(False)
 
         self.rename_button = Gtk.Button.new_with_label('Rename')
-        self.rename_button.set_action_name('win.show-rename-file-popover')
         self.rename_button.add_css_class('flat')
         self.rename_button.set_can_focus(False)
-
-        self.more_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
-        self.more_button.add_css_class('flat')
-        self.more_button.set_can_focus(False)
-        self.more_button.set_tooltip_text(_('More Actions'))
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.open_button)
         box.append(self.rename_button)
-        box.append(self.more_button)
         self.append(box)
         self.append(Gtk.Separator())
 
@@ -140,11 +138,7 @@ class ToolbarAttachment(Gtk.Box):
         self.append(box)
 
         self.open_button.connect('clicked', self.on_open_button_clicked)
-        controller = Gtk.GestureClick()
-        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        controller.set_button(1)
-        controller.connect('pressed', self.on_more_button_press)
-        self.more_button.add_controller(controller)
+        self.rename_button.connect('clicked', self.on_rename_button_clicked)
 
         self.filename = None
 
@@ -158,8 +152,36 @@ class ToolbarAttachment(Gtk.Box):
         if self.filename != None:
             Files.open_document_file(self.filename)
 
-    def on_more_button_press(self, controller, n_press, x, y):
-        self.application.popover_manager.show_popover_at_button('paragraph_style', self.more_button, 'top')
+    def on_rename_button_clicked(self, button):
+        self.application.document_view.view.content.grab_focus()
+        self.application.scrolling.scroll_insert_on_screen(animation_type=None)
+
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
+
+        insert = document.get_insert_node()
+        x, y = document.get_absolute_xy(insert.layout)
+        x -= scrolling_position_x
+        y -= scrolling_position_y
+        document_view = self.main_window.document_view
+        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
+        x += document_view_allocation.origin.x
+        y += document_view_allocation.origin.y
+        x += LayoutInfo.get_document_padding_left()
+        y += LayoutInfo.get_normal_document_offset()
+        fontname = insert.layout['fontname']
+        padding_top = TextShaper.get_padding_top(fontname)
+        padding_bottom = TextShaper.get_padding_bottom(fontname)
+        y += insert.layout['height'] - padding_top - padding_bottom
+        x += insert.layout['width'] / 2
+
+        orientation = 'bottom'
+        if y + 260 > document_view_allocation.size.height:
+            orientation = 'top'
+            y -= insert.layout['height'] - padding_top - padding_bottom
+
+        popover = self.application.popover_manager.get_popover('rename_file')
+        self.application.popover_manager.show_popover_at_xy(popover, x, y, orientation)
 
 
 class ToolbarImage(Gtk.Box):
@@ -225,27 +247,31 @@ class ToolbarImage(Gtk.Box):
         layout.set_text(self.get_longest_possible_status_text(widget))
         self.status_label.set_size_request(layout.get_extents()[0].width / Pango.SCALE + 30, -1)
 
-        self.scale.set_range(LayoutInfo.get_min_image_size(), LayoutInfo.get_max_layout_width())
+        width, height = widget.get_size()
 
-        self.scale.set_value(widget.get_width())
+        self.scale.set_range(LayoutInfo.get_min_image_size(), LayoutInfo.get_max_layout_width())
+        self.scale.set_value(width)
         self.scale.clear_marks()
 
-        orig_width = widget.get_original_width()
+        orig_width = widget.cache['original_width']
         if orig_width > LayoutInfo.get_min_image_size() and orig_width < LayoutInfo.get_max_layout_width():
             self.scale.add_mark(orig_width, Gtk.PositionType.TOP)
 
-        self.shrink_button.set_sensitive(widget.get_width() > LayoutInfo.get_min_image_size())
-        self.enlarge_button.set_sensitive(widget.get_width() < LayoutInfo.get_max_layout_width())
+        self.shrink_button.set_sensitive(width > LayoutInfo.get_min_image_size())
+        self.enlarge_button.set_sensitive(width < LayoutInfo.get_max_layout_width())
 
     def get_status_text(self, widget):
-        size_string = str(widget.width) + ' × ' + str(widget.height)
-        return widget.format + _(' Image') + ' (' + size_string + ')'
+        width, height = widget.get_size()
+        size_string = str(width) + ' × ' + str(height)
+
+        return widget.cache['image_format'] + _(' Image') + ' (' + size_string + ')'
 
     def get_longest_possible_status_text(self, widget):
         max_width = LayoutInfo.get_max_layout_width()
-        max_height = int((max_width / widget.original_width) * widget.original_height)
+        max_height = int((max_width / widget.cache['original_width']) * widget.cache['original_height'])
         max_digits = len(str(max_width)) + len(str(max_height))
-        return widget.format + _(' Image') + ' ( × ' + max_digits * '0' + ')'
+
+        return widget.cache['image_format'] + _(' Image') + ' ( × ' + max_digits * '0' + ')'
 
     def on_widget_scale_change_value(self, scale, scroll, value):
         UseCases.resize_widget(value)
@@ -254,11 +280,17 @@ class ToolbarImage(Gtk.Box):
     def on_shrink_button_clicked(self, button):
         self.application.document_view.view.content.grab_focus()
 
-        UseCases.resize_widget(self.widget.get_width() - 1)
+        if self.widget.get_attribute('width') != None:
+            width = self.widget.get_attribute('width')
+        else:
+            width = min(self.widget.cache['original_width'], LayoutInfo.get_max_layout_width())
+
+        UseCases.resize_widget(width - 1)
 
     def on_enlarge_button_clicked(self, button):
         self.application.document_view.view.content.grab_focus()
 
-        UseCases.resize_widget(self.widget.get_width() + 1)
+        width, height = widget.get_size()
+        UseCases.resize_widget(width + 1)
 
 

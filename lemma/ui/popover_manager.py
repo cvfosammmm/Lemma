@@ -62,8 +62,10 @@ class PopoverManager():
         self.popovers["rename_file"] = rename_file.Popover(self)
         self.popovers["bookmarks"] = bookmarks.Popover(self)
 
-    def show_popover_at_button(self, name, button, orientation='bottom'):
-        popover = self.popovers[name]
+    def get_popover(self, name):
+        return self.popovers[name]
+
+    def show_popover_at_button(self, popover, button, orientation='bottom'):
         if popover == self.current_popover: return
 
         allocation = button.compute_bounds(self.main_window).out_bounds
@@ -78,8 +80,7 @@ class PopoverManager():
         self.active_popover_button = button
         self.active_popover_button.add_css_class('active')
 
-    def show_popover_at_xy(self, name, x, y, orientation='bottom'):
-        popover = self.popovers[name]
+    def show_popover_at_xy(self, popover, x, y, orientation='bottom'):
         if popover == self.current_popover: return
 
         self.popdown()

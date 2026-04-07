@@ -15,18 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import urllib.parse, os.path
+import urllib.parse, shutil, os.path
 from html.parser import HTMLParser as HTMLParserLib
 
 from lemma.document.ast import Root, Paragraph, Node
-from lemma.document.image import Image
+from lemma.widgets.factory import WidgetFactory
 from lemma.services.layout_info import LayoutInfo
+from lemma.services.files import Files
 
 
 class HTMLParser():
 
-    def parse(html, path):
-        parser = HTMLParserObject(html, path)
+    def parse(html, path, data_dir):
+        parser = HTMLParserObject(html, path, data_dir)
         parser.run()
 
         return parser.title, parser.root
@@ -34,11 +35,12 @@ class HTMLParser():
 
 class HTMLParserObject(HTMLParserLib):
 
-    def __init__(self, html, path):
+    def __init__(self, html, path, data_dir):
         HTMLParserLib.__init__(self)
 
         self.html = html
         self.path = path
+        self.data_dir = data_dir
 
         self.open_tags = list()
         self.tags = set()
@@ -91,20 +93,23 @@ class HTMLParserObject(HTMLParserLib):
         if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol']:
             self.composite.style = tag
         if tag == 'img':
-            width = LayoutInfo.get_max_layout_width()
             for name, value in attrs:
                 if name == 'src':
-                    filename = urllib.parse.unquote_plus(value)
-                if name == 'width':
-                    width = int(value)
+                    src = urllib.parse.unquote_plus(value)
 
-            try:
-                with open(os.path.join(self.path, filename), 'rb') as file:
-                    data = file.read()
-                image = Image(data, attributes={'width': width})
-                node = Node('widget', image)
-                self.composite.append(node)
-            except FileNotFoundError: pass
+                    if src != None:
+                        path_origin = os.path.join(self.path, src)
+                        abs_data_dir = os.path.join(Files.get_documents_folder(), self.data_dir)
+                        filename = os.path.basename(src)
+                        path_dest = os.path.join(abs_data_dir, filename)
+
+                        if not os.path.exists(abs_data_dir): os.makedirs(abs_data_dir)
+                        shutil.copyfile(path_origin, path_dest)
+
+                        image = WidgetFactory.make_widget('image', {'filename': os.path.join(self.data_dir, filename)})
+                        if image != None:
+                            node = Node('widget', image)
+                            self.composite.append(node)
         if tag == 'msubsup':
             node = Node('mathscript')
             self.composite.append(node)

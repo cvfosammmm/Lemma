@@ -22,11 +22,12 @@ from gi.repository import Gio, GLib, GObject, Gdk
 from lemma.services.message_bus import MessageBus
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
-from lemma.document.image import Image
+from lemma.widgets.factory import WidgetFactory
 from lemma.services.xml_exporter import XMLExporter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.text_shaper import TextShaper
+from lemma.services.files import Files
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
@@ -76,7 +77,6 @@ class Actions(object):
 
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
         self.add_simple_action('show-attach-files-dialog', self.show_attach_files_dialog)
-        self.add_simple_action('show-rename-file-popover', self.show_rename_file_popover)
 
         self.add_simple_action('subscript', self.subscript)
         self.add_simple_action('superscript', self.superscript)
@@ -130,7 +130,6 @@ class Actions(object):
         image_in_clipboard = 'image/jpeg' in clipboard_formats or 'image/png' in clipboard_formats
         selected_widget = None if document == None else document.get_selected_widget()
         image_selected = selected_widget != None and selected_widget.get_type() == 'image'
-        attachment_selected = selected_widget != None and selected_widget.get_type() == 'attachment'
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
@@ -151,7 +150,6 @@ class Actions(object):
         self.actions['remove-selection'].set_enabled(document != None and document.has_selection())
         self.actions['show-insert-image-dialog'].set_enabled(document != None and document.insert_parent_is_root())
         self.actions['show-attach-files-dialog'].set_enabled(document != None and document.insert_parent_is_root())
-        self.actions['show-rename-file-popover'].set_enabled(attachment_selected)
         self.actions['open-link'].set_enabled(document != None and document.cursor_inside_link())
         self.actions['remove-link'].set_enabled(document != None and (document.links_inside_selection() or document.cursor_inside_link()))
         self.actions['show-link-popover'].set_enabled(document != None and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
@@ -268,9 +266,10 @@ class Actions(object):
             xml += XMLExporter.export_paragraph(nodes, paragraph.style, paragraph.indentation_level, paragraph.state)
         content_providers.append(Gdk.ContentProvider.new_for_bytes('lemma/ast', GLib.Bytes(xml.encode())))
 
-        if len(selected_nodes) == 1 and selected_nodes[0].type == 'widget' and selected_nodes[0].value.get_type() == 'image':
-            data = selected_nodes[0].value.get_data()
-            content_providers.append(Gdk.ContentProvider.new_for_bytes('image/png', GLib.Bytes(data)))
+        if (widget := document.get_selected_widget()) != None:
+            provider = widget.get_clipboard_content_provider()
+            if provider != None:
+                content_providers.append(provider)
 
         cp_union = Gdk.ContentProvider.new_union(content_providers)
         clipboard.set_content(cp_union)
@@ -293,9 +292,12 @@ class Actions(object):
         UseCases.insert_xml(xml)
 
     def on_paste_image(self, clipboard, result):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
         texture = clipboard.read_texture_finish(result)
-        data = texture.save_to_png_bytes().unref_to_data()
-        image = Image(data)
+        filename = Files.get_distinct_document_file_name(document, '.png')
+        texture.save_to_png(Files.abspath_for_document_file(filename))
+        image = WidgetFactory.make_widget('image', {'filename': filename})
         UseCases.add_widget(image)
 
     def on_paste_text(self, clipboard, result):
@@ -451,7 +453,9 @@ class Actions(object):
 
         if not document.has_selection() and insert.is_inside_link():
             UseCases.select_section(*insert.link_bounds())
-        self.application.popover_manager.show_popover_at_xy('link_autocomplete', x, y, orientation)
+
+        popover = self.application.popover_manager.get_popover('link_autocomplete')
+        self.application.popover_manager.show_popover_at_xy(popover, x, y, orientation)
 
     def copy_link(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -490,58 +494,33 @@ class Actions(object):
 
     def show_paragraph_style_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
+        popover = self.application.popover_manager.get_popover('paragraph_style')
 
-        self.application.popover_manager.show_popover_at_button('paragraph_style', button, 'top')
+        self.application.popover_manager.show_popover_at_button(popover, button, 'top')
 
     def show_edit_menu(self, action=None, parameter=''):
         button = self.main_window.toolbar.toolbar_right.edit_menu_button
+        popover = self.application.popover_manager.get_popover('edit_menu')
 
-        self.application.popover_manager.show_popover_at_button('edit_menu', button, 'top')
+        self.application.popover_manager.show_popover_at_button(popover, button, 'top')
 
     def show_document_menu(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_right.document_menu_button
+        popover = self.application.popover_manager.get_popover('document_menu')
 
-        self.application.popover_manager.show_popover_at_button('document_menu', button, 'bottom')
+        self.application.popover_manager.show_popover_at_button(popover, button, 'bottom')
 
     def show_bookmarks(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_right.bookmarks_button
+        popover = self.application.popover_manager.get_popover('bookmarks')
 
-        self.application.popover_manager.show_popover_at_button('bookmarks', button, 'bottom')
+        self.application.popover_manager.show_popover_at_button(popover, button, 'bottom')
 
     def show_hamburger_menu(self, action=None, parameter=''):
         button = self.main_window.headerbar.hb_left.hamburger_menu_button
+        popover = self.application.popover_manager.get_popover('hamburger_menu')
 
-        self.application.popover_manager.show_popover_at_button('hamburger_menu', button, 'bottom')
-
-    def show_rename_file_popover(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
-        self.application.scrolling.scroll_insert_on_screen(animation_type=None)
-
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
-
-        insert = document.get_insert_node()
-        x, y = document.get_absolute_xy(insert.layout)
-        x -= scrolling_position_x
-        y -= scrolling_position_y
-        document_view = self.main_window.document_view
-        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
-        x += document_view_allocation.origin.x
-        y += document_view_allocation.origin.y
-        x += LayoutInfo.get_document_padding_left()
-        y += LayoutInfo.get_normal_document_offset()
-        fontname = insert.layout['fontname']
-        padding_top = TextShaper.get_padding_top(fontname)
-        padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += insert.layout['height'] - padding_top - padding_bottom
-        x += insert.layout['width'] / 2
-
-        orientation = 'bottom'
-        if y + 260 > document_view_allocation.size.height:
-            orientation = 'top'
-            y -= insert.layout['height'] - padding_top - padding_bottom
-
-        self.application.popover_manager.show_popover_at_xy('rename_file', x, y, orientation)
+        self.application.popover_manager.show_popover_at_button(popover, button, 'bottom')
 
     def show_settings_dialog(self, action=None, parameter=''):
         self.application.dialog_locator.get_dialog('settings').run()

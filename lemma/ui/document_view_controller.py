@@ -23,11 +23,12 @@ from urllib.parse import urlparse
 import time
 
 import lemma.services.xml_helpers as xml_helpers
-from lemma.document.image import Image
+from lemma.widgets.factory import WidgetFactory
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
 from lemma.services.layout_info import LayoutInfo
+from lemma.services.files import Files
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
@@ -262,8 +263,9 @@ class DocumentViewController():
 
                 if content_type.startswith('image/'):
                     texture = Gdk.Texture.new_from_file(file)
-                    data = texture.save_to_png_bytes().unref_to_data()
-                    image = Image(data)
+                    filename = Files.get_distinct_document_file_name(document, '.png')
+                    texture.save_to_png(Files.abspath_for_document_file(filename))
+                    image = WidgetFactory.make_widget('image', {'filename': filename})
 
                     UseCases.move_cursor_to_xy(x, y)
                     UseCases.add_widget(image)
@@ -281,8 +283,10 @@ class DocumentViewController():
             UseCases.insert_xml(xml)
 
         elif isinstance(value, Gdk.Texture):
-            data = value.save_to_png_bytes().unref_to_data()
-            image = Image(data)
+            texture = value
+            filename = Files.get_distinct_document_file_name(document, '.png')
+            texture.save_to_png(Files.abspath_for_document_file(filename))
+            image = WidgetFactory.make_widget('image', {'filename': filename})
 
             UseCases.move_cursor_to_xy(x, y)
             UseCases.add_widget(image)
@@ -290,13 +294,11 @@ class DocumentViewController():
     def on_drop_enter(self, controller, x, y):
         self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)
 
-        controller.reset()
         return Gdk.DragAction.COPY
 
     def on_drop_hover(self, controller, x, y):
         self.model.set_drop_cursor_position(x, y)
 
-        controller.reset()
         return Gdk.DragAction.COPY
 
     def on_drop_leave(self, controller):
@@ -304,8 +306,6 @@ class DocumentViewController():
             self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
             self.scroll_on_drop_callback_id = None
         self.model.set_drop_cursor_position(-1, -1)
-
-        controller.reset()
 
     def scroll_on_drop_callback(self, widget, frame_clock):
         x, y = self.model.drop_cursor_x, self.model.drop_cursor_y

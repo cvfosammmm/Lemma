@@ -70,7 +70,7 @@ class Dialog(object):
                 if not filename.endswith('.png'):
                     filename += '.png'
 
-                with PIL_Image.open(io.BytesIO(self.image.data)) as pil_image:
+                with PIL_Image.open(self.image.attributes['filename']) as pil_image:
                     pil_image.save(filename)
 
 

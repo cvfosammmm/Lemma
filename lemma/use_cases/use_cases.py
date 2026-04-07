@@ -97,7 +97,7 @@ class UseCases():
         html = mdi.render(markdown)
         html = html.replace('.md">', '">')
 
-        title, ast = HTMLParser.parse(html, os.path.dirname(path))
+        title, ast = HTMLParser.parse(html, os.path.dirname(path), str(document.id) + '_files')
 
         if title != None:
             document.title = title
@@ -459,6 +459,7 @@ class UseCases():
 
     def add_widget(widget):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        if not document.insert_parent_is_root(): return
 
         document.start_undoable_action()
         document.delete_selected_nodes()

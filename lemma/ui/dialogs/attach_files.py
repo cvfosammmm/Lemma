@@ -22,7 +22,7 @@ from gi.repository import Gtk, Gdk
 import os.path
 
 from lemma.use_cases.use_cases import UseCases
-from lemma.document.attachment import Attachment
+from lemma.widgets.factory import WidgetFactory
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.files import Files
 
@@ -53,7 +53,7 @@ class Dialog(object):
                 origin = file.get_path()
                 filename = Files.add_file_to_doc_folder_with_distinct_name(document, origin)
 
-                widget = Attachment(filename)
+                widget = WidgetFactory.make_widget('attachment', {'filename': filename})
                 UseCases.add_widget(widget)
 
 

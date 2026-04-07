@@ -84,9 +84,19 @@ class Files():
 
         return os.path.relpath(target_full, Files.get_documents_folder())
 
+    def get_distinct_document_file_name(document, extension):
+        count = 1
+        while str(document.id) + '_files/' + str(count) + extension in document.files:
+            count += 1
+
+        return str(document.id) + '_files/' + str(count) + extension
+
     def open_document_file(filename):
         path = os.path.join(Files.get_documents_folder(), filename)
         subprocess.call(['xdg-open', path])
+
+    def abspath_for_document_file(filename):
+        return os.path.join(Files.get_documents_folder(), filename)
 
     def get_document_file_size(filename):
         path = os.path.join(Files.get_documents_folder(), filename)

@@ -27,16 +27,19 @@ class Command():
         self.state['width_before'] = None
 
         widget = self.node.value
-        self.state['width_before'] = widget.get_width()
-        widget.set_width(self.width)
+        self.state['width_before'], self.state['height_before'] = widget.get_size()
+        height = int((self.width / widget.cache['original_width']) * widget.cache['original_height'])
+        widget.set_attribute('width', self.width)
+        widget.set_attribute('height', height)
 
         self.node.paragraph().invalidate()
         document.update_last_modified()
 
     def undo(self, document):
-        if self.state['width_before'] != None:
+        if self.state['width_before'] != None and self.state['width_before'] != None:
             widget = self.node.value
-            widget.set_width(self.state['width_before'])
+            widget.set_attribute('width', self.state['width_before'])
+            widget.set_attribute('height', self.state['height_before'])
 
         self.node.paragraph().invalidate()
         document.update_last_modified()

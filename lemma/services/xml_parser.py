@@ -18,8 +18,7 @@
 import xml.parsers.expat
 
 from lemma.document.ast import Paragraph, Node
-from lemma.document.image import Image
-from lemma.document.attachment import Attachment
+from lemma.widgets.factory import WidgetFactory
 import lemma.services.xml_helpers as xml_helpers
 
 
@@ -49,11 +48,9 @@ class XMLParserObject(object):
         self.level = 0
         self.current_link = [None for i in range(20)]
         self.current_tags = [set() for i in range(20)]
-        self.current_attributes = dict()
         self.current_indentation_level = 0
         self.current_paragraph_state = 0
 
-        self.widget_data = ''
         self.title = ''
 
     def parse(self, xml_string):
@@ -64,8 +61,10 @@ class XMLParserObject(object):
         self.current_link = [None for i in range(20)]
         self.current_tags = [set() for i in range(20)]
         self.title = ''
+
+        xml_string = '<?xml version="1.0" encoding="utf-8"?><list>' + xml_string + '</list>'
         try:
-            self.expat_parser.Parse('<?xml version="1.0" encoding="utf-8"?><list>' + xml_string + '</list>', 1)
+            self.expat_parser.Parse(xml_string, 1)
         except xml.parsers.expat.ExpatError as error:
             return None
         else:
@@ -112,20 +111,28 @@ class XMLParserObject(object):
             if tag == 'placeholder':
                 node = Node('placeholder', '')
             if tag == 'widget':
-                node = Node('widget', None)
-                self.current_attributes = attrs
-                self.widget_data = ''
+                attributes = dict()
+                for key, value in attrs.items():
+                    if key != 'type':
+                        attributes[key] = value
 
-            node.link = self.current_link[self.level]
-            node.tags = self.current_tags[self.level].copy()
+                widget = WidgetFactory.make_widget(attrs['type'], attributes)
+                if widget != None:
+                    node = Node('widget', widget)
+                else:
+                    node = None
 
-            if self.current_node != None:
-                self.current_node.append(node)
-            else:
-                self.nodes.append(node)
+            if node != None:
+                node.link = self.current_link[self.level]
+                node.tags = self.current_tags[self.level].copy()
 
-            self.current_node = node
-            self.level += 1
+                if self.current_node != None:
+                    self.current_node.append(node)
+                else:
+                    self.nodes.append(node)
+
+                self.current_node = node
+                self.level += 1
 
     def handle_endtag(self, tag):
         self.open_xml_tags.pop()
@@ -151,13 +158,7 @@ class XMLParserObject(object):
         if tag == 'mark':
             self.current_tags[self.level].discard('highlight')
 
-        if tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'widget']:
-            if tag == 'widget' and self.current_node.type == 'widget':
-                if self.current_attributes['type'] == 'image':
-                    self.current_node.value = Image(eval(self.widget_data), attributes=self.current_attributes)
-                elif self.current_attributes['type'] == 'attachment' and 'filename' in self.current_attributes:
-                    self.current_node.value = Attachment(self.current_attributes['filename'])
-
+        if self.current_node != None and tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'widget']:
             if self.current_node.parent != None:
                 self.current_node = self.current_node.parent
             else:
@@ -165,10 +166,7 @@ class XMLParserObject(object):
             self.level -= 1
 
     def handle_data(self, data):
-        if self.current_node != None and self.current_node.type == 'widget':
-            self.widget_data += data
-
-        elif 'head' in self.open_xml_tags and 'title' in self.open_xml_tags:
+        if 'head' in self.open_xml_tags and 'title' in self.open_xml_tags:
             self.title += data
 
         else:
