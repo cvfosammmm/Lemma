@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Gdk, Pango
 
 import os.path
 
@@ -94,6 +94,16 @@ class WidgetManager():
         if widget.get_type() == 'attachment':
             if n_press == 2:
                 Files.open_document_file(widget.get_attribute('filename'))
+                return True
+
+    def on_keypress(self, widget, keyval, keycode, keyboard_state):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+
+        if widget.get_type() == 'attachment':
+            match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
+                case ('return', _) | ('kp_enter', _):
+                    Files.open_document_file(widget.get_attribute('filename'))
+                    return True
 
 
 class ToolbarAttachment(Gtk.Box):

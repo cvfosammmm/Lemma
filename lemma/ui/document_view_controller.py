@@ -363,6 +363,11 @@ class DocumentViewController():
         if self.model.document == None: return False
 
         document = self.model.document
+
+        if (widget := document.get_selected_widget()) != None:
+            if self.model.application.widget_manager.on_keypress(widget, keyval, keycode, keyboard_state):
+                return
+
         match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
             case ('left', 0):
                 UseCases.left()
