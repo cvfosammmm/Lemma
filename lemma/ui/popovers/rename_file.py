@@ -101,6 +101,7 @@ class Popover(PopoverView):
 
         self.validate()
         self.entry.grab_focus()
+        self.entry.select_region(0, len(os.path.splitext(filename)[0]))
 
     def on_popdown(self):
         pass
