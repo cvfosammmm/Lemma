@@ -262,6 +262,9 @@ class DocumentViewController():
                 content_type = file_info.get_content_type()
                 done_with_file = False
 
+                if content_type.endswith('/directory'):
+                    continue
+
                 if content_type.startswith('image/'):
                     try:
                         texture = Gdk.Texture.new_from_file(file)
