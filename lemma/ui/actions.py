@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gio, GLib, GObject, Gdk
 
+import os.path
+
 from lemma.services.message_bus import MessageBus
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.node_type_db import NodeTypeDB
@@ -307,6 +309,9 @@ class Actions(object):
 
         text = clipboard.read_text_finish(result)
         for origin in text.splitlines():
+            if os.path.isdir(origin):
+                continue
+
             filename = Files.add_file_to_doc_folder_with_distinct_name(document, origin)
             widget = WidgetFactory.make_widget('attachment', {'filename': filename})
             UseCases.add_widget(widget)
