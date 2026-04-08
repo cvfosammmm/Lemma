@@ -43,7 +43,7 @@ class PageToolbars(object):
         self.button_list[-1].append(['indent-less-symbolic', 'button_visible_decrease_indent', 'Decrease Indent'])
         self.button_list[-1].append(['indent-more-symbolic', 'button_visible_increase_indent', 'Increase Indent'])
         self.button_list.append([])
-        self.button_list[-1].append(['insert-image-symbolic', 'button_visible_insert_image', 'Insert Image'])
+        self.button_list[-1].append(['insert-image-new-symbolic', 'button_visible_insert_image', 'Insert Image'])
         self.button_list[-1].append(['attach-files-symbolic', 'button_visible_attach_files', 'Attach File(s)'])
         self.button_list.append([])
         self.button_list[-1].append(['link-symbolic', 'button_visible_insert_link', 'Insert Link'])

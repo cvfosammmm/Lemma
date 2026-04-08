@@ -186,7 +186,7 @@ class ToolbarMain(Gtk.Box):
         self.insert_buttons_separator = Gtk.Separator()
         self.append(self.insert_buttons_separator)
 
-        self.image_button = Gtk.Button.new_from_icon_name('insert-image-symbolic')
+        self.image_button = Gtk.Button.new_from_icon_name('insert-image-new-symbolic')
         self.image_button.set_action_name('win.show-insert-image-dialog')
         self.image_button.set_can_focus(False)
         self.image_button.set_tooltip_text(_('Insert Image'))
