@@ -45,6 +45,7 @@ class HTMLParserObject(HTMLParserLib):
         self.open_tags = list()
         self.tags = set()
         self.link_target = None
+        self.ignore_data = False
 
         self.title = None
         self.root = None
@@ -89,7 +90,24 @@ class HTMLParserObject(HTMLParserLib):
         if tag == 'a':
             for name, value in attrs:
                 if name == 'href':
-                    self.link_target = urllib.parse.unquote_plus(value)
+                    target = urllib.parse.unquote_plus(value)
+                    abs_path_target = os.path.join(self.path, target)
+                    if os.path.isfile(abs_path_target) and os.path.dirname(abs_path_target).endswith('_files'):
+                        abs_data_dir = os.path.join(Files.get_documents_folder(), self.data_dir)
+                        filename = os.path.basename(target)
+                        path_dest = os.path.join(abs_data_dir, filename)
+
+                        if not os.path.exists(abs_data_dir): os.makedirs(abs_data_dir)
+                        shutil.copyfile(abs_path_target, path_dest)
+
+                        widget = WidgetFactory.make_widget('attachment', {'filename': os.path.join(self.data_dir, filename)})
+                        if widget != None:
+                            node = Node('widget', widget)
+                            self.composite.append(node)
+
+                        self.ignore_data = True
+                    else:
+                        self.link_target = target
         if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol']:
             self.composite.style = tag
         if tag == 'img':
@@ -106,9 +124,9 @@ class HTMLParserObject(HTMLParserLib):
                         if not os.path.exists(abs_data_dir): os.makedirs(abs_data_dir)
                         shutil.copyfile(path_origin, path_dest)
 
-                        image = WidgetFactory.make_widget('image', {'filename': os.path.join(self.data_dir, filename)})
-                        if image != None:
-                            node = Node('widget', image)
+                        widget = WidgetFactory.make_widget('image', {'filename': os.path.join(self.data_dir, filename)})
+                        if widget != None:
+                            node = Node('widget', widget)
                             self.composite.append(node)
         if tag == 'msubsup':
             node = Node('mathscript')
@@ -153,7 +171,9 @@ class HTMLParserObject(HTMLParserLib):
         if tag == 'em': self.tags.discard('italic')
         if tag == 'code': self.tags.discard('verbatim')
         if tag == 'mark': self.tags.discard('highlight')
-        if tag == 'a': self.link_target = None
+        if tag == 'a':
+            self.link_target = None
+            self.ignore_data = False
         if tag == 'msubsup':
             self.composite = self.composite.parent
         if tag == 'mfrac':
@@ -167,6 +187,9 @@ class HTMLParserObject(HTMLParserLib):
             self.composite_prev = None
 
     def handle_data(self, data):
+        if self.ignore_data:
+            return
+
         if 'title' in self.open_tags:
             self.title = data
 
