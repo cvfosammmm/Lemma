@@ -260,15 +260,26 @@ class DocumentViewController():
                 file_info = file.query_info('standard::content-type', 0, None)
                 path = file.get_parse_name()
                 content_type = file_info.get_content_type()
+                done_with_file = False
 
                 if content_type.startswith('image/'):
-                    texture = Gdk.Texture.new_from_file(file)
-                    filename = Files.get_distinct_document_file_name(document, '.png')
-                    texture.save_to_png(Files.abspath_for_document_file(filename))
-                    image = WidgetFactory.make_widget('image', {'filename': filename})
+                    try:
+                        texture = Gdk.Texture.new_from_file(file)
+                    except Exception: pass
+                    else:
+                        filename = Files.get_distinct_document_file_name(document, '.png')
+                        texture.save_to_png(Files.abspath_for_document_file(filename))
+                        image = WidgetFactory.make_widget('image', {'filename': filename})
 
-                    UseCases.move_cursor_to_xy(x, y)
-                    UseCases.add_widget(image)
+                        UseCases.move_cursor_to_xy(x, y)
+                        UseCases.add_widget(image)
+
+                        done_with_file = True
+
+                if not done_with_file:
+                    filename = Files.add_file_to_doc_folder_with_distinct_name(document, path)
+                    widget = WidgetFactory.make_widget('attachment', {'filename': filename})
+                    UseCases.add_widget(widget)
 
         elif isinstance(value, str):
             text = value
