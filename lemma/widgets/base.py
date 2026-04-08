@@ -46,6 +46,9 @@ class Widget(object):
             attributes += ' ' + key + '="' + str(value) + '"'
         return '<widget' + attributes + '></widget>'
 
+    def to_plaintext(self):
+        return ''
+
     def to_html(self, data_folder):
         return ''
 

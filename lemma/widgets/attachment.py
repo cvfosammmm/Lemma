@@ -35,6 +35,9 @@ class Widget(base.Widget):
             case _:
                 raise Exception
 
+    def to_plaintext(self):
+        return '📎'
+
     def to_html(self, data_folder):
         path_origin = os.path.join(Files.get_documents_folder(), self.attributes['filename'])
         path_dest = os.path.join(data_folder, os.path.basename(self.attributes['filename']))

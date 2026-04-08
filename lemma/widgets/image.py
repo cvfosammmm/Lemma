@@ -48,6 +48,9 @@ class Widget(base.Widget):
             img_bytes = bytearray(pil_image.tobytes('raw', 'BGRa'))
             self.cache['cairo_surface'] = cairo.ImageSurface.create_for_data(img_bytes, cairo.FORMAT_ARGB32, self.cache['original_width'], self.cache['original_height'])
 
+    def to_plaintext(self):
+        return '🖼'
+
     def to_html(self, data_folder):
         path_origin = os.path.join(Files.get_documents_folder(), self.attributes['filename'])
         path_dest = os.path.join(data_folder, os.path.basename(self.attributes['filename']))

@@ -40,6 +40,8 @@ class PlaintextScanner(object):
                         text += node.value
                     elif node.type == 'eol':
                         text += '\n'
+                    elif node.type == 'widget':
+                        text += node.value.to_plaintext()
                 paragraph.plaintext = text
             plaintext += paragraph.plaintext
 
