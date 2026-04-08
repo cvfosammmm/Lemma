@@ -8,7 +8,7 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <rect
-     style="fill:#241f31;stroke:none;stroke-width:0;stroke-dasharray:none"
+     style="stroke:none;stroke-width:0;stroke-dasharray:none"
      id="rect1"
      class="success"
      width="16"
