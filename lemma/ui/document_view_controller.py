@@ -282,6 +282,8 @@ class DocumentViewController():
                 if not done_with_file:
                     filename = Files.add_file_to_doc_folder_with_distinct_name(document, path)
                     widget = WidgetFactory.make_widget('attachment', {'filename': filename})
+
+                    UseCases.move_cursor_to_xy(x, y)
                     UseCases.add_widget(widget)
 
         elif isinstance(value, str):
