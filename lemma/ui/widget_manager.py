@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, Pango
 
-import os.path
+import os.path, math
 
 from lemma.services.files import Files
 from lemma.services.helpers import Helpers
@@ -61,12 +61,30 @@ class WidgetManager():
     def draw(self, widget, ctx, offset_x, offset_y, hidpi_factor, fontname):
         if widget.get_type() == 'attachment':
             baseline = TextShaper.get_ascend(fontname) + TextShaper.get_descend(fontname)
-            fg_color = ColorManager.get_ui_color_string('links')
+            allocation = widget.get_allocation(fontname)
+            fg_color_1 = ColorManager.get_ui_color_string('attachment_fg_1')
+            fg_color_2 = ColorManager.get_ui_color_string('attachment_fg_2')
+            bg_color_1 = ColorManager.get_ui_color('attachment_bg_1')
+            bg_color_2 = ColorManager.get_ui_color('attachment_bg_2')
+
+            Gdk.cairo_set_source_rgba(ctx, bg_color_1)
+            ctx.rectangle(int((offset_x) * hidpi_factor), int((offset_y + TextShaper.get_descend(fontname)) * hidpi_factor), math.ceil(28 * hidpi_factor), math.ceil(allocation[1] * hidpi_factor))
+            ctx.fill()
+
+            surface = TextRenderer.get_icon_surface('attach-files-symbolic', hidpi_factor, fg_color_1)
+            ctx.set_source_surface(surface, int((offset_x + 6) * hidpi_factor), int((offset_y + TextShaper.get_descend(fontname) + 6) * hidpi_factor))
+            ctx.paint()
+            offset_x += 28
+
+            Gdk.cairo_set_source_rgba(ctx, bg_color_2)
+            ctx.rectangle(int((offset_x) * hidpi_factor), int((offset_y + TextShaper.get_descend(fontname)) * hidpi_factor), math.ceil((allocation[0] - 28) * hidpi_factor), math.ceil(allocation[1] * hidpi_factor))
+            ctx.fill()
+            offset_x += 6
 
             filename = os.path.basename(widget.get_attribute('filename'))
             dimensions = TextShaper.measure(filename, fontname)
             for char, dims in zip(filename, dimensions):
-                surface, left, top = TextRenderer.get_glyph(char, fontname, fg_color, hidpi_factor)
+                surface, left, top = TextRenderer.get_glyph(char, fontname, fg_color_2, hidpi_factor)
                 if surface != None:
                     ctx.set_source_surface(surface, int((offset_x) * hidpi_factor + left), int((offset_y + baseline) * hidpi_factor + top))
                     ctx.paint()

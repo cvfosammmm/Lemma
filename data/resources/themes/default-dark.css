@@ -111,6 +111,10 @@
 @define-color text #f9f9f9;
 @define-color links #69f;
 @define-color links_page_not_existing #e66;
+@define-color attachment_fg_1 @view_bg_color;
+@define-color attachment_bg_1 #99c1f1;
+@define-color attachment_fg_2 @view_bg_color;
+@define-color attachment_bg_2 @text;
 @define-color selection_bg #ffffff44;
 @define-color cursor #fff;
 @define-color highlight_bg #1f441f;

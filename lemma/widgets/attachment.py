@@ -62,6 +62,6 @@ class Widget(base.Widget):
     def get_allocation(self, fontname):
         dimensions = TextShaper.measure(os.path.basename(self.attributes['filename']), fontname)
 
-        return (sum(metric[0] for metric in dimensions), max(metric[1] for metric in dimensions))
+        return (sum(metric[0] for metric in dimensions) + 40, max(metric[1] for metric in dimensions))
 
 
