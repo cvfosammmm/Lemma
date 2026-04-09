@@ -76,6 +76,7 @@
 /* Toolbar */
 @define-color toolbar_fg #eee;
 @define-color toolbar_border #555;
+@define-color toolbar_seperator #555;
 @define-color toolbar_bg #333;
 @define-color toolbar_selected_bg #515151;
 @define-color toolbar_active_bg #434343;

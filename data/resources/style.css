@@ -227,8 +227,10 @@ paned.document-view separator.wide {
 }
 .toolbar separator {
     margin: 0px 6px;
+    background-color: @toolbar_seperator;
 }
 .toolbar label.status {
+    color: @toolbar_fg;
     margin: 0px 10px;
 }
 .toolbar scale highlight {
@@ -236,6 +238,12 @@ paned.document-view separator.wide {
 }
 .toolbar scale slider {
     border-radius: 100px;
+}
+.toolbar scale trough {
+    background: @toolbar_selected_bg;
+}
+.toolbar scale mark {
+    background: @toolbar_fg;
 }
 
 /* tools sidebar */

@@ -76,6 +76,7 @@
 /* Toolbar */
 @define-color toolbar_fg rgba(0, 0, 0, 0.8);
 @define-color toolbar_border #00000030;
+@define-color toolbar_seperator #00000020;
 @define-color toolbar_bg @view_bg_color;
 @define-color toolbar_selected_bg rgba(0, 0, 0, 0.16);
 @define-color toolbar_active_bg rgba(0, 0, 0, 0.16);
