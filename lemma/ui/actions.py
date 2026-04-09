@@ -285,7 +285,7 @@ class Actions(object):
         elif clipboard.get_formats().contain_mime_type('image/png') or clipboard.get_formats().contain_mime_type('image/jpeg'):
             Gdk.Display.get_default().get_clipboard().read_texture_async(None, self.on_paste_image)
         elif clipboard.get_formats().contain_mime_type('text/uri-list'):
-            Gdk.Display.get_default().get_clipboard().read_text_async(None, self.on_paste_files)
+            Gdk.Display.get_default().get_clipboard().read_value_async(Gdk.FileList, 0, None, self.on_paste_files)
         elif clipboard.get_formats().contain_mime_type('text/plain;charset=utf-8') or clipboard.get_formats().contain_mime_type('text/plain'):
             Gdk.Display.get_default().get_clipboard().read_text_async(None, self.on_paste_text)
 
@@ -307,8 +307,9 @@ class Actions(object):
     def on_paste_files(self, clipboard, result):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        text = clipboard.read_text_finish(result)
-        for origin in text.splitlines():
+        file_list = clipboard.read_value_finish(result)
+        for file in file_list.get_files():
+            origin = file.get_path()
             if os.path.isdir(origin):
                 continue
 
