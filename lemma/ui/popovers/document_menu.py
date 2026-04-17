@@ -21,6 +21,7 @@ from gi.repository import Gtk, Gdk
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
+from lemma.ui.shortcuts import Shortcuts
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -32,7 +33,7 @@ class Popover(PopoverView):
         self.set_width(306)
 
         self.delete_document_button = self.add_action_button(_('Delete Document'), 'win.delete-document')
-        self.rename_document_button = self.add_action_button(_('Rename Document'), 'win.rename-document', shortcut='F2')
+        self.rename_document_button = self.add_action_button(_('Rename Document'), 'win.rename-document', shortcut=Shortcuts.get_for_labels('rename_document'))
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 

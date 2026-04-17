@@ -30,6 +30,7 @@ from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.text_shaper import TextShaper
 from lemma.services.files import Files
+from lemma.ui.shortcuts import Shortcuts
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
@@ -96,6 +97,20 @@ class Actions(object):
 
         self.actions['quit'] = Gio.SimpleAction.new('quit', None)
         self.main_window.add_action(self.actions['quit'])
+
+        self.shortcut_controller = Shortcuts.new_controller()
+        self.shortcut_controller.add_cb('quit', self.actions['quit'].activate)
+        self.shortcut_controller.add_cb('add_document', self.actions['add-document'].activate)
+        self.shortcut_controller.add_cb('start_global_search', self.actions['start-global-search'].activate)
+        self.shortcut_controller.add_cb('go_back', self.actions['go-back'].activate)
+        self.shortcut_controller.add_cb('go_forward', self.actions['go-forward'].activate)
+        self.shortcut_controller.add_cb('show_shortcuts_dialog', self.actions['show-shortcuts-dialog'].activate)
+        self.shortcut_controller.add_cb('show_hamburger_menu', self.actions['show-hamburger-menu'].activate)
+        self.shortcut_controller.add_cb('show_document_menu', self.actions['show-document-menu'].activate)
+        self.shortcut_controller.add_cb('show_bookmarks', self.actions['show-bookmarks'].activate)
+        for i in range(1, 10):
+            self.shortcut_controller.add_cb('activate_bookmark_' + str(i), self.activate_bookmark, i)
+        self.main_window.add_controller(self.shortcut_controller)
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
 
@@ -441,6 +456,14 @@ class Actions(object):
 
         UseCases.open_link(document.get_insert_node().link)
 
+    def activate_bookmark(self, button_pos):
+        workspace = WorkspaceRepo.get_workspace()
+        bookmarks = workspace.get_bookmarked_document_ids()
+
+        if len(bookmarks) >= button_pos:
+            document_id = bookmarks[button_pos - 1]
+            UseCases.set_active_document(document_id, update_history=True)
+
     def show_link_popover(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
         self.application.scrolling.scroll_insert_on_screen(animation_type=None)
@@ -543,7 +566,7 @@ class Actions(object):
         self.application.dialog_locator.get_dialog('settings').run()
 
     def show_shortcuts_dialog(self, action=None, parameter=''):
-        self.application.dialog_locator.get_dialog('keyboard_shortcuts').run()
+        self.application.dialog_locator.get_dialog('settings').run('Keyboard Shortcuts')
 
     def show_about_dialog(self, action=None, parameter=''):
         self.application.dialog_locator.get_dialog('about').run()

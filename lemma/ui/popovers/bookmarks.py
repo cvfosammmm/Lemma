@@ -24,6 +24,7 @@ from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
+from lemma.ui.shortcuts import Shortcuts
 
 
 class Popover(PopoverView):
@@ -77,7 +78,7 @@ class Popover(PopoverView):
             drag_handle_revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_RIGHT)
             drag_handle_revealer.set_child(drag_handle)
 
-            shortcut_label = Gtk.Label.new(_('Alt') + '+' + str(i + 1))
+            shortcut_label = Gtk.Label.new(Shortcuts.get_for_labels('activate_bookmark_' + str(i + 1)))
             shortcut_label.add_css_class('shortcut')
             shortcut_label.set_xalign(1)
             shortcut_label.set_hexpand(True)

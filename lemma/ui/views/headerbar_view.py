@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
+from lemma.ui.shortcuts import Shortcuts
+
 
 class HeaderBar(Gtk.Paned):
 
@@ -60,7 +62,7 @@ class HeaderBarLeft(Gtk.WindowHandle):
         # workspace menu
         self.hamburger_menu_button = Gtk.Button.new_from_icon_name('open-menu-symbolic')
         self.hamburger_menu_button.set_can_focus(False)
-        self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (F10)')
+        self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (' + Shortcuts.get_for_labels('show_hamburger_menu') + ')')
         self.hamburger_menu_button.add_css_class('flat')
         self.hamburger_menu_button.add_css_class('sidebar')
         self.hamburger_menu_button.set_action_name('win.show-hamburger-menu')
@@ -77,13 +79,13 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.set_child(self.box)
 
         self.back_button = Gtk.Button.new_from_icon_name('go-previous-symbolic')
-        self.back_button.set_tooltip_text('Back (Alt+Left Arrow)')
+        self.back_button.set_tooltip_text('Back (' + Shortcuts.get_for_labels('go_back') + ')')
         self.back_button.set_action_name('win.go-back')
         self.back_button.set_can_focus(False)
         self.back_button.add_css_class('flat')
 
         self.forward_button = Gtk.Button.new_from_icon_name('go-next-symbolic')
-        self.forward_button.set_tooltip_text('Forward (Alt+Right Arrow)')
+        self.forward_button.set_tooltip_text('Forward (' + Shortcuts.get_for_labels('go_forward') + ')')
         self.forward_button.set_action_name('win.go-forward')
         self.forward_button.set_can_focus(False)
         self.forward_button.add_css_class('flat')
@@ -100,18 +102,18 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.add_document_button = Gtk.Button.new_from_icon_name('list-add-symbolic')
         self.add_document_button.set_action_name('win.add-document')
         self.add_document_button.set_can_focus(False)
-        self.add_document_button.set_tooltip_text(_('New Document') + ' (' + _('Ctrl') + '+N)')
+        self.add_document_button.set_tooltip_text(_('New Document') + ' (' + Shortcuts.get_for_labels('add_document') + ')')
         self.add_document_button.add_css_class('flat')
 
         self.bookmarks_button = Gtk.Button.new_from_icon_name('library-symbolic')
         self.bookmarks_button.set_can_focus(False)
-        self.bookmarks_button.set_tooltip_text(_('Bookmarks') + ' (' + _('Alt') + '+0)')
+        self.bookmarks_button.set_tooltip_text(_('Bookmarks') + ' (' + Shortcuts.get_for_labels('show_bookmarks') + ')')
         self.bookmarks_button.add_css_class('flat')
         self.bookmarks_button.set_action_name('win.show-bookmarks')
 
         self.document_menu_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
         self.document_menu_button.set_can_focus(False)
-        self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (F12)')
+        self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (' + Shortcuts.get_for_labels('show_document_menu') + ')')
         self.document_menu_button.add_css_class('flat')
         self.document_menu_button.set_action_name('win.show-document-menu')
 

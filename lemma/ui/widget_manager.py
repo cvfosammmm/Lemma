@@ -29,6 +29,7 @@ from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
+from lemma.ui.shortcuts import Shortcuts
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
 
@@ -167,7 +168,7 @@ class ToolbarAttachment(Gtk.Box):
         self.copy_button.set_action_name('win.copy')
         self.copy_button.add_css_class('flat')
         self.copy_button.set_can_focus(False)
-        self.copy_button.set_tooltip_text(_('Copy File (Ctrl+C)'))
+        self.copy_button.set_tooltip_text(_('Copy File (' + Shortcuts.get_for_labels('copy') + ')'))
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.open_button)

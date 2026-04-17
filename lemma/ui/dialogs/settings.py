@@ -24,6 +24,7 @@ import lemma.ui.dialogs.settings_page_colors as page_colors
 import lemma.ui.dialogs.settings_page_workspace as page_workspace
 import lemma.ui.dialogs.settings_page_toolbars as page_toolbars
 import lemma.ui.dialogs.settings_page_autocomplete as page_autocomplete
+import lemma.ui.dialogs.settings_page_shortcuts as page_shortcuts
 import lemma.ui.dialogs.settings_page_storage as page_storage
 from lemma.use_cases.use_cases import UseCases
 
@@ -33,11 +34,12 @@ class Dialog(object):
     def __init__(self, main_window):
         self.main_window = main_window
 
-    def run(self):
+    def run(self, visible_page_name='Colors'):
         self.setup()
+        self.view.set_visible_page(visible_page_name)
         self.view.present()
 
-    def setup(self, visible_page_name='Colors'):
+    def setup(self):
         self.view = view.Settings(self.main_window)
 
         self.pages = []
@@ -45,12 +47,11 @@ class Dialog(object):
         self.pages.append(['Workspace', 'overlapping-windows-symbolic', page_workspace.PageWorkspace(self, self.main_window)])
         self.pages.append(['Toolbars', 'preferences-system-symbolic', page_toolbars.PageToolbars(self, self.main_window)])
         self.pages.append(['Autocomplete', 'completion-snippet-symbolic', page_autocomplete.PageAutocomplete(self, self.main_window)])
+        self.pages.append(['Keyboard Shortcuts', 'preferences-desktop-keyboard-shortcuts-symbolic', page_shortcuts.PageShortcuts(self, self.main_window)])
         self.pages.append(['Storage', 'drawer-symbolic', page_storage.PageStorage(self, self.main_window)])
 
         for title, icon_name, page in self.pages:
             self.view.add_page(title, icon_name, page.view)
             page.init()
-
-        self.view.set_visible_page(visible_page_name)
 
 

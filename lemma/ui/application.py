@@ -53,6 +53,7 @@ class Application(Adw.Application):
     def do_activate(self):
         Adw.Application.do_activate(self)
 
+        shortcuts.Shortcuts.init()
         self.main_window = main_window_view.MainWindow(self)
 
         ColorManager.init(self.main_window)
@@ -62,6 +63,7 @@ class Application(Adw.Application):
         self.widget_manager = WidgetManager(self.main_window, self)
         self.dialog_locator = DialogLocator(self.main_window)
         self.history = history.History(self.main_window)
+        self.actions = actions.Actions(self.main_window, self)
         self.document_view = document_view.DocumentView(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
         self.scrolling = scrolling.DocumentScrolling(self.main_window, self)
@@ -72,11 +74,9 @@ class Application(Adw.Application):
         self.document_draft = document_draft.DocumentDraft(self.main_window)
         self.document_list = document_list.DocumentList(self.main_window)
         self.backlinks = backlinks.Backlinks(self.main_window)
-        self.actions = actions.Actions(self.main_window, self)
         self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self)
         self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self)
         self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
-        self.shortcuts = shortcuts.Shortcuts(self.main_window, self)
         self.window_state = window_state.WindowState(self.main_window)
 
         self.actions.actions['quit'].connect('activate', self.on_quit_action)
@@ -88,7 +88,6 @@ class Application(Adw.Application):
     def animate(self, widget, frame_clock):
         self.colors.animate()
         self.actions.animate()
-        self.shortcuts.animate()
         self.window_state.animate()
         self.popover_manager.animate()
         self.widget_manager.animate()

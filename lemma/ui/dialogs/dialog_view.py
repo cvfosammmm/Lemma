@@ -19,7 +19,7 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.ui.shortcuts import ShortcutController
+from lemma.ui.shortcuts import Shortcuts
 
 
 class DialogView(Gtk.Window):
@@ -37,8 +37,8 @@ class DialogView(Gtk.Window):
         self.topbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.set_child(self.topbox)
 
-        self.shortcuts_controller = ShortcutController()
-        self.shortcuts_controller.add_with_callback('Escape', self.close)
+        self.shortcuts_controller = Shortcuts.new_controller()
+        self.shortcuts_controller.add_cb('close_dialog', self.close)
         self.add_controller(self.shortcuts_controller)
 
 

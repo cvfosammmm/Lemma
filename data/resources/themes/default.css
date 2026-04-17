@@ -35,7 +35,8 @@
 @define-color dialog_border #d9d9d9;
 @define-color dialog_list_bg #fff;
 @define-color dialog_list_border #ddd;
-@define-color dialog_sidebar_bg_color #ddd;
+@define-color dialog_sidebar_bg #ddd;
+@define-color dialog_sidebar_border #ccc;
 
 /* Settings Dialog */
 
@@ -105,6 +106,7 @@
 
 /* Borders */
 @define-color borders #ccc;
+@define-color light_borders #e5e5e5;
 @define-color border_1 #00000030;
 
 /* Document View */

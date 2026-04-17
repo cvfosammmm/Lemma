@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 import lemma.ui.views.filechooser_button_save as filechooser_button_save
-from lemma.ui.shortcuts import ShortcutController
+from lemma.ui.shortcuts import Shortcuts
 
 
 class DialogViewAction(Gtk.Window):
@@ -54,8 +54,8 @@ class DialogViewAction(Gtk.Window):
         self.content.set_vexpand(True)
         self.topbox.append(self.content)
 
-        self.shortcuts_controller = ShortcutController()
-        self.shortcuts_controller.add_with_callback('Escape', self.close)
+        self.shortcuts_controller = Shortcuts.new_controller()
+        self.shortcuts_controller.add_cb('close_dialog', self.close)
         self.add_controller(self.shortcuts_controller)
 
         self.cancel_button = Gtk.Button.new_with_mnemonic(_('_Cancel'))

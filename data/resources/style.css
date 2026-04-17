@@ -499,8 +499,8 @@ window.action-dialog checkbutton.radio-group label {
 /* settings dialog */
 
 window.settings .navbar {
-    background: @dialog_sidebar_bg_color;
-    border-right: 1px solid @dialog_list_border;
+    background: @dialog_sidebar_bg;
+    border-right: 1px solid @dialog_sidebar_border;
 }
 window.settings .navbar button {
     font-weight: normal;
@@ -532,6 +532,9 @@ window.settings headerbar label {
     padding-top: 11px;
     padding-bottom: 0px;
 }
+.settings-page-color flowbox checkbutton {
+    font-weight: normal;
+}
 window.settings flowbox {
     background: @dialog_bg_color;
     padding: 9px 8px;
@@ -561,20 +564,6 @@ window.settings checkbutton.single {
 window.settings checkbutton.single check {
     margin-right: 6px;
 }
-window.settings .settings-page-toolbars checkbutton {
-    margin-bottom: 2px;
-    margin-left: 14px;
-}
-window.settings .settings-page-toolbars checkbutton image {
-    margin-right: 9px;
-}
-window.settings .settings-page-toolbars separator {
-    margin-top: 13px;
-    margin-bottom: 14px;
-    margin-left: 16px;
-    min-width: 72px;
-    background: @borders;
-}
 label.settings-header {
     font-weight: bold;
     margin-left: 17px;
@@ -589,6 +578,29 @@ label.settings-info {
 .settings-margin-box {
     margin-left: 17px;
     margin-right: 17px;
+}
+window.settings .settings-page-toolbars checkbutton {
+    margin-bottom: 2px;
+    margin-left: 14px;
+}
+window.settings .settings-page-toolbars checkbutton image {
+    margin-right: 9px;
+}
+window.settings .settings-page-toolbars separator {
+    margin-top: 13px;
+    margin-bottom: 14px;
+    margin-left: 16px;
+    min-width: 72px;
+    background: @borders;
+}
+window.settings .settings-page-shortcuts .item {
+    padding: 6px 17px 5px 17px;
+    border-bottom: 1px solid @light_borders;
+}
+window.settings .settings-page-shortcuts .settings-header {
+    border-bottom: 1px solid @light_borders;
+    margin: 0px;
+    padding: 35px 17px 11px 17px;
 }
 .settings-colorcode {
     min-width: 18px;

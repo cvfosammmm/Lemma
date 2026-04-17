@@ -17,27 +17,109 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gio, GLib
+from gi.repository import Gtk
 
-from lemma.repos.workspace_repo import WorkspaceRepo
-from lemma.use_cases.use_cases import UseCases
-import lemma.services.timer as timer
+from lemma.services.files import Files
 
 
-class Shortcuts(object):
+class Shortcuts():
 
-    def __init__(self, main_window, application):
-        self.main_window = main_window
-        self.application = application
+    defaults = dict()
+    data = dict()
 
-        self.shortcut_controller_app = ShortcutControllerApp(self.application)
-        self.shortcut_controller_document = ShortcutControllerDocument(self.application)
+    def init():
+        Shortcuts.defaults['close_dialog'] = 'Escape'
 
-        self.main_window.add_controller(self.shortcut_controller_app)
-        self.main_window.document_view.content.add_controller(self.shortcut_controller_document)
+        Shortcuts.defaults['toggle_bold'] = '<Control>b'
+        Shortcuts.defaults['toggle_italic'] = '<Control>i'
+        Shortcuts.defaults['toggle_verbatim'] = '<Control>e'
+        Shortcuts.defaults['toggle_highlight'] = '<Control>u'
+        Shortcuts.defaults['link_popover'] = '<Control>l'
+        Shortcuts.defaults['subscript'] = '<Control>minus'
+        Shortcuts.defaults['superscript'] = '<Control>underscore'
+        Shortcuts.defaults['toggle_checkbox'] = '<Control>m'
+        Shortcuts.defaults['undo'] = '<Control>z'
+        Shortcuts.defaults['redo'] = '<Control><Shift>z'
+        Shortcuts.defaults['cut'] = '<Control>x'
+        Shortcuts.defaults['copy'] = '<Control>c'
+        Shortcuts.defaults['paste'] = '<Control>v'
+        Shortcuts.defaults['select_all'] = '<Control>a'
+        Shortcuts.defaults['paragraph_style_h2'] = '<Control>2'
+        Shortcuts.defaults['paragraph_style_h3'] = '<Control>3'
+        Shortcuts.defaults['paragraph_style_h4'] = '<Control>4'
+        Shortcuts.defaults['paragraph_style_h5'] = '<Control>5'
+        Shortcuts.defaults['paragraph_style_h6'] = '<Control>6'
+        Shortcuts.defaults['paragraph_style_ul'] = '<Control>7'
+        Shortcuts.defaults['paragraph_style_ol'] = '<Control>8'
+        Shortcuts.defaults['paragraph_style_cl'] = '<Control>9'
+        Shortcuts.defaults['paragraph_style_p'] = '<Control>0'
+        Shortcuts.defaults['rename_document'] = 'F2'
 
-    def animate(self):
-        pass
+        Shortcuts.defaults['quit'] = '<Control>q'
+        Shortcuts.defaults['add_document'] = '<Control>n'
+        Shortcuts.defaults['go_back'] = '<Alt>Left'
+        Shortcuts.defaults['go_forward'] = '<Alt>Right'
+        Shortcuts.defaults['show_shortcuts_dialog'] = '<Control>question'
+        Shortcuts.defaults['show_hamburger_menu'] = 'F10'
+        Shortcuts.defaults['show_document_menu'] = 'F12'
+        Shortcuts.defaults['show_bookmarks'] = '<Alt>0'
+        for i in range(1, 10):
+            Shortcuts.defaults['activate_bookmark_' + str(i)] = '<Alt>' + str(i)
+
+        Shortcuts.defaults['start_global_search'] = '<Control>f'
+        Shortcuts.defaults['stop_global_search'] = 'Escape'
+        Shortcuts.defaults['global_search_prev_result'] = 'Up'
+        Shortcuts.defaults['global_search_next_result'] = 'Down'
+
+    def new_controller():
+        return ShortcutController()
+
+    def get_trigger_string(name):
+        try: value = Shortcuts.data[name]
+        except KeyError:
+            value = Shortcuts.defaults[name]
+
+        return value
+
+    def get_for_labels(name):
+        try: value = Shortcuts.data[name]
+        except KeyError:
+            value = Shortcuts.defaults[name]
+
+        value = value.replace('minus', '-')
+        value = value.replace('underscore', '_')
+        value = value.replace('question', '?')
+
+        value = value.replace('>a', '>A')
+        value = value.replace('>b', '>B')
+        value = value.replace('>c', '>C')
+        value = value.replace('>d', '>D')
+        value = value.replace('>e', '>E')
+        value = value.replace('>f', '>F')
+        value = value.replace('>g', '>G')
+        value = value.replace('>h', '>H')
+        value = value.replace('>i', '>I')
+        value = value.replace('>j', '>J')
+        value = value.replace('>k', '>K')
+        value = value.replace('>l', '>L')
+        value = value.replace('>m', '>M')
+        value = value.replace('>n', '>N')
+        value = value.replace('>o', '>O')
+        value = value.replace('>p', '>P')
+        value = value.replace('>q', '>Q')
+        value = value.replace('>r', '>R')
+        value = value.replace('>s', '>S')
+        value = value.replace('>t', '>T')
+        value = value.replace('>u', '>U')
+        value = value.replace('>v', '>V')
+        value = value.replace('>w', '>W')
+        value = value.replace('>x', '>X')
+        value = value.replace('>y', '>Y')
+        value = value.replace('>z', '>Z')
+
+        value = value.replace('Escape', 'Esc')
+
+        return value.replace('<Control>', 'Ctrl+').replace('<Shift>', 'Shift+').replace('<Alt>', 'Alt+')
 
 
 class ShortcutController(Gtk.ShortcutController):
@@ -45,8 +127,11 @@ class ShortcutController(Gtk.ShortcutController):
     def __init__(self):
         Gtk.ShortcutController.__init__(self)
 
-    def add_with_callback(self, trigger_string, callback, data=None):
+        self.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+
+    def add_cb(self, name, callback, data=None):
         callback_action = Gtk.CallbackAction.new(self.action, (callback, data))
+        trigger_string = Shortcuts.get_trigger_string(name)
 
         shortcut = Gtk.Shortcut()
         shortcut.set_action(callback_action)
@@ -61,70 +146,5 @@ class ShortcutController(Gtk.ShortcutController):
         else:
             callback()
         return True
-
-
-class ShortcutControllerApp(ShortcutController):
-
-    def __init__(self, application):
-        ShortcutController.__init__(self)
-        self.application = application
-
-        self.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-
-        self.add_with_callback('<Control>q', self.application.actions.actions['quit'].activate)
-        self.add_with_callback('<Control>n', self.application.actions.actions['add-document'].activate)
-        self.add_with_callback('<Control>f', self.application.actions.actions['start-global-search'].activate)
-        self.add_with_callback('<Alt>Left', self.application.actions.actions['go-back'].activate)
-        self.add_with_callback('<Alt>Right', self.application.actions.actions['go-forward'].activate)
-        self.add_with_callback('<Control>question', self.application.actions.actions['show-shortcuts-dialog'].activate)
-        self.add_with_callback('F10', self.application.actions.actions['show-hamburger-menu'].activate)
-        self.add_with_callback('F12', self.application.actions.actions['show-document-menu'].activate)
-
-        self.add_with_callback('<Alt>0', self.application.actions.actions['show-bookmarks'].activate)
-        for i in range(1, 10):
-            self.add_with_callback('<Alt>' + str(i), self.activate_bookmark, i)
-
-    def activate_bookmark(self, button_pos):
-        workspace = WorkspaceRepo.get_workspace()
-        bookmarks = workspace.get_bookmarked_document_ids()
-
-        if len(bookmarks) >= button_pos:
-            document_id = bookmarks[button_pos - 1]
-            UseCases.set_active_document(document_id, update_history=True)
-
-
-class ShortcutControllerDocument(ShortcutController):
-
-    def __init__(self, application):
-        ShortcutController.__init__(self)
-        self.application = application
-
-        self.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-
-        self.add_with_callback('<Control>b', self.application.actions.actions['toggle-bold'].activate)
-        self.add_with_callback('<Control>i', self.application.actions.actions['toggle-italic'].activate)
-        self.add_with_callback('<Control>e', self.application.actions.actions['toggle-verbatim'].activate)
-        self.add_with_callback('<Control>u', self.application.actions.actions['toggle-highlight'].activate)
-        self.add_with_callback('<Control>l', self.application.actions.actions['show-link-popover'].activate)
-        self.add_with_callback('<Control>minus', self.application.actions.actions['subscript'].activate)
-        self.add_with_callback('<Control>underscore', self.application.actions.actions['superscript'].activate)
-        self.add_with_callback('<Control>m', self.application.actions.actions['toggle-checkbox'].activate)
-
-        self.add_with_callback('<Control>z', self.application.actions.actions['undo'].activate)
-        self.add_with_callback('<Control><Shift>z', self.application.actions.actions['redo'].activate)
-        self.add_with_callback('<Control>x', self.application.actions.actions['cut'].activate)
-        self.add_with_callback('<Control>c', self.application.actions.actions['copy'].activate)
-        self.add_with_callback('<Control>v', self.application.actions.actions['paste'].activate)
-        self.add_with_callback('<Control>a', self.application.actions.actions['select-all'].activate)
-
-        self.application.set_accels_for_action('win.set-paragraph-style::h2', ['<Control>2'])
-        self.application.set_accels_for_action('win.set-paragraph-style::h3', ['<Control>3'])
-        self.application.set_accels_for_action('win.set-paragraph-style::h4', ['<Control>4'])
-        self.application.set_accels_for_action('win.set-paragraph-style::h5', ['<Control>5'])
-        self.application.set_accels_for_action('win.set-paragraph-style::h6', ['<Control>6'])
-        self.application.set_accels_for_action('win.set-paragraph-style::ul', ['<Control>7'])
-        self.application.set_accels_for_action('win.set-paragraph-style::ol', ['<Control>8'])
-        self.application.set_accels_for_action('win.set-paragraph-style::cl', ['<Control>9'])
-        self.application.set_accels_for_action('win.set-paragraph-style::p', ['<Control>0'])
 
 

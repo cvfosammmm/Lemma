@@ -20,6 +20,8 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 
+from lemma.ui.shortcuts import Shortcuts
+
 
 class WelcomeView(Gtk.CenterBox):
         
@@ -43,7 +45,7 @@ class WelcomeView(Gtk.CenterBox):
         self.button.set_can_focus(False)
         self.button.set_halign(Gtk.Align.CENTER)
         self.button.set_action_name('win.add-document')
-        self.button.set_tooltip_text('Add new document (Ctrl+N)')
+        self.button.set_tooltip_text('Add new document (' + Shortcuts.get_for_labels('add_document') + ')')
         self.button.add_css_class('suggested-action')
         self.button.grab_focus()
 

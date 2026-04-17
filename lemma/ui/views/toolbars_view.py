@@ -19,6 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib
 
+from lemma.ui.shortcuts import Shortcuts
+
 
 class ToolbarsView(Gtk.ActionBar):
 
@@ -51,12 +53,12 @@ class ToolbarRight(Gtk.Box):
         self.redo_button = Gtk.Button.new_from_icon_name('edit-redo-symbolic')
         self.redo_button.set_action_name('win.redo')
         self.redo_button.set_can_focus(False)
-        self.redo_button.set_tooltip_text(_('Redo') + ' (Shift+Ctrl+Z)')
+        self.redo_button.set_tooltip_text(_('Redo') + ' (' + Shortcuts.get_for_labels('redo') + ')')
 
         self.undo_button = Gtk.Button.new_from_icon_name('edit-undo-symbolic')
         self.undo_button.set_action_name('win.undo')
         self.undo_button.set_can_focus(False)
-        self.undo_button.set_tooltip_text(_('Undo') + ' (Ctrl+Z)')
+        self.undo_button.set_tooltip_text(_('Undo') + ' (' + Shortcuts.get_for_labels('undo') + ')')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.edit_menu_button)
@@ -111,17 +113,17 @@ class ToolbarMain(Gtk.Box):
         self.bold_button = Gtk.Button.new_from_icon_name('bold-text-symbolic')
         self.bold_button.set_action_name('win.toggle-bold')
         self.bold_button.set_can_focus(False)
-        self.bold_button.set_tooltip_text(_('Bold') + ' (Ctrl+B)')
+        self.bold_button.set_tooltip_text(_('Bold') + ' (' + Shortcuts.get_for_labels('toggle_bold') + ')')
 
         self.italic_button = Gtk.Button.new_from_icon_name('italic-text-symbolic')
         self.italic_button.set_action_name('win.toggle-italic')
         self.italic_button.set_can_focus(False)
-        self.italic_button.set_tooltip_text(_('Italic') + ' (Ctrl+I)')
+        self.italic_button.set_tooltip_text(_('Italic') + ' (' + Shortcuts.get_for_labels('toggle_italic') + ')')
 
         self.verbatim_button = Gtk.Button.new_from_icon_name('verbatim-text-symbolic')
         self.verbatim_button.set_action_name('win.toggle-verbatim')
         self.verbatim_button.set_can_focus(False)
-        self.verbatim_button.set_tooltip_text(_('Verbatim') + ' (Ctrl+E)')
+        self.verbatim_button.set_tooltip_text(_('Verbatim') + ' (' + Shortcuts.get_for_labels('toggle_verbatim') + ')')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.add_css_class('highlight-tag-button')
@@ -132,7 +134,7 @@ class ToolbarMain(Gtk.Box):
         self.highlight_button.add_css_class('flat')
         self.highlight_button.set_action_name('win.toggle-highlight')
         self.highlight_button.set_can_focus(False)
-        self.highlight_button.set_tooltip_text(_('Highlight') + ' (Ctrl+U)')
+        self.highlight_button.set_tooltip_text(_('Highlight') + ' (' + Shortcuts.get_for_labels('toggle_highlight') + ')')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.bold_button)
@@ -147,17 +149,17 @@ class ToolbarMain(Gtk.Box):
         self.ul_button = Gtk.Button.new_from_icon_name('view-list-bullet-symbolic')
         self.ul_button.set_detailed_action_name('win.set-paragraph-style::ul')
         self.ul_button.set_can_focus(False)
-        self.ul_button.set_tooltip_text(_('Bullet List') + ' (Ctrl+7)')
+        self.ul_button.set_tooltip_text(_('Bullet List') + ' (' + Shortcuts.get_for_labels('paragraph_style_ul') + ')')
 
         self.ol_button = Gtk.Button.new_from_icon_name('view-list-ordered-symbolic')
         self.ol_button.set_detailed_action_name('win.set-paragraph-style::ol')
         self.ol_button.set_can_focus(False)
-        self.ol_button.set_tooltip_text(_('Numbered List') + ' (Ctrl+8)')
+        self.ol_button.set_tooltip_text(_('Numbered List') + ' (' + Shortcuts.get_for_labels('paragraph_style_ol') + ')')
 
         self.cl_button = Gtk.Button.new_from_icon_name('view-checklist-symbolic')
         self.cl_button.set_detailed_action_name('win.set-paragraph-style::cl')
         self.cl_button.set_can_focus(False)
-        self.cl_button.set_tooltip_text(_('Checklist') + ' (Ctrl+9)')
+        self.cl_button.set_tooltip_text(_('Checklist') + ' (' + Shortcuts.get_for_labels('paragraph_style_cl') + ')')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.ul_button)
@@ -208,7 +210,7 @@ class ToolbarMain(Gtk.Box):
         self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
         self.insert_link_button.set_can_focus(False)
         self.insert_link_button.add_css_class('flat')
-        self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
+        self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (' + Shortcuts.get_for_labels('link_popover') + ')')
         self.insert_link_button.set_action_name('win.show-link-popover')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)

@@ -21,6 +21,7 @@ from gi.repository import Gtk, Gdk
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
+from lemma.ui.shortcuts import Shortcuts
 
 
 class Popover(PopoverView):
@@ -48,7 +49,7 @@ class Popover(PopoverView):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.button_shortcuts = MenuBuilder.create_button(_('Keyboard Shortcuts'), shortcut=_('Ctrl') + '+?')
+        self.button_shortcuts = MenuBuilder.create_button(_('Keyboard Shortcuts'), shortcut=Shortcuts.get_for_labels('show_shortcuts_dialog'))
         self.button_shortcuts.set_action_name('win.show-shortcuts-dialog')
         self.add_closing_button(self.button_shortcuts)
 
@@ -58,7 +59,7 @@ class Popover(PopoverView):
 
         self.add_widget(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL))
 
-        self.button_quit = MenuBuilder.create_button(_('Quit'), shortcut=_('Ctrl') + '+Q')
+        self.button_quit = MenuBuilder.create_button(_('Quit'), shortcut=Shortcuts.get_for_labels('quit'))
         self.button_quit.set_action_name('win.quit')
         self.add_closing_button(self.button_quit)
 

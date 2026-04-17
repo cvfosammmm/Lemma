@@ -24,6 +24,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.ui.views.context_menu import ContextMenu
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
+from lemma.ui.shortcuts import Shortcuts
 import lemma.services.timer as timer
 
 
@@ -113,11 +114,11 @@ class ContextMenuDocumentView(ContextMenu):
         self.link_buttons_separator = Gtk.Separator()
         self.box.append(self.link_buttons_separator)
 
-        self.back_button = self.create_button('Back', _('Alt') + '+Left Arrow')
+        self.back_button = self.create_button('Back', Shortcuts.get_for_labels('go_back'))
         self.back_button.set_action_name('win.go-back')
         self.box.append(self.back_button)
 
-        self.forward_button = self.create_button('Forward', _('Alt') + '+Right Arrow')
+        self.forward_button = self.create_button('Forward', Shortcuts.get_for_labels('go_forward'))
         self.forward_button.set_action_name('win.go-forward')
         self.box.append(self.forward_button)
 
@@ -131,15 +132,15 @@ class ContextMenuDocumentView(ContextMenu):
         self.image_functions_separator = Gtk.Separator()
         self.box.append(self.image_functions_separator)
 
-        self.cut_button = self.create_button('Cut', _('Ctrl') + '+X')
+        self.cut_button = self.create_button('Cut', Shortcuts.get_for_labels('cut'))
         self.cut_button.set_action_name('win.cut')
         self.box.append(self.cut_button)
 
-        self.copy_button = self.create_button('Copy', _('Ctrl') + '+C')
+        self.copy_button = self.create_button('Copy', Shortcuts.get_for_labels('copy'))
         self.copy_button.set_action_name('win.copy')
         self.box.append(self.copy_button)
 
-        self.paste_button = self.create_button('Paste', _('Ctrl') + '+V')
+        self.paste_button = self.create_button('Paste', Shortcuts.get_for_labels('paste'))
         self.paste_button.set_action_name('win.paste')
         self.box.append(self.paste_button)
 
@@ -149,7 +150,7 @@ class ContextMenuDocumentView(ContextMenu):
 
         self.box.append(Gtk.Separator())
 
-        self.select_all_button = self.create_button('Select All', _('Ctrl') + '+A')
+        self.select_all_button = self.create_button('Select All', Shortcuts.get_for_labels('select_all'))
         self.select_all_button.set_action_name('win.select-all')
         self.box.append(self.select_all_button)
 
@@ -190,13 +191,13 @@ class EditMenu(PopoverView):
         self.image_functions_separator = Gtk.Separator()
         self.add_widget(self.image_functions_separator)
 
-        self.cut_button = MenuBuilder.create_button(_('Cut'), shortcut=_('Ctrl') + '+X')
+        self.cut_button = MenuBuilder.create_button(_('Cut'), shortcut=Shortcuts.get_for_labels('cut'))
         self.cut_button.set_action_name('win.cut')
         self.add_closing_button(self.cut_button)
-        self.copy_button = MenuBuilder.create_button(_('Copy'), shortcut=_('Ctrl') + '+C')
+        self.copy_button = MenuBuilder.create_button(_('Copy'), shortcut=Shortcuts.get_for_labels('copy'))
         self.copy_button.set_action_name('win.copy')
         self.add_closing_button(self.copy_button)
-        self.paste_button = MenuBuilder.create_button(_('Paste'), shortcut=_('Ctrl') + '+V')
+        self.paste_button = MenuBuilder.create_button(_('Paste'), shortcut=Shortcuts.get_for_labels('paste'))
         self.paste_button.set_action_name('win.paste')
         self.add_closing_button(self.paste_button)
         self.delete_button = MenuBuilder.create_button(_('Delete'))
@@ -205,7 +206,7 @@ class EditMenu(PopoverView):
 
         self.add_widget(Gtk.Separator())
 
-        self.select_all_button = MenuBuilder.create_button(_('Select All'), shortcut=_('Ctrl') + '+A')
+        self.select_all_button = MenuBuilder.create_button(_('Select All'), shortcut=Shortcuts.get_for_labels('select_all'))
         self.select_all_button.set_action_name('win.select-all')
         self.add_closing_button(self.select_all_button)
 

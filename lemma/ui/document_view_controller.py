@@ -29,6 +29,7 @@ from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.files import Files
+from lemma.ui.shortcuts import Shortcuts
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
@@ -58,6 +59,34 @@ class DocumentViewController():
         self.key_controller_content.connect('key-pressed', self.on_keypress_content)
         self.key_controller_content.connect('key-released', self.on_keyrelease_content)
         self.content.add_controller(self.key_controller_content)
+
+        self.shortcut_controller = Shortcuts.new_controller()
+        self.shortcut_controller.add_cb('toggle_bold', self.model.application.actions.actions['toggle-bold'].activate)
+        self.shortcut_controller.add_cb('toggle_italic', self.model.application.actions.actions['toggle-italic'].activate)
+        self.shortcut_controller.add_cb('toggle_verbatim', self.model.application.actions.actions['toggle-verbatim'].activate)
+        self.shortcut_controller.add_cb('toggle_highlight', self.model.application.actions.actions['toggle-highlight'].activate)
+        self.shortcut_controller.add_cb('link_popover', self.model.application.actions.actions['show-link-popover'].activate)
+        self.shortcut_controller.add_cb('subscript', self.model.application.actions.actions['subscript'].activate)
+        self.shortcut_controller.add_cb('superscript', self.model.application.actions.actions['superscript'].activate)
+        self.shortcut_controller.add_cb('toggle_checkbox', self.model.application.actions.actions['toggle-checkbox'].activate)
+        self.shortcut_controller.add_cb('undo', self.model.application.actions.actions['undo'].activate)
+        self.shortcut_controller.add_cb('redo', self.model.application.actions.actions['redo'].activate)
+        self.shortcut_controller.add_cb('cut', self.model.application.actions.actions['cut'].activate)
+        self.shortcut_controller.add_cb('copy', self.model.application.actions.actions['copy'].activate)
+        self.shortcut_controller.add_cb('paste', self.model.application.actions.actions['paste'].activate)
+        self.shortcut_controller.add_cb('select_all', self.model.application.actions.actions['select-all'].activate)
+        self.shortcut_controller.add_cb('rename_document', self.model.application.actions.actions['rename-document'].activate)
+        self.shortcut_controller.add_cb('paragraph_style_h2', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h2'))
+        self.shortcut_controller.add_cb('paragraph_style_h3', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h3'))
+        self.shortcut_controller.add_cb('paragraph_style_h4', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h4'))
+        self.shortcut_controller.add_cb('paragraph_style_h5', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h5'))
+        self.shortcut_controller.add_cb('paragraph_style_h6', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h6'))
+        self.shortcut_controller.add_cb('paragraph_style_ul', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('ul'))
+        self.shortcut_controller.add_cb('paragraph_style_ol', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('ol'))
+        self.shortcut_controller.add_cb('paragraph_style_cl', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('cl'))
+        self.shortcut_controller.add_cb('paragraph_style_p', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('p'))
+
+        self.content.add_controller(self.shortcut_controller)
 
         self.im_context = Gtk.IMContextSimple()
         self.im_context.set_use_preedit(True)
@@ -385,8 +414,6 @@ class DocumentViewController():
                 return
 
         match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
-            case ('f2', _):
-                self.model.application.actions.actions['rename-document'].activate()
             case ('left', 0):
                 UseCases.left()
             case ('right', 0):

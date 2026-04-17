@@ -28,7 +28,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.services.color_manager import ColorManager
-from lemma.ui.shortcuts import ShortcutController
+from lemma.ui.shortcuts import Shortcuts
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.files import Files
 import lemma.services.timer as timer
@@ -69,13 +69,11 @@ class DocumentList(object):
         self.secondary_click_controller.connect('pressed', self.on_secondary_button_press)
         self.view.content.add_controller(self.secondary_click_controller)
 
-        self.shortcuts_controller = ShortcutController()
-        self.shortcuts_controller.add_with_callback('Escape', self.stop_search)
-        self.shortcuts_controller.add_with_callback('Up', self.select_previous_button)
-        self.shortcuts_controller.add_with_callback('Down', self.select_next_button)
-        self.shortcuts_controller.add_with_callback('Tab', self.select_next_button)
-        self.shortcuts_controller.add_with_callback('<Shift>Tab', self.select_previous_button)
-        self.main_window.headerbar.hb_left.search_entry.add_controller(self.shortcuts_controller)
+        self.shortcut_controller = Shortcuts.new_controller()
+        self.shortcut_controller.add_cb('stop_global_search', self.stop_search)
+        self.shortcut_controller.add_cb('global_search_prev_result', self.select_previous_button)
+        self.shortcut_controller.add_cb('global_search_next_result', self.select_next_button)
+        self.main_window.headerbar.hb_left.search_entry.add_controller(self.shortcut_controller)
 
         self.view.scrollbar_vertical.observe('dragged', self.on_scrollbar_drag)
         self.view.scrolling_widget.adjustment_y.connect('value-changed', self.on_adjustment_changed)

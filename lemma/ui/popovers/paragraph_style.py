@@ -21,6 +21,7 @@ from gi.repository import Gtk, GLib
 
 from lemma.ui.popovers.popover_menu_builder import MenuBuilder
 from lemma.ui.popovers.popover_templates import PopoverView
+from lemma.ui.shortcuts import Shortcuts
 
 
 class Popover(PopoverView):
@@ -31,12 +32,12 @@ class Popover(PopoverView):
         self.set_width(252)
 
         entries = list()
-        entries.append(['p', _('Normal'), 'placeholder', 'Ctrl+0'])
-        entries.append(['h2', _('Heading 2'), 'placeholder', 'Ctrl+2'])
-        entries.append(['h3', _('Heading 3'), 'placeholder', 'Ctrl+3'])
-        entries.append(['h4', _('Heading 4'), 'placeholder', 'Ctrl+4'])
-        entries.append(['h5', _('Heading 5'), 'placeholder', 'Ctrl+5'])
-        entries.append(['h6', _('Heading 6'), 'placeholder', 'Ctrl+6'])
+        entries.append(['p', _('Normal'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_p')])
+        entries.append(['h2', _('Heading 2'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h2')])
+        entries.append(['h3', _('Heading 3'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h3')])
+        entries.append(['h4', _('Heading 4'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h4')])
+        entries.append(['h5', _('Heading 5'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h5')])
+        entries.append(['h6', _('Heading 6'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h6')])
 
         for entry in entries:
             self.add_action_button(entry[1], 'win.set-paragraph-style', entry[0], icon=entry[2], shortcut=entry[3])
@@ -44,9 +45,9 @@ class Popover(PopoverView):
         self.add_widget(Gtk.Separator())
 
         entries = list()
-        entries.append(['ul', _('Bullet List'), 'view-list-bullet-symbolic', 'Ctrl+7'])
-        entries.append(['ol', _('Numbered List'), 'view-list-ordered-symbolic', 'Ctrl+8'])
-        entries.append(['cl', _('Checklist'), 'view-checklist-symbolic', 'Ctrl+9'])
+        entries.append(['ul', _('Bullet List'), 'view-list-bullet-symbolic', Shortcuts.get_for_labels('paragraph_style_ul')])
+        entries.append(['ol', _('Numbered List'), 'view-list-ordered-symbolic', Shortcuts.get_for_labels('paragraph_style_ol')])
+        entries.append(['cl', _('Checklist'), 'view-checklist-symbolic', Shortcuts.get_for_labels('paragraph_style_cl')])
 
         for entry in entries:
             self.add_action_button(entry[1], 'win.set-paragraph-style', entry[0], icon=entry[2], shortcut=entry[3])

@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 
-from lemma.ui.shortcuts import ShortcutController
+from lemma.ui.shortcuts import Shortcuts
 
 
 class Settings(Adw.Window):
@@ -35,8 +35,8 @@ class Settings(Adw.Window):
         self.set_can_focus(False)
         self.set_default_size(500, 600)
 
-        self.shortcuts_controller = ShortcutController()
-        self.shortcuts_controller.add_with_callback('Escape', self.close)
+        self.shortcuts_controller = Shortcuts.new_controller()
+        self.shortcuts_controller.add_cb('close_dialog', self.close)
         self.add_controller(self.shortcuts_controller)
 
         self.navbar = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)

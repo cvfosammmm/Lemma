@@ -24,6 +24,7 @@ from lemma.services.layout_info import LayoutInfo
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
+from lemma.ui.shortcuts import Shortcuts
 import lemma.services.timer as timer
 
 
@@ -105,9 +106,9 @@ class Toolbars():
         else:
             self.toolbar.mode_stack.set_visible_child_name('main')
             if edit_link_visible:
-                self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Edit Link') + ' (Ctrl+L)')
+                self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Edit Link') + ' (' + Shortcuts.get_for_labels('link_popover') + ')')
             else:
-                self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Insert Link') + ' (Ctrl+L)')
+                self.toolbar.toolbar_main.insert_link_button.set_tooltip_text(_('Insert Link') + ' (' + Shortcuts.get_for_labels('link_popover') + ')')
 
         self.update_button_visibility()
 
