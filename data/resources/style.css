@@ -3,6 +3,10 @@
 label link, button.link {
     color: @accent_color;
 }
+label.warning-box {
+    color: @warning_fg_color;
+    background: mix(@warning_bg_color, transparent, 0.8);
+}
 
 /* headerbar */
 
@@ -462,6 +466,12 @@ window.action-dialog actionbar {
     box-shadow: none;
     border-top: 1px solid @dialog_list_border;
 }
+window.action-dialog.no-border headerbar {
+    border-bottom-width: 0px;
+}
+window.action-dialog.no-border actionbar {
+    border-top-width: 0px;
+}
 window.action-dialog actionbar button.cancel {
     color: @dialog_fg_color;
 }
@@ -596,11 +606,26 @@ window.settings .settings-page-toolbars separator {
 window.settings .settings-page-shortcuts .item {
     padding: 6px 17px 5px 17px;
     border-bottom: 1px solid @light_borders;
+    border-radius: 0px;
+    font-weight: normal;
 }
 window.settings .settings-page-shortcuts .settings-header {
     border-bottom: 1px solid @light_borders;
     margin: 0px;
-    padding: 35px 17px 11px 17px;
+    padding: 40px 17px 11px 17px;
+}
+window.settings .settings-page-shortcuts .settings-header.first {
+    padding: 29px 17px 11px 17px;
+}
+.set-shortcut-dialog .warning-box {
+    padding: 12px 17px;
+}
+.settings-bottom-box {
+    padding: 6px;
+    border-top: 1px solid @light_borders;
+}
+.settings-bottom-box > label {
+    margin: 12px 11px;
 }
 .settings-colorcode {
     min-width: 18px;
