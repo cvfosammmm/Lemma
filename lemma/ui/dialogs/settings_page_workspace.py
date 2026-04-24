@@ -43,7 +43,7 @@ class PageWorkspaceView(Gtk.Box):
     def __init__(self):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
-        self.get_style_context().add_class('settings-page')
+        self.add_css_class('settings-page')
 
         self.checkbox_backlinks = Gtk.CheckButton.new_with_label(_('Update links when documents are renamed'))
         self.checkbox_backlinks.add_css_class('single')

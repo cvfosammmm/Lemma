@@ -139,8 +139,8 @@ class PageFontColorView(Gtk.Box):
     def __init__(self):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
-        self.get_style_context().add_class('settings-page')
-        self.get_style_context().add_class('settings-page-color')
+        self.add_css_class('settings-page')
+        self.add_css_class('settings-page-color')
 
         self.options_header = Gtk.Label.new(_('Options'))
         self.options_header.add_css_class('settings-header')

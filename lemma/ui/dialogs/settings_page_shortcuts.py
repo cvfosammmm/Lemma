@@ -198,8 +198,8 @@ class PageShortcutsView(Gtk.Box):
     def __init__(self):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
-        self.get_style_context().add_class('settings-page')
-        self.get_style_context().add_class('settings-page-shortcuts')
+        self.add_css_class('settings-page')
+        self.add_css_class('settings-page-shortcuts')
 
         self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
 

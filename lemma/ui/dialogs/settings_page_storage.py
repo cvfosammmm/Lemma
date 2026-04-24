@@ -69,7 +69,7 @@ class PageStorageView(Gtk.Box):
     def __init__(self):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
-        self.get_style_context().add_class('settings-page')
+        self.add_css_class('settings-page')
 
         self.folder_header = Gtk.Label.new(_('Data Folder'))
         self.folder_header.add_css_class('settings-header')
