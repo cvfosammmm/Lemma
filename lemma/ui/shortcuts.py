@@ -48,6 +48,8 @@ class Shortcuts():
         Shortcuts.defaults['copy'] = '<Control>c'
         Shortcuts.defaults['paste'] = '<Control>v'
         Shortcuts.defaults['select_all'] = '<Control>a'
+        Shortcuts.defaults['go_to_parent_node'] = '<Control>Up'
+        Shortcuts.defaults['extend_selection'] = '<Control><Shift>Up'
         Shortcuts.defaults['paragraph_style_h2'] = '<Control>2'
         Shortcuts.defaults['paragraph_style_h3'] = '<Control>3'
         Shortcuts.defaults['paragraph_style_h4'] = '<Control>4'
@@ -113,6 +115,10 @@ class Shortcuts():
         Shortcuts.titles['paragraph_style_p'] = 'Normal Paragraph'
         Shortcuts.titles['subscript'] = 'Subscript'
         Shortcuts.titles['superscript'] = 'Superscript'
+        Shortcuts.titles['select_all'] = 'Select All'
+        Shortcuts.titles['go_to_parent_node'] = 'Go to Parent Node'
+        Shortcuts.titles['extend_selection'] = 'Extend Selection'
+        Shortcuts.titles['link_popover'] = 'Insert Link'
 
         Shortcuts.load_from_disk()
 

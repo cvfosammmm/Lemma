@@ -75,6 +75,9 @@ class DocumentViewController():
         self.shortcut_controller.add_cb('copy', self.model.application.actions.actions['copy'].activate)
         self.shortcut_controller.add_cb('paste', self.model.application.actions.actions['paste'].activate)
         self.shortcut_controller.add_cb('select_all', self.model.application.actions.actions['select-all'].activate)
+        self.shortcut_controller.add_cb('go_to_parent_node', UseCases.move_cursor_to_parent)
+        self.shortcut_controller.add_cb('extend_selection', UseCases.extend_selection)
+
         self.shortcut_controller.add_cb('rename_document', self.model.application.actions.actions['rename-document'].activate)
         self.shortcut_controller.add_cb('paragraph_style_h2', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h2'))
         self.shortcut_controller.add_cb('paragraph_style_h3', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h3'))
@@ -448,10 +451,6 @@ class DocumentViewController():
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.page(self.model.document_view_height - 100, True)
 
-            case ('up', Gdk.ModifierType.CONTROL_MASK):
-                UseCases.move_cursor_to_parent()
-            case ('up', 5):
-                UseCases.extend_selection()
             case ('left', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.jump_left(False)
             case ('left', 5):

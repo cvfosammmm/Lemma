@@ -40,7 +40,8 @@ class PageShortcuts(object):
         self.sections.append({'title': 'Navigation', 'items': ['start_global_search', 'go_back', 'go_forward', 'show_bookmarks', 'activate_bookmark_1', 'activate_bookmark_2', 'activate_bookmark_3', 'activate_bookmark_4', 'activate_bookmark_5', 'activate_bookmark_6', 'activate_bookmark_7', 'activate_bookmark_8', 'activate_bookmark_9']})
         self.sections.append({'title': 'Undo and Redo', 'items': ['undo', 'redo']})
         self.sections.append({'title': 'Copy and Paste', 'items': ['cut', 'copy', 'paste']})
-        self.sections.append({'title': 'Actions', 'items': ['toggle_checkbox']})
+        self.sections.append({'title': 'Cursor Movement', 'items': ['go_to_parent_node', 'extend_selection', 'select_all']})
+        self.sections.append({'title': 'Actions', 'items': ['toggle_checkbox', 'link_popover']})
         self.sections.append({'title': 'Formatting', 'items': ['toggle_bold', 'toggle_italic', 'toggle_verbatim', 'toggle_highlight', 'paragraph_style_h2', 'paragraph_style_h3', 'paragraph_style_h4', 'paragraph_style_h5', 'paragraph_style_h6', 'paragraph_style_ul', 'paragraph_style_ol', 'paragraph_style_cl', 'paragraph_style_p']})
         self.sections.append({'title': 'Math', 'items': ['subscript', 'superscript']})
 
