@@ -4,9 +4,9 @@
 @define-color accent_color #1c71d8;
 
 /* destructive-action buttons */
-@define-color destructive_bg_color #e01b24;
+@define-color destructive_bg_color #c01c28;
 @define-color destructive_fg_color white;
-@define-color destructive_color #c01c28;
+@define-color destructive_color #ff938c;
 
 /* Levelbars, entries, labels and infobars. These don't need text colors */
 @define-color success_bg_color #2ec27e;

@@ -7,6 +7,9 @@ label.warning-box {
     color: @warning_fg_color;
     background: mix(@warning_bg_color, transparent, 0.8);
 }
+button.destructive {
+    color: @destructive_color;
+}
 
 /* headerbar */
 

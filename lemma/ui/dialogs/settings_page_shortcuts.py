@@ -140,7 +140,7 @@ class SetShortcutDialog(DialogViewAction):
         self.content.append(self.warning_label_revealer)
 
         self.reset_button = Gtk.Button.new_with_label('Remove')
-        self.reset_button.add_css_class('destructive-action')
+        self.reset_button.add_css_class('destructive')
         self.reset_button.set_sensitive(False)
         self.reset_button.connect('clicked', self.on_reset_button_clicked)
         self.action_bar.pack_start(self.reset_button)
@@ -209,7 +209,7 @@ class PageShortcutsView(Gtk.Box):
         self.scrolled_window.set_child(self.vbox)
 
         self.reset_button = Gtk.Button.new_with_label('Reset to Defaults')
-        self.reset_button.add_css_class('destructive-action')
+        self.reset_button.add_css_class('destructive')
         self.reset_button.add_css_class('flat')
 
         info_label = Gtk.Label.new(_('Click on the shortcuts above to change them. You may have to restart Lemma for changes to take full effect.'))
