@@ -532,7 +532,7 @@ window.settings headerbar {
     border-bottom: none;
     box-shadow: none;
     padding-bottom: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 4px;
 }
 window.settings headerbar box.start {
     padding-bottom: 0px;
