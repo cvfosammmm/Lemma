@@ -50,20 +50,20 @@ class ToolbarRight(Gtk.Box):
         self.edit_menu_button.add_css_class('flat')
         self.edit_menu_button.set_action_name('win.show-edit-menu')
 
-        self.redo_button = Gtk.Button.new_from_icon_name('edit-redo-symbolic')
-        self.redo_button.set_action_name('win.redo')
-        self.redo_button.set_can_focus(False)
-        self.redo_button.set_tooltip_text(_('Redo') + ' (' + Shortcuts.get_for_labels('redo') + ')')
-
         self.undo_button = Gtk.Button.new_from_icon_name('edit-undo-symbolic')
         self.undo_button.set_action_name('win.undo')
         self.undo_button.set_can_focus(False)
         self.undo_button.set_tooltip_text(_('Undo') + ' (' + Shortcuts.get_for_labels('undo') + ')')
 
+        self.redo_button = Gtk.Button.new_from_icon_name('edit-redo-symbolic')
+        self.redo_button.set_action_name('win.redo')
+        self.redo_button.set_can_focus(False)
+        self.redo_button.set_tooltip_text(_('Redo') + ' (' + Shortcuts.get_for_labels('redo') + ')')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.edit_menu_button)
-        box.append(self.redo_button)
         box.append(self.undo_button)
+        box.append(self.redo_button)
         self.append(box)
         self.append(Gtk.Separator())
 
