@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import sys, os.path, gettext, json
+import sys, gettext
 
-from lemma.services.text_shaper import TextShaper
-from lemma.services.text_renderer import TextRenderer
 from lemma.services.app_info import AppInfo
 from lemma.services.files import Files
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -36,15 +34,6 @@ Files.init('@resources_path@')
 
 Settings.init()
 DocumentRepo.init()
-
-# setup fonts
-font_path = os.path.join(Files.get_resources_folder(), 'fonts')
-font_theme = Settings.get_value('font_theme')
-with open(os.path.join(font_path, font_theme + '.json'), 'r') as file:
-    for data in json.load(file):
-        TextShaper.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
-        TextRenderer.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
-
 WorkspaceRepo.init(DocumentRepo)
 
 do_time = '--time' in sys.argv

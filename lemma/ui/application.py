@@ -19,10 +19,16 @@ import gi
 gi.require_version('Adw', '1')
 from gi.repository import Adw
 
+import os.path, json
+
+from lemma.services.files import Files
+from lemma.services.text_shaper import TextShaper
+from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
 from lemma.ui.dialog_locator import DialogLocator
 from lemma.ui.popover_manager import PopoverManager
 from lemma.ui.widget_manager import WidgetManager
+from lemma.services.settings import Settings
 import lemma.services.timer as timer
 
 import lemma.ui.colors as colors
@@ -53,6 +59,14 @@ class Application(Adw.Application):
 
     def do_activate(self):
         Adw.Application.do_activate(self)
+
+        # setup fonts
+        font_path = os.path.join(Files.get_resources_folder(), 'fonts')
+        font_theme = Settings.get_value('font_theme')
+        with open(os.path.join(font_path, font_theme + '.json'), 'r') as file:
+            for data in json.load(file):
+                TextShaper.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
+                TextRenderer.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
 
         shortcuts.Shortcuts.init()
         self.main_window = main_window_view.MainWindow(self)
