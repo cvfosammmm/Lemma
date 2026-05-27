@@ -19,11 +19,6 @@ import gi
 gi.require_version('Adw', '1')
 from gi.repository import Adw
 
-import os.path, json
-
-from lemma.services.files import Files
-from lemma.services.text_shaper import TextShaper
-from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
 from lemma.ui.dialog_locator import DialogLocator
 from lemma.ui.popover_manager import PopoverManager
@@ -31,6 +26,7 @@ from lemma.ui.widget_manager import WidgetManager
 from lemma.services.settings import Settings
 import lemma.services.timer as timer
 
+import lemma.ui.fonts as fonts
 import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
 import lemma.ui.views.main_window_view as main_window_view
@@ -60,17 +56,8 @@ class Application(Adw.Application):
     def do_activate(self):
         Adw.Application.do_activate(self)
 
-        # setup fonts
-        font_path = os.path.join(Files.get_resources_folder(), 'fonts')
-        font_theme = Settings.get_value('font_theme')
-        with open(os.path.join(font_path, font_theme + '.json'), 'r') as file:
-            for data in json.load(file):
-                TextShaper.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
-                TextRenderer.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
-
         shortcuts.Shortcuts.init()
         self.main_window = main_window_view.MainWindow(self)
-
         ColorManager.init(self.main_window)
         self.main_window.add_widgets()
 
@@ -82,6 +69,7 @@ class Application(Adw.Application):
         self.document_view = document_view.DocumentView(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
         self.scrolling = scrolling.DocumentScrolling(self.main_window, self)
+        self.fonts = fonts.Fonts(self.main_window, self)
         self.colors = colors.Colors(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
         self.cursor_state = cursor_state.CursorState(self.main_window, self)
@@ -102,6 +90,7 @@ class Application(Adw.Application):
 
     @timer.timer
     def animate(self, widget, frame_clock):
+        self.fonts.animate()
         self.colors.animate()
         self.actions.animate()
         self.window_state.animate()

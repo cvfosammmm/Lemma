@@ -23,7 +23,6 @@ from gi.repository import Gtk, Adw
 import os.path
 
 from lemma.services.color_manager import ColorManager
-from lemma.services.message_bus import MessageBus
 from lemma.services.files import Files
 from lemma.services.settings import Settings
 import lemma.services.timer as timer
