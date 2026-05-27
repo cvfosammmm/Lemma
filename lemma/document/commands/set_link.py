@@ -31,7 +31,7 @@ class Command():
         self.state['nodes_and_prev_target'] = list(zip(self.nodes, prev_links))
 
         for node in self.nodes:
-            node.paragraph().invalidate()
+            document.invalidate_paragraph(node.paragraph())
 
         document.update_last_modified()
 
@@ -40,7 +40,7 @@ class Command():
             item[0].link = item[1]
 
         for item in self.state['nodes_and_prev_target']:
-            item[0].paragraph().invalidate()
+            document.invalidate_paragraph(item[0].paragraph())
 
         document.update_last_modified()
 

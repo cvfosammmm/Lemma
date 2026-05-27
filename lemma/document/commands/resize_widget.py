@@ -32,7 +32,7 @@ class Command():
         widget.set_attribute('width', self.width)
         widget.set_attribute('height', height)
 
-        self.node.paragraph().invalidate()
+        document.invalidate_paragraph(self.node.paragraph())
         document.update_last_modified()
 
     def undo(self, document):
@@ -41,7 +41,7 @@ class Command():
             widget.set_attribute('width', self.state['width_before'])
             widget.set_attribute('height', self.state['height_before'])
 
-        self.node.paragraph().invalidate()
+        document.invalidate_paragraph(self.node.paragraph())
         document.update_last_modified()
 
 

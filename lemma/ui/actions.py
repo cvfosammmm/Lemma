@@ -400,7 +400,8 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('bold')
         else:
-            self.application.toolbars.toggle_tag('bold')
+            self.application.cursor_state.tags_at_cursor ^= {'bold'}
+            self.application.toolbars.update_tag_toggle('bold')
 
     def toggle_italic(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -409,7 +410,8 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('italic')
         else:
-            self.application.toolbars.toggle_tag('italic')
+            self.application.cursor_state.tags_at_cursor ^= {'italic'}
+            self.application.toolbars.update_tag_toggle('italic')
 
     def toggle_verbatim(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -418,7 +420,8 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('verbatim')
         else:
-            self.application.toolbars.toggle_tag('verbatim')
+            self.application.cursor_state.tags_at_cursor ^= {'verbatim'}
+            self.application.toolbars.update_tag_toggle('verbatim')
 
     def toggle_highlight(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -427,7 +430,8 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('highlight')
         else:
-            self.application.toolbars.toggle_tag('highlight')
+            self.application.cursor_state.tags_at_cursor ^= {'highlight'}
+            self.application.toolbars.update_tag_toggle('highlight')
 
     def decrease_indent(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -472,7 +476,7 @@ class Actions(object):
         scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
 
         insert = document.get_insert_node()
-        x, y = document.get_absolute_xy(insert.layout)
+        x, y = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(insert))
         x -= scrolling_position_x
         y -= scrolling_position_y
         document_view = self.main_window.document_view
@@ -481,15 +485,15 @@ class Actions(object):
         y += document_view_allocation.origin.y
         x += LayoutInfo.get_document_padding_left()
         y += LayoutInfo.get_normal_document_offset()
-        fontname = insert.layout['fontname']
+        fontname = document.get_layout().get_node_layout(insert)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += insert.layout['height'] - padding_top - padding_bottom
+        y += document.get_layout().get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         orientation = 'bottom'
         if y + 260 > document_view_allocation.size.height:
             orientation = 'top'
-            y -= insert.layout['height'] - padding_top - padding_bottom
+            y -= document.get_layout().get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         if not document.has_selection() and insert.is_inside_link():
             UseCases.select_section(*insert.link_bounds())

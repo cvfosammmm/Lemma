@@ -194,7 +194,7 @@ class Popover(PopoverView):
 
         if self.current_values['link_target'] != '':
             if self.bounds == None:
-                tags_at_cursor = self.application.toolbars.tags_at_cursor
+                tags_at_cursor = self.application.cursor_state.tags_at_cursor
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)

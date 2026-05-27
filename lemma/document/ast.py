@@ -71,23 +71,11 @@ class Paragraph():
     def __init__(self):
         self.parent = None
         self.children = []
-        self.layout = None
-        self.xml = None
-        self.plaintext = None
-        self.links = None
-        self.files = None
         self.type = 'paragraph'
 
         self.style = 'p'
         self.indentation_level = 0
         self.state = None
-
-    def invalidate(self):
-        self.layout = None
-        self.xml = None
-        self.plaintext = None
-        self.links = None
-        self.files = None
 
     def set_parent(self, parent):
         self.parent = parent
@@ -152,7 +140,6 @@ class Node():
         self.value = value
         self.tags = set()
         self.link = None
-        self.layout = None
 
     def set_parent(self, parent):
         self.parent = parent
@@ -425,7 +412,6 @@ class Cursor():
         self.document = document
         self.node_insert = node_insert
         self.node_selection = node_selection
-        self.implicit_x_position = 0
 
     @timer.timer
     def set_insert_selection_nodes(self, node_insert, node_selection):
@@ -445,9 +431,6 @@ class Cursor():
     def set_state(self, position):
         self.node_insert = self.document.get_node_at_position(position[0])
         self.node_selection = self.document.get_node_at_position(position[1])
-
-    def update_implicit_x_position(self, x):
-        self.implicit_x_position = x
 
     @timer.timer
     def get_state(self):

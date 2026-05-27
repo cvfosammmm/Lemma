@@ -87,7 +87,7 @@ class PopoverManager():
 
         scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
 
-        x, y = document.get_absolute_xy(node.layout)
+        x, y = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(node))
         x -= scrolling_position_x
         y -= scrolling_position_y
         document_view = self.main_window.document_view
@@ -96,16 +96,16 @@ class PopoverManager():
         y += document_view_allocation.origin.y
         x += LayoutInfo.get_document_padding_left()
         y += LayoutInfo.get_normal_document_offset()
-        fontname = node.layout['fontname']
+        fontname = document.get_layout().get_node_layout(node)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += node.layout['height'] - padding_top - padding_bottom
-        x += node.layout['width'] / 2
+        y += document.get_layout().get_node_layout(node)['height'] - padding_top - padding_bottom
+        x += document.get_layout().get_node_layout(node)['width'] / 2
 
         orientation = 'bottom'
         if y + 260 > document_view_allocation.size.height:
             orientation = 'top'
-            y -= node.layout['height'] - padding_top - padding_bottom
+            y -= document.get_layout().get_node_layout(node)['height'] - padding_top - padding_bottom
 
         self.popdown()
         self.popup(popover, x, y, orientation)

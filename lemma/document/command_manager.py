@@ -49,7 +49,6 @@ class CommandManager():
     def add_command(self, name, *parameters):
         command = eval(name + '.Command')(*parameters)
         command.run(self.document)
-        self.document.update()
 
         if self.current_undoable_action == None:
             if self.last_undoable_action >= 0 and len(self.undoable_actions[self.last_undoable_action]) > 0:
@@ -82,7 +81,6 @@ class CommandManager():
 
         for command in reversed(undoable_action):
             command.undo(self.document)
-            self.document.update()
 
     def redo(self):
         undoable_action = self.undoable_actions[self.last_undoable_action + 1]
@@ -99,7 +97,6 @@ class CommandManager():
 
         for command in undoable_action:
             command.run(self.document)
-            self.document.update()
 
     def resize_group_match(self, undoable_action):
         return (len(undoable_action) == 1 and type(undoable_action[0]) == resize_widget.Command)

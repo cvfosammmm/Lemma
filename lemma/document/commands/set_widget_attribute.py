@@ -29,14 +29,14 @@ class Command():
         self.state['value_before'] = widget.get_attribute(self.key)
         widget.set_attribute(self.key, self.value)
 
-        self.node.paragraph().invalidate()
+        document.invalidate_paragraph(self.node.paragraph())
         document.update_last_modified()
 
     def undo(self, document):
         widget = self.node.value
         widget.set_attribute(self.key, self.state['value_before'])
 
-        self.node.paragraph().invalidate()
+        document.invalidate_paragraph(self.node.paragraph())
         document.update_last_modified()
 
 

@@ -19,19 +19,21 @@ from lemma.services.xml_exporter import XMLExporter
 import lemma.services.timer as timer
 
 
-class XMLScanner(object):
+class XML(object):
 
     def __init__(self, document):
         self.document = document
 
-    def update(self):
-        if self.document.has_changed(self):
-            self.update_xml()
+        self.paragraph_xml = dict()
+
+    def invalidate_paragraph(self, paragraph):
+        if paragraph in self.paragraph_xml:
+            del(self.paragraph_xml[paragraph])
 
     @timer.timer
-    def update_xml(self):
+    def update(self):
         for paragraph in self.document.ast:
-            if paragraph.xml == None:
-                paragraph.xml = XMLExporter.export_paragraph(paragraph.children, paragraph.style, paragraph.indentation_level, paragraph.state)
+            if paragraph not in self.paragraph_xml:
+                self.paragraph_xml[paragraph] = XMLExporter.export_paragraph(paragraph.children, paragraph.style, paragraph.indentation_level, paragraph.state)
 
 

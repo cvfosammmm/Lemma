@@ -20,16 +20,15 @@ import time
 import lemma.services.xml_helpers as xml_helpers
 from lemma.services.xml_parser import XMLParser
 from lemma.document.ast import Root, Cursor
+from lemma.document.layout import Layout
 from lemma.document.command_manager import CommandManager
-from lemma.document.layouter import Layouter
-from lemma.document.plaintext_scanner import PlaintextScanner
 from lemma.services.character_db import CharacterDB
-from lemma.document.links_scanner import LinksScanner
-from lemma.document.files_scanner import FilesScanner
-from lemma.document.xml_scanner import XMLScanner
+from lemma.document.plaintext import Plaintext
+from lemma.document.links import Links
+from lemma.document.files import Files
+from lemma.document.xml import XML
 from lemma.services.ast_validator import ASTValidator
 from lemma.services.node_type_db import NodeTypeDB
-from lemma.services.layout_info import LayoutInfo
 import lemma.services.timer as timer
 
 
@@ -43,19 +42,17 @@ class Document():
         self.title = ''
         self.ast = Root()
         self.cursor = Cursor(self, self.ast[0][0], self.ast[0][0])
-        self.plaintext = None
-        self.links = set()
-        self.files = set()
 
-        self.change_flag = dict()
+        self.plaintext = Plaintext(self)
+        self.links = Links(self)
+        self.files = Files(self)
+        self.layout = Layout(self)
+        self.xml = XML(self)
+
+        self.secondary_formats_cache = dict()
         self.query_cache = dict()
 
         self.command_manager = CommandManager(self)
-        self.layouter = Layouter(self)
-        self.plaintext_scanner = PlaintextScanner(self)
-        self.links_scanner = LinksScanner(self)
-        self.files_scanner = FilesScanner(self)
-        self.xml_scanner = XMLScanner(self)
 
     def start_undoable_action(self):
         self.command_manager.start_undoable_action()
@@ -77,7 +74,6 @@ class Document():
     def set_title(self, title):
         self.title = title
         self.update_last_modified()
-        self.update()
 
     @undoable_action
     def insert_paragraph(self, paragraph, index):
@@ -204,9 +200,6 @@ class Document():
 
         self.command_manager.add_command('set_widget_attribute', node, key, value)
 
-    def move_cursor_to_xy(self, x, y, do_selection):
-        self.command_manager.add_command('move_cursor_to_xy', x, y, do_selection)
-
     def select_placeholder_in_range(self, first_node, last_node):
         placeholder_found = False
         node = first_node
@@ -220,12 +213,6 @@ class Document():
         next_node = node.next_in_parent()
         self.command_manager.add_command('move_cursor_to_node', node, next_node)
 
-    def update_implicit_x_position(self):
-        x, y = self.get_absolute_xy(self.cursor.get_insert_node().layout)
-        self.cursor.update_implicit_x_position(x)
-
-        self.update_last_cursor_movement()
-
     def undo(self):
         self.command_manager.undo()
 
@@ -233,32 +220,21 @@ class Document():
         self.command_manager.redo()
 
     def update_last_modified(self):
-        for client in self.change_flag:
-            self.change_flag[client] = True
-
         self.last_modified = time.time()
         self.last_cursor_movement = time.time()
         self.query_cache = dict()
+        self.secondary_formats_cache = dict()
 
     def update_last_cursor_movement(self):
         self.last_cursor_movement = time.time()
         self.query_cache = dict()
 
-    @timer.timer
-    def update(self):
-        self.layouter.update()
-        self.plaintext_scanner.update()
-        self.links_scanner.update()
-        self.files_scanner.update()
-        self.xml_scanner.update()
-
-    def has_changed(self, client):
-        if client not in self.change_flag:
-            self.change_flag[client] = True
-
-        result = self.change_flag[client]
-        self.change_flag[client] = False
-        return result
+    def invalidate_paragraph(self, paragraph):
+        self.plaintext.invalidate_paragraph(paragraph)
+        self.links.invalidate_paragraph(paragraph)
+        self.files.invalidate_paragraph(paragraph)
+        self.layout.invalidate_paragraph(paragraph)
+        self.xml.invalidate_paragraph(paragraph)
 
     def has_multiple_lines_selected(self):
         if 'multiple_lines_selected' not in self.query_cache:
@@ -381,22 +357,6 @@ class Document():
             self.query_cache['can_redo'] = self.command_manager.can_redo()
         return self.query_cache['can_redo']
 
-    def get_height(self):
-        if 'height' not in self.query_cache:
-            self.query_cache['height'] = self.ast[-1].layout['y'] + self.ast[-1].layout['height']
-        return self.query_cache['height']
-
-    def get_width(self):
-        return self.ast[0].layout['width']
-
-    def get_link_at_xy(self, x, y):
-        layout = self.get_leaf_layout_at_xy(x, y)
-
-        if layout != None:
-            return layout['node'].link
-        else:
-            return None
-
     def get_link_bounds_and_targets(self):
         current_target = None
         current_bounds = [None, None]
@@ -413,82 +373,40 @@ class Document():
             result.append([[current_bounds[0], current_bounds[1]], current_target])
         return result
 
-    def get_ancestors(self, layout):
-        ancestors = []
-        while layout['parent'] != None:
-            ancestors.append(layout['parent'])
-            layout = layout['parent']
-        return ancestors
+    def get_files(self):
+        if 'files' not in self.secondary_formats_cache:
+            self.files.update()
+            self.secondary_formats_cache['files'] = self.files.files
+        return self.secondary_formats_cache['files']
 
-    @timer.timer
-    def get_leaf_layout_at_xy(self, x, y):
-        line = self.get_line_layout_at_y(y)
+    def get_links(self):
+        if 'links' not in self.secondary_formats_cache:
+            self.links.update()
+            self.secondary_formats_cache['links'] = self.links.links
+        return self.secondary_formats_cache['links']
 
-        if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
-            for layout in self.layouter.flatten_layout(line):
-                if layout['node'] != None and layout['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
-                    layout_x, layout_y = self.get_absolute_xy(layout)
-                    if x >= layout_x and x <= layout_x + layout['width'] and y >= layout_y and y <= layout_y + layout['height']:
-                        return layout
-        return None
+    def get_plaintext(self):
+        if 'plaintext' not in self.secondary_formats_cache:
+            self.plaintext.update()
+            self.secondary_formats_cache['plaintext'] = self.plaintext.plaintext
+        return self.secondary_formats_cache['plaintext']
 
-    def get_cursor_holding_layout_close_to_xy(self, x, y):
-        if y < 0: x = 0
-        if y > self.get_height(): x = LayoutInfo.get_max_layout_width()
-
-        hbox = self.get_line_layout_at_y(y)
-        if y >= hbox['y'] + hbox['parent']['y'] and y < hbox['y'] + hbox['parent']['y'] + hbox['height']:
-            for layout in self.layouter.flatten_layout(hbox):
-                if layout['type'] == 'hbox':
-                    layout_x, layout_y = self.get_absolute_xy(layout)
-                    if x >= layout_x and x <= layout_x + layout['width'] \
-                            and y >= layout_y and y <= layout_y + layout['height'] \
-                            and hbox in self.get_ancestors(layout):
-                        hbox = layout
-
-        closest_layout = None
-        min_distance = 10000
-        for layout in hbox['children']:
-            layout_x, layout_y = self.get_absolute_xy(layout)
-            distance = abs(layout_x - x)
-            if distance < min_distance:
-                closest_layout = layout
-                min_distance = distance
-
-        return closest_layout
-
-    def get_line_layout_at_y(self, y):
-        if y < 0:
-            return self.ast[0].layout['children'][0]
-        elif y > self.get_height():
-            return self.ast[-1].layout['children'][-1]
-        else:
-            for paragraph in self.ast:
-                if y >= paragraph.layout['y'] and y < paragraph.layout['y'] + paragraph.layout['height']:
-                    y -= paragraph.layout['y']
-                    for line in paragraph.layout['children']:
-                        if y >= line['y'] and y < line['y'] + line['height']:
-                            return line
-
-    def get_absolute_xy(self, layout):
-        x, y = (0, 0)
-
-        while not layout == None:
-            x += layout['x']
-            y += layout['y']
-            layout = layout['parent']
-
-        return x, y
+    def get_layout(self):
+        if 'layout' not in self.secondary_formats_cache:
+            self.layout.update()
+            self.secondary_formats_cache['layout'] = self.layout
+        return self.secondary_formats_cache['layout']
 
     @timer.timer
     def get_xml(self):
-        if 'xml' not in self.query_cache:
+        if 'xml' not in self.secondary_formats_cache:
+            self.xml.update()
             xml = '<head><title>' + xml_helpers.escape(self.title) + '</title></head>'
             xml += '<root>'
             for paragraph in self.ast:
-                xml += paragraph.xml
+                xml += self.xml.paragraph_xml[paragraph]
             xml += '</root>'
-            self.query_cache['xml'] = xml
-        return self.query_cache['xml']
+            self.secondary_formats_cache['xml'] = xml
+        return self.secondary_formats_cache['xml']
 
 

@@ -37,6 +37,7 @@ class DocumentViewPresenter():
 
     def __init__(self, model):
         self.model = model
+        self.document = self.model.document
         self.view = self.model.view.content
         self.view.set_draw_func(self.draw)
 
@@ -49,7 +50,7 @@ class DocumentViewPresenter():
     @timer.timer
     def draw(self, snapshot):
         if self.model.document == None: return
-        document = self.model.document
+        self.document = self.model.document
 
         self.height = self.view.get_allocated_height()
         self.width = self.view.get_allocated_width()
@@ -59,17 +60,17 @@ class DocumentViewPresenter():
         content_offset_x = LayoutInfo.get_document_padding_left()
         content_offset_y = LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height - self.model.scrolling_position_y
 
-        self.first_selection_node = document.get_first_selection_bound()
-        self.last_selection_node = document.get_last_selection_bound()
-        self.first_selection_line = document.get_ancestors(self.first_selection_node.layout)[-2]
-        self.last_selection_line = document.get_ancestors(self.last_selection_node.layout)[-2]
+        self.first_selection_node = self.document.get_first_selection_bound()
+        self.last_selection_node = self.document.get_last_selection_bound()
+        self.first_selection_line = self.document.get_layout().get_ancestors(self.document.get_layout().get_node_layout(self.first_selection_node))[-2]
+        self.last_selection_line = self.document.get_layout().get_ancestors(self.document.get_layout().get_node_layout(self.last_selection_node))[-2]
 
         ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
 
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
         list_item_numbers = [0, 0, 0, 0, 0]
-        for i, paragraph in enumerate(document.ast):
+        for i, paragraph in enumerate(self.document.ast):
             if paragraph.style == 'ol':
                 list_item_numbers[paragraph.indentation_level] += 1
                 if paragraph.indentation_level < 4:
@@ -77,16 +78,16 @@ class DocumentViewPresenter():
             else:
                 list_item_numbers = list_item_numbers[:paragraph.indentation_level] + [0, 0, 0, 0, 0][paragraph.indentation_level:]
 
-            if content_offset_y + paragraph.layout['y'] + paragraph.layout['height'] >= 0 and content_offset_y + paragraph.layout['y'] <= self.height:
+            if content_offset_y + self.document.get_layout().get_paragraph_layout(paragraph)['y'] + self.document.get_layout().get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + self.document.get_layout().get_paragraph_layout(paragraph)['y'] <= self.height:
                 self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph, list_item_numbers)
 
-            for j, line_layout in enumerate(paragraph.layout['children']):
-                if content_offset_y + line_layout['y'] + paragraph.layout['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + paragraph.layout['y'] <= self.height:
+            for j, line_layout in enumerate(self.document.get_layout().get_paragraph_layout(paragraph)['children']):
+                if content_offset_y + line_layout['y'] + self.document.get_layout().get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + self.document.get_layout().get_paragraph_layout(paragraph)['y'] <= self.height:
                     if (i,j) not in self.render_cache:
                         self.draw_line(ctx, i, j, line_layout, in_selection)
 
                     line_x = self.device_offset_x + math.floor(content_offset_x) * self.hidpi_factor
-                    line_y = self.device_offset_y + math.floor(content_offset_y + paragraph.layout['y'] + line_layout['y']) * self.hidpi_factor
+                    line_y = self.device_offset_y + math.floor(content_offset_y + self.document.get_layout().get_paragraph_layout(paragraph)['y'] + line_layout['y']) * self.hidpi_factor
                     ctx.set_source_surface(self.render_cache[(i,j)], line_x, line_y)
                     ctx.paint()
                 elif (i,j) in self.render_cache:
@@ -114,7 +115,7 @@ class DocumentViewPresenter():
 
     def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
         if paragraph.style == 'ul':
-            layout = paragraph.layout
+            layout = self.document.get_layout().get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
@@ -130,7 +131,7 @@ class DocumentViewPresenter():
             ctx.paint()
 
         elif paragraph.style == 'ol':
-            layout = paragraph.layout
+            layout = self.document.get_layout().get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
@@ -149,7 +150,7 @@ class DocumentViewPresenter():
                 ctx.paint()
 
         elif paragraph.style == 'cl':
-            layout = paragraph.layout
+            layout = self.document.get_layout().get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             outline_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_outline')
             inner_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_inner')
@@ -284,9 +285,9 @@ class DocumentViewPresenter():
     def draw_cursor(self, ctx, offset_x, offset_y):
         if not self.model.cursor_visible: return
 
-        insert = self.model.document.get_insert_node()
-        layout = insert.layout
-        x, y = self.model.document.get_absolute_xy(layout)
+        insert = self.document.get_insert_node()
+        layout = self.document.get_layout().get_node_layout(insert)
+        x, y = self.document.get_layout().get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])
         padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
@@ -301,9 +302,9 @@ class DocumentViewPresenter():
         y -= LayoutInfo.get_normal_document_offset()
         y += self.model.scrolling_position_y
 
-        layout = self.model.document.get_cursor_holding_layout_close_to_xy(x, y)
+        layout = self.document.get_layout().get_cursor_holding_layout_close_to_xy(x, y)
 
-        x, y = self.model.document.get_absolute_xy(layout)
+        x, y = self.document.get_layout().get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])
         padding_bottom = 0
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))

@@ -142,7 +142,7 @@ class Popover(PopoverView):
         if self.current_values['name'] == '':
             self.is_valid = False
             self.error_msg.set_text('Filename cannot be empty.')
-        if self.current_values['name'] != self.current_values['original_name'] and self.current_values['name'] in [os.path.basename(file) for file in document.files]:
+        if self.current_values['name'] != self.current_values['original_name'] and self.current_values['name'] in [os.path.basename(file) for file in document.get_files()]:
             self.is_valid = False
             self.error_msg.set_text('A file with this name already exists.')
 

@@ -27,16 +27,16 @@ class Command():
         self.state['node'] = self.paragraph[0]
         self.state['previous_level'] = self.paragraph.indentation_level
         self.paragraph.indentation_level = self.new_level
-        self.paragraph.invalidate()
 
+        document.invalidate_paragraph(self.paragraph)
         document.update_last_modified()
 
     def undo(self, document):
         paragraph = self.state['node'].paragraph()
 
         paragraph.indentation_level = self.state['previous_level']
-        paragraph.invalidate()
 
+        document.invalidate_paragraph(self.paragraph)
         document.update_last_modified()
 
 

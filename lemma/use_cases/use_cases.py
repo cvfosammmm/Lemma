@@ -73,7 +73,6 @@ class UseCases():
                 new_document.id = DocumentRepo.get_max_document_id() + 1
                 new_document.title = link_target
                 new_document.update_last_modified()
-                new_document.update()
 
                 workspace.set_active_document(new_document, update_history=True)
 
@@ -107,7 +106,6 @@ class UseCases():
         document.ast = ast
         document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
         document.update_last_modified()
-        document.update()
 
         DocumentRepo.add(document)
         MessageBus.add_message('new_document')
@@ -135,7 +133,6 @@ class UseCases():
         document.id = DocumentRepo.get_max_document_id() + 1
         document.title = title
         document.update_last_modified()
-        document.update()
 
         workspace.set_active_document(document, update_history=True)
         workspace.leave_draft_mode()
@@ -264,7 +261,6 @@ class UseCases():
         document.insert_nodes(paragraphs[0].children)
         if not document.has_selection() and text.isspace():
             document.replace_max_string_before_cursor()
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -272,6 +268,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
         MessageBus.add_message('keyboard_input')
 
     @timer.timer
@@ -301,7 +298,6 @@ class UseCases():
                 document.set_paragraph_style(paragraph, 'p')
 
         document.replace_max_string_before_cursor()
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -309,6 +305,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def insert_text(text):
@@ -328,7 +325,6 @@ class UseCases():
                 document.insert_paragraph(paragraph, document.ast.index(insert_node.paragraph()))
             else:
                 document.insert_nodes(paragraph.children)
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -336,6 +332,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     def replace_section(document, node_from, node_to, xml):
         nodes = []
@@ -347,7 +344,6 @@ class UseCases():
         document.delete_nodes(node_from, node_to)
         document.insert_nodes(nodes, node_to)
         document.set_insert_and_selection_node(node_to)
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -355,6 +351,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def insert_xml(xml):
@@ -387,7 +384,6 @@ class UseCases():
                 document.insert_nodes(paragraph.children)
 
         document.select_placeholder_in_range(document.get_node_at_position(insert_position), document.get_insert_node())
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -395,6 +391,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def backspace():
@@ -410,7 +407,6 @@ class UseCases():
             document.delete_nodes(insert.prev_no_descent(), insert)
         elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.prev_no_descent(), insert)
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -418,6 +414,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def delete():
@@ -433,7 +430,6 @@ class UseCases():
             document.delete_nodes(insert, insert.next())
         elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.next_no_descent(), insert)
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -441,6 +437,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def delete_selection():
@@ -448,7 +445,6 @@ class UseCases():
 
         document.start_undoable_action()
         document.delete_selected_nodes()
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -456,6 +452,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     def add_widget(widget):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -465,7 +462,6 @@ class UseCases():
         document.delete_selected_nodes()
         node = Node('widget', widget)
         document.insert_nodes([node])
-        document.update_implicit_x_position()
         document.end_undoable_action()
 
         DocumentRepo.update(document)
@@ -473,6 +469,7 @@ class UseCases():
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def resize_widget(new_width):
@@ -622,12 +619,11 @@ class UseCases():
             if next_insert != None:
                 document.set_insert_and_selection_node(next_insert)
 
-        document.update_implicit_x_position()
-
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def jump_left(do_selection=False):
@@ -652,12 +648,12 @@ class UseCases():
             document.set_insert_and_selection_node(document.get_first_selection_bound())
         else:
             document.set_insert_and_selection_node(insert_new)
-        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def right(do_selection=False):
@@ -677,12 +673,11 @@ class UseCases():
             if next_insert != None:
                 document.set_insert_and_selection_node(next_insert)
 
-        document.update_implicit_x_position()
-
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def jump_right(do_selection=False):
@@ -708,24 +703,24 @@ class UseCases():
             document.set_insert_and_selection_node(document.get_last_selection_bound())
         else:
             document.set_insert_and_selection_node(insert_new)
-        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
-    def up(do_selection=False):
+    def up(implicit_x_position, do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
 
-        x, y = document.get_absolute_xy(insert.layout)
-        if document.get_implicit_x_position() != None:
-            x = document.get_implicit_x_position()
+        x, y = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(insert))
+        if implicit_x_position != None:
+            x = implicit_x_position
 
         new_node = None
-        ancestors = document.get_ancestors(insert.layout)
+        ancestors = document.get_layout().get_ancestors(document.get_layout().get_node_layout(insert))
         for i, box in enumerate(ancestors):
             if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
                 if box['type'] == 'vbox':
@@ -734,14 +729,14 @@ class UseCases():
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast:
-                        for hbox in paragraph.layout['children']:
+                        for hbox in document.get_layout().get_paragraph_layout(paragraph)['children']:
                             if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
                 for hbox in reversed(prev_hboxes):
                     if new_node == None:
                         min_distance = 10000
                         for layout in hbox['children']:
-                            layout_x, layout_y = document.get_absolute_xy(layout)
+                            layout_x, layout_y = document.get_layout().get_absolute_xy(layout)
                             distance = abs(layout_x - x)
                             if distance < min_distance:
                                 new_node = layout['node']
@@ -759,16 +754,17 @@ class UseCases():
         MessageBus.add_message('cursor_movement')
 
     @timer.timer
-    def down(do_selection=False):
+    def down(implicit_x_position, do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
+        insert_layout = document.get_layout().get_node_layout(insert)
 
-        x, y = document.get_absolute_xy(insert.layout)
-        if document.get_implicit_x_position() != None:
-            x = document.get_implicit_x_position()
+        x, y = document.get_layout().get_absolute_xy(insert_layout)
+        if implicit_x_position != None:
+            x = implicit_x_position
 
         new_node = None
-        ancestors = document.get_ancestors(insert.layout)
+        ancestors = document.get_layout().get_ancestors(insert_layout)
         for i, box in enumerate(ancestors):
             if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
                 if box['type'] == 'vbox':
@@ -777,14 +773,14 @@ class UseCases():
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast:
-                        for hbox in paragraph.layout['children']:
+                        for hbox in document.get_layout().get_paragraph_layout(paragraph)['children']:
                             if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
                 for child in prev_hboxes:
                     if new_node == None:
                         min_distance = 10000
                         for layout in child['children']:
-                            layout_x, layout_y = document.get_absolute_xy(layout)
+                            layout_x, layout_y = document.get_layout().get_absolute_xy(layout)
                             distance = abs(layout_x - x)
                             if distance < min_distance:
                                 new_node = layout['node']
@@ -806,7 +802,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
 
-        layout = insert.layout
+        layout = document.get_layout().get_node_layout(insert)
         while layout['parent']['parent'] != None:
             layout = layout['parent']
         while layout['children'][0]['node'] == None:
@@ -816,19 +812,19 @@ class UseCases():
         selection_node = document.get_selection_node()
 
         document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
-        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def paragraph_end(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
 
-        layout = insert.layout
+        layout = document.get_layout().get_node_layout(insert)
         while layout['parent']['parent'] != None:
             layout = layout['parent']
         while layout['children'][-1]['node'] == None:
@@ -838,24 +834,24 @@ class UseCases():
         selection_node = document.get_selection_node()
 
         document.set_insert_and_selection_node(new_node, new_node if not do_selection else selection_node)
-        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
-    def page(y, do_selection=False):
+    def page(implicit_x_position, y, do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         insert = document.get_insert_node()
-        orig_x, orig_y = document.get_absolute_xy(insert.layout)
-        if document.get_implicit_x_position() != None:
-            orig_x = document.get_implicit_x_position()
+        orig_x, orig_y = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(insert))
+        if implicit_x_position != None:
+            orig_x = implicit_x_position
         new_x = orig_x
         new_y = orig_y + y
-        layout = document.get_cursor_holding_layout_close_to_xy(new_x, new_y)
+        layout = document.get_layout().get_cursor_holding_layout_close_to_xy(new_x, new_y)
 
         new_insert = layout['node']
         new_selection_bound = document.get_selection_node() if do_selection else layout['node']
@@ -945,11 +941,11 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.set_insert_and_selection_node(document.ast[0][0], document.ast[-1][-1])
-        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def remove_selection():
@@ -957,24 +953,30 @@ class UseCases():
 
         if document.has_selection():
             document.set_insert_and_selection_node(document.get_last_selection_bound())
-            document.update_implicit_x_position()
 
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
             MessageBus.add_message('document_ast_or_cursor_changed')
             MessageBus.add_message('cursor_movement')
+            MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        document.move_cursor_to_xy(x, y, do_selection)
-        document.update_implicit_x_position()
+        layout = document.get_layout().get_cursor_holding_layout_close_to_xy(x, y)
+        new_insert = layout['node']
+        if do_selection:
+            new_selection_bound = document.get_selection_node()
+        else:
+            new_selection_bound = layout['node']
+        document.set_insert_and_selection_node(new_insert, new_selection_bound)
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def move_cursor_to_parent():
@@ -989,12 +991,12 @@ class UseCases():
 
         if new_insert != None:
             document.set_insert_and_selection_node(new_insert, new_insert)
-            document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
     def extend_selection():
@@ -1032,11 +1034,11 @@ class UseCases():
                         new_selection = document.ast[-1][-1]
 
         document.set_insert_and_selection_node(new_insert, new_selection)
-        document.update_implicit_x_position()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('implicit_x_position_changed')
 
 

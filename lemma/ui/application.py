@@ -33,6 +33,7 @@ import lemma.ui.scrolling as scrolling
 import lemma.ui.document_view as document_view
 import lemma.ui.document_title as document_title
 import lemma.ui.document_context_menu as context_menu_document
+import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
 import lemma.ui.bookmarks as bookmarks
 import lemma.ui.document_list as document_list
@@ -69,6 +70,7 @@ class Application(Adw.Application):
         self.scrolling = scrolling.DocumentScrolling(self.main_window, self)
         self.colors = colors.Colors(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
+        self.cursor_state = cursor_state.CursorState(self.main_window, self)
         self.toolbars = toolbars.Toolbars(self.main_window, self)
         self.bookmarks = bookmarks.Bookmarks(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
@@ -100,6 +102,7 @@ class Application(Adw.Application):
         self.document_title.animate()
         self.context_menu_document.animate()
         self.autocomplete.animate()
+        self.cursor_state.animate()
         self.toolbars.animate()
         self.bookmarks.animate()
         self.sidebar_emojis.animate()

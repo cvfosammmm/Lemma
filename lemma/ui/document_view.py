@@ -91,7 +91,7 @@ class DocumentView():
                 do_draw = True
 
         scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
-        content_height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
+        content_height = document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
 
         self.view.scrollbar_vertical.set_content_height(content_height)
         self.view.scrollbar_vertical.set_scrolling_offset(scrolling_position_y)
@@ -149,8 +149,8 @@ class DocumentView():
         y -= self.application.document_title.title_buttons_height
 
         if y > 0:
-            leaf_layout = document.get_leaf_layout_at_xy(x, y)
-            line_layout = document.get_line_layout_at_y(y)
+            leaf_layout = document.get_layout().get_leaf_layout_at_xy(x, y)
+            line_layout = document.get_layout().get_line_layout_at_y(y)
             paragraph_layout = line_layout['parent']
             line_layout = paragraph_layout['children'][0]
             paragraph = paragraph_layout['node']

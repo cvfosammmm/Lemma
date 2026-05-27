@@ -32,7 +32,7 @@ class Command():
                     node.tags.add(self.tag_name)
 
             for paragraph_no in range(document.ast.index(document.get_first_selection_bound().paragraph()), document.ast.index(document.get_last_selection_bound().paragraph()) + 1):
-                document.ast[paragraph_no].invalidate()
+                document.invalidate_paragraph(document.ast[paragraph_no])
             document.update_last_modified()
 
     def undo(self, document):
@@ -41,7 +41,7 @@ class Command():
 
         if len(self.state['affected_nodes']) > 0:
             for paragraph_no in range(document.ast.index(self.state['affected_nodes'][0].paragraph()), document.ast.index(self.state['affected_nodes'][-1].paragraph()) + 1):
-                document.ast[paragraph_no].invalidate()
+                document.invalidate_paragraph(document.ast[paragraph_no])
             document.update_last_modified()
 
 

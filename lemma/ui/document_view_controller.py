@@ -145,8 +145,8 @@ class DocumentViewController():
         self.model.selected_click_target = (x, y)
 
         if y > 0:
-            link = document.get_link_at_xy(x, y)
-            leaf_layout = document.get_leaf_layout_at_xy(x, y)
+            leaf_layout = document.get_layout().get_leaf_layout_at_xy(x, y)
+            link = leaf_layout['node'].link if leaf_layout != None else None
 
             if leaf_layout != None and leaf_layout['node'].type == 'widget':
                 self.model.application.widget_manager.on_primary_button_press(leaf_layout['node'].value, n_press, x, y)
@@ -191,18 +191,20 @@ class DocumentViewController():
             if y >= -LayoutInfo.get_subtitle_height():
                 document = self.model.document
 
-                link_at_press = document.get_link_at_xy(*self.model.selected_click_target)
-                link_at_release = document.get_link_at_xy(x, y)
+                leaf_layout_at_press = document.get_layout().get_leaf_layout_at_xy(*self.model.selected_click_target)
+                link_at_press = leaf_layout_at_press['node'].link if leaf_layout_at_press != None else None
+                leaf_layout_at_release = document.get_layout().get_leaf_layout_at_xy(x, y)
+                link_at_release = leaf_layout_at_release['node'].link if leaf_layout_at_release != None else None
 
                 if link_at_press == link_at_release and link_at_release != None:
                     UseCases.open_link(link_at_release)
                     return
 
                 x_at_press, y_at_press = self.model.selected_click_target
-                line_layout_at_press = document.get_line_layout_at_y(y_at_press)
+                line_layout_at_press = document.get_layout().get_line_layout_at_y(y_at_press)
                 paragraph_layout_at_press = line_layout_at_press['parent']
 
-                line_layout_at_release = document.get_line_layout_at_y(y)
+                line_layout_at_release = document.get_layout().get_line_layout_at_y(y)
                 paragraph_layout_at_release = line_layout_at_release['parent']
 
                 if paragraph_layout_at_press != paragraph_layout_at_release: return
@@ -229,7 +231,7 @@ class DocumentViewController():
 
         if y_offset > 0:
             if not document.has_selection():
-                leaf_layout = document.get_leaf_layout_at_xy(x_offset, y_offset)
+                leaf_layout = document.get_layout().get_leaf_layout_at_xy(x_offset, y_offset)
                 if keyboard_state == 0 and leaf_layout != None and NodeTypeDB.focus_on_click(leaf_layout['node']):
                     UseCases.select_node(leaf_layout['node'])
                 else:
@@ -256,7 +258,7 @@ class DocumentViewController():
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - self.model.document_view_height > 0:
-            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
+            height = self.model.document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
             new_x = self.model.scrolling_position_x
             new_y = min(max(0, height - self.model.document_view_height), self.model.scrolling_position_y + y - self.model.document_view_height)
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
@@ -364,7 +366,7 @@ class DocumentViewController():
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - self.model.document_view_height > -56:
-            height = self.model.document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
+            height = self.model.document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
             new_x = self.model.scrolling_position_x
             new_y = min(max(0, height - self.model.document_view_height), self.model.scrolling_position_y + y - self.model.document_view_height + 56)
             self.model.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
@@ -379,7 +381,7 @@ class DocumentViewController():
 
         if controller.get_current_event_state() & modifiers == 0:
             document = self.model.document
-            height = document.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
+            height = document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.model.application.document_title.title_buttons_height
 
             if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
                 dx *= self.model.document_view_width ** (2/3)
@@ -422,34 +424,34 @@ class DocumentViewController():
             case ('right', 0):
                 UseCases.right()
             case ('up', 0):
-                UseCases.up()
+                UseCases.up(self.model.application.cursor_state.implicit_x_position)
             case ('down', 0):
-                UseCases.down()
+                UseCases.down(self.model.application.cursor_state.implicit_x_position)
             case ('home', 0):
                 UseCases.paragraph_start()
             case ('end', 0):
                 UseCases.paragraph_end()
             case ('page_up', 0):
-                UseCases.page(-self.model.document_view_height + 100)
+                UseCases.page(self.model.application.cursor_state.implicit_x_position, -self.model.document_view_height + 100)
             case ('page_down', 0):
-                UseCases.page(self.model.document_view_height - 100)
+                UseCases.page(self.model.application.cursor_state.implicit_x_position, self.model.document_view_height - 100)
 
             case ('left', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.left(True)
             case ('right', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.right(True)
             case ('up', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.up(True)
+                UseCases.up(self.model.application.cursor_state.implicit_x_position, True)
             case ('down', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.down(True)
+                UseCases.down(self.model.application.cursor_state.implicit_x_position, True)
             case ('home', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.paragraph_start(True)
             case ('end', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.paragraph_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(-self.model.document_view_height + 100, True)
+                UseCases.page(self.model.application.cursor_state.implicit_x_position, -self.model.document_view_height + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(self.model.document_view_height - 100, True)
+                UseCases.page(self.model.application.cursor_state.implicit_x_position, self.model.document_view_height - 100, True)
 
             case ('left', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.jump_left(False)
@@ -488,10 +490,10 @@ class DocumentViewController():
                         UseCases.set_paragraph_style('p')
                         UseCases.set_indentation_level(0)
                     else:
-                        tags_at_cursor = self.model.application.toolbars.tags_at_cursor
+                        tags_at_cursor = self.model.application.cursor_state.tags_at_cursor
                         UseCases.add_newline(tags_at_cursor)
                 else:
-                    tags_at_cursor = self.model.application.toolbars.tags_at_cursor
+                    tags_at_cursor = self.model.application.cursor_state.tags_at_cursor
                     UseCases.add_newline(tags_at_cursor)
             case ('backspace', _):
                 UseCases.backspace()
@@ -506,7 +508,7 @@ class DocumentViewController():
         self.model.set_ctrl_pressed(int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
 
     def on_im_commit(self, im_context, text):
-        tags_at_cursor = self.model.application.toolbars.tags_at_cursor
+        tags_at_cursor = self.model.application.cursor_state.tags_at_cursor
         UseCases.im_commit(text, tags_at_cursor)
 
     def on_focus_in(self, controller):

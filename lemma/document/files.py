@@ -18,27 +18,28 @@
 import lemma.services.timer as timer
 
 
-class LinksScanner(object):
+class Files(object):
 
     def __init__(self, document):
         self.document = document
 
-    def update(self):
-        if self.document.has_changed(self):
-            self.update_links()
+        self.paragraph_files = dict()
+        self.files = set()
+
+    def invalidate_paragraph(self, paragraph):
+        if paragraph in self.paragraph_files:
+            del(self.paragraph_files[paragraph])
 
     @timer.timer
-    def update_links(self):
-        links = set()
+    def update(self):
+        self.files = set()
 
         for paragraph in self.document.ast:
-            if paragraph.links == None:
-                paragraph.links = set()
+            if paragraph not in self.paragraph_files:
+                self.paragraph_files[paragraph] = set()
                 for node in paragraph:
-                    if node.link != None and node.type == 'char':
-                        paragraph.links.add(node.link)
-            links |= paragraph.links
-
-        self.document.links = links
+                    if node.type == 'widget':
+                        self.paragraph_files[paragraph] |= node.value.get_filenames()
+            self.files |= self.paragraph_files[paragraph]
 
 

@@ -39,39 +39,48 @@ class DocumentRepo():
 
     @timer.timer
     def init():
-        stubs = dict()
-        for direntry in os.scandir(Files.get_stubs_folder()):
-            with open(direntry.path, 'rb') as file:
-                try:
-                    stub = pickle.load(file)
-                except EOFError: pass
-                else:
-                    stubs[int(direntry.name)] = stub
-
+        document_ids = list()
         for direntry in os.scandir(Files.get_documents_folder()):
             if direntry.is_file() and direntry.name.isdigit():
-                document_id = int(direntry.name)
-                if document_id in stubs and direntry.stat().st_mtime >= stubs[document_id]['last_modified']:
-                    DocumentRepo.document_stubs_by_id[document_id] = stubs[document_id]
-                    del(stubs[document_id])
-                else:
-                    document = DocumentRepo.get_by_id(document_id)
-                    DocumentRepo.document_stubs_by_id[document_id] = {'id': document_id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links, 'files': document.files}
-                    pathname = os.path.join(Files.get_stubs_folder(), str(document.id))
-                    with open(pathname, 'wb') as filehandle:
-                        pickle.dump(DocumentRepo.document_stubs_by_id[document.id], filehandle)
+                document_ids.append(int(direntry.name))
+        DocumentRepo.max_document_id = max(document_ids + [0])
 
-                    if document_id in stubs:
-                        del(stubs[document_id])
+        for document_id in document_ids:
+            pathname_document = os.path.join(Files.get_documents_folder(), str(document_id))
+            pathname_stub = os.path.join(Files.get_stubs_folder(), str(document_id))
 
-        for document_id in stubs:
-            pathname = os.path.join(Files.get_stubs_folder(), str(document_id))
-            os.remove(pathname)
+            if os.path.isfile(pathname_stub):
+                with open(pathname_stub, 'rb') as file:
+                    try:
+                        stub = pickle.load(file)
+                    except EOFError: pass
+                    else:
+                        if os.path.getmtime(pathname_stub) >= stub['last_modified']:
+                            DocumentRepo.document_stubs_by_id[document_id] = stub
 
-        if len(DocumentRepo.document_stubs_by_id) > 0:
-            DocumentRepo.max_document_id = max(DocumentRepo.document_stubs_by_id)
-        else:
-            DocumentRepo.max_document_id = 0
+            if document_id not in DocumentRepo.document_stubs_by_id:
+                document = Document(document_id)
+                document.last_modified = os.path.getmtime(pathname_document)
+
+                with open(pathname_document, 'r') as file:
+                    xml = file.read()
+
+                title, paragraphs = XMLParser.parse(xml)
+                if paragraphs != None:
+                    for paragraph in paragraphs:
+                        if len(paragraph) > 0 and paragraph[-1].type == 'eol':
+                            document.ast.append(paragraph)
+                if len(document.ast) > 1:
+                    document.ast.remove(document.ast[0])
+
+                document.title = title
+                document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
+
+                stub = {'id': document_id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'links': document.get_links(), 'files': document.get_files()}
+
+                DocumentRepo.document_stubs_by_id[document_id] = stub
+                with open(pathname_stub, 'wb') as filehandle:
+                    pickle.dump(stub, filehandle)
 
         GObject.timeout_add(1000, DocumentRepo.lazy_save_loop)
 
@@ -164,8 +173,6 @@ class DocumentRepo():
 
         document.title = title
         document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
-        document.update()
-        document.change_flag[DocumentRepo] = False
 
         return document
 
@@ -177,7 +184,7 @@ class DocumentRepo():
     def add(document):
         if document.id in DocumentRepo.document_stubs_by_id: return
 
-        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links, 'files': document.files}
+        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'links': document.get_links(), 'files': document.get_files()}
         DocumentRepo.save_document(document, can_wait=False)
         DocumentRepo.max_document_id = max(document.id, DocumentRepo.max_document_id)
 
@@ -207,9 +214,7 @@ class DocumentRepo():
 
     @timer.timer
     def update(document):
-        if not document.has_changed(DocumentRepo): return
-
-        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.plaintext, 'links': document.links, 'files': document.files}
+        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'links': document.get_links(), 'files': document.get_files()}
         DocumentRepo.save_document(document, can_wait=True)
 
     @timer.timer

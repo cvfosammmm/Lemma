@@ -15,36 +15,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-from lemma.services.node_type_db import NodeTypeDB
 import lemma.services.timer as timer
 
 
-class PlaintextScanner(object):
+class Links(object):
 
     def __init__(self, document):
         self.document = document
 
-    def update(self):
-        if self.document.has_changed(self):
-            self.update_pal()
+        self.paragraph_links = dict()
+        self.links = set()
+
+    def invalidate_paragraph(self, paragraph):
+        if paragraph in self.paragraph_links:
+            del(self.paragraph_links[paragraph])
 
     @timer.timer
-    def update_pal(self):
-        plaintext = ''
+    def update(self):
+        self.links = set()
 
         for paragraph in self.document.ast:
-            if paragraph.plaintext == None:
-                text = ''
+            if paragraph not in self.paragraph_links:
+                self.paragraph_links[paragraph] = set()
                 for node in paragraph:
-                    if node.type == 'char':
-                        text += node.value
-                    elif node.type == 'eol':
-                        text += '\n'
-                    elif node.type == 'widget':
-                        text += node.value.to_plaintext()
-                paragraph.plaintext = text
-            plaintext += paragraph.plaintext
-
-        self.document.plaintext = plaintext
+                    if node.link != None and node.type == 'char':
+                        self.paragraph_links[paragraph].add(node.link)
+            self.links |= self.paragraph_links[paragraph]
 
 

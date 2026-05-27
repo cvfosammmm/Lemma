@@ -15,30 +15,37 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.services.node_type_db import NodeTypeDB
 import lemma.services.timer as timer
 
 
-class FilesScanner(object):
+class Plaintext(object):
 
     def __init__(self, document):
         self.document = document
 
-    def update(self):
-        if self.document.has_changed(self):
-            self.update_files()
+        self.paragraph_plaintexts = dict()
+        self.plaintext = ''
+
+    def invalidate_paragraph(self, paragraph):
+        if paragraph in self.paragraph_plaintexts:
+            del(self.paragraph_plaintexts[paragraph])
 
     @timer.timer
-    def update_files(self):
-        files = set()
+    def update(self):
+        self.plaintext = ''
 
         for paragraph in self.document.ast:
-            if paragraph.files == None:
-                paragraph.files = set()
+            if paragraph not in self.paragraph_plaintexts:
+                text = ''
                 for node in paragraph:
-                    if node.type == 'widget':
-                        paragraph.files |= node.value.get_filenames()
-            files |= paragraph.files
-
-        self.document.files = files
+                    if node.type == 'char':
+                        text += node.value
+                    elif node.type == 'eol':
+                        text += '\n'
+                    elif node.type == 'widget':
+                        text += node.value.to_plaintext()
+                self.paragraph_plaintexts[paragraph] = text
+            self.plaintext += self.paragraph_plaintexts[paragraph]
 
 

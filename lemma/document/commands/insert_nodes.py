@@ -26,7 +26,7 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.position_node.paragraph().invalidate()
+        document.invalidate_paragraph(self.position_node.paragraph())
 
         offset = self.position_node.parent.index(self.position_node)
         for node in self.nodes:
@@ -54,8 +54,8 @@ class Command():
 
     def undo(self, document):
         if len(self.nodes) > 0:
-            self.nodes[0].paragraph().invalidate()
-            self.nodes[-1].paragraph().invalidate()
+            document.invalidate_paragraph(self.nodes[0].paragraph())
+            document.invalidate_paragraph(self.nodes[-1].paragraph())
 
         for node in self.nodes:
             if node.type == 'eol':

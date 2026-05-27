@@ -35,6 +35,7 @@ AppInfo.init_lemma_version('@lemma_version@')
 Files.init('@resources_path@')
 
 Settings.init()
+DocumentRepo.init()
 
 # setup fonts
 font_path = os.path.join(Files.get_resources_folder(), 'fonts')
@@ -44,7 +45,6 @@ with open(os.path.join(font_path, font_theme + '.json'), 'r') as file:
         TextShaper.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
         TextRenderer.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
 
-DocumentRepo.init()
 WorkspaceRepo.init(DocumentRepo)
 
 do_time = '--time' in sys.argv

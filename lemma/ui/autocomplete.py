@@ -172,11 +172,11 @@ class Autocomplete():
     def update_position(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
-        insert_x, insert_y = document.get_absolute_xy(insert.layout)
+        insert_x, insert_y = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(insert))
         content_offset = LayoutInfo.get_normal_document_offset()
         scrolling_offset_y = self.application.scrolling.get_current_scrolling_offsets()[1]
         insert_y += content_offset - scrolling_offset_y
-        insert_height = insert.layout['height']
+        insert_height = document.get_layout().get_node_layout(insert)['height']
         insert_x += LayoutInfo.get_document_padding_left()
         window_height = self.application.document_view.document_view_height
         window_width = self.application.document_view.document_view_width

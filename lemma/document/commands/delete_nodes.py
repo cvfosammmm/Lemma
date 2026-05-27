@@ -27,7 +27,7 @@ class Command():
         self.state['cursor_state_before'] = document.get_cursor_state()
         self.state['deleted_nodes'] = []
 
-        self.node_from.paragraph().invalidate()
+        document.invalidate_paragraph(self.node_from.paragraph())
 
         parent = self.node_from.parent
         index_from = parent.index(self.node_from)
@@ -40,7 +40,7 @@ class Command():
         document.update_last_modified()
 
     def undo(self, document):
-        self.node_to.paragraph().invalidate()
+        document.invalidate_paragraph(self.node_to.paragraph())
 
         offset = self.node_to.parent.index(self.node_to)
         for node in self.state['deleted_nodes']:

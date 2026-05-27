@@ -27,14 +27,14 @@ class Command():
         self.state['previous_style'] = self.paragraph.style
 
         self.paragraph.style = self.style
-        self.paragraph.invalidate()
 
+        document.invalidate_paragraph(self.paragraph)
         document.update_last_modified()
 
     def undo(self, document):
         self.paragraph.style = self.state['previous_style']
-        self.paragraph.invalidate()
 
+        document.invalidate_paragraph(self.paragraph)
         document.update_last_modified()
 
 

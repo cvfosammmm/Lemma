@@ -70,7 +70,7 @@ class Files():
         target_full = target
 
         count = 0
-        while str(document.id) + '_files/' + os.path.basename(target_full) in document.files:
+        while str(document.id) + '_files/' + os.path.basename(target_full) in document.get_files():
             count += 1
             root, ext = os.path.splitext(target)
             target_full = root + '~' + (str(count) if count > 0 else '') + ext
@@ -86,7 +86,7 @@ class Files():
 
     def get_distinct_document_file_name(document, extension):
         count = 1
-        while str(document.id) + '_files/' + str(count) + extension in document.files:
+        while str(document.id) + '_files/' + str(count) + extension in document.get_files():
             count += 1
 
         return str(document.id) + '_files/' + str(count) + extension
