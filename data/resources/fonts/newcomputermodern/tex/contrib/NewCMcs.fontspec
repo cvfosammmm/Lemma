@@ -1,0 +1,102 @@
+\defaultfontfeatures[NewCMcs]{%
+  UprightFont= NewCM10-Regular.otf,%
+  UprightFeatures={ SizeFeatures={%
+        {Size=-6,    Font= NewCM08-Book.otf, FakeStretch= 1.215, LetterSpace= 3.5, SmallCapsFeatures={ FakeStretch= 1.01 } },%
+        {Size=6-7,   Font= NewCM08-Book.otf, FakeStretch= 1.110, LetterSpace= 2.5, SmallCapsFeatures={ FakeStretch= 0.99 } },%
+        {Size=7-8,   Font= NewCM08-Book.otf, FakeStretch= 1.040, LetterSpace= 1.9, SmallCapsFeatures={ FakeStretch= 0.97 } },%
+        {Size=8-9,   Font= NewCM08-Book.otf, SmallCapsFeatures={ FakeStretch= 0.98 } },%
+        {Size=9-10,  Font= NewCM10-Book.otf, FakeStretch= 1.025, SmallCapsFeatures={ FakeStretch= 1.030 } },%
+        {Size=10-12, Font= NewCM10-Book.otf, SmallCapsFeatures={ FakeStretch= 1.00 } },%
+        {Size=12-14, Font= NewCM10-Book.otf, FakeStretch= 0.980, SmallCapsFeatures={ FakeStretch= 1.00 } },%
+        {Size=14-17, FakeStretch= 0.955 },%
+        {Size=17-20, FakeStretch= 0.935 },%
+        {Size=20-23, FakeStretch= 0.925 },%
+        {Size=23-28, FakeStretch= 0.910 },%
+        {Size=28-35, FakeStretch= 0.905 },%
+        {Size=35-,   FakeStretch= 0.895 }%
+  } },%
+  BoldFont= NewCM10-Bold.otf,%
+  BoldFeatures={ SizeFeatures={%
+        {Size=-6,    FakeStretch= 1.255, LetterSpace= 3.3, SmallCapsFeatures={ FakeStretch= 1.20, LetterSpace= 1.5 } },%
+        {Size=6-7,   FakeStretch= 1.175, LetterSpace= 1.8, SmallCapsFeatures={ FakeStretch= 1.09 } },%
+		  {Size=7-8,   FakeStretch= 1.110, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.085 } },%
+		  {Size=8-9,   FakeStretch= 1.045, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.06 } },%
+		  {Size=9-10,  FakeStretch= 1.020, LetterSpace= 0.5, SmallCapsFeatures={ FakeStretch= 1.02 } },%
+		  {Size=10-12, SmallCapsFeatures={ FakeStretch= 0.98 } },%
+		  {Size=12-14, FakeStretch= 0.980, SmallCapsFeatures={ FakeStretch= 0.965 } },%
+        {Size=14-17, FakeStretch= 0.955, SmallCapsFeatures={ FakeStretch= 0.930 } },%
+        {Size=17-20, FakeStretch= 0.935, SmallCapsFeatures={ FakeStretch= 0.905 } },%
+        {Size=20-23, FakeStretch= 0.920, SmallCapsFeatures={ FakeStretch= 0.885 } },%
+        {Size=23-28, FakeStretch= 0.910, SmallCapsFeatures={ FakeStretch= 0.870 } },%
+        {Size=28-35, FakeStretch= 0.895, SmallCapsFeatures={ FakeStretch= 0.855 } },%
+        {Size=35-,   FakeStretch= 0.885, SmallCapsFeatures={ FakeStretch= 0.845 } }%
+  } },%
+  ItalicFont= NewCM10-Italic.otf,%
+  ItalicFeatures={ SizeFeatures={%
+        {Size=-6,    Font= NewCM08-BookItalic.otf, FakeStretch= 1.255, LetterSpace= 3.0, SmallCapsFeatures={ FakeStretch= 1.025, LetterSpace= 2.5 } },%
+        {Size=6-7,   Font= NewCM08-BookItalic.otf, FakeStretch= 1.210, LetterSpace= 1.8, SmallCapsFeatures={ FakeStretch= 1.010, LetterSpace= 1.0 } },%
+		  {Size=7-8,   Font= NewCM08-BookItalic.otf, FakeStretch= 1.105, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.000, LetterSpace= 0.0 } },%
+		  {Size=8-9,   Font= NewCM08-BookItalic.otf, LetterSpace= 0.9, SmallCapsFeatures={ FakeStretch= 0.980 } },%
+		  {Size=9-10,  Font= NewCM10-BookItalic.otf, FakeStretch=1.005, LetterSpace= 0.8, SmallCapsFeatures={ FakeStretch= 1.020, LetterSpace= 0.5 } },%
+		  {Size=10-11, Font= NewCM10-BookItalic.otf, SmallCapsFeatures={ FakeStretch= 1.000, LetterSpace= 0.5 } },%%
+		  {Size=11-12, Font= NewCM10-BookItalic.otf, SmallCapsFeatures={ LetterSpace= 1.0 } },%%
+		  {Size=12-14, Font= NewCM10-BookItalic.otf, FakeStretch= 0.975 },%
+        {Size=14-17, FakeStretch= 0.955 },%
+        {Size=17-20, FakeStretch= 0.935 },%
+        {Size=20-23, FakeStretch= 0.920 },%
+        {Size=23-28, FakeStretch= 0.910 },%
+        {Size=28-35, FakeStretch= 0.900 },%
+        {Size=35-,   FakeStretch= 0.890 }%
+  } },%
+  BoldItalicFont= NewCM10-BoldItalic.otf,%
+  BoldItalicFeatures={ SizeFeatures={%
+        {Size=-6,    FakeStretch= 1.215, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.175, LetterSpace= 3.3 } },%
+        {Size=6-7,   FakeStretch= 1.105, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.095, LetterSpace= 1.5 } },%
+		  {Size=7-8,   FakeStretch= 1.070, LetterSpace= 0.8, SmallCapsFeatures={ FakeStretch= 1.095, LetterSpace= 1.0 } },%
+		  {Size=8-9,   FakeStretch= 1.045, LetterSpace= 0.6, SmallCapsFeatures={ FakeStretch= 1.070 } },%
+		  {Size=9-10,  FakeStretch= 1.005, LetterSpace= 0.9, SmallCapsFeatures={ FakeStretch= 1.030 } },%
+		  {Size=10-11, SmallCapsFeatures={ FakeStretch= 1.000 } },%
+		  {Size=11-12, SmallCapsFeatures={ FakeStretch= 0.990, LetterSpace= 0.0 } },%
+		  {Size=12-14, FakeStretch= 0.970, SmallCapsFeatures={ FakeStretch= 0.980 } },%
+        {Size=14-17, FakeStretch= 0.940, SmallCapsFeatures={ FakeStretch= 0.950 } },%
+        {Size=17-20, FakeStretch= 0.925, SmallCapsFeatures={ FakeStretch= 0.925 } },%
+        {Size=20-23, FakeStretch= 0.910, SmallCapsFeatures={ FakeStretch= 0.900 } },%
+        {Size=23-28, FakeStretch= 0.935, SmallCapsFeatures={ FakeStretch= 0.885 } },%
+        {Size=28-35, FakeStretch= 0.925, SmallCapsFeatures={ FakeStretch= 0.870 } },%
+        {Size=35-,   FakeStretch= 0.885, SmallCapsFeatures={ FakeStretch= 0.860 } }%
+  } },%
+  SlantedFont= NewCM10-Regular.otf,%
+  SlantedFeatures={ FakeSlant= 0.160, SizeFeatures={%
+        {Size=-6,    Font= NewCM08-Book.otf, FakeStretch= 1.215, LetterSpace= 3.5, SmallCapsFeatures={ FakeStretch= 1.025, LetterSpace= 2.5 } },%
+        {Size=6-7,   Font= NewCM08-Book.otf, FakeStretch= 1.110, LetterSpace= 2.0, SmallCapsFeatures={ FakeStretch= 1.010, LetterSpace= 1.0 } },%
+        {Size=7-8,   Font= NewCM08-Book.otf, FakeStretch= 1.035, LetterSpace= 1.9, SmallCapsFeatures={ FakeStretch= 1.000, LetterSpace= 0.0 } },%
+		  {Size=8-9,   Font= NewCM08-Book.otf, SmallCapsFeatures={ FakeStretch= 0.980 } },%
+		  {Size=9-10,  Font= NewCM10-Book.otf, FakeStretch= 1.025, SmallCapsFeatures={ FakeStretch= 1.020, LetterSpace= 0.5 } },%%
+		  {Size=10-11, Font= NewCM10-Book.otf, SmallCapsFeatures={ FakeStretch= 1.000, LetterSpace= 0.5 } },%%
+		  {Size=11-12, Font= NewCM10-Book.otf, SmallCapsFeatures={ LetterSpace= 1.0 } },%%
+		  {Size=12-14, Font= NewCM10-Book.otf, FakeStretch= 0.975 },%
+		  {Size=14-17, FakeStretch= 0.950 },%
+        {Size=17-20, FakeStretch= 0.935 },%
+        {Size=20-23, FakeStretch= 0.920 },%
+        {Size=23-28, FakeStretch= 0.910 },%
+        {Size=28-35, FakeStretch= 0.900 },%
+        {Size=35-,   FakeStretch= 0.890 } %
+  } },%
+  BoldSlantedFont= NewCM10-Bold.otf,%
+  BoldSlantedFeatures={ FakeSlant= 0.160, SizeFeatures={%
+        {Size=-6,    FakeStretch= 1.250, LetterSpace= 3.3, SmallCapsFeatures={ FakeStretch= 1.175, LetterSpace= 3.3 } },%
+        {Size=6-7,   FakeStretch= 1.175, LetterSpace= 1.4, SmallCapsFeatures={ FakeStretch= 1.095, LetterSpace= 1.5 } },%
+		  {Size=7-8,   FakeStretch= 1.105, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.095, LetterSpace= 1.0 } },%
+		  {Size=8-9,   FakeStretch= 1.045, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.070 } },%
+		  {Size=9-10,  FakeStretch= 1.020, LetterSpace= 0.4, SmallCapsFeatures={ FakeStretch= 1.030 } },%
+		  {Size=10-11, SmallCapsFeatures={ FakeStretch= 1.000 } },%
+		  {Size=11-12, SmallCapsFeatures={ FakeStretch= 0.990, LetterSpace= 0.0 } },%
+		  {Size=12-14, FakeStretch= 0.975, SmallCapsFeatures={ FakeStretch= 0.980 } },%
+        {Size=14-17, FakeStretch= 0.950, SmallCapsFeatures={ FakeStretch= 0.950 } },%
+        {Size=17-20, FakeStretch= 0.935, SmallCapsFeatures={ FakeStretch= 0.925 } },%
+        {Size=20-23, FakeStretch= 0.920, SmallCapsFeatures={ FakeStretch= 0.900 } },%
+        {Size=23-28, FakeStretch= 0.905, SmallCapsFeatures={ FakeStretch= 0.885 } },%
+        {Size=28-35, FakeStretch= 0.895, SmallCapsFeatures={ FakeStretch= 0.870 } },%
+        {Size=35-,   FakeStretch= 0.885, SmallCapsFeatures={ FakeStretch= 0.860 } } %
+  } }%
+}%

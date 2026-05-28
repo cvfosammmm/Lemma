@@ -1,8 +1,75 @@
-\defaultfontfeatures[NewCMMono10-Book]
-	{
-		Extension      = .otf ,
-		UprightFont    = NewCMMono10-Book,
-		BoldFont       = NewCMMono10-Bold,
-		ItalicFont     = NewCMMono10-BookItalic,
-		BoldItalicFont = NewCMMono10-BoldOblique,
-	}
+\defaultfontfeatures[NewCMMono10-Book]{%
+%  Renderer={HarfBuzz},%
+  UprightFont={NewCMMono10-Book.otf},%
+  UprightFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-Book.otf}%
+      }%
+    }%
+  },%
+  ItalicFont={NewCMMono10-BookItalic.otf},%
+  ItalicFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-BookItalic.otf}%
+      }%
+    }%
+  },%
+  BoldFont={NewCMMono10-Bold.otf},%
+  BoldFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-Bold.otf}%
+      }%
+    }%
+  },%
+  BoldItalicFont={NewCMMono10-BoldOblique.otf},%
+  BoldItalicFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-BoldOblique.otf}%
+      }%
+    }%
+  },%
+  SlantedFont={NewCMMono10-Book.otf},%
+  SlantedFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-Book.otf}%
+      }%
+    }%
+  },%
+  BoldSlantedFont={NewCMMono10-Bold.otf},%
+  BoldSlantedFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-Bold.otf}%
+      }%
+    }%
+  },%
+  SwashFont={NewCMMono10-Book.otf},%
+  SwashFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-Book.otf}%
+      }%
+    }%
+  },%
+  BoldSwashFont={NewCMMono10-Bold.otf},%
+  BoldSwashFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCMMono10-Bold.otf}%
+      }%
+    }%
+  }%
+}

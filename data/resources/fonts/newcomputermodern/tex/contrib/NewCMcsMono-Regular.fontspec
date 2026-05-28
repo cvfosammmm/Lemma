@@ -1,0 +1,68 @@
+\defaultfontfeatures[NewCMcsMono-Regular]{%
+  UprightFont= NewCMMono10-Regular,%
+  UprightFeatures={ SizeFeatures={%
+        {Size= -9,   FakeStretch= 1.010 },%
+		  {Size=9-12 },%
+		  {Size=12-14, FakeStretch= 0.980 },%
+		  {Size=14-17, FakeStretch= 0.965 },%
+        {Size=17-20, FakeStretch= 0.955 },%
+        {Size=20-23, FakeStretch= 0.945 },%
+        {Size=23-28, FakeStretch= 0.935 },%
+        {Size=28-,   FakeStretch= 0.925 },%
+  } },%
+  ItalicFont= NewCMMono10-Italic.otf,%
+  ItalicFeatures={ SizeFeatures={%
+        {Size= -9,   FakeStretch= 1.010 },%
+		  {Size= 9-12 },%
+		  {Size=12-14, FakeStretch= 0.980 },%
+		  {Size=14-17, FakeStretch= 0.965 },%
+        {Size=17-20, FakeStretch= 0.955 },%
+        {Size=20-23, FakeStretch= 0.945 },%
+        {Size=23-28, FakeStretch= 0.935 },%
+        {Size=28-,   FakeStretch= 0.925 },%
+  } },%
+  SlantedFont= NewCMMono10-Regular.otf,%
+  SlantedFeatures={ FakeSlant= 0.160, SizeFeatures={%
+        {Size= -9,   FakeStretch= 1.01 },%
+		  {Size=9-12 },%
+		  {Size=12-14, FakeStretch= 0.980 },%
+		  {Size=14-17, FakeStretch= 0.965 },%
+        {Size=17-20, FakeStretch= 0.955 },%
+        {Size=20-23, FakeStretch= 0.945 },%
+        {Size=23-28, FakeStretch= 0.935 },%
+        {Size=28-,   FakeStretch= 0.925 },%
+  } },%
+  BoldFont= NewCMMono10-Bold.otf, %
+  BoldFeatures={ SizeFeatures={%
+        {Size= -9,   FakeStretch= 1.01 },%
+		  {Size=9-12 },%
+		  {Size=12-14, FakeStretch= 0.980 },%
+		  {Size=14-17, FakeStretch= 0.965 },%
+        {Size=17-20, FakeStretch= 0.955 },%
+        {Size=20-23, FakeStretch= 0.945 },%
+        {Size=23-28, FakeStretch= 0.935 },%
+        {Size=28-,   FakeStretch= 0.925 },%
+  } },%
+  BoldItalicFont= NewCMMono10-BoldOblique.otf,%
+  BoldItalicFeatures={ SizeFeatures={%
+        {Size= -9,   FakeStretch= 1.01 },%
+		  {Size=9-12 },%
+		  {Size=12-14, FakeStretch= 0.980 },%
+		  {Size=14-17, FakeStretch= 0.965 },%
+        {Size=17-20, FakeStretch= 0.955 },%
+        {Size=20-23, FakeStretch= 0.945 },%
+        {Size=23-28, FakeStretch= 0.935 },%
+        {Size=28-,   FakeStretch= 0.925 },%
+  } },%
+  BoldSlantedFont= NewCMMono10-BoldOblique.otf,%
+  BoldSlantedFeatures={ SizeFeatures={%
+        {Size= -9,   FakeStretch= 1.01 },%
+		  {Size=9-12 },%
+		  {Size=12-14, FakeStretch= 0.980 },%
+		  {Size=14-17, FakeStretch= 0.965 },%
+        {Size=17-20, FakeStretch= 0.955 },%
+        {Size=20-23, FakeStretch= 0.945 },%
+        {Size=23-28, FakeStretch= 0.935 },%
+        {Size=28-,   FakeStretch= 0.925 },%
+  } }%
+}%

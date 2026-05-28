@@ -1,10 +1,10 @@
 
 		New Computer Modern Fonts
 
-           (Package version 5.1, GustFLv1 or later)
+           (Package version 8.0.1, mixed, consult License.txt)
 
 		Antonis Tsolomitis
-		Samos, Greece, 2019--2024
+		Samos, Greece, 2019--2026
 
 This is a release of a new assembly of ComputerModern 
 fonts that extents the family with more shapes and more mathematical glyphs
@@ -26,12 +26,20 @@ or
 
 OR
 
+\usepackage[sansdefault]{fontsetup} (loads the Regular Sans weight)
+or
+\usepackage[sansdefault]{newcomputermodern} (loads the Regular Sans weight)
+
+
+
+OR
+
 \usepackage{fontspec}
 \setmainfont{NewCM10-Book}
 \setsansfont{NewCMSans10-Book}
 \setmonofont{NewCMMono10-Book}
 
-and similarly for the Regular weight.
+and similarly for the Regular weight or the Sans family.
 =======================================================================
 
 The fonts contain Latin and accented latin letters and combinations,
@@ -45,7 +53,13 @@ As of version 5.0 the Devanagari script is supported for
 Languages Hindi (default), Sanskrit, Marathi and Nepali in 
 Regular/Book 08/10pt and Bold 10t.
 
-The Math fonts (Regular and Book) support fully all Unicode blocks
+As of version 6.0.0 a Bold Math font has been added.
+
+As of version 7.0.0 a Sans Math font has been added.
+
+As of version 8.0.0 Armenian and Georgian scripts are fully supported.
+
+The Math fonts (Regular, Book, Bold and Sans) support fully all Unicode blocks
 of Mathematics providing the widest possible Mathematical coverage.
 
 The fonts have their own protrusion settings through the microtype package
@@ -102,6 +116,165 @@ xelatex newcm-doc.tex
 
 Latest additions/improvements:
 ------------------------------
+
+Version 8.0.0
+
+Complete redesign of the Cyrillics to a new design that
+is "acceptable" in todays Russia. Bulgarian forms supported.
+(cmu and cyrillic-modern have been removed because of license
+issues).
+
+Armenian and Georgian added as major scripts in all fonts.
+
+GreekSans redesigned keeping the style but correcting color.
+
+Character ypogegrammeni redesigned and 
+psili/dasia+perispomeni recomposed for all fonts.
+
+LX fonts (very good for beamer work)
+added NewCMSans10 and in NewCMSansMath in StylisticSet 8.
+They have been adjusted for color uniformization
+and stabilization. 
+Thanks to Claudio Beccari for this.
+
+Latin letters in NewCM10-Regular and accented and built composites
+re-traced from public metafont sources and hand adjusted glyph by glyph
+so that with the redesign of cyrillics and the agreement of C. Beccari
+this font, together with NewCM*Devanagari and NewCMUncial*
+are now released under GPL3+FontException+DistributionException
+(check License.txt and the documentation).
+
+Vietnamese double accent letters adjusted by properly repositioning
+accents. Thanks to Karl Berry for letting me know.
+
+Variation Selectors added to all supported math glyphs
+satisfying Unicode version 17.0
+
+Added custom fontspec files that adjust microexpansion
+of the fonts to match in detail the original CM fonts. 
+Thanks to Alexey Kuznetsov for providing these files.
+
+
+
+Version 7.1.1
+
+Fix of bugs for overline arrows for the Book Math font.
+
+
+Version 7.1.0
+
+Added Cyrillic compatible with Didot style and preserved the
+CMU design in RawFeature=cmu
+
+Switched theta and theta1 design to match Unicode and enabled
+initial versions (theta and beta) with ss06+ss07
+
+Added diacritics blocks 
+U+1AB0--U+1ACE, U+1DC0--U+1DFF, U+20D0--U+20F0, U+FE20--U+FE2F
+
+Added phonetic extensions block U+1D00--U1D7F, U+1D80--U+1DBF
+ 
+Fixed several integral glyphs to be Extended Shapes
+
+
+
+Version 7.0.4
+
+Variation Selector U+FE01 has been added in all math fonts
+for selecting the roundhand calligraphics as a variation
+of the default script, chancery capitals.
+
+
+Version 7.0.3
+
+Some IPA fixes.
+
+
+
+Version 7.0.2
+
+Fontspec files reworked to fully support slshape and scshape
+in all text faces.
+
+Additional fontspec files for Mono-Regular+Book to cover the missing Oblique
+Mono fonts.
+
+Some more kerning for upright partialdiff and some capital letters.
+
+
+Version 7.0.1
+
+Math kerning introduced for Latin Italic Math Capitals
+and Capital Calligraphics with period and comma. 
+
+Several metrics bug fixes.
+
+
+Version 7.0.0
+
+Added NewCMSansMath-Regular
+
+Sans letters used for math variables are a new design  
+(and not the original with a slant) so they really look as variables!
+
+NewCM mathbb/symbb symbols in Sans have been reworked to match the Sans design
+in both style and wight.
+
+Same goes for mathcal/symcal letters.
+
+Math Kerning has been introduced in ALL math fonts to compensate
+for bad spacing especially of the index of mathcal/symcal letters.
+
+Added ss06 and ss07 to be selected for auto 
+middle beta and theta in Greek.
+
+The kerning of Greek Oblique block has been greatly improved; "theorem"
+statements now look much better.
+
+testmath-newcm.tex/pdf has been added to the documentation from the AMS bundle
+to showcase the new SansMath font. 
+
+
+
+Version 6.0.0
+
+Added Bold Math font
+
+NewCM mathbb symbols (in ss03) have been reworked and they now
+match the design of ComputerModern fonts (the AMSbb remain the default)
+
+AMSbb and NewCMbb are now provided in SmallCaps for special applications
+(see the documentation) in ss05
+
+An additional operator similar to \sum and \int has been added 
+to the Math fonts. Namely now it is possible to convolute many 
+function in the usual shorthand notation mathematicians use. 
+The new operator is called: \convolution
+
+Added Currency Symbols font in all text fonts (except Uncials)
+
+Fixed several typos in Lookup tables thanks to Eric Biedert
+
+Fixed CapHeight parameter in OS2 tables for some of the fonts
+thanks to Max Kortge
+
+
+
+
+Version 5.2.0
+
+Added Cherokee in the Sans font too
+
+Added Canadian Aboriginal Syllabics to Sans
+
+Added Allergies symbols to Sans Regular and Book
+
+Added twoheadhookrightarrow and twoheadhookleftarrow
+to the Math fonts in Private USe Area, 
+since they are needed and do not exist in Unicode.
+
+Fixed minor IPA tilde overlapping bugs
+
 
 Version 5.1
 

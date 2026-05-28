@@ -1,0 +1,99 @@
+\defaultfontfeatures[NewCMcsSans-Regular]{
+  RawFeature=cmu,%
+  UprightFont= NewCMSans10-Regular.otf,%
+  UprightFeatures = { SizeFeatures={%
+        {Size=-6,    Font= NewCMSans08-Regular.otf, FakeStretch= 1.180, SmallCapsFeatures={ FakeStretch= 1.00, LetterSpace= 0.0 } },%
+        {Size=6-7,   Font= NewCMSans08-Regular.otf, FakeStretch= 1.085, LetterSpace= 1.3 },%
+        {Size=7-8,   Font= NewCMSans08-Regular.otf, FakeStretch= 1.020, LetterSpace= 1.3 },%
+		  {Size=8-9,   Font= NewCMSans08-Regular.otf },%
+		  {Size=9-10,  FakeStretch= 1.025 },%
+		  {Size=10-12 },%
+		  {Size=12-14, FakeStretch= 0.975 },%
+		  {Size=14-17, FakeStretch= 0.950 },%
+        {Size=17-20, FakeStretch= 0.940 },%
+        {Size=20-23, FakeStretch= 0.925 },%
+        {Size=23-28, FakeStretch= 0.910 },%
+        {Size=28-35, FakeStretch= 0.900 },%
+        {Size=35-,   FakeStretch= 0.895 }%
+  } },%
+  ItalicFont= NewCMSans10-Oblique.otf,%
+  ItalicFeatures = { SizeFeatures={%
+        {Size=-6,    Font= NewCMSans08-Oblique.otf, FakeStretch= 1.165, LetterSpace= 1.6, SmallCapsFeatures={ FakeStretch= 1.00, LetterSpace= 0.0 } },%
+        {Size=6-7,   Font= NewCMSans08-Oblique.otf, FakeStretch= 1.085, LetterSpace= 1.2 },%
+		  {Size=7-8,   Font= NewCMSans08-Oblique.otf, FakeStretch= 1.035, LetterSpace= 0.5 },%
+		  {Size=8-9,   Font= NewCMSans08-Oblique.otf },%
+		  {Size=9-10,  FakeStretch=1.01,  LetterSpace= 0.75 },%
+		  {Size=10-12 },%
+		  {Size=12-14, FakeStretch= 0.972 },% 
+		  {Size=14-17, FakeStretch= 0.945 },% 
+        {Size=17-20, FakeStretch= 0.935 },%
+        {Size=20-23, FakeStretch= 0.917 },%
+        {Size=23-28, FakeStretch= 0.905 },%
+        {Size=28-35, FakeStretch= 0.895 },%
+        {Size=35-,   FakeStretch= 0.890 }%
+  } },%
+  SlantedFont= NewCMSans10-Oblique.otf,%
+  SlantedFeatures = { SizeFeatures={%
+        {Size=-6,    Font= NewCMSans08-Oblique.otf, FakeStretch= 1.165, LetterSpace= 1.6, SmallCapsFeatures={ FakeStretch= 1.00, LetterSpace= 0.0 } },%
+        {Size=6-7,   Font= NewCMSans08-Oblique.otf, FakeStretch= 1.085, LetterSpace= 1.2 },%
+		  {Size=7-8,   Font= NewCMSans08-Oblique.otf, FakeStretch= 1.035, LetterSpace= 0.5 },%
+		  {Size=8-9,   Font= NewCMSans08-Oblique.otf },%
+		  {Size=9-10,  FakeStretch=1.01,  LetterSpace= 0.75 },%
+		  {Size=10-12 },%
+		  {Size=12-14, FakeStretch= 0.972 },% 
+		  {Size=14-17, FakeStretch= 0.945 },% 
+        {Size=17-20, FakeStretch= 0.935 },%
+        {Size=20-23, FakeStretch= 0.917 },%
+        {Size=23-28, FakeStretch= 0.905 },%
+        {Size=28-35, FakeStretch= 0.895 },%
+        {Size=35-,   FakeStretch= 0.890 }%
+  } },%
+  BoldFont= NewCMSans10-Bold.otf,%
+  BoldFeatures= { SizeFeatures={
+        {Size=-6,    FakeStretch= 1.120, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.00, LetterSpace= 0.0 } },%
+        {Size=6-7,   FakeStretch= 1.077, LetterSpace= 0.8 },%
+		  {Size=7-8,   FakeStretch= 1.060, LetterSpace= 0.5 },%
+		  {Size=8-9,   FakeStretch= 1.065, LetterSpace= 0.8 },%
+		  {Size=9-10,  FakeStretch= 1.005 },%
+		  {Size=10-12, FakeStretch= 1.050 },%
+		  {Size=12-14, FakeStretch= 1.035, LetterSpace= 1.3 },%
+        {Size=14-17, FakeStretch= 1.045, LetterSpace= 1.5 },%
+        {Size=17-20, FakeStretch= 1.050, LetterSpace= 1.5 },%
+        {Size=20-23, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=23-28, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=28-35, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=35-,   FakeStretch= 1.050, LetterSpace= 2.0 }%
+  } },%
+  BoldItalicFont= NewCMSans10-BoldOblique.otf,%
+  BoldItalicFeatures= { SizeFeatures={
+        {Size=-6,    FakeStretch= 1.115, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.00, LetterSpace= 0.0 } },%
+        {Size=6-7,   FakeStretch= 1.070, LetterSpace= 1.0 },%
+		  {Size=7-8,   FakeStretch= 1.050, LetterSpace= 0.8 },%
+		  {Size=8-9,   FakeStretch= 1.060, LetterSpace= 0.8 },%
+		  {Size=9-10 },%
+		  {Size=10-12, FakeStretch= 1.045 },%
+		  {Size=12-14, FakeStretch= 1.045, LetterSpace= 1.0 },% 
+        {Size=14-17, FakeStretch= 1.045, LetterSpace= 1.5 },%
+        {Size=17-20, FakeStretch= 1.050, LetterSpace= 1.5 },%
+        {Size=20-23, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=23-28, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=28-35, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=35-,   FakeStretch= 1.050, LetterSpace= 2.0 }%
+  } },%
+  BoldSlantedFont= NewCMSans10-BoldOblique.otf,%
+  BoldSlantedFeatures= { SizeFeatures={
+        {Size=-6,    FakeStretch= 1.115, LetterSpace= 1.0, SmallCapsFeatures={ FakeStretch= 1.00, LetterSpace= 0.0 } },%
+        {Size=6-7,   FakeStretch= 1.070, LetterSpace= 1.0 },%
+		  {Size=7-8,   FakeStretch= 1.050, LetterSpace= 0.8 },%
+		  {Size=8-9,   FakeStretch= 1.060, LetterSpace= 0.8 },%
+		  {Size=9-10 },%
+		  {Size=10-12, FakeStretch= 1.045 },%
+		  {Size=12-14, FakeStretch= 1.045, LetterSpace= 1.0 },%
+        {Size=14-17, FakeStretch= 1.045, LetterSpace= 1.5 },%
+        {Size=17-20, FakeStretch= 1.050, LetterSpace= 1.5 },%
+        {Size=20-23, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=23-28, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=28-35, FakeStretch= 1.050, LetterSpace= 2.0 },%
+        {Size=35-,   FakeStretch= 1.050, LetterSpace= 2.0 }%
+  } }%
+}%

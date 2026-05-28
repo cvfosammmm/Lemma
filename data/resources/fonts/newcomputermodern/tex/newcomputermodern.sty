@@ -1,11 +1,14 @@
 %\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{newcomputermodern}[v5.1 NewCM fonts by Antonis Tsolomitis]
+\ProvidesPackage{newcomputermodern}[v8.0.1 NewCM fonts by Antonis Tsolomitis]
 \typeout{Loading NewCM fonts by Antonis Tsolomitis}
 \RequirePackage{fontspec}
 \RequirePackage{unicode-math}
 
 \newif\if@olddefault
 \DeclareOption{regular}{\@olddefaulttrue}
+
+\newif\if@sansdefault
+\DeclareOption{sansdefault}{\@sansdefaulttrue}
 \ProcessOptions\relax
 
 %Next command has been moved to fspolddefault.tex and
@@ -15,7 +18,11 @@
 \if@olddefault
  \input{fspolddefault.tex}
  \else
+\if@sansdefault
+\input{fspsansdefault.tex}
+\else
  \input{fspdefault.tex}
  \fi
+\fi
 \endinput
 

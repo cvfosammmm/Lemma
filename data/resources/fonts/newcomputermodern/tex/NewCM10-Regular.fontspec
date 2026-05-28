@@ -1,26 +1,91 @@
-\defaultfontfeatures[NewCM10-Regular]
-   {
-    Extension = .otf ,
+\defaultfontfeatures[NewCM10-Regular]{%
+%  Renderer={HarfBuzz},%
+  UprightFont={NewCM10-Regular.otf},%
+  UprightFeatures={%
     SizeFeatures={%
-                 {Size=-8, Font = NewCM08-Regular,
-      			   ItalicFont = NewCM08-Italic,%
-			   BoldFont = NewCM10-Bold,%
-      			   BoldItalicFont = NewCM10-BoldItalic,%
-      			   SlantedFont = NewCM08-Regular,%
-      			   BoldSlantedFont = NewCM10-Bold,%
-      			   SmallCapsFeatures = {Numbers=OldStyle}},
-		  {Size=8, Font = NewCM08-Regular,
-      		  	   ItalicFont = NewCM08-Italic,%
-      			   BoldFont = NewCM10-Bold,%
-      			   BoldItalicFont = NewCM10-BoldItalic,%
-      			   SlantedFont = NewCM08-Regular,%
-      			   BoldSlantedFont = NewCM10-Bold,%
-      			   SmallCapsFeatures = {Numbers=OldStyle}},
-		{Size= 9-, Font = NewCM10-Regular,
-      		       	   ItalicFont = NewCM10-Italic,%
-      			   BoldFont = NewCM10-Bold,%
-      			   BoldItalicFont = NewCM10-BoldItalic,%
-      			   SlantedFont = NewCM10-Regular,%
-      			   BoldSlantedFont = NewCM10-Bold,%
-      			   SmallCapsFeatures = {Numbers=OldStyle}}%
-	}}
+      {%
+        Size={-8},%
+        Font={NewCM08-Regular.otf}%
+      },%
+      {%
+        Size={8-},%
+        Font={NewCM10-Regular.otf}%
+      }%
+    }%
+  },%
+  ItalicFont={NewCM10-Italic.otf},%
+  ItalicFeatures={%
+    SizeFeatures={%
+      {%
+        Size={-8},%
+        Font={NewCM08-Italic.otf}%
+      },%
+      {%
+        Size={8-},%
+        Font={NewCM10-Italic.otf}%
+      }%
+    }%
+  },%
+  BoldFont={NewCM10-Bold.otf},%
+  BoldFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCM10-Bold.otf}%
+      }%
+    }%
+  },%
+  BoldItalicFont={NewCM10-BoldItalic.otf},%
+  BoldItalicFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCM10-BoldItalic.otf}%
+      }%
+    }%
+  },%
+  SlantedFont={NewCM10-Regular.otf},%
+  SlantedFeatures={%
+    SizeFeatures={%
+      {%
+        Size={-8},%
+        Font={NewCM08-Regular.otf}%
+      },%
+      {%
+        Size={8-},%
+        Font={NewCM10-Regular.otf}%
+      }%
+    }%
+  },%
+  BoldSlantedFont={NewCM10-Bold.otf},%
+  BoldSlantedFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCM10-Bold.otf}%
+      }%
+    }%
+  },%
+  SwashFont={NewCM10-Regular.otf},%
+  SwashFeatures={%
+    SizeFeatures={%
+      {%
+        Size={-8},%
+        Font={NewCM08-Regular.otf}%
+      },%
+      {%
+        Size={8-},%
+        Font={NewCM10-Regular.otf}%
+      }%
+    }%
+  },%
+  BoldSwashFont={NewCM10-Bold.otf},%
+  BoldSwashFeatures={%
+    SizeFeatures={%
+      {%
+        Size={0-},%
+        Font={NewCM10-Bold.otf}%
+      }%
+    }%
+  }%
+}

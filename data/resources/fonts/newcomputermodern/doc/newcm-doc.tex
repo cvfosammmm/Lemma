@@ -6,8 +6,16 @@
 \usepackage{polyglossia}
 \setmainlanguage{english}
 \setotherlanguage[variant=polytonic]{greek}
+\setotherlanguage{armenian}
+\setotherlanguage{georgian}
+\setotherlanguage{russian}\setotherlanguage{bulgarian}
 \usepackage[hidelinks,pdfa]{hyperref}
 %\usepackage{xgreek}
+\usepackage{pstricks}
+\renewcommand{\TeX}{T\kern-.5ex\raisebox{-.5ex}{E}\kern-.4exX}
+\renewcommand{\LaTeX}{L\kern-.8ex\raisebox{.6ex}{\textsc{a}}\kern-.3ex\TeX}
+\newcommand{\XeLaTeX}{X\kern-.45ex\raisebox{-.5ex}{\reflectbox{E}}\kern-.4ex\LaTeX}
+\newcommand{\LuaLaTeX}{Lua\LaTeX}
 \usepackage[default,varnothing]{fontsetup}
 \usepackage{unicodefonttable,graphicx,wrapfig,xcolor,calc}
 \newfontfamily\lmboldsans{lmsans10-bold.otf}
@@ -15,12 +23,20 @@
 \newfontfamily\newcmaltk[CharacterVariant=1]{NewCM10-Book.otf}
 \newfontfamily\newcmdlig[RawFeature=+dlig]{NewCM10-Book.otf}
 %\newfontfamily\uncial{NewCMUncial10-Book.otf}
-\newfontfamily\newcmgreekguillemots[CharacterVariant=4]{NewCM10-Book.otf}
-\newfontfamily\newcmrussianguillemots[CharacterVariant=3]{NewCM10-Book.otf}
+\newfontfamily\newcmgreekguillemets[CharacterVariant=4]{NewCM10-Book.otf}
+\newfontfamily\newcmrussianguillemets[CharacterVariant=3]{NewCM10-Book.otf}
 \newfontfamily\showtiefont[CharacterVariant=5]{NewCM10-Book.otf}
 \newfontfamily\ipafont[%Renderer     = {Harfbuzz},
 StylisticSet = {05},ItalicFont=NewCM10-BookItalic]{NewCM10-Book.otf}
-%
+\newfontfamily\ctoscseries[Letters=UppercaseSmallCaps]{NewCM10-Book.otf}
+\newcommand{\ctosc}[1]{{\ctoscseries#1}}
+\newfontfamily\greekalts[StylisticSet=6]{NewCM10-Book.otf}
+\newfontfamily\middlegreekon[StylisticSet=6,StylisticSet=7]{NewCM10-Book.otf}
+\newfontfamily\middlegreekonsans[StylisticSet=6,StylisticSet=7]{NewCMSans10-Book.otf}
+\newfontfamily{\mathastext}{NewCMMath-Book.otf}
+\newfontfamily{\mathastextnewcm}[StylisticSet=3]{NewCMMath-Book.otf}
+\newfontfamily{\cyrsans}{NewCMSans10-Book.otf}
+\newfontfamily{\lxfonts}[StylisticSet=8,BoldFont=NewCMSans10-Bold.otf,ItalicFont=NewCMSans10-Oblique.otf]{NewCMSans10-Regular.otf}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Devanagari text %%%%
 \newfontfamily\hinditext[%
 Script=Devanagari,%
@@ -90,19 +106,23 @@ Language=Nepali,
 %  \Umathcode #1 = "0 ~ \use:c{ symdevletters } ~ #1
 %}
 %\ExplSyntaxOff
-  
+
 
 \renewcommand{\arraystretch}{1.4}
 
 
-\title{The New Computer Modern FontFamily\\ version 5.1}
+\title{The New Computer Modern FontFamily\\ version 8.0.1}%\\
+%{\normalsize Based on and extending works of Donald Knuth, J\"org Knappen, Norbert Schwarz, A.~Khodulev, O.~Lapko, A.~Berdnikov, V.~Volovich, Claudio Beccari, Fukui Rei, Han The Thấnh, Walter Schmidt, Andrey V.~Panov, The American Mathematical Society}}
 \author{Antonis Tsolomitis}
 %\address{Department of Mathematics\\ University of the Aegean\\ Karlovassi, 832\,00 Samos\\ Greece}
 %\netaddress{atsol (at) aegean dot gr}
 %\personalURL{https://myria.math.aegean.gr/~atsol/}
 %%% End of metadata %%%
-\usepackage{pstricks}
 \begin{document}
+\mathversion{bold}
+\newsavebox{\mathcalscrA}
+\savebox{\mathcalscrA}{$\symcal A$ $\symbfscr A$}
+\mathversion{normal}
 
 %
 \rput(-2,-3){\devgray ल}%
@@ -157,7 +177,8 @@ Language=Nepali,
 \rput(10,-18){\lrgu a A}
 \rput(10,-20){\lrg א אּ}
 \rput(10,-22){\lrg ꭿ Ꭿ}
-
+\rput(0.2,-21){\graytwo փ}
+\rput(7.25,-18){\graytwos ჱ}
 
 %
 \thispagestyle{empty}
@@ -174,20 +195,19 @@ Language=Nepali,
 \null\thispagestyle{empty}
 
 
-%\vfill
-%
-%\ttxstackedup \qquad
-%{\ttxstackeddown}
-%
-%\vfill
-%
-
 \newpage
 
-%\end{document}
 
 \maketitle
 \tableofcontents
+
+\newsavebox{\vsbox}
+\savebox{\vsbox}{$0, \cap, \cup, \lneqq,\gneqq, 
+\lesssim,\gtrsim,\subsetneq,\supsetneq, \sqcap,\sqcup,\oplus,\otimes,
+\circledequal,\lesseqgtr,\gtreqless,\circledparallel,\intprod,\intprodr,
+\simless,\simgtr,\smte,\late,\subsetneqq,\supsetneqq$}
+
+
 
 \section{Introduction}
 The NewComputerModern FontFamily is a huge extension (``huge'' in terms of
@@ -195,24 +215,132 @@ the number of additional glyphs)
 of the \verb|lm| fonts. It is not just a family adding random missing glyphs but it
 adds support for several more languages and shapes needed for academic (and not only) work.
 Currently it supports among others, Greek\footnote{from Claudio Beccari's Greek.},
-Cyrillic\footnote{from the \texttt{cmu} package.}, Hebrew, Cherokee and
-Coptic. Since it supports
+Cyrillic,
+Devanagari, Hebrew, Coptic, Cherokee,
+Canadian Aboriginal, Armenian and Georgian. Since it supports
 diacritics stacking the number of languages that use the Latin alphabet is greatly expanded. 
 Diacritics stacking is also needed for Greek for papyrological work and this is also supported.
 
-Version 4.0 adds to the classic design of computer modern new shapes for Latin and Greek,
+Version 4.0 added to the classic design of computer modern new shapes for Latin and Greek,
 in particular it adds families for Medieval Latin and Uncial Greek matching in style to the
 main family.
 
 In terms of weights and sizes, all of its shapes come in Regular, Book weights
 at 10 and 8 point sizes and in Bold at 10 points.
 
-Mathematics is also supported in Regular and Book weights, currently providing
+Mathematics is also supported in Regular, Book, Bold and Sans-Regular weights/shapes,
+currently providing
 a full coverage of the Unicode Math blocks (with a few more glyphs needed for Mathematics
 that Unicode has forgotten to encode).
 
 \textit{What follows is a sequence of commands and results so as to show how to access all features
 of the fonts. Character tables are also included}.
+
+\textsc{Important:} If you want to provide patches for the fonts
+please contact me before you create them. The fonts evolve quickly
+and you may not have the latest development version and your patches
+may not apply if created for the published version.
+
+\section{License}
+
+All glyphs, \textit{except} Latin, some basic Math symbols and Greek, are drawn by the author.
+The fonts are released under \ctosc{GUST} license because the Latin Part, a derivative of LM fonts,
+is released with \ctosc{GUST} license,
+\textit{except} the fonts
+\begin{center}
+NewCM10-Regular, all of NewCMUncial, and all of NewCM*Devanagari,
+\end{center}
+which are released under \ctosc{GPL}\oldstylenums{3} or later, plus \ctosc{FE} (Font Exception)
+plus \ctosc{DE} (Distribution Exception).
+
+
+%However, notice that all fonts will move to GPL3+FE+DE
+%in the future (see below).
+
+Claudio Beccari, the designer of the Greek part, kindly agreed to
+release the Greek part under
+\ctosc{GPL}\oldstylenums{3}+\ctosc{FE+DE}.  I also thank Alexey
+Kuznetsov, who helped me with his knowlegde on today's Russian needs,
+to completely redesign the cyrillic glyphs.
+This was a much needed
+work as the Cyrillic of previous releases were erratically copied from
+\ctosc{OFL} fonts (and I apologise for this, as I overlooked \ctosc{OFL}). \ctosc{OFL} is
+incompatible with \ctosc{GUST} and \ctosc{LPPL} which were the licenses of components
+of NewCM. For diacritic stacking, NewCM needs to have these components
+in a single font file which is not possible if the components are
+incompatibly licensed. With this release, since Cyrillic is completely
+reworked, the fonts are distributed under the \ctosc{GUST} license as it
+respects the conditions of the other component license, ie,
+\ctosc{LPPL}. Any font file that doesn't have the Latin block, eg,
+Devanagari, is already switched to \ctosc{GPL}.
+
+The remaining fonts also are planned to move to \ctosc{GPL} in the upcoming
+versions. Claudio Beccari, the author of Greek fonts, has kindly
+allowed me to combine his otherwise \ctosc{LPPL} licensed fonts in my \ctosc{GPL}
+licensed ones. The Latin block will be completely retraced with
+Knuthian \ctosc{CM} and then the \ctosc{GUST} component also will become \ctosc{GPL}.
+
+NewCM10-Regular released under this new license scheme does \textit{not} use lm glyphs
+anymore. The Latin part has been retraced from public domain metafont sources
+and hand adjusted glyph by glyph to match the original using fontforge
+(with its auto composing mechanism for accented glyphs)
+and the package
+\verb|pdfpagediff|. 
+
+\textit{Important notice}: The fonts contain thousands of glyphs. So I may have accidentally
+not removed some glyph from lm. This is not done on purpose and I will remove it and
+replace it immediately if I get notified for such a bug.
+
+The details of Font Exception and Distribution Exception follow:
+\begin{description}
+\item[Font Exception] If you create a document which uses this font,
+  and embed this font or unaltered portions of this font into the
+  document, this font does not by itself cause the resulting document
+  to be covered by the \ctosc{GNU} General Public License. This exception does
+  not however invalidate any other reasons why the document might be
+  covered by the \ctosc{GNU} General Public License. If you modify this font,
+  you may extend this exception to your version of the font, but you
+  are not obligated to do so. If you do not wish to do so, delete this
+  exception statement from your version.
+\item[Distribution Exception] If you distribute the fonts as they are
+  in your program, and your program follows a license compatible with
+  \ctosc{GPL} version \oldstylenums{3} (or later) as described in
+  https://www.gnu.org/licenses/license-list.en.html these fonts do not
+  by themselves cause the resulting program to be covered by the \ctosc{GNU}
+  General Public License. This exception does not however invalidate
+  any other reasons why the program might be covered by the \ctosc{GNU}
+  General Public License. If however you distribute a copy of the
+  fonts that modifies either the glyphs (one or more) or the glyph-set
+  by adding or removing glyphs, this exception is invalidated and your
+  program has to follow \ctosc{GPL} version \oldstylenums{3} (or later).
+\end{description}
+
+
+% For details, please consult License.txt/License.odt in the distribution of the fonts.
+
+
+\section{Short history of ComputerModern type fonts}
+
+For historical reasons we provide a list of copyright holders
+of \ctosc{CM}-type fonts up today. The licenses of these fonts do not apply to NewCM
+as no glyphs are copied from these except \ctosc{GUST} licensed fonts.
+\begin{itemize}
+\item Copyright \copyright\ Authors of original metafont fonts: Donald Ervin Knuth (cm \&\ concrete fonts).
+\item \textsc{1995, 1996, 1997} J\"org Knappen, \textsc{1990, 1992} Norbert Schwarz (ec fonts).
+\item \textsc{1992--2006} A.~Khodulev, O.~Lapko, A.~Berdnikov, V.~Volovich (lh fonts).
+\item \textsc{1997--2005} Claudio Beccari (cb greek fonts and lx fonts).
+\item \textsc{2002} Fukui Rei (tipa fonts).
+\item \textsc{2003--2005} Hàn Thế Thành (Vietnamese fonts).
+\item \textsc{1996--2005} Walter Schmidt (cmbright fonts).
+ \item \textsc{2003--2021} B.~Jackowski and J.~M.~Nowacki (lm-modern fonts).
+\item Copyright \copyright\  \textsc{2003--2009}, Andrey V.~Panov (panov@canopus.iacp.dvo.ru) with Reserved Font Family Name ``Computer Modern Unicode fonts''.
+\item Copyright \copyright\ \textsc{2012--2014}, Andrey V.~Panov (panov@canopus.iacp.dvo.ru) (cyrillic-modern).
+\item Copyright \copyright\ \textsc{1997, 2009}, American Mathematical Society (http://www.ams.org).
+All Rights Reserved.
+\end{itemize}
+
+
+
 
 
 \section{How to load the fonts}
@@ -220,14 +348,50 @@ The simpler way to load the fonts is through the \verb|fontsetup| package. The c
 
 \verb|\usepackage[default]{fontsetup}|
 
-\noindent will load the Book weight of the NewCM family, and
+\noindent will load the Book weight of the NewCM family, 
 
 \verb|\usepackage[olddefault]{fontsetup}|
 
-\noindent will load the Regular weight.
+\noindent will load the Regular weight, and
+
+\verb|\usepackage[sansdefault]{fontsetup}|
+
+\noindent will load the Sans Serif NewCM family. 
+
+Notice that the Mono family has Italic fonts only for Regular and Book weights
+but for the Bold it has Oblique. To avoid confusion fontspec files are provided
+that provide the Oblique shape for Regular and Book using the FakeBold fontspec parameter.
 
 Also notice that the fonts support the microtype package for fine typographic tuning. See the
 documentation of microtype for this.
+
+
+\section{Classic spacing}
+
+Alexey Kuznetsov kindly contributed fontspec files with streching factors
+that micro-adjust the fonts to
+be as close as possible to orginal metafont output. These are in the folder
+\texttt{tex/contrib/} The files are marked with the string ``cs'' (for ``classically
+stretched''). For example \texttt{NewCMcs.fontspec}
+micro-adjusts the Book Roman weight, and
+\texttt{NewCMcs-Regular.fontspec} for the Regular Roman fonts. So if you need to mimic
+as close as possible the original ``Knuthian'' output you can load the fonts with
+
+\begin{verbatim}
+\setmainfont{NewCMcs}
+\setsansfont{NewCMcsSans}
+\setmonofont{NewCMcsMono}
+\end{verbatim}
+
+or 
+
+\begin{verbatim}
+\setmainfont{NewCMcs-Regular}
+\setsansfont{NewCMcsSans-Regular}
+\setmonofont{NewCMcsMono-Regular}
+\end{verbatim}
+
+
 
 \section{The Latin alphabet}
 
@@ -311,12 +475,12 @@ gives
 \subsection{Old Italic}
 
 The fonts also fully support the Old Italic Unicode block
-(U10300--U1032F) in the Sans font. For example, the slots
-U10307, U10310, U10312, U10314, U1031F and U1032F are
+(U+10300--U+1032F) in the Sans font. For example, the slots
+U+10307, U+10310, U+10312, U+10314, U+1031F and U+1032F are
 {\sffamily\char"10307\char"10310\char"10312\char"10314\char"1031F\char"1032F}.
 
 \subsection{Diacritics Stacking}
-\marginpar{\begin{center}
+\marginpar{\begin{center} \ \\[-1cm]
 {\color{red}$\rightarrow$}\ \xstacked\quad{\sffamily\xstacked}\quad{\ttfamily\xstacked}\ {\color{red}$\leftarrow$}
 \end{center}}
 Diacritics---the full block U+0300 to U+036F---and diacritics stacking
@@ -334,25 +498,26 @@ these accents you can use the \verb|\char| command or just copy-paste from the f
 {\Large ̩\quad ̪\quad ̫\quad ̬\quad ̭\quad ̮\quad ̯\quad ̰\quad ̱\quad ̲\quad ̹\quad ̺\quad ̻\quad ̼\quad ͇\quad ͈\quad ͉\quad ͍}
   \end{center}
   Please note that stacking is by default supported with xetex. With luatex
-  you have to add the option \texttt{Renderer=Harfbuzz}, say by
+  you have to add the option \texttt{Renderer=HarfBuzz}, say by
 
-  \noindent\verb|\addfontfeature{Renderer=Harfbuzz}|
+  \noindent\verb|\addfontfeatures{Renderer=HarfBuzz}|
 
+  \noindent however this will probably affect hyphenation.
+  
 Also notice that your text editor may not support stacking. The editor may show the
 accents one after the other, but the pdf produced by xetex or luatex will have the accents stacked.
 
 \subsubsection{Coloring diacritics}
 
 If one wants to use color for diacritics, different from the color of the base character
-this does not work with Xe\LaTeX\ (the commands of the \verb|color| package
-break the stacking mechanism). It works though with Lua\LaTeX\ using the \verb|luacolor|
+this does not work with \XeLaTeX\ (the commands of the \verb|color| package
+break the stacking mechanism). It works though with \LuaLaTeX\ using the \verb|luacolor|
 package. However, there is a problem when the base glyph and the first diacritic above
 exist in the font as a precomposed character. For example, this is the case
 with aacute (á) (U+00E1). Such characters are treated as one by Lua and they can not
 be colorized with different colors. A work around is to place the empty character U+034F
 between ``a'' and acute (U+0301). So the following minimal example
 produces the result below:
-
 
 \begin{verbatim}
 \documentclass{article}
@@ -389,13 +554,46 @@ produces the result below:
 
 The full Unicode Greek block is supported, which is
 \begin{itemize}
-  \item U0370--U03FF for monotonic, where missing glyphs, such as Heta (Ͱ),
+  \item U+0370--U+03FF for monotonic, where missing glyphs, such as Heta (Ͱ),
     Pamphilian digamma (ͷ) etc, have been added. For example, it is now possible to write
 
     \centerline{βιϐλίο instead of βιβλίο.}
+
+    In order to auto select this conversion for middle beta and theta the StylisticSets
+    \verb|ss06| and \verb|ss07| must be enabled with, say,
     
-  \item U1F00--U1FFF for polytonic, and
-  \item U10140--U1018F for ancient Greek numbers.
+    \noindent\verb|\addfontfeatures{StylisticSet=6,StylisticSet=7}|
+
+    \textit{Important}: if you add font features like the above in the preamble you need to set them
+    with \verb|\AddToHook{begindocument/end}|. So in the preamble you must have
+
+\begin{verbatim}\AddToHook{begindocument/end}{%
+\addfontfeatures{StylisticSet=6,StylisticSet=7}}
+\end{verbatim}
+    
+    To disable this feature
+    you can do
+
+    \noindent\verb|\addfontfeature{RawFeature={-ss06},RawFeature={-ss07}}|
+
+    Notice also that the original Beccari fonts for Greek used only the open theta
+    {\greekalts θ}. However, this violates the Unicode standard description for this
+    glyph which proposes the closed theta θ. If you want the original behavior
+    you need to enable \verb|ss06|.
+
+    
+    \begin{center}
+      \begin{tabular}{|c|c|c|} \hline
+        \texttt{Source} & \texttt{βιβλίο} & \texttt{θυμήθηκα}\\ \hline
+        \texttt{ss06} enabled & {\greekalts βιβλίο}  & {\greekalts θυμήθηκα}\\ \hline
+        \texttt{ss06} and \texttt{ss07} enabled & {\middlegreekon βιβλίο}& {\middlegreekon θυμήθηκα}\\ \hline
+        \texttt{ss06} and \texttt{ss07} disabled & βιβλίο  & θυμήθηκα \\ \hline
+      \end{tabular}
+    \end{center}
+    
+    
+  \item U+1F00--U+1FFF for polytonic, and
+  \item U+10140--U+1018F for ancient Greek numbers.
 \end{itemize}
     
 
@@ -432,15 +630,15 @@ The prosgegrammeni alternates can be accessed with
 
 \subsection{Other character variants}
 
-Guillemots (left and right) have a different shape for Greek. For this to work
+Guillemets (left and right) have a different shape for Greek. For this to work
 the fonts must be loaded with the cv04 character variant.
 
   
-Compare the default guillemots: «» with Greek guillemots:
-\textlang{greek}{\newcmgreekguillemots «»}. 
+Compare the default guillemets: «» with Greek guillemets:
+\textlang{greek}{\newcmgreekguillemets «»}. 
 
-There is a serious problem with Unicode and the Greek anoteleia (U0387); the Greek semicolon. 
-Unicode ``thinks'' that this character is the same with periodcentered (U00B7). This influences
+There is a serious problem with Unicode and the Greek anoteleia (U+0387); the Greek semicolon. 
+Unicode ``thinks'' that this character is the same with periodcentered (U+00B7). This influences
 the way keyboards are configured by several vendors such as xorg. Anoteleia
 is a dot written at x-height and not at 1/2 the x-height as the periodcentered.
 Although Unicode recognizes the problem\footnote{personal communication}, althought
@@ -451,18 +649,18 @@ they refuse to fix it, justifying it by saying the magical words ``backwards com
 NewComputerModern can not allow this, as it defies the purpose of its
 existence, which is to properly write every supported language. So
 enabling the CharacterVariant 04 (cv04) in addition to correct
-guillemots for Greek it maps periodcentered (produced by the keyboards
+guillemets for Greek it maps periodcentered (produced by the keyboards
 (in Greek Linux keyboards by AltGr+q) to proper anoteleia.
 
-It also fixes a long standing issue with the Greek apostrophe (᾽)(U1FBD) which
-is not the same with quoteright (’)(U2019). U1FBD named as ``Greek Koronis''
+It also fixes a long standing issue with the Greek apostrophe (᾽)(U+1FBD) which
+is not the same with quoteright (’)(U+2019). U+1FBD named as ``Greek Koronis''
 by Unicode is the proper character.
 
 Another problem that has to do with
 quotes inside quotes. The internal quotes in Greek should be written with
 the characters quotedblleft and quotedblbase\footnote{Μανόλης Τριανταφυλλίδης, \textit{Νεοελληνική Γραμματική της δημοτικής}, Ανατύπωση της έκδοσης του \textsc{οεσβ 1941} με διορθώσεις, Θεσσαλονίκη \textsc{2002}, σελ.~\textsc{66}, ενότητα~\textsc{133}.}. For example, this is correct for Greek
 \begin{center}
- {\newcmgreekguillemots  «άλφα \leftgrquotes βήτα\rightgrquotes»}
+ {\newcmgreekguillemets  «άλφα \leftgrquotes βήτα\rightgrquotes»}
 \end{center}
 But the keyboards only produce quotesingle which is already mapped to apostrophe
 and it is difficult to remember the names ``quotedblleft'' and ``quotedblbase''. 
@@ -480,13 +678,13 @@ the \verb|fontsetup| package or when the language is set to Greek by, say, the B
 Otherwise, for non-Greek documents with small passages of Greek,
 the author may enable \verb|cv04| by creating a custom command such as
 
-\verb|\newcommand\propergreek[CharacterVariant=4]{NewCM10-Book.otf}|
+\verb|\newfontfamily\propergreek[CharacterVariant=4]{NewCM10-Book.otf}|
 
 
 A phrase with Greek quotes inside quotes, proper anoteleia, and proper apostrophe is
 
 \begin{center}
-{\newcmgreekguillemots  «φώναζε: \leftgrquotes απ' έξω την προπαίδεια\rightgrquotes»· σαν εκδίκηση ακουγόταν\ldots}
+{\newcmgreekguillemets  «φώναζε: \leftgrquotes απ' έξω την προπαίδεια\rightgrquotes»· σαν εκδίκηση ακουγόταν\ldots}
 \end{center}
 
 \subsection{Prosodic symbols}
@@ -500,7 +698,7 @@ For example,
 κομπ̈ρέσα, \quad αντιαντ̈αντ̈ικός, \quad ελεγκ̈τής
 \end{center}
 (see previous footnote). The fonts support this writing if a combining dieresis is placed after
-the letter to receive it. The combining dieresis is the character U0308. On Linux desktops this is
+the letter to receive it. The combining dieresis is the character U+0308. On Linux desktops this is
 easily entered pressing Alt+Control+u, release them, and type the sequence 0308 and space.
 
 More than that, in linguistics, they need to combine several accents above Greek letters. All this
@@ -508,12 +706,40 @@ stacking of accents is supported by the fonts. For example, one can write
 \begin{center}
 ᾱ῏\quad ε᾿῀\quad Ἀ̆ \quad Ἆ̄ \quad ῼ᾿῀\quad ᾱ΄\quad Χ̆᾿\quad ῑ̈΄
 \end{center}
-by placing the combining accents from the Unicode block U0300--U0362 plus the usual Greek accents
+by placing the combining accents from the Unicode block U+0300--U+0362 plus the usual Greek accents
 \textit{after} the letter.
 So the above was typed as
 \begin{center}
 {\ttfamily α ̄\hspace*{-5pt} ῏\qquad ε\hspace*{-5pt} ᾿ ῀\qquad Ἀ ̆ \quad Ἆ ̄ \qquad ῼ\hspace*{-5pt} ᾿ ῀\qquad α ̄\hspace*{-5pt} ΄\qquad Χ ̆\hspace*{-5pt} ᾿\qquad ι ̄ ̈\hspace*{-5pt} ΄}
 \end{center}
+
+\section{Greek Sans}
+
+The Greek Sans in previous releases of New Computer Modern was largely
+inherited from earlier designs and had not been systematically
+re-evaluated under modern usage conditions, in particular mixed
+Latin–Greek documents, dense mathematical text, and projected
+presentations (\emph{beamer}). As a result, several long-standing
+issues were present: uneven paragraph color compared to Latin Sans,
+excessive local darkness in round letters (notably σ, θ,
+ω), inconsistent behavior of diacritics at small sizes, and
+reduced robustness under low-resolution projection. While these issues
+were often tolerable in print, they became clearly visible in
+contemporary workflows that rely on screen reading and projection.
+
+The redesigned Greek Sans included in this release is a ground-up
+revision that preserves the spirit and proportions of the original
+design while carefully rebalancing stroke weight, junctions, and
+counters to achieve uniform paragraph color and stable interaction
+with Latin Sans. Particular attention was paid to round and semi-round
+letters, final sigma, capital forms, and the full system of monotonic
+and polytonic diacritics, with extensive testing in mixed-script text,
+mathematical environments, and real projector conditions. The result
+is a Greek Sans that integrates naturally with Latin Sans, remains
+calm and legible in dense academic material, and is robust in
+presentation settings, without sacrificing typographic discipline or
+historical continuity.
+
 
 \subsection{Archaic Greek writing}
 The Sans Serif Regular font provides access to 6th century bce and 4th century bce Greek capitals
@@ -531,14 +757,14 @@ in ss04 and ss03 lookups. The \texttt{fontsetup} package provides commands such 
   \end{tabular}
 \end{center}
 Moreover, all fonts (except Mono \&\ Math) support Ancient Greek
-Numerals (the full Unicode block of Greek digits U10140--U1018E is supported),
+Numerals (the full Unicode block of Greek digits U+10140--U+1018E is supported),
 with most symbols designed from scratch (and did not exist in C. Beccari's original fonts).
 A few of the new symbols:
 \begin{center}
 𐅋𐅌𐅍𐅏𐅯𐅴𐆉
 \end{center}
 The four numerals that already existed in 
-this range (that is U10144--U10147) in Beccari's fonts have been altered to a new
+this range (that is U+10144--U+10147) in Beccari's fonts have been altered to a new
 design matching the style of cm but also provide some Ancient Greek flair.
 The new designs in Serifed and SansSerifed are:
 \begin{center}
@@ -546,9 +772,9 @@ The new designs in Serifed and SansSerifed are:
 \end{center}
 The \texttt{fontsetup} package provides commands for all of the above symbols.
 The commands follow the Unicode name of each slot (minus the ``Greek Acrophonic'').
-So the Unicode slot U1014F named ``Greek Acrophonic Attic Five Staters'' can be accessed
+So the Unicode slot U+1014F named ``Greek Acrophonic Attic Five Staters'' can be accessed
 with the command \verb|\atticfivestaters| and it gives \atticfivestaters; and the
-slot u10182 named ``Greek Kyathos Base Sign'' can be accessed with the command
+slot U+10182 named ``Greek Kyathos Base Sign'' can be accessed with the command
 \verb|\greekkyathosbasesign| and it gives \greekkyathosbasesign.
 
 
@@ -580,18 +806,19 @@ is shown on page \pageref{AegeanNumbers}.
 
 \subsection{Support for Papyrology}
 Papyrology needs to declare that a glyph is missing from the papyrus or
-the papyrus is worn at this point and the papyrologist adds the missing glyph
+the papyrus is worn out at this point and the papyrologist adds the missing glyph
 but it is not clear from the papyrus. This is done by adding a dot below the glyph
 and it is supported for all Greek glyphs in the upright fonts monotonic or polytonic:
 \begin{center}
 {\Large Α̣\quad Ἆ̣\quad ᾞ̣\quad ἇ̣\quad ᾦ̣\quad ῥ̣}
 \end{center}
-where in the source we just typed the dot below (char U0323) after the glyph.
+where in the source we just typed the dot below (char U+0323) after the glyph.
 This feature is supported for the 4th bce and 6th bce Greek in Sans:
 \begin{center}
   \textvibce{\Large Γ̣Ε̣Ω̣Μ̣Ε̣Τ̣Ρ̣Ι̣Α̣}
   \quad\quad\textivbce{\Large Γ̣Ε̣Ω̣Μ̣Ε̣Τ̣Ρ̣Ι̣Α̣}
 \end{center}
+More support for papyrology is available. Check Section~\ref{phextsupp}.
 
 
 \subsection{Support for Chemistry}
@@ -618,14 +845,107 @@ and this is how \verb|\chemkappa| is defined in \verb|fontsetup|:
 in math mode too.)
 Similar is the situation for \verb|\chemrho| (\chemrho) and \verb|\chemrhoalt| (\chemrhoalt).
 
+Especially for Chemistry notice that the MathFonts contain the ``reaction arrows'',
+that is U+1F8D0--U+1F8D4 ($🣐, 🣑, 🣒, 🣓, 🣔$),
+unsuccesful reaction arrows U+1F8D6 ($🣖$)
+and U+1F8D7 ($🣗$)
+and the isolobal arrow U+1F8D8 ($🣘$).
+You can directly type these symbols in MathMode (consult your editor manual on how to do this).
+or create commands such as
+%\Umathchardef\isolobalarrow = "0 "0 "1F8D0
+% \newcommand\isolobalarrow{\symmathchar"1F8D0}
+% $\isolobalarrow$
+
+ \verb|\Umathchardef\isolobalarrow = "0 "0 "1F8D8|
+
+ \noindent and then use \verb|$\isolobalarrow$|
 
 
 
+ \section{Cyrillic}
+
+The NewComputerModern font family includes full support for the
+modern Cyrillic alphabet. The implementation is intended for academic
+typesetting and therefore aims at typographic compatibility with the Latin
+and Greek components of the family. Particular care has been taken to ensure
+consistent stroke weight, proportions, and text color across scripts, so
+that multilingual documents remain visually harmonious.
+
+The Cyrillic repertoire covers the standard alphabets used in Russian,
+Bulgarian, Ukrainian, Serbian, and North Macedonian. 
+
+\subsection{Bulgarian Localized Forms}
+
+Bulgarian typographic tradition uses distinct shapes for several lowercase
+letters that differ from the forms commonly used in Russian typography.
+NewCM provides these forms through the OpenType \texttt{locl} feature.
+When the Bulgarian language is selected via a language-aware package
+(for example \texttt{polyglossia} or \texttt{babel}), the appropriate
+glyph substitutions are applied automatically.
+
+The following five letters have Bulgarian-specific designs:
+
+\begin{center}
+\begin{tabular}{c|c}
+Default Cyrillic & Bulgarian forms \\
+\hline
+{\LARGE б\ г\ д\ п\ т} & {\LARGE\selectlanguage{bulgarian}б\ г\ д\ п\ т} %\\
+%г & {\selectlanguage{bulgarian}г} \\
+%д & {\selectlanguage{bulgarian}д} \\
+%п & {\selectlanguage{bulgarian}п} \\
+%т & {\selectlanguage{bulgarian}т} \\
+\end{tabular}
+\end{center}
+
+These alternate forms affect only the lowercase alphabet. Uppercase letters
+are common across Cyrillic typographic traditions and therefore remain
+unchanged.
+
+\subsection{Small Capitals}
+
+The NewCM Cyrillic implementation also includes small capitals.
+These are designed to match the proportions and weight of the Latin
+small capitals in the family, allowing consistent typographic hierarchy
+in multilingual documents.
+
+Small caps are accessed in the usual way via font features. For example:
+
+\begin{verbatim}
+\addfontfeatures{Letters=SmallCaps}
+\end{verbatim}
+
+or with the standard \LaTeX\ command
+
+\begin{verbatim}
+\textsc{текст на кирилица}
+\end{verbatim}
+
+The Cyrillic small capitals follow the same design principles as the Latin
+ones: slightly increased letterspacing and carefully adjusted stroke weight
+ensure that they remain legible and visually balanced in continuous text.
+
+\subsection{Example}
+
+The following example illustrates Cyrillic text with Bulgarian localization
+and small capitals:
 
 
-\section{Russian}
-Russian is supported using the glyphs from the \verb|cmu| package but it has considerable
-improvements (for example, the quality of the bold sans (see below)).
+
+{\selectlanguage{bulgarian}Това е примерен текст на кирилица.}
+
+\textsc{Български текст със малки главни букви.}
+
+{\cyrsans
+{\selectlanguage{bulgarian}\cyrsans Това е примерен текст на кирилица.}
+
+\textsc{\cyrsans Български текст със малки главни букви.} 
+}
+
+
+The result demonstrates the integration of Cyrillic glyphs within the
+typographic system of the NewCM family.
+
+ 
 \begin{verse}
 Я помню чудное мгновенье:\\
 Передо мной явилась ты,\\
@@ -633,23 +953,67 @@ improvements (for example, the quality of the bold sans (see below)).
 Как гений чистой красоты.\\
 \hspace{3cm}(Пушкинъ)
 \end{verse}
-Again, as in Greek there is a different kind of guillemots for Russian which are available
+
+
+\bigskip
+
+  Again, as in Greek there is a different kind of guillemets for Cyrillic which are available
 in CharacterVariant 3 (cv03). Compare:
 \begin{center}
-Defaults guillemots: «» \quad Russian guillemots: {\newcmrussianguillemots «»}\quad Greek guillemots: {\newcmgreekguillemots «»}
+Defaults guillemets: «» \quad Cyrillic guillemets: {\newcmrussianguillemets «»}\quad Greek guillemets: {\newcmgreekguillemets «»}
 \end{center}
-Same is the situation with Russian emdash which is shorter than the default:
+Same is the situation with Cyrillic emdash which is shorter than the default:
 \begin{center}
 \begin{tabular}{rl}
   Default emdash: & ---\\
-  Russian emdash: & {\newcmrussianguillemots ---}
+  Cyrillic emdash: & {\newcmrussianguillemets ---}
 \end{tabular}
 \end{center}
 
 
+\subsection{Design Principles}
+
+The Cyrillic component of NewCM has been designed with the same
+typographic philosophy that guides the Latin and Greek parts of the
+family. The goal is not only to provide Unicode coverage, but to ensure
+that Cyrillic text integrates naturally within documents that mix
+multiple scripts, as is common in academic publications.
+
+Several aspects were considered during the design process. First, the
+overall proportions and x-height were aligned with the Latin alphabet so
+that line rhythm remains consistent when the scripts appear together.
+Second, the stroke modulation and contrast were calibrated to match the
+visual weight of the surrounding Latin and Greek glyphs. This ensures a
+uniform typographic ``color'' across multilingual paragraphs.
+
+Particular attention was given to letters that typically dominate the
+texture of Cyrillic text, such as \textit{ш}, \textit{щ}, \textit{ж},
+and \textit{ф}. Their internal counters and stroke distribution were
+carefully balanced so that dense sequences remain readable even at
+smaller sizes.
+
+The Bulgarian localized forms were implemented following modern
+typographic practice and are derived from the cursive structures
+traditionally used in Bulgarian typesetting. Their design was adapted
+to the stylistic character of the NewCM family so that the localized
+forms remain compatible with the rest of the typeface while preserving
+their distinctive identity.
+
+Finally, the Cyrillic small capitals were developed to match the Latin
+small-cap system of NewCM. Their proportions, stroke thickness, and
+spacing were adjusted to produce a consistent appearance in headings,
+running text, and scholarly apparatus such as abbreviations or
+bibliographic references.
+
+These design choices aim to make the NewCM Cyrillic extension suitable
+for demanding academic applications, including multilingual scientific
+publications, lecture notes, and typographically complex mathematical
+documents.
+
+
 \section{Hebrew}
-\noindent The Hebrew blocks U0590--U05FF and Hebrew Presentation forms
-UFB1D--UFB4F are fully covered. and  A few letters from Hebrew: 
+\noindent The Hebrew blocks U+0590--U+05FF and Hebrew Presentation forms
+U+FB1D--U+FB4F are fully covered.  A few letters from Hebrew: 
 \begin{center}
  אבגדהושׁשּׂלּצּ
 \end{center}
@@ -657,8 +1021,8 @@ UFB1D--UFB4F are fully covered. and  A few letters from Hebrew:
 \section{Coptic and Epact Numbers}
 \noindent The Coptic language is fully supported. This covers the Coptic blocks
 in the Greek and Coptic Unicode
-block (U03E2--U03EF), the full Coptic Unicode block (U2C80--U2CFF) and the Coptic Epact Numbers
-(U102E0--U102FF).
+block (U+03E2--U+03EF), the full Coptic Unicode block (U+2C80--U+2CFF) and the Coptic Epact Numbers
+(U+102E0--U+102FF).
 A few letters from Coptic and Epact numbers follow: 
 \begin{center}
 ⲗⲟⲅⲟⲥ ⲛ̀ⲁⲓⲅⲩⲡⲧⲓⲟⲥ \quad 𐋡 𐋢 𐋣 𐋤 𐋥
@@ -669,13 +1033,105 @@ A few letters from Coptic and Epact numbers follow:
 
 \section{Cherokee}
 Both Unicode blocks 
-U13A0--13FF and UAB70--UABBF for Cherokee are supported. A few letters are:
+U+13A0--U+13FF and U+AB70--U+ABBF for Cherokee are supported.
+% A few letters are:
 %\begin{center}
-  ᎣᎤᎹᏊᏐ  ꭳꭴꭷꮂꮔꮿ
+%  ᎣᎤᎹᏊᏐ  ꭳꭴꭷꮂꮔꮿ
 %\end{center}
+The samples below were kindly provided by Sedi Eastwood:
+
+\medskip
+
+\noindent Sample 1:
+\begin{center}
+\begin{tabular}{ll}
+  \begin{minipage}{5cm}  ᎬᏣᎵᏨᏗᏣᏓᏲᎯᏍᏗ ᎢᏤᎮᏍᏗ\\
+    \textsf{ᎬᏣᎵᏨᏗᏣᏓᏲᎯᏍᏗ ᎢᏤᎮᏍᏗ}
+\end{minipage}
+  &
+  \begin{minipage}{6cm}
+    Live/exist in a manner that there is never a reason or purpose to let go of one another.\\
+    (gvjalijvdijadayohisdi ijehesdi\\
+\hphantom{(}gvtsalitsvditsadayohisdi itsehesdi)
+  \end{minipage}
+\end{tabular}
+\end{center}
 
 
+\medskip
 
+\noindent Sample 2:
+\begin{center}
+\begin{tabular}{ll}
+\begin{minipage}{4cm}  ᏕᏣᏓᎨᏳᏎᏍᏗ\\ \textsf{ᏕᏣᏓᎨᏳᏎᏍᏗ} 
+\end{minipage}
+  &
+  \begin{minipage}{6cm}
+    Value the existence of one another.\\
+    (dejadageyusesdi\\
+\hphantom{(}detsadageyusesdi)
+  \end{minipage}
+\end{tabular}
+\end{center}
+
+\medskip
+
+\noindent Sample 3:
+\begin{center}
+\begin{tabular}{ll}
+\begin{minipage}{4cm}  ᎥᎵᏍᎨᏗ ᏕᏣᏓᏰᎸᏎᏍᏗ\\ \textsf{ᎥᎵᏍᎨᏗ ᏕᏣᏓᏰᎸᏎᏍᏗ} 
+\end{minipage}
+  &
+  \begin{minipage}{6cm}
+    Think of one another as sacred or hold the existence of others sacred.\\
+    (vlisgedi dejadayelvsesdi)
+  \end{minipage}
+\end{tabular}
+\end{center}
+
+
+\section{Canadian Aboriginal Syllabics}
+
+\newfontfamily{\textsfca}[BoldFont=NewCMSans10-Bold.otf,%
+ItalicFont=NewCMSans10-BookOblique.otf]{NewCMSans10-Book.otf}
+
+Canadian Aboriginal Syllabics are supported in the sans font.
+The full Unicode blocks are covered, which are
+U+1400--U+167F, U+18B0--U+18F5, and U+11AB0--U+11ABF.
+
+Some examples in Blackfoot Siksiká:
+
+\noindent Blackfoot-speaking real people: {\textsfca ᖹᐟᒧᐧᒣᑯ}
+Siksiká: {\textsfca ᓱᖽᐧᖿ}\\ 
+Siksikáíʼpowahsin: {\textsfca ᓱᘁᓱᘁᖳᐟᑲᖷᑊᓱᐡ} In bold: {\textsfca\bfseries ᓱᘁᓱᘁᖳᐟᑲᖷᑊᓱᐡ}\\ 
+Niitsipowahsin: {\textsfca ᖹᐨᓱᑲᖷᑊᓱᐡ} In oblique: {\textsfca\itshape ᖹᐨᓱᑲᖷᑊᓱᐡ}
+
+\medskip
+
+Some more in Cree:
+
+\begin{tabular}{l|l}
+\begin{minipage}{5.5cm}
+\noindent{\textsfca ᐌᐘᑯ ᐅᒪ ᐊᓯᓂᐏᒣᓂᑲᐣ ᑭᒥᓇᐘᐠ}\\
+{\textsfca ᐃᓂᓂᐘᐠ ᒪᓂᑐᐸ ᑲᐊᔭᒋᐠ᙮ ᐁᐘᑿᓂᐠ ᐅᑭ}\\
+{\textsfca ᑲᓄᒋᐦᑕᒋᐠ ᐊᓯᓂᐏᐊᑐᐢᑭᐃᓂᓂᐤ ᑲᑭᒥᓂᐦᒋᐠ}\\
+{\textsfca ᐅᒣᓂᐤ᙮ ᐊᑿᓂ ᒥᑕᐦᑐᒥᑕᓇᐤ ᐊᐢᑭᐩ ᐊᓴᐩ}\\
+{\textsfca ᐁᐊᑐᐢᑫᒋᐠ ᐅᑕ ᒪᓂᑐᐸ᙮}
+\end{minipage}
+  &
+\begin{minipage}{4.8cm}
+{\sffamily  The masonry for the wall through time
+  has been given to people of Manitoba
+  by the international union of bricklayers
+  and allied craftsmen local one Manitoba
+  to commemorate 100 years of service, by
+  Manitoba masonry contractors and by Manitoba
+  masonry suppliers.}
+\end{minipage}
+\end{tabular}
+
+
+    
 \section{Devanagari}
 
 Devanagari script is supported for the serifed font in Regular (10pt/8pt), Book (10pt/8pt),
@@ -686,7 +1142,7 @@ must include
 \noindent \verb|Script=Devanagari, Language=XXXX| where \verb|XXXX|
 must be replaced with one of \verb|Hindi|, \verb|Sanskrit|, \verb|Marathi|, \verb|Nepali|.
 If the \verb|Language| parameter is not set then the default is \verb|Hindi|.
-For Lua\LaTeX\ the parameter \verb|Renderer=Harfbuzz| must also be included.
+For \LuaLaTeX\ the parameter \verb|Renderer=Harfbuzz| must also be included.
 
 So if say Marathi is needed as the default font document then one can use the following:
 \begin{verbatim}
@@ -698,7 +1154,11 @@ Renderer=Harfbuzz]{NewCM10Devanagari-Book.otf}
 
 The Devanagari fonts were developed with the help of {\devanagaritext निरंजन} (Niranjan)
 whose name appears in the copyright section of the fonts and I also thank him for
-providing the samples below.
+providing the samples below. It should also be noted that the design is original
+and based on old handwritten books. In old civilizations, such as the Indian one,
+it is only natural that the design be affected by how the handwritten
+books look. Ink creates ``drop''-like serifs on paper that absorbs it, and the
+tool used to write also affects the look of the script. All these were taken into account.
 
 
 \noindent A Sanskrit sample from {\sanskrittext बृहदारण्यकोपनिषद्} (bṛhadāraṇyakopaniṣad) follows:
@@ -749,7 +1209,7 @@ by {\marathitext तुकाराम} (Tukaram) and its translation:
 
 \bigskip
          
-Devanagari Unicode letters (range U0900--U097F) are also available as variables (letters) and
+Devanagari Unicode letters (range U+0900--U+097F) are also available as variables (letters) and
 numbers in the Regular and Book Math fonts. They are available as usually in three weights
 in the Math fonts so that the color is balanced when in script size (eg in exponents or indices).
 For this to work a version of \verb|fontsetup| package greater or equal to 1.8 with options
@@ -782,10 +1242,10 @@ So the command
 \noindent\verb|\setmathfont[StylisticSet=4]{NewCMMath-Regular.otf}|
 with source:
 \begin{verbatim}
-$$\sum_{n=0}^\infty \frac1{n!}x^n=1+x+\frac{1}{2!}x^2
-   +\frac1{3!}x^3+\frac1{4!}x^4+\ldots=e^x.$$
-$$9!=1\cdot2\cdot3\cdot4\cdot5\cdot6\cdot7\cdot8\cdot9.$$
-$$2^{2^2}$$
+\[\sum_{n=0}^\infty \frac1{n!}x^n=1+x+\frac{1}{2!}x^2
+   +\frac1{3!}x^3+\frac1{4!}x^4+\ldots=e^x.\]
+\[9!=1\cdot2\cdot3\cdot4\cdot5\cdot6\cdot7\cdot8\cdot9.\]
+\[2^{2^2}\]
 \end{verbatim}
 will have the following effect:
 
@@ -809,8 +1269,198 @@ $$9!=1\cdot2\cdot3\cdot4\cdot5\cdot6\cdot7\cdot8\cdot9.$$
 $$2^{2^2}$$
 
 
+\section{Armenian Script Support}
+
+New Computer Modern, as of version 8.0.0 provides full, native support
+for the Armenian script, designed with the same typographic principles
+that govern the Latin, Greek, and Cyrillic components of the
+family. Armenian is treated as a first-class script across all major
+styles, weights, and optical sizes. A sample follows.
+
+\medskip
+
+{\selectlanguage{armenian}
+Պյութագորասի թեորեմը մաթեմատիկայի ամենակարևոր թեորեմներից մեկն է։
+
+\noindent\textbf{Թեորեմ}\,(Πυθαγόρας) {\itshape
+Ամեն ուղղանկյուն եռանկյան մեջ, կատետների վրա կառուցված երկու
+քառակուսիների մակերեսների գումարը հավասար է հիպոտենուզայի վրա
+կառուցված քառակուսու մակերեսին, այսինքն}
+$\alpha^2=\beta^2+\gamma^2$։
+}
+
+\medskip
+
+
+Armenian is available in:
+\begin{itemize}
+\item Families: Serif (NewCM), Sans (NewCMSans), Mono (NewCMMono)
+
+\item Series: Regular, Book, Bold
+
+\item Shapes: Roman, Italic (Serif), Oblique (Sans), Bold Italic / Bold Oblique
+
+\item Optical sizes: 10 pt and 8 pt designs (with independent drawings)
+\end{itemize}
+
+
+The Armenian design in NewCM follows three guiding principles:
+\begin{itemize}
+\item Typographic neutrality:
+Armenian glyphs are designed to blend seamlessly with Latin and Greek text in academic and technical documents, without drawing undue attention or altering line color.
+
+\item Script-specific structure
+Armenian joins, counters, and internal rhythm are handled according to the structural logic of the script, not by mechanical reuse of Latin shapes. Particular care is taken with join-heavy letters and complex counters to preserve clarity at text sizes.
+
+\item Consistency across families
+Serif, Sans, and Mono Armenian share the same underlying proportions and rhythm, while respecting the constraints of each family (contrast in Serif, openness in Sans, grid discipline in Mono).
+\end{itemize}
+
+\begin{description}
+\item[Serif Armenian] is
+designed in a Didot-influenced style, consistent with NewCM’s high contrast and vertical stress.
+
+Italic Armenian is a true italic, not a slanted Roman, with moderated slant to respect Armenian letter structure.
+
+Armenian ligatures defined by Unicode (U+FB13–U+FB17) are supported via standard OpenType liga features.
+
+Separate 8 pt designs increase stroke robustness and counter openness for small-size text.
+
+\item[Sans Armenian]
+is drawn independently, not derived from the Serif outlines.
+
+Italic is implemented as an oblique, with script-sensitive slant values (distinct for uppercase and lowercase).
+
+Stroke weights are adjusted to account for Armenian’s higher internal density, ensuring even color in mixed-script text.
+
+Suitable for modern academic layouts, captions, headings, and presentations.
+
+\item[Mono Armenian]
+is fully monospaced, with all glyphs sharing a fixed advance width.
+
+The design prioritizes grid predictability and alignment, making it suitable for code, tables, and technical material.
+
+Joins and counters are optimized for clarity at small sizes without compromising alignment.
+
+\item[Mathematics and Armenian] integrates cleanly with NewCM’s math fonts:
+
+Mixed Armenian–Latin–Greek text maintains consistent color and hierarchy.
+
+Bold and italic Greek symbols used in mathematics harmonize visually with Armenian Bold and Italic text.
+
+This makes NewCM suitable for scholarly publications involving Armenian text alongside formal mathematics.
+\end{description}
+
+
+\subsection{Intended use}
+
+NewCM’s Armenian support is intended for:
+\begin{itemize}
+\item Academic books and journals
+
+\item Critical editions and linguistic work
+
+\item Mathematical and scientific texts
+
+\item Multilingual documents combining Armenian with Latin and Greek
+
+\item Technical material requiring monospaced layout
+\end{itemize}
+
+With full Armenian coverage across Serif, Sans, and Mono, all major
+weights and shapes, and dedicated optical sizes, New Computer Modern
+offers one of the most complete and typographically coherent Armenian
+implementations available in a general-purpose academic type family.
+
+
+%%%%%%%%%%%%
+\section{Georgian (Mkhedruli) script support}
+
+NewCM includes full support for Georgian Mkhedruli (Unicode
+U+10D0--U+10FF) across the Roman, Sans, and Mono families, in Regular,
+Bold, Oblique/Italic, and Bold Oblique styles. The design aims at
+seamless integration with Computer Modern–derived Latin, Greek, and
+mathematical typography, with particular emphasis on paragraph color,
+rhythm, and mixed-script stability.
+
+\subsection{Design principles}
+
+The Georgian design in NewCM is based exclusively on \textbf{Mkhedruli},
+the contemporary Georgian script used in all modern contexts. No
+uppercase/lowercase distinction exists in Mkhedruli, and the font
+follows Unicode conventions without introducing artificial
+capitalization.
+
+\medskip
+
+\noindent Key design goals were:
+\begin{description}
+\item[Text color compatibility] with NewCM Latin and Greek at typical academic sizes (9--12 pt).
+\item[Controlled joins and counters,] especially in Bold and Mono styles, to avoid local darkening.
+\item[Script neutrality:] Georgian text should neither dominate nor recede in mixed-script paragraphs.
+\item[Mechanical italics (obliques)] rather than cursive reinterpretations,
+  in line with NewCM practice.
+\end{description}
+The Sans and Mono variants are true companions of their Latin
+counterparts, not condensed or simplified derivatives. In Mono,
+spacing discipline was prioritized over calligraphic expressiveness to
+ensure usability in code listings and technical material.
+
+\subsection{Italics and emphasis}
+
+In Georgian typography, emphasis in academic and editorial contexts is
+commonly expressed through \textbf{italic (oblique) forms}, similarly to
+Latin practice. NewCM therefore provides full Georgian support in
+oblique styles for Roman, Sans, and Mono families. Italic Georgian is
+constructed as a consistent slant of the upright forms, ensuring
+harmony with Latin and Greek italics in theorem statements and
+emphasized text.
+
+\subsection{Example: the Pythagorean theorem}
+
+Below is a short Georgian text introducing the Pythagorean theorem,
+followed by the theorem statement itself, set in italics to
+demonstrate typical mathematical typography.
+
+{\selectlanguage{georgian}
+პითაგორას თეორემა არის ევკლიდური გეომეტრიის ერთ-ერთი ყველაზე ცნობილი
+და ფუნდამენტური შედეგი. იგი ამყარებს კავშირს მართკუთხა სამკუთხედის
+გვერდებს შორის და ფართოდ გამოიყენება მათემატიკაში, ფიზიკაში და
+ინჟინერიაში.
+
+\smallskip
+
+\textbf{თეორემა} (Πυθαγόρας) {\itshape მართკუთხა სამკუთხედში
+  ჰიპოტენუზის კვადრატი ტოლია კატეტების კვადრატების ჯამისა.}  $c^2 =
+a^2 + b^2$.
+}
+
+\smallskip
+
+This example illustrates the behavior of Georgian text in italic
+theorem statements, its interaction with Latin mathematical symbols,
+and the balance between text and displayed mathematics.
+
+\subsection{Scope}
+
+NewCM Georgian covers:
+\begin{itemize}
+\item  Unicode block U+10D0--U+10FF (Georgian)
+\item Roman, Sans, and Mono families
+\item Regular, Bold, Oblique/Italic, and Bold Oblique styles
+\end{itemize}
+The Georgian support is intended for \textit{academic, scientific, and
+technical documents}, where Georgian text appears alongside Latin,
+Greek, and mathematics in a unified typographic system.
+
+
+
+
+
+
+
 \section{Medieval Latin and Uncial Greek}
-The family includes new shapes for medieval and uncial Greek.
+The family includes new shapes for medieval Latin and uncial Greek.
 The \verb|fontsetup| package provides \verb|\textuncial{<text>}| and
 \verb|{\uncial text}| to use this shape. Let us write a sentence
 in this shape:
@@ -820,9 +1470,19 @@ in this shape:
 {\uncial    Το Πυθαγόρειο Θεώρημα είναι από τα σημαντικότερα θε\-ω\-ρή\-μα\-τα των Mαθηματικών.}
   \end{minipage}
 \end{center}
+Medieval Latin and Uncial Greek fonts will give a lot of ``missing slot''
+warnings if the microtype package is loaded. To suppress these warnings
+use
+\begin{verbatim}
+\DeclareMicrotypeAlias{NewCMUncial10-Book.otf}{TU-empty}
+\end{verbatim}
+and similarly for the other NewCMUncial fonts.
+
+
+
 \section{Braille}
 Braille, both 6dot (uni2801--uni283F)
-as well as 8dit (uni2840--uni28FF) patterns
+as well as 8dot (uni2840--uni28FF) patterns
 are included in two versions. The Regular font provides the
 characters for sighted persons (such as teachers) so they can easily see which dots are
 on and which off. The Sans font contains the true Braille characters. I decided to have the
@@ -837,7 +1497,7 @@ typeset text mainly for sighted persons.
   \end{tabular}
 \end{center}
 
-\section{Ipa symbols}
+\section{\textsc{ipa} symbols}
 
 \acro{\textsc{ipa}} symbols are included and following a suggestion of Huanyu Liu
 the kerning found in \texttt{tipa} package has been added here and further improved. Moreover
@@ -859,14 +1519,14 @@ I am grateful to {\devanagaritext निरंजन} (Niranjan) for suggesting
 and testing all the \textsc{ipa} improvements that follow:
 
 
-The joining of two characters such as t͜s, d͜z, k͡p, t͡ʃ etc is also supported.
-The low tie is the character U035C and the upper tie is U0361. The t͜s is produced by typing the
+The joining of two characters such as t͜s, d͜ʒ, k͡p, t͡ʃ etc is also supported.
+The low tie is the character U+035C and the upper tie is U+0361. The t͜s is produced by typing the
 sequence t then the low tie and then s. Similarly k͡p is produced by typing the
 sequence k then the upper tie and then p. For t͜ʃ and d͜ʒ the fonts have a contextual chaining
 substitution table that uses a tie which prints lower so it does not touch ʃ and ʒ.
 In cases that one wants to show the tie as {\showtiefont x͜y͡z} then one needs to
 enable the cv5 character variant
-since the tie characters (U035C and U0361) are marks and not base glyphs.
+since the tie characters (U+035C and U+0361) are marks and not base glyphs.
 One can do that with a command
 such as
 
@@ -905,7 +1565,7 @@ Another such case is with the ``a'' shape. It has a different
 visual form in Italics ``\textit{a}'' which resembles to a distinct symbol
 of \textsc{ipa} leading to a wrong transcription. In order to avoid
 this confusion, we have used the slanted version ``{\itshape\ipafont a}'' of ``a'' in
-ss05. The other vowel symbol (ie, ɑ (U0251)) is also
+ss05. The other vowel symbol (ie, ɑ (U+0251)) is also
 available in the fonts.
 
 
@@ -930,6 +1590,251 @@ Next we give a real example of using \acro{\textsc{ipa}} symbols. The quote belo
   {\ipafont [t̪y]} ``you.''
 \end{quote}
 
+\section{All Unicode combining marks}
+As NewComputerModern has top priority the support of Academic work,
+all combinig marks are supported in all fonts. Please notice that
+not all slots in these blocks are filled in with glyphs by Unicode standard.
+Some slots are empty and reserved for the future. All glyphs described
+by Unicode are in NewCM.
+
+These are the Unicode blocks:
+\begin{itemize}
+\item Combining Diacritical Marks U+0300--U+036F
+
+\item Combining Diacritical Marks Extended U+1AB0--U+1AFF
+
+\item Combining Diacritical Marks Supplement U+1DC0--U+1DFF
+
+\item Combining Diacritical Marks for Symbols U+20D0--U+20FF
+
+\item Combining Half Marks U+FE20--U+FE2F
+\end{itemize}
+\textit{All blocks support stacking}.
+Examples, other than the main diacritical block U+0300--U+036F, follow in the next subsections.
+
+\subsection{Extended and Supplement Combining Diacritical Marks}
+Both blocks are supported:
+\begin{description}
+\item[Extended] U+1AB0--U+1AFF. These are used to represent fine-grained phonetic, prosodic, and tone features, primarily in linguistics, dialectology, and musicology.
+  They are combining characters, so they attach to a base letter. Example:
+  \begin{center}
+    ma᷄ ma᷅ ma᷆ \textbf{ma᷄ ma᷅ ma᷆}\\
+    \textsf{ma᷄ ma᷅ ma᷆}
+\end{center}
+Used for advanced tone marks and diacritic combinations in phonetics and linguistics (eg, tonal contour notation in African and East Asian languages). For example, Yoruba, Zulu, Mandarin, or reconstructed Proto-Bantu tone patterns.
+\item[Supplement] U+1DC0--U+1DFF. Adds additional combining marks used in linguistic fieldwork,
+  \textsc{ipa} transcription, and medieval manuscripts.
+Example:
+  \begin{center}
+aᷰn᷽ \textbf{aᷰn᷽} \textsf{aᷰn᷽}
+\end{center}
+  Supplementary diacritics used in phonetic transcription and historical linguistics, allowing precise representation of speech sounds and manuscript variants.
+\end{description}
+Medieval Latin manuscripts often abbreviate -us, -um, per, pro, etc,
+with special marks that can now be encoded as combining diacritics.
+\begin{center}
+  In n̄o d̄i nostri Ih̄u xp̄i (\textbf{In n̄o d̄i nostri Ih̄u xp̄i})\\
+  \textsf{In n̄o d̄i nostri Ih̄u xp̄i} $\longrightarrow$ In nomine domini nostri Iesu Christi
+\end{center}
+
+
+\subsection{Diacritical Marks for Symbols and Half Marks}
+Both blocks are supported:
+\begin{description}
+\item[Marks for Symbols] U+20D0--U+20FF. This block is used in
+  Mathematical notation and the symbols are available in the Math
+  fonts.  However, there are needs for this block outside
+  Mathematics. So they have also been added in the text fonts. For
+  example, in Linguistics an arrow may mark a rising or a falling tone
+  as in a⃗, a⃖. Another example is in automata theory: a circled state
+  q⃝ or a squared proposition p⃞. Here these symbols are typed as text
+  (this is why they have the metrics of q and p respectively, and
+  consequently the imposed circle does not create addition horizontal
+  space). However, the NewCM Math fonts include the procomposed glyphs
+  for use in mathematics mode (U+2460--U+24FF). For example, ``circled p''
+  and ``circled f'' are the glyphs U+24DF and U+24D5 respectively. Commands to
+  access those in math mode, such as \verb|\circledp| are provided by
+  the style file \verb|newcomputermodern.sty| through the
+  \verb|fontsetup| package. The metrics here are different as the circle has
+  its own metrics. Compare text: |p⃝| and |f⃝| with math $|ⓟ|$ and $|ⓕ|$.
+%$|\circledf|$ and $|\circledp|$.
+  
+\item[Half Marks] U+FE20--U+FE2F. Again constuctions using these symbols are available in Math fonts.
+  They are also added to text fonts for non-math cases. An example is in linguistics
+  for double diacritics over two letters: a︠b︡, double tilde spanning two characters
+  used for nasalization spaning a diphthong or a contour tone that applies to two vowels:
+  o︢u︣.
+
+  Also used in Medieval and textual criticism. For example, spanning macrons: n︤o︥.
+  Represents n̄o (“no-” from nobis, noster, etc.)
+But with a macron spanning both letters to indicate the omitted syllable.
+Scholars of medieval Latin and Greek use exactly this.
+
+To give an example that relates to Cyrillic we show the ``titlo'' used
+in early Cyrillic manuscripts and Old Slavonic: used to mark
+abbreviations, contractions, sacred names, and numeric values. The
+FE2E/FE2F pair lets a single titlo be encoded as two combining halves
+that attach to the leftmost and rightmost letters of the span and
+visually join 
+into one continuous overline. However, when more than two characters are used, or characters
+with different heights, there is no provision by Unicode how these characters should join.
+Necessarily the titlo will break. However, a new command \verb|\titlo| has been introduced
+in \verb|fontsetup| package (that applies to \verb|newcomputermodern.sty| as well) that
+produces proper titlos on more than two letters and of unequal heights. I thank
+David Carlisle for his help with this.
+
+Use case: when an editor wants a single titlo covering two or more adjacent Cyrillic letters, they insert the left-half after the first letter and the right-half after the last letter of the span.
+\begin{itemize}
+\item Two-letter titlo; Characters: U+043A U+FE2E U+043D U+FE2F: к︮н︯
+\item Three-letter titlo with different heights;
+  Characters: U+043A U+FE2E U+0430 U+0431 U+FE2F: к︮аб︯
+  \item Titlo used with a numeral (titlo often marks numeric use of letters); Characters: U+0432 U+FE2E U+0438 U+FE2F: в︮и︯
+  \item Corrected output using the \verb|\titlo| command with
+    \verb|\titlo{каб}|: \titlo{Каб}.
+  \end{itemize}
+\end{description}
+
+%%%%%%%%
+\section{Editorial Marks}
+
+NewComputerModern supports a range of combining editorial marks intended for use in scholarly text, critical editions, manuscript transcription, and linguistic annotation. These marks function as textual modifiers applied to arbitrary base characters and are distinct from precomposed mathematical symbols.
+
+\subsection{Scope and Intended Use}
+
+Editorial marks are used to indicate:
+\begin{enumerate}
+\item manuscript witnesses and scribal hands in critical apparatus,
+
+\item editorial interventions and conjectural readings,
+
+\item layered annotation in palaeography and codicology,
+
+\item feature marking and classification in linguistics.
+\end{enumerate}
+In these contexts, the mark conveys editorial status, not mathematical meaning.
+
+\subsection{Combining Enclosing Marks}
+
+The font provides full support for combining enclosing marks, including:
+
+\begin{description}
+  \item[U+20DD] COMBINING ENCLOSING CIRCLE
+
+\item[U+20DE] COMBINING ENCLOSING SQUARE
+
+\item[U+20DF] COMBINING ENCLOSING DIAMOND
+\end{description}
+These characters attach to a preceding base glyph.
+% using mark-to-base and mark-to-mark positioning.
+The enclosing shape adapts to the base character’s size
+and style (e.g. italic, small caps, Greek, Cyrillic), enabling consistent use in running text.
+
+Example (editorial sigla):
+\begin{center}
+a⃝ \hspace*{.6cm}  p⃝ \hspace*{.6cm} f⃝ \hspace*{.6cm} γ⃝ \hspace*{.6cm} д⃝ \hspace*{.6cm} \textsc{ω⃝} 
+\end{center}
+(the last example is in small caps).
+Editorial marks are positioned using dedicated anchors in the text
+font. The enclosing shapes are centered optically relative to the base
+glyph rather than aligned to the mathematical axis. Letters with
+ascenders or descenders are adjusted to preserve visual balance inside
+the enclosure.
+
+Editorial combining marks should not be confused with precomposed
+circled letters used in mathematical notation (eg automata
+theory). Mathematical circled symbols are atomic glyphs provided by
+math fonts and are accessed via Unicode or math alphabets. Combining
+enclosing marks in NewComputerModern are intended exclusively for
+textual and editorial use.
+
+
+
+
+
+\section{Phonetic Extensions and Supplement}\label{phextsupp}
+The block U+1D00--U+1D7F
+contains letters and small capitals used in the \textsc{ipa} and related phonetic alphabets,
+and the block U+1D80--U+1DBF adds further small capitals and modifier
+letters for phonetic and prosodic notation. The small letters here are \textit{not} to be confused
+with typographical small capitals.
+The designs here are at the x-height of the font which is smaller than
+small capitals. Small capitals should still be called with commands such as \verb|\textsc| or
+similar. Examples:
+\begin{enumerate}
+ \item[(i)] [ʙ̥ɑɾɪ] \textbf{[ʙ̥ɑɾɪ]} \textsf{[ʙ̥ɑɾɪ]} {\textsf{\bfseries [ʙ̥ɑɾɪ]}}
+ \item[(ii)] [ᴍɑɴ] \textbf{[ᴍɑɴ]} \textsf{[ᴍɑɴ]} {\textsf{\bfseries [ᴍɑɴ]}}
+   meaning “man” pronounced with a bilabial trill
+ \item[(iii)] [ᶑaᶆa] \textbf{[ᶑaᶆa]} \textsf{[ᶑaᶆa]} {\textsf{\bfseries [ᶑaᶆa]}} could represent a voiced implosive /ɗama/ in a phonetic study.
+ \item[(iv)] tʰa   kʷa   nʲi   lˠa \textbf{tʰa} \textbf{kʷa} \textbf{nʲi} \textbf{lˠa} \textsf{tʰa   kʷa   nʲi   lˠa}
+   aspirated t, labialized k, palatalized n, velarized l
+ \item[(v)] tᶴ  dᶷ   nᶮ \textbf{tᶴ} \textbf{dᶷ} \textbf{nᶮ} \textsf{tᶴ  dᶷ   nᶮ} detailed articulatory descriptions and experimental phonetics.
+\end{enumerate}
+Editors of medieval and ancient texts sometimes mark uncertain
+or supplied letters with combining strokes or dots above/below.
+\begin{center}
+s᷽an᷎ct᷎us \textbf{s᷽an᷎ct᷎us} \textsf{s᷽an᷎ct᷎us}
+\end{center}
+may be used to indicate a word reconstructed or uncertain in a manuscript.
+
+\noindent More examples from the block U+1D80--U+1DBF:
+\begin{center}
+  \begin{tabular}{|c|c|}\hline
+Upright & Italic\\ \hline
+    ᶀ ᶂ ᶈ ᶉ ᶋ ᶌ ᶕ ᶔ ᶙ ᶚ ᶛ ᶞ ᶽ ᶿ &\textit{ᶀ ᶂ ᶈ ᶉ ᶋ ᶌ ᶕ ᶔ ᶙ ᶚ ᶛ ᶞ ᶽ ᶿ}\\ \hline
+    Sans Upright & Sans Oblique\\ \hline
+    \textsf{ᶀ ᶂ ᶈ ᶉ ᶋ ᶌ ᶕ ᶔ ᶙ ᶚ ᶛ ᶞ ᶽ ᶿ}& \textsf{\itshape ᶀ ᶂ ᶈ ᶉ ᶋ ᶌ ᶕ ᶔ ᶙ ᶚ ᶛ ᶞ ᶽ ᶿ}\\
+    \hline
+  \end{tabular}                        
+\end{center}
+
+Even though these are designed for phonetics, some medievalists and
+historical linguists use these modifier letters to show reduced vowels,
+superscripts, or lenited consonants in Old English or Middle English.
+\begin{center}
+hᶦs  heᶣrᶦng  cᶤld \textbf{hᶦs  heᶣrᶦng  cᶤld} \textsf{hᶦs  heᶣrᶦng  cᶤld}
+\end{center}
+could represent small, superscript-like vowels in ``his'', ``hearing'', ``child'',
+when reproducing manuscript letter size distinctions or marginal additions.
+Modifier letters used to reproduce reduced or superscript vowels
+from early English manuscripts and paleographic editions.
+
+
+\section{Currency Symbols}
+
+Support for currency symbols block U+20A0--U+20C0 in all text fonts (except uncials).
+\begin{center}
+  \begin{tabular}{rl}
+Roman:& ₠₡₢₣₤₥₦₧₨₩₪₫€₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿⃀\\
+Sans:& \textsf{₠₡₢₣₤₥₦₧₨₩₪₫€₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿⃀}\\
+    Mono:& \texttt{₠₡₢₣₤₥₦₧₨₩₪₫€₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿⃀}
+  \end{tabular}
+\end{center}
+Interesting is the design of Spanish Peseta in the Mono family
+(seen enlarged in the margin) were we have
+to fit essentially three letters in the width of the Mono font.
+\marginpar{\scalebox{2}{\texttt{\huge ₧}}}
+%\begin{center}
+%{Roman: \huge ₧}\hspace{1cm}{Mono: \texttt{\huge ₧}}
+%\end{center}
+
+
+Especially for the Rupee sign (U+20B9) the upright serifed
+non-Devanagari fonts have the ``latinized''
+version, but to avoid changing fonts they also provide the Devanagari
+version in CharacterVariant 7. So the code
+\begin{verbatim}
+\begin{LARGE}
+\begin{center}
+  100\,₹ \hspace{2cm} {\addfontfeatures{CharacterVariant=7}100\,₹}
+\end{center}
+\end{LARGE}
+\end{verbatim}
+gives
+\begin{LARGE}
+\begin{center}
+  100\,₹ \hspace{2cm} {\addfontfeatures{CharacterVariant=7}100\,₹}
+\end{center}
+\end{LARGE}
 
 
 
@@ -945,6 +1850,87 @@ NewCM fixes that and provides a true BoldSans:
 \end{tabular}
 
 
+\section{LX fonts for presentations}
+
+\setmathfont[StylisticSet=8,Scale=1.17343]{NewCMSansMath-Regular.otf}
+
+
+This is a very interesting variation expecially designed for beamer projections.
+The original design belongs to Claudio Beccari who suggested me to incorporate
+this into NewCM. It is compatible with the Knuthian design and looks
+very clean on projections. The fonts have been reworked
+to stabilize the color and provide Oblique, Bold and BoldOblique.
+
+Here is a sample with Pythagorean theorem.
+
+\bigskip
+
+{\lxfonts
+{The Pythagorean Theorem is one of the most important theorems in Mathematics.}\\
+{Το Πυθαγόρειο Θεώρημα είναι από τα σημαντικότερα θε\-ω\-ρή\-μα\-τα των Mαθηματικών.}
+
+\medskip
+
+\textbf{Theorem}\,(Πυθαγόρειον)
+In a right angle triangle with sides $\alpha$, $\beta$, $\gamma$
+with $\alpha$ being the hypotenuse, we have
+$$\alpha^2=\beta^2+\gamma^2.$$
+
+Ἐν τοῖς ὀρθογω\-νί\-οις τριγώνοις τὸ ἀπὸ τῆς τὴν ὀρθὴν γωνίαν ὑπο\-τει\-νού\-σης πλευρᾶς
+τετράγωνον ἴσον ἐστὶ τοῖς ἀπὸ τῶν τὴν ὀρθὴν\hspace{-1pt} γωνίαν περιεχουσῶν πλευρῶν τετραγώνοις.
+  }
+
+
+%\begin{center}
+%\includegraphics{lxfonts.pdf}
+%\end{center}
+
+\bigskip
+  
+You can select this variation when in Sans family by enabling StylisticSet 8
+for both text and Mathematics, although one must make adjustments
+of the height of letters as their x-height is bigger.
+It is simpler to load the \verb|fontsetup| package
+with option \verb|lx| which will take care of proper scaling
+factors for text and Mathematics.
+%For example, you may use
+% \verb|\setmathfont[StylisticSet=8]{NewCMSansMath-Regular.otf}|
+% \noindent and after \verb|\begin{document}| issue
+%   \verb|\addfontfeatures{StylicticSet=8}|
+
+\setmathfont{NewCMMath-Book.otf}
+
+  
+\section{Food Allergies}
+
+Food allergy symbols have long been proposed to be accepted to
+Unicode standard but there has not been any progress up to now.
+The Sans 10 Regular and Book include standard allergy symbols
+in the Private Use Area. Each glyph is named after what it represents.
+For example, the soya symbol is named ``soya'' so copying the symbol
+from a pdf file and pasting elsewhere you will get its name, that is ``soya''.
+The symbols are in positions U+E033 to U+E040 and can be accessed using the
+commands of the next table.
+\begin{sffamily}
+  \newcommand{\fdal}[2]{\begin{minipage}[c]{2.5cm}\begin{center}\ \  \\[1.5ex] \scalebox{4}{\char"#1}\\ \textsc{#2}\\[-1ex] \ \ \end{center}\end{minipage}}
+% \newcommand\crustaceans{\begin{minipage}[c]{1cm}\begin{center}\scalebox{4}{\char"E033}\\ \textsc{crustaceans}\end{center}\end{minipage}}
+%\newcommand\eggs{\begin{minipage}[c]{1cm}\scalebox{4}{\char"E034}\\ \textsc{eggs}\end{minipage}}
+\begin{center}
+    \begin{tabular}{|l|c||l|c|}\hline
+    \verb|\char"E033| & \fdal{E033}{crustaceans} & \verb|\char"E034| & \fdal{E034}{eggs}\\ \hline
+    \verb|\char"E035| & \fdal{E035}{gluten} & \verb|\char"E036| & \fdal{E036}{fish}\\ \hline
+    \verb|\char"E037| & \fdal{E037}{lupin} & \verb|\char"E038| & \fdal{E038}{milk}\\ \hline
+      \verb|\char"E039| & \fdal{E039}{molluscs} & \verb|\char"E03A| & \fdal{E03A}{mustard}\\ \hline
+    \end{tabular}
+  \end{center}
+\begin{center}
+  \begin{tabular}{|l|c||l|c|}\hline
+    \verb|\char"E03B| & \fdal{E03B}{peanut} & \verb|\char"E03C| & \fdal{E03C}{sesame}\\ \hline
+    \verb|\char"E03D| & \fdal{E03D}{soya} & \verb|\char"E03E| & \fdal{E03E}{treenuts}\\ \hline
+    \verb|\char"E03F| & \fdal{E03F}{celery} &  \verb|\char"E040| & \fdal{E040}{SO$_2$}\\ \hline
+    \end{tabular}
+\end{center}
+\end{sffamily}
 
 
 \section{Unicode Math coverage and options}
@@ -952,52 +1938,144 @@ NewCM provides
 full Unicode math support, that is 
  all Mathematics Unicode Slots
  presented in \url{http://www.unicode.org/charts/}
-  in both Math weights, Regular and Book. These blocks are:
+  in the Math weights, Regular, Book and Bold. These blocks are:
 \hspace*{-5em} \begin{description}
 \item[Mathematical Symbols]
 \ \\
-Arrows (uni2190--uni21FF)\\
-Supplemental Arrows-A (uni27F0--uni27FF)\\
-Supplemental Arrows-B (uni2900--uni297F)\\
-Supplemental Arrows-C (u1F800--u1F8FF)\\
-Additional Arrows (uni2B00--uni2BFF)\\
-Miscellaneous Symbols and Arrows (uni2B00--uni2BFF)
+Arrows (U+2190--U+21FF)\\
+Supplemental Arrows-A (U+27F0--U+27FF)\\
+Supplemental Arrows-B (U+2900--U+297F)\\
+Supplemental Arrows-C (U+1F800--U+1F8FF)\\
+Additional Arrows (U+2B00--U+2BFF)\\
+Miscellaneous Symbols and Arrows (U+2B00--U+2BFF)
 \item[Mathematical Alphanumeric Symbols] 
-\ \\ (u1D400--u1D7FF)\\
-     Arabic Mathematical Alphabetic Symbols\\ (u1EE00--u1EEFF)\\
-     Letterlike Symbols (uni2100--uni214F)
+\ \\ (U+1D400--U+1D7FF)\\
+     Arabic Mathematical Alphabetic Symbols\\ (U+1EE00--U+1EEFF)\\
+     Letterlike Symbols (U+2100--U+214F)
 \item[Mathematical Operators] 
-\ \\ (uni2200--uni22FF)\\
-    Basic operators: Plus, Factorial\\ (uni0000--uni007F)\\
-             Division, Multiplication\\ (uni0080--uni00FF)\\
-    Supplemental Mathematical Operators\\ (uni2A00--uni2AFF)\\
-    Miscellaneous Mathematical Symbols-A\\ (uni27C0--uni27EF)\\
-    Miscellaneous Mathematical Symbols-B\\ (uni2980--uni29FF)\\
-    Floors and Ceilings (uni2308--uni230B)\\
-    Invisible Operators (uni2061--uni2064)
-  \item[Geometric Shapes (uni25A0--25FF)]
+\ \\ (U+2200--U+22FF)\\
+    Basic operators: Plus, Factorial\\ (U+0000--U+007F)\\
+             Division, Multiplication\\ (U+0080--U+00FF)\\
+    Supplemental Mathematical Operators\\ (U+2A00--U+2AFF)\\
+    Miscellaneous Mathematical Symbols-A\\ (U+27C0--U+27EF)\\
+    Miscellaneous Mathematical Symbols-B\\ (U+2980--U+29FF)\\
+    Floors and Ceilings (U+2308--U+230B)\\
+    Invisible Operators (U+2061--U+2064)
+  \item[Geometric Shapes (U+25A0--U+25FF)]
     \ \\
-   Additional Shapes (uni2B00--uni2BFF)\\
-   Box Drawing (uni2500--uni257F)\\
-   Block Elements (uni2580--uni259F)\\
-   Geometric Shapes Extended (u1F780--u1F7FF)
+   Additional Shapes (U+2B00--U+2BFF)\\
+   Box Drawing (U+2500--U+257F)\\
+   Block Elements (U+2580--U+259F)\\
+   Geometric Shapes Extended (U+1F780--U+1F7FF)
    \end{description}
 
 \begin{wrapfigure}[8]{o}{0.08\textwidth}\vspace*{-1\baselineskip}
 \ \\[2ex]
   \scalebox{8}{\color{gray}$\char"2BDA$}
 \end{wrapfigure}
-  Unfortunately, the \texttt{unicode-math} package does not
-provide commands currently for the hundrends of extra glyphs that have been added
+  Unfortunately, the \texttt{unicode-math} package does not currently
+provide commands for the hundrends of extra glyphs that have been added
 in order to fully cover the above Unicode ranges. The user can 
 consult the Unicode charts at the above link and access the required 
 glyph with \verb|\char"#| where \#\ is the Unicode number of the
 slot the glyph belongs to. 
 
 For example, \verb|\char"2BDA| will give the Hygeia symbol
-(uni2BDA) the Rod of Asclepius as shown above (grayed and scaled $\times 8$). The glyph
+(U+2BDA) the Rod of Asclepius as shown above (grayed and scaled $\times 8$). The glyph
 that appeared in TUGboat (see \cite{1}), being more realistic will be moved to
 a new font in the future with ornaments.
+
+
+\subsection{Bold Math}
+
+A complete math font, such as NewCM, contains all alphabetic characters in bold too.
+These characters are typically accessed using the \verb|\mathbf| command. However,
+this is not true for bold versions of symbols. This creates difficulties
+when a user has some math in chapter or section titles, or when a user wants to
+create a poster with colored background. In the later case the Regular and Book
+weights look too light (especially with dark backgrounds) and one is in need
+of a real Bold Math font, that has everything in Bold.
+
+NewCM, starting from version 6.0.0 provides an independent Bold Math font for the
+first time for a Computer Modern font family.
+Let us compare:
+
+Book inline: $\sqrt[3]{x+y\pm 1}=\sum_{n=1}^\infty \int_{K}f_n(x)\,dx$ and the same in display
+$$\sqrt[3]{x+y\pm 1}=\sum_{n=1}^\infty \int_{K}f_n(x)\,dx.$$
+
+\setmathfont{NewCMMath-Bold.otf} %[version=bold]
+%\mathversion{bold}
+\setmathfont[range={\mathscr,\mathbfscr},StylisticSet=1]{NewCMMath-Book.otf}
+
+
+Bold inline: $\sqrt[3]{x+y\pm 1}=\sum_{n=1}^\infty \int_{K}f_n(x)\,dx$ and the same in display
+$$\sqrt[3]{x+y\pm 1}=\sum_{n=1}^\infty \int_{K}f_n(x)\,dx.$$
+
+Bold Math with colors inverted:
+
+\medskip
+
+
+\begin{pspicture}(0,0)(10,2)
+\psframe[fillstyle=solid,fillcolor=black](1.5,0)(9.5,2)
+\rput(5.5,1){{\color{white}$\displaystyle\sqrt[3]{x+y\pm 1}=\sum_{n=1}^\infty \int_{K}f_n(x)\,dx.$}}
+\end{pspicture}
+
+In order to use the Bold font for chapter and section titles, when using the \verb|default|
+or \verb|olddefault| options of the \verb|fontsetup| package, change the math version
+to bold with \verb|\mathversion{bold}| \textit{before} the commands for chapter and section
+and switch back to normal with \verb|\mathversion{normal}| \textit{afterwards}.
+
+The \verb|unicode-math| package, according to it's documentation
+has still some troubles with ``versions'' and the \verb|range| options. These seem to affect
+at least the calligraphic and script math alphabets. In normal version for example
+the commands \verb|\symcal| and \verb|\symscr| work as expected, but when one switches
+to the bold version the \verb|\symscr| fails. In this case one can use
+\verb|\symbfscr|: \usebox{\mathcalscrA} (which was \verb|$\symcal A$ $\symbfscr A$|).
+
+%\mathversion{normal}
+
+\subsection{Sans Serif Math}
+
+\setmathfont{NewCMSansMath-Regular.otf}
+\newfontfamily{\sansAmSfont}{NewCMSansMath-Regular.otf}
+\renewcommand{\AmS}{{\sansAmSfont $\symcal A$\kern-.1667em\lower.5ex\hbox{$\symcal M$}\kern-.125em$\symcal S$}}
+
+
+As of version 7.0.0, the family includes a full-featured Math Sans font. Up to now such a font
+did not exist in the CM family (although partial solutions existed), and it
+posed a serious problem for scientific writing especially in the preparation of presentations.
+The font supplied with NewCM covers all Unicode math slots but it also provides some new features.
+The lowercase Latin alphabet has been completely re-worked so that it really looks
+as it should when used for Math variables. The letters are
+
+$$|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|$$
+In Large
+\begin{Large}
+$$|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|$$
+\end{Large}
+Moreover the calligraphic capitals have been re-worked to match
+better with the sans serif style (see subsection~\ref{mathscript} for how to select them)
+$$\symcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+
+The same holds true for the \verb|\mathbb/\symbb| capital letters. They have been adjusted to match
+the Sans design, both in style and weight:
+$$\symbb{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+It is also worth noticing that the SansSerifed and the Serifed letters have swapped slots
+in the font. So if using the MathSans font and you write for example \verb|$\symsf{ABCDabcd}$|
+you will get the Serifed version(!): $\symsf{ABCDabcd}$. This choice facilitates
+converting a document with Serifed fonts using Sans for emphasis or differentiation
+to keep these characteristics when changed to Sans.
+
+One can see the Sans Serif Math font in action in the provided file
+\verb|testmath-newcm.pdf| which comes form the \AmS-{\sffamily L\kern-.5ex\raise.5ex\hbox{\textsc{a}}\kern-.2exT\kern-.4ex\lower.6ex\hbox{E}X}
+bundle (here the logo is written in NewCMSans).
+
+
+
+
+\setmathfont{NewCMMath-Book.otf}
+
 
 \subsection{Optical sizes for more glyphs}
 So far the fonts provided optical sizes for 1st and 2nd order exponents for letters. This was
@@ -1014,61 +2092,121 @@ Zoom or print and compare with \texttt{lat\-in\-modern-math} font:
 \end{center}
 
 
-\subsection{Math Script}
+\subsection{Math Script}\label{mathscript}
 
-Calligraphic letters are accessed as usual with \verb|\mathcal| producing
-$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+
+Calligraphic letters are accessed as usual with \verb|\mathcal| or \verb|\symcal|, producing
+$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ},$$
+which is a re-traced and glyph by glyph adjustment of the original Knuth design.
+Prior to version 8.0.0 of the fonts the \verb|\mathcal| was providing
+the Euler chancery style calligraphics inherited from lmodern-math. This
+version is now saved in StylisticSet 6.
+
 
 However, mathematicians often need a second level of ``scriptness''. The fonts
 provide an alternative calligraphic, a script design at StylisticSet 1. For this to work
 one has to re-set the math font using
 
-\noindent\verb|\setmathfont[StylisticSet=1]{NewCMMath-Book.otf}|
+\noindent\verb|\setmathfont[range={\mathscr,\mathbfscr},StylisticSet=1]{NewCMMath-Book.otf}|
 
-(or the Regular version). So the following code
+(or the Regular version). The \verb|fontsetup| package from version 2.4.0 and on,
+supports automatically all three variants (thanks to David Carlisle, see \cite{chancery})
+introducing a new command, namely
+ \verb|\mathchancery|/\verb|\symchancery| to access the chancery version.
+
+ The next code
 \begin{verbatim}
 $$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
-\setmathfont[StylisticSet=1]{NewCMMath-Book.otf}
-$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
-$$
-\mscra\mscrb\mscrc\mscrd\mscre\mscrf\mscrg\mscrh\mscri\mscrj
+$$\mathchancery{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+$$\mathscr{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+$$\mscra\mscrb\mscrc\mscrd\mscre\mscrf\mscrg\mscrh\mscri\mscrj
 \mscrk\mscrl\mscrm\mscrn\mscro\mscrp\mscrq\mscrr\mscrs\mscrt
-\mscru\mscrv\mscrw\mscrx\mscry\mscrz
-$$
-\setmathfont{NewCMMath-Book.otf}
-$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+\mscru\mscrv\mscrw\mscrx\mscry\mscrz$$
 \end{verbatim}
 produces
-$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$\setmathfont[StylisticSet=1]{NewCMMath-Book.otf}$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
-$$
-\mscra\mscrb\mscrc\mscrd\mscre\mscrf\mscrg\mscrh\mscri\mscrj\mscrk\mscrl\mscrm\mscrn\mscro\mscrp\mscrq\mscrr\mscrs\mscrt\mscru\mscrv\mscrw\mscrx\mscry\mscrz
-$$
-\setmathfont{NewCMMath-Book.otf}$$\mathcal{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
+\begin{center}
+\includegraphics{mathscript-cropped.pdf}
+\end{center}
+
+\setmathfont{NewCMMath-Book.otf}
+
+
+\subsection{Math Kerning}
+
+Math kerning has been added to all NewCM Math fonts. This feature
+greatly improves Math typesetting, especially for the calligraphic letters but for regular
+letters as well, such as, $Y$ or $\Gamma$.
+
+\begin{center}
+  \includegraphics{mathkern-example.pdf}
+\end{center}
+
+Regular kerning in math mode works with Lua\LaTeX\ but not with \XeLaTeX.
+The next table shows the effect of kerning in math mode with calligraphic capital letters
+and capital Latin italic letters with period and comma (look closely).
+This table is compiled
+with Lua\LaTeX.
+
+\begin{center}
+  \includegraphics{mathkern-example2.pdf}
+\end{center}
+
+Regular kerning in math mode does not work with \XeLaTeX\ as said above. With
+Lua\LaTeX\ we notice that it works with calligraphic capitals but not with
+Latin italic capitals. The reason looks to be the fact that these letters
+have italic correction enabled in the fonts (as they should). Italic correction
+breaks the application of the kern. Now if italic correction is removed,
+by say \verb|$H\/.$|, then the engine does not see the characters \verb|H| and
+period as consecutive characters to apply the kern, and the kern is lost.
+
+The code of the table above is as follows:
+
+\begin{verbatim}
+\begin{tabular}{c|c}
+ Before & Current (with Lua)\\ \hline
+  {\setmathfont{latinmodern-math.otf}\Large 
+${\symcal H.}^{{\symcal H,}^{\symcal H,}}$
+${H\/.}{H.}^{{H\/,}{H,}^{H\/,H,}}$}
+ & {\setmathfont{NewCMMath-Regular.otf}\Large 
+${\symcal H.}^{{\symcal H,}^{\symcal H,}}$
+ ${H\/.}{H.}^{{H\/,}{H,}^{H\/,H,}}$}
+\end{tabular}
+\end{verbatim}
+
+We also notice that \LuaLaTeX\ has a parameter set by the command
+
+\noindent\verb|\mathitalicsmode|
+
+with default value $0$. If set to $2$ with \verb|\mathitalicsmode=2| then
+\LuaLaTeX\ uses regular letter kerning in math mode but breaks other things
+like the endpoints of integrals (see \cite{stackexchangeitcor}).
+We conclude this subsection realizing that there is no single engine
+(among \XeLaTeX\ and Lua\LaTeX) that supports all features.
+
 
 
 \subsection{Blackboard Bold}
-In version 5.0 of the fonts a new NewCM blackboard bold was introduced
-in the place of the \textsc{ams} blackboard
-bold letters. There were many complains from Mathematicians for this choice.
-I have to make a statement here: it seems that although \textsc{ams} blackboard
-bold are not matching with the computer modern design the long time
-Mathematicians use them had its effect. People (including myself)
-got used to it and find it difficult to feel their non-matching design.
-Moreover, the new design can not be metrically equivalent with the past
-so there will be slight changes in the older documents if re-run.
-With this in mind and the fact that the new design should be considered
-``beta'', as there are characters that need improvement,
-I decided bring back to default the \textsc{ams} design and keep the
-new design for new documents for the StylisticSet 3. 
+The fonts contain as default the \textsc{ams} blackboard bold. These are:
 
-
-
-The \textsc{ams} blackboard bold are:
 $$\mathbb{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
 $$\mathbb{abcdefghijklmnopqrstuvwxyz}$$
-$$\mathbb{0123456789\ \pi\gamma\Gamma\Pi\Sigma\mitBbbD\mitBbbd\mitBbbe\mitBbbi\mitBbbj}$$
+$$\mathbb{0123456789\ \pi\gamma\Gamma\Pi\textrm{\mathastext\char"2140}\mitBbbD\mitBbbd\mitBbbe\mitBbbi\mitBbbj}$$
 
-To access the new ones needs to load the math font enabling the
+They also contain a blackboard bold that matches the design of Computer Modern
+but respecting the fact that most users have been used for a long period to
+the AMS bb design. Compare
+the
+default \begin{center}{\LARGE $\textup{R}\in\mathbb R\qquad \textup{Q}\in\mathbb Q$}
+\end{center}
+with the new design
+\setmathfont[StylisticSet=3]{NewCMMath-Book.otf}
+\begin{center}
+{\LARGE $\textup{R}\in\mathbb R\qquad \textup{Q}\in\mathbb Q$}
+\end{center}
+
+\setmathfont{NewCMMath-Book.otf}
+
+To access this design one needs to load the math font enabling the
 \verb|ss03| stylistic set using for example
 
 \noindent\verb|\setmathfont[StylisticSet=3]{NewCMMath-Book.otf}|
@@ -1076,13 +2214,52 @@ Then the above blackboard bold design changes to
 \setmathfont[StylisticSet=3]{NewCMMath-Book.otf}
 $$\mathbb{ABCDEFGHIJKLMNOPQRSTUVWXYZ}$$
 $$\mathbb{abcdefghijklmnopqrstuvwxyz}$$
-$$\mathbb{0123456789\ \pi\gamma\Gamma\Pi\Sigma\mitBbbD\mitBbbd\mitBbbe\mitBbbi\mitBbbj}$$
+$$\mathbb{0123456789\ \pi\gamma\Gamma\Pi\textrm{\mathastextnewcm\char"2140}\mitBbbD\mitBbbd\mitBbbe\mitBbbi\mitBbbj}$$
 
-\setmathfont{NewCMMath-Book.otf}
+%\setmathfont{NewCMMath-Book.otf}
+%\newsavebox{\emptysetdefault}
+%\savebox{\emptysetdefault}{$\emptyset$}
+%
+%\setmathfont[CharacterVariant=2]{NewCMMath-Book.otf}
 
-If using the latest \verb|fontsetup| (to be released soon)
+If using the latest \verb|fontsetup|
 then you can choose the NewCM blackboard bold
 with the option \verb|newcmbb|.
+
+\subsubsection{Small Caps for Blackboard Bold}
+
+A user might need to use Blackboard Bold in Small Caps. For example,
+this may arise when running heads
+are in small caps and contain a Blackboard Bold symbol. Consider for example
+the case when a chapter is named ``The Lebesgue measure on $\mathbb R$''.
+Then the running head in small caps will look awkward:
+\begin{center}
+\textsc{the lebesgue measure on} $\mathbb R$
+\end{center}
+In such cases, a small caps version of the number sets is needed. NewCM provides
+the needed glyphs in \verb|ss05|. So setting
+
+\noindent\verb|\setmathfont[StylisticSet=5]{NewCMMath-Book.otf}|
+
+\noindent the above
+running head becomes:
+\setmathfont[StylisticSet=5]{NewCMMath-Book.otf}
+\begin{center}
+\textsc{the lebesgue measure on} $\mathbb R$
+\end{center}
+\setmathfont{NewCMMath-Book.otf}
+These glyphs are provided in the CM style (instead of the AMS bb)
+by enabling \verb|ss03| too. So the command
+
+\noindent\verb|\setmathfont[StylisticSet=3,StylisticSet=5]{NewCMMath-Book.otf}|
+
+\noindent will produce:
+\setmathfont[StylisticSet=3,StylisticSet=5]{NewCMMath-Book.otf}
+\begin{center}
+\textsc{the lebesgue measure on} $\mathbb R$
+\end{center}
+\setmathfont[CharacterVariant=2,CharacterVariant=1]{NewCMMath-Book.otf}
+The same is true for the Regular and Bold Math fonts.
 
 \subsection{Upright and extensible integrals}
 The Math fonts (both Regular and Book weights) include upright integrals
@@ -1113,7 +2290,7 @@ for the regular weight.
 Moreover, extensible integrals are supported by the fonts but \textit{NOT} by the Unicode TeX
 engines.
 The following code is a trick so that extensible integrals can be
-constructed using Lua\LaTeX. The result is shown at the end
+constructed using \LuaLaTeX. The result is shown at the end
 of the article.
 What the  code below does, is that it defines the slot uni222B (integral) as
 a delimiter. And then this is extended as a delimiter with the mechanism that
@@ -1144,33 +2321,148 @@ $
 \end{tabular}
 
 \subsection{Additional and alternative characters in Math}
-The Math fonts provide the character \verb|\varnothing| ($\varnothing$), as
-an alternative to \verb|\emptyset| (a slashed zero),
-through Character Variant \verb|cv01|. The \verb|fontsetup| package provides the option 
-`\verb|varnothing|' to easily switch to the alternative character.
 
-It also provides two more symbols that correspond to the commands
+\subsubsection{Alternative symbol for the empty set}
+\renewcommand{\emptyset}{\char"2205}\renewcommand{\varnothing}{\char"2300}
+
+There is a mismatch between the \TeX\ world for the empty set and the Unicode standard.
+For \TeX\ the default empty set is $\emptyset$, that is a slashed zero. Unicode suggests
+that the proper character is $\varnothing$, and suggests the switch to
+the slashed zero if $\varnothing$ is followed by the Variation Selector U+FE00.
+However, this method is not yet supported by Unicode \TeX\ engines.
+Since the fonts must comply to the Unicode standard the math fonts follow the
+Unicode suggestion. To make things work as expected in \TeX, the user must
+load the Math fonts with CharacterVariant=2. For example, with
 
 \medskip
 
-  \verb|\nrightrightarrows| ($\nrightrightarrows$)
+\noindent\verb|\setmathfont[CharacterVariant=2]{NewCMMath-Regular.otf}|
+
+\medskip
+
+\noindent This will map \verb|\emptyset| to $\emptyset$. If CharacterVariant=2 is not loaded
+the \verb|\emptyset| will give the proper Unicode character, that is $\varnothing$.
+
+If users want to have access to both symbols, $\emptyset$ with \verb|\emptyset|
+and $\varnothing$ with \verb|\varnothing| in the same document then this can by done
+with the next four lines.
+
+\begin{verbatim}
+\setmathfont[CharacterVariant=2]{NewCMMath-Regular.otf}
+\AtBeginDocument{%
+\renewcommand{\emptyset}{\char"2205}%
+\renewcommand{\varnothing}{\char"2300}}
+\end{verbatim}
+
+The \verb|fontsetup| package defaults to the \TeX-default empty set ($\emptyset$) and
+provides the option 
+`\verb|varnothing|' to easily switch to the alternative character.
+
+\subsubsection{Other alternative symbols}
+
+The Unicode standard defines more alternative symbols as for the emptyset above
+using variation selector characters U+FE00 and U+FE01.
+%%%https://www.unicode.org/Public/UCD/latest/ucd/StandardizedVariants.txt
+NewCM Math fonts support all variations suggested by Unicode (except U+FF10
+as this is to be used with CJK fonts, not with math).
+The Unicode method
+is that we get a variation of the original glyph if it is followed
+by U+FE00 or U+FE01. However, this method is not supported yet by the Unicode \TeX\ engines.
+One block of such characters are the script capitals, chancery or roundhand.
+\TeX\ access to those is described before, in Section~\ref{mathscript}.
+The rest are the following:
+\begin{center}
+\usebox{\vsbox}
+\end{center}
+As we did for the empty set, we have included these variations in \verb|cv01|. When
+enabled it will produce the varied characters:
+\begin{center}
+$0, \cap, \cup, \lneqq,\gneqq, 
+\lesssim,\gtrsim,\subsetneq,\supsetneq, \sqcap,\sqcup,\oplus,\otimes,
+\circledequal,\lesseqgtr,\gtreqless,\circledparallel,\intprod,\intprodr,
+\simless,\simgtr,\smte,\late,\subsetneqq,\supsetneqq$
+\end{center}
+
+
+\subsubsection{Additional symbols}
+
+%\newcommand{\twoheadhookrightarrow}{\char"E034}
+%\newcommand{\twoheadhookleftarrow}{\char"E035}
+%\newcommand{\increasingconcave}{\char"E03A}
+%\newcommand{\increasingconvex}{\char"E03B}
+%\newcommand{\decreasingconcave}{\char"E03C}
+%\newcommand{\increasingconvex}{\char"E03D}
+
+
+It also provides four more arrows that correspond to the commands
+
+\medskip
+
+  \verb|\nrightrightarrows| ($\nrightrightarrows$) \quad \verb|\nleftleftarrows| ($\nleftleftarrows$)
+
+
+
+\verb|\twoheadhookrightarrow| ($\twoheadhookrightarrow$)\quad \verb|\twoheadhookleftarrow| ($\twoheadhookleftarrow$)
 
 \noindent and
 
-\verb|\nleftleftarrows| ($\nleftleftarrows$)
+\verb|\increasingconcave| ($\increasingconcave$)\quad \verb|\increasingconvex| ($\increasingconvex$)
+
+\verb|\decreasingconcave| ($\decreasingconcave$)\quad \verb|\increasingconvex| ($\increasingconvex$)
 
 \medskip
 
 \noindent
-and supported by the \verb|default| and \verb|olddefault| options of the \verb|fontsetup| package.
+and supported by the \verb|default|, \verb|olddefault| and \verb|sansdefault|
+options of the \verb|fontsetup| package.
 These symbols are not in the Unicode Standard and so they are added in the
-Private Area of the fonts. 
+Private Area of the fonts. The later four arrows are needed when making tables describing
+the behavior of functions when they are studied in Calculus.
+
+\subsubsection{Additional operators}
+
+An operator for convolution of functions seems to have long been forgotten from both
+Unicode and the \TeX\ world.
+The \verb|default| and \verb|olddefault| options of the \verb|fontsetup| package
+define a new command \verb|\convolution| which behaves just like the \verb|\sum| and
+\verb|\int| operators.
+The convolution of $N$ functions in inline mode: $\convolution_{n=1}^N f_n$ and the same
+in display mode: $$\convolution_{n=1}^N f_n.$$
+
+\subsubsection{``Smoother'' changing radicals}
+
+One more radical size has been added that improves the way radical sizes change. Compare
+the previous state 
+\setmathfont{latinmodern-math.otf}
+$$\sqrt{q}\quad\sqrt{q_1^2}\quad\sqrt{q_1^{2^3}}\quad\sqrt{\frac12}$$ with the new one
+\setmathfont[CharacterVariant=1]{NewCMMath-Book.otf}
+$$\sqrt{q}\quad\sqrt{q_1^2}\quad\sqrt{q_1^{2^3}}\quad\sqrt{\frac12}.$$
+
+
+\subsection{Notes on Mathematics}
+
+Extensible tildes and hats produce different results
+with \XeLaTeX\ and \LuaLaTeX\ because these unicode
+engines treat differently the width of characters. In particular, \XeLaTeX\ handles italic
+correction as part of the character width but \LuaLaTeX\ does this only if a character
+follows. This affects how extensible accents like \verb|\widehat| or \verb|\widetilde|
+select the proper size. With \XeLaTeX, \verb|\widetilde{Y}| \verb|\widetilde{X}| will give the
+expected result $\widetilde{Y}\widetilde{X}$; but with \LuaLaTeX\ the letter $Y$ is
+narrower (and its italic correction is not taken into account if it stands alone)
+and gets the plain tilde size, as in $\tilde{Y}$. To bypass this with \LuaLaTeX\ one
+has to use a zero width character after a letter such as $Y$ so that
+\LuaLaTeX\ takes into account the italic correction of $Y$. For example with
+\begin{center}\verb|\widetilde{Y\Uchar"200D}|
+\end{center}
+the result will be correct (U+200D is the ``Zero Width Joiner'' in Unicode).
+
+I thank Ulrike Fischer for this solution.
 
 
 \section{The Medieval Latin and Uncial Greek glyph complement}
 
 
-\displayfonttable[hex-digits=head+foot, range-end=03CE]{NewCMUncial10-Book.otf}
+\displayfonttable[hex-digits=head+foot, range-end=03CE]{NewCMUncial10-Book.otf}[ExternalLocation=../otf/]
 
 
 \section{The Aegean Numbers glyph complement}
@@ -1210,12 +2502,12 @@ Private Area of the fonts.
 
 
 
-
-
 \begin{thebibliography}{9}
 \bibitem[\textsc{at}]{1} Antonis Tsolomitis, \textit{The NewComputerModern font family}, \textsc{tug}boat Vol.~\textsc{42}, No.~\textsc{1}, \textsc{2021}.
 \bibitem[\textsc{ipa}rev]{2} Council actions on revisions of the \textsc{ipa}, Phonetic Representation: b) Revision of the \textsc{ipa}, Journal of the International Phonetic Association, Volume \textsc{23}, Issue \textsc{1},
   June \textsc{1993},
-  pp.~\textsc{32--34}. 
+  pp.~\textsc{32--34}.
+\bibitem[web1]{stackexchangeitcor} \texttt{https://tex.stackexchange.com/a/697498}
+  \bibitem[web2]{chancery} \texttt{https://tex.stackexchange.com/a/762017}
 \end{thebibliography}
 \end{document}
