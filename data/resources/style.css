@@ -574,7 +574,7 @@ window.settings checkbutton.single {
     margin-left: 13px;
     margin-right: 14px;
 }
-window.settings checkbutton.single check {
+window.settings checkbutton.single check, window.settings checkbutton.single radio {
     margin-right: 6px;
 }
 label.settings-header {

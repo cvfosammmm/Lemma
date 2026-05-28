@@ -229,6 +229,11 @@ class Document():
         self.last_cursor_movement = time.time()
         self.query_cache = dict()
 
+    def invalidate_all_paragraphs(self):
+        for paragraph in self.ast:
+            self.invalidate_paragraph(paragraph)
+        self.secondary_formats_cache = dict()
+
     def invalidate_paragraph(self, paragraph):
         self.plaintext.invalidate_paragraph(paragraph)
         self.links.invalidate_paragraph(paragraph)

@@ -21,6 +21,7 @@ from gi.repository import Gtk
 
 import lemma.ui.dialogs.settings_view as view
 import lemma.ui.dialogs.settings_page_colors as page_colors
+import lemma.ui.dialogs.settings_page_fonts as page_fonts
 import lemma.ui.dialogs.settings_page_workspace as page_workspace
 import lemma.ui.dialogs.settings_page_toolbars as page_toolbars
 import lemma.ui.dialogs.settings_page_autocomplete as page_autocomplete
@@ -44,6 +45,7 @@ class Dialog(object):
 
         self.pages = []
         self.pages.append(['Colors', 'preferences-color-symbolic', page_colors.PageColors(self, self.main_window)])
+        self.pages.append(['Font Theme', 'font-settings-symbolic', page_fonts.PageFonts(self, self.main_window)])
         self.pages.append(['Workspace', 'overlapping-windows-symbolic', page_workspace.PageWorkspace(self, self.main_window)])
         self.pages.append(['Toolbars', 'preferences-system-symbolic', page_toolbars.PageToolbars(self, self.main_window)])
         self.pages.append(['Autocomplete', 'completion-snippet-symbolic', page_autocomplete.PageAutocomplete(self, self.main_window)])

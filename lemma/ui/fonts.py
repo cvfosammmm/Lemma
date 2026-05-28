@@ -52,4 +52,10 @@ class Fonts(object):
                 TextShaper.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
                 TextRenderer.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
 
+        self.application.document_view.presenter.clear_render_cache()
+
+        self.main_window.main_box.queue_draw()
+        self.main_window.document_view.content.queue_draw()
+        self.main_window.document_list.content.queue_draw()
+
 

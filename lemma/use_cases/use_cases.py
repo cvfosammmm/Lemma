@@ -999,6 +999,15 @@ class UseCases():
         MessageBus.add_message('implicit_x_position_changed')
 
     @timer.timer
+    def invalidate_document_layout():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        document.invalidate_all_paragraphs()
+
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+
+    @timer.timer
     def extend_selection():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
