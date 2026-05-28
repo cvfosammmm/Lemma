@@ -1,9 +1,6 @@
 Lemma is licensed under GPL version 3 or later. See below for details.
 
-NewComputerModern fonts are licensed under GustFLv1 or later.
-See https://ctan.org/tex-archive/fonts/newcomputermodern for details.
-A copy of the license can be found in this file (below the GPL) or
-under beforementioned link.
+All fonts are distributed under the GUST license except NewCM10-Regular, all NewCMUncial, and all NewCM*Devanagari which are distributed with GPL3 or later plus Font Exception (FE) plus Distribution Exception (DE); see Section 7 of the GPL3 license below and consult the documentation of NewCM for details. A copy of the GUST license can be found in this file (below the GPL) or under https://ctan.org/tex-archive/fonts/newcomputermodern.
 
 python_freetype (in the "lib" folder) is dual-licensed under the FreeType licence (http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT) and GPLv2 (http://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/GPLv2.TXT) or later, to be compatible with FreeType itself.
 
