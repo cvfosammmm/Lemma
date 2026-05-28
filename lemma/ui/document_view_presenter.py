@@ -121,7 +121,7 @@ class DocumentViewPresenter():
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
             fg_color = ColorManager.get_ui_color_string('bullets')
 
-            surface, left, top = TextRenderer.get_glyph('-', 'book', fg_color, self.hidpi_factor)
+            surface, left, top = TextRenderer.get_glyph('-', 'body', fg_color, self.hidpi_factor)
             bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_ul_bullet_padding() - surface.get_width()
             bullet_measurement = TextShaper.measure_single('-')
 
@@ -139,8 +139,8 @@ class DocumentViewPresenter():
 
             text = '.' + ''.join(reversed(str(list_item_numbers[paragraph.indentation_level])))
             bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_ol_bullet_padding()
-            for char, dim in zip(text, TextShaper.measure(text, 'book')):
-                surface, left, top = TextRenderer.get_glyph(char, 'book', fg_color, self.hidpi_factor)
+            for char, dim in zip(text, TextShaper.measure(text, 'body')):
+                surface, left, top = TextRenderer.get_glyph(char, 'body', fg_color, self.hidpi_factor)
                 bullet_indent -= dim[0]
                 bullet_measurement = TextShaper.measure_single(char)
 

@@ -49,8 +49,8 @@ class Fonts(object):
 
         with open(os.path.join(font_path, self.theme_name + '.json'), 'r') as file:
             for data in json.load(file):
-                TextShaper.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
-                TextRenderer.add_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
+                TextShaper.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
+                TextRenderer.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
 
         self.application.document_view.presenter.clear_render_cache()
 

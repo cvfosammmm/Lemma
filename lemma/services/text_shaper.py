@@ -30,7 +30,7 @@ class TextShaper():
     harfbuzz_buffer = HarfBuzz.buffer_create()
     harfbuzz_features = [HarfBuzz.feature_from_string(b'liga 0')[1], HarfBuzz.feature_from_string(b'kern 1')[1]]
 
-    def add_font(name, filename, size, ascend, descend, padding_top, padding_bottom):
+    def set_font(name, filename, size, ascend, descend, padding_top, padding_bottom):
         fontconfig.Config.get_current().app_font_add_file(filename)
 
         TextShaper.fonts[name] = dict()
@@ -49,25 +49,25 @@ class TextShaper():
         HarfBuzz.font_set_scale(TextShaper.fonts[name]['harfbuzz_font'], size * 64, size * 64)
         TextShaper.fonts[name]['char_extents'] = dict()
 
-    def get_descend(fontname='book'):
+    def get_descend(fontname='body'):
         return TextShaper.fonts[fontname]['descend']
 
-    def get_ascend(fontname='book'):
+    def get_ascend(fontname='body'):
         return TextShaper.fonts[fontname]['ascend']
 
-    def get_padding_top(fontname='book'):
+    def get_padding_top(fontname='body'):
         return TextShaper.fonts[fontname]['padding_top']
 
-    def get_padding_bottom(fontname='book'):
+    def get_padding_bottom(fontname='body'):
         return TextShaper.fonts[fontname]['padding_bottom']
 
-    def measure_single(char, fontname='book'):
+    def measure_single(char, fontname='body'):
         if char not in TextShaper.fonts[fontname]['char_extents']:
             TextShaper.load_glyph(char, fontname)
 
         return TextShaper.fonts[fontname]['char_extents'][char]
 
-    def measure(text, fontname='book'):
+    def measure(text, fontname='body'):
         harfbuzz_buffer = TextShaper.harfbuzz_buffer
         HarfBuzz.buffer_reset(harfbuzz_buffer)
         HarfBuzz.buffer_add_utf8(harfbuzz_buffer, text.encode('utf8'), 0, -1)

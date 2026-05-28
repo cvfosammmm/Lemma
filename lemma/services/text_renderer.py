@@ -37,7 +37,7 @@ class TextRenderer():
     fonts = dict()
     icon_cache = dict()
 
-    def add_font(name, filename, size, ascend, descend):
+    def set_font(name, filename, size, ascend, descend):
         TextRenderer.fonts[name] = dict()
         TextRenderer.fonts[name]['size'] = size
         TextRenderer.fonts[name]['filename'] = filename
@@ -78,7 +78,7 @@ class TextRenderer():
 
         TextRenderer.icon_cache[(icon_name, scale, default_color, highlight_color)] = surface
 
-    def get_glyph(char, fontname='book', color=None, scale=1):
+    def get_glyph(char, fontname='body', color=None, scale=1):
         if (char, color, scale) not in TextRenderer.fonts[fontname]['cache']:
             TextRenderer.load_glyph(char, fontname, color, scale)
 

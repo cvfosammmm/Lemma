@@ -515,6 +515,6 @@ class Layouter(object):
         if 'bold' in node.tags and 'italic' in node.tags: return 'bolditalic'
         if 'bold' not in node.tags and 'italic' in node.tags: return 'italic'
 
-        return 'book'
+        return 'body'
 
 
