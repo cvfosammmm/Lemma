@@ -10,7 +10,7 @@
     },
     {
         "name": "bold",
-        "path": "newcomputermodern/otf/NewCM10-Bold.otf",
+        "path": "newcomputermodern/otf/NewCMSans10-Bold.otf",
         "size": 19.407,
         "ascend": 21,
         "descend": 7,
@@ -19,7 +19,7 @@
     },
     {
         "name": "bolditalic",
-        "path": "newcomputermodern/otf/NewCM10-BoldItalic.otf",
+        "path": "newcomputermodern/otf/NewCMSans10-BoldOblique.otf",
         "size": 19.407,
         "ascend": 21,
         "descend": 7,
@@ -28,7 +28,7 @@
     },
     {
         "name": "italic",
-        "path": "newcomputermodern/otf/NewCM10-Italic.otf",
+        "path": "newcomputermodern/otf/NewCMSans10-Oblique.otf",
         "size": 19.407,
         "ascend": 21,
         "descend": 7,
@@ -46,7 +46,7 @@
     },
     {
         "name": "math",
-        "path": "newcomputermodern/otf/NewCMMath-Book.otf",
+        "path": "newcomputermodern/otf/NewCMSansMath-Regular.otf",
         "size": 19.407,
         "ascend": 21,
         "descend": 7,
@@ -55,7 +55,7 @@
     },
     {
         "name": "math_small",
-        "path": "newcomputermodern/otf/NewCMMath-Book.otf",
+        "path": "newcomputermodern/otf/NewCMSansMath-Regular.otf",
         "size": 14,
         "ascend": 12,
         "descend": 2,
@@ -64,7 +64,7 @@
     },
     {
         "name": "teaser",
-        "path": "newcomputermodern/otf/NewCM08-Book.otf",
+        "path": "newcomputermodern/otf/NewCMSans08-Regular.otf",
         "size": 14,
         "ascend": 16,
         "descend": 4,
@@ -100,7 +100,7 @@
     },
     {
         "name": "h4",
-        "path": "newcomputermodern/otf/NewCMSans10-Book.otf",
+        "path": "newcomputermodern/otf/NewCMSans10-BoldOblique.otf",
         "size": 24,
         "ascend": 27,
         "descend": 8,
@@ -109,16 +109,16 @@
     },
     {
         "name": "h5",
-        "path": "newcomputermodern/otf/NewCMSans10-BookOblique.otf",
-        "size": 24,
-        "ascend": 27,
-        "descend": 8,
-        "padding_top": 3,
-        "padding_bottom": 2
+        "path": "newcomputermodern/otf/NewCMSans10-Bold.otf",
+        "size": 19.407,
+        "ascend": 21,
+        "descend": 7,
+        "padding_top": 0,
+        "padding_bottom": 1
     },
     {
         "name": "h6",
-        "path": "newcomputermodern/otf/NewCMSans10-Book.otf",
+        "path": "newcomputermodern/otf/NewCMSans10-BoldOblique.otf",
         "size": 19.407,
         "ascend": 21,
         "descend": 7,
