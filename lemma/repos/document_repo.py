@@ -100,6 +100,11 @@ class DocumentRepo():
             else:
                 Files.delete_all_document_files(stub['id'])
 
+        for direntry in os.scandir(Files.get_stubs_folder()):
+            if direntry.is_file() and direntry.name.isdigit():
+                if not int(direntry.name) in DocumentRepo.document_stubs_by_id:
+                    os.remove(os.path.join(Files.get_stubs_folder(), direntry.name))
+
         for thread in threading.enumerate():
             try:
                 thread.join()
