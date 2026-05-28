@@ -31,6 +31,7 @@ class Command():
     def undo(self, document):
         document.ast.remove_range(self.index, self.index + 1)
 
+        document.invalidate_paragraph(self.paragraph)
         document.update_last_modified()
 
 

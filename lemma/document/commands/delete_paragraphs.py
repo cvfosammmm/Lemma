@@ -36,6 +36,8 @@ class Command():
 
         document.ast.remove_range(self.index_from, self.index_to)
 
+        for paragraph in reversed(self.state['deleted_paragraphs']):
+            document.invalidate_paragraph(paragraph)
         document.update_last_modified()
 
     def undo(self, document):
