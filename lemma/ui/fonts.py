@@ -25,6 +25,7 @@ import os.path, json
 from lemma.services.files import Files
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
+from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
 import lemma.services.timer as timer
 
@@ -46,12 +47,19 @@ class Fonts(object):
 
         self.theme_name = Settings.get_value('font_theme')
         font_path = os.path.join(Files.get_resources_folder(), 'fonts')
+        theme_path = os.path.join(font_path, self.theme_name + '.json')
 
-        with open(os.path.join(font_path, self.theme_name + '.json'), 'r') as file:
-            for data in json.load(file):
+        if not os.path.isfile(theme_path):
+            Settings.reset_default('font_theme')
+            self.update_font_theme()
+            return
+
+        with open(theme_path, 'r') as file:
+            for data in json.load(file)['fonts']:
                 TextShaper.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
                 TextRenderer.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
 
+        UseCases.invalidate_document_layout()
         self.application.document_view.presenter.clear_render_cache()
 
         self.main_window.main_box.queue_draw()

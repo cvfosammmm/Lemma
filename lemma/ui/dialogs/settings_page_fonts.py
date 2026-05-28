@@ -19,6 +19,9 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
+import os.path, json
+
+from lemma.services.files import Files
 from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 
@@ -30,26 +33,28 @@ class PageFonts(object):
         self.settings = settings
         self.main_window = main_window
 
-        self.theme_choices = dict()
+        self.theme_choices = []
 
     def init(self):
-        for name in ['default', 'Sans-serif']:
-            self.add_theme_choice(name)
+        font_path = os.path.join(Files.get_resources_folder(), 'fonts')
+        for direntry in os.scandir(font_path):
+            if direntry.is_file() and direntry.name.endswith('.json'):
+                with open(os.path.join(font_path, direntry.name), 'r') as file:
+                    self.add_theme_choice(direntry.name[:-5], json.load(file)['title'])
 
-    def add_theme_choice(self, name):
-        button = Gtk.CheckButton.new_with_label(name)
-        if 'default' in self.theme_choices:
-            button.set_group(self.theme_choices['default'])
+    def add_theme_choice(self, name, title):
+        button = Gtk.CheckButton.new_with_label(title)
+        if len(self.theme_choices) > 0:
+            button.set_group(self.theme_choices[0])
         button.set_active(Settings.get_value('font_theme') == name)
         button.add_css_class('single')
         button.connect('toggled', self.on_theme_choice_toggled, name)
-        self.theme_choices[name] = button
+        self.theme_choices.append(button)
         self.view.radio_buttons.append(button)
 
     def on_theme_choice_toggled(self, button, name):
         if button.get_active():
             UseCases.settings_set_value('font_theme', name)
-            UseCases.invalidate_document_layout()
 
 
 class PageFontsView(Gtk.Box):

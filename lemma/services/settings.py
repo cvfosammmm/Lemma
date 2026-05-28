@@ -30,7 +30,7 @@ class Settings():
         Settings.defaults['color_scheme'] = 'default'
         Settings.defaults['color_scheme_dark'] = 'default-dark'
         Settings.defaults['separate_dark_color_scheme'] = False
-        Settings.defaults['font_theme'] = 'default'
+        Settings.defaults['font_theme'] = 'sans'
         Settings.defaults['update_backlinks'] = True
         Settings.defaults['stylized_latex_autocomplete'] = True
 
@@ -82,6 +82,9 @@ class Settings():
 
     def set_value(item, value):
         Settings.data[item] = value
+
+    def reset_default(item):
+        Settings.data[item] = Settings.defaults[item]
 
     def save():
         try: filehandle = open(os.path.join(Files.get_config_folder(), 'settings.pickle'), 'wb')

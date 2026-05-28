@@ -78,8 +78,8 @@ class Colors(object):
             path = self.color_scheme
 
             if not os.path.isfile(path):
-                Settings.set_value('color_scheme', 'default')
-                Settings.set_value('color_scheme_dark', 'default-dark')
+                Settings.reset_default('color_scheme')
+                Settings.reset_default('color_scheme_dark')
                 self.update_color_scheme()
                 return
 
