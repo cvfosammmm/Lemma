@@ -27,27 +27,26 @@ class Layout():
     def __init__(self, document):
         self.document = document
         self.ast = document.ast
-        self.layouter = Layouter(self)
 
-        self.paragraph_layouts = dict()
-        self.node_layouts = dict()
+        self.layouts = dict()
+        self.layouter = Layouter()
 
     def invalidate_paragraph(self, paragraph):
-        if paragraph in self.paragraph_layouts:
-            del(self.paragraph_layouts[paragraph])
+        if paragraph in self.layouts:
+            del(self.layouts[paragraph])
 
     def update(self):
         y_offset = 0
         for paragraph in self.ast:
-            if paragraph not in self.paragraph_layouts:
+            if paragraph not in self.layouts:
                 indentation = LayoutInfo.get_indentation(paragraph.style, paragraph.indentation_level)
                 width = LayoutInfo.get_max_layout_width() - indentation
 
-                layout_tree = self.layouter.make_layout_tree_paragraph(self.ast, paragraph)
+                layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(self.ast, paragraph)
                 self.layouter.layout_paragraph(layout_tree, width, indentation)
-                self.paragraph_layouts[paragraph] = layout_tree
+                self.layouts[paragraph] = {'paragraph': layout_tree, 'nodes': node_layouts}
             else:
-                layout_tree = self.paragraph_layouts[paragraph]
+                layout_tree = self.layouts[paragraph]['paragraph']
             layout_tree['y'] = y_offset
             y_offset += layout_tree['height']
 
@@ -59,13 +58,15 @@ class Layout():
         return self.get_paragraph_layout(self.ast[0])['width']
 
     def get_paragraph_layout(self, paragraph):
-        if paragraph in self.paragraph_layouts:
-            return self.paragraph_layouts[paragraph]
+        if paragraph in self.layouts:
+            return self.layouts[paragraph]['paragraph']
         return None
 
     def get_node_layout(self, node):
-        if node in self.node_layouts:
-            return self.node_layouts[node]
+        paragraph = node.paragraph()
+
+        if paragraph in self.layouts and node in self.layouts[paragraph]['nodes']:
+            return self.layouts[paragraph]['nodes'][node]
         return None
 
     @timer.timer
@@ -146,13 +147,14 @@ class Layout():
 
 class Layouter(object):
 
-    def __init__(self, layout):
-        self.layout = layout
+    def __init__(self):
         self.paragraph_style = None
+        self.node_layouts = dict()
 
     @timer.timer
     def make_layout_tree_paragraph(self, root, paragraph):
         self.paragraph_style = paragraph.style
+        self.node_layouts = dict()
 
         layout_tree = {'type': 'paragraph',
                        'fixed': False,
@@ -173,20 +175,20 @@ class Layouter(object):
                 subtree = {'type': 'word', 'fixed': False, 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': fontname}
                 for char_node, extents in zip(char_nodes, TextShaper.measure(text, fontname=fontname)):
                     subsubtree = {'type': 'char','fixed': True, 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': extents[0], 'height': extents[1], 'fontname': fontname}
-                    self.layout.node_layouts[char_node] = subsubtree
+                    self.node_layouts[char_node] = subsubtree
                     subtree['children'].append(subsubtree)
             else:
                 subtree = self.make_layout_tree(child, layout_tree)
             layout_tree['children'].append(subtree)
 
-        return layout_tree
+        return layout_tree, self.node_layouts
 
     def make_layout_tree(self, node, parent=None):
         if node.type == 'char':
             fontname = self.get_fontname_from_node(node)
             width, height = TextShaper.measure_single(node.value, fontname=fontname)
             layout_tree = {'type': 'char', 'fixed': True, 'node': node, 'parent': parent, 'children': [], 'x': 0, 'y': 0, 'width': width, 'height': height, 'fontname': fontname}
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
             return layout_tree
 
         layout_tree = {'type': None,
@@ -207,7 +209,7 @@ class Layouter(object):
             layout_tree['width'] = 1
             width, height = TextShaper.measure_single('\n', fontname=layout_tree['fontname'])
             layout_tree['height'] = height
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
         elif node.type == 'end':
             layout_tree['type'] = 'end'
             layout_tree['fixed'] = True
@@ -215,7 +217,7 @@ class Layouter(object):
             layout_tree['width'] = 1
             width, height = TextShaper.measure_single('\n', fontname=layout_tree['fontname'])
             layout_tree['height'] = height
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
         elif node.type == 'placeholder':
             layout_tree['type'] = 'placeholder'
             layout_tree['fixed'] = True
@@ -223,12 +225,12 @@ class Layouter(object):
             width, height = TextShaper.measure_single('▯', fontname=layout_tree['fontname'])
             layout_tree['width'] = width
             layout_tree['height'] = height
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
         elif node.type == 'widget':
             layout_tree['type'] = 'widget'
             layout_tree['fixed'] = True
             layout_tree['fontname'] = self.get_fontname_from_node(node)
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
             width, height = layout_tree['node'].value.get_allocation(layout_tree['fontname'])
             layout_tree['width'] = width
             layout_tree['height'] = height
@@ -236,17 +238,17 @@ class Layouter(object):
             layout_tree['type'] = 'mathscript'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
         elif node.type == 'mathfraction':
             layout_tree['type'] = 'mathfraction'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
         elif node.type == 'mathroot':
             layout_tree['type'] = 'mathroot'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
-            self.layout.node_layouts[node] = layout_tree
+            self.node_layouts[node] = layout_tree
         elif node.type == 'mathlist':
             layout_tree['type'] = 'hbox'
             layout_tree['fixed'] = False
