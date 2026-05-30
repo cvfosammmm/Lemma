@@ -1001,6 +1001,7 @@ class UseCases():
     @timer.timer
     def invalidate_document_layout():
         document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
 
         document.invalidate_all_paragraphs()
 

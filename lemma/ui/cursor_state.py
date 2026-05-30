@@ -48,11 +48,15 @@ class CursorState():
 
     def update_implicit_x_position(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
-        layout = document.get_layout()
-        insert = document.cursor.get_insert_node()
 
-        x, y = layout.get_absolute_xy(layout.get_node_layout(insert))
-        self.implicit_x_position = x
+        if document == None:
+            self.implicit_x_position = 0
+        else:
+            layout = document.get_layout()
+            insert = document.cursor.get_insert_node()
+
+            x, y = layout.get_absolute_xy(layout.get_node_layout(insert))
+            self.implicit_x_position = x
 
     def update_tags_at_cursor(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
