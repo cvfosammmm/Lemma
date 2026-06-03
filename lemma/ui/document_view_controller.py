@@ -54,48 +54,6 @@ class DocumentViewController():
         self.secondary_click_controller.connect('pressed', self.on_secondary_button_press)
         self.content.add_controller(self.secondary_click_controller)
 
-        self.key_controller_content = Gtk.EventControllerKey()
-        self.key_controller_content.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.key_controller_content.connect('key-pressed', self.on_keypress_content)
-        self.key_controller_content.connect('key-released', self.on_keyrelease_content)
-        self.content.add_controller(self.key_controller_content)
-
-        self.shortcut_controller = Shortcuts.new_controller()
-        self.shortcut_controller.add_cb('toggle_bold', self.model.application.actions.actions['toggle-bold'].activate)
-        self.shortcut_controller.add_cb('toggle_italic', self.model.application.actions.actions['toggle-italic'].activate)
-        self.shortcut_controller.add_cb('toggle_verbatim', self.model.application.actions.actions['toggle-verbatim'].activate)
-        self.shortcut_controller.add_cb('toggle_highlight', self.model.application.actions.actions['toggle-highlight'].activate)
-        self.shortcut_controller.add_cb('link_popover', self.model.application.actions.actions['show-link-popover'].activate)
-        self.shortcut_controller.add_cb('subscript', self.model.application.actions.actions['subscript'].activate)
-        self.shortcut_controller.add_cb('superscript', self.model.application.actions.actions['superscript'].activate)
-        self.shortcut_controller.add_cb('toggle_checkbox', self.model.application.actions.actions['toggle-checkbox'].activate)
-        self.shortcut_controller.add_cb('undo', self.model.application.actions.actions['undo'].activate)
-        self.shortcut_controller.add_cb('redo', self.model.application.actions.actions['redo'].activate)
-        self.shortcut_controller.add_cb('cut', self.model.application.actions.actions['cut'].activate)
-        self.shortcut_controller.add_cb('copy', self.model.application.actions.actions['copy'].activate)
-        self.shortcut_controller.add_cb('paste', self.model.application.actions.actions['paste'].activate)
-        self.shortcut_controller.add_cb('select_all', self.model.application.actions.actions['select-all'].activate)
-        self.shortcut_controller.add_cb('go_to_parent_node', UseCases.move_cursor_to_parent)
-        self.shortcut_controller.add_cb('extend_selection', UseCases.extend_selection)
-
-        self.shortcut_controller.add_cb('rename_document', self.model.application.actions.actions['rename-document'].activate)
-        self.shortcut_controller.add_cb('paragraph_style_h2', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h2'))
-        self.shortcut_controller.add_cb('paragraph_style_h3', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h3'))
-        self.shortcut_controller.add_cb('paragraph_style_h4', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h4'))
-        self.shortcut_controller.add_cb('paragraph_style_h5', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h5'))
-        self.shortcut_controller.add_cb('paragraph_style_h6', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('h6'))
-        self.shortcut_controller.add_cb('paragraph_style_ul', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('ul'))
-        self.shortcut_controller.add_cb('paragraph_style_ol', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('ol'))
-        self.shortcut_controller.add_cb('paragraph_style_cl', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('cl'))
-        self.shortcut_controller.add_cb('paragraph_style_p', self.model.application.actions.actions['set-paragraph-style'].activate, GLib.Variant.new_string('p'))
-
-        self.content.add_controller(self.shortcut_controller)
-
-        self.im_context = Gtk.IMContextSimple()
-        self.im_context.set_use_preedit(True)
-        self.im_context.connect('commit', self.on_im_commit)
-        self.key_controller_content.set_im_context(self.im_context)
-
         self.focus_controller = Gtk.EventControllerFocus()
         self.focus_controller.connect('enter', self.on_focus_in)
         self.focus_controller.connect('leave', self.on_focus_out)
@@ -404,148 +362,24 @@ class DocumentViewController():
     def on_scrollbar_drag(self, widget, new_y):
         self.model.application.scrolling.scroll_to_xy(0, new_y, animation_type=None)
 
-    def on_keypress_content(self, controller, keyval, keycode, keyboard_state):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
-
-        self.model.set_ctrl_pressed(int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK or Gdk.keyval_name(keyval).startswith('Control'))
-
-        if self.model.document == None: return False
-
-        document = self.model.document
-
-        if (widget := document.get_selected_widget()) != None:
-            if self.model.application.widget_manager.on_keypress(widget, keyval, keycode, keyboard_state):
-                return
-
-        match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
-            case ('left', 0):
-                UseCases.left()
-            case ('right', 0):
-                UseCases.right()
-            case ('up', 0):
-                UseCases.up(self.model.application.cursor_state.implicit_x_position)
-            case ('down', 0):
-                UseCases.down(self.model.application.cursor_state.implicit_x_position)
-            case ('home', 0):
-                UseCases.paragraph_start()
-            case ('end', 0):
-                UseCases.paragraph_end()
-            case ('page_up', 0):
-                UseCases.page(self.model.application.cursor_state.implicit_x_position, -self.model.document_view_height + 100)
-            case ('page_down', 0):
-                UseCases.page(self.model.application.cursor_state.implicit_x_position, self.model.document_view_height - 100)
-
-            case ('left', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.left(True)
-            case ('right', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.right(True)
-            case ('up', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.up(self.model.application.cursor_state.implicit_x_position, True)
-            case ('down', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.down(self.model.application.cursor_state.implicit_x_position, True)
-            case ('home', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.paragraph_start(True)
-            case ('end', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.paragraph_end(True)
-            case ('page_up', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(self.model.application.cursor_state.implicit_x_position, -self.model.document_view_height + 100, True)
-            case ('page_down', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(self.model.application.cursor_state.implicit_x_position, self.model.document_view_height - 100, True)
-
-            case ('left', Gdk.ModifierType.CONTROL_MASK):
-                UseCases.jump_left(False)
-            case ('left', 5):
-                UseCases.jump_left(True)
-            case ('right', Gdk.ModifierType.CONTROL_MASK):
-                UseCases.jump_right(False)
-            case ('right', 5):
-                UseCases.jump_right(True)
-
-            case ('tab', 0):
-                if document.has_multiple_lines_selected():
-                    UseCases.change_indentation_level(1)
-                elif not document.has_selection() and document.cursor_at_paragraph_start():
-                    UseCases.change_indentation_level(1)
-                else:
-                    UseCases.select_next_placeholder()
-            case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK):
-                if document.has_multiple_lines_selected():
-                    UseCases.change_indentation_level(-1)
-                elif not document.has_selection() and document.cursor_at_paragraph_start():
-                    UseCases.change_indentation_level(-1)
-                else:
-                    UseCases.select_prev_placeholder()
-            case ('escape', _):
-                if document.get_selected_widget() != None:
-                    UseCases.remove_selection()
-            case ('return', _) | ('kp_enter', _):
-                if not document.has_selection() and document.get_insert_node().is_inside_link():
-                    UseCases.open_link(document.get_insert_node().link)
-                elif not document.has_selection():
-                    insert_paragraph = document.get_insert_node().paragraph()
-                    paragraph_style = insert_paragraph.style
-
-                    if paragraph_style in ['ul', 'ol', 'cl'] and len(insert_paragraph) == 1:
-                        UseCases.set_paragraph_style('p')
-                        UseCases.set_indentation_level(0)
-                    else:
-                        tags_at_cursor = self.model.application.cursor_state.tags_at_cursor
-                        UseCases.add_newline(tags_at_cursor)
-                else:
-                    tags_at_cursor = self.model.application.cursor_state.tags_at_cursor
-                    UseCases.add_newline(tags_at_cursor)
-            case ('backspace', _):
-                UseCases.backspace()
-            case ('delete', _):
-                UseCases.delete()
-
-            case _: return False
-        return True
-
-    def on_keyrelease_content(self, controller, keyval, keycode, keyboard_state):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.set_ctrl_pressed(int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control'))
-
-    def on_im_commit(self, im_context, text):
-        tags_at_cursor = self.model.application.cursor_state.tags_at_cursor
-        UseCases.im_commit(text, tags_at_cursor)
-
     def on_focus_in(self, controller):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
-
-        self.im_context.focus_in()
         self.model.reset_cursor_blink()
         self.view.content.queue_draw()
 
     def on_focus_out(self, controller):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
-
-        self.im_context.focus_out()
         self.view.content.queue_draw()
 
     def on_focus_change(self, controller, pspec):
         self.view.content.queue_draw()
 
     def on_enter(self, controller, x, y):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
-
         self.model.set_pointer_position(x, y)
 
     def on_hover(self, controller, x, y):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
-
         self.model.set_pointer_position(x, y)
         self.view.scrollbar_vertical.ping()
 
     def on_leave(self, controller):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.model.set_ctrl_pressed(int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK)
-
         self.model.set_pointer_position(None, None)
 
 

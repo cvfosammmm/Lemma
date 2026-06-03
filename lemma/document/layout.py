@@ -31,6 +31,9 @@ class Layout():
         self.layouts = dict()
         self.layouter = Layouter()
 
+        self.line_layouts_by_y = dict()
+        self.leaf_layouts_by_xy = dict()
+
     def invalidate_paragraph(self, paragraph):
         if paragraph in self.layouts:
             del(self.layouts[paragraph])
@@ -49,6 +52,9 @@ class Layout():
                 layout_tree = self.layouts[paragraph]['paragraph']
             layout_tree['y'] = y_offset
             y_offset += layout_tree['height']
+
+        self.line_layouts_by_y = dict()
+        self.leaf_layouts_by_xy = dict()
 
     def get_height(self):
         layout = self.get_paragraph_layout(self.ast[-1])
@@ -69,17 +75,19 @@ class Layout():
             return self.layouts[paragraph]['nodes'][node]
         return None
 
-    @timer.timer
     def get_leaf_layout_at_xy(self, x, y):
-        line = self.get_line_layout_at_y(y)
+        if (x, y) not in self.leaf_layouts_by_xy:
+            line = self.get_line_layout_at_y(y)
 
-        if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
-            for layout in self.flatten_layout(line):
-                if layout['node'] != None and layout['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
-                    layout_x, layout_y = self.get_absolute_xy(layout)
-                    if x >= layout_x and x <= layout_x + layout['width'] and y >= layout_y and y <= layout_y + layout['height']:
-                        return layout
-        return None
+            self.leaf_layouts_by_xy[(x, y)] = None
+            if y >= line['y'] + line['parent']['y'] and y < line['y'] + line['parent']['y'] + line['height']:
+                for layout in self.flatten_layout(line):
+                    if layout['node'] != None and layout['node'].type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
+                        layout_x, layout_y = self.get_absolute_xy(layout)
+                        if x >= layout_x and x <= layout_x + layout['width'] and y >= layout_y and y <= layout_y + layout['height']:
+                            self.leaf_layouts_by_xy[(x, y)] = layout
+
+        return self.leaf_layouts_by_xy[(x, y)]
 
     def get_cursor_holding_layout_close_to_xy(self, x, y):
         if y < 0: x = 0
@@ -107,20 +115,23 @@ class Layout():
         return closest_layout
 
     def get_line_layout_at_y(self, y):
-        if y < 0:
-            layout = self.get_paragraph_layout(self.ast[0])
-            return layout['children'][0]
-        elif y > self.get_height():
-            layout = self.get_paragraph_layout(self.ast[-1])
-            return layout['children'][-1]
-        else:
-            for paragraph in self.ast:
-                layout = self.get_paragraph_layout(paragraph)
-                if y >= layout['y'] and y < layout['y'] + layout['height']:
-                    y -= layout['y']
-                    for line in layout['children']:
-                        if y >= line['y'] and y < line['y'] + line['height']:
-                            return line
+        if y not in self.line_layouts_by_y:
+            if y < 0:
+                layout = self.get_paragraph_layout(self.ast[0])
+                self.line_layouts_by_y[y] = layout['children'][0]
+            elif y > self.get_height():
+                layout = self.get_paragraph_layout(self.ast[-1])
+                self.line_layouts_by_y[y] = layout['children'][-1]
+            else:
+                for paragraph in self.ast:
+                    layout = self.get_paragraph_layout(paragraph)
+                    if y >= layout['y'] and y < layout['y'] + layout['height']:
+                        y -= layout['y']
+                        for line in layout['children']:
+                            if y >= line['y'] and y < line['y'] + line['height']:
+                                self.line_layouts_by_y[y] = line
+
+        return self.line_layouts_by_y[y]
 
     def flatten_layout(self, layout_tree):
         result = [layout_tree]

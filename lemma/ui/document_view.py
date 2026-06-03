@@ -40,14 +40,15 @@ class DocumentView():
         self.application = application
 
         self.pointer_x, self.pointer_y = None, None
+        self.pointer_name = 'default'
         self.scrolling_position_x, self.scrolling_position_y = -1, -1
         self.document_view_width, self.document_view_height = 0, 0
         self.drop_cursor_x, self.drop_cursor_y = -1, -1
-        self.ctrl_pressed = False
         self.scrolling_multiplier = 2.5
         self.selected_click_target = None
         self.link_target_at_cursor = None
         self.link_target_at_pointer = None
+        self.link_overlay_text = None
 
         self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
         self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
@@ -116,8 +117,10 @@ class DocumentView():
             do_draw = True
 
         if do_draw:
-            self.update_pointer()
             self.view.content.queue_draw()
+
+        self.update_pointer()
+        self.update_link_overlay_text()
 
     def reset_cursor_blink(self):
         self.cursor_blink_reset = time.time()
@@ -125,7 +128,6 @@ class DocumentView():
     def set_pointer_position(self, x, y):
         if x != self.pointer_x or y != self.pointer_y:
             self.pointer_x, self.pointer_y = x, y
-            self.update_pointer()
 
     def set_view_size(self, width, height, baseline):
         if width != self.document_view_width or height != self.document_view_height:
@@ -149,55 +151,50 @@ class DocumentView():
         y -= self.application.document_title.title_buttons_height
 
         if y > 0:
-            leaf_layout = document.get_layout().get_leaf_layout_at_xy(x, y)
             line_layout = document.get_layout().get_line_layout_at_y(y)
+            leaf_layout = document.get_layout().get_leaf_layout_at_xy(x, y)
             paragraph_layout = line_layout['parent']
-            line_layout = paragraph_layout['children'][0]
             paragraph = paragraph_layout['node']
 
             link = None
             if leaf_layout != None and leaf_layout['node'] != None and leaf_layout['node'].link != None:
                 link = leaf_layout['node'].link
-            self.set_link_target_at_pointer(link)
+            self.link_target_at_pointer = link
 
-            indentation = LayoutInfo.get_indentation('cl', paragraph_layout['node'].indentation_level)
+            indentation = LayoutInfo.get_indentation('cl', paragraph.indentation_level)
             x_start = indentation - 35
             x_end = indentation - 16
+
             if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + line_layout['height'] - 23 and y <= paragraph_layout['y'] + line_layout['height'] - 4 and x >= x_start and x <= x_end:
-                self.view.content.set_cursor_from_name('default')
+                pointer_name = 'default'
             elif leaf_layout != None:
                 node = leaf_layout['node']
                 if node != None:
-                    if node.link != None and not self.ctrl_pressed:
-                        self.view.content.set_cursor_from_name('pointer')
+                    if node.link != None and not self.application.keyboard_input.ctrl_pressed:
+                        pointer_name = 'pointer'
                     elif node.type == 'widget':
                         self.view.content.set_cursor_from_name(self.application.widget_manager.get_cursor_name(node.value))
                     elif node.type == 'placeholder':
-                        self.view.content.set_cursor_from_name('default')
+                        pointer_name = 'default'
                     else:
-                        self.view.content.set_cursor_from_name('text')
+                        pointer_name = 'text'
                 else:
-                    self.view.content.set_cursor_from_name('text')
+                    pointer_name = 'text'
             else:
-                self.view.content.set_cursor_from_name('text')
+                pointer_name = 'text'
         else:
-            self.view.content.set_cursor_from_name('default')
+            pointer_name = 'default'
+            self.link_target_at_pointer = None
 
-    def set_ctrl_pressed(self, is_pressed):
-        if is_pressed != self.ctrl_pressed:
-            self.ctrl_pressed = is_pressed
-            self.update_pointer()
+        if pointer_name != self.pointer_name:
+            self.pointer_name = pointer_name
+            self.view.content.set_cursor_from_name(pointer_name)
 
     def update_link_at_cursor(self):
         if self.document == None:
             self.link_target_at_cursor = None
         else:
             self.link_target_at_cursor = self.document.get_link_at_cursor()
-        self.update_link_overlay_text()
-
-    def set_link_target_at_pointer(self, link):
-        self.link_target_at_pointer = link
-        self.update_link_overlay_text()
 
     def update_link_overlay_text(self):
         if self.link_target_at_pointer != None:
@@ -210,9 +207,13 @@ class DocumentView():
                 if len(DocumentRepo.list_by_title(text)) == 0:
                     text = 'Create "' + text + '"'
 
-            self.view.link_overlay.set_text(text)
-            self.view.link_overlay.set_visible(True)
-        else:
-            self.view.link_overlay.set_visible(False)
+        if text != self.link_overlay_text:
+            self.link_overlay_text = text
+
+            if text != None:
+                self.view.link_overlay.set_text(text)
+                self.view.link_overlay.set_visible(True)
+            else:
+                self.view.link_overlay.set_visible(False)
 
 

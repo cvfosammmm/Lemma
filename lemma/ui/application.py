@@ -32,6 +32,7 @@ import lemma.ui.window_state as window_state
 import lemma.ui.views.main_window_view as main_window_view
 import lemma.ui.history as history
 import lemma.ui.scrolling as scrolling
+import lemma.ui.keyboard_input as keyboard_input
 import lemma.ui.document_view as document_view
 import lemma.ui.document_title as document_title
 import lemma.ui.document_context_menu as context_menu_document
@@ -66,6 +67,7 @@ class Application(Adw.Application):
         self.dialog_locator = DialogLocator(self.main_window)
         self.history = history.History(self.main_window)
         self.actions = actions.Actions(self.main_window, self)
+        self.keyboard_input = keyboard_input.KeyboardInput(self.main_window, self)
         self.document_view = document_view.DocumentView(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
         self.scrolling = scrolling.DocumentScrolling(self.main_window, self)
@@ -101,6 +103,7 @@ class Application(Adw.Application):
         self.backlinks.animate()
         self.document_draft.animate()
         self.scrolling.animate()
+        self.keyboard_input.animate()
         self.document_view.animate()
         self.document_title.animate()
         self.context_menu_document.animate()
