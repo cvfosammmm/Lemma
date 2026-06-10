@@ -393,7 +393,6 @@ class UseCases():
 
         document.start_undoable_action()
         document.delete_nodes(node_from, node_to)
-        document.set_insert_and_selection_node(node_to)
         document.end_undoable_action()
 
         DocumentRepo.update(document)
