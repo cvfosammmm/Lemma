@@ -430,8 +430,8 @@ class SidebarMath(object):
 
     def on_button_clicked(self, button, xml):
         self.application.document_view.view.content.grab_focus()
-
         UseCases.insert_xml(xml)
+        self.application.keyboard.update_implicit_x_position()
 
 
 class Icon(Gtk.DrawingArea):

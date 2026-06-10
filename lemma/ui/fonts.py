@@ -59,8 +59,8 @@ class Fonts(object):
                 TextShaper.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
                 TextRenderer.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
 
-        UseCases.invalidate_document_layout()
-        self.application.document_view.presenter.clear_render_cache()
+        self.application.layout.invalidate()
+        self.application.document_view.clear_render_cache()
 
         self.main_window.main_box.queue_draw()
         self.main_window.document_view.content.queue_draw()

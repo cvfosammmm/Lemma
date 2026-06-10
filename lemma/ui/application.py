@@ -27,16 +27,17 @@ from lemma.services.settings import Settings
 import lemma.services.timer as timer
 
 import lemma.ui.fonts as fonts
+import lemma.ui.layout as layout
 import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
 import lemma.ui.views.main_window_view as main_window_view
 import lemma.ui.history as history
 import lemma.ui.scrolling as scrolling
-import lemma.ui.keyboard_input as keyboard_input
+import lemma.ui.keyboard as keyboard
+import lemma.ui.pointer as pointer
 import lemma.ui.document_view as document_view
 import lemma.ui.document_title as document_title
 import lemma.ui.document_context_menu as context_menu_document
-import lemma.ui.cursor_state as cursor_state
 import lemma.ui.toolbars as toolbars
 import lemma.ui.bookmarks as bookmarks
 import lemma.ui.document_list as document_list
@@ -67,14 +68,15 @@ class Application(Adw.Application):
         self.dialog_locator = DialogLocator(self.main_window)
         self.history = history.History(self.main_window)
         self.actions = actions.Actions(self.main_window, self)
-        self.keyboard_input = keyboard_input.KeyboardInput(self.main_window, self)
+        self.layout = layout.Layout(self.main_window, self)
+        self.keyboard = keyboard.Keyboard(self.main_window, self)
+        self.pointer = pointer.Pointer(self.main_window, self)
         self.document_view = document_view.DocumentView(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
         self.scrolling = scrolling.DocumentScrolling(self.main_window, self)
         self.fonts = fonts.Fonts(self.main_window, self)
         self.colors = colors.Colors(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
-        self.cursor_state = cursor_state.CursorState(self.main_window, self)
         self.toolbars = toolbars.Toolbars(self.main_window, self)
         self.bookmarks = bookmarks.Bookmarks(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
@@ -93,6 +95,7 @@ class Application(Adw.Application):
     @timer.timer
     def animate(self, widget, frame_clock):
         self.fonts.animate()
+        self.layout.animate()
         self.colors.animate()
         self.actions.animate()
         self.window_state.animate()
@@ -103,12 +106,12 @@ class Application(Adw.Application):
         self.backlinks.animate()
         self.document_draft.animate()
         self.scrolling.animate()
-        self.keyboard_input.animate()
+        self.keyboard.animate()
+        self.pointer.animate()
         self.document_view.animate()
         self.document_title.animate()
         self.context_menu_document.animate()
         self.autocomplete.animate()
-        self.cursor_state.animate()
         self.toolbars.animate()
         self.bookmarks.animate()
         self.sidebar_emojis.animate()

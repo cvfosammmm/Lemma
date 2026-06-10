@@ -62,6 +62,8 @@ class Actions(object):
         self.add_simple_action('delete', self.delete)
         self.add_simple_action('select-all', self.select_all)
         self.add_simple_action('remove-selection', self.remove_selection)
+        self.add_simple_action('extend-selection', self.extend_selection)
+        self.add_simple_action('move-cursor-to-parent', self.move_cursor_to_parent)
 
         self.add_simple_action('open-link', self.open_link)
         self.add_simple_action('show-link-popover', self.show_link_popover)
@@ -165,6 +167,8 @@ class Actions(object):
         self.actions['delete'].set_enabled(workspace.get_mode() == 'documents' and document.has_selection())
         self.actions['select-all'].set_enabled(document != None)
         self.actions['remove-selection'].set_enabled(document != None and document.has_selection())
+        self.actions['extend-selection'].set_enabled(document != None)
+        self.actions['move-cursor-to-parent'].set_enabled(document != None)
         self.actions['show-insert-image-dialog'].set_enabled(document != None and document.insert_parent_is_root())
         self.actions['show-attach-files-dialog'].set_enabled(document != None and document.insert_parent_is_root())
         self.actions['open-link'].set_enabled(document != None and document.cursor_inside_link())
@@ -252,6 +256,8 @@ class Actions(object):
         self.copy()
         UseCases.delete_selection()
 
+        self.application.keyboard.update_implicit_x_position()
+
     def copy(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
 
@@ -310,6 +316,8 @@ class Actions(object):
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
 
+        self.application.keyboard.update_implicit_x_position()
+
     def on_paste_image(self, clipboard, result):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
@@ -318,6 +326,8 @@ class Actions(object):
         texture.save_to_png(Files.abspath_for_document_file(filename))
         image = WidgetFactory.make_widget('image', {'filename': filename})
         UseCases.add_widget(image)
+
+        self.application.keyboard.update_implicit_x_position()
 
     def on_paste_files(self, clipboard, result):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -332,25 +342,36 @@ class Actions(object):
             widget = WidgetFactory.make_widget('attachment', {'filename': filename})
             UseCases.add_widget(widget)
 
+        self.application.keyboard.update_implicit_x_position()
+
     def on_paste_text(self, clipboard, result):
         text = clipboard.read_text_finish(result)
-
         UseCases.insert_text(text)
+        self.application.keyboard.update_implicit_x_position()
 
     def delete(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
-
-        UseCases.delete()
+        UseCases.delete_selection()
+        self.application.keyboard.update_implicit_x_position()
 
     def select_all(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
-
         UseCases.select_all()
 
     def remove_selection(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
-
         UseCases.remove_selection()
+        self.application.keyboard.update_implicit_x_position()
+
+    def extend_selection(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+        UseCases.extend_selection()
+        self.application.keyboard.update_implicit_x_position()
+
+    def move_cursor_to_parent(self, action=None, parameter=''):
+        self.application.document_view.view.content.grab_focus()
+        UseCases.move_cursor_to_parent()
+        self.application.keyboard.update_implicit_x_position()
 
     def subscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -363,6 +384,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
+        self.application.keyboard.update_implicit_x_position()
 
     def superscript(self, action=None, parameter=''):
         self.application.document_view.view.content.grab_focus()
@@ -375,6 +397,7 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
+        self.application.keyboard.update_implicit_x_position()
 
     def set_paragraph_style(self, action=None, parameter=None):
         self.application.document_view.view.content.grab_focus()
@@ -400,7 +423,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('bold')
         else:
-            self.application.cursor_state.tags_at_cursor ^= {'bold'}
+            self.application.keyboard.tags_at_cursor ^= {'bold'}
             self.application.toolbars.update_tag_toggle('bold')
 
     def toggle_italic(self, action=None, parameter=''):
@@ -410,7 +433,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('italic')
         else:
-            self.application.cursor_state.tags_at_cursor ^= {'italic'}
+            self.application.keyboard.tags_at_cursor ^= {'italic'}
             self.application.toolbars.update_tag_toggle('italic')
 
     def toggle_verbatim(self, action=None, parameter=''):
@@ -420,7 +443,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('verbatim')
         else:
-            self.application.cursor_state.tags_at_cursor ^= {'verbatim'}
+            self.application.keyboard.tags_at_cursor ^= {'verbatim'}
             self.application.toolbars.update_tag_toggle('verbatim')
 
     def toggle_highlight(self, action=None, parameter=''):
@@ -430,7 +453,7 @@ class Actions(object):
         if document.has_selection():
             UseCases.toggle_tag('highlight')
         else:
-            self.application.cursor_state.tags_at_cursor ^= {'highlight'}
+            self.application.keyboard.tags_at_cursor ^= {'highlight'}
             self.application.toolbars.update_tag_toggle('highlight')
 
     def decrease_indent(self, action=None, parameter=''):
@@ -476,7 +499,7 @@ class Actions(object):
         scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
 
         insert = document.get_insert_node()
-        x, y = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(insert))
+        x, y = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(insert))
         x -= scrolling_position_x
         y -= scrolling_position_y
         document_view = self.main_window.document_view
@@ -485,15 +508,15 @@ class Actions(object):
         y += document_view_allocation.origin.y
         x += LayoutInfo.get_document_padding_left()
         y += LayoutInfo.get_normal_document_offset()
-        fontname = document.get_layout().get_node_layout(insert)['fontname']
+        fontname = self.application.layout.get_node_layout(insert)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += document.get_layout().get_node_layout(insert)['height'] - padding_top - padding_bottom
+        y += self.application.layout.get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         orientation = 'bottom'
         if y + 260 > document_view_allocation.size.height:
             orientation = 'top'
-            y -= document.get_layout().get_node_layout(insert)['height'] - padding_top - padding_bottom
+            y -= self.application.layout.get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         if not document.has_selection() and insert.is_inside_link():
             UseCases.select_section(*insert.link_bounds())

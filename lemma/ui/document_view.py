@@ -17,19 +17,20 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, Graphene
 
-import time, math
 from urllib.parse import urlparse
+import datetime
+import time
+import cairo
+import math
 
-from lemma.services.settings import Settings
-from lemma.ui.document_view_controller import DocumentViewController
-from lemma.ui.document_view_presenter import DocumentViewPresenter
+from lemma.services.text_shaper import TextShaper
+from lemma.services.text_renderer import TextRenderer
+from lemma.services.color_manager import ColorManager
+from lemma.services.layout_info import LayoutInfo
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
-from lemma.use_cases.use_cases import UseCases
-from lemma.services.layout_info import LayoutInfo
-import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
 
@@ -38,31 +39,18 @@ class DocumentView():
     def __init__(self, main_window, application):
         self.main_window = main_window
         self.application = application
+        self.document = None
 
-        self.pointer_x, self.pointer_y = None, None
-        self.pointer_name = 'default'
-        self.scrolling_position_x, self.scrolling_position_y = -1, -1
-        self.document_view_width, self.document_view_height = 0, 0
-        self.drop_cursor_x, self.drop_cursor_y = -1, -1
-        self.scrolling_multiplier = 2.5
-        self.selected_click_target = None
-        self.link_target_at_cursor = None
-        self.link_target_at_pointer = None
+        self.last_cache_reset = time.time()
         self.link_overlay_text = None
 
-        self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
-        self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
-        self.cursor_blink_reset = time.time()
-        self.cursor_visible = True
-
-        self.document = None
-        self.last_cache_reset = time.time()
-
         self.view = main_window.document_view
-        self.controller = DocumentViewController(self)
-        self.presenter = DocumentViewPresenter(self)
-
         self.view.content.set_allocate_func(self.set_view_size)
+        self.view.content.set_draw_func(self.draw)
+
+        self.window_surface = None
+        self.width, self.height = 0, 0
+        self.render_cache = dict()
 
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -71,136 +59,27 @@ class DocumentView():
         if new_active_document:
             self.document = document
             if document != None:
-                self.view.content.grab_focus()
-
-        if self.document == None:
-            self.scrolling_position_x, self.scrolling_position_y = -1, -1
-            self.drop_cursor_x, self.drop_cursor_y = -1, -1
-            return True
+                self.view.grab_focus()
 
         document_changed = max(document.last_cursor_movement, document.last_modified) > self.last_cache_reset
         do_draw = False
 
         if self.document != None:
             if new_active_document or document_changed:
-                self.presenter.clear_render_cache()
+                self.application.keyboard.reset_cursor_blink()
+                self.clear_render_cache()
                 self.last_cache_reset = time.time()
-                self.reset_cursor_blink()
+                self.view.content.queue_draw()
 
-                self.update_link_at_cursor()
-
-                do_draw = True
-
-        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
-        content_height = document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
-
-        self.view.scrollbar_vertical.set_content_height(content_height)
-        self.view.scrollbar_vertical.set_scrolling_offset(scrolling_position_y)
-        if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
-            self.scrolling_position_x = scrolling_position_x
-            self.scrolling_position_y = scrolling_position_y
-            do_draw = True
-
-        time_since_blink_start = time.time() - self.cursor_blink_reset
-        time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
-
-        cursor_visible = True
-        if time_since_blink_start <= 10 and time_in_cycle > 0.6:
-            cursor_visible = False
-        if not self.view.content.has_focus():
-            cursor_visible = False
-        if self.document.has_selection():
-            cursor_visible = False
-
-        if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
-            self.cursor_visible = cursor_visible
-            do_draw = True
-
-        if do_draw:
-            self.view.content.queue_draw()
-
-        self.update_pointer()
         self.update_link_overlay_text()
 
-    def reset_cursor_blink(self):
-        self.cursor_blink_reset = time.time()
-
-    def set_pointer_position(self, x, y):
-        if x != self.pointer_x or y != self.pointer_y:
-            self.pointer_x, self.pointer_y = x, y
-
-    def set_view_size(self, width, height, baseline):
-        if width != self.document_view_width or height != self.document_view_height:
-            self.document_view_width, self.document_view_height = width, height
-
-    def set_drop_cursor_position(self, x, y):
-        self.drop_cursor_x = x
-        self.drop_cursor_y = y
-        self.view.content.queue_draw()
-
-    def update_pointer(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document == None:
-            self.view.content.set_cursor_from_name('default')
-            return
-
-        x = self.scrolling_position_x + (self.pointer_x if self.pointer_x != None else 0)
-        y = self.scrolling_position_y + (self.pointer_y if self.pointer_y != None else 0)
-        x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
-        y -= self.application.document_title.title_buttons_height
-
-        if y > 0:
-            line_layout = document.get_layout().get_line_layout_at_y(y)
-            leaf_layout = document.get_layout().get_leaf_layout_at_xy(x, y)
-            paragraph_layout = line_layout['parent']
-            paragraph = paragraph_layout['node']
-
-            link = None
-            if leaf_layout != None and leaf_layout['node'] != None and leaf_layout['node'].link != None:
-                link = leaf_layout['node'].link
-            self.link_target_at_pointer = link
-
-            indentation = LayoutInfo.get_indentation('cl', paragraph.indentation_level)
-            x_start = indentation - 35
-            x_end = indentation - 16
-
-            if paragraph.style == 'cl' and line_layout == paragraph_layout['children'][0] and y >= paragraph_layout['y'] + line_layout['height'] - 23 and y <= paragraph_layout['y'] + line_layout['height'] - 4 and x >= x_start and x <= x_end:
-                pointer_name = 'default'
-            elif leaf_layout != None:
-                node = leaf_layout['node']
-                if node != None:
-                    if node.link != None and not self.application.keyboard_input.ctrl_pressed:
-                        pointer_name = 'pointer'
-                    elif node.type == 'widget':
-                        self.view.content.set_cursor_from_name(self.application.widget_manager.get_cursor_name(node.value))
-                    elif node.type == 'placeholder':
-                        pointer_name = 'default'
-                    else:
-                        pointer_name = 'text'
-                else:
-                    pointer_name = 'text'
-            else:
-                pointer_name = 'text'
-        else:
-            pointer_name = 'default'
-            self.link_target_at_pointer = None
-
-        if pointer_name != self.pointer_name:
-            self.pointer_name = pointer_name
-            self.view.content.set_cursor_from_name(pointer_name)
-
-    def update_link_at_cursor(self):
-        if self.document == None:
-            self.link_target_at_cursor = None
-        else:
-            self.link_target_at_cursor = self.document.get_link_at_cursor()
-
     def update_link_overlay_text(self):
-        if self.link_target_at_pointer != None:
-            text = self.link_target_at_pointer
+        if self.application.pointer.link_target_at_pointer != None:
+            text = self.application.pointer.link_target_at_pointer
+        elif self.document == None:
+            text = None
         else:
-            text = self.link_target_at_cursor
+            text = self.document.get_link_at_cursor()
 
         if text != None:
             if not urlparse(text).scheme in ['http', 'https']:
@@ -215,5 +94,278 @@ class DocumentView():
                 self.view.link_overlay.set_visible(True)
             else:
                 self.view.link_overlay.set_visible(False)
+
+    def set_view_size(self, width, height, baseline):
+        if width != self.width or height != self.height:
+            self.width, self.height = width, height
+
+    def clear_render_cache(self):
+        self.render_cache = dict()
+
+    @timer.timer
+    def draw(self, snapshot):
+        self.document = WorkspaceRepo.get_workspace().get_active_document()
+        if self.document == None: return
+
+        self.height = self.view.content.get_allocated_height()
+        self.width = self.view.content.get_allocated_width()
+
+        self.setup_scaling_offsets()
+
+        content_offset_x = LayoutInfo.get_document_padding_left()
+        content_offset_y = LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height - self.application.scrolling.current_y
+
+        self.first_selection_node = self.document.get_first_selection_bound()
+        self.last_selection_node = self.document.get_last_selection_bound()
+        self.first_selection_line = self.application.layout.get_ancestors(self.application.layout.get_node_layout(self.first_selection_node))[-2]
+        self.last_selection_line = self.application.layout.get_ancestors(self.application.layout.get_node_layout(self.last_selection_node))[-2]
+
+        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
+
+        ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+        in_selection = False
+        list_item_numbers = [0, 0, 0, 0, 0]
+        for i, paragraph in enumerate(self.document.ast):
+            if paragraph.style == 'ol':
+                list_item_numbers[paragraph.indentation_level] += 1
+                if paragraph.indentation_level < 4:
+                    list_item_numbers = list_item_numbers[:paragraph.indentation_level + 1] + [0, 0, 0, 0, 0][paragraph.indentation_level + 1:]
+            else:
+                list_item_numbers = list_item_numbers[:paragraph.indentation_level] + [0, 0, 0, 0, 0][paragraph.indentation_level:]
+
+            if content_offset_y + self.application.layout.get_paragraph_layout(paragraph)['y'] + self.application.layout.get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + self.application.layout.get_paragraph_layout(paragraph)['y'] <= self.height:
+                self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph, list_item_numbers)
+
+            for j, line_layout in enumerate(self.application.layout.get_paragraph_layout(paragraph)['children']):
+                if content_offset_y + line_layout['y'] + self.application.layout.get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + self.application.layout.get_paragraph_layout(paragraph)['y'] <= self.height:
+                    if (i,j) not in self.render_cache:
+                        self.draw_line(ctx, i, j, line_layout, in_selection)
+
+                    line_x = self.device_offset_x + math.floor(content_offset_x) * self.hidpi_factor
+                    line_y = self.device_offset_y + math.floor(content_offset_y + self.application.layout.get_paragraph_layout(paragraph)['y'] + line_layout['y']) * self.hidpi_factor
+                    ctx.set_source_surface(self.render_cache[(i,j)], line_x, line_y)
+                    ctx.paint()
+                elif (i,j) in self.render_cache:
+                    del(self.render_cache[(i,j)])
+
+                if not in_selection and line_layout['y'] + line_layout['parent']['y'] == self.first_selection_line['y'] + self.first_selection_line['parent']['y']: in_selection = True
+                if in_selection and line_layout['y'] + line_layout['parent']['y'] == self.last_selection_line['y'] + self.last_selection_line['parent']['y']: in_selection = False
+
+        if self.application.pointer.drop_cursor_x != -1 and self.application.pointer.drop_cursor_y != -1:
+            self.draw_drop_cursor(ctx, content_offset_x, content_offset_y)
+        else:
+            self.draw_cursor(ctx, content_offset_x, content_offset_y)
+
+    @timer.timer
+    def setup_scaling_offsets(self):
+        if self.window_surface == None:
+            self.window_surface = self.main_window.get_surface()
+
+        self.hidpi_factor = self.window_surface.get_scale()
+        self.hidpi_factor_inverted = 1 / self.hidpi_factor
+        allocation = self.view.content.compute_bounds(self.main_window).out_bounds
+        surface_transform = self.main_window.get_surface_transform()
+        self.device_offset_x = 1 - ((allocation.get_x() + surface_transform.x) * self.hidpi_factor) % 1
+        self.device_offset_y = 1 - ((allocation.get_y() + surface_transform.y) * self.hidpi_factor) % 1
+
+    def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
+        if paragraph.style == 'ul':
+            layout = self.application.layout.get_paragraph_layout(paragraph)
+            line_layout = layout['children'][0]
+            first_char_layout = line_layout['children'][0]
+            baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
+            fg_color = ColorManager.get_ui_color_string('bullets')
+
+            surface, left, top = TextRenderer.get_glyph('-', 'body', fg_color, self.hidpi_factor)
+            bullet_indent = LayoutInfo.get_indentation('ul', paragraph.indentation_level) - LayoutInfo.get_ul_bullet_padding() - surface.get_width()
+            bullet_measurement = TextShaper.measure_single('-')
+
+            bullet_x = self.device_offset_x + math.floor(offset_x + bullet_indent) * self.hidpi_factor + left
+            bullet_y = self.device_offset_y + math.floor(offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top
+            ctx.set_source_surface(surface, bullet_x, bullet_y)
+            ctx.paint()
+
+        elif paragraph.style == 'ol':
+            layout = self.application.layout.get_paragraph_layout(paragraph)
+            line_layout = layout['children'][0]
+            first_char_layout = line_layout['children'][0]
+            baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
+            fg_color = ColorManager.get_ui_color_string('bullets')
+
+            text = '.' + ''.join(reversed(str(list_item_numbers[paragraph.indentation_level])))
+            bullet_indent = LayoutInfo.get_indentation('ol', paragraph.indentation_level) - LayoutInfo.get_ol_bullet_padding()
+            for char, dim in zip(text, TextShaper.measure(text, 'body')):
+                surface, left, top = TextRenderer.get_glyph(char, 'body', fg_color, self.hidpi_factor)
+                bullet_indent -= dim[0]
+                bullet_measurement = TextShaper.measure_single(char)
+
+                bullet_x = self.device_offset_x + math.floor(offset_x + bullet_indent) * self.hidpi_factor + left
+                bullet_y = self.device_offset_y + math.floor(offset_y + baseline + layout['y'] + line_layout['height'] - bullet_measurement[1]) * self.hidpi_factor + top
+                ctx.set_source_surface(surface, bullet_x, bullet_y)
+                ctx.paint()
+
+        elif paragraph.style == 'cl':
+            layout = self.application.layout.get_paragraph_layout(paragraph)
+            line_layout = layout['children'][0]
+            outline_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_outline')
+            inner_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_inner')
+            outline_checked_color = ColorManager.get_ui_color_string('checkbox_checked_outline')
+            inner_checked_color = ColorManager.get_ui_color_string('checkbox_checked_inner')
+
+            if paragraph.state == 'checked':
+                surface = TextRenderer.get_icon_surface('checkbox-checked-symbolic', self.hidpi_factor, inner_checked_color, outline_checked_color)
+            else:
+                surface = TextRenderer.get_icon_surface('checkbox-unchecked-symbolic', self.hidpi_factor, outline_unchecked_color, inner_unchecked_color)
+            bullet_indent = LayoutInfo.get_indentation('cl', paragraph.indentation_level) - LayoutInfo.get_cl_bullet_padding() - surface.get_width()
+            top = -23
+
+            bullet_x = self.device_offset_x + math.floor(offset_x + bullet_indent) * self.hidpi_factor
+            bullet_y = self.device_offset_y + math.floor(offset_y + layout['y'] + line_layout['height'] + top) * self.hidpi_factor
+            ctx.set_source_surface(surface, bullet_x, bullet_y)
+            ctx.paint()
+
+    @timer.timer
+    def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
+        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int((layout['x'] + layout['width']) * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
+        self.draw_highlight_bg(layout, cairo.Context(surface), 0, -layout['y'])
+        self.draw_selection_bg(layout, cairo.Context(surface), 0, -layout['y'], in_selection)
+        self.draw_layout(layout, cairo.Context(surface), 0, -layout['y'])
+        self.render_cache[(paragraph_no, line_no)] = surface
+
+    def draw_highlight_bg(self, layout, ctx, offset_x, offset_y):
+        if layout['node'] != None and 'highlight' in layout['node'].tags:
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('highlight_bg'))
+            ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
+            ctx.fill()
+
+        else:
+            for child in layout['children']:
+                self.draw_highlight_bg(child, ctx, offset_x + layout['x'], offset_y + layout['y'])
+
+    def draw_selection_bg(self, layout, ctx, offset_x, offset_y, in_selection):
+        if in_selection and layout != self.first_selection_line and layout != self.last_selection_line:
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
+            ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
+            ctx.fill()
+
+        else:
+            for child in layout['children']:
+                if child['node'] != None and child['node'] == self.first_selection_node:
+                    in_selection = True
+                if child['node'] != None and child['node'] == self.last_selection_node:
+                    in_selection = False
+                self.draw_selection_bg(child, ctx, offset_x + layout['x'], offset_y + layout['y'], in_selection)
+
+    def draw_layout(self, layout, ctx, offset_x, offset_y):
+        if layout['type'] == 'char':
+            fontname = layout['fontname']
+            baseline = TextShaper.get_ascend(fontname=fontname)
+
+            if fontname != 'emojis':
+                fg_color = self.get_fg_color_string_by_node(layout['node'])
+                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname, fg_color, self.hidpi_factor)
+                if surface != None:
+                    ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
+                    ctx.paint()
+            else:
+                surface, left, top = TextRenderer.get_glyph(layout['node'].value, fontname, None, self.hidpi_factor)
+                if surface != None:
+                    ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
+                    ctx.paint()
+
+        if layout['type'] == 'widget':
+            widget = layout['node'].value
+
+            fontname = layout['fontname']
+            top = -TextShaper.get_descend(fontname=fontname)
+
+            self.application.widget_manager.draw(widget, ctx, offset_x + layout['x'], offset_y + layout['y'] + top, self.hidpi_factor, fontname)
+
+        if layout['type'] == 'placeholder':
+            fontname = layout['fontname']
+            baseline = TextShaper.get_ascend(fontname=fontname)
+
+            fg_color = self.get_fg_color_string_by_node(layout['node'])
+            surface, left, top = TextRenderer.get_glyph('▯', fontname, fg_color, self.hidpi_factor)
+
+            ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
+            ctx.paint()
+
+        for child in layout['children']:
+            self.draw_layout(child, ctx, offset_x + layout['x'], offset_y + layout['y'])
+
+        if layout['type'] == 'mathroot':
+            fg_color = self.get_fg_color_by_node(layout['node'])
+            Gdk.cairo_set_source_rgba(ctx, fg_color)
+
+            line_offset = max(7, layout['children'][1]['width'])
+            line_width = layout['children'][0]['width']
+            line_height = layout['children'][0]['height']
+
+            ctx.set_line_width(2)
+            ctx.move_to((offset_x + layout['x'] + line_offset - 6) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 10) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 2) * self.hidpi_factor)
+            ctx.stroke()
+            ctx.set_line_width(1)
+            ctx.move_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 2) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, (offset_y + layout['y'] + 1) * self.hidpi_factor)
+            ctx.stroke()
+            ctx.rectangle((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, int((offset_y + layout['y']) * self.hidpi_factor), line_width, 1)
+            ctx.fill()
+
+        if layout['type'] == 'mathfraction':
+            fg_color = self.get_fg_color_by_node(layout['node'])
+            Gdk.cairo_set_source_rgba(ctx, fg_color)
+
+            line_offset = layout['children'][0]['children'][1]['height']
+            line_width = layout['width']
+
+            ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
+            ctx.fill()
+
+    def get_fg_color_string_by_node(self, node):
+        if node.link == None:
+            return ColorManager.get_ui_color_string('text')
+        if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
+            return ColorManager.get_ui_color_string('links')
+        return ColorManager.get_ui_color_string('links_page_not_existing')
+
+    def get_fg_color_by_node(self, node):
+        if node.link == None:
+            return ColorManager.get_ui_color('text')
+        if node.link.startswith('http') or len(DocumentRepo.list_by_title(node.link)) > 0:
+            return ColorManager.get_ui_color('links')
+        return ColorManager.get_ui_color('links_page_not_existing')
+
+    def draw_cursor(self, ctx, offset_x, offset_y):
+        if not self.application.keyboard.cursor_visible: return
+
+        insert = self.document.get_insert_node()
+        layout = self.application.layout.get_node_layout(insert)
+        x, y = self.application.layout.get_absolute_xy(layout)
+        padding_top = TextShaper.get_padding_top(layout['fontname'])
+        padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
+        cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
+
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('cursor'))
+        ctx.rectangle(*cursor_coords)
+        ctx.fill()
+
+    def draw_drop_cursor(self, ctx, offset_x, offset_y):
+        x, y = self.application.pointer.drop_cursor_x, self.application.pointer.drop_cursor_y
+        x -= LayoutInfo.get_document_padding_left()
+        y -= LayoutInfo.get_normal_document_offset()
+        y += self.application.scrolling.current_y
+
+        layout = self.application.layout.get_cursor_holding_layout_close_to_xy(x, y)
+
+        x, y = self.application.layout.get_absolute_xy(layout)
+        padding_top = TextShaper.get_padding_top(layout['fontname'])
+        padding_bottom = 0
+        cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
+
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('drop_color'))
+        ctx.rectangle(*cursor_coords)
+        ctx.fill()
 
 

@@ -175,7 +175,7 @@ class Toolbars():
 
         if chars_selected and all_tagged:
             button.add_css_class('checked')
-        elif not chars_selected and tagname in self.application.cursor_state.tags_at_cursor:
+        elif not chars_selected and tagname in self.application.keyboard.tags_at_cursor:
             button.add_css_class('checked')
         else:
             button.remove_css_class('checked')

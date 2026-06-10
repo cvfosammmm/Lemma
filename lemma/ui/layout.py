@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import time
+
+from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.text_shaper import TextShaper
 from lemma.services.character_db import CharacterDB
@@ -24,28 +27,41 @@ import lemma.services.timer as timer
 
 class Layout():
 
-    def __init__(self, document):
-        self.document = document
-        self.ast = document.ast
+    def __init__(self, main_window, application):
+        self.main_window = main_window
+        self.application = application
 
+        self.document = None
         self.layouts = dict()
         self.layouter = Layouter()
 
         self.line_layouts_by_y = dict()
         self.leaf_layouts_by_xy = dict()
 
-    def invalidate_paragraph(self, paragraph):
-        if paragraph in self.layouts:
-            del(self.layouts[paragraph])
+        self.last_updated = 0
+        self.is_valid = False
 
+    def animate(self):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document != self.document:
+            self.document = document
+            self.invalidate()
+            self.update()
+        elif document != None and document.last_modified > self.last_updated or not self.is_valid:
+            self.update()
+
+    @timer.timer
     def update(self):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
         y_offset = 0
-        for paragraph in self.ast:
-            if paragraph not in self.layouts:
+        for paragraph in document.ast:
+            if paragraph not in self.layouts or paragraph.last_modified > self.last_updated:
                 indentation = LayoutInfo.get_indentation(paragraph.style, paragraph.indentation_level)
                 width = LayoutInfo.get_max_layout_width() - indentation
 
-                layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(self.ast, paragraph)
+                layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(document.ast, paragraph)
                 self.layouter.layout_paragraph(layout_tree, width, indentation)
                 self.layouts[paragraph] = {'paragraph': layout_tree, 'nodes': node_layouts}
             else:
@@ -55,13 +71,24 @@ class Layout():
 
         self.line_layouts_by_y = dict()
         self.leaf_layouts_by_xy = dict()
+        self.last_updated = time.time()
+        self.is_valid = True
+
+    def invalidate(self):
+        self.layouts = dict()
+        self.last_updated = 0
+        self.is_valid = False
 
     def get_height(self):
-        layout = self.get_paragraph_layout(self.ast[-1])
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        layout = self.get_paragraph_layout(document.ast[-1])
         return layout['y'] + layout['height']
 
     def get_width(self):
-        return self.get_paragraph_layout(self.ast[0])['width']
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        return self.get_paragraph_layout(document.ast[0])['width']
 
     def get_paragraph_layout(self, paragraph):
         if paragraph in self.layouts:
@@ -115,15 +142,17 @@ class Layout():
         return closest_layout
 
     def get_line_layout_at_y(self, y):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
         if y not in self.line_layouts_by_y:
             if y < 0:
-                layout = self.get_paragraph_layout(self.ast[0])
+                layout = self.get_paragraph_layout(document.ast[0])
                 self.line_layouts_by_y[y] = layout['children'][0]
             elif y > self.get_height():
-                layout = self.get_paragraph_layout(self.ast[-1])
+                layout = self.get_paragraph_layout(document.ast[-1])
                 self.line_layouts_by_y[y] = layout['children'][-1]
             else:
-                for paragraph in self.ast:
+                for paragraph in document.ast:
                     layout = self.get_paragraph_layout(paragraph)
                     if y >= layout['y'] and y < layout['y'] + layout['height']:
                         y -= layout['y']

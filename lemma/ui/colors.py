@@ -85,7 +85,7 @@ class Colors(object):
 
         self.main_window.css_provider_colors.load_from_path(path)
         ColorManager.invalidate_cache()
-        self.application.document_view.presenter.clear_render_cache()
+        self.application.document_view.clear_render_cache()
 
         self.main_window.main_box.queue_draw()
         self.main_window.document_view.content.queue_draw()

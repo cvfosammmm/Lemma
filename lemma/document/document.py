@@ -20,7 +20,6 @@ import time
 import lemma.services.xml_helpers as xml_helpers
 from lemma.services.xml_parser import XMLParser
 from lemma.document.ast import Root, Cursor
-from lemma.document.layout import Layout
 from lemma.document.command_manager import CommandManager
 from lemma.services.character_db import CharacterDB
 from lemma.document.plaintext import Plaintext
@@ -46,7 +45,6 @@ class Document():
         self.plaintext = Plaintext(self)
         self.links = Links(self)
         self.files = Files(self)
-        self.layout = Layout(self)
         self.xml = XML(self)
 
         self.secondary_formats_cache = dict()
@@ -229,17 +227,12 @@ class Document():
         self.last_cursor_movement = time.time()
         self.query_cache = dict()
 
-    def invalidate_all_paragraphs(self):
-        for paragraph in self.ast:
-            self.invalidate_paragraph(paragraph)
-        self.secondary_formats_cache = dict()
-
     def invalidate_paragraph(self, paragraph):
         self.plaintext.invalidate_paragraph(paragraph)
         self.links.invalidate_paragraph(paragraph)
         self.files.invalidate_paragraph(paragraph)
-        self.layout.invalidate_paragraph(paragraph)
         self.xml.invalidate_paragraph(paragraph)
+        paragraph.update_last_modified()
 
     def has_multiple_lines_selected(self):
         if 'multiple_lines_selected' not in self.query_cache:
@@ -344,9 +337,6 @@ class Document():
             self.query_cache['selection_bounds'] = self.cursor.get_first_and_last_node()
         return self.query_cache['selection_bounds'][1]
 
-    def get_implicit_x_position(self):
-        return self.cursor.implicit_x_position
-
     def get_cursor_state(self):
         if 'cursor_state' not in self.query_cache:
             self.query_cache['cursor_state'] = self.cursor.get_state()
@@ -395,12 +385,6 @@ class Document():
             self.plaintext.update()
             self.secondary_formats_cache['plaintext'] = self.plaintext.plaintext
         return self.secondary_formats_cache['plaintext']
-
-    def get_layout(self):
-        if 'layout' not in self.secondary_formats_cache:
-            self.layout.update()
-            self.secondary_formats_cache['layout'] = self.layout
-        return self.secondary_formats_cache['layout']
 
     @timer.timer
     def get_xml(self):

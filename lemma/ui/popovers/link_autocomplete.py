@@ -194,10 +194,11 @@ class Popover(PopoverView):
 
         if self.current_values['link_target'] != '':
             if self.bounds == None:
-                tags_at_cursor = self.application.cursor_state.tags_at_cursor
+                tags_at_cursor = self.application.keyboard.tags_at_cursor
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
+                self.application.keyboard.update_implicit_x_position()
             else:
                 UseCases.set_link(document, self.bounds, self.current_values['link_target'])
         elif self.bounds != None:

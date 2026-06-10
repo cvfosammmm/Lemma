@@ -57,7 +57,6 @@ class Autocomplete():
 
         MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_changed')
-        MessageBus.subscribe(self, 'keyboard_input')
 
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -71,8 +70,6 @@ class Autocomplete():
             self.on_new_active_document()
         if 'document_changed' in messages:
             self.on_document_changed()
-        if 'keyboard_input' in messages:
-            self.on_keyboard_input()
 
         scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
         if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
@@ -172,14 +169,14 @@ class Autocomplete():
     def update_position(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
-        insert_x, insert_y = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(insert))
+        insert_x, insert_y = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(insert))
         content_offset = LayoutInfo.get_normal_document_offset()
         scrolling_offset_y = self.application.scrolling.get_current_scrolling_offsets()[1]
         insert_y += content_offset - scrolling_offset_y
-        insert_height = document.get_layout().get_node_layout(insert)['height']
+        insert_height = self.application.layout.get_node_layout(insert)['height']
         insert_x += LayoutInfo.get_document_padding_left()
-        window_height = self.application.document_view.document_view_height
-        window_width = self.application.document_view.document_view_width
+        window_height = self.application.document_view.height
+        window_width = self.application.document_view.width
 
         self.view.x = min(insert_x, window_width - self.view.width - 18)
         if insert_y + insert_height + self.view.max_height > window_height:
@@ -271,6 +268,7 @@ class Autocomplete():
         insert = document.get_insert_node()
         xml = AutocompleteDB.get_xml(self.view.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
+        self.application.keyboard.update_implicit_x_position()
 
         self.deactivate()
 

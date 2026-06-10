@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+import time
+
 from lemma.services.node_type_db import NodeTypeDB
 import lemma.services.timer as timer
 
@@ -76,6 +78,11 @@ class Paragraph():
         self.style = 'p'
         self.indentation_level = 0
         self.state = None
+
+        self.last_modified = 0
+
+    def update_last_modified(self):
+        self.last_modified = time.time()
 
     def set_parent(self, parent):
         self.parent = parent

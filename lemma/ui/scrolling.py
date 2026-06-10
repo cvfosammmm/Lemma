@@ -30,9 +30,11 @@ class DocumentScrolling():
     def __init__(self, main_window, application):
         self.main_window = main_window
         self.application = application
+        self.view = main_window.document_view
 
         self.prev_x, self.prev_y = 0, 0
         self.target_x, self.target_y = 0, 0
+        self.current_x, self.current_y = -1, -1
 
         self.last_scroll_scheduled = time.time()
         self.last_scroll_animation_type = None
@@ -67,6 +69,22 @@ class DocumentScrolling():
         if 'cursor_movement' in messages or 'undo_executed' in messages or 'redo_executed' in messages:
             self.scroll_insert_on_screen(animation_type='default')
 
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document == None:
+            self.current_x, self.current_y = -1, -1
+            return True
+
+        current_x, current_y = self.get_current_scrolling_offsets()
+        content_height = self.application.layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
+
+        self.view.scrollbar_vertical.set_content_height(content_height)
+        self.view.scrollbar_vertical.set_scrolling_offset(current_y)
+        if current_x != self.current_x or current_y != self.current_y:
+            self.current_x = current_x
+            self.current_y = current_y
+            self.view.content.queue_draw()
+
     @timer.timer
     def scroll_to_xy(self, x, y, animation_type='default'):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -79,27 +97,27 @@ class DocumentScrolling():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
-        window_height = self.application.document_view.document_view_height
+        window_height = self.application.document_view.height
         insert_node = document.get_insert_node()
-        insert_position = document.get_layout().get_absolute_xy(document.get_layout().get_node_layout(insert_node))
+        insert_position = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(insert_node))
 
         content_offset = LayoutInfo.get_normal_document_offset()
         insert_y = insert_position[1] + content_offset
-        insert_height = document.get_layout().get_node_layout(insert_node)['height']
+        insert_height = self.application.layout.get_node_layout(insert_node)['height']
         scrolling_offset_y = self.get_current_scrolling_offsets()[1]
-        content_height = document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
+        content_height = self.application.layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
 
         if window_height <= 0:
             new_position = (0, 0)
-        elif document.get_layout().get_absolute_xy(document.get_layout().get_line_layout_at_y(insert_position[1]))[1] == 0:
+        elif self.application.layout.get_absolute_xy(self.application.layout.get_line_layout_at_y(insert_position[1]))[1] == 0:
             new_position = (0, 0)
         elif insert_y < scrolling_offset_y:
             if insert_height > window_height:
                 new_position = (0, insert_y - window_height + insert_height)
             else:
                 new_position = (0, insert_y)
-        elif insert_position[1] >= document.get_layout().get_height() - insert_height and content_height >= window_height:
-            new_position = (0, document.get_layout().get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height)
+        elif insert_position[1] >= self.application.layout.get_height() - insert_height and content_height >= window_height:
+            new_position = (0, self.application.layout.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
             new_position = (0, insert_y - window_height + insert_height)
         else:
@@ -113,8 +131,8 @@ class DocumentScrolling():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height + document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() - self.application.document_view.document_view_height)
-        max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_layout().get_width() - self.application.document_view.document_view_width)
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height + self.application.layout.get_height() + LayoutInfo.get_document_padding_bottom() - self.application.document_view.height)
+        max_x = max(0, LayoutInfo.get_document_padding_left() + self.application.layout.get_width() - self.application.document_view.width)
 
         vel_x *= 0.4
         vel_y *= 0.4
@@ -155,8 +173,8 @@ class DocumentScrolling():
             x = self.target_x
             y = self.target_y
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height + document.get_layout().get_height() + LayoutInfo.get_document_padding_bottom() - self.application.document_view.document_view_height)
-        max_x = max(0, LayoutInfo.get_document_padding_left() + document.get_layout().get_width() - self.application.document_view.document_view_width)
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height + self.application.layout.get_height() + LayoutInfo.get_document_padding_bottom() - self.application.document_view.height)
+        max_x = max(0, LayoutInfo.get_document_padding_left() + self.application.layout.get_width() - self.application.document_view.width)
 
         x = min(max_x, max(0, x))
         y = min(max_y, max(0, y))
