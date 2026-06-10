@@ -323,7 +323,7 @@ class Actions(object):
 
         texture = clipboard.read_texture_finish(result)
         filename = Files.get_distinct_document_file_name(document, '.png')
-        texture.save_to_png(Files.abspath_for_document_file(filename))
+        Files.write_bytes_to_document_file(filename, texture.save_to_png_bytes().unref_to_data())
         image = WidgetFactory.make_widget('image', {'filename': filename})
         UseCases.add_widget(image)
 

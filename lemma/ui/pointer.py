@@ -20,7 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib, GObject, Gio
 
 from urllib.parse import urlparse
-import time
+import time, os.path
 
 import lemma.services.xml_helpers as xml_helpers
 from lemma.widgets.factory import WidgetFactory
@@ -323,7 +323,7 @@ class Pointer():
                     except Exception: pass
                     else:
                         filename = Files.get_distinct_document_file_name(document, '.png')
-                        texture.save_to_png(Files.abspath_for_document_file(filename))
+                        Files.write_bytes_to_document_file(filename, texture.save_to_png_bytes().unref_to_data())
                         image = WidgetFactory.make_widget('image', {'filename': filename})
 
                         self.move_cursor_to_xy(x, y)
@@ -333,12 +333,13 @@ class Pointer():
                         done_with_file = True
 
                 if not done_with_file:
-                    filename = Files.add_file_to_doc_folder_with_distinct_name(document, path)
-                    widget = WidgetFactory.make_widget('attachment', {'filename': filename})
+                    if os.path.isfile(path):
+                        filename = Files.add_file_to_doc_folder_with_distinct_name(document, path)
+                        widget = WidgetFactory.make_widget('attachment', {'filename': filename})
 
-                    self.move_cursor_to_xy(x, y)
-                    UseCases.add_widget(widget)
-                    self.application.keyboard.update_implicit_x_position()
+                        self.move_cursor_to_xy(x, y)
+                        UseCases.add_widget(widget)
+                        self.application.keyboard.update_implicit_x_position()
 
         elif isinstance(value, str):
             text = value
@@ -356,7 +357,7 @@ class Pointer():
         elif isinstance(value, Gdk.Texture):
             texture = value
             filename = Files.get_distinct_document_file_name(document, '.png')
-            texture.save_to_png(Files.abspath_for_document_file(filename))
+            Files.write_bytes_to_document_file(filename, texture.save_to_png_bytes().unref_to_data())
             image = WidgetFactory.make_widget('image', {'filename': filename})
 
             self.move_cursor_to_xy(x, y)

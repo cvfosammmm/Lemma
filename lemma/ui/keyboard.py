@@ -57,6 +57,7 @@ class Keyboard():
         self.im_context = Gtk.IMContextSimple()
         self.im_context.set_use_preedit(True)
         self.im_context.connect('commit', self.on_im_commit)
+        self.im_context.connect('preedit-changed', self.on_preedit_changed)
         self.key_controller.set_im_context(self.im_context)
 
         self.shortcut_controller = Shortcuts.new_controller()
@@ -93,9 +94,6 @@ class Keyboard():
         MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
         MessageBus.subscribe(self, 'implicit_x_position_changed')
-
-        self.update_tags_at_cursor()
-        self.update_implicit_x_position()
 
     def animate(self):
         messages = MessageBus.get_messages(self)
@@ -270,6 +268,10 @@ class Keyboard():
 
         self.update_implicit_x_position()
         self.application.autocomplete.on_keyboard_input()
+
+    def on_preedit_changed(self, im_context):
+        self.application.layout.invalidate_paragraph_with_insert()
+        self.view.content.queue_draw()
 
     def on_realize(self, content, data=None):
         self.reset_cursor_blink()

@@ -84,6 +84,15 @@ class Files():
 
         return os.path.relpath(target_full, Files.get_documents_folder())
 
+    def write_bytes_to_document_file(filename, data):
+        target = Files.abspath_for_document_file(filename)
+
+        if not os.path.exists(os.path.dirname(target)):
+            os.makedirs(os.path.dirname(target))
+
+        with open(target, 'wb') as file:
+            file.write(data)
+
     def get_distinct_document_file_name(document, extension):
         count = 1
         while str(document.id) + '_files/' + str(count) + extension in document.get_files():

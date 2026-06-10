@@ -42,18 +42,21 @@ class Layout():
         self.is_valid = False
 
     def animate(self):
+        pass
+
+    @timer.timer
+    def update(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document != self.document:
             self.document = document
             self.invalidate()
-            self.update()
-        elif document != None and document.last_modified > self.last_updated or not self.is_valid:
-            self.update()
 
-    @timer.timer
-    def update(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
+        if document.last_modified <= self.last_updated and self.is_valid: return
+
+        insert = document.get_insert_node()
+        insert_paragraph = insert.paragraph()
 
         y_offset = 0
         for paragraph in document.ast:
@@ -61,7 +64,12 @@ class Layout():
                 indentation = LayoutInfo.get_indentation(paragraph.style, paragraph.indentation_level)
                 width = LayoutInfo.get_max_layout_width() - indentation
 
-                layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(document.ast, paragraph)
+                if paragraph == insert_paragraph:
+                    preedit_string = self.application.keyboard.im_context.get_preedit_string().str
+                    layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(document.ast, paragraph, insert, preedit_string)
+                else:
+                    layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(document.ast, paragraph)
+
                 self.layouter.layout_paragraph(layout_tree, width, indentation)
                 self.layouts[paragraph] = {'paragraph': layout_tree, 'nodes': node_layouts}
             else:
@@ -76,33 +84,47 @@ class Layout():
 
     def invalidate(self):
         self.layouts = dict()
-        self.last_updated = 0
+        self.is_valid = False
+
+    def invalidate_paragraph_with_insert(self):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        insert = document.get_insert_node()
+        paragraph = insert.paragraph()
+        if paragraph in self.layouts:
+            del(self.layouts[paragraph])
         self.is_valid = False
 
     def get_height(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
+        self.update()
 
+        document = WorkspaceRepo.get_workspace().get_active_document()
         layout = self.get_paragraph_layout(document.ast[-1])
         return layout['y'] + layout['height']
 
     def get_width(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
+        self.update()
 
+        document = WorkspaceRepo.get_workspace().get_active_document()
         return self.get_paragraph_layout(document.ast[0])['width']
 
     def get_paragraph_layout(self, paragraph):
+        self.update()
+
         if paragraph in self.layouts:
             return self.layouts[paragraph]['paragraph']
         return None
 
     def get_node_layout(self, node):
-        paragraph = node.paragraph()
+        self.update()
 
+        paragraph = node.paragraph()
         if paragraph in self.layouts and node in self.layouts[paragraph]['nodes']:
             return self.layouts[paragraph]['nodes'][node]
         return None
 
     def get_leaf_layout_at_xy(self, x, y):
+        self.update()
+
         if (x, y) not in self.leaf_layouts_by_xy:
             line = self.get_line_layout_at_y(y)
 
@@ -117,6 +139,8 @@ class Layout():
         return self.leaf_layouts_by_xy[(x, y)]
 
     def get_cursor_holding_layout_close_to_xy(self, x, y):
+        self.update()
+
         if y < 0: x = 0
         if y > self.get_height(): x = LayoutInfo.get_max_layout_width()
 
@@ -142,8 +166,9 @@ class Layout():
         return closest_layout
 
     def get_line_layout_at_y(self, y):
-        document = WorkspaceRepo.get_workspace().get_active_document()
+        self.update()
 
+        document = WorkspaceRepo.get_workspace().get_active_document()
         if y not in self.line_layouts_by_y:
             if y < 0:
                 layout = self.get_paragraph_layout(document.ast[0])
@@ -189,11 +214,16 @@ class Layouter(object):
 
     def __init__(self):
         self.paragraph_style = None
+        self.insert = None
+        self.preedit = None
+
         self.node_layouts = dict()
 
     @timer.timer
-    def make_layout_tree_paragraph(self, root, paragraph):
+    def make_layout_tree_paragraph(self, root, paragraph, insert=None, preedit=None):
         self.paragraph_style = paragraph.style
+        self.insert = insert
+        self.preedit = preedit
         self.node_layouts = dict()
 
         layout_tree = {'type': 'paragraph',
@@ -214,11 +244,13 @@ class Layouter(object):
                 fontname = self.get_fontname_from_node(char_nodes[0])
                 subtree = {'type': 'word', 'fixed': False, 'node': root, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': fontname}
                 for char_node, extents in zip(char_nodes, TextShaper.measure(text, fontname=fontname)):
-                    subsubtree = {'type': 'char','fixed': True, 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': extents[0], 'height': extents[1], 'fontname': fontname}
+                    subsubtree = {'type': 'char', 'fixed': True, 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': extents[0], 'height': extents[1], 'fontname': fontname}
                     self.node_layouts[char_node] = subsubtree
+
                     subtree['children'].append(subsubtree)
             else:
                 subtree = self.make_layout_tree(child, layout_tree)
+
             layout_tree['children'].append(subtree)
 
         return layout_tree, self.node_layouts
@@ -298,6 +330,7 @@ class Layouter(object):
 
         for child in node:
             subtree = self.make_layout_tree(child, layout_tree)
+
             if subtree != None:
                 layout_tree['children'].append(subtree)
 
