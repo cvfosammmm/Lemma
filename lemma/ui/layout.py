@@ -258,7 +258,7 @@ class Layouter(object):
     def make_layout_tree(self, node, parent=None):
         if node.type == 'char':
             fontname = self.get_fontname_from_node(node)
-            width, height = TextShaper.measure_single(node.value, fontname=fontname)
+            width, height = TextShaper.measure(node.value, fontname=fontname)[0]
             layout_tree = {'type': 'char', 'fixed': True, 'node': node, 'parent': parent, 'children': [], 'x': 0, 'y': 0, 'width': width, 'height': height, 'fontname': fontname}
             self.node_layouts[node] = layout_tree
             return layout_tree
@@ -340,10 +340,7 @@ class Layouter(object):
             if child['node'] == insert:
                 fontname = self.get_fontname_from_node(child['node'])
 
-                width, height = 0, 0
-                for extents in TextShaper.measure(preedit_string, fontname=fontname):
-                    width += extents[0]
-                    height += extents[1]
+                width, height = TextShaper.measure(preedit_string, fontname=fontname)[0]
                 layout_tree['children'].insert(i, {'type': 'preedit', 'fixed': False, 'node': child['node'], 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': width, 'height': height, 'fontname': fontname})
                 break
 
