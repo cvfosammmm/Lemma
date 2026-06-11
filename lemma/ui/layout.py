@@ -34,6 +34,7 @@ class Layout():
         self.document = None
         self.layouts = dict()
         self.layouter = Layouter()
+        self.paragraph_with_preedit = None
 
         self.line_layouts_by_y = dict()
         self.leaf_layouts_by_xy = dict()
@@ -64,11 +65,12 @@ class Layout():
                 indentation = LayoutInfo.get_indentation(paragraph.style, paragraph.indentation_level)
                 width = LayoutInfo.get_max_layout_width() - indentation
 
+                layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(document.ast, paragraph)
                 if paragraph == insert_paragraph:
                     preedit_string = self.application.keyboard.im_context.get_preedit_string().str
-                    layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(document.ast, paragraph, insert, preedit_string)
-                else:
-                    layout_tree, node_layouts = self.layouter.make_layout_tree_paragraph(document.ast, paragraph)
+                    if len(preedit_string) > 0:
+                        self.layouter.add_preedit(layout_tree, insert, preedit_string)
+                        self.paragraph_with_preedit = paragraph
 
                 self.layouter.layout_paragraph(layout_tree, width, indentation)
                 self.layouts[paragraph] = {'paragraph': layout_tree, 'nodes': node_layouts}
@@ -86,12 +88,15 @@ class Layout():
         self.layouts = dict()
         self.is_valid = False
 
-    def invalidate_paragraph_with_insert(self):
+    def invalidate_on_preedit_change(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
         paragraph = insert.paragraph()
         if paragraph in self.layouts:
             del(self.layouts[paragraph])
+        if self.paragraph_with_preedit in self.layouts:
+            del(self.layouts[self.paragraph_with_preedit])
+            self.paragraph_with_preedit = None
         self.is_valid = False
 
     def get_height(self):
@@ -214,16 +219,12 @@ class Layouter(object):
 
     def __init__(self):
         self.paragraph_style = None
-        self.insert = None
-        self.preedit = None
 
         self.node_layouts = dict()
 
     @timer.timer
-    def make_layout_tree_paragraph(self, root, paragraph, insert=None, preedit=None):
+    def make_layout_tree_paragraph(self, root, paragraph):
         self.paragraph_style = paragraph.style
-        self.insert = insert
-        self.preedit = preedit
         self.node_layouts = dict()
 
         layout_tree = {'type': 'paragraph',
@@ -246,7 +247,6 @@ class Layouter(object):
                 for char_node, extents in zip(char_nodes, TextShaper.measure(text, fontname=fontname)):
                     subsubtree = {'type': 'char', 'fixed': True, 'node': char_node, 'parent': subtree, 'children': [], 'x': 0, 'y': 0, 'width': extents[0], 'height': extents[1], 'fontname': fontname}
                     self.node_layouts[char_node] = subsubtree
-
                     subtree['children'].append(subsubtree)
             else:
                 subtree = self.make_layout_tree(child, layout_tree)
@@ -330,11 +330,24 @@ class Layouter(object):
 
         for child in node:
             subtree = self.make_layout_tree(child, layout_tree)
-
             if subtree != None:
                 layout_tree['children'].append(subtree)
 
         return layout_tree
+
+    def add_preedit(self, layout_tree, insert, preedit_string):
+        for i, child in enumerate(layout_tree['children']):
+            if child['node'] == insert:
+                fontname = self.get_fontname_from_node(child['node'])
+
+                width, height = 0, 0
+                for extents in TextShaper.measure(preedit_string, fontname=fontname):
+                    width += extents[0]
+                    height += extents[1]
+                layout_tree['children'].insert(i, {'type': 'preedit', 'fixed': False, 'node': child['node'], 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': width, 'height': height, 'fontname': fontname})
+                break
+
+            self.add_preedit(child, insert, preedit_string)
 
     @timer.timer
     def group_words(self, nodes):

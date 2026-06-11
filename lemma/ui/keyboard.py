@@ -270,7 +270,8 @@ class Keyboard():
         self.application.autocomplete.on_keyboard_input()
 
     def on_preedit_changed(self, im_context):
-        self.application.layout.invalidate_paragraph_with_insert()
+        self.application.layout.invalidate_on_preedit_change()
+        self.application.document_view.clear_render_cache()
         self.view.content.queue_draw()
 
     def on_realize(self, content, data=None):

@@ -273,6 +273,25 @@ class DocumentView():
                     ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
                     ctx.paint()
 
+        if layout['type'] == 'preedit':
+            fontname = layout['fontname']
+            baseline = TextShaper.get_ascend(fontname=fontname)
+
+            preedit_string = self.application.keyboard.im_context.get_preedit_string().str
+            fg_color = self.get_fg_color_string_by_node(layout['node'])
+            surface, left, top = TextRenderer.get_glyph(preedit_string, fontname, fg_color, self.hidpi_factor)
+
+            ctx.set_source_surface(surface, int((offset_x + layout['x']) * self.hidpi_factor + left), int((offset_y + baseline + layout['y']) * self.hidpi_factor + top))
+            ctx.paint()
+
+            fg_color = self.get_fg_color_by_node(layout['node'])
+            Gdk.cairo_set_source_rgba(ctx, fg_color)
+            line_offset = layout['height']
+            line_width = layout['width']
+
+            ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + baseline) * self.hidpi_factor), line_width * self.hidpi_factor, 1)
+            ctx.fill()
+
         if layout['type'] == 'widget':
             widget = layout['node'].value
 
