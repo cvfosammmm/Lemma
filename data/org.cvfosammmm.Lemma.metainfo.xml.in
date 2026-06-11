@@ -39,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="69" date="2026-6-11">
+            <description translatable="no">
+                <p>Show preedit for dead keys, ...</p>
+            </description>
+        </release>
         ​<release version="68" date="2026-5-30">
             <description translatable="no">
                 <p>Bugfix, ...</p>
