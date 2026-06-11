@@ -42,6 +42,7 @@ class Keyboard():
         self.implicit_x_position = 0
         self.ctrl_pressed = False
         self.insert_node = None
+        self.selection_node = None
 
         self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
         self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
@@ -97,20 +98,14 @@ class Keyboard():
 
     def animate(self):
         messages = MessageBus.get_messages(self)
-        if 'new_active_document' in messages:
-            self.im_context.reset()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None:
-            insert_node = None
-        else:
-            insert_node = document.get_insert_node()
-        if insert_node != self.insert_node:
-            self.insert_node = insert_node
             self.im_context.reset()
 
         if 'new_active_document' in messages or 'document_ast_or_cursor_changed' in messages:
             self.update_tags_at_cursor()
+            self.im_context.reset()
 
         if 'new_active_document' in messages or 'implicit_x_position_changed' in messages:
             self.update_implicit_x_position()
@@ -273,6 +268,7 @@ class Keyboard():
         self.application.layout.invalidate_on_preedit_change()
         self.application.document_view.clear_render_cache()
         self.view.content.queue_draw()
+        MessageBus.add_message('preedit_changed')
 
     def on_realize(self, content, data=None):
         self.reset_cursor_blink()

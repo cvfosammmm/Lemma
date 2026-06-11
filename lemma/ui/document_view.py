@@ -276,8 +276,10 @@ class DocumentView():
         if layout['type'] == 'preedit':
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
-
             preedit_string = self.application.keyboard.im_context.get_preedit_string().str
+
+            if len(preedit_string) == 0: return
+
             fg_color = self.get_fg_color_string_by_node(layout['node'])
             surface, left, top = TextRenderer.get_glyph(preedit_string, fontname, fg_color, self.hidpi_factor)
 
