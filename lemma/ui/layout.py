@@ -185,9 +185,8 @@ class Layout():
                 for paragraph in document.ast:
                     layout = self.get_paragraph_layout(paragraph)
                     if y >= layout['y'] and y < layout['y'] + layout['height']:
-                        y -= layout['y']
                         for line in layout['children']:
-                            if y >= line['y'] and y < line['y'] + line['height']:
+                            if y - layout['y'] >= line['y'] and y - layout['y'] < line['y'] + line['height']:
                                 self.line_layouts_by_y[y] = line
 
         return self.line_layouts_by_y[y]
