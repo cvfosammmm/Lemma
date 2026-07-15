@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
+from lemma.services.message_bus import MessageBus
+from lemma.application_state.application_state import ApplicationState
 import lemma.ui.dialogs.about as about
 import lemma.ui.dialogs.attach_files as attach_files
 import lemma.ui.dialogs.export_bulk as export_bulk
@@ -25,7 +27,7 @@ import lemma.ui.dialogs.insert_image as insert_image
 import lemma.ui.dialogs.settings as settings
 
 
-class DialogLocator():
+class DialogManager():
 
     def __init__(self, main_window):
         self.dialogs = dict()
@@ -38,7 +40,18 @@ class DialogLocator():
         self.dialogs['insert_image'] = insert_image.Dialog(main_window)
         self.dialogs['settings'] = settings.Dialog(main_window)
 
-    def get_dialog(self, dialog_type):
-        return self.dialogs[dialog_type]
+        MessageBus.subscribe(self, 'dialog_display_scheduled')
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+
+        if 'dialog_display_scheduled' in messages:
+            dialog_name, argument = ApplicationState.get_dialog_display_schedule()
+
+            if argument == None:
+                self.dialogs[dialog_name].run()
+
+            else:
+                self.dialogs[dialog_name].run(argument)
 
 

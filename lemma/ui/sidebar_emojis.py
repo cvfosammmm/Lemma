@@ -34,8 +34,7 @@ import lemma.services.timer as timer
 class SidebarEmojis(object):
 
     def __init__(self, main_window, application):
-        self.view = main_window.tools_sidebar
-        self.application = application
+        self.main_window = main_window
 
         self.emoji_data = dict()
         self.emoji_data['emojis_and_people'] = {'title': 'Emojis & People', 'symbols': ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '🫠', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙', '🥲', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🫢', '🫣', '🤫', '🤔', '🫡', '🤐', '🤨', '😑', '😶', '🫥', '😏', '😒', '🙄', '😬', '🤥', '🫨', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐', '😕', '🫤', '😟', '🙁', '😮', '😯', '😲', '😳', '🥺', '🥹', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '💩', '🤡', '👹', '👺', '👻', '👾', '🤖', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾', '🙈', '🙉', '🙊', '💌', '💘', '💝', '💖', '💗', '💓', '💞', '💕', '💟', '💔', '🩷', '🧡', '💛', '💚', '💙', '🩵', '💜', '🤎', '🖤', '🩶', '🤍', '💋', '💯', '💢', '💥', '💫', '💦', '💨', '💬', '💭', '💤', '👋', '🤚', '🖖', '🫱', '🫲', '🫳', '🫴', '🫷', '🫸', '👌', '🤌', '🤏', '🤞', '🫰', '🤟', '🤘', '🤙', '🖕', '🫵', '👊', '🤛', '🤜', '👏', '🙌', '🫶', '👐', '🤲', '🤝', '🙏', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👅', '👄', '🫦', '👶', '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👩', '🧓', '👴', '👵', '🙍', '🙎', '🙅', '🙆', '💁', '🙋', '🧏', '🙇', '🤦', '🤷', '👮', '💂', '🥷', '👷', '🫅', '🤴', '👸', '👳', '👲', '🧕', '🤵', '👰', '🤰', '🫃', '🫄', '🤱', '👼', '🎅', '🤶', '🦸', '🦹', '🧙', '🧚', '🧛', '🧜', '🧝', '🧞', '🧟', '🧌', '💆', '💇', '💏', '💑', '👤', '👥', '🫂', '👣']}
@@ -79,7 +78,7 @@ class SidebarEmojis(object):
 
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_child(box)
-        self.view.add_named(scrolled_window, 'emojis')
+        self.main_window.tools_sidebar.add_named(scrolled_window, 'emojis')
 
         is_first = True
         for name, section in self.emoji_data.items():
@@ -118,8 +117,8 @@ class SidebarEmojis(object):
         return wrapbox
 
     def on_button_clicked(self, button, xml):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
         UseCases.insert_xml(xml)
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
 

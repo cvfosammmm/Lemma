@@ -25,9 +25,11 @@ import time, os.path
 import lemma.services.xml_helpers as xml_helpers
 from lemma.widgets.factory import WidgetFactory
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.application_state.application_state import ApplicationState
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
 from lemma.services.layout_info import LayoutInfo
+from lemma.services.layouter import Layouter
 from lemma.services.files import Files
 from lemma.ui.shortcuts import Shortcuts
 from lemma.use_cases.use_cases import UseCases
@@ -42,8 +44,6 @@ class Pointer():
         self.application = application
         self.view = main_window.document_view
         self.content = self.view.content
-
-        self.scrolling_multiplier = 2.5
 
         self.pointer_x, self.pointer_y = None, None
         self.pointer_name = 'default'
@@ -84,14 +84,6 @@ class Pointer():
         self.motion_controller.connect('leave', self.on_leave)
         self.content.add_controller(self.motion_controller)
 
-        self.scrolling_controller = Gtk.EventControllerScroll()
-        self.scrolling_controller.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
-        self.scrolling_controller.connect('scroll', self.on_scroll)
-        self.scrolling_controller.connect('decelerate', self.on_decelerate)
-        self.view.add_controller(self.scrolling_controller)
-
-        self.view.scrollbar_vertical.observe('dragged', self.on_scrollbar_drag)
-
     @timer.timer
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -107,15 +99,16 @@ class Pointer():
             self.content.set_cursor_from_name('default')
             return
 
-        x = self.application.scrolling.current_x + (self.pointer_x if self.pointer_x != None else 0)
-        y = self.application.scrolling.current_y + (self.pointer_y if self.pointer_y != None else 0)
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        x = scrolling_pos_x + (self.pointer_x if self.pointer_x != None else 0)
+        y = scrolling_pos_y + (self.pointer_y if self.pointer_y != None else 0)
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y -= self.application.document_title.title_buttons_height
+        y -= ApplicationState.get_title_buttons_height()
 
         if y > 0:
-            line_layout = self.application.layout.get_line_layout_at_y(y)
-            leaf_layout = self.application.layout.get_leaf_layout_at_xy(x, y)
+            line_layout = Layouter.get_line_layout_at_y(y)
+            leaf_layout = Layouter.get_leaf_layout_at_xy(x, y)
             paragraph_layout = line_layout['parent']
             paragraph = paragraph_layout['node']
 
@@ -133,7 +126,7 @@ class Pointer():
             elif leaf_layout != None:
                 node = leaf_layout['node']
                 if node != None:
-                    if node.link != None and not self.application.keyboard.ctrl_pressed:
+                    if node.link != None and not ApplicationState.get_ctrl_pressed():
                         pointer_name = 'pointer'
                     elif node.type == 'widget':
                         pointer_name = self.application.widget_manager.get_cursor_name(node.value)
@@ -157,14 +150,15 @@ class Pointer():
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        x += self.application.scrolling.current_x - LayoutInfo.get_document_padding_left()
-        y += self.application.scrolling.current_y - LayoutInfo.get_normal_document_offset()
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        x += scrolling_pos_x - LayoutInfo.get_document_padding_left()
+        y += scrolling_pos_y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         self.selected_click_target = (x, y)
 
         if y > 0:
-            leaf_layout = self.application.layout.get_leaf_layout_at_xy(x, y)
+            leaf_layout = Layouter.get_leaf_layout_at_xy(x, y)
             link = leaf_layout['node'].link if leaf_layout != None else None
 
             if leaf_layout != None and leaf_layout['node'].type == 'widget':
@@ -174,16 +168,19 @@ class Pointer():
 
             elif n_press == 1:
                 if int(keyboard_state & modifiers) == Gdk.ModifierType.SHIFT_MASK:
-                    self.move_cursor_to_xy(x, y, True)
+                    UseCases.move_cursor_to_xy(x, y, True)
+                    UseCases.update_implicit_x_position()
 
                 elif int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK:
-                    self.move_cursor_to_xy(x, y, False)
+                    UseCases.move_cursor_to_xy(x, y, False)
+                    UseCases.update_implicit_x_position()
 
                 else:
                     if leaf_layout != None and NodeTypeDB.focus_on_click(leaf_layout['node']):
                         UseCases.select_node(leaf_layout['node'])
                     else:
-                        self.move_cursor_to_xy(x, y, False)
+                        UseCases.move_cursor_to_xy(x, y, False)
+                        UseCases.update_implicit_x_position()
 
             else:
                 if link == None or int(keyboard_state & modifiers) != 0:
@@ -191,10 +188,11 @@ class Pointer():
                     selection = document.get_selection_node()
                     paragraph_start, paragraph_end = insert.paragraph_bounds()
                     if insert == paragraph_start and selection == paragraph_end or insert == paragraph_end and selection == paragraph_start:
-                        self.move_cursor_to_xy(x, y, False)
+                        UseCases.move_cursor_to_xy(x, y, False)
+                        UseCases.update_implicit_x_position()
                     else:
                         UseCases.extend_selection()
-                        self.application.keyboard.update_implicit_x_position()
+                        UseCases.update_implicit_x_position()
 
             self.content.grab_focus()
 
@@ -203,15 +201,17 @@ class Pointer():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = WorkspaceRepo.get_workspace().get_active_document()
-        x += self.application.scrolling.current_x - LayoutInfo.get_document_padding_left()
-        y += self.application.scrolling.current_y - LayoutInfo.get_normal_document_offset()
+
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        x += scrolling_pos_x - LayoutInfo.get_document_padding_left()
+        y += scrolling_pos_y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if keyboard_state == 0:
             if y >= -LayoutInfo.get_subtitle_height():
-                leaf_layout_at_press = self.application.layout.get_leaf_layout_at_xy(*self.selected_click_target)
+                leaf_layout_at_press = Layouter.get_leaf_layout_at_xy(*self.selected_click_target)
                 link_at_press = leaf_layout_at_press['node'].link if leaf_layout_at_press != None else None
-                leaf_layout_at_release = self.application.layout.get_leaf_layout_at_xy(x, y)
+                leaf_layout_at_release = Layouter.get_leaf_layout_at_xy(x, y)
                 link_at_release = leaf_layout_at_release['node'].link if leaf_layout_at_release != None else None
 
                 if link_at_press == link_at_release and link_at_release != None:
@@ -219,10 +219,10 @@ class Pointer():
                     return
 
                 x_at_press, y_at_press = self.selected_click_target
-                line_layout_at_press = self.application.layout.get_line_layout_at_y(y_at_press)
+                line_layout_at_press = Layouter.get_line_layout_at_y(y_at_press)
                 paragraph_layout_at_press = line_layout_at_press['parent']
 
-                line_layout_at_release = self.application.layout.get_line_layout_at_y(y)
+                line_layout_at_release = Layouter.get_line_layout_at_y(y)
                 paragraph_layout_at_release = line_layout_at_release['parent']
 
                 if paragraph_layout_at_press != paragraph_layout_at_release: return
@@ -243,23 +243,27 @@ class Pointer():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = WorkspaceRepo.get_workspace().get_active_document()
-        x_offset = self.application.scrolling.current_x + x - LayoutInfo.get_document_padding_left()
-        y_offset = self.application.scrolling.current_y + y - LayoutInfo.get_normal_document_offset()
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        x_offset = scrolling_pos_x + x - LayoutInfo.get_document_padding_left()
+        y_offset = scrolling_pos_y + y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if y_offset > 0:
             if not document.has_selection():
-                leaf_layout = self.application.layout.get_leaf_layout_at_xy(x_offset, y_offset)
+                leaf_layout = Layouter.get_leaf_layout_at_xy(x_offset, y_offset)
                 if keyboard_state == 0 and leaf_layout != None and NodeTypeDB.focus_on_click(leaf_layout['node']):
                     UseCases.select_node(leaf_layout['node'])
                 else:
-                    self.move_cursor_to_xy(x_offset, y_offset, False)
+                    UseCases.move_cursor_to_xy(x_offset, y_offset, False)
+                    UseCases.update_implicit_x_position()
             self.application.context_menu_document.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.application.scrolling.current_y
+        y += scrolling_pos_y
 
         if y <= 0:
             gesture.reset()
@@ -269,23 +273,26 @@ class Pointer():
 
         start_point = gesture.get_start_point()
         x, y = start_point.x + x, start_point.y + y
+        view_width, view_height = ApplicationState.get_view_size()
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
 
         if y < 0:
-            new_x = self.application.scrolling.current_x
-            new_y = max(0, self.application.scrolling.current_y + y)
-            self.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
+            new_x = scrolling_pos_x
+            new_y = max(0, scrolling_pos_y + y)
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
-        if y - self.application.document_view.height > 0:
-            height = self.application.layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
-            new_x = self.application.scrolling.current_x
-            new_y = min(max(0, height - self.application.document_view.height), self.application.scrolling.current_y + y - self.application.document_view.height)
-            self.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
+        if y - view_height > 0:
+            height = Layouter.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            new_x = scrolling_pos_x
+            new_y = min(max(0, height - view_height), scrolling_pos_y + y - view_height)
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.application.scrolling.current_y
+        y += scrolling_pos_y
 
-        self.move_cursor_to_xy(x, y, True)
+        UseCases.move_cursor_to_xy(x, y, True)
+        UseCases.update_implicit_x_position()
 
     def on_drag_end(self, gesture, x, y, data=None):
         pass
@@ -295,9 +302,10 @@ class Pointer():
             self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
             self.scroll_on_drop_callback_id = None
 
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.application.scrolling.current_y
+        y += scrolling_pos_y
 
         self.handle_drop(value, x, y)
         controller.reset()
@@ -326,9 +334,9 @@ class Pointer():
                         Files.write_bytes_to_document_file(filename, texture.save_to_png_bytes().unref_to_data())
                         image = WidgetFactory.make_widget('image', {'filename': filename})
 
-                        self.move_cursor_to_xy(x, y)
+                        UseCases.move_cursor_to_xy(x, y)
                         UseCases.add_widget(image)
-                        self.application.keyboard.update_implicit_x_position()
+                        UseCases.update_implicit_x_position()
 
                         done_with_file = True
 
@@ -337,9 +345,9 @@ class Pointer():
                         filename = Files.add_file_to_doc_folder_with_distinct_name(document, path)
                         widget = WidgetFactory.make_widget('attachment', {'filename': filename})
 
-                        self.move_cursor_to_xy(x, y)
+                        UseCases.move_cursor_to_xy(x, y)
                         UseCases.add_widget(widget)
-                        self.application.keyboard.update_implicit_x_position()
+                        UseCases.update_implicit_x_position()
 
         elif isinstance(value, str):
             text = value
@@ -350,9 +358,9 @@ class Pointer():
             else:
                 xml = xml_helpers.escape(text)
 
-            self.move_cursor_to_xy(x, y)
+            UseCases.move_cursor_to_xy(x, y)
             UseCases.insert_xml(xml)
-            self.application.keyboard.update_implicit_x_position()
+            UseCases.update_implicit_x_position()
 
         elif isinstance(value, Gdk.Texture):
             texture = value
@@ -360,9 +368,9 @@ class Pointer():
             Files.write_bytes_to_document_file(filename, texture.save_to_png_bytes().unref_to_data())
             image = WidgetFactory.make_widget('image', {'filename': filename})
 
-            self.move_cursor_to_xy(x, y)
+            UseCases.move_cursor_to_xy(x, y)
             UseCases.add_widget(image)
-            self.application.keyboard.update_implicit_x_position()
+            UseCases.update_implicit_x_position()
 
     def on_drop_enter(self, controller, x, y):
         self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)
@@ -383,50 +391,21 @@ class Pointer():
 
     def scroll_on_drop_callback(self, widget, frame_clock):
         x, y = self.drop_cursor_x, self.drop_cursor_y
+        view_width, view_height = ApplicationState.get_view_size()
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
 
         if y < 56:
-            new_x = self.application.scrolling.current_x
-            new_y = max(0, self.application.scrolling.current_y + y - 56)
-            self.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
+            new_x = scrolling_pos_x
+            new_y = max(0, scrolling_pos_y + y - 56)
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
-        if y - self.application.document_view.height > -56:
-            height = self.application.layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
-            new_x = self.application.scrolling.current_x
-            new_y = min(max(0, height - self.application.document_view.height), self.application.scrolling.current_y + y - self.application.document_view.height + 56)
-            self.application.scrolling.scroll_to_xy(new_x, new_y, animation_type=None)
+        if y - view_height > -56:
+            height = Layouter.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            new_x = scrolling_pos_x
+            new_y = min(max(0, height - view_height), scrolling_pos_y + y - view_height + 56)
+            UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         return True
-
-    def on_scroll(self, controller, dx, dy):
-        if abs(dx) > 0 and abs(dy / dx) >= 1: dx = 0
-        if abs(dy) > 0 and abs(dx / dy) >  1: dy = 0
-
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-
-        if controller.get_current_event_state() & modifiers == 0:
-            document = WorkspaceRepo.get_workspace().get_active_document()
-            height = self.application.layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height
-
-            if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
-                dx *= self.application.document_view.width ** (2/3)
-                dy *= self.application.document_view.height ** (2/3)
-            else:
-                dy *= self.scrolling_multiplier
-                dx *= self.scrolling_multiplier
-            x = min(0, max(0, self.application.scrolling.current_x + dx))
-            y = min(max(0, height - self.application.document_view.height), max(0, self.application.scrolling.current_y + dy))
-
-            self.application.scrolling.scroll_to_xy(x, y, animation_type=None)
-        return
-
-    def on_decelerate(self, controller, vel_x, vel_y):
-        if abs(vel_x) > 0 and abs(vel_y / vel_x) >= 1: vel_x = 0
-        if abs(vel_y) > 0 and abs(vel_x / vel_y) >  1: vel_y = 0
-
-        self.application.scrolling.decelerate(self.application.scrolling.current_x, self.application.scrolling.current_y, vel_x, vel_y)
-
-    def on_scrollbar_drag(self, widget, new_y):
-        self.application.scrolling.scroll_to_xy(0, new_y, animation_type=None)
 
     def on_enter(self, controller, x, y):
         self.pointer_x, self.pointer_y = x, y
@@ -437,17 +416,5 @@ class Pointer():
 
     def on_leave(self, controller):
         self.pointer_x, self.pointer_y = None, None
-
-    @timer.timer
-    def move_cursor_to_xy(self, x, y, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        layout = self.application.layout.get_cursor_holding_layout_close_to_xy(x, y)
-
-        if do_selection:
-            UseCases.select_section(layout['node'], document.get_selection_node())
-        else:
-            UseCases.move_cursor_to_node(layout['node'])
-
-        self.application.keyboard.update_implicit_x_position()
 
 

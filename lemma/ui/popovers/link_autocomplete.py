@@ -23,6 +23,7 @@ import os
 
 from lemma.ui.popovers.popover_templates import PopoverView
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.application_state.application_state import ApplicationState
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.xml_helpers as xml_helpers
@@ -30,9 +31,8 @@ import lemma.services.xml_helpers as xml_helpers
 
 class Popover(PopoverView):
 
-    def __init__(self, manager):
-        PopoverView.__init__(self, manager)
-        self.application = manager.application
+    def __init__(self):
+        PopoverView.__init__(self)
 
         self.current_values = dict()
         self.bounds = None
@@ -111,7 +111,7 @@ class Popover(PopoverView):
 
         if keyval == Gdk.keyval_from_name('Escape'):
             if state & modifiers == 0:
-                self.manager.hide_popovers()
+                UseCases.hide_popovers()
                 return True
 
         if keyval == Gdk.keyval_from_name('Up'):
@@ -194,17 +194,17 @@ class Popover(PopoverView):
 
         if self.current_values['link_target'] != '':
             if self.bounds == None:
-                tags_at_cursor = self.application.keyboard.tags_at_cursor
+                tags_at_cursor = ApplicationState.get_tags_at_cursor()
                 text = xml_helpers.escape(self.current_values['link_target'])
                 xml = xml_helpers.embellish_with_link_and_tags(text, text, tags_at_cursor)
                 UseCases.insert_xml(xml)
-                self.application.keyboard.update_implicit_x_position()
+                UseCases.update_implicit_x_position()
             else:
                 UseCases.set_link(document, self.bounds, self.current_values['link_target'])
         elif self.bounds != None:
             UseCases.set_link(document, self.bounds, None)
 
-        self.manager.hide_popovers()
+        UseCases.hide_popovers()
 
 
 class ACItem(Gtk.ListBoxRow):

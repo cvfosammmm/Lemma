@@ -20,7 +20,11 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
 from lemma.services.layout_info import LayoutInfo
+from lemma.services.layouter import Layouter
 from lemma.services.text_shaper import TextShaper
+from lemma.application_state.application_state import ApplicationState
+from lemma.services.message_bus import MessageBus
+from lemma.use_cases.use_cases import UseCases
 import lemma.ui.popovers.document_menu as document_menu
 from lemma.ui.document_context_menu import EditMenu
 import lemma.ui.popovers.hamburger_menu as hamburger_menu
@@ -34,12 +38,10 @@ class PopoverManager():
 
     def __init__(self, main_window, application):
         self.current_popover = None
-        self.active_popover_button = None
         self.prev_focus_widget = None
         self.main_window = main_window
         self.headerbar = main_window.headerbar
         self.toolbar = main_window.toolbar
-        self.application = application
         self.popoverlay = main_window.popoverlay
         self.inbetween = main_window.inbetween
 
@@ -56,75 +58,28 @@ class PopoverManager():
         self.inbetween.set_can_target(False)
 
         self.popovers = dict()
-        self.popovers["document_menu"] = document_menu.Popover(self)
-        self.popovers["edit_menu"] = EditMenu(self)
-        self.popovers["hamburger_menu"] = hamburger_menu.Popover(self)
-        self.popovers["paragraph_style"] = paragraph_style.Popover(self)
-        self.popovers["link_autocomplete"] = link_autocomplete.Popover(self)
-        self.popovers["rename_file"] = rename_file.Popover(self)
-        self.popovers["bookmarks"] = bookmarks.Popover(self)
+        self.popovers["document_menu"] = document_menu.Popover()
+        self.popovers["edit_menu"] = EditMenu()
+        self.popovers["hamburger_menu"] = hamburger_menu.Popover()
+        self.popovers["paragraph_style"] = paragraph_style.Popover()
+        self.popovers["link_autocomplete"] = link_autocomplete.Popover()
+        self.popovers["rename_file"] = rename_file.Popover()
+        self.popovers["bookmarks"] = bookmarks.Popover()
 
-    def get_popover(self, name):
-        return self.popovers[name]
-
-    def show_popover_at_button(self, popover, button, orientation='bottom'):
-        if popover == self.current_popover: return
-
-        allocation = button.compute_bounds(self.main_window).out_bounds
-
-        x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y
-        y += allocation.size.height if orientation == 'bottom' else 0
-
-        self.popdown()
-        self.popup(popover, x, y, orientation)
-
-        self.active_popover_button = button
-        self.active_popover_button.add_css_class('active')
-
-    def show_popover_at_node(self, popover, document, node):
-        if popover == self.current_popover: return
-
-        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
-
-        x, y = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(node))
-        x -= scrolling_position_x
-        y -= scrolling_position_y
-        document_view = self.main_window.document_view
-        document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
-        x += document_view_allocation.origin.x
-        y += document_view_allocation.origin.y
-        x += LayoutInfo.get_document_padding_left()
-        y += LayoutInfo.get_normal_document_offset()
-        fontname = self.application.layout.get_node_layout(node)['fontname']
-        padding_top = TextShaper.get_padding_top(fontname)
-        padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += self.application.layout.get_node_layout(node)['height'] - padding_top - padding_bottom
-        x += self.application.layout.get_node_layout(node)['width'] / 2
-
-        orientation = 'bottom'
-        if y + 260 > document_view_allocation.size.height:
-            orientation = 'top'
-            y -= self.application.layout.get_node_layout(node)['height'] - padding_top - padding_bottom
-
-        self.popdown()
-        self.popup(popover, x, y, orientation)
-
-    def show_popover_at_xy(self, popover, x, y, orientation='bottom'):
-        if popover == self.current_popover: return
-
-        self.popdown()
-        self.popup(popover, x, y, orientation)
-
-    def hide_popovers(self):
-        self.popdown()
-
-        if self.active_popover_button != None:
-            self.active_popover_button.remove_css_class('active')
-            self.active_popover_button = None
+        MessageBus.subscribe(self, 'popover_changed')
 
     def animate(self):
-        pass
+        messages = MessageBus.get_messages(self)
+
+        if 'popover_changed' in messages:
+            popover = ApplicationState.get_popover()
+            if popover == None:
+                self.popdown()
+            else:
+                name, x, y, orientation = popover
+
+                self.popdown()
+                self.popup(self.popovers[name], x, y, orientation)
 
     def popup(self, popover, x, y, orientation):
         popover.show_page(None, 'main', Gtk.StackTransitionType.NONE)
@@ -202,6 +157,6 @@ class PopoverManager():
         self.prev_focus_widget = widget
 
     def on_click_inbetween(self, controller, n_press, x, y):
-        self.hide_popovers()
+        UseCases.hide_popovers()
 
 

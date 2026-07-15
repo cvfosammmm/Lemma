@@ -29,8 +29,12 @@ from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
 from lemma.services.layout_info import LayoutInfo
+from lemma.services.layouter import Layouter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
+from lemma.services.message_bus import MessageBus
+from lemma.application_state.application_state import ApplicationState
+from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
 
@@ -39,9 +43,9 @@ class DocumentView():
     def __init__(self, main_window, application):
         self.main_window = main_window
         self.application = application
-        self.document = None
 
-        self.last_cache_reset = time.time()
+        self.document = None
+        self.current_scrolling_x, self.current_scrolling_y = -1, -1
         self.link_overlay_text = None
 
         self.view = main_window.document_view
@@ -49,27 +53,45 @@ class DocumentView():
         self.view.content.set_draw_func(self.draw)
 
         self.window_surface = None
-        self.width, self.height = 0, 0
         self.render_cache = dict()
 
+        MessageBus.subscribe(self, 'new_active_document')
+        MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
+        MessageBus.subscribe(self, 'preedit_changed')
+        MessageBus.subscribe(self, 'color_scheme_settings_changed')
+        MessageBus.subscribe(self, 'color_scheme_dark_settings_changed')
+        MessageBus.subscribe(self, 'separate_dark_color_scheme_settings_changed')
+        MessageBus.subscribe(self, 'font_theme_settings_changed')
+        MessageBus.subscribe(self, 'dark_mode_changed')
+
     def animate(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
+        messages = MessageBus.get_messages(self)
 
-        new_active_document = document != self.document
-        if new_active_document:
-            self.document = document
-            if document != None:
-                self.view.grab_focus()
+        self.document = WorkspaceRepo.get_workspace().get_active_document()
+        new_active_document = ('new_active_document' in messages)
+        document_changed = ('new_active_document' in messages or 'document_ast_or_cursor_changed' in messages)
 
-        document_changed = max(document.last_cursor_movement, document.last_modified) > self.last_cache_reset
-        do_draw = False
+        if new_active_document and self.document != None:
+            self.view.grab_focus()
 
-        if self.document != None:
-            if new_active_document or document_changed:
-                self.application.keyboard.reset_cursor_blink()
-                self.clear_render_cache()
-                self.last_cache_reset = time.time()
+        if self.document == None:
+            self.current_scrolling_x, self.current_scrolling_y = -1, -1
+        else:
+            current_scrolling_x, current_scrolling_y = ApplicationState.get_current_scrolling_offsets()
+            if current_scrolling_x != self.current_scrolling_x or current_scrolling_y != self.current_scrolling_y:
+                self.current_scrolling_x = current_scrolling_x
+                self.current_scrolling_y = current_scrolling_y
                 self.view.content.queue_draw()
+
+            content_height = Layouter.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+
+            self.view.scrollbar_vertical.set_content_height(content_height)
+            self.view.scrollbar_vertical.set_scrolling_offset(current_scrolling_y)
+
+        if 'new_active_document' in messages or 'document_ast_or_cursor_changed' in messages or 'preedit_changed' in messages or 'dark_mode_changed' in messages or 'color_scheme_settings_changed' in messages or 'color_scheme_dark_settings_changed' in messages or 'separate_dark_color_scheme_settings_changed' in messages or 'font_theme_settings_changed' in messages:
+            self.clear_render_cache()
+            self.application.keyboard.reset_cursor_blink()
+            self.view.content.queue_draw()
 
         self.update_link_overlay_text()
 
@@ -96,8 +118,7 @@ class DocumentView():
                 self.view.link_overlay.set_visible(False)
 
     def set_view_size(self, width, height, baseline):
-        if width != self.width or height != self.height:
-            self.width, self.height = width, height
+        UseCases.set_view_size(width, height)
 
     def clear_render_cache(self):
         self.render_cache = dict()
@@ -107,20 +128,20 @@ class DocumentView():
         self.document = WorkspaceRepo.get_workspace().get_active_document()
         if self.document == None: return
 
-        self.height = self.view.content.get_allocated_height()
-        self.width = self.view.content.get_allocated_width()
+        view_width, view_height = ApplicationState.get_view_size()
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
 
         self.setup_scaling_offsets()
 
         content_offset_x = LayoutInfo.get_document_padding_left()
-        content_offset_y = LayoutInfo.get_normal_document_offset() + self.application.document_title.title_buttons_height - self.application.scrolling.current_y
+        content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height() - scrolling_pos_y
 
         self.first_selection_node = self.document.get_first_selection_bound()
         self.last_selection_node = self.document.get_last_selection_bound()
-        self.first_selection_line = self.application.layout.get_ancestors(self.application.layout.get_node_layout(self.first_selection_node))[-2]
-        self.last_selection_line = self.application.layout.get_ancestors(self.application.layout.get_node_layout(self.last_selection_node))[-2]
+        self.first_selection_line = Layouter.get_ancestors(Layouter.get_node_layout(self.first_selection_node))[-2]
+        self.last_selection_line = Layouter.get_ancestors(Layouter.get_node_layout(self.last_selection_node))[-2]
 
-        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
+        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, view_width, view_height))
 
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
         in_selection = False
@@ -133,16 +154,16 @@ class DocumentView():
             else:
                 list_item_numbers = list_item_numbers[:paragraph.indentation_level] + [0, 0, 0, 0, 0][paragraph.indentation_level:]
 
-            if content_offset_y + self.application.layout.get_paragraph_layout(paragraph)['y'] + self.application.layout.get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + self.application.layout.get_paragraph_layout(paragraph)['y'] <= self.height:
+            if content_offset_y + Layouter.get_paragraph_layout(paragraph)['y'] + Layouter.get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + Layouter.get_paragraph_layout(paragraph)['y'] <= view_height:
                 self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph, list_item_numbers)
 
-            for j, line_layout in enumerate(self.application.layout.get_paragraph_layout(paragraph)['children']):
-                if content_offset_y + line_layout['y'] + self.application.layout.get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + self.application.layout.get_paragraph_layout(paragraph)['y'] <= self.height:
+            for j, line_layout in enumerate(Layouter.get_paragraph_layout(paragraph)['children']):
+                if content_offset_y + line_layout['y'] + Layouter.get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + Layouter.get_paragraph_layout(paragraph)['y'] <= view_height:
                     if (i,j) not in self.render_cache:
                         self.draw_line(ctx, i, j, line_layout, in_selection)
 
                     line_x = self.device_offset_x + math.floor(content_offset_x) * self.hidpi_factor
-                    line_y = self.device_offset_y + math.floor(content_offset_y + self.application.layout.get_paragraph_layout(paragraph)['y'] + line_layout['y']) * self.hidpi_factor
+                    line_y = self.device_offset_y + math.floor(content_offset_y + Layouter.get_paragraph_layout(paragraph)['y'] + line_layout['y']) * self.hidpi_factor
                     ctx.set_source_surface(self.render_cache[(i,j)], line_x, line_y)
                     ctx.paint()
                 elif (i,j) in self.render_cache:
@@ -170,7 +191,7 @@ class DocumentView():
 
     def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
         if paragraph.style == 'ul':
-            layout = self.application.layout.get_paragraph_layout(paragraph)
+            layout = Layouter.get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
@@ -186,7 +207,7 @@ class DocumentView():
             ctx.paint()
 
         elif paragraph.style == 'ol':
-            layout = self.application.layout.get_paragraph_layout(paragraph)
+            layout = Layouter.get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
@@ -205,7 +226,7 @@ class DocumentView():
                 ctx.paint()
 
         elif paragraph.style == 'cl':
-            layout = self.application.layout.get_paragraph_layout(paragraph)
+            layout = Layouter.get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             outline_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_outline')
             inner_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_inner')
@@ -276,7 +297,7 @@ class DocumentView():
         if layout['type'] == 'preedit':
             fontname = layout['fontname']
             baseline = TextShaper.get_ascend(fontname=fontname)
-            preedit_string = self.application.keyboard.im_context.get_preedit_string().str
+            preedit_string = ApplicationState.get_preedit()
 
             if len(preedit_string) == 0: return
 
@@ -362,8 +383,8 @@ class DocumentView():
         if not self.application.keyboard.cursor_visible: return
 
         insert = self.document.get_insert_node()
-        layout = self.application.layout.get_node_layout(insert)
-        x, y = self.application.layout.get_absolute_xy(layout)
+        layout = Layouter.get_node_layout(insert)
+        x, y = Layouter.get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])
         padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
@@ -373,14 +394,16 @@ class DocumentView():
         ctx.fill()
 
     def draw_drop_cursor(self, ctx, offset_x, offset_y):
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+
         x, y = self.application.pointer.drop_cursor_x, self.application.pointer.drop_cursor_y
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
-        y += self.application.scrolling.current_y
+        y += scrolling_pos_y
 
-        layout = self.application.layout.get_cursor_holding_layout_close_to_xy(x, y)
+        layout = Layouter.get_cursor_holding_layout_close_to_xy(x, y)
 
-        x, y = self.application.layout.get_absolute_xy(layout)
+        x, y = Layouter.get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])
         padding_bottom = 0
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))

@@ -20,14 +20,16 @@ gi.require_version('Adw', '1')
 from gi.repository import Adw
 
 from lemma.services.color_manager import ColorManager
-from lemma.ui.dialog_locator import DialogLocator
+from lemma.ui.dialog_manager import DialogManager
 from lemma.ui.popover_manager import PopoverManager
 from lemma.ui.widget_manager import WidgetManager
 from lemma.services.settings import Settings
+from lemma.use_cases.use_cases import UseCases
+from lemma.services.layouter import Layouter
+from lemma.repos.workspace_repo import WorkspaceRepo
 import lemma.services.timer as timer
 
 import lemma.ui.fonts as fonts
-import lemma.ui.layout as layout
 import lemma.ui.colors as colors
 import lemma.ui.window_state as window_state
 import lemma.ui.views.main_window_view as main_window_view
@@ -63,12 +65,14 @@ class Application(Adw.Application):
         ColorManager.init(self.main_window)
         self.main_window.add_widgets()
 
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        Layouter.update_document(document)
+
         self.popover_manager = PopoverManager(self.main_window, self)
         self.widget_manager = WidgetManager(self.main_window, self)
-        self.dialog_locator = DialogLocator(self.main_window)
+        self.dialog_manager = DialogManager(self.main_window)
         self.history = history.History(self.main_window)
         self.actions = actions.Actions(self.main_window, self)
-        self.layout = layout.Layout(self.main_window, self)
         self.keyboard = keyboard.Keyboard(self.main_window, self)
         self.pointer = pointer.Pointer(self.main_window, self)
         self.document_view = document_view.DocumentView(self.main_window, self)
@@ -94,18 +98,19 @@ class Application(Adw.Application):
 
     @timer.timer
     def animate(self, widget, frame_clock):
+        UseCases.set_frame_time(frame_clock.get_frame_time())
+
         self.fonts.animate()
-        self.layout.animate()
         self.colors.animate()
         self.actions.animate()
         self.window_state.animate()
         self.popover_manager.animate()
+        self.dialog_manager.animate()
         self.widget_manager.animate()
         self.document_list.animate()
         self.history.animate()
         self.backlinks.animate()
         self.document_draft.animate()
-        self.scrolling.animate()
         self.keyboard.animate()
         self.pointer.animate()
         self.document_view.animate()

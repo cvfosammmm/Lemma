@@ -38,8 +38,7 @@ import lemma.services.timer as timer
 class SidebarMath(object):
 
     def __init__(self, main_window, application):
-        self.view = main_window.tools_sidebar
-        self.application = application
+        self.main_window = main_window
 
         self.data = dict()
         self.data['math_typesetting'] = {'title': 'Math Typesetting', 'symbols': []}
@@ -395,7 +394,7 @@ class SidebarMath(object):
 
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_child(box)
-        self.view.add_named(scrolled_window, 'math')
+        self.main_window.tools_sidebar.add_named(scrolled_window, 'math')
 
         is_first = True
         for name, section in self.data.items():
@@ -429,9 +428,9 @@ class SidebarMath(object):
         return wrapbox
 
     def on_button_clicked(self, button, xml):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
         UseCases.insert_xml(xml)
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
 
 class Icon(Gtk.DrawingArea):

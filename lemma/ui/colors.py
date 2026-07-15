@@ -25,6 +25,8 @@ import os.path
 from lemma.services.color_manager import ColorManager
 from lemma.services.files import Files
 from lemma.services.settings import Settings
+from lemma.use_cases.use_cases import UseCases
+from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
 
 
@@ -32,7 +34,6 @@ class Colors(object):
 
     def __init__(self, main_window, application):
         self.main_window = main_window
-        self.application = application
 
         self.color_scheme = None
         self.dark_mode_active = False
@@ -40,12 +41,29 @@ class Colors(object):
         self.css_provider_dark = Gtk.CssProvider()
         self.css_provider_dark.load_from_path(os.path.join(Files.get_resources_folder(), 'themes', 'default-dark.css'))
 
+        UseCases.set_dark_mode(self.style_manager.get_dark())
         self.update_dark_mode()
         self.update_color_scheme()
+
+        self.style_manager.connect('notify::dark', self.on_dark_mode_changed)
+
+    def on_dark_mode_changed(self, style_manager, is_dark):
+        UseCases.set_dark_mode(self.style_manager.get_dark())
 
     def animate(self):
         self.update_dark_mode()
         self.update_color_scheme()
+
+    def update_dark_mode(self):
+        dark_mode_active = Settings.get_value('separate_dark_color_scheme') and ApplicationState.get_dark_mode()
+
+        if dark_mode_active != self.dark_mode_active:
+            self.dark_mode_active = dark_mode_active
+
+            if dark_mode_active:
+                Gtk.StyleContext.add_provider_for_display(self.main_window.get_display(), self.css_provider_dark, 600)
+            else:
+                Gtk.StyleContext.remove_provider_for_display(self.main_window.get_display(), self.css_provider_dark)
 
     def update_color_scheme(self):
         if self.dark_mode_active:
@@ -56,17 +74,6 @@ class Colors(object):
         if color_scheme != self.color_scheme:
             self.color_scheme = color_scheme
             self.update_colors()
-
-    def update_dark_mode(self):
-        dark_mode_active = Settings.get_value('separate_dark_color_scheme') and self.style_manager.get_dark()
-
-        if dark_mode_active != self.dark_mode_active:
-            self.dark_mode_active = dark_mode_active
-
-            if dark_mode_active:
-                Gtk.StyleContext.add_provider_for_display(self.main_window.get_display(), self.css_provider_dark, 600)
-            else:
-                Gtk.StyleContext.remove_provider_for_display(self.main_window.get_display(), self.css_provider_dark)
 
     @timer.timer
     def update_colors(self):
@@ -85,10 +92,8 @@ class Colors(object):
 
         self.main_window.css_provider_colors.load_from_path(path)
         ColorManager.invalidate_cache()
-        self.application.document_view.clear_render_cache()
 
         self.main_window.main_box.queue_draw()
-        self.main_window.document_view.content.queue_draw()
         self.main_window.document_list.content.queue_draw()
 
 

@@ -106,7 +106,7 @@ class Bookmarks():
         if len(bookmarks) >= button_pos:
             document_id = bookmarks[button_pos]
             UseCases.set_active_document(document_id, update_history=True)
-            self.application.popover_manager.hide_popovers()
+            UseCases.hide_popovers()
 
     def on_bookmark_remove_clicked(self, button, button_pos):
         workspace = WorkspaceRepo.get_workspace()

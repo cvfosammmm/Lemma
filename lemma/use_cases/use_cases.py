@@ -27,13 +27,17 @@ from lemma.services.xml_parser import XMLParser
 from lemma.services.settings import Settings
 from lemma.services.regex import RegexService
 from lemma.services.files import Files
+from lemma.services.layouter import Layouter
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.document.ast import Node
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
+from lemma.application_state.application_state import ApplicationState
 from lemma.document.document import Document
 from lemma.services.message_bus import MessageBus
 from lemma.services.html_parser import HTMLParser
+from lemma.services.layout_info import LayoutInfo
+from lemma.services.text_shaper import TextShaper
 import lemma.services.timer as timer
 
 
@@ -42,7 +46,11 @@ class UseCases():
     def settings_set_value(item, value):
         Settings.set_value(item, value)
 
+        if item == 'font_theme':
+            Layouter.update_font_theme(value)
+
         Settings.save()
+        MessageBus.add_message(item + '_settings_changed')
         MessageBus.add_message('settings_changed')
 
     def toggle_tools_sidebar(name):
@@ -68,6 +76,7 @@ class UseCases():
             if len(target_list) > 0:
                 document = DocumentRepo.get_by_id(target_list[0]['id'])
                 workspace.set_active_document(document, update_history=True)
+                Layouter.update_document(document)
             else:
                 new_document = Document()
                 new_document.id = DocumentRepo.get_max_document_id() + 1
@@ -75,6 +84,12 @@ class UseCases():
                 new_document.update_last_modified()
 
                 workspace.set_active_document(new_document, update_history=True)
+                Layouter.update_document(document)
+
+                ApplicationState.set_scrolling_target(new_document.id, 0, 0, None)
+
+        ApplicationState.update_implicit_x_position()
+        ApplicationState.reset_tags_at_cursor()
 
         if new_document != None:
             DocumentRepo.add(new_document)
@@ -83,6 +98,7 @@ class UseCases():
         MessageBus.add_message('new_document')
         MessageBus.add_message('history_changed')
         MessageBus.add_message('new_active_document')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     def import_markdown(path):
         document = Document()
@@ -137,12 +153,18 @@ class UseCases():
         workspace.set_active_document(document, update_history=True)
         workspace.leave_draft_mode()
 
+        Layouter.update_document(document)
+        ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+        ApplicationState.update_implicit_x_position()
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.add(document)
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('mode_set')
         MessageBus.add_message('new_document')
         MessageBus.add_message('history_changed')
         MessageBus.add_message('new_active_document')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     def delete_document(document_id):
         workspace = WorkspaceRepo.get_workspace()
@@ -154,7 +176,13 @@ class UseCases():
                 new_active_document_id = workspace.get_next_id_in_history(document_id)
 
             document = DocumentRepo.get_by_id(new_active_document_id)
+
             workspace.set_active_document(document, update_history=False)
+
+            Layouter.update_document(document)
+            ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+            ApplicationState.update_implicit_x_position()
+            ApplicationState.reset_tags_at_cursor()
 
         workspace.remove_from_history(document_id)
         workspace.unbookmark_document(document_id)
@@ -167,6 +195,7 @@ class UseCases():
         MessageBus.add_message('bookmarks_changed')
         if document_changed:
             MessageBus.add_message('new_active_document')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     def set_active_document(document_id, update_history=True):
         workspace = WorkspaceRepo.get_workspace()
@@ -177,11 +206,24 @@ class UseCases():
             document = workspace.get_active_document()
         workspace.set_active_document(document, update_history)
 
+        Layouter.update_document(document)
+        if update_history:
+            ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+        else:
+            pos = ApplicationState.get_scrolling_position(document.id)
+            if pos != None:
+                ApplicationState.set_scrolling_target(document.id, pos[0], pos[1], None)
+            else:
+                ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+        ApplicationState.update_implicit_x_position()
+        ApplicationState.reset_tags_at_cursor()
+
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('mode_set')
         if update_history:
             MessageBus.add_message('history_changed')
         MessageBus.add_message('new_active_document')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     def bookmark_document(document_id):
         workspace = WorkspaceRepo.get_workspace()
@@ -208,23 +250,20 @@ class UseCases():
         MessageBus.add_message('bookmarks_changed')
 
     @timer.timer
-    def cache_scrolling_position(x, y):
-        workspace = WorkspaceRepo.get_workspace()
-        document = workspace.get_active_document()
-
-        workspace.cache_scrolling_position(document.id, x, y)
-
-    @timer.timer
     def undo():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.undo()
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('undo_executed')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def redo():
@@ -232,11 +271,15 @@ class UseCases():
 
         document.redo()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('redo_executed')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def set_title(title):
@@ -249,8 +292,9 @@ class UseCases():
         MessageBus.add_message('document_title_changed')
 
     @timer.timer
-    def im_commit(text, tags=set()):
+    def im_commit(text):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        tags = ApplicationState.get_tags_at_cursor()
 
         link_at_cursor = document.get_link_at_cursor()
         xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags.copy())
@@ -263,15 +307,20 @@ class UseCases():
             document.replace_max_string_before_cursor()
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
-    def add_newline(tags=set()):
+    def add_newline():
         document = WorkspaceRepo.get_workspace().get_active_document()
+        tags = ApplicationState.get_tags_at_cursor()
 
         document.start_undoable_action()
         document.delete_selected_nodes()
@@ -298,11 +347,15 @@ class UseCases():
         document.replace_max_string_before_cursor()
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def insert_text(text):
@@ -324,11 +377,15 @@ class UseCases():
                 document.insert_nodes(paragraph.children)
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     def replace_section(document, node_from, node_to, xml):
         nodes = []
@@ -342,11 +399,15 @@ class UseCases():
         document.set_insert_and_selection_node(node_to)
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def insert_xml(xml):
@@ -381,11 +442,63 @@ class UseCases():
         document.select_placeholder_in_range(document.get_node_at_position(insert_position), document.get_insert_node())
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def backspace():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        insert = document.get_insert_node()
+
+        if document.has_selection():
+            document.delete_selected_nodes()
+        elif not insert.is_first_in_parent():
+            document.delete_nodes(insert.prev_in_parent(), insert)
+        elif insert.parent.type == 'paragraph' and not insert.parent.is_first_in_parent():
+            document.delete_nodes(insert.prev_no_descent(), insert)
+        elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
+            document.set_insert_and_selection_node(insert.prev_no_descent(), insert)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def delete():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        insert = document.get_insert_node()
+
+        if document.has_selection():
+            document.delete_selected_nodes()
+        elif not insert.is_last_in_parent():
+            document.delete_nodes(insert, insert.next_in_parent())
+        elif insert.parent.type == 'paragraph' and not insert.parent.is_last_in_parent():
+            document.delete_nodes(insert, insert.next())
+        elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
+            document.set_insert_and_selection_node(insert.next_no_descent(), insert)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def delete_section(node_from, node_to):
@@ -395,11 +508,15 @@ class UseCases():
         document.delete_nodes(node_from, node_to)
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def delete_selection():
@@ -409,11 +526,15 @@ class UseCases():
         document.delete_selected_nodes()
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     def add_widget(widget):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -425,11 +546,15 @@ class UseCases():
         document.insert_nodes([node])
         document.end_undoable_action()
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def resize_widget(new_width):
@@ -463,10 +588,13 @@ class UseCases():
         document.set_insert_and_selection_node(bounds[1])
         document.end_undoable_action()
 
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def set_paragraph_style(style):
@@ -488,10 +616,13 @@ class UseCases():
             document.set_paragraph_style(paragraph, style)
         document.end_undoable_action()
 
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def toggle_checkbox_at_cursor():
@@ -501,26 +632,38 @@ class UseCases():
         new_state = 'checked' if paragraph.state == None else None
         document.set_paragraph_state(paragraph, new_state)
 
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def toggle_tag(tagname):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        has_untagged_nodes_in_selection = any((tagname not in node.tags) for node in document.get_selected_nodes())
+        if document.has_selection():
+            has_untagged_nodes_in_selection = any((tagname not in node.tags) for node in document.get_selected_nodes())
 
-        if has_untagged_nodes_in_selection:
-            document.add_tag(tagname)
+            if has_untagged_nodes_in_selection:
+                document.add_tag(tagname)
+            else:
+                document.remove_tag(tagname)
+
+            ApplicationState.reset_tags_at_cursor()
+
+            DocumentRepo.update(document)
+            MessageBus.add_message('document_changed')
+            MessageBus.add_message('document_ast_changed')
+            MessageBus.add_message('document_ast_or_cursor_changed')
+            MessageBus.add_message('tags_at_cursor_changed')
+
         else:
-            document.remove_tag(tagname)
+            ApplicationState.toggle_tag_at_cursor(tagname)
 
-        DocumentRepo.update(document)
-        MessageBus.add_message('document_changed')
-        MessageBus.add_message('document_ast_changed')
-        MessageBus.add_message('document_ast_or_cursor_changed')
+            MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def set_indentation_level(indentation_level):
@@ -562,6 +705,305 @@ class UseCases():
         MessageBus.add_message('document_ast_or_cursor_changed')
 
     @timer.timer
+    def left(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        insert = document.get_insert_node()
+        selection = document.get_selection_node()
+
+        if do_selection:
+            new_insert = insert.prev_no_descent()
+            if new_insert != None:
+                document.set_insert_and_selection_node(new_insert, selection)
+        elif document.has_selection():
+            document.set_insert_and_selection_node(document.get_first_selection_bound(), document.get_first_selection_bound())
+        else:
+            next_insert = insert.prev()
+            if next_insert != None:
+                document.set_insert_and_selection_node(next_insert, next_insert)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def jump_left(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        selection = document.get_selection_node()
+        original_insert = document.get_insert_node()
+        insert = original_insert
+        prev_insert = insert.prev_no_descent()
+        while prev_insert != None and NodeTypeDB.is_whitespace(prev_insert):
+            insert = prev_insert
+            prev_insert = insert.prev_no_descent()
+
+        if prev_insert != None:
+            insert_new = insert.prev_no_descent().word_bounds()[0]
+        else:
+            insert_new = insert
+
+        if do_selection:
+            document.set_insert_and_selection_node(insert_new, selection)
+        elif document.has_selection():
+            document.set_insert_and_selection_node(document.get_first_selection_bound(), document.get_first_selection_bound())
+        else:
+            document.set_insert_and_selection_node(insert_new, insert_new)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def right(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        insert = document.get_insert_node()
+        selection = document.get_selection_node()
+
+        if do_selection:
+            new_insert = insert.next_no_descent()
+            if new_insert != None:
+                document.set_insert_and_selection_node(new_insert, selection)
+        elif document.has_selection():
+            document.set_insert_and_selection_node(document.get_last_selection_bound(), document.get_last_selection_bound())
+        else:
+            next_insert = insert.next()
+            if next_insert != None:
+                document.set_insert_and_selection_node(next_insert, next_insert)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def jump_right(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        selection = document.get_selection_node()
+        original_insert = document.get_insert_node()
+        insert = original_insert
+        while NodeTypeDB.is_whitespace(insert):
+            next_insert = insert.next_no_descent()
+            if next_insert == None:
+                break
+            insert = next_insert
+
+        if not NodeTypeDB.is_whitespace(insert):
+            insert_new = insert.word_bounds()[1]
+        else:
+            insert_new = insert
+
+        if do_selection:
+            document.set_insert_and_selection_node(insert_new, selection)
+        elif document.has_selection():
+            document.set_insert_and_selection_node(document.get_last_selection_bound(), document.get_last_selection_bound())
+        else:
+            document.set_insert_and_selection_node(insert_new, insert_new)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def up(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        insert = document.get_insert_node()
+
+        x, y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
+        implicit_x_position = ApplicationState.get_implicit_x_position()
+        if implicit_x_position != None:
+            x = implicit_x_position
+
+        new_node = None
+        ancestors = Layouter.get_ancestors(Layouter.get_node_layout(insert))
+        for i, box in enumerate(ancestors):
+            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
+                if box['type'] == 'vbox':
+                    j = box['children'].index(ancestors[i - 1])
+                    prev_hboxes = box['children'][:j]
+                elif box['type'] == 'paragraph':
+                    prev_hboxes = []
+                    for paragraph in document.ast:
+                        for hbox in Layouter.get_paragraph_layout(paragraph)['children']:
+                            if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
+                                prev_hboxes.append(hbox)
+                for hbox in reversed(prev_hboxes):
+                    if new_node == None:
+                        min_distance = 10000
+                        for layout in hbox['children']:
+                            layout_x, layout_y = Layouter.get_absolute_xy(layout)
+                            distance = abs(layout_x - x)
+                            if distance < min_distance:
+                                new_node = layout['node']
+                                min_distance = distance
+        if new_node == None:
+            new_node = document.ast[0][0]
+
+        if do_selection:
+            document.set_insert_and_selection_node(new_node, document.get_selection_node())
+        else:
+            document.set_insert_and_selection_node(new_node, new_node)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def down(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        insert = document.get_insert_node()
+        insert_layout = Layouter.get_node_layout(insert)
+
+        x, y = Layouter.get_absolute_xy(insert_layout)
+        implicit_x_position = ApplicationState.get_implicit_x_position()
+        if implicit_x_position != None:
+            x = implicit_x_position
+
+        new_node = None
+        ancestors = Layouter.get_ancestors(insert_layout)
+        for i, box in enumerate(ancestors):
+            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
+                if box['type'] == 'vbox':
+                    j = box['children'].index(ancestors[i - 1])
+                    prev_hboxes = box['children'][j + 1:]
+                elif box['type'] == 'paragraph':
+                    prev_hboxes = []
+                    for paragraph in document.ast:
+                        for hbox in Layouter.get_paragraph_layout(paragraph)['children']:
+                            if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
+                                prev_hboxes.append(hbox)
+                for child in prev_hboxes:
+                    if new_node == None:
+                        min_distance = 10000
+                        for layout in child['children']:
+                            layout_x, layout_y = Layouter.get_absolute_xy(layout)
+                            distance = abs(layout_x - x)
+                            if distance < min_distance:
+                                new_node = layout['node']
+                                min_distance = distance
+        if new_node == None:
+            new_node = document.ast[-1][-1]
+
+        if do_selection:
+            document.set_insert_and_selection_node(new_node, document.get_selection_node())
+        else:
+            document.set_insert_and_selection_node(new_node, new_node)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def paragraph_start(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        insert = document.get_insert_node()
+
+        layout = Layouter.get_node_layout(insert)
+        while layout['parent']['parent'] != None:
+            layout = layout['parent']
+        while layout['children'][0]['node'] == None:
+            layout = layout['children'][0]
+        new_node = layout['children'][0]['node']
+
+        if do_selection:
+            document.set_insert_and_selection_node(new_node, document.get_selection_node())
+        else:
+            document.set_insert_and_selection_node(new_node, new_node)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def paragraph_end(do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        insert = document.get_insert_node()
+
+        layout = Layouter.get_node_layout(insert)
+        while layout['parent']['parent'] != None:
+            layout = layout['parent']
+        while layout['children'][-1]['node'] == None:
+            layout = layout['children'][-1]
+        new_node = layout['children'][-1]['node']
+
+        if do_selection:
+            document.set_insert_and_selection_node(new_node, document.get_selection_node())
+        else:
+            document.set_insert_and_selection_node(new_node, new_node)
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def page(y, do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        insert = document.get_insert_node()
+        orig_x, orig_y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
+        implicit_x_position = ApplicationState.get_implicit_x_position()
+        if implicit_x_position != None:
+            orig_x = implicit_x_position
+        new_x = orig_x
+        new_y = orig_y + y
+        layout = Layouter.get_cursor_holding_layout_close_to_xy(new_x, new_y)
+
+        if do_selection:
+            document.set_insert_and_selection_node(layout['node'], document.get_selection_node())
+        else:
+            document.set_insert_and_selection_node(layout['node'], layout['node'])
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
     def select_next_placeholder():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
@@ -583,10 +1025,14 @@ class UseCases():
         if node != None and node.type == 'placeholder':
             document.select_node(node)
 
+            ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+            ApplicationState.reset_tags_at_cursor()
+
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
             MessageBus.add_message('document_ast_or_cursor_changed')
             MessageBus.add_message('cursor_movement')
+            MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def select_prev_placeholder():
@@ -607,10 +1053,14 @@ class UseCases():
         if node != None and node.type == 'placeholder':
             document.select_node(node)
 
+            ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+            ApplicationState.reset_tags_at_cursor()
+
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
             MessageBus.add_message('document_ast_or_cursor_changed')
             MessageBus.add_message('cursor_movement')
+            MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def select_node(node):
@@ -618,10 +1068,14 @@ class UseCases():
 
         document.select_node(node)
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def select_section(node_from, node_to):
@@ -629,10 +1083,14 @@ class UseCases():
 
         document.set_insert_and_selection_node(node_from, node_to)
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def select_all():
@@ -640,10 +1098,14 @@ class UseCases():
 
         document.set_insert_and_selection_node(document.ast[0][0], document.ast[-1][-1])
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def remove_selection():
@@ -652,10 +1114,32 @@ class UseCases():
         if document.has_selection():
             document.set_insert_and_selection_node(document.get_last_selection_bound())
 
+            ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+            ApplicationState.reset_tags_at_cursor()
+
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
             MessageBus.add_message('document_ast_or_cursor_changed')
             MessageBus.add_message('cursor_movement')
+            MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def move_cursor_to_xy(x, y, do_selection=False):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        layout = Layouter.get_cursor_holding_layout_close_to_xy(x, y)
+        if do_selection:
+            document.set_insert_and_selection_node(layout['node'], document.get_selection_node())
+        else:
+            document.set_insert_and_selection_node(layout['node'], layout['node'])
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def move_cursor_to_node(node):
@@ -663,10 +1147,14 @@ class UseCases():
 
         document.set_insert_and_selection_node(node, node)
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def move_cursor_to_parent():
@@ -682,10 +1170,14 @@ class UseCases():
         if new_insert != None:
             document.set_insert_and_selection_node(new_insert, new_insert)
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
     def extend_selection():
@@ -724,9 +1216,115 @@ class UseCases():
 
         document.set_insert_and_selection_node(new_insert, new_selection)
 
+        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
+        ApplicationState.reset_tags_at_cursor()
+
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    def set_frame_time(time):
+        ApplicationState.set_frame_time(time)
+
+    def set_view_size(width, height):
+        ApplicationState.set_view_size(width, height)
+
+    def set_title_buttons_height(height):
+        ApplicationState.set_title_buttons_height(height)
+
+    def set_dark_mode(is_dark):
+        ApplicationState.set_dark_mode(is_dark)
+
+        MessageBus.add_message('dark_mode_changed')
+
+    def set_ctrl_pressed(is_pressed):
+        ApplicationState.set_ctrl_pressed(is_pressed)
+
+    @timer.timer
+    def set_preedit(preedit_string):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        ApplicationState.set_preedit(preedit_string)
+        Layouter.update_preedit(preedit_string)
+        ApplicationState.scroll_insert_on_screen(document, 'default')
+
+        MessageBus.add_message('preedit_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def update_implicit_x_position():
+        ApplicationState.update_implicit_x_position()
+
+    @timer.timer
+    def scroll_to_xy(x, y, animation_type='default'):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
+
+        ApplicationState.set_scrolling_target(document.id, x, y, animation_type)
+
+    @timer.timer
+    def scroll_insert_on_screen(animation_type='default'):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
+
+        ApplicationState.scroll_insert_on_screen(document, animation_type)
+
+    @timer.timer
+    def decelerate(vel_x, vel_y):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
+
+        view_width, view_height = ApplicationState.get_view_size()
+        x, y = ApplicationState.get_current_scrolling_offsets()
+
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height() + Layouter.get_height() + LayoutInfo.get_document_padding_bottom() - view_height)
+        max_x = max(0, LayoutInfo.get_document_padding_left() + Layouter.get_width() - view_width)
+
+        vel_x *= 0.4
+        vel_y *= 0.4
+        x = x + 15.13 / 16 * vel_x
+        y = y + 15.13 / 16 * vel_y
+
+        ApplicationState.set_scrolling_target(document.id, x, y, 'decelerate')
+
+    def show_dialog(name, argument=None):
+        ApplicationState.schedule_dialog_display(name, argument)
+
+        MessageBus.add_message('dialog_display_scheduled')
+
+    def show_popover(name, x, y, orientation='bottom'):
+        ApplicationState.set_popover(name, x, y, orientation)
+
+        MessageBus.add_message('popover_changed')
+
+    def show_popover_at_node(name, document, node, offset_x, offset_y):
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        view_width, view_height = ApplicationState.get_view_size()
+
+        x, y = Layouter.get_absolute_xy(Layouter.get_node_layout(node))
+        x += LayoutInfo.get_document_padding_left() + offset_x - scrolling_pos_x
+        y += LayoutInfo.get_normal_document_offset() + offset_y - scrolling_pos_y
+        fontname = Layouter.get_node_layout(node)['fontname']
+        padding_top = TextShaper.get_padding_top(fontname)
+        padding_bottom = TextShaper.get_padding_bottom(fontname)
+        y += Layouter.get_node_layout(node)['height'] - padding_top - padding_bottom
+        x += Layouter.get_node_layout(node)['width'] / 2
+
+        orientation = 'bottom'
+        if y + 260 > view_height:
+            orientation = 'top'
+            y -= Layouter.get_node_layout(node)['height'] - padding_top - padding_bottom
+
+        ApplicationState.set_popover(name, x, y, orientation)
+
+        MessageBus.add_message('popover_changed')
+
+    def hide_popovers():
+        ApplicationState.set_popover(None)
+
+        MessageBus.add_message('popover_changed')
 
 

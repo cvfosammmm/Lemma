@@ -24,7 +24,9 @@ from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.settings import Settings
 from lemma.services.autocomplete_db import AutocompleteDB
 from lemma.services.layout_info import LayoutInfo
+from lemma.services.layouter import Layouter
 from lemma.use_cases.use_cases import UseCases
+from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
 
 
@@ -33,7 +35,6 @@ class Autocomplete():
     def __init__(self, main_window, application):
         self.document_view = main_window.document_view
         self.view = main_window.document_view.autocomplete_view
-        self.application = application
 
         self.scrolling_position_x, self.scrolling_position_y = -1, -1
 
@@ -71,7 +72,7 @@ class Autocomplete():
         if 'document_changed' in messages:
             self.on_document_changed()
 
-        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
+        scrolling_position_x, scrolling_position_y = ApplicationState.get_current_scrolling_offsets()
         if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
             self.scrolling_position_x = scrolling_position_x
             self.scrolling_position_y = scrolling_position_y
@@ -169,14 +170,12 @@ class Autocomplete():
     def update_position(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
-        insert_x, insert_y = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(insert))
+        insert_x, insert_y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
         content_offset = LayoutInfo.get_normal_document_offset()
-        scrolling_offset_y = self.application.scrolling.get_current_scrolling_offsets()[1]
-        insert_y += content_offset - scrolling_offset_y
-        insert_height = self.application.layout.get_node_layout(insert)['height']
+        insert_y += content_offset - self.scrolling_position_y
+        insert_height = Layouter.get_node_layout(insert)['height']
         insert_x += LayoutInfo.get_document_padding_left()
-        window_height = self.application.document_view.height
-        window_width = self.application.document_view.width
+        window_width, window_height = ApplicationState.get_view_size()
 
         self.view.x = min(insert_x, window_width - self.view.width - 18)
         if insert_y + insert_height + self.view.max_height > window_height:
@@ -268,7 +267,7 @@ class Autocomplete():
         insert = document.get_insert_node()
         xml = AutocompleteDB.get_xml(self.view.listbox.get_selected_row().title[1:])
         UseCases.replace_section(document, self.session_first_node, insert, xml)
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
         self.deactivate()
 

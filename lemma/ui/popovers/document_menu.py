@@ -27,8 +27,8 @@ from lemma.use_cases.use_cases import UseCases
 
 class Popover(PopoverView):
 
-    def __init__(self, manager):
-        PopoverView.__init__(self, manager)
+    def __init__(self):
+        PopoverView.__init__(self)
 
         self.set_width(306)
 
@@ -54,7 +54,7 @@ class Popover(PopoverView):
 
         if keyval == Gdk.keyval_from_name('F12'):
             if state & modifiers == 0:
-                self.manager.hide_popovers()
+                UseCases.hide_popovers()
 
                 return True
 

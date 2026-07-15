@@ -22,11 +22,9 @@ from gi.repository import Gtk, Gdk, GLib
 import time
 
 from lemma.repos.workspace_repo import WorkspaceRepo
-from lemma.ui.shortcuts import Shortcuts
-from lemma.services.node_type_db import NodeTypeDB
+from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.message_bus import MessageBus
-import lemma.services.timer as timer
 
 
 class Keyboard():
@@ -36,13 +34,6 @@ class Keyboard():
         self.application = application
         self.view = main_window.document_view
         self.content = self.view.content
-        self.actions = self.application.actions.actions
-
-        self.tags_at_cursor = set()
-        self.implicit_x_position = 0
-        self.ctrl_pressed = False
-        self.insert_node = None
-        self.selection_node = None
 
         self.cursor_blink_time = Gtk.Settings.get_default().get_property('gtk_cursor_blink_time') / 1000
         self.cursor_blink_timeout = Gtk.Settings.get_default().get_property('gtk_cursor_blink_timeout')
@@ -61,30 +52,6 @@ class Keyboard():
         self.im_context.connect('preedit-changed', self.on_preedit_changed)
         self.key_controller.set_im_context(self.im_context)
 
-        self.shortcut_controller = Shortcuts.new_controller()
-        self.shortcut_controller.add_cb('toggle_bold', self.actions['toggle-bold'].activate)
-        self.shortcut_controller.add_cb('toggle_italic', self.actions['toggle-italic'].activate)
-        self.shortcut_controller.add_cb('toggle_verbatim', self.actions['toggle-verbatim'].activate)
-        self.shortcut_controller.add_cb('toggle_highlight', self.actions['toggle-highlight'].activate)
-        self.shortcut_controller.add_cb('link_popover', self.actions['show-link-popover'].activate)
-        self.shortcut_controller.add_cb('subscript', self.actions['subscript'].activate)
-        self.shortcut_controller.add_cb('superscript', self.actions['superscript'].activate)
-        self.shortcut_controller.add_cb('toggle_checkbox', self.actions['toggle-checkbox'].activate)
-        self.shortcut_controller.add_cb('undo', self.actions['undo'].activate)
-        self.shortcut_controller.add_cb('redo', self.actions['redo'].activate)
-        self.shortcut_controller.add_cb('cut', self.actions['cut'].activate)
-        self.shortcut_controller.add_cb('copy', self.actions['copy'].activate)
-        self.shortcut_controller.add_cb('paste', self.actions['paste'].activate)
-        self.shortcut_controller.add_cb('select_all', self.actions['select-all'].activate)
-        self.shortcut_controller.add_cb('go_to_parent_node', self.actions['move-cursor-to-parent'].activate)
-        self.shortcut_controller.add_cb('extend_selection', self.actions['extend-selection'].activate)
-        self.shortcut_controller.add_cb('rename_document', self.actions['rename-document'].activate)
-        for para_style in ['h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'p']:
-            sc_name = 'paragraph_style_' + para_style
-            callback = self.actions['set-paragraph-style'].activate
-            self.shortcut_controller.add_cb(sc_name, callback, GLib.Variant.new_string(para_style))
-        self.view.content.add_controller(self.shortcut_controller)
-
         self.content.connect('realize', self.on_realize)
 
         self.focus_controller = Gtk.EventControllerFocus()
@@ -94,7 +61,6 @@ class Keyboard():
 
         MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
-        MessageBus.subscribe(self, 'implicit_x_position_changed')
 
     def animate(self):
         messages = MessageBus.get_messages(self)
@@ -104,11 +70,7 @@ class Keyboard():
             self.im_context.reset()
 
         if 'new_active_document' in messages or 'document_ast_or_cursor_changed' in messages:
-            self.update_tags_at_cursor()
             self.im_context.reset()
-
-        if 'new_active_document' in messages or 'implicit_x_position_changed' in messages:
-            self.update_implicit_x_position()
 
         time_since_blink_start = time.time() - self.cursor_blink_reset
         time_in_cycle = (time_since_blink_start % self.cursor_blink_time) / self.cursor_blink_time
@@ -118,42 +80,12 @@ class Keyboard():
             cursor_visible = False
         if not self.view.content.has_focus():
             cursor_visible = False
-        if document.has_selection():
+        if document != None and document.has_selection():
             cursor_visible = False
 
         if time_since_blink_start <= self.cursor_blink_timeout and cursor_visible != self.cursor_visible:
             self.cursor_visible = cursor_visible
             self.view.content.queue_draw()
-
-    def update_implicit_x_position(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        if document == None:
-            self.implicit_x_position = 0
-        else:
-            layout = self.application.layout
-            insert = document.cursor.get_insert_node()
-
-            x, y = layout.get_absolute_xy(layout.get_node_layout(insert))
-            self.implicit_x_position = x
-
-    def update_tags_at_cursor(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        if document == None:
-            self.tags_at_cursor = set()
-        else:
-            node = document.get_insert_node()
-
-            if node.parent.type == 'paragraph':
-                prev_node = node.prev_no_descent()
-            else:
-                prev_node = node.prev_in_parent()
-
-            if node == None or prev_node == None:
-                self.tags_at_cursor = set()
-            else:
-                self.tags_at_cursor = prev_node.tags.copy()
 
     def on_keypress_content(self, controller, keyval, keycode, keyboard_state):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -161,8 +93,10 @@ class Keyboard():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
+        view_width, view_height = ApplicationState.get_view_size()
 
-        self.ctrl_pressed = int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK or Gdk.keyval_name(keyval).startswith('Control')
+        ctrl_pressed = int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK or Gdk.keyval_name(keyval).startswith('Control')
+        UseCases.set_ctrl_pressed(ctrl_pressed)
 
         if (widget := document.get_selected_widget()) != None:
             if self.application.widget_manager.on_keypress(widget, keyval, keycode, keyboard_state):
@@ -170,47 +104,51 @@ class Keyboard():
 
         match (Gdk.keyval_name(keyval).lower(), int(keyboard_state & modifiers)):
             case ('left', 0):
-                self.left()
+                UseCases.left()
+                UseCases.update_implicit_x_position()
             case ('right', 0):
-                self.right()
+                UseCases.right()
+                UseCases.update_implicit_x_position()
             case ('up', 0):
-                self.up()
+                UseCases.up()
             case ('down', 0):
-                self.down()
+                UseCases.down()
             case ('home', 0):
-                self.paragraph_start()
+                UseCases.paragraph_start()
+                UseCases.update_implicit_x_position()
             case ('end', 0):
-                self.paragraph_end()
+                UseCases.paragraph_end()
+                UseCases.update_implicit_x_position()
             case ('page_up', 0):
-                self.page(-self.application.document_view.height + 100)
+                UseCases.page(-view_height + 100)
             case ('page_down', 0):
-                self.page(self.application.document_view.height - 100)
+                UseCases.page(view_height - 100)
 
             case ('left', Gdk.ModifierType.SHIFT_MASK):
-                self.left(True)
+                UseCases.left(True)
             case ('right', Gdk.ModifierType.SHIFT_MASK):
-                self.right(True)
+                UseCases.right(True)
             case ('up', Gdk.ModifierType.SHIFT_MASK):
-                self.up(True)
+                UseCases.up(True)
             case ('down', Gdk.ModifierType.SHIFT_MASK):
-                self.down(True)
+                UseCases.down(True)
             case ('home', Gdk.ModifierType.SHIFT_MASK):
-                self.paragraph_start(True)
+                UseCases.paragraph_start(True)
             case ('end', Gdk.ModifierType.SHIFT_MASK):
-                self.paragraph_end(True)
+                UseCases.paragraph_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
-                self.page(-self.application.document_view.height + 100, True)
+                UseCases.page(-view_height + 100, True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
-                self.page(self.application.document_view.height - 100, True)
+                UseCases.page(view_height - 100, True)
 
             case ('left', Gdk.ModifierType.CONTROL_MASK):
-                self.jump_left(False)
+                UseCases.jump_left(False)
             case ('left', 5):
-                self.jump_left(True)
+                UseCases.jump_left(True)
             case ('right', Gdk.ModifierType.CONTROL_MASK):
-                self.jump_right(False)
+                UseCases.jump_right(False)
             case ('right', 5):
-                self.jump_right(True)
+                UseCases.jump_right(True)
 
             case ('tab', 0):
                 if document.has_multiple_lines_selected():
@@ -229,7 +167,7 @@ class Keyboard():
             case ('escape', _):
                 if document.get_selected_widget() != None:
                     UseCases.remove_selection()
-                    self.update_implicit_x_position()
+                    UseCases.update_implicit_x_position()
             case ('return', _) | ('kp_enter', _):
                 if not document.has_selection() and document.get_insert_node().is_inside_link():
                     UseCases.open_link(document.get_insert_node().link)
@@ -241,315 +179,47 @@ class Keyboard():
                         UseCases.set_paragraph_style('p')
                         UseCases.set_indentation_level(0)
                     else:
-                        UseCases.add_newline(self.tags_at_cursor)
-                        self.update_implicit_x_position()
+                        UseCases.add_newline()
+                        UseCases.update_implicit_x_position()
                 else:
-                    UseCases.add_newline(self.tags_at_cursor)
-                    self.update_implicit_x_position()
+                    UseCases.add_newline()
+                    UseCases.update_implicit_x_position()
             case ('backspace', _):
-                self.backspace()
+                UseCases.backspace()
+                UseCases.update_implicit_x_position()
             case ('delete', _):
-                self.delete()
+                UseCases.delete()
+                UseCases.update_implicit_x_position()
 
             case _: return False
         return True
 
     def on_keyrelease_content(self, controller, keyval, keycode, keyboard_state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.ctrl_pressed = int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control')
+        ctrl_pressed = int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK and not Gdk.keyval_name(keyval).startswith('Control')
+        UseCases.set_ctrl_pressed(ctrl_pressed)
 
     def on_im_commit(self, im_context, text):
-        UseCases.im_commit(text, self.tags_at_cursor)
-
-        self.update_implicit_x_position()
+        UseCases.im_commit(text)
+        UseCases.update_implicit_x_position()
         self.application.autocomplete.on_keyboard_input()
 
     def on_preedit_changed(self, im_context):
-        self.application.layout.invalidate_on_preedit_change()
-        self.application.document_view.clear_render_cache()
-        self.view.content.queue_draw()
-        MessageBus.add_message('preedit_changed')
+        UseCases.set_preedit(self.im_context.get_preedit_string().str)
 
     def on_realize(self, content, data=None):
         self.reset_cursor_blink()
 
     def on_focus_in(self, controller):
         modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.ctrl_pressed = int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK
+        ctrl_pressed = int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK
+        UseCases.set_ctrl_pressed(ctrl_pressed)
 
         self.reset_cursor_blink()
         self.im_context.focus_in()
 
     def on_focus_out(self, controller):
-        modifiers = Gtk.accelerator_get_default_mod_mask()
-        self.ctrl_pressed = int(controller.get_current_event_state() & modifiers) == Gdk.ModifierType.CONTROL_MASK
-
         self.im_context.focus_out()
-
-    @timer.timer
-    def backspace(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.get_insert_node()
-
-        if document.has_selection():
-            UseCases.delete_selection()
-        elif not insert.is_first_in_parent():
-            UseCases.delete_section(insert.prev_in_parent(), insert)
-        elif insert.parent.type == 'paragraph' and not insert.parent.is_first_in_parent():
-            UseCases.delete_section(insert.prev_no_descent(), insert)
-        elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
-            UseCases.select_section(insert.prev_no_descent(), insert)
-
-        self.update_implicit_x_position()
-
-    @timer.timer
-    def delete(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.get_insert_node()
-
-        if document.has_selection():
-            UseCases.delete_selection()
-        elif not insert.is_last_in_parent():
-            UseCases.delete_section(insert, insert.next_in_parent())
-        elif insert.parent.type == 'paragraph' and not insert.parent.is_last_in_parent():
-            UseCases.delete_section(insert, insert.next())
-        elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
-            UseCases.select_section(insert.next_no_descent(), insert)
-
-        self.update_implicit_x_position()
-
-    @timer.timer
-    def left(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        insert = document.get_insert_node()
-        selection = document.get_selection_node()
-
-        if do_selection:
-            new_insert = insert.prev_no_descent()
-            if new_insert != None:
-                UseCases.select_section(new_insert, selection)
-        elif document.has_selection():
-            UseCases.move_cursor_to_node(document.get_first_selection_bound())
-        else:
-            next_insert = insert.prev()
-            if next_insert != None:
-                UseCases.move_cursor_to_node(next_insert)
-
-        if not do_selection:
-            self.update_implicit_x_position()
-
-    @timer.timer
-    def jump_left(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        selection = document.get_selection_node()
-        original_insert = document.get_insert_node()
-        insert = original_insert
-        prev_insert = insert.prev_no_descent()
-        while prev_insert != None and NodeTypeDB.is_whitespace(prev_insert):
-            insert = prev_insert
-            prev_insert = insert.prev_no_descent()
-
-        if prev_insert != None:
-            insert_new = insert.prev_no_descent().word_bounds()[0]
-        else:
-            insert_new = insert
-
-        if do_selection:
-            UseCases.select_section(insert_new, selection)
-        elif document.has_selection():
-            UseCases.move_cursor_to_node(document.get_first_selection_bound())
-        else:
-            UseCases.move_cursor_to_node(insert_new)
-
-        if not do_selection:
-            self.update_implicit_x_position()
-
-    @timer.timer
-    def right(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        insert = document.get_insert_node()
-        selection = document.get_selection_node()
-
-        if do_selection:
-            new_insert = insert.next_no_descent()
-            if new_insert != None:
-                UseCases.select_section(new_insert, selection)
-        elif document.has_selection():
-            UseCases.move_cursor_to_node(document.get_last_selection_bound())
-        else:
-            next_insert = insert.next()
-            if next_insert != None:
-                UseCases.move_cursor_to_node(next_insert)
-
-        if not do_selection:
-            self.update_implicit_x_position()
-
-    @timer.timer
-    def jump_right(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        selection = document.get_selection_node()
-        original_insert = document.get_insert_node()
-        insert = original_insert
-        while NodeTypeDB.is_whitespace(insert):
-            next_insert = insert.next_no_descent()
-            if next_insert == None:
-                break
-            insert = next_insert
-
-        if not NodeTypeDB.is_whitespace(insert):
-            insert_new = insert.word_bounds()[1]
-        else:
-            insert_new = insert
-
-        if do_selection:
-            UseCases.select_section(insert_new, selection)
-        elif document.has_selection():
-            UseCases.move_cursor_to_node(document.get_last_selection_bound())
-        else:
-            UseCases.move_cursor_to_node(insert_new)
-
-        if not do_selection:
-            self.update_implicit_x_position()
-
-    @timer.timer
-    def up(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.get_insert_node()
-
-        x, y = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(insert))
-        if self.implicit_x_position != None:
-            x = self.implicit_x_position
-
-        new_node = None
-        ancestors = self.application.layout.get_ancestors(self.application.layout.get_node_layout(insert))
-        for i, box in enumerate(ancestors):
-            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
-                if box['type'] == 'vbox':
-                    j = box['children'].index(ancestors[i - 1])
-                    prev_hboxes = box['children'][:j]
-                elif box['type'] == 'paragraph':
-                    prev_hboxes = []
-                    for paragraph in document.ast:
-                        for hbox in self.application.layout.get_paragraph_layout(paragraph)['children']:
-                            if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
-                                prev_hboxes.append(hbox)
-                for hbox in reversed(prev_hboxes):
-                    if new_node == None:
-                        min_distance = 10000
-                        for layout in hbox['children']:
-                            layout_x, layout_y = self.application.layout.get_absolute_xy(layout)
-                            distance = abs(layout_x - x)
-                            if distance < min_distance:
-                                new_node = layout['node']
-                                min_distance = distance
-        if new_node == None:
-            new_node = document.ast[0][0]
-
-        if do_selection:
-            UseCases.select_section(new_node, document.get_selection_node())
-        else:
-            UseCases.move_cursor_to_node(new_node)
-
-    @timer.timer
-    def down(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.get_insert_node()
-        insert_layout = self.application.layout.get_node_layout(insert)
-
-        x, y = self.application.layout.get_absolute_xy(insert_layout)
-        if self.implicit_x_position != None:
-            x = self.implicit_x_position
-
-        new_node = None
-        ancestors = self.application.layout.get_ancestors(insert_layout)
-        for i, box in enumerate(ancestors):
-            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
-                if box['type'] == 'vbox':
-                    j = box['children'].index(ancestors[i - 1])
-                    prev_hboxes = box['children'][j + 1:]
-                elif box['type'] == 'paragraph':
-                    prev_hboxes = []
-                    for paragraph in document.ast:
-                        for hbox in self.application.layout.get_paragraph_layout(paragraph)['children']:
-                            if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
-                                prev_hboxes.append(hbox)
-                for child in prev_hboxes:
-                    if new_node == None:
-                        min_distance = 10000
-                        for layout in child['children']:
-                            layout_x, layout_y = self.application.layout.get_absolute_xy(layout)
-                            distance = abs(layout_x - x)
-                            if distance < min_distance:
-                                new_node = layout['node']
-                                min_distance = distance
-        if new_node == None:
-            new_node = document.ast[-1][-1]
-
-        if do_selection:
-            UseCases.select_section(new_node, document.get_selection_node())
-        else:
-            UseCases.move_cursor_to_node(new_node)
-
-    @timer.timer
-    def paragraph_start(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.get_insert_node()
-
-        layout = self.application.layout.get_node_layout(insert)
-        while layout['parent']['parent'] != None:
-            layout = layout['parent']
-        while layout['children'][0]['node'] == None:
-            layout = layout['children'][0]
-        new_node = layout['children'][0]['node']
-
-        if do_selection:
-            UseCases.select_section(new_node, document.get_selection_node())
-        else:
-            UseCases.move_cursor_to_node(new_node)
-
-        if not do_selection:
-            self.update_implicit_x_position()
-
-    @timer.timer
-    def paragraph_end(self, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        insert = document.get_insert_node()
-
-        layout = self.application.layout.get_node_layout(insert)
-        while layout['parent']['parent'] != None:
-            layout = layout['parent']
-        while layout['children'][-1]['node'] == None:
-            layout = layout['children'][-1]
-        new_node = layout['children'][-1]['node']
-
-        if do_selection:
-            UseCases.select_section(new_node, document.get_selection_node())
-        else:
-            UseCases.move_cursor_to_node(new_node)
-
-        if not do_selection:
-            self.update_implicit_x_position()
-
-    @timer.timer
-    def page(self, y, do_selection=False):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        insert = document.get_insert_node()
-        orig_x, orig_y = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(insert))
-        if self.implicit_x_position != None:
-            orig_x = self.implicit_x_position
-        new_x = orig_x
-        new_y = orig_y + y
-        layout = self.application.layout.get_cursor_holding_layout_close_to_xy(new_x, new_y)
-
-        if do_selection:
-            UseCases.select_section(layout['node'], document.get_selection_node())
-        else:
-            UseCases.move_cursor_to_node(layout['node'])
 
     def reset_cursor_blink(self):
         self.cursor_blink_reset = time.time()

@@ -25,6 +25,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.services.settings import Settings
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
+from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -34,13 +35,11 @@ class DocumentTitle():
 
     def __init__(self, main_window, application):
         self.main_window = main_window
-        self.application = application
         self.document_view = main_window.document_view
         self.view = main_window.document_view.title_widget
 
         self.is_active = False
         self.document = None
-        self.title_buttons_height = 0
         self.scrolling_position_x = None
         self.scrolling_position_y = None
 
@@ -69,7 +68,7 @@ class DocumentTitle():
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document != None:
-            scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
+            scrolling_position_x, scrolling_position_y = ApplicationState.get_current_scrolling_offsets()
             if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
                 self.scrolling_position_x = scrolling_position_x
                 self.scrolling_position_y = scrolling_position_y
@@ -92,7 +91,7 @@ class DocumentTitle():
         if document == None:
             self.view.set_offset_y(0)
         else:
-            offset = math.floor(self.application.scrolling.get_current_scrolling_offsets()[1])
+            offset = math.floor(ApplicationState.get_current_scrolling_offsets()[1])
             self.view.set_offset_y(offset)
         self.document_view.queue_allocate()
 
@@ -111,8 +110,8 @@ class DocumentTitle():
             self.reset_title()
             self.validate_title()
             self.view.button_revealer.set_reveal_child(True)
-            self.set_title_buttons_height(50)
-            self.application.scrolling.scroll_to_xy(0, 0, animation_type='default')
+            UseCases.set_title_buttons_height(50)
+            UseCases.scroll_to_xy(0, 0, animation_type='default')
 
     def on_content_focus_in(self, controller):
         self.cancel()
@@ -157,7 +156,7 @@ class DocumentTitle():
                             UseCases.set_link(linking_doc, bounds, title)
 
         self.view.button_revealer.set_reveal_child(False)
-        self.set_title_buttons_height(0)
+        UseCases.set_title_buttons_height(0)
         self.document_view.content.grab_focus()
 
         self.is_active = False
@@ -166,7 +165,7 @@ class DocumentTitle():
         self.reset_title()
 
         self.view.button_revealer.set_reveal_child(False)
-        self.set_title_buttons_height(0)
+        UseCases.set_title_buttons_height(0)
         self.document_view.content.grab_focus()
 
         self.is_active = False
@@ -213,8 +212,5 @@ class DocumentTitle():
             self.view.subtext.set_text('Please enter a name for this document.')
             self.view.subtext.remove_css_class('error')
             self.view.title_entry.remove_css_class('error')
-
-    def set_title_buttons_height(self, height):
-        self.title_buttons_height = height
 
 

@@ -72,4 +72,6 @@ class Dialog(object):
                 widget = WidgetFactory.make_widget('image', {'filename': filename})
                 UseCases.add_widget(widget)
 
+                self.main_window.document_view.content.grab_focus()
+
 

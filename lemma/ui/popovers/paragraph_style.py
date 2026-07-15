@@ -26,8 +26,8 @@ from lemma.ui.shortcuts import Shortcuts
 
 class Popover(PopoverView):
 
-    def __init__(self, manager):
-        PopoverView.__init__(self, manager)
+    def __init__(self):
+        PopoverView.__init__(self)
 
         self.set_width(252)
 

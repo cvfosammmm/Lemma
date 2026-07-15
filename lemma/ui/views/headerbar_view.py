@@ -65,7 +65,6 @@ class HeaderBarLeft(Gtk.WindowHandle):
         self.hamburger_menu_button.set_tooltip_text(_('Main Menu') + ' (' + Shortcuts.get_for_labels('show_hamburger_menu') + ')')
         self.hamburger_menu_button.add_css_class('flat')
         self.hamburger_menu_button.add_css_class('sidebar')
-        self.hamburger_menu_button.set_action_name('win.show-hamburger-menu')
         self.box.append(self.hamburger_menu_button)
 
 
@@ -109,13 +108,11 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.bookmarks_button.set_can_focus(False)
         self.bookmarks_button.set_tooltip_text(_('Bookmarks') + ' (' + Shortcuts.get_for_labels('show_bookmarks') + ')')
         self.bookmarks_button.add_css_class('flat')
-        self.bookmarks_button.set_action_name('win.show-bookmarks')
 
         self.document_menu_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
         self.document_menu_button.set_can_focus(False)
         self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (' + Shortcuts.get_for_labels('show_document_menu') + ')')
         self.document_menu_button.add_css_class('flat')
-        self.document_menu_button.set_action_name('win.show-document-menu')
 
         self.add_docmenu_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.add_docmenu_box.append(self.add_document_button)

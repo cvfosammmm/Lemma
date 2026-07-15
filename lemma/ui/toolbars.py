@@ -22,6 +22,7 @@ from gi.repository import Gtk, Pango
 from lemma.services.message_bus import MessageBus
 from lemma.services.layout_info import LayoutInfo
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
 from lemma.ui.shortcuts import Shortcuts
@@ -31,44 +32,53 @@ import lemma.services.timer as timer
 class Toolbars():
 
     def __init__(self, main_window, application):
+        self.main_window = main_window
         self.application = application
         self.headerbar = main_window.headerbar
         self.toolbar = main_window.toolbar
 
-        controller = Gtk.GestureClick()
-        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        controller.set_button(1)
-        controller.connect('pressed', self.on_menu_button_press, 'show-hamburger-menu')
-        self.headerbar.hb_left.hamburger_menu_button.add_controller(controller)
+        self.hamburger_button_controller = Gtk.GestureClick()
+        self.hamburger_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.hamburger_button_controller.set_button(1)
+        self.hamburger_button_controller.connect('pressed', self.on_hamburger_button_press)
+        self.headerbar.hb_left.hamburger_menu_button.add_controller(self.hamburger_button_controller)
 
-        controller = Gtk.GestureClick()
-        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        controller.set_button(1)
-        controller.connect('pressed', self.on_menu_button_press, 'show-bookmarks')
-        self.headerbar.hb_right.bookmarks_button.add_controller(controller)
+        self.bookmarks_button_controller = Gtk.GestureClick()
+        self.bookmarks_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.bookmarks_button_controller.set_button(1)
+        self.bookmarks_button_controller.connect('pressed', self.on_bookmarks_button_press)
+        self.headerbar.hb_right.bookmarks_button.add_controller(self.bookmarks_button_controller)
 
-        controller = Gtk.GestureClick()
-        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        controller.set_button(1)
-        controller.connect('pressed', self.on_menu_button_press, 'show-document-menu')
-        self.headerbar.hb_right.document_menu_button.add_controller(controller)
+        self.docmenu_button_controller = Gtk.GestureClick()
+        self.docmenu_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.docmenu_button_controller.set_button(1)
+        self.docmenu_button_controller.connect('pressed', self.on_docmenu_button_press)
+        self.headerbar.hb_right.document_menu_button.add_controller(self.docmenu_button_controller)
 
-        controller = Gtk.GestureClick()
-        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        controller.set_button(1)
-        controller.connect('pressed', self.on_menu_button_press, 'show-paragraph-style-menu')
-        self.toolbar.toolbar_main.paragraph_style_menu_button.add_controller(controller)
+        self.paragraph_button_controller = Gtk.GestureClick()
+        self.paragraph_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.paragraph_button_controller.set_button(1)
+        self.paragraph_button_controller.connect('pressed', self.on_paragraph_button_press)
+        self.toolbar.toolbar_main.paragraph_style_menu_button.add_controller(self.paragraph_button_controller)
 
-        controller = Gtk.GestureClick()
-        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        controller.set_button(1)
-        controller.connect('pressed', self.on_menu_button_press, 'show-edit-menu')
-        self.toolbar.toolbar_right.edit_menu_button.add_controller(controller)
+        self.edit_button_controller = Gtk.GestureClick()
+        self.edit_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.edit_button_controller.set_button(1)
+        self.edit_button_controller.connect('pressed', self.on_edit_button_press)
+        self.toolbar.toolbar_right.edit_menu_button.add_controller(self.edit_button_controller)
+
+        self.shortcut_controller = Shortcuts.new_controller()
+        self.shortcut_controller.add_cb('show_hamburger_menu', self.on_hamburger_button_press)
+        self.shortcut_controller.add_cb('show_document_menu', self.on_docmenu_button_press)
+        self.shortcut_controller.add_cb('show_bookmarks', self.on_bookmarks_button_press)
+        self.main_window.add_controller(self.shortcut_controller)
 
         MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'settings_changed')
+        MessageBus.subscribe(self, 'tags_at_cursor_changed')
+        MessageBus.subscribe(self, 'popover_changed')
 
         self.update_tag_toggle('bold')
         self.update_tag_toggle('italic')
@@ -83,15 +93,73 @@ class Toolbars():
             self.update()
             self.update_paragraph_style()
 
-        if 'new_active_document' in messages or 'document_ast_or_cursor_changed' in messages:
+        if 'tags_at_cursor_changed' in messages:
             self.update_tag_toggle('bold')
             self.update_tag_toggle('italic')
             self.update_tag_toggle('verbatim')
             self.update_tag_toggle('highlight')
 
-    def on_menu_button_press(self, controller, n_press, x, y, action_name):
-        self.application.actions.actions[action_name].activate()
-        controller.reset()
+        if 'popover_changed' in messages:
+            popover = ApplicationState.get_popover()
+            if popover != None: popover = popover[0]
+
+            data = list()
+            data.append((self.main_window.headerbar.hb_left.hamburger_menu_button, 'hamburger_menu'))
+            data.append((self.main_window.headerbar.hb_right.bookmarks_button, 'bookmarks'))
+            data.append((self.toolbar.toolbar_right.edit_menu_button, 'edit_menu'))
+            data.append((self.toolbar.toolbar_main.paragraph_style_menu_button, 'paragraph_style'))
+            data.append((self.main_window.headerbar.hb_right.document_menu_button, 'document_menu'))
+
+            for button, name in data:
+                if popover == name:
+                    button.add_css_class('active')
+                else:
+                    button.remove_css_class('active')
+
+    def on_hamburger_button_press(self, controller=None, n_press=None, x=None, y=None):
+        button = self.main_window.headerbar.hb_left.hamburger_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y + allocation.size.height
+
+        UseCases.show_popover('hamburger_menu', x, y, 'bottom')
+        self.hamburger_button_controller.reset()
+
+    def on_bookmarks_button_press(self, controller=None, n_press=None, x=None, y=None):
+        button = self.main_window.headerbar.hb_right.bookmarks_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y + allocation.size.height
+
+        UseCases.show_popover('bookmarks', x, y, 'bottom')
+        self.bookmarks_button_controller.reset()
+
+    def on_edit_button_press(self, controller=None, n_press=None, x=None, y=None):
+        button = self.toolbar.toolbar_right.edit_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y
+
+        UseCases.show_popover('edit_menu', x, y, 'top')
+        self.edit_button_controller.reset()
+
+    def on_paragraph_button_press(self, controller=None, n_press=None, x=None, y=None):
+        button = self.toolbar.toolbar_main.paragraph_style_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y
+
+        UseCases.show_popover('paragraph_style', x, y, 'top')
+        self.paragraph_button_controller.reset()
+
+    def on_docmenu_button_press(self, controller=None, n_press=None, x=None, y=None):
+        button = self.main_window.headerbar.hb_right.document_menu_button
+        allocation = button.compute_bounds(self.main_window).out_bounds
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y + allocation.size.height
+
+        UseCases.show_popover('document_menu', x, y, 'bottom')
+        self.docmenu_button_controller.reset()
 
     @timer.timer
     def update(self):
@@ -175,7 +243,7 @@ class Toolbars():
 
         if chars_selected and all_tagged:
             button.add_css_class('checked')
-        elif not chars_selected and tagname in self.application.keyboard.tags_at_cursor:
+        elif not chars_selected and tagname in ApplicationState.get_tags_at_cursor():
             button.add_css_class('checked')
         else:
             button.remove_css_class('checked')

@@ -30,9 +30,8 @@ import lemma.services.xml_helpers as xml_helpers
 
 class Popover(PopoverView):
 
-    def __init__(self, manager):
-        PopoverView.__init__(self, manager)
-        self.application = manager.application
+    def __init__(self):
+        PopoverView.__init__(self)
 
         self.current_values = dict()
         self.is_valid = False
@@ -115,7 +114,7 @@ class Popover(PopoverView):
 
         if keyval == Gdk.keyval_from_name('Escape'):
             if state & modifiers == 0:
-                self.manager.hide_popovers()
+                UseCases.hide_popovers()
                 return True
 
         return False
@@ -159,6 +158,6 @@ class Popover(PopoverView):
         if self.is_valid:
             UseCases.set_widget_attribute_filename('filename', str(document.id) + '_files/' + self.current_values['name'])
 
-            self.manager.hide_popovers()
+            UseCases.hide_popovers()
 
 

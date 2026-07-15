@@ -48,7 +48,6 @@ class ToolbarRight(Gtk.Box):
         self.edit_menu_button.set_can_focus(False)
         self.edit_menu_button.set_tooltip_text(_('Edit Menu'))
         self.edit_menu_button.add_css_class('flat')
-        self.edit_menu_button.set_action_name('win.show-edit-menu')
 
         self.undo_button = Gtk.Button.new_from_icon_name('edit-undo-symbolic')
         self.undo_button.set_action_name('win.undo')
@@ -103,7 +102,6 @@ class ToolbarMain(Gtk.Box):
         self.paragraph_style_menu_button.set_can_focus(False)
         self.paragraph_style_menu_button.set_tooltip_text(_('Paragraph Style'))
         self.paragraph_style_menu_button.add_css_class('flat')
-        self.paragraph_style_menu_button.set_action_name('win.show-paragraph-style-menu')
 
         self.append(self.paragraph_style_menu_button)
 

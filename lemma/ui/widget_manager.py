@@ -37,11 +37,11 @@ from lemma.ui.popovers.popover_templates import PopoverView
 class WidgetManager():
 
     def __init__(self, main_window, application):
-        self.application = application
+        self.main_window = main_window
 
         self.toolbars = dict()
-        self.toolbars['attachment'] = ToolbarAttachment(main_window, application)
-        self.toolbars['image'] = ToolbarImage(main_window, application)
+        self.toolbars['attachment'] = ToolbarAttachment(main_window)
+        self.toolbars['image'] = ToolbarImage(main_window)
 
     def animate(self):
         pass
@@ -126,24 +126,27 @@ class WidgetManager():
                     Files.open_document_file(widget.get_attribute('filename'))
                     return True
                 case ('f2', _):
-                    self.application.document_view.view.content.grab_focus()
-                    self.application.scrolling.scroll_insert_on_screen(animation_type=None)
+                    self.main_window.document_view.content.grab_focus()
+                    UseCases.scroll_insert_on_screen(animation_type=None)
+
+                    document_view_allocation = self.main_window.document_view.compute_bounds(self.main_window).out_bounds
+                    x_offset = document_view_allocation.origin.x
+                    y_offset = document_view_allocation.origin.y
 
                     document = WorkspaceRepo.get_workspace().get_active_document()
                     node = document.get_selected_nodes()[0]
-                    popover = self.application.popover_manager.get_popover('rename_file')
-                    self.application.popover_manager.show_popover_at_node(popover, document, node)
+                    UseCases.show_popover_at_node('rename_file', document, node, x_offset, y_offset)
+
                     return True
 
 
 class ToolbarAttachment(Gtk.Box):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
         self.main_window = main_window
-        self.application = application
 
         self.status_label = Gtk.Label.new('')
         self.status_label.set_xalign(0)
@@ -202,22 +205,25 @@ class ToolbarAttachment(Gtk.Box):
             Files.open_document_file(self.filename)
 
     def on_rename_button_clicked(self, button):
-        self.application.document_view.view.content.grab_focus()
-        self.application.scrolling.scroll_insert_on_screen(animation_type=None)
+        self.main_window.document_view.content.grab_focus()
+        UseCases.scroll_insert_on_screen(animation_type=None)
+
+        document_view_allocation = self.main_window.document_view.compute_bounds(self.main_window).out_bounds
+        x_offset = document_view_allocation.origin.x
+        y_offset = document_view_allocation.origin.y
 
         document = WorkspaceRepo.get_workspace().get_active_document()
         node = document.get_selected_nodes()[0]
-        popover = self.application.popover_manager.get_popover('rename_file')
-        self.application.popover_manager.show_popover_at_node(popover, document, node)
+        UseCases.show_popover_at_node('rename_file', document, node, x_offset, y_offset)
 
 
 class ToolbarImage(Gtk.Box):
 
-    def __init__(self, main_window, application):
+    def __init__(self, main_window):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
-        self.application = application
+        self.main_window = main_window
 
         self.status_label = Gtk.Label.new('')
         self.status_label.set_xalign(0)
@@ -305,7 +311,7 @@ class ToolbarImage(Gtk.Box):
         return True
 
     def on_shrink_button_clicked(self, button):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         if self.widget.get_attribute('width') != None:
             width = self.widget.get_attribute('width')
@@ -315,7 +321,7 @@ class ToolbarImage(Gtk.Box):
         UseCases.resize_widget(width - 1)
 
     def on_enlarge_button_clicked(self, button):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         width, height = widget.get_size()
         UseCases.resize_widget(width + 1)

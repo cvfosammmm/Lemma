@@ -27,9 +27,11 @@ from lemma.services.node_type_db import NodeTypeDB
 from lemma.widgets.factory import WidgetFactory
 from lemma.services.xml_exporter import XMLExporter
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.text_shaper import TextShaper
 from lemma.services.files import Files
+from lemma.services.layouter import Layouter
 from lemma.ui.shortcuts import Shortcuts
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -88,11 +90,6 @@ class Actions(object):
 
         self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar, GLib.VariantType('s'))
-        self.add_simple_action('show-paragraph-style-menu', self.show_paragraph_style_menu)
-        self.add_simple_action('show-edit-menu', self.show_edit_menu)
-        self.add_simple_action('show-document-menu', self.show_document_menu)
-        self.add_simple_action('show-bookmarks', self.show_bookmarks)
-        self.add_simple_action('show-hamburger-menu', self.show_hamburger_menu)
         self.add_simple_action('show-settings-dialog', self.show_settings_dialog)
         self.add_simple_action('show-shortcuts-dialog', self.show_shortcuts_dialog)
         self.add_simple_action('show-about-dialog', self.show_about_dialog)
@@ -107,12 +104,33 @@ class Actions(object):
         self.shortcut_controller.add_cb('go_back', self.actions['go-back'].activate)
         self.shortcut_controller.add_cb('go_forward', self.actions['go-forward'].activate)
         self.shortcut_controller.add_cb('show_shortcuts_dialog', self.actions['show-shortcuts-dialog'].activate)
-        self.shortcut_controller.add_cb('show_hamburger_menu', self.actions['show-hamburger-menu'].activate)
-        self.shortcut_controller.add_cb('show_document_menu', self.actions['show-document-menu'].activate)
-        self.shortcut_controller.add_cb('show_bookmarks', self.actions['show-bookmarks'].activate)
         for i in range(1, 10):
             self.shortcut_controller.add_cb('activate_bookmark_' + str(i), self.activate_bookmark, i)
         self.main_window.add_controller(self.shortcut_controller)
+
+        self.shortcut_controller_docview = Shortcuts.new_controller()
+        self.shortcut_controller_docview.add_cb('toggle_bold', self.actions['toggle-bold'].activate)
+        self.shortcut_controller_docview.add_cb('toggle_italic', self.actions['toggle-italic'].activate)
+        self.shortcut_controller_docview.add_cb('toggle_verbatim', self.actions['toggle-verbatim'].activate)
+        self.shortcut_controller_docview.add_cb('toggle_highlight', self.actions['toggle-highlight'].activate)
+        self.shortcut_controller_docview.add_cb('link_popover', self.actions['show-link-popover'].activate)
+        self.shortcut_controller_docview.add_cb('subscript', self.actions['subscript'].activate)
+        self.shortcut_controller_docview.add_cb('superscript', self.actions['superscript'].activate)
+        self.shortcut_controller_docview.add_cb('toggle_checkbox', self.actions['toggle-checkbox'].activate)
+        self.shortcut_controller_docview.add_cb('undo', self.actions['undo'].activate)
+        self.shortcut_controller_docview.add_cb('redo', self.actions['redo'].activate)
+        self.shortcut_controller_docview.add_cb('cut', self.actions['cut'].activate)
+        self.shortcut_controller_docview.add_cb('copy', self.actions['copy'].activate)
+        self.shortcut_controller_docview.add_cb('paste', self.actions['paste'].activate)
+        self.shortcut_controller_docview.add_cb('select_all', self.actions['select-all'].activate)
+        self.shortcut_controller_docview.add_cb('go_to_parent_node', self.actions['move-cursor-to-parent'].activate)
+        self.shortcut_controller_docview.add_cb('extend_selection', self.actions['extend-selection'].activate)
+        self.shortcut_controller_docview.add_cb('rename_document', self.actions['rename-document'].activate)
+        for para_style in ['h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'p']:
+            sc_name = 'paragraph_style_' + para_style
+            callback = self.actions['set-paragraph-style'].activate
+            self.shortcut_controller_docview.add_cb(sc_name, callback, GLib.Variant.new_string(para_style))
+        self.main_window.document_view.content.add_controller(self.shortcut_controller_docview)
 
         Gdk.Display.get_default().get_clipboard().connect('changed', self.on_clipboard_changed)
 
@@ -186,11 +204,6 @@ class Actions(object):
         self.actions['decrease-indent'].set_enabled(document != None)
         self.actions['increase-indent'].set_enabled(document != None)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
-        self.actions['show-paragraph-style-menu'].set_enabled(document != None)
-        self.actions['show-edit-menu'].set_enabled(document != None)
-        self.actions['show-document-menu'].set_enabled(document != None)
-        self.actions['show-bookmarks'].set_enabled(True)
-        self.actions['show-hamburger-menu'].set_enabled(True)
         self.actions['show-settings-dialog'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
         self.actions['show-about-dialog'].set_enabled(True)
@@ -199,10 +212,10 @@ class Actions(object):
         UseCases.enter_draft_mode()
 
     def import_markdown_files(self, action=None, paramenter=''):
-        self.application.dialog_locator.get_dialog('import_documents').run()
+        UseCases.show_dialog('import_documents')
 
     def export_bulk(self, action=None, paramenter=''):
-        self.application.dialog_locator.get_dialog('export_bulk').run()
+        UseCases.show_dialog('export_bulk')
 
     def delete_document(self, action=None, parameter=''):
         document_id = WorkspaceRepo.get_workspace().get_active_document_id()
@@ -215,12 +228,12 @@ class Actions(object):
     def export_markdown(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        self.application.dialog_locator.get_dialog('export_markdown').run(document)
+        UseCases.show_dialog('export_markdown', document)
 
     def export_image(self, action=None, parameter=''):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        self.application.dialog_locator.get_dialog('export_image').run(document.get_selected_widget())
+        UseCases.show_dialog('export_image', document.get_selected_widget())
 
     def go_back(self, action=None, parameter=''):
         workspace = WorkspaceRepo.get_workspace()
@@ -241,25 +254,25 @@ class Actions(object):
             UseCases.set_active_document(next_doc, update_history=False)
 
     def undo(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         UseCases.undo()
 
     def redo(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         UseCases.redo()
 
     def cut(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         self.copy()
         UseCases.delete_selection()
 
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def copy(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         clipboard = Gdk.Display.get_default().get_clipboard()
         content_providers = []
@@ -298,7 +311,7 @@ class Actions(object):
         clipboard.set_content(cp_union)
 
     def paste(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         clipboard = Gdk.Display.get_default().get_clipboard()
         if clipboard.get_formats().contain_mime_type('lemma/ast'):
@@ -316,7 +329,7 @@ class Actions(object):
         xml = result[0].read_bytes(8192 * 8192, None).get_data().decode('utf8')
         UseCases.insert_xml(xml)
 
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def on_paste_image(self, clipboard, result):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -327,7 +340,7 @@ class Actions(object):
         image = WidgetFactory.make_widget('image', {'filename': filename})
         UseCases.add_widget(image)
 
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def on_paste_files(self, clipboard, result):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -342,39 +355,39 @@ class Actions(object):
             widget = WidgetFactory.make_widget('attachment', {'filename': filename})
             UseCases.add_widget(widget)
 
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def on_paste_text(self, clipboard, result):
         text = clipboard.read_text_finish(result)
         UseCases.insert_text(text)
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def delete(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
         UseCases.delete_selection()
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def select_all(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
         UseCases.select_all()
 
     def remove_selection(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
         UseCases.remove_selection()
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def extend_selection(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
         UseCases.extend_selection()
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def move_cursor_to_parent(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
         UseCases.move_cursor_to_parent()
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def subscript(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
@@ -384,10 +397,10 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def superscript(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
@@ -397,10 +410,10 @@ class Actions(object):
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
-        self.application.keyboard.update_implicit_x_position()
+        UseCases.update_implicit_x_position()
 
     def set_paragraph_style(self, action=None, parameter=None):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         style = parameter.get_string()
 
@@ -412,72 +425,48 @@ class Actions(object):
         UseCases.set_paragraph_style(style)
 
     def toggle_checkbox(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         UseCases.toggle_checkbox_at_cursor()
 
     def toggle_bold(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document.has_selection():
-            UseCases.toggle_tag('bold')
-        else:
-            self.application.keyboard.tags_at_cursor ^= {'bold'}
-            self.application.toolbars.update_tag_toggle('bold')
+        UseCases.toggle_tag('bold')
 
     def toggle_italic(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document.has_selection():
-            UseCases.toggle_tag('italic')
-        else:
-            self.application.keyboard.tags_at_cursor ^= {'italic'}
-            self.application.toolbars.update_tag_toggle('italic')
+        UseCases.toggle_tag('italic')
 
     def toggle_verbatim(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document.has_selection():
-            UseCases.toggle_tag('verbatim')
-        else:
-            self.application.keyboard.tags_at_cursor ^= {'verbatim'}
-            self.application.toolbars.update_tag_toggle('verbatim')
+        UseCases.toggle_tag('verbatim')
 
     def toggle_highlight(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document.has_selection():
-            UseCases.toggle_tag('highlight')
-        else:
-            self.application.keyboard.tags_at_cursor ^= {'highlight'}
-            self.application.toolbars.update_tag_toggle('highlight')
+        UseCases.toggle_tag('highlight')
 
     def decrease_indent(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         UseCases.change_indentation_level(-1)
 
     def increase_indent(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         UseCases.change_indentation_level(1)
 
     def show_insert_image_dialog(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
-
-        self.application.dialog_locator.get_dialog('insert_image').run()
+        UseCases.show_dialog('insert_image')
 
     def show_attach_files_dialog(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
-
-        self.application.dialog_locator.get_dialog('attach_files').run()
+        UseCases.show_dialog('attach_files')
 
     def open_link(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
 
@@ -492,40 +481,39 @@ class Actions(object):
             UseCases.set_active_document(document_id, update_history=True)
 
     def show_link_popover(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
-        self.application.scrolling.scroll_insert_on_screen(animation_type=None)
+        self.main_window.document_view.content.grab_focus()
+        UseCases.scroll_insert_on_screen(animation_type=None)
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        scrolling_position_x, scrolling_position_y = self.application.scrolling.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
 
         insert = document.get_insert_node()
-        x, y = self.application.layout.get_absolute_xy(self.application.layout.get_node_layout(insert))
-        x -= scrolling_position_x
-        y -= scrolling_position_y
+        x, y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
+        x -= scrolling_pos_x
+        y -= scrolling_pos_y
         document_view = self.main_window.document_view
         document_view_allocation = document_view.compute_bounds(self.main_window).out_bounds
         x += document_view_allocation.origin.x
         y += document_view_allocation.origin.y
         x += LayoutInfo.get_document_padding_left()
         y += LayoutInfo.get_normal_document_offset()
-        fontname = self.application.layout.get_node_layout(insert)['fontname']
+        fontname = Layouter.get_node_layout(insert)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += self.application.layout.get_node_layout(insert)['height'] - padding_top - padding_bottom
+        y += Layouter.get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         orientation = 'bottom'
         if y + 260 > document_view_allocation.size.height:
             orientation = 'top'
-            y -= self.application.layout.get_node_layout(insert)['height'] - padding_top - padding_bottom
+            y -= Layouter.get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         if not document.has_selection() and insert.is_inside_link():
             UseCases.select_section(*insert.link_bounds())
 
-        popover = self.application.popover_manager.get_popover('link_autocomplete')
-        self.application.popover_manager.show_popover_at_xy(popover, x, y, orientation)
+        UseCases.show_popover('link_autocomplete', x, y, orientation)
 
     def copy_link(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         clipboard = Gdk.Display.get_default().get_clipboard()
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -540,7 +528,7 @@ class Actions(object):
             clipboard.set_content(cp_union)
 
     def remove_link(self, action=None, parameter=''):
-        self.application.document_view.view.content.grab_focus()
+        self.main_window.document_view.content.grab_focus()
 
         document = WorkspaceRepo.get_workspace().get_active_document()
 
@@ -559,43 +547,13 @@ class Actions(object):
     def toggle_tools_sidebar(self, action=None, parameter=None):
         UseCases.toggle_tools_sidebar(parameter.get_string())
 
-    def show_paragraph_style_menu(self, action=None, parameter=''):
-        button = self.main_window.toolbar.toolbar_main.paragraph_style_menu_button
-        popover = self.application.popover_manager.get_popover('paragraph_style')
-
-        self.application.popover_manager.show_popover_at_button(popover, button, 'top')
-
-    def show_edit_menu(self, action=None, parameter=''):
-        button = self.main_window.toolbar.toolbar_right.edit_menu_button
-        popover = self.application.popover_manager.get_popover('edit_menu')
-
-        self.application.popover_manager.show_popover_at_button(popover, button, 'top')
-
-    def show_document_menu(self, action=None, parameter=''):
-        button = self.main_window.headerbar.hb_right.document_menu_button
-        popover = self.application.popover_manager.get_popover('document_menu')
-
-        self.application.popover_manager.show_popover_at_button(popover, button, 'bottom')
-
-    def show_bookmarks(self, action=None, parameter=''):
-        button = self.main_window.headerbar.hb_right.bookmarks_button
-        popover = self.application.popover_manager.get_popover('bookmarks')
-
-        self.application.popover_manager.show_popover_at_button(popover, button, 'bottom')
-
-    def show_hamburger_menu(self, action=None, parameter=''):
-        button = self.main_window.headerbar.hb_left.hamburger_menu_button
-        popover = self.application.popover_manager.get_popover('hamburger_menu')
-
-        self.application.popover_manager.show_popover_at_button(popover, button, 'bottom')
-
     def show_settings_dialog(self, action=None, parameter=''):
-        self.application.dialog_locator.get_dialog('settings').run()
+        UseCases.show_dialog('settings')
 
     def show_shortcuts_dialog(self, action=None, parameter=''):
-        self.application.dialog_locator.get_dialog('settings').run('Keyboard Shortcuts')
+        UseCases.show_dialog('settings', 'Keyboard Shortcuts')
 
     def show_about_dialog(self, action=None, parameter=''):
-        self.application.dialog_locator.get_dialog('about').run()
+        UseCases.show_dialog('about')
 
 

@@ -29,8 +29,8 @@ from lemma.ui.shortcuts import Shortcuts
 
 class Popover(PopoverView):
 
-    def __init__(self, manager):
-        PopoverView.__init__(self, manager)
+    def __init__(self):
+        PopoverView.__init__(self)
 
         self.add_css_class('bookmarks')
         self.set_width(342)
@@ -149,7 +149,7 @@ class Popover(PopoverView):
 
         if keyval == Gdk.keyval_from_name('0'):
             if state & modifiers == Gdk.ModifierType.ALT_MASK:
-                self.manager.hide_popovers()
+                UseCases.hide_popovers()
 
                 return True
 
