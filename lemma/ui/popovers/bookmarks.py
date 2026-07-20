@@ -25,6 +25,8 @@ from lemma.ui.popovers.popover_templates import PopoverView
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.use_cases.use_cases import UseCases
 from lemma.ui.shortcuts import Shortcuts
+from lemma.services.message_bus import MessageBus
+from lemma.repos.document_repo import DocumentRepo
 
 
 class Popover(PopoverView):
@@ -144,6 +146,33 @@ class Popover(PopoverView):
         self.register_button_for_keyboard_navigation(self.unbookmark_document_button)
         self.add_widget(self.unbookmark_document_button)
 
+        self.drag_start_id = None
+
+        for i, button in enumerate(self.bookmark_buttons):
+            button.connect('clicked', self.on_bookmark_clicked, i)
+        for i, button in enumerate(self.bookmark_remove_buttons):
+            button.connect('clicked', self.on_bookmark_remove_clicked, i)
+        for i, handle in enumerate(self.bookmark_drag_handles):
+            drag_controller = Gtk.GestureDrag()
+            drag_controller.connect('drag-begin', self.on_drag_begin, i)
+            drag_controller.connect('drag-update', self.on_drag_update, i)
+            drag_controller.connect('drag-end', self.on_drag_end, i)
+            handle.add_controller(drag_controller)
+        self.edit_bookmarks_button.connect('clicked', self.on_edit_bookmarks_button_clicked)
+        self.done_editing_button.connect('clicked', self.on_done_editing_button_clicked)
+        self.bookmark_document_button.connect('clicked', self.bookmark_document)
+        self.unbookmark_document_button.connect('clicked', self.unbookmark_document)
+
+        MessageBus.subscribe(self, 'new_active_document')
+        MessageBus.subscribe(self, 'bookmarks_changed')
+
+        self.update_bookmark_buttons()
+
+    def animate(self):
+        messages = MessageBus.get_messages(self)
+        if 'bookmarks_changed' in messages or 'new_active_document' in messages:
+            self.update_bookmark_buttons()
+
     def on_keypress(self, controller, keyval, keycode, state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
@@ -160,5 +189,99 @@ class Popover(PopoverView):
 
     def on_popdown(self):
         self.edit_mode = False
+
+    def update_bookmark_buttons(self):
+        workspace = WorkspaceRepo.get_workspace()
+        bookmarks = workspace.get_bookmarked_document_ids()
+        document = workspace.get_active_document()
+
+        for i in range(len(bookmarks)):
+            document_title = DocumentRepo.get_stub_by_id(bookmarks[i])['title']
+            self.bookmark_button_labels[i].set_text(document_title)
+
+        for i, button in enumerate(self.bookmark_buttons):
+            button.set_sensitive(len(bookmarks) > i)
+            button.set_visible(len(bookmarks) > i)
+
+        for i, revealer in enumerate(self.bookmark_revealers):
+            revealer.set_reveal_child(len(bookmarks) > i)
+
+        self.empty_state.set_visible(len(bookmarks) <= 0)
+        self.headline.set_visible(len(bookmarks) > 0)
+
+        self.edit_mode = self.edit_mode and len(workspace.get_bookmarked_document_ids()) > 0
+
+        current_document_has_no_bookmark = (document != None and document.id not in workspace.get_bookmarked_document_ids())
+        space_available = (len(workspace.get_bookmarked_document_ids()) < 9)
+        self.bookmark_document_button.set_sensitive(current_document_has_no_bookmark and space_available)
+        self.bookmark_document_button.set_visible(current_document_has_no_bookmark and space_available)
+        self.unbookmark_document_button.set_sensitive(document != None and not current_document_has_no_bookmark)
+        self.unbookmark_document_button.set_visible(document != None and not current_document_has_no_bookmark)
+
+        self.edit_bookmarks_button.set_sensitive(len(workspace.get_bookmarked_document_ids()) > 0 and not self.edit_mode)
+        self.edit_bookmarks_button.set_visible(len(workspace.get_bookmarked_document_ids()) > 0 and not self.edit_mode)
+        self.done_editing_button.set_sensitive(len(workspace.get_bookmarked_document_ids()) > 0 and self.edit_mode)
+        self.done_editing_button.set_visible(len(workspace.get_bookmarked_document_ids()) > 0 and self.edit_mode)
+
+        for i, revealer in enumerate(self.bookmark_remove_button_revealers):
+            revealer.set_reveal_child(self.edit_mode)
+
+        for i, revealer in enumerate(self.bookmark_drag_handle_revealers):
+            revealer.set_reveal_child(self.edit_mode)
+
+    def on_bookmark_clicked(self, button, button_pos):
+        workspace = WorkspaceRepo.get_workspace()
+        bookmarks = workspace.get_bookmarked_document_ids()
+
+        if len(bookmarks) >= button_pos:
+            document_id = bookmarks[button_pos]
+            UseCases.set_active_document(document_id, update_history=True)
+            UseCases.hide_popovers()
+
+    def on_bookmark_remove_clicked(self, button, button_pos):
+        workspace = WorkspaceRepo.get_workspace()
+        bookmarks = workspace.get_bookmarked_document_ids()
+
+        if len(bookmarks) >= button_pos:
+            document_id = bookmarks[button_pos]
+            UseCases.unbookmark_document(document_id)
+
+    def on_drag_begin(self, gesture, x, y, start_position):
+        workspace = WorkspaceRepo.get_workspace()
+        bookmarks = workspace.get_bookmarked_document_ids()
+
+        self.drag_start_id = bookmarks[start_position]
+
+        gesture.get_widget().set_cursor_from_name('grabbing')
+
+    def on_drag_update(self, gesture, x, y, start_position):
+        if self.drag_start_id == None: return
+
+        workspace = WorkspaceRepo.get_workspace()
+        bookmarks = workspace.get_bookmarked_document_ids()
+
+        new_position = max(0, min(len(bookmarks) - 1, round(start_position + y / 34)))
+        UseCases.move_bookmark(self.drag_start_id, new_position)
+
+    def on_drag_end(self, gesture, x, y, start_position):
+        gesture.get_widget().set_cursor_from_name('grab')
+
+    def on_edit_bookmarks_button_clicked(self, button):
+        self.edit_mode = True
+        self.update_bookmark_buttons()
+
+    def on_done_editing_button_clicked(self, button):
+        self.edit_mode = False
+        self.update_bookmark_buttons()
+
+    def bookmark_document(self, button=None, parameter=''):
+        active_document_id = WorkspaceRepo.get_workspace().get_active_document_id()
+
+        UseCases.bookmark_document(active_document_id)
+
+    def unbookmark_document(self, button=None, parameter=''):
+        active_document_id = WorkspaceRepo.get_workspace().get_active_document_id()
+
+        UseCases.unbookmark_document(active_document_id)
 
 

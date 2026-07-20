@@ -81,6 +81,9 @@ class PopoverManager():
                 self.popdown()
                 self.popup(self.popovers[name], x, y, orientation)
 
+        if self.current_popover != None:
+            self.current_popover.animate()
+
     def popup(self, popover, x, y, orientation):
         popover.show_page(None, 'main', Gtk.StackTransitionType.NONE)
 

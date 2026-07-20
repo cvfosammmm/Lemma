@@ -41,7 +41,6 @@ import lemma.ui.document_view as document_view
 import lemma.ui.document_title as document_title
 import lemma.ui.document_context_menu as context_menu_document
 import lemma.ui.toolbars as toolbars
-import lemma.ui.bookmarks as bookmarks
 import lemma.ui.document_list as document_list
 import lemma.ui.document_draft as document_draft
 import lemma.ui.backlinks as backlinks
@@ -82,7 +81,6 @@ class Application(Adw.Application):
         self.colors = colors.Colors(self.main_window, self)
         self.context_menu_document = context_menu_document.ContextMenuDocument(self.main_window, self)
         self.toolbars = toolbars.Toolbars(self.main_window, self)
-        self.bookmarks = bookmarks.Bookmarks(self.main_window, self)
         self.document_draft = document_draft.DocumentDraft(self.main_window)
         self.document_list = document_list.DocumentList(self.main_window)
         self.backlinks = backlinks.Backlinks(self.main_window)
@@ -118,7 +116,6 @@ class Application(Adw.Application):
         self.context_menu_document.animate()
         self.autocomplete.animate()
         self.toolbars.animate()
-        self.bookmarks.animate()
         self.sidebar_emojis.animate()
         self.sidebar_math.animate()
 

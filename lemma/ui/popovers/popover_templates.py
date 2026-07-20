@@ -57,6 +57,9 @@ class PopoverView(Gtk.Overlay):
 
         self.add_page('main')
 
+    def animate(self):
+        pass
+
     def on_keypress(self, controller, keyval, keycode, state):
         modifiers = Gtk.accelerator_get_default_mod_mask()
 
