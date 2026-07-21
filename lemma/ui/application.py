@@ -23,10 +23,7 @@ from lemma.services.color_manager import ColorManager
 from lemma.ui.dialog_manager import DialogManager
 from lemma.ui.popover_manager import PopoverManager
 from lemma.ui.widget_manager import WidgetManager
-from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
-from lemma.services.layouter import Layouter
-from lemma.repos.workspace_repo import WorkspaceRepo
 import lemma.services.timer as timer
 
 import lemma.ui.fonts as fonts
@@ -63,9 +60,6 @@ class Application(Adw.Application):
         self.main_window = main_window_view.MainWindow(self)
         ColorManager.init(self.main_window)
         self.main_window.add_widgets()
-
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        Layouter.update_document(document)
 
         self.popover_manager = PopoverManager(self.main_window, self)
         self.widget_manager = WidgetManager(self.main_window, self)

@@ -25,8 +25,8 @@ from lemma.services.message_bus import MessageBus
 from lemma.services.settings import Settings
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
-from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
+from lemma.use_cases.queries import Queries
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
 
@@ -68,7 +68,7 @@ class DocumentTitle():
     def animate(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document != None:
-            scrolling_position_x, scrolling_position_y = ApplicationState.get_current_scrolling_offsets()
+            scrolling_position_x, scrolling_position_y = Queries.get_current_scrolling_offsets()
             if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
                 self.scrolling_position_x = scrolling_position_x
                 self.scrolling_position_y = scrolling_position_y
@@ -91,7 +91,7 @@ class DocumentTitle():
         if document == None:
             self.view.set_offset_y(0)
         else:
-            offset = math.floor(ApplicationState.get_current_scrolling_offsets()[1])
+            offset = math.floor(Queries.get_current_scrolling_offsets()[1])
             self.view.set_offset_y(offset)
         self.document_view.queue_allocate()
 

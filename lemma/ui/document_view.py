@@ -29,12 +29,13 @@ from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
 from lemma.services.layout_info import LayoutInfo
-from lemma.services.layouter import Layouter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.services.message_bus import MessageBus
 from lemma.application_state.application_state import ApplicationState
+from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
+from lemma.use_cases.queries import Queries
 import lemma.services.timer as timer
 
 
@@ -77,13 +78,14 @@ class DocumentView():
         if self.document == None:
             self.current_scrolling_x, self.current_scrolling_y = -1, -1
         else:
-            current_scrolling_x, current_scrolling_y = ApplicationState.get_current_scrolling_offsets()
+            current_scrolling_x, current_scrolling_y = Queries.get_current_scrolling_offsets()
             if current_scrolling_x != self.current_scrolling_x or current_scrolling_y != self.current_scrolling_y:
                 self.current_scrolling_x = current_scrolling_x
                 self.current_scrolling_y = current_scrolling_y
                 self.view.content.queue_draw()
 
-            content_height = Layouter.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+            content_height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
 
             self.view.scrollbar_vertical.set_content_height(content_height)
             self.view.scrollbar_vertical.set_scrolling_offset(current_scrolling_y)
@@ -127,9 +129,10 @@ class DocumentView():
     def draw(self, snapshot):
         self.document = WorkspaceRepo.get_workspace().get_active_document()
         if self.document == None: return
+        document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
         view_width, view_height = ApplicationState.get_view_size()
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         self.setup_scaling_offsets()
 
@@ -138,8 +141,8 @@ class DocumentView():
 
         self.first_selection_node = self.document.get_first_selection_bound()
         self.last_selection_node = self.document.get_last_selection_bound()
-        self.first_selection_line = Layouter.get_ancestors(Layouter.get_node_layout(self.first_selection_node))[-2]
-        self.last_selection_line = Layouter.get_ancestors(Layouter.get_node_layout(self.last_selection_node))[-2]
+        self.first_selection_line = document_layout.get_ancestors(document_layout.get_node_layout(self.first_selection_node))[-2]
+        self.last_selection_line = document_layout.get_ancestors(document_layout.get_node_layout(self.last_selection_node))[-2]
 
         ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, view_width, view_height))
 
@@ -154,16 +157,16 @@ class DocumentView():
             else:
                 list_item_numbers = list_item_numbers[:paragraph.indentation_level] + [0, 0, 0, 0, 0][paragraph.indentation_level:]
 
-            if content_offset_y + Layouter.get_paragraph_layout(paragraph)['y'] + Layouter.get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + Layouter.get_paragraph_layout(paragraph)['y'] <= view_height:
+            if content_offset_y + document_layout.get_paragraph_layout(paragraph)['y'] + document_layout.get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + document_layout.get_paragraph_layout(paragraph)['y'] <= view_height:
                 self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph, list_item_numbers)
 
-            for j, line_layout in enumerate(Layouter.get_paragraph_layout(paragraph)['children']):
-                if content_offset_y + line_layout['y'] + Layouter.get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + Layouter.get_paragraph_layout(paragraph)['y'] <= view_height:
+            for j, line_layout in enumerate(document_layout.get_paragraph_layout(paragraph)['children']):
+                if content_offset_y + line_layout['y'] + document_layout.get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + document_layout.get_paragraph_layout(paragraph)['y'] <= view_height:
                     if (i,j) not in self.render_cache:
                         self.draw_line(ctx, i, j, line_layout, in_selection)
 
                     line_x = self.device_offset_x + math.floor(content_offset_x) * self.hidpi_factor
-                    line_y = self.device_offset_y + math.floor(content_offset_y + Layouter.get_paragraph_layout(paragraph)['y'] + line_layout['y']) * self.hidpi_factor
+                    line_y = self.device_offset_y + math.floor(content_offset_y + document_layout.get_paragraph_layout(paragraph)['y'] + line_layout['y']) * self.hidpi_factor
                     ctx.set_source_surface(self.render_cache[(i,j)], line_x, line_y)
                     ctx.paint()
                 elif (i,j) in self.render_cache:
@@ -190,8 +193,10 @@ class DocumentView():
         self.device_offset_y = 1 - ((allocation.get_y() + surface_transform.y) * self.hidpi_factor) % 1
 
     def draw_bullet(self, ctx, offset_x, offset_y, paragraph, list_item_numbers):
+        document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
         if paragraph.style == 'ul':
-            layout = Layouter.get_paragraph_layout(paragraph)
+            layout = document_layout.get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
@@ -207,7 +212,7 @@ class DocumentView():
             ctx.paint()
 
         elif paragraph.style == 'ol':
-            layout = Layouter.get_paragraph_layout(paragraph)
+            layout = document_layout.get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             first_char_layout = line_layout['children'][0]
             baseline = TextShaper.get_ascend(fontname=first_char_layout['fontname'])
@@ -226,7 +231,7 @@ class DocumentView():
                 ctx.paint()
 
         elif paragraph.style == 'cl':
-            layout = Layouter.get_paragraph_layout(paragraph)
+            layout = document_layout.get_paragraph_layout(paragraph)
             line_layout = layout['children'][0]
             outline_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_outline')
             inner_unchecked_color = ColorManager.get_ui_color_string('checkbox_unchecked_inner')
@@ -382,9 +387,10 @@ class DocumentView():
     def draw_cursor(self, ctx, offset_x, offset_y):
         if not self.application.keyboard.cursor_visible: return
 
+        document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
         insert = self.document.get_insert_node()
-        layout = Layouter.get_node_layout(insert)
-        x, y = Layouter.get_absolute_xy(layout)
+        layout = document_layout.get_node_layout(insert)
+        x, y = document_layout.get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])
         padding_bottom = 0#TextShaper.get_padding_bottom(fontname)
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))
@@ -394,16 +400,17 @@ class DocumentView():
         ctx.fill()
 
     def draw_drop_cursor(self, ctx, offset_x, offset_y):
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         x, y = self.application.pointer.drop_cursor_x, self.application.pointer.drop_cursor_y
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
         y += scrolling_pos_y
 
-        layout = Layouter.get_cursor_holding_layout_close_to_xy(x, y)
+        document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+        layout = document_layout.get_cursor_holding_layout_close_to_xy(x, y)
+        x, y = document_layout.get_absolute_xy(layout)
 
-        x, y = Layouter.get_absolute_xy(layout)
         padding_top = TextShaper.get_padding_top(layout['fontname'])
         padding_bottom = 0
         cursor_coords = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y + padding_top) * self.hidpi_factor), 1, int((layout['height'] - padding_top - padding_bottom) * self.hidpi_factor))

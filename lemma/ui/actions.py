@@ -29,9 +29,10 @@ from lemma.services.xml_exporter import XMLExporter
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
+from lemma.use_cases.queries import Queries
 from lemma.services.text_shaper import TextShaper
 from lemma.services.files import Files
-from lemma.services.layouter import Layouter
+from lemma.services.settings import Settings
 from lemma.ui.shortcuts import Shortcuts
 import lemma.services.xml_helpers as xml_helpers
 import lemma.services.timer as timer
@@ -485,10 +486,11 @@ class Actions(object):
         UseCases.scroll_insert_on_screen(animation_type=None)
 
         document = WorkspaceRepo.get_workspace().get_active_document()
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         insert = document.get_insert_node()
-        x, y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
+        x, y = document_layout.get_absolute_xy(document_layout.get_node_layout(insert))
         x -= scrolling_pos_x
         y -= scrolling_pos_y
         document_view = self.main_window.document_view
@@ -497,15 +499,15 @@ class Actions(object):
         y += document_view_allocation.origin.y
         x += LayoutInfo.get_document_padding_left()
         y += LayoutInfo.get_normal_document_offset()
-        fontname = Layouter.get_node_layout(insert)['fontname']
+        fontname = document_layout.get_node_layout(insert)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += Layouter.get_node_layout(insert)['height'] - padding_top - padding_bottom
+        y += document_layout.get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         orientation = 'bottom'
         if y + 260 > document_view_allocation.size.height:
             orientation = 'top'
-            y -= Layouter.get_node_layout(insert)['height'] - padding_top - padding_bottom
+            y -= document_layout.get_node_layout(insert)['height'] - padding_top - padding_bottom
 
         if not document.has_selection() and insert.is_inside_link():
             UseCases.select_section(*insert.link_bounds())

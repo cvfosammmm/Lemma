@@ -19,9 +19,6 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
 
-from lemma.services.layout_info import LayoutInfo
-from lemma.services.layouter import Layouter
-from lemma.services.text_shaper import TextShaper
 from lemma.application_state.application_state import ApplicationState
 from lemma.services.message_bus import MessageBus
 from lemma.use_cases.use_cases import UseCases

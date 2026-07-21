@@ -24,8 +24,8 @@ from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.settings import Settings
 from lemma.services.autocomplete_db import AutocompleteDB
 from lemma.services.layout_info import LayoutInfo
-from lemma.services.layouter import Layouter
 from lemma.use_cases.use_cases import UseCases
+from lemma.use_cases.queries import Queries
 from lemma.application_state.application_state import ApplicationState
 import lemma.services.timer as timer
 
@@ -72,7 +72,7 @@ class Autocomplete():
         if 'document_changed' in messages:
             self.on_document_changed()
 
-        scrolling_position_x, scrolling_position_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_position_x, scrolling_position_y = Queries.get_current_scrolling_offsets()
         if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
             self.scrolling_position_x = scrolling_position_x
             self.scrolling_position_y = scrolling_position_y
@@ -169,11 +169,13 @@ class Autocomplete():
 
     def update_position(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
         insert = document.get_insert_node()
-        insert_x, insert_y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
+        insert_x, insert_y = document_layout.get_absolute_xy(document_layout.get_node_layout(insert))
         content_offset = LayoutInfo.get_normal_document_offset()
         insert_y += content_offset - self.scrolling_position_y
-        insert_height = Layouter.get_node_layout(insert)['height']
+        insert_height = document_layout.get_node_layout(insert)['height']
         insert_x += LayoutInfo.get_document_padding_left()
         window_width, window_height = ApplicationState.get_view_size()
 

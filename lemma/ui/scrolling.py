@@ -21,9 +21,10 @@ from gi.repository import Gtk, Gdk
 
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.layout_info import LayoutInfo
-from lemma.services.layouter import Layouter
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
+from lemma.use_cases.queries import Queries
+from lemma.services.settings import Settings
 
 
 class DocumentScrolling():
@@ -48,11 +49,12 @@ class DocumentScrolling():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         view_width, view_height = ApplicationState.get_view_size()
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         if controller.get_current_event_state() & modifiers == 0:
             document = WorkspaceRepo.get_workspace().get_active_document()
-            height = Layouter.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
 
             if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
                 dx *= view_width ** (2/3)

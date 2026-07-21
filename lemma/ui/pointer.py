@@ -26,13 +26,14 @@ import lemma.services.xml_helpers as xml_helpers
 from lemma.widgets.factory import WidgetFactory
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.application_state.application_state import ApplicationState
+from lemma.services.settings import Settings
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.xml_exporter import XMLExporter
 from lemma.services.layout_info import LayoutInfo
-from lemma.services.layouter import Layouter
 from lemma.services.files import Files
 from lemma.ui.shortcuts import Shortcuts
 from lemma.use_cases.use_cases import UseCases
+from lemma.use_cases.queries import Queries
 from lemma.services.message_bus import MessageBus
 import lemma.services.timer as timer
 
@@ -98,8 +99,9 @@ class Pointer():
         if document == None:
             self.content.set_cursor_from_name('default')
             return
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x = scrolling_pos_x + (self.pointer_x if self.pointer_x != None else 0)
         y = scrolling_pos_y + (self.pointer_y if self.pointer_y != None else 0)
         x -= LayoutInfo.get_document_padding_left()
@@ -107,8 +109,8 @@ class Pointer():
         y -= ApplicationState.get_title_buttons_height()
 
         if y > 0:
-            line_layout = Layouter.get_line_layout_at_y(y)
-            leaf_layout = Layouter.get_leaf_layout_at_xy(x, y)
+            line_layout = document_layout.get_line_layout_at_y(y)
+            leaf_layout = document_layout.get_leaf_layout_at_xy(x, y)
             paragraph_layout = line_layout['parent']
             paragraph = paragraph_layout['node']
 
@@ -149,8 +151,9 @@ class Pointer():
     def on_primary_button_press(self, controller, n_press, x, y):
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x += scrolling_pos_x - LayoutInfo.get_document_padding_left()
         y += scrolling_pos_y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
@@ -158,7 +161,7 @@ class Pointer():
         self.selected_click_target = (x, y)
 
         if y > 0:
-            leaf_layout = Layouter.get_leaf_layout_at_xy(x, y)
+            leaf_layout = document_layout.get_leaf_layout_at_xy(x, y)
             link = leaf_layout['node'].link if leaf_layout != None else None
 
             if leaf_layout != None and leaf_layout['node'].type == 'widget':
@@ -201,17 +204,18 @@ class Pointer():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x += scrolling_pos_x - LayoutInfo.get_document_padding_left()
         y += scrolling_pos_y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if keyboard_state == 0:
             if y >= -LayoutInfo.get_subtitle_height():
-                leaf_layout_at_press = Layouter.get_leaf_layout_at_xy(*self.selected_click_target)
+                leaf_layout_at_press = document_layout.get_leaf_layout_at_xy(*self.selected_click_target)
                 link_at_press = leaf_layout_at_press['node'].link if leaf_layout_at_press != None else None
-                leaf_layout_at_release = Layouter.get_leaf_layout_at_xy(x, y)
+                leaf_layout_at_release = document_layout.get_leaf_layout_at_xy(x, y)
                 link_at_release = leaf_layout_at_release['node'].link if leaf_layout_at_release != None else None
 
                 if link_at_press == link_at_release and link_at_release != None:
@@ -219,10 +223,10 @@ class Pointer():
                     return
 
                 x_at_press, y_at_press = self.selected_click_target
-                line_layout_at_press = Layouter.get_line_layout_at_y(y_at_press)
+                line_layout_at_press = document_layout.get_line_layout_at_y(y_at_press)
                 paragraph_layout_at_press = line_layout_at_press['parent']
 
-                line_layout_at_release = Layouter.get_line_layout_at_y(y)
+                line_layout_at_release = document_layout.get_line_layout_at_y(y)
                 paragraph_layout_at_release = line_layout_at_release['parent']
 
                 if paragraph_layout_at_press != paragraph_layout_at_release: return
@@ -243,14 +247,15 @@ class Pointer():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         document = WorkspaceRepo.get_workspace().get_active_document()
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x_offset = scrolling_pos_x + x - LayoutInfo.get_document_padding_left()
         y_offset = scrolling_pos_y + y - LayoutInfo.get_normal_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if y_offset > 0:
             if not document.has_selection():
-                leaf_layout = Layouter.get_leaf_layout_at_xy(x_offset, y_offset)
+                leaf_layout = document_layout.get_leaf_layout_at_xy(x_offset, y_offset)
                 if keyboard_state == 0 and leaf_layout != None and NodeTypeDB.focus_on_click(leaf_layout['node']):
                     UseCases.select_node(leaf_layout['node'])
                 else:
@@ -259,7 +264,7 @@ class Pointer():
             self.application.context_menu_document.popup_at_cursor(x, y)
 
     def on_drag_begin(self, gesture, x, y, data=None):
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
@@ -271,10 +276,13 @@ class Pointer():
     def on_drag_update(self, gesture, x, y, data=None):
         if x == 0 and y == 0: return
 
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
         start_point = gesture.get_start_point()
         x, y = start_point.x + x, start_point.y + y
         view_width, view_height = ApplicationState.get_view_size()
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         if y < 0:
             new_x = scrolling_pos_x
@@ -282,7 +290,7 @@ class Pointer():
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - view_height > 0:
-            height = Layouter.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
             new_x = scrolling_pos_x
             new_y = min(max(0, height - view_height), scrolling_pos_y + y - view_height)
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
@@ -302,7 +310,7 @@ class Pointer():
             self.content.remove_tick_callback(self.scroll_on_drop_callback_id)
             self.scroll_on_drop_callback_id = None
 
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x -= LayoutInfo.get_document_padding_left()
         y -= LayoutInfo.get_normal_document_offset()
         y += scrolling_pos_y
@@ -390,9 +398,12 @@ class Pointer():
         self.drop_cursor_x, self.drop_cursor_y = -1, -1
 
     def scroll_on_drop_callback(self, widget, frame_clock):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
         x, y = self.drop_cursor_x, self.drop_cursor_y
         view_width, view_height = ApplicationState.get_view_size()
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         if y < 56:
             new_x = scrolling_pos_x
@@ -400,7 +411,7 @@ class Pointer():
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - view_height > -56:
-            height = Layouter.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
             new_x = scrolling_pos_x
             new_y = min(max(0, height - view_height), scrolling_pos_y + y - view_height + 56)
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)

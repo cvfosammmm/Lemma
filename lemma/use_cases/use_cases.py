@@ -27,7 +27,6 @@ from lemma.services.xml_parser import XMLParser
 from lemma.services.settings import Settings
 from lemma.services.regex import RegexService
 from lemma.services.files import Files
-from lemma.services.layouter import Layouter
 from lemma.services.node_type_db import NodeTypeDB
 from lemma.document.ast import Node
 from lemma.repos.workspace_repo import WorkspaceRepo
@@ -38,6 +37,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.services.html_parser import HTMLParser
 from lemma.services.layout_info import LayoutInfo
 from lemma.services.text_shaper import TextShaper
+from lemma.use_cases.queries import Queries
 import lemma.services.timer as timer
 
 
@@ -45,9 +45,6 @@ class UseCases():
 
     def settings_set_value(item, value):
         Settings.set_value(item, value)
-
-        if item == 'font_theme':
-            Layouter.update_font_theme(value)
 
         Settings.save()
         MessageBus.add_message(item + '_settings_changed')
@@ -76,7 +73,6 @@ class UseCases():
             if len(target_list) > 0:
                 document = DocumentRepo.get_by_id(target_list[0]['id'])
                 workspace.set_active_document(document, update_history=True)
-                Layouter.update_document(document)
             else:
                 new_document = Document()
                 new_document.id = DocumentRepo.get_max_document_id() + 1
@@ -84,12 +80,11 @@ class UseCases():
                 new_document.update_last_modified()
 
                 workspace.set_active_document(new_document, update_history=True)
-                Layouter.update_document(document)
 
                 ApplicationState.set_scrolling_target(new_document.id, 0, 0, None)
 
-        ApplicationState.update_implicit_x_position()
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__update_implicit_x_position()
+        UseCases.__reset_tags_at_cursor()
 
         if new_document != None:
             DocumentRepo.add(new_document)
@@ -153,10 +148,9 @@ class UseCases():
         workspace.set_active_document(document, update_history=True)
         workspace.leave_draft_mode()
 
-        Layouter.update_document(document)
         ApplicationState.set_scrolling_target(document.id, 0, 0, None)
-        ApplicationState.update_implicit_x_position()
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__update_implicit_x_position()
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.add(document)
         WorkspaceRepo.update(workspace)
@@ -179,10 +173,9 @@ class UseCases():
 
             workspace.set_active_document(document, update_history=False)
 
-            Layouter.update_document(document)
             ApplicationState.set_scrolling_target(document.id, 0, 0, None)
-            ApplicationState.update_implicit_x_position()
-            ApplicationState.reset_tags_at_cursor()
+            UseCases.__update_implicit_x_position()
+            UseCases.__reset_tags_at_cursor()
 
         workspace.remove_from_history(document_id)
         workspace.unbookmark_document(document_id)
@@ -206,7 +199,6 @@ class UseCases():
             document = workspace.get_active_document()
         workspace.set_active_document(document, update_history)
 
-        Layouter.update_document(document)
         if update_history:
             ApplicationState.set_scrolling_target(document.id, 0, 0, None)
         else:
@@ -215,8 +207,8 @@ class UseCases():
                 ApplicationState.set_scrolling_target(document.id, pos[0], pos[1], None)
             else:
                 ApplicationState.set_scrolling_target(document.id, 0, 0, None)
-        ApplicationState.update_implicit_x_position()
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__update_implicit_x_position()
+        UseCases.__reset_tags_at_cursor()
 
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('mode_set')
@@ -255,8 +247,8 @@ class UseCases():
 
         document.undo()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -271,8 +263,8 @@ class UseCases():
 
         document.redo()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -307,8 +299,8 @@ class UseCases():
             document.replace_max_string_before_cursor()
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -347,8 +339,8 @@ class UseCases():
         document.replace_max_string_before_cursor()
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -377,8 +369,8 @@ class UseCases():
                 document.insert_nodes(paragraph.children)
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -399,8 +391,8 @@ class UseCases():
         document.set_insert_and_selection_node(node_to)
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -442,8 +434,8 @@ class UseCases():
         document.select_placeholder_in_range(document.get_node_at_position(insert_position), document.get_insert_node())
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -466,8 +458,8 @@ class UseCases():
         elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.prev_no_descent(), insert)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -490,8 +482,8 @@ class UseCases():
         elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.next_no_descent(), insert)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -508,8 +500,8 @@ class UseCases():
         document.delete_nodes(node_from, node_to)
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -526,8 +518,8 @@ class UseCases():
         document.delete_selected_nodes()
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -546,8 +538,8 @@ class UseCases():
         document.insert_nodes([node])
         document.end_undoable_action()
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -588,7 +580,7 @@ class UseCases():
         document.set_insert_and_selection_node(bounds[1])
         document.end_undoable_action()
 
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -616,7 +608,7 @@ class UseCases():
             document.set_paragraph_style(paragraph, style)
         document.end_undoable_action()
 
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -632,7 +624,7 @@ class UseCases():
         new_state = 'checked' if paragraph.state == None else None
         document.set_paragraph_state(paragraph, new_state)
 
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -652,7 +644,7 @@ class UseCases():
             else:
                 document.remove_tag(tagname)
 
-            ApplicationState.reset_tags_at_cursor()
+            UseCases.__reset_tags_at_cursor()
 
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
@@ -722,8 +714,8 @@ class UseCases():
             if next_insert != None:
                 document.set_insert_and_selection_node(next_insert, next_insert)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -755,8 +747,8 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new, insert_new)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -782,8 +774,8 @@ class UseCases():
             if next_insert != None:
                 document.set_insert_and_selection_node(next_insert, next_insert)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -816,8 +808,8 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(insert_new, insert_new)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -828,15 +820,16 @@ class UseCases():
     @timer.timer
     def up(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
         insert = document.get_insert_node()
 
-        x, y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
+        x, y = document_layout.get_absolute_xy(document_layout.get_node_layout(insert))
         implicit_x_position = ApplicationState.get_implicit_x_position()
         if implicit_x_position != None:
             x = implicit_x_position
 
         new_node = None
-        ancestors = Layouter.get_ancestors(Layouter.get_node_layout(insert))
+        ancestors = document_layout.get_ancestors(document_layout.get_node_layout(insert))
         for i, box in enumerate(ancestors):
             if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
                 if box['type'] == 'vbox':
@@ -845,17 +838,17 @@ class UseCases():
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast:
-                        for hbox in Layouter.get_paragraph_layout(paragraph)['children']:
+                        for hbox in document_layout.get_paragraph_layout(paragraph)['children']:
                             if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
                 for hbox in reversed(prev_hboxes):
                     if new_node == None:
                         min_distance = 10000
-                        for layout in hbox['children']:
-                            layout_x, layout_y = Layouter.get_absolute_xy(layout)
+                        for hbox_child in hbox['children']:
+                            layout_x, layout_y = document_layout.get_absolute_xy(hbox_child)
                             distance = abs(layout_x - x)
                             if distance < min_distance:
-                                new_node = layout['node']
+                                new_node = hbox_child['node']
                                 min_distance = distance
         if new_node == None:
             new_node = document.ast[0][0]
@@ -865,8 +858,8 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(new_node, new_node)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -877,16 +870,17 @@ class UseCases():
     @timer.timer
     def down(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
         insert = document.get_insert_node()
-        insert_layout = Layouter.get_node_layout(insert)
+        layout = document_layout.get_node_layout(insert)
 
-        x, y = Layouter.get_absolute_xy(insert_layout)
+        x, y = document_layout.get_absolute_xy(layout)
         implicit_x_position = ApplicationState.get_implicit_x_position()
         if implicit_x_position != None:
             x = implicit_x_position
 
         new_node = None
-        ancestors = Layouter.get_ancestors(insert_layout)
+        ancestors = document_layout.get_ancestors(layout)
         for i, box in enumerate(ancestors):
             if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
                 if box['type'] == 'vbox':
@@ -895,17 +889,17 @@ class UseCases():
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast:
-                        for hbox in Layouter.get_paragraph_layout(paragraph)['children']:
+                        for hbox in document_layout.get_paragraph_layout(paragraph)['children']:
                             if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
                                 prev_hboxes.append(hbox)
                 for child in prev_hboxes:
                     if new_node == None:
                         min_distance = 10000
-                        for layout in child['children']:
-                            layout_x, layout_y = Layouter.get_absolute_xy(layout)
+                        for child_layout in child['children']:
+                            layout_x, layout_y = document_layout.get_absolute_xy(child_layout)
                             distance = abs(layout_x - x)
                             if distance < min_distance:
-                                new_node = layout['node']
+                                new_node = child_layout['node']
                                 min_distance = distance
         if new_node == None:
             new_node = document.ast[-1][-1]
@@ -915,8 +909,8 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(new_node, new_node)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -927,9 +921,10 @@ class UseCases():
     @timer.timer
     def paragraph_start(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
         insert = document.get_insert_node()
 
-        layout = Layouter.get_node_layout(insert)
+        layout = document_layout.get_node_layout(insert)
         while layout['parent']['parent'] != None:
             layout = layout['parent']
         while layout['children'][0]['node'] == None:
@@ -941,8 +936,8 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(new_node, new_node)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -953,9 +948,10 @@ class UseCases():
     @timer.timer
     def paragraph_end(do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
         insert = document.get_insert_node()
 
-        layout = Layouter.get_node_layout(insert)
+        layout = document_layout.get_node_layout(insert)
         while layout['parent']['parent'] != None:
             layout = layout['parent']
         while layout['children'][-1]['node'] == None:
@@ -967,8 +963,8 @@ class UseCases():
         else:
             document.set_insert_and_selection_node(new_node, new_node)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -979,23 +975,24 @@ class UseCases():
     @timer.timer
     def page(y, do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
         insert = document.get_insert_node()
-        orig_x, orig_y = Layouter.get_absolute_xy(Layouter.get_node_layout(insert))
+        orig_x, orig_y = document_layout.get_absolute_xy(document_layout.get_node_layout(insert))
         implicit_x_position = ApplicationState.get_implicit_x_position()
         if implicit_x_position != None:
             orig_x = implicit_x_position
         new_x = orig_x
         new_y = orig_y + y
-        layout = Layouter.get_cursor_holding_layout_close_to_xy(new_x, new_y)
+        layout = document_layout.get_cursor_holding_layout_close_to_xy(new_x, new_y)
 
         if do_selection:
             document.set_insert_and_selection_node(layout['node'], document.get_selection_node())
         else:
             document.set_insert_and_selection_node(layout['node'], layout['node'])
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1025,8 +1022,8 @@ class UseCases():
         if node != None and node.type == 'placeholder':
             document.select_node(node)
 
-            ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-            ApplicationState.reset_tags_at_cursor()
+            UseCases.__scroll_insert_on_screen(document, animation_type='default')
+            UseCases.__reset_tags_at_cursor()
 
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
@@ -1053,8 +1050,8 @@ class UseCases():
         if node != None and node.type == 'placeholder':
             document.select_node(node)
 
-            ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-            ApplicationState.reset_tags_at_cursor()
+            UseCases.__scroll_insert_on_screen(document, animation_type='default')
+            UseCases.__reset_tags_at_cursor()
 
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
@@ -1068,8 +1065,8 @@ class UseCases():
 
         document.select_node(node)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1083,8 +1080,8 @@ class UseCases():
 
         document.set_insert_and_selection_node(node_from, node_to)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1098,8 +1095,8 @@ class UseCases():
 
         document.set_insert_and_selection_node(document.ast[0][0], document.ast[-1][-1])
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1114,8 +1111,8 @@ class UseCases():
         if document.has_selection():
             document.set_insert_and_selection_node(document.get_last_selection_bound())
 
-            ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-            ApplicationState.reset_tags_at_cursor()
+            UseCases.__scroll_insert_on_screen(document, animation_type='default')
+            UseCases.__reset_tags_at_cursor()
 
             DocumentRepo.update(document)
             MessageBus.add_message('document_changed')
@@ -1126,14 +1123,15 @@ class UseCases():
     @timer.timer
     def move_cursor_to_xy(x, y, do_selection=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
-        layout = Layouter.get_cursor_holding_layout_close_to_xy(x, y)
+        layout = document_layout.get_cursor_holding_layout_close_to_xy(x, y)
         if do_selection:
             document.set_insert_and_selection_node(layout['node'], document.get_selection_node())
         else:
             document.set_insert_and_selection_node(layout['node'], layout['node'])
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1147,8 +1145,8 @@ class UseCases():
 
         document.set_insert_and_selection_node(node, node)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1170,8 +1168,8 @@ class UseCases():
         if new_insert != None:
             document.set_insert_and_selection_node(new_insert, new_insert)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1216,8 +1214,8 @@ class UseCases():
 
         document.set_insert_and_selection_node(new_insert, new_selection)
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type='default')
-        ApplicationState.reset_tags_at_cursor()
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
 
         DocumentRepo.update(document)
         MessageBus.add_message('document_changed')
@@ -1247,8 +1245,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         ApplicationState.set_preedit(preedit_string)
-        Layouter.update_preedit(preedit_string)
-        ApplicationState.scroll_insert_on_screen(document, 'default')
+        UseCases.__scroll_insert_on_screen(document, 'default')
 
         MessageBus.add_message('preedit_changed')
         MessageBus.add_message('cursor_movement')
@@ -1256,7 +1253,7 @@ class UseCases():
 
     @timer.timer
     def update_implicit_x_position():
-        ApplicationState.update_implicit_x_position()
+        UseCases.__update_implicit_x_position()
 
     @timer.timer
     def scroll_to_xy(x, y, animation_type='default'):
@@ -1270,18 +1267,19 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
 
-        ApplicationState.scroll_insert_on_screen(document, animation_type)
+        UseCases.__scroll_insert_on_screen(document, animation_type)
 
     @timer.timer
     def decelerate(vel_x, vel_y):
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document == None: return
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
         view_width, view_height = ApplicationState.get_view_size()
-        x, y = ApplicationState.get_current_scrolling_offsets()
+        x, y = Queries.get_current_scrolling_offsets()
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height() + Layouter.get_height() + LayoutInfo.get_document_padding_bottom() - view_height)
-        max_x = max(0, LayoutInfo.get_document_padding_left() + Layouter.get_width() - view_width)
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height() + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - view_height)
+        max_x = max(0, LayoutInfo.get_document_padding_left() + document_layout.get_width() - view_width)
 
         vel_x *= 0.4
         vel_y *= 0.4
@@ -1301,22 +1299,24 @@ class UseCases():
         MessageBus.add_message('popover_changed')
 
     def show_popover_at_node(name, document, node, offset_x, offset_y):
-        scrolling_pos_x, scrolling_pos_y = ApplicationState.get_current_scrolling_offsets()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
+        scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         view_width, view_height = ApplicationState.get_view_size()
 
-        x, y = Layouter.get_absolute_xy(Layouter.get_node_layout(node))
+        x, y = document_layout.get_absolute_xy(document_layout.get_node_layout(node))
         x += LayoutInfo.get_document_padding_left() + offset_x - scrolling_pos_x
         y += LayoutInfo.get_normal_document_offset() + offset_y - scrolling_pos_y
-        fontname = Layouter.get_node_layout(node)['fontname']
+        fontname = document_layout.get_node_layout(node)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
-        y += Layouter.get_node_layout(node)['height'] - padding_top - padding_bottom
-        x += Layouter.get_node_layout(node)['width'] / 2
+        y += document_layout.get_node_layout(node)['height'] - padding_top - padding_bottom
+        x += document_layout.get_node_layout(node)['width'] / 2
 
         orientation = 'bottom'
         if y + 260 > view_height:
             orientation = 'top'
-            y -= Layouter.get_node_layout(node)['height'] - padding_top - padding_bottom
+            y -= document_layout.get_node_layout(node)['height'] - padding_top - padding_bottom
 
         ApplicationState.set_popover(name, x, y, orientation)
 
@@ -1326,5 +1326,68 @@ class UseCases():
         ApplicationState.set_popover(None)
 
         MessageBus.add_message('popover_changed')
+
+    def __scroll_insert_on_screen(document, animation_type='default'):
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
+        window_height = ApplicationState.view_height
+        insert_node = document.get_insert_node()
+        insert_position = document_layout.get_absolute_xy(document_layout.get_node_layout(insert_node))
+
+        content_offset = LayoutInfo.get_normal_document_offset()
+        insert_y = insert_position[1] + content_offset
+        insert_height = document_layout.get_node_layout(insert_node)['height']
+        scrolling_offset_y = Queries.get_current_scrolling_offsets()[1]
+        content_height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.title_buttons_height
+
+        if window_height <= 0:
+            new_position = (0, 0)
+        elif document_layout.get_absolute_xy(document_layout.get_line_layout_at_y(insert_position[1]))[1] == 0:
+            new_position = (0, 0)
+        elif insert_y < scrolling_offset_y:
+            if insert_height > window_height:
+                new_position = (0, insert_y - window_height + insert_height)
+            else:
+                new_position = (0, insert_y)
+        elif insert_position[1] >= document_layout.get_height() - insert_height and content_height >= window_height:
+            new_position = (0, document_layout.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height)
+        elif insert_y > scrolling_offset_y - insert_height + window_height:
+            new_position = (0, insert_y - window_height + insert_height)
+        else:
+            new_position = (ApplicationState.scrolling_target_x, ApplicationState.scrolling_target_y)
+
+        ApplicationState.set_scrolling_target(document.id, new_position[0], new_position[1], animation_type)
+
+    def __update_implicit_x_position():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document == None:
+            value = 0
+        else:
+            document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+            insert = document.get_insert_node()
+            value = document_layout.get_absolute_xy(document_layout.get_node_layout(insert))[0]
+
+        ApplicationState.set_implicit_x_position(value)
+
+    def __reset_tags_at_cursor():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document == None:
+            tags_at_cursor = set()
+        else:
+            node = document.get_insert_node()
+
+            if node.parent.type == 'paragraph':
+                prev_node = node.prev_no_descent()
+            else:
+                prev_node = node.prev_in_parent()
+
+            if node == None or prev_node == None:
+                tags_at_cursor = set()
+            else:
+                tags_at_cursor = prev_node.tags.copy()
+
+        ApplicationState.set_tags_at_cursor(tags_at_cursor)
 
 

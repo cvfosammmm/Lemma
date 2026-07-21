@@ -26,6 +26,7 @@ from lemma.document.plaintext import Plaintext
 from lemma.document.links import Links
 from lemma.document.files import Files
 from lemma.document.xml import XML
+from lemma.document.layout import Layout
 from lemma.services.ast_validator import ASTValidator
 from lemma.services.node_type_db import NodeTypeDB
 import lemma.services.timer as timer
@@ -46,6 +47,7 @@ class Document():
         self.links = Links(self)
         self.files = Files(self)
         self.xml = XML(self)
+        self.layout = Layout(self)
 
         self.secondary_formats_cache = dict()
         self.query_cache = dict()
@@ -385,6 +387,16 @@ class Document():
             self.plaintext.update()
             self.secondary_formats_cache['plaintext'] = self.plaintext.plaintext
         return self.secondary_formats_cache['plaintext']
+
+    def get_layout(self, preedit_string, font_theme):
+        if 'layout' not in self.secondary_formats_cache:
+            self.layout.update()
+            self.secondary_formats_cache['layout'] = self.layout
+        elif self.layout.preedit_string != preedit_string or self.layout.font_theme != font_theme:
+            self.layout.update_font_theme(font_theme)
+            self.layout.update_preedit(preedit_string)
+            self.layout.update()
+        return self.secondary_formats_cache['layout']
 
     @timer.timer
     def get_xml(self):
