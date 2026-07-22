@@ -312,18 +312,18 @@ overlay.popover-bottom {
 @keyframes popover-animation-top {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(-5px);
+        transform: translateY(-3px);
     }
 }
 overlay.popover-top {
     animation-name: popover-animation-top;
     animation-duration: 0.2s;
     animation-timing-function: ease;
-    transform: translateY(-5px);
+    transform: translateY(-3px);
 }
 overlay.popover .content {
     background: @popover_bg_color;
@@ -338,7 +338,7 @@ overlay.popover .arrow {
 }
 overlay.popover-bottom .arrow {
     color: @popover_arrow_color;
-    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @popover_borders) left top no-repeat;
+    background: -gtk-recolor(url('./icons/hicolor/scalable/actions/popover-arrow-down-symbolic.svg'), success @popover_bg_color, error @popover_borders) left bottom no-repeat;
 }
 overlay.popover-top .arrow {
     color: @popover_arrow_color;
@@ -348,7 +348,7 @@ overlay.popover-bottom .content {
     margin-top: 10px;
 }
 overlay.popover-top .content {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 overlay.popover button.action, overlay.popover button.menu, overlay.popover button.header {
     background: none;
