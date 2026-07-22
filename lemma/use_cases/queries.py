@@ -60,4 +60,18 @@ class Queries():
 
         return (x, y)
 
+    def is_currently_scrolling():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
+        x, y = Queries.get_current_scrolling_offsets()
+
+        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.title_buttons_height + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.view_height)
+        max_x = max(0, LayoutInfo.get_document_padding_left() + document_layout.get_width() - ApplicationState.view_width)
+
+        target_x = min(max_x, max(0, ApplicationState.scrolling_target_x))
+        target_y = min(max_y, max(0, ApplicationState.scrolling_target_y))
+
+        return (abs(target_x - x) > 1 or abs(target_y - y) > 1)
+
 

@@ -120,7 +120,7 @@ class Document():
                         start_node = start_node.prev_in_parent()
 
                     nodes = []
-                    title, paragraphs = XMLParser.parse(xml)
+                    title, meta, paragraphs = XMLParser.parse(xml)
                     for paragraph in paragraphs:
                         nodes += paragraph.children
 
@@ -341,7 +341,7 @@ class Document():
 
     def get_cursor_state(self):
         if 'cursor_state' not in self.query_cache:
-            self.query_cache['cursor_state'] = self.cursor.get_state()
+            self.query_cache['cursor_state'] = [self.get_insert_node().get_position(), self.get_selection_node().get_position()]
         return self.query_cache['cursor_state']
 
     def can_undo(self):
@@ -402,7 +402,11 @@ class Document():
     def get_xml(self):
         if 'xml' not in self.secondary_formats_cache:
             self.xml.update()
-            xml = '<head><title>' + xml_helpers.escape(self.title) + '</title></head>'
+            xml = '<head>'
+            xml += '<title>' + xml_helpers.escape(self.title) + '</title>'
+            xml += '<meta name="insert-position" content="' + str(self.get_cursor_state()[0]) + '" />'
+            xml += '<meta name="selection-position" content="' + str(self.get_cursor_state()[1]) + '" />'
+            xml += '</head>'
             xml += '<root>'
             for paragraph in self.ast:
                 xml += self.xml.paragraph_xml[paragraph]

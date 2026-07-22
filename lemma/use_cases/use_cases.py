@@ -290,7 +290,7 @@ class UseCases():
 
         link_at_cursor = document.get_link_at_cursor()
         xml = xml_helpers.embellish_with_link_and_tags(xml_helpers.escape(text), link_at_cursor, tags.copy())
-        title, paragraphs = XMLParser.parse(xml)
+        title, meta, paragraphs = XMLParser.parse(xml)
 
         document.start_undoable_action()
         document.delete_selected_nodes()
@@ -359,7 +359,7 @@ class UseCases():
             xml = xml_helpers.escape(line)
             xml = RegexService.get_regex(r'((?:http://|https://)[a-zA-Z0-9\.\/\&\?=\-_#]*)').sub(r'<a href="\1">\1</a>', xml)
 
-            title, paragraphs = XMLParser.parse(xml)
+            title, meta, paragraphs = XMLParser.parse(xml)
             paragraph = paragraphs[0]
 
             insert_node = document.get_insert_node()
@@ -381,7 +381,7 @@ class UseCases():
 
     def replace_section(document, node_from, node_to, xml):
         nodes = []
-        title, paragraphs = XMLParser.parse(xml)
+        title, meta, paragraphs = XMLParser.parse(xml)
         for paragraph in paragraphs:
             nodes += paragraph.children
 
@@ -411,7 +411,7 @@ class UseCases():
                 prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
                 xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
 
-        title, paragraphs = XMLParser.parse(xml)
+        title, meta, paragraphs = XMLParser.parse(xml)
 
         document.start_undoable_action()
         document.delete_selected_nodes()
@@ -1337,26 +1337,25 @@ class UseCases():
         content_offset = LayoutInfo.get_normal_document_offset()
         insert_y = insert_position[1] + content_offset
         insert_height = document_layout.get_node_layout(insert_node)['height']
-        scrolling_offset_y = Queries.get_current_scrolling_offsets()[1]
+        scrolling_offset_x, scrolling_offset_y = Queries.get_current_scrolling_offsets()
         content_height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.title_buttons_height
 
         if window_height <= 0:
-            new_position = (0, 0)
+            ApplicationState.set_scrolling_target(document.id, 0, 0, animation_type)
         elif document_layout.get_absolute_xy(document_layout.get_line_layout_at_y(insert_position[1]))[1] == 0:
-            new_position = (0, 0)
+            ApplicationState.set_scrolling_target(document.id, 0, 0, animation_type)
         elif insert_y < scrolling_offset_y:
             if insert_height > window_height:
-                new_position = (0, insert_y - window_height + insert_height)
+                ApplicationState.set_scrolling_target(document.id, 0, insert_y - window_height + insert_height, animation_type)
             else:
-                new_position = (0, insert_y)
+                ApplicationState.set_scrolling_target(document.id, 0, insert_y, animation_type)
         elif insert_position[1] >= document_layout.get_height() - insert_height and content_height >= window_height:
-            new_position = (0, document_layout.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height)
+            ApplicationState.set_scrolling_target(document.id, 0, document_layout.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height, animation_type)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
-            new_position = (0, insert_y - window_height + insert_height)
+            ApplicationState.set_scrolling_target(document.id, 0, insert_y - window_height + insert_height, animation_type)
         else:
-            new_position = (ApplicationState.scrolling_target_x, ApplicationState.scrolling_target_y)
-
-        ApplicationState.set_scrolling_target(document.id, new_position[0], new_position[1], animation_type)
+            if not Queries.is_currently_scrolling():
+                ApplicationState.set_scrolling_target(document.id, scrolling_offset_x, scrolling_offset_y, None)
 
     def __update_implicit_x_position():
         document = WorkspaceRepo.get_workspace().get_active_document()

@@ -28,7 +28,7 @@ class XMLParser():
         parser = XMLParserObject()
         paragraphs = parser.parse(xml_string)
 
-        return parser.title, paragraphs
+        return parser.title, parser.meta, paragraphs
 
 
 class XMLParserObject(object):
@@ -52,6 +52,7 @@ class XMLParserObject(object):
         self.current_paragraph_state = 0
 
         self.title = ''
+        self.meta = dict()
 
     def parse(self, xml_string):
         self.paragraphs = []
@@ -77,6 +78,9 @@ class XMLParserObject(object):
 
     def handle_starttag(self, tag, attrs):
         self.open_xml_tags.append(tag)
+
+        if tag == 'meta' and 'name' in attrs and 'content' in attrs:
+            self.meta[attrs['name']] = attrs['content']
 
         if tag == 'a' and 'href' in attrs:
             self.current_link[self.level] = xml_helpers.unescape(attrs['href'])

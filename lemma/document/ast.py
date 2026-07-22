@@ -439,25 +439,15 @@ class Cursor():
         self.node_insert = self.document.get_node_at_position(position[0])
         self.node_selection = self.document.get_node_at_position(position[1])
 
-    @timer.timer
-    def get_state(self):
-        return [self.get_insert_position(), self.get_selection_position()]
-
     def get_insert_node(self):
         return self.node_insert
 
     def get_selection_node(self):
         return self.node_selection
 
-    def get_insert_position(self):
-        return self.node_insert.get_position()
-
-    def get_selection_position(self):
-        return self.node_selection.get_position()
-
     @timer.timer
     def get_first_and_last_node(self):
-        if self.get_insert_position() < self.get_selection_position():
+        if self.node_insert.get_position() < self.node_selection.get_position():
             return (self.node_insert, self.node_selection)
         else:
             return (self.node_selection, self.node_insert)

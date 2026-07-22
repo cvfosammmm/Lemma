@@ -65,7 +65,7 @@ class DocumentRepo():
                 with open(pathname_document, 'r') as file:
                     xml = file.read()
 
-                title, paragraphs = XMLParser.parse(xml)
+                title, meta, paragraphs = XMLParser.parse(xml)
                 if paragraphs != None:
                     for paragraph in paragraphs:
                         if len(paragraph) > 0 and paragraph[-1].type == 'eol':
@@ -168,7 +168,7 @@ class DocumentRepo():
         with open(pathname, 'r') as file:
             xml = file.read()
 
-        title, paragraphs = XMLParser.parse(xml)
+        title, meta, paragraphs = XMLParser.parse(xml)
         if paragraphs != None:
             for paragraph in paragraphs:
                 if len(paragraph) > 0 and paragraph[-1].type == 'eol':
@@ -177,7 +177,12 @@ class DocumentRepo():
             document.ast.remove(document.ast[0])
 
         document.title = title
-        document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
+
+        if 'insert-position' in meta: insert_pos = eval(meta['insert-position'])
+        else: insert_pos = document.ast[0][0].get_position()
+        if 'selection-position' in meta: selection_pos = eval(meta['selection-position'])
+        else: selection_pos = document.ast[0][0].get_position()
+        document.cursor.set_state([insert_pos, selection_pos])
 
         return document
 
