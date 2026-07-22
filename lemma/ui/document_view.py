@@ -252,7 +252,7 @@ class DocumentView():
 
     @timer.timer
     def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
-        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int((layout['x'] + layout['width']) * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
+        surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int((layout['x'] + layout['width'] + 10) * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
         self.draw_highlight_bg(layout, cairo.Context(surface), 0, -layout['y'])
         self.draw_selection_bg(layout, cairo.Context(surface), 0, -layout['y'], in_selection)
         self.draw_layout(layout, cairo.Context(surface), 0, -layout['y'])
