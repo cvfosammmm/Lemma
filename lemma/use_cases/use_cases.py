@@ -454,7 +454,7 @@ class UseCases():
         elif not insert.is_first_in_parent():
             document.delete_nodes(insert.prev_in_parent(), insert)
         elif insert.parent.type == 'paragraph' and not insert.parent.is_first_in_parent():
-            document.delete_nodes(insert.prev_no_descent(), insert)
+            document.merge_paragraphs(insert.prev_no_descent().parent)
         elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.prev_no_descent(), insert)
 
@@ -478,7 +478,7 @@ class UseCases():
         elif not insert.is_last_in_parent():
             document.delete_nodes(insert, insert.next_in_parent())
         elif insert.parent.type == 'paragraph' and not insert.parent.is_last_in_parent():
-            document.delete_nodes(insert, insert.next())
+            document.merge_paragraphs(insert.parent)
         elif insert.parent.type != 'paragraph' and len(insert.parent) == 1:
             document.set_insert_and_selection_node(insert.next_no_descent(), insert)
 

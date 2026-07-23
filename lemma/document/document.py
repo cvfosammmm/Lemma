@@ -159,6 +159,17 @@ class Document():
                 self.command_manager.add_command('move_cursor_to_node', self.ast[paragraph_index_from][node_from_index], self.ast[paragraph_index_from][node_from_index])
 
     @undoable_action
+    def merge_paragraphs(self, first_paragraph):
+        paragraph_index = self.ast.index(first_paragraph)
+        second_paragraph = first_paragraph.next_in_parent()
+
+        copy_nodes = second_paragraph[0:-1]
+        self.command_manager.add_command('delete_nodes', second_paragraph[0], second_paragraph[-1])
+        self.command_manager.add_command('delete_paragraphs', paragraph_index + 1, paragraph_index + 2)
+        self.command_manager.add_command('insert_nodes', first_paragraph[-1], copy_nodes)
+        self.command_manager.add_command('move_cursor_to_node', first_paragraph[-1 - len(copy_nodes)], first_paragraph[-1 - len(copy_nodes)])
+
+    @undoable_action
     def add_tag(self, tagname):
         self.command_manager.add_command('add_tag', tagname)
 
