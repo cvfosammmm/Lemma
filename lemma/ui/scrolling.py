@@ -54,7 +54,7 @@ class DocumentScrolling():
         if controller.get_current_event_state() & modifiers == 0:
             document = WorkspaceRepo.get_workspace().get_active_document()
             document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
-            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + Queries.get_document_offset()
 
             if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
                 dx *= view_width ** (2/3)

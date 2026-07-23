@@ -52,7 +52,7 @@ class Queries():
             x = ApplicationState.scrolling_target_x
             y = ApplicationState.scrolling_target_y
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.title_buttons_height + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.view_height)
+        max_y = max(0, Queries.get_document_offset() + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.view_height)
         max_x = max(0, LayoutInfo.get_document_padding_left() + document_layout.get_width() - ApplicationState.view_width)
 
         x = min(max_x, max(0, x))
@@ -66,12 +66,15 @@ class Queries():
 
         x, y = Queries.get_current_scrolling_offsets()
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.title_buttons_height + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.view_height)
+        max_y = max(0, Queries.get_document_offset() + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - ApplicationState.view_height)
         max_x = max(0, LayoutInfo.get_document_padding_left() + document_layout.get_width() - ApplicationState.view_width)
 
         target_x = min(max_x, max(0, ApplicationState.scrolling_target_x))
         target_y = min(max_y, max(0, ApplicationState.scrolling_target_y))
 
         return (abs(target_x - x) > 1 or abs(target_y - y) > 1)
+
+    def get_document_offset():
+        return ApplicationState.get_title_height() 
 
 

@@ -1229,8 +1229,8 @@ class UseCases():
     def set_view_size(width, height):
         ApplicationState.set_view_size(width, height)
 
-    def set_title_buttons_height(height):
-        ApplicationState.set_title_buttons_height(height)
+    def set_title_height(height):
+        ApplicationState.set_title_height(height)
 
     def set_dark_mode(is_dark):
         ApplicationState.set_dark_mode(is_dark)
@@ -1278,7 +1278,7 @@ class UseCases():
         view_width, view_height = ApplicationState.get_view_size()
         x, y = Queries.get_current_scrolling_offsets()
 
-        max_y = max(0, LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height() + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - view_height)
+        max_y = max(0, Queries.get_document_offset() + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - view_height)
         max_x = max(0, LayoutInfo.get_document_padding_left() + document_layout.get_width() - view_width)
 
         vel_x *= 0.4
@@ -1306,7 +1306,7 @@ class UseCases():
 
         x, y = document_layout.get_absolute_xy(document_layout.get_node_layout(node))
         x += LayoutInfo.get_document_padding_left() + offset_x - scrolling_pos_x
-        y += LayoutInfo.get_normal_document_offset() + offset_y - scrolling_pos_y
+        y += Queries.get_document_offset() + offset_y - scrolling_pos_y
         fontname = document_layout.get_node_layout(node)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)
@@ -1334,11 +1334,10 @@ class UseCases():
         insert_node = document.get_insert_node()
         insert_position = document_layout.get_absolute_xy(document_layout.get_node_layout(insert_node))
 
-        content_offset = LayoutInfo.get_normal_document_offset()
-        insert_y = insert_position[1] + content_offset
+        insert_y = insert_position[1] + Queries.get_document_offset()
         insert_height = document_layout.get_node_layout(insert_node)['height']
         scrolling_offset_x, scrolling_offset_y = Queries.get_current_scrolling_offsets()
-        content_height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.title_buttons_height
+        content_height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + Queries.get_document_offset()
 
         if window_height <= 0:
             ApplicationState.set_scrolling_target(document.id, 0, 0, animation_type)
@@ -1350,7 +1349,7 @@ class UseCases():
             else:
                 ApplicationState.set_scrolling_target(document.id, 0, insert_y, animation_type)
         elif insert_position[1] >= document_layout.get_height() - insert_height and content_height >= window_height:
-            ApplicationState.set_scrolling_target(document.id, 0, document_layout.get_height() + content_offset + LayoutInfo.get_document_padding_bottom() - window_height, animation_type)
+            ApplicationState.set_scrolling_target(document.id, 0, document_layout.get_height() + Queries.get_document_offset() + LayoutInfo.get_document_padding_bottom() - window_height, animation_type)
         elif insert_y > scrolling_offset_y - insert_height + window_height:
             ApplicationState.set_scrolling_target(document.id, 0, insert_y - window_height + insert_height, animation_type)
         else:

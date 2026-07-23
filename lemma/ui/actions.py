@@ -498,7 +498,7 @@ class Actions(object):
         x += document_view_allocation.origin.x
         y += document_view_allocation.origin.y
         x += LayoutInfo.get_document_padding_left()
-        y += LayoutInfo.get_normal_document_offset()
+        y += Queries.get_document_offset()
         fontname = document_layout.get_node_layout(insert)['fontname']
         padding_top = TextShaper.get_padding_top(fontname)
         padding_bottom = TextShaper.get_padding_bottom(fontname)

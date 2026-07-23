@@ -173,8 +173,7 @@ class Autocomplete():
 
         insert = document.get_insert_node()
         insert_x, insert_y = document_layout.get_absolute_xy(document_layout.get_node_layout(insert))
-        content_offset = LayoutInfo.get_normal_document_offset()
-        insert_y += content_offset - self.scrolling_position_y
+        insert_y += Queries.get_document_offset() - self.scrolling_position_y
         insert_height = document_layout.get_node_layout(insert)['height']
         insert_x += LayoutInfo.get_document_padding_left()
         window_width, window_height = ApplicationState.get_view_size()

@@ -105,8 +105,7 @@ class Pointer():
         x = scrolling_pos_x + (self.pointer_x if self.pointer_x != None else 0)
         y = scrolling_pos_y + (self.pointer_y if self.pointer_y != None else 0)
         x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
-        y -= ApplicationState.get_title_buttons_height()
+        y -= Queries.get_document_offset()
 
         if y > 0:
             line_layout = document_layout.get_line_layout_at_y(y)
@@ -155,7 +154,7 @@ class Pointer():
 
         scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x += scrolling_pos_x - LayoutInfo.get_document_padding_left()
-        y += scrolling_pos_y - LayoutInfo.get_normal_document_offset()
+        y += scrolling_pos_y - Queries.get_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         self.selected_click_target = (x, y)
@@ -208,39 +207,38 @@ class Pointer():
 
         scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x += scrolling_pos_x - LayoutInfo.get_document_padding_left()
-        y += scrolling_pos_y - LayoutInfo.get_normal_document_offset()
+        y += scrolling_pos_y - Queries.get_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if keyboard_state == 0:
-            if y >= -LayoutInfo.get_subtitle_height():
-                leaf_layout_at_press = document_layout.get_leaf_layout_at_xy(*self.selected_click_target)
-                link_at_press = leaf_layout_at_press['node'].link if leaf_layout_at_press != None else None
-                leaf_layout_at_release = document_layout.get_leaf_layout_at_xy(x, y)
-                link_at_release = leaf_layout_at_release['node'].link if leaf_layout_at_release != None else None
+            leaf_layout_at_press = document_layout.get_leaf_layout_at_xy(*self.selected_click_target)
+            link_at_press = leaf_layout_at_press['node'].link if leaf_layout_at_press != None else None
+            leaf_layout_at_release = document_layout.get_leaf_layout_at_xy(x, y)
+            link_at_release = leaf_layout_at_release['node'].link if leaf_layout_at_release != None else None
 
-                if link_at_press == link_at_release and link_at_release != None:
-                    UseCases.open_link(link_at_release)
-                    return
+            if link_at_press == link_at_release and link_at_release != None:
+                UseCases.open_link(link_at_release)
+                return
 
-                x_at_press, y_at_press = self.selected_click_target
-                line_layout_at_press = document_layout.get_line_layout_at_y(y_at_press)
-                paragraph_layout_at_press = line_layout_at_press['parent']
+            x_at_press, y_at_press = self.selected_click_target
+            line_layout_at_press = document_layout.get_line_layout_at_y(y_at_press)
+            paragraph_layout_at_press = line_layout_at_press['parent']
 
-                line_layout_at_release = document_layout.get_line_layout_at_y(y)
-                paragraph_layout_at_release = line_layout_at_release['parent']
+            line_layout_at_release = document_layout.get_line_layout_at_y(y)
+            paragraph_layout_at_release = line_layout_at_release['parent']
 
-                if paragraph_layout_at_press != paragraph_layout_at_release: return
-                if paragraph_layout_at_release['node'].style != 'cl': return
-                if line_layout_at_release != paragraph_layout_at_release['children'][0]: return
+            if paragraph_layout_at_press != paragraph_layout_at_release: return
+            if paragraph_layout_at_release['node'].style != 'cl': return
+            if line_layout_at_release != paragraph_layout_at_release['children'][0]: return
 
-                indentation = LayoutInfo.get_indentation('cl', paragraph_layout_at_release['node'].indentation_level)
-                x_start = indentation - 35
-                x_end = indentation - 16
+            indentation = LayoutInfo.get_indentation('cl', paragraph_layout_at_release['node'].indentation_level)
+            x_start = indentation - 35
+            x_end = indentation - 16
 
-                if y < paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 23 or y > paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 4 or x < x_start or x > x_end: return
-                if y_at_press < paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 23 or y_at_press > paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 4 or x_at_press < x_start or x_at_press > x_end: return
+            if y < paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 23 or y > paragraph_layout_at_release['y'] + line_layout_at_release['height'] - 4 or x < x_start or x > x_end: return
+            if y_at_press < paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 23 or y_at_press > paragraph_layout_at_press['y'] + line_layout_at_press['height'] - 4 or x_at_press < x_start or x_at_press > x_end: return
 
-                UseCases.toggle_checkbox_at_cursor()
+            UseCases.toggle_checkbox_at_cursor()
 
     def on_secondary_button_press(self, controller, n_press, x, y):
         if n_press % 3 != 1: return
@@ -250,7 +248,7 @@ class Pointer():
         document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
         scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x_offset = scrolling_pos_x + x - LayoutInfo.get_document_padding_left()
-        y_offset = scrolling_pos_y + y - LayoutInfo.get_normal_document_offset()
+        y_offset = scrolling_pos_y + y - Queries.get_document_offset()
         keyboard_state = controller.get_current_event_state() & modifiers
 
         if y_offset > 0:
@@ -267,7 +265,7 @@ class Pointer():
         scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
 
         x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
+        y -= Queries.get_document_offset()
         y += scrolling_pos_y
 
         if y <= 0:
@@ -290,13 +288,13 @@ class Pointer():
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - view_height > 0:
-            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + Queries.get_document_offset()
             new_x = scrolling_pos_x
             new_y = min(max(0, height - view_height), scrolling_pos_y + y - view_height)
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
+        y -= Queries.get_document_offset()
         y += scrolling_pos_y
 
         UseCases.move_cursor_to_xy(x, y, True)
@@ -312,7 +310,7 @@ class Pointer():
 
         scrolling_pos_x, scrolling_pos_y = Queries.get_current_scrolling_offsets()
         x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
+        y -= Queries.get_document_offset()
         y += scrolling_pos_y
 
         self.handle_drop(value, x, y)
@@ -411,7 +409,7 @@ class Pointer():
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)
 
         if y - view_height > -56:
-            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + Queries.get_document_offset()
             new_x = scrolling_pos_x
             new_y = min(max(0, height - view_height), scrolling_pos_y + y - view_height + 56)
             UseCases.scroll_to_xy(new_x, new_y, animation_type=None)

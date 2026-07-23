@@ -85,7 +85,7 @@ class DocumentView():
                 self.view.content.queue_draw()
 
             document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
-            content_height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height()
+            content_height = document_layout.get_height() + LayoutInfo.get_document_padding_bottom() + Queries.get_document_offset()
 
             self.view.scrollbar_vertical.set_content_height(content_height)
             self.view.scrollbar_vertical.set_scrolling_offset(current_scrolling_y)
@@ -137,7 +137,7 @@ class DocumentView():
         self.setup_scaling_offsets()
 
         content_offset_x = LayoutInfo.get_document_padding_left()
-        content_offset_y = LayoutInfo.get_normal_document_offset() + ApplicationState.get_title_buttons_height() - scrolling_pos_y
+        content_offset_y = Queries.get_document_offset() - scrolling_pos_y
 
         self.first_selection_node = self.document.get_first_selection_bound()
         self.last_selection_node = self.document.get_last_selection_bound()
@@ -404,7 +404,7 @@ class DocumentView():
 
         x, y = self.application.pointer.drop_cursor_x, self.application.pointer.drop_cursor_y
         x -= LayoutInfo.get_document_padding_left()
-        y -= LayoutInfo.get_normal_document_offset()
+        y -= Queries.get_document_offset()
         y += scrolling_pos_y
 
         document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))

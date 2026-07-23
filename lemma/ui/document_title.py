@@ -110,7 +110,6 @@ class DocumentTitle():
             self.reset_title()
             self.validate_title()
             self.view.button_revealer.set_reveal_child(True)
-            UseCases.set_title_buttons_height(50)
             UseCases.scroll_to_xy(0, 0, animation_type='default')
 
     def on_content_focus_in(self, controller):
@@ -156,7 +155,6 @@ class DocumentTitle():
                             UseCases.set_link(linking_doc, bounds, title)
 
         self.view.button_revealer.set_reveal_child(False)
-        UseCases.set_title_buttons_height(0)
         self.document_view.content.grab_focus()
 
         self.is_active = False
@@ -165,7 +163,6 @@ class DocumentTitle():
         self.reset_title()
 
         self.view.button_revealer.set_reveal_child(False)
-        UseCases.set_title_buttons_height(0)
         self.document_view.content.grab_focus()
 
         self.is_active = False

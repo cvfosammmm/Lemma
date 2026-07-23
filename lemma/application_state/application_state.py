@@ -26,7 +26,7 @@ class ApplicationState():
 
     view_width = 0
     view_height = 0
-    title_buttons_height = 0
+    title_height = 0
     ctrl_pressed = False
     is_dark_mode = False
 
@@ -74,11 +74,11 @@ class ApplicationState():
     def get_view_size():
         return (ApplicationState.view_width, ApplicationState.view_height)
 
-    def set_title_buttons_height(height):
-        ApplicationState.title_buttons_height = height
+    def set_title_height(height):
+        ApplicationState.title_height = height
 
-    def get_title_buttons_height():
-        return ApplicationState.title_buttons_height
+    def get_title_height():
+        return ApplicationState.title_height
 
     def set_dark_mode(is_dark):
         ApplicationState.is_dark_mode = is_dark

@@ -74,6 +74,7 @@ class DocumentView(Gtk.Widget):
         rectangle = Gdk.Rectangle()
         rectangle.x, rectangle.y, rectangle.width, rectangle.height = (0, -self.title_widget.offset_y, width, height)
         self.title_widget.size_allocate(rectangle, baseline)
+        UseCases.set_title_height(self.title_widget.get_allocated_height())
 
         rectangle = Gdk.Rectangle()
         rectangle.x, rectangle.y, rectangle.width, rectangle.height = (0, 0, width, height)
@@ -82,6 +83,8 @@ class DocumentView(Gtk.Widget):
         rectangle = Gdk.Rectangle()
         rectangle.x, rectangle.y, rectangle.width, rectangle.height = (0, 0, width, height)
         self.autocomplete_view.size_allocate(rectangle, baseline)
+
+        self.content.queue_draw()
 
 
 class DocumentViewDrawingArea(Gtk.Widget):
@@ -116,7 +119,7 @@ class TitleWidget(Gtk.Box):
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
         self.add_css_class('document-title')
         self.set_valign(Gtk.Align.START)
-        self.set_halign(Gtk.Align.START)
+        self.set_halign(Gtk.Align.FILL)
 
         self.offset_y = 0
 
