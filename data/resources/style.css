@@ -97,7 +97,6 @@ label.link-overlay {
     box-shadow: none;
     outline: none;
     border-radius: 0px;
-    border-bottom: 1px solid @border_1;
     padding: 0px;
     color: @title_color;
 }
@@ -106,7 +105,6 @@ label.link-overlay {
 }
 .document-title button {
     padding: 3px 9px;
-    margin-bottom: 25px;
 }
 .document-title button.submit {
     margin-right: 6px;

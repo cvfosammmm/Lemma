@@ -19,16 +19,12 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
-import time, datetime, math
-
 from lemma.services.message_bus import MessageBus
 from lemma.services.settings import Settings
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.use_cases.use_cases import UseCases
-from lemma.use_cases.queries import Queries
 import lemma.services.xml_helpers as xml_helpers
-import lemma.services.timer as timer
 
 
 class DocumentTitle():
@@ -39,7 +35,6 @@ class DocumentTitle():
         self.view = main_window.document_view.title_widget
 
         self.is_active = False
-        self.document = None
         self.scrolling_position_x = None
         self.scrolling_position_y = None
 
@@ -65,35 +60,13 @@ class DocumentTitle():
         MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_changed')
 
+        self.reset_title()
+
     def animate(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-        if document != None:
-            scrolling_position_x, scrolling_position_y = Queries.get_current_scrolling_offsets()
-            if scrolling_position_x != self.scrolling_position_x or scrolling_position_y != self.scrolling_position_y:
-                self.scrolling_position_x = scrolling_position_x
-                self.scrolling_position_y = scrolling_position_y
-                self.update()
-
         messages = MessageBus.get_messages(self)
-        if 'new_active_document' in messages or 'document_changed' in messages:
-            self.update()
-
-    @timer.timer
-    def update(self):
-        document = WorkspaceRepo.get_workspace().get_active_document()
-
-        new_active_document = document != self.document
-        if new_active_document:
-            self.document = document
+        if 'new_active_document' in messages:
             self.cancel()
             self.reset_title()
-
-        if document == None:
-            self.view.set_offset_y(0)
-        else:
-            offset = math.floor(Queries.get_current_scrolling_offsets()[1])
-            self.view.set_offset_y(offset)
-        self.document_view.queue_allocate()
 
     def on_entry_activate(self, entry=None):
         self.submit()
@@ -126,9 +99,11 @@ class DocumentTitle():
         self.validate_title()
 
     def init_renaming(self):
-        if self.document != None:
-            self.view.title_entry.grab_focus()
-            self.view.title_entry.set_position(self.view.title_entry.get_text_length())
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
+
+        self.view.title_entry.grab_focus()
+        self.view.title_entry.set_position(self.view.title_entry.get_text_length())
 
     def submit(self):
         if not self.view.submit_button.get_sensitive(): return
@@ -168,40 +143,38 @@ class DocumentTitle():
         self.is_active = False
 
     def reset_title(self):
-        if self.document == None:
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        if document == None:
             self.view.title_entry.set_enable_undo(False)
             self.view.title_entry.set_text('')
             self.view.title_entry.set_enable_undo(True)
-
-            self.view.subtext.set_text('')
         else:
             self.view.title_entry.set_enable_undo(False)
-            self.view.title_entry.set_text(self.document.title)
+            self.view.title_entry.set_text(document.title)
             self.view.title_entry.set_enable_undo(True)
 
-            datetime_last_modified = datetime.datetime.fromtimestamp(self.document.last_modified)
-            self.view.subtext.set_text('{datetime:%a}, {datetime.day} {datetime:%b} {datetime.year} - {datetime.hour}:{datetime.minute:02}'.format(datetime=datetime_last_modified))
-
-        self.view.subtext.remove_css_class('error')
+        self.view.subtext.set_visible(False)
         self.view.title_entry.remove_css_class('error')
 
     def validate_title(self):
-        if self.document == None: return
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return
 
         title = self.view.title_entry.get_text()
 
         validation_state = True
         if title == '':
             validation_state = False
-        elif title != self.document.title and len(DocumentRepo.list_by_title(title)) > 0:
+        elif title != document.title and len(DocumentRepo.list_by_title(title)) > 0:
             validation_state = False
         self.view.submit_button.set_sensitive(validation_state)
 
-        if title != self.document.title and title == '':
+        if title != document.title and title == '':
             self.view.subtext.set_text('Name cannot be empty.')
             self.view.subtext.add_css_class('error')
             self.view.title_entry.add_css_class('error')
-        elif title != self.document.title and len(DocumentRepo.list_by_title(title)) > 0:
+        elif title != document.title and len(DocumentRepo.list_by_title(title)) > 0:
             self.view.subtext.set_text('A document with this name already exists.')
             self.view.subtext.add_css_class('error')
             self.view.title_entry.add_css_class('error')
@@ -209,5 +182,7 @@ class DocumentTitle():
             self.view.subtext.set_text('Please enter a name for this document.')
             self.view.subtext.remove_css_class('error')
             self.view.title_entry.remove_css_class('error')
+
+        self.view.subtext.set_visible(True)
 
 

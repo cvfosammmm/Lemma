@@ -28,6 +28,8 @@ class Queries():
 
     def get_current_scrolling_offsets():
         document = WorkspaceRepo.get_workspace().get_active_document()
+        if document == None: return (0, 0)
+
         document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
 
         # these factors correspond to a spring animation with damping factor of 1, mass of 0.2 and stiffness of 350.

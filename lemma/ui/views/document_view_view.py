@@ -19,7 +19,10 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
+import math
+
 from lemma.use_cases.use_cases import UseCases
+from lemma.use_cases.queries import Queries
 from lemma.ui.views.autocomplete_view import AutocompleteView
 from lemma.ui.views.scrollbars import ScrollbarVertical
 
@@ -71,8 +74,9 @@ class DocumentView(Gtk.Widget):
         rectangle.x, rectangle.y, rectangle.width, rectangle.height = (0, 0, width, height)
         self.scrollbar_vertical.size_allocate(rectangle, baseline)
 
+        offset_y = math.floor(Queries.get_current_scrolling_offsets()[1])
         rectangle = Gdk.Rectangle()
-        rectangle.x, rectangle.y, rectangle.width, rectangle.height = (0, -self.title_widget.offset_y, width, height)
+        rectangle.x, rectangle.y, rectangle.width, rectangle.height = (0, -offset_y, width, height)
         self.title_widget.size_allocate(rectangle, baseline)
         UseCases.set_title_height(self.title_widget.get_allocated_height())
 
@@ -121,8 +125,6 @@ class TitleWidget(Gtk.Box):
         self.set_valign(Gtk.Align.START)
         self.set_halign(Gtk.Align.FILL)
 
-        self.offset_y = 0
-
         self.outer_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
 
         self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -155,8 +157,5 @@ class TitleWidget(Gtk.Box):
         self.outer_vbox.append(Gtk.DrawingArea())
 
         self.append(self.outer_vbox)
-
-    def set_offset_y(self, offset):
-        self.offset_y = offset
 
 

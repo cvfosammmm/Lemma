@@ -82,6 +82,7 @@ class DocumentView():
             if current_scrolling_x != self.current_scrolling_x or current_scrolling_y != self.current_scrolling_y:
                 self.current_scrolling_x = current_scrolling_x
                 self.current_scrolling_y = current_scrolling_y
+                self.view.queue_allocate()
                 self.view.content.queue_draw()
 
             document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
@@ -93,6 +94,7 @@ class DocumentView():
         if 'new_active_document' in messages or 'document_ast_or_cursor_changed' in messages or 'preedit_changed' in messages or 'dark_mode_changed' in messages or 'color_scheme_settings_changed' in messages or 'color_scheme_dark_settings_changed' in messages or 'separate_dark_color_scheme_settings_changed' in messages or 'font_theme_settings_changed' in messages:
             self.clear_render_cache()
             self.application.keyboard.reset_cursor_blink()
+            self.view.queue_allocate()
             self.view.content.queue_draw()
 
         self.update_link_overlay_text()
