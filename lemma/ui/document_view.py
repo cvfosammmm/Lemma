@@ -65,6 +65,8 @@ class DocumentView():
         MessageBus.subscribe(self, 'font_theme_settings_changed')
         MessageBus.subscribe(self, 'dark_mode_changed')
 
+        self.view.content.grab_focus()
+
     def animate(self):
         messages = MessageBus.get_messages(self)
 
