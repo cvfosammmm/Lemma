@@ -39,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="71" date="2026-7-24">
+            <description translatable="no">
+                <p>Tweaks and Fixes, ...</p>
+            </description>
+        </release>
         ​<release version="70" date="2026-7-21">
             <description translatable="no">
                 <p>Fixes, ...</p>
