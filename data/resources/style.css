@@ -86,7 +86,7 @@ label.link-overlay {
     margin-top: 48px;
     margin-right: 48px;
     margin-left: 48px;
-    margin-bottom: 20px;
+    margin-bottom: 19px;
     background: @view_bg_color;
 }
 .document-title entry {
@@ -99,6 +99,13 @@ label.link-overlay {
     border-radius: 0px;
     padding: 0px;
     color: @title_color;
+    border-bottom: 1px solid transparent;
+}
+.document-title entry:hover {
+    border-bottom: 1px solid @border_1;
+}
+.document-title entry.active {
+    border-bottom: 1px solid @border_1;
 }
 .document-title entry.error {
     border-bottom: 1px solid @error_color;

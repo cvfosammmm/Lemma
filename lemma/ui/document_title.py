@@ -82,6 +82,7 @@ class DocumentTitle():
             self.is_active = True
             self.reset_title()
             self.validate_title()
+            self.view.title_entry.add_css_class('active')
             self.view.button_revealer.set_reveal_child(True)
             UseCases.scroll_to_xy(0, 0, animation_type='default')
 
@@ -129,6 +130,7 @@ class DocumentTitle():
                         else:
                             UseCases.set_link(linking_doc, bounds, title)
 
+        self.view.title_entry.remove_css_class('active')
         self.view.button_revealer.set_reveal_child(False)
         self.document_view.content.grab_focus()
 
@@ -137,6 +139,7 @@ class DocumentTitle():
     def cancel(self):
         self.reset_title()
 
+        self.view.title_entry.remove_css_class('active')
         self.view.button_revealer.set_reveal_child(False)
         self.document_view.content.grab_focus()
 
