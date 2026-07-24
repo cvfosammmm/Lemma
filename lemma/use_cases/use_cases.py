@@ -79,19 +79,19 @@ class UseCases():
                 document.update_last_modified()
 
             workspace.set_active_document(document, update_history=True)
+
             UseCases.__scroll_to_top(document, None)
+            UseCases.__update_implicit_x_position()
+            UseCases.__reset_tags_at_cursor()
 
-        UseCases.__update_implicit_x_position()
-        UseCases.__reset_tags_at_cursor()
-
-        if new_document != None:
-            DocumentRepo.add(new_document)
-        WorkspaceRepo.update(workspace)
-        MessageBus.add_message('mode_set')
-        MessageBus.add_message('new_document')
-        MessageBus.add_message('history_changed')
-        MessageBus.add_message('new_active_document')
-        MessageBus.add_message('tags_at_cursor_changed')
+            if len(target_list) == 0:
+                DocumentRepo.add(document)
+            WorkspaceRepo.update(workspace)
+            MessageBus.add_message('mode_set')
+            MessageBus.add_message('new_document')
+            MessageBus.add_message('history_changed')
+            MessageBus.add_message('new_active_document')
+            MessageBus.add_message('tags_at_cursor_changed')
 
     def import_markdown(path):
         document = Document()
