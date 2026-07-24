@@ -28,6 +28,7 @@ class DocumentDraftView(Gtk.Box):
 
         self.hbox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.hbox.add_css_class('document-title')
+        self.hbox.add_css_class('draft')
         self.hbox.set_valign(Gtk.Align.FILL)
 
         self.outer_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)

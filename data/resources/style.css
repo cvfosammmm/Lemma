@@ -101,6 +101,9 @@ label.link-overlay {
     color: @title_color;
     border-bottom: 1px solid transparent;
 }
+.document-title.draft entry {
+    border-bottom: 1px solid @border_1;
+}
 .document-title entry:hover {
     border-bottom: 1px solid @border_1;
 }
