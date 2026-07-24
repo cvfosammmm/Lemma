@@ -79,7 +79,7 @@ class UseCases():
                 document.update_last_modified()
 
             workspace.set_active_document(document, update_history=True)
-            ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+            UseCases.__scroll_to_top(document, None)
 
         UseCases.__update_implicit_x_position()
         UseCases.__reset_tags_at_cursor()
@@ -146,7 +146,7 @@ class UseCases():
         workspace.set_active_document(document, update_history=True)
         workspace.leave_draft_mode()
 
-        ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+        UseCases.__scroll_to_top(document, None)
         UseCases.__update_implicit_x_position()
         UseCases.__reset_tags_at_cursor()
 
@@ -168,10 +168,9 @@ class UseCases():
                 new_active_document_id = workspace.get_next_id_in_history(document_id)
 
             document = DocumentRepo.get_by_id(new_active_document_id)
-
             workspace.set_active_document(document, update_history=False)
 
-            ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+            UseCases.__scroll_to_previous_position(document, None)
             UseCases.__update_implicit_x_position()
             UseCases.__reset_tags_at_cursor()
 
@@ -198,13 +197,9 @@ class UseCases():
         workspace.set_active_document(document, update_history)
 
         if update_history:
-            ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+            UseCases.__scroll_to_top(document, None)
         else:
-            pos = ApplicationState.get_scrolling_position(document.id)
-            if pos != None:
-                ApplicationState.set_scrolling_target(document.id, pos[0], pos[1], None)
-            else:
-                ApplicationState.set_scrolling_target(document.id, 0, 0, None)
+            UseCases.__scroll_to_previous_position(document, None)
         UseCases.__update_implicit_x_position()
         UseCases.__reset_tags_at_cursor()
 
@@ -1353,6 +1348,16 @@ class UseCases():
         else:
             if not Queries.is_currently_scrolling():
                 ApplicationState.set_scrolling_target(document.id, scrolling_offset_x, scrolling_offset_y, None)
+
+    def __scroll_to_top(document, animation_type='default'):
+        ApplicationState.set_scrolling_target(document.id, 0, 0, animation_type)
+
+    def __scroll_to_previous_position(document, animation_type='default'):
+        pos = ApplicationState.get_scrolling_position(document.id)
+        if pos != None:
+            ApplicationState.set_scrolling_target(document.id, pos[0], pos[1], None)
+        else:
+            ApplicationState.set_scrolling_target(document.id, 0, 0, None)
 
     def __update_implicit_x_position():
         document = WorkspaceRepo.get_workspace().get_active_document()
