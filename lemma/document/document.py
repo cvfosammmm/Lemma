@@ -163,11 +163,15 @@ class Document():
         paragraph_index = self.ast.index(first_paragraph)
         second_paragraph = first_paragraph.next_in_parent()
 
-        copy_nodes = second_paragraph[0:-1]
-        self.command_manager.add_command('delete_nodes', second_paragraph[0], second_paragraph[-1])
-        self.command_manager.add_command('delete_paragraphs', paragraph_index + 1, paragraph_index + 2)
-        self.command_manager.add_command('insert_nodes', first_paragraph[-1], copy_nodes)
-        self.command_manager.add_command('move_cursor_to_node', first_paragraph[-1 - len(copy_nodes)], first_paragraph[-1 - len(copy_nodes)])
+        if len(first_paragraph) <= 1 and first_paragraph.style == 'p':
+            self.command_manager.add_command('delete_paragraphs', paragraph_index, paragraph_index + 1)
+            self.command_manager.add_command('move_cursor_to_node', second_paragraph[0], second_paragraph[0])
+        else:
+            copy_nodes = second_paragraph[0:-1]
+            self.command_manager.add_command('delete_nodes', second_paragraph[0], second_paragraph[-1])
+            self.command_manager.add_command('delete_paragraphs', paragraph_index + 1, paragraph_index + 2)
+            self.command_manager.add_command('insert_nodes', first_paragraph[-1], copy_nodes)
+            self.command_manager.add_command('move_cursor_to_node', first_paragraph[-1 - len(copy_nodes)], first_paragraph[-1 - len(copy_nodes)])
 
     @undoable_action
     def add_tag(self, tagname):
