@@ -72,16 +72,14 @@ class UseCases():
 
             if len(target_list) > 0:
                 document = DocumentRepo.get_by_id(target_list[0]['id'])
-                workspace.set_active_document(document, update_history=True)
             else:
-                new_document = Document()
-                new_document.id = DocumentRepo.get_max_document_id() + 1
-                new_document.title = link_target
-                new_document.update_last_modified()
+                document = Document()
+                document.id = DocumentRepo.get_max_document_id() + 1
+                document.title = link_target
+                document.update_last_modified()
 
-                workspace.set_active_document(new_document, update_history=True)
-
-                ApplicationState.set_scrolling_target(new_document.id, 0, 0, None)
+            workspace.set_active_document(document, update_history=True)
+            ApplicationState.set_scrolling_target(document.id, 0, 0, None)
 
         UseCases.__update_implicit_x_position()
         UseCases.__reset_tags_at_cursor()
