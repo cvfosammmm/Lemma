@@ -25,6 +25,7 @@ from lemma.use_cases.use_cases import UseCases
 from lemma.use_cases.queries import Queries
 from lemma.ui.views.autocomplete_view import AutocompleteView
 from lemma.ui.views.scrollbars import ScrollbarVertical
+from lemma.services.layout_info import LayoutInfo
 
 
 class DocumentView(Gtk.Widget):
@@ -128,9 +129,9 @@ class TitleWidget(Gtk.Box):
         self.outer_vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
 
         self.vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
-        self.vbox.set_size_request(640, -1)
 
         self.title_entry = Gtk.Entry()
+        self.title_entry.set_size_request(LayoutInfo.get_max_layout_width(), -1)
 
         self.subtext = Gtk.Label()
         self.subtext.set_xalign(0)
