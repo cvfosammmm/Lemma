@@ -350,7 +350,7 @@ class UseCases():
         document.delete_selected_nodes()
         for line in text.splitlines(keepends=True):
             xml = xml_helpers.escape(line)
-            xml = RegexService.get_regex(r'((?:http://|https://)[a-zA-Z0-9\.\/\&\?=\-_#]*)').sub(r'<a href="\1">\1</a>', xml)
+            xml = RegexService.get_regex(r'((?:http://|https://)[a-zA-Z0-9\.\/\?=\-\(\)&%~_#\\\;]*)').sub(r'<a href="\1">\1</a>', xml)
 
             title, meta, paragraphs = XMLParser.parse(xml)
             paragraph = paragraphs[0]
