@@ -122,7 +122,7 @@ class DocumentRepo():
         result = []
         for doc_stub in DocumentRepo.list():
             for term in terms:
-                if min(x.casefold() in doc_stub['plaintext'].casefold() or x.casefold() in doc_stub['title'] for x in terms):
+                if min(x.casefold() in doc_stub['plaintext'].casefold() or x.casefold() in doc_stub['title'].casefold() for x in terms):
                     result.append(doc_stub)
                     break
         return result
