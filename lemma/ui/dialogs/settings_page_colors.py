@@ -204,7 +204,7 @@ class PageFontColorView(Gtk.Box):
         self.custom_themes_header.set_margin_top(21)
 
         self.explainer = Gtk.Label()
-        self.explainer.set_markup('If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming.html">https://www.cvfosammmm.org/lemma/book/theming.html</a>.')
+        self.explainer.set_markup('If you want to make your own custom color themes, see the instructions on <a href="https://www.cvfosammmm.org/lemma/book/theming/">https://www.cvfosammmm.org/lemma/book/theming/</a>.')
         self.explainer.set_wrap(True)
         self.explainer.set_xalign(0)
         self.explainer.set_margin_top(18)
