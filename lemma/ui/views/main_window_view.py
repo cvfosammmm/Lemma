@@ -28,11 +28,12 @@ from lemma.ui.views.headerbar_view import HeaderBar
 from lemma.ui.views.history_view import HistoryView
 from lemma.ui.views.document_list_view import DocumentListView
 from lemma.ui.views.backlinks_view import BacklinksView
+from lemma.ui.views.graph_panel_view import GraphPanelView
 from lemma.ui.views.toolbars_view import ToolbarsView
 from lemma.ui.views.document_view_view import DocumentView
-from lemma.ui.views.navigation_sidebar_view import NavigationSidebar
 from lemma.ui.views.document_draft_view import DocumentDraftView
 from lemma.ui.views.animated_paned import AnimatedHPaned
+from lemma.ui.views.animated_paned import AnimatedVPaned
 
 
 class MainWindow(Adw.ApplicationWindow):
@@ -53,8 +54,39 @@ class MainWindow(Adw.ApplicationWindow):
         self.toolbar = ToolbarsView()
 
         self.document_list = DocumentListView()
+
         self.backlinks = BacklinksView()
-        self.navigation_sidebar = NavigationSidebar(self.document_list, self.backlinks)
+        self.graph_panel = GraphPanelView()
+
+        self.navigation_sidebar_stack = Gtk.Stack()
+        self.navigation_sidebar_stack.add_named(self.backlinks, 'backlinks')
+        self.navigation_sidebar_stack.add_named(self.graph_panel, 'graph_panel')
+
+        self.navigation_sidebar_paned = AnimatedVPaned(self.document_list, self.navigation_sidebar_stack, False)
+        self.navigation_sidebar_paned.set_vexpand(True)
+        self.navigation_sidebar_paned.set_wide_handle(False)
+
+        self.backlinks_toggle = Gtk.Button()
+        self.backlinks_toggle.set_tooltip_text(_('Backlinks'))
+        self.backlinks_toggle.set_icon_name('backlinks-symbolic')
+        self.backlinks_toggle.set_can_focus(False)
+        self.backlinks_toggle.add_css_class('flat')
+
+        self.graph_panel_toggle = Gtk.Button()
+        self.graph_panel_toggle.set_tooltip_text(_('Graph View'))
+        self.graph_panel_toggle.set_icon_name('graph-view-symbolic')
+        self.graph_panel_toggle.set_can_focus(False)
+        self.graph_panel_toggle.add_css_class('flat')
+
+        self.navigation_sidebar_toolbar = Gtk.ActionBar()
+        self.navigation_sidebar_toolbar.add_css_class('nav-toolbar')
+        self.navigation_sidebar_toolbar.pack_start(self.backlinks_toggle)
+        self.navigation_sidebar_toolbar.pack_start(self.graph_panel_toggle)
+
+        self.navigation_sidebar = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.navigation_sidebar.add_css_class('navbar')
+        self.navigation_sidebar.append(self.navigation_sidebar_paned)
+        self.navigation_sidebar.append(self.navigation_sidebar_toolbar)
 
         self.content_paned = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
         self.content_paned.add_css_class('content')

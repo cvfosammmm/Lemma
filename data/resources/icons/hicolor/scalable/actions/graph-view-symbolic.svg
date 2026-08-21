@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="16px"
+   viewBox="0 0 16 16"
+   width="16px"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="graph-view-symbolic.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="20.759662"
+     inkscape:cx="4.2630752"
+     inkscape:cy="6.1898888"
+     inkscape:window-width="1440"
+     inkscape:window-height="831"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     d="m 13,-0.0429688 c -1.65625,0 -3,1.3867188 -3,3.0429688 0,1.304688 0.835938,2.441406 2,2.863281 V 6 c 0,0.5625 -0.4375,1 -1,1 H 4 V 5.90625 C 5.164062,5.484375 6,4.347656 6,3.042969 6,1.382812 4.65625,0 3,0 1.34375,0 0,1.382812 0,3.042969 0,4.347656 0.835938,5.484375 2,5.90625 v 4.230469 C 0.835938,10.558594 0,11.695312 0,13 0,14.65625 1.34375,16.042969 3,16.042969 4.65625,16.042969 6,14.65625 6,13 6,11.695312 5.164062,10.558594 4,10.136719 V 9 h 7 c 1.644531,0 3,-1.355469 3,-3 V 5.863281 C 15.164062,5.441406 16,4.304688 16,3 16,1.34375 14.65625,-0.0429688 13,-0.0429688 Z m 0,1.9999998 c 0.554688,0 1,0.445313 1,1.042969 0,0.597656 -0.445312,1.042969 -1,1.042969 C 12.445312,4.042969 12,3.597656 12,3 12,2.402344 12.445312,1.957031 13,1.957031 Z M 3,2 C 3.554688,2 4,2.441406 4,3.042969 4,3.640625 3.554688,4.082031 3,4.082031 2.445312,4.082031 2,3.640625 2,3.042969 2,2.441406 2.445312,2 3,2 Z m 0,9.957031 c 0.554688,0 1,0.445313 1,1.042969 0,0.597656 -0.445312,1.042969 -1,1.042969 -0.554688,0 -1,-0.445313 -1,-1.042969 0,-0.597656 0.445312,-1.042969 1,-1.042969 z"
+     fill="#222222"
+     fill-rule="evenodd"
+     id="path1"
+     sodipodi:nodetypes="sscssccsssccsssccsscsssssssssssssssss" />
+</svg>

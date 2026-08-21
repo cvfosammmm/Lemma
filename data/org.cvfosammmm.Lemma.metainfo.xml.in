@@ -26,7 +26,7 @@
     <url type="homepage">https://www.cvfosammmm.org/lemma/</url>
     <url type="bugtracker">https://github.com/cvfosammmm/Lemma/issues</url>
     <url type="vcs-browser">https://github.com/cvfosammmm/Lemma</url>
-    <url type="donation">https://www.cvfosammmm.org/lemma/donate.html</url>
+    <url type="donation">https://www.cvfosammmm.org/lemma/donate/</url>
 
     <provides>
         <id>org.cvfosammmm.Lemma.desktop</id>

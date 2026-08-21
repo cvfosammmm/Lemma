@@ -101,8 +101,8 @@ class DocumentViewDrawingArea(Gtk.Widget):
         self.set_focusable(True)
         self.set_vexpand(True)
 
-        self.draw_func = lambda: None
-        self.allocate_func = lambda: None
+        self.draw_func = lambda snapshot: None
+        self.allocate_func = lambda width, height, baseline: None
 
     def set_draw_func(self, draw_func):
         self.draw_func = draw_func

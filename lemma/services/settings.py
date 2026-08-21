@@ -41,7 +41,8 @@ class Settings():
         Settings.defaults['show_tools_sidebar'] = False
         Settings.defaults['tools_sidebar_active_tab'] = 'math'
         Settings.defaults['tools_sidebar_position'] = -1
-        Settings.defaults['show_backlinks'] = False
+        Settings.defaults['split_navigation_sidebar'] = False
+        Settings.defaults['navigation_sidebar_active_tab'] = 'backlinks'
         Settings.defaults['navbar_paned_position'] = -1
 
         Settings.defaults['last_export_folder'] = None

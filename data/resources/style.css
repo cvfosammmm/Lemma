@@ -180,7 +180,7 @@ paned.document-view separator.wide {
 .nav-toolbar button {
     color: @sidebar_fg_3;
 }
-.nav-toolbar button:checked {
+.nav-toolbar button.checked {
     background: @sidebar_toolbar_button_active;
 }
 
@@ -214,6 +214,17 @@ paned.document-view separator.wide {
 }
 .backlinks list row {
     padding: 12px 15px 12px 15px;
+}
+
+/* graph panel */
+
+.graph-panel {
+    background: @sidebar_bg_1;
+}
+.graph-panel label.headline {
+    color: @sidebar_fg_1;
+    padding: 18px 0px 15px 15px;
+    background: @sidebar_bg_1;
 }
 
 /* toolbar */

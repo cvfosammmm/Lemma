@@ -50,6 +50,16 @@ class UseCases():
         MessageBus.add_message(item + '_settings_changed')
         MessageBus.add_message('settings_changed')
 
+    def toggle_navigation_sidebar(name):
+        if Settings.get_value('split_navigation_sidebar') and Settings.get_value('navigation_sidebar_active_tab') == name:
+            Settings.set_value('split_navigation_sidebar', False)
+        else:
+            Settings.set_value('split_navigation_sidebar', True)
+            Settings.set_value('navigation_sidebar_active_tab', name)
+
+        Settings.save()
+        MessageBus.add_message('sidebar_visibility_changed')
+
     def toggle_tools_sidebar(name):
         if Settings.get_value('show_tools_sidebar') and Settings.get_value('tools_sidebar_active_tab') == name:
             Settings.set_value('show_tools_sidebar', False)
@@ -350,7 +360,7 @@ class UseCases():
         document.delete_selected_nodes()
         for line in text.splitlines(keepends=True):
             xml = xml_helpers.escape(line)
-            xml = RegexService.get_regex(r'((?:http://|https://)[a-zA-Z0-9\.\/\?=\-\(\)&%~_#\\\;]*)').sub(r'<a href="\1">\1</a>', xml)
+            xml = RegexService.get_regex(r'((?:http://|https://)[a-zA-Z0-9\.,\/\?=\-\(\)&+%~_#\\\;]*)').sub(r'<a href="\1">\1</a>', xml)
 
             title, meta, paragraphs = XMLParser.parse(xml)
             paragraph = paragraphs[0]

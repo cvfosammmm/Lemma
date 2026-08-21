@@ -134,6 +134,15 @@ class DocumentRepo():
                 result.append(document_stub)
         return result
 
+    def list_by_link_origin(document_id):
+        origin_stub = DocumentRepo.get_stub_by_id(document_id)
+
+        result = []
+        for document_stub in DocumentRepo.list():
+            if document_stub['title'] in origin_stub['links']:
+                result.append(document_stub)
+        return result
+
     def list_by_terms_in_title(terms, limit=None):
         result = []
         for document_stub in DocumentRepo.list():

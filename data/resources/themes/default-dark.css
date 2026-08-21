@@ -95,6 +95,14 @@
 @define-color sidebar_toolbar_button_hover #3e3e3e;
 @define-color sidebar_toolbar_button_active #434343;
 
+/* Graph Panel */
+@define-color graph_panel_node_normal #888;
+@define-color graph_panel_node_normal_hover #ccc;
+@define-color graph_panel_node_current #48f;
+@define-color graph_panel_edge #ffffff1f;
+@define-color graph_panel_edge_hover #fff6;
+@define-color graph_panel_title #eee;
+
 /* Paneds */
 @define-color headerpaned_border_1 #666;
 @define-color headerpaned_border_2 #666;
