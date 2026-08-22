@@ -99,8 +99,8 @@
 @define-color graph_panel_node_normal #888;
 @define-color graph_panel_node_normal_hover #ccc;
 @define-color graph_panel_node_current #48f;
-@define-color graph_panel_edge #ffffff1f;
-@define-color graph_panel_edge_hover #fff6;
+@define-color graph_panel_edge #ffffff1e;
+@define-color graph_panel_edge_hover #fff7;
 @define-color graph_panel_title #eee;
 
 /* Paneds */

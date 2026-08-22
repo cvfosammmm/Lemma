@@ -40,6 +40,8 @@ class GraphPanel(object):
         self.V = []
         self.E = []
         self.positions = dict()
+        self.titles_by_id = dict()
+        self.ids_by_title = dict()
         self.width = 0
         self.height = 0
         self.hover_node = None
@@ -79,15 +81,31 @@ class GraphPanel(object):
 
         if document != None:
             self.current_node = document.id
+            self.titles_by_id = {document.id: document.title}
+            self.ids_by_title = {document.title: document.id}
 
-            back_links = DocumentRepo.list_by_link_target(document.title)
-            forward_links = DocumentRepo.list_by_link_origin(document.id)
+            V = set()
+            for document_stub in DocumentRepo.list():
+                if document.title in document_stub['links']:
+                    V.add(document_stub['id'])
+                    self.titles_by_id[document_stub['id']] = document_stub['title']
+                    self.ids_by_title[document_stub['title']] = document_stub['id']
+                if document_stub['title'] in document.get_links():
+                    V.add(document_stub['id'])
+                    self.titles_by_id[document_stub['id']] = document_stub['title']
+                    self.ids_by_title[document_stub['title']] = document_stub['id']
 
-            V = set(stub['id'] for stub in back_links) | set(stub['id'] for stub in forward_links)
             self.V = [self.current_node] + list(V - {self.current_node})
 
-            self.E = [[document.id, stub['id']] for stub in back_links]
-            self.E += [[document.id, stub['id']] for stub in forward_links]
+            E = set((document.id, v) for v in self.V if v != document.id)
+            for document_stub in DocumentRepo.list():
+                if document_stub['id'] not in self.V:
+                    continue
+
+                for title in list(document_stub['links'] & set(self.ids_by_title)):
+                    E.add((document_stub['id'], self.ids_by_title[title]))
+
+            self.E = list(E)
 
             g = graph_tool.Graph(directed=False)
             g.add_vertex(len(self.V))
@@ -97,10 +115,11 @@ class GraphPanel(object):
                         g.add_edge(i, j)
 
             numpy.random.seed(42)
+            graph_tool.seed_rng(42)
             random.seed(42)
 
             pos = g.new_vertex_property('vector<double>')
-            pos.set_values([(random.random(), random.random()) for i in range(len(self.V))])
+            pos.set_values([(random.random() - 0.5, random.random() - 0.5) for i in range(len(self.V))])
             pos[0] = (0.0, 0.0)
             pin = g.new_vertex_property('bool')
             pin.set_value(False)
@@ -131,6 +150,8 @@ class GraphPanel(object):
 
         else:
             self.current_node = None
+            self.titles_by_id = dict()
+            self.ids_by_title = dict()
             self.V = []
             self.E = []
 
@@ -167,11 +188,10 @@ class GraphPanel(object):
             vertex_pos = self.positions[vertex]
 
             if vertex == self.hover_node:
-                stub = DocumentRepo.get_stub_by_id(vertex)
-                text_extents = ctx.text_extents(stub['title'])
-                ctx.move_to(vertex_pos[0] * self.width + 17 - text_extents.width / 2, vertex_pos[1] * self.height - 5)
+                text_extents = ctx.text_extents(self.titles_by_id[vertex])
+                ctx.move_to(vertex_pos[0] * self.width + 17 - text_extents.width / 2, vertex_pos[1] * self.height - 6)
                 Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_title'))
-                ctx.show_text(stub['title'])
+                ctx.show_text(self.titles_by_id[vertex])
 
                 color = ColorManager.get_ui_color('graph_panel_node_normal_hover')
             else:
@@ -184,15 +204,16 @@ class GraphPanel(object):
         current_pos = self.positions[self.V[0]]
 
         if self.V[0] == self.hover_node:
-            stub = DocumentRepo.get_stub_by_id(self.V[0])
-            text_extents = ctx.text_extents(stub['title'])
+            text_extents = ctx.text_extents(self.titles_by_id[self.V[0]])
             ctx.move_to(current_pos[0] * self.width + 17 - text_extents.width / 2, current_pos[1] * self.height - 5)
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_title'))
-            ctx.show_text(stub['title'])
+            ctx.show_text(self.titles_by_id[self.V[0]])
 
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_node_current'))
         ctx.arc(current_pos[0] * self.width + 17, current_pos[1] * self.height + 5, 8, 0, 2 * math.pi)
         ctx.fill()
+
+        self.update_pointer()
 
     def on_enter(self, controller, x, y):
         node = self.get_node_at_xy(x, y)
@@ -223,7 +244,7 @@ class GraphPanel(object):
 
     def get_node_at_xy(self, x, y):
         for node, pos in self.positions.items():
-            if abs((pos[0] * self.width + 17) - x) + abs((pos[1] * self.height + 5) - y) < 12:
+            if abs((pos[0] * self.width + 17) - x) + abs((pos[1] * self.height + 5) - y) < 13:
                 return node
         return None
 
@@ -234,5 +255,11 @@ class GraphPanel(object):
     def set_selected_node(self, node):
         self.selected_node = node
         self.view.content.queue_draw()
+
+    def update_pointer(self):
+        if self.hover_node != None:
+            self.view.content.set_cursor_from_name('pointer')
+        else:
+            self.view.content.set_cursor_from_name('default')
 
 
