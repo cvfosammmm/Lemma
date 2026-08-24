@@ -37,8 +37,7 @@ class GraphPanel(object):
         self.view = self.main_window.graph_panel
 
         self.current_node = None
-        self.V = []
-        self.E = []
+        self.G = nx.Graph()
         self.positions = dict()
         self.titles_by_id = dict()
         self.ids_by_title = dict()
@@ -84,36 +83,32 @@ class GraphPanel(object):
             self.titles_by_id = {document.id: document.title}
             self.ids_by_title = {document.title: document.id}
 
-            V = set()
+            G = nx.Graph()
+            G.add_node(self.current_node)
+
             for document_stub in DocumentRepo.list():
                 if document.title in document_stub['links']:
-                    V.add(document_stub['id'])
+                    G.add_node(document_stub['id'])
                     self.titles_by_id[document_stub['id']] = document_stub['title']
                     self.ids_by_title[document_stub['title']] = document_stub['id']
                 if document_stub['title'] in document.get_links():
-                    V.add(document_stub['id'])
+                    G.add_node(document_stub['id'])
                     self.titles_by_id[document_stub['id']] = document_stub['title']
                     self.ids_by_title[document_stub['title']] = document_stub['id']
 
-            self.V = [self.current_node] + list(V - {self.current_node})
+            for v in G.nodes:
+                if v != document.id:
+                    G.add_edge(document.id, v)
 
-            E = set((document.id, v) for v in self.V if v != document.id)
             for document_stub in DocumentRepo.list():
-                if document_stub['id'] not in self.V:
+                if document_stub['id'] not in G.nodes:
                     continue
 
                 for title in list(document_stub['links'] & set(self.ids_by_title)):
-                    E.add((document_stub['id'], self.ids_by_title[title]))
-
-            self.E = list(E)
-
-            G = nx.Graph()
-            for v in self.V:
-                G.add_node(v)
-            for e in self.E:
-                G.add_edge(*e)
+                    G.add_edge(document_stub['id'], self.ids_by_title[title])
 
             pos = nx.spring_layout(G, seed=42, pos={document.id: (0, 0)}, fixed=[document.id])
+            self.G = G
 
             total_dist = 0
             max_x = 0
@@ -125,8 +120,8 @@ class GraphPanel(object):
                 max_x = max(max_x, vpos[0], -vpos[0])
                 max_y = max(max_y, vpos[1], -vpos[1])
 
-            if len(self.V) > 1:
-                scaling_factor_avg = (total_dist / (len(self.V) - 1)) / (math.sqrt(max(9, len(self.V))) * 0.06)
+            if len(self.G.nodes) > 1:
+                scaling_factor_avg = (total_dist / (len(self.G.nodes) - 1)) / (math.sqrt(max(9, len(self.G.nodes))) * 0.06)
                 scaling_x = min(1 / (2 * max_x), 1 / scaling_factor_avg)
                 scaling_y = min(1 / (2 * max_y), 1 / scaling_factor_avg)
             else:
@@ -141,8 +136,7 @@ class GraphPanel(object):
             self.current_node = None
             self.titles_by_id = dict()
             self.ids_by_title = dict()
-            self.V = []
-            self.E = []
+            self.G = nx.Graph()
             self.positions = dict()
 
     def size_allocate(self, width, height, baseline):
@@ -159,7 +153,7 @@ class GraphPanel(object):
         graph_panel_current_stroke = ColorManager.get_ui_color('graph_panel_current_stroke')
         graph_panel_current_fill = ColorManager.get_ui_color('graph_panel_current_fill')
 
-        for edge in self.E:
+        for edge in self.G.edges:
             if edge[0] == self.hover_node or edge[1] == self.hover_node:
                 color = ColorManager.get_ui_color('graph_panel_edge_hover')
             else:
@@ -174,12 +168,15 @@ class GraphPanel(object):
             ctx.set_line_width(1)
             ctx.stroke()
 
-        for vertex in self.V[1:]:
+        for vertex in self.G.nodes:
+            if vertex == self.current_node:
+                continue
+
             vertex_pos = self.positions[vertex]
 
             if vertex == self.hover_node:
                 color = ColorManager.get_ui_color('graph_panel_node_normal_hover')
-                size = 8
+                size = 6
             else:
                 color = ColorManager.get_ui_color('graph_panel_node_normal')
                 size = 5
@@ -188,7 +185,7 @@ class GraphPanel(object):
             ctx.arc(vertex_pos[0] * self.width + 17, vertex_pos[1] * self.height + 20, size, 0, 2 * math.pi)
             ctx.fill()
 
-        current_pos = self.positions[self.V[0]]
+        current_pos = self.positions[self.current_node]
 
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_node_current'))
         ctx.arc(current_pos[0] * self.width + 17, current_pos[1] * self.height + 20, 8, 0, 2 * math.pi)
