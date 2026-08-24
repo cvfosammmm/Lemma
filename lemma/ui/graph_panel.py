@@ -19,8 +19,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, Graphene
 
-import math, random, numpy.random
-import graph_tool, graph_tool.draw
+import math
+import networkx as nx
 
 from lemma.services.color_manager import ColorManager
 from lemma.services.message_bus import MessageBus
@@ -107,34 +107,23 @@ class GraphPanel(object):
 
             self.E = list(E)
 
-            g = graph_tool.Graph(directed=False)
-            g.add_vertex(len(self.V))
-            for i, vi in enumerate(self.V):
-                for j, vj in enumerate(self.V):
-                    if [vi, vj] in self.E:
-                        g.add_edge(i, j)
+            G = nx.Graph()
+            for v in self.V:
+                G.add_node(v)
+            for e in self.E:
+                G.add_edge(*e)
 
-            numpy.random.seed(42)
-            graph_tool.seed_rng(42)
-            random.seed(42)
-
-            pos = g.new_vertex_property('vector<double>')
-            pos.set_values([(random.random() - 0.5, random.random() - 0.5) for i in range(len(self.V))])
-            pos[0] = (0.0, 0.0)
-            pin = g.new_vertex_property('bool')
-            pin.set_value(False)
-            pin[0] = True
-            drawing = graph_tool.draw.sfdp_layout(g, adaptive_cooling=True, pos=pos, pin=pin, kc=10, C=10, p=5, r=1, epsilon=0.01)
+            pos = nx.spring_layout(G, seed=42, pos={document.id: (0, 0)}, fixed=[document.id])
 
             total_dist = 0
             max_x = 0
             max_y = 0
-            for i, pos in enumerate(drawing):
-                if i == 0: continue
+            for v, vpos in pos.items():
+                if v == document.id: continue
 
-                total_dist += math.sqrt(pos[0]**2 + pos[1]**2)
-                max_x = max(max_x, pos[0], -pos[0])
-                max_y = max(max_y, pos[1], -pos[1])
+                total_dist += math.sqrt(vpos[0]**2 + vpos[1]**2)
+                max_x = max(max_x, vpos[0], -vpos[0])
+                max_y = max(max_y, vpos[1], -vpos[1])
 
             if len(self.V) > 1:
                 scaling_factor_avg = (total_dist / (len(self.V) - 1)) / (math.sqrt(max(9, len(self.V))) * 0.06)
@@ -145,8 +134,8 @@ class GraphPanel(object):
                 scaling_y = 1
 
             self.positions = dict()
-            for i, pos in enumerate(drawing):
-                self.positions[self.V[i]] = (0.5 + pos[0] * scaling_x, 0.5 + pos[1] * scaling_y)
+            for v, vpos in pos.items():
+                self.positions[v] = (0.5 + vpos[0] * scaling_x, 0.5 + vpos[1] * scaling_y)
 
         else:
             self.current_node = None
@@ -154,6 +143,7 @@ class GraphPanel(object):
             self.ids_by_title = dict()
             self.V = []
             self.E = []
+            self.positions = dict()
 
     def size_allocate(self, width, height, baseline):
         self.width = width - 34
@@ -188,17 +178,14 @@ class GraphPanel(object):
             vertex_pos = self.positions[vertex]
 
             if vertex == self.hover_node:
-                text_extents = ctx.text_extents(self.titles_by_id[vertex])
-                ctx.move_to(vertex_pos[0] * self.width + 17 - text_extents.width / 2, vertex_pos[1] * self.height - 6)
-                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_title'))
-                ctx.show_text(self.titles_by_id[vertex])
-
                 color = ColorManager.get_ui_color('graph_panel_node_normal_hover')
+                size = 8
             else:
                 color = ColorManager.get_ui_color('graph_panel_node_normal')
+                size = 5
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.arc(vertex_pos[0] * self.width + 17, vertex_pos[1] * self.height + 5, 5, 0, 2 * math.pi)
+            ctx.arc(vertex_pos[0] * self.width + 17, vertex_pos[1] * self.height + 5, size, 0, 2 * math.pi)
             ctx.fill()
 
         current_pos = self.positions[self.V[0]]
@@ -212,6 +199,13 @@ class GraphPanel(object):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_node_current'))
         ctx.arc(current_pos[0] * self.width + 17, current_pos[1] * self.height + 5, 8, 0, 2 * math.pi)
         ctx.fill()
+
+        if self.hover_node != None:
+            vertex_pos = self.positions[self.hover_node]
+            text_extents = ctx.text_extents(self.titles_by_id[self.hover_node])
+            ctx.move_to(vertex_pos[0] * self.width + 17 - text_extents.width / 2, vertex_pos[1] * self.height - 6)
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_title'))
+            ctx.show_text(self.titles_by_id[self.hover_node])
 
         self.update_pointer()
 
