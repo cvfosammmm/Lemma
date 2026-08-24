@@ -147,14 +147,14 @@ class GraphPanel(object):
 
     def size_allocate(self, width, height, baseline):
         self.width = width - 34
-        self.height = height - 24
+        self.height = height - 40
         self.view.content.queue_draw()
 
     @timer.timer
     def draw(self, snapshot):
         if self.current_node == None: return
 
-        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width + 34, self.height + 24))
+        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width + 34, self.height + 40))
 
         graph_panel_current_stroke = ColorManager.get_ui_color('graph_panel_current_stroke')
         graph_panel_current_fill = ColorManager.get_ui_color('graph_panel_current_fill')
@@ -169,8 +169,8 @@ class GraphPanel(object):
             vertex_pos_2 = self.positions[edge[1]]
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.move_to(vertex_pos_1[0] * self.width + 17, vertex_pos_1[1] * self.height + 5)
-            ctx.line_to(vertex_pos_2[0] * self.width + 17, vertex_pos_2[1] * self.height + 5)
+            ctx.move_to(vertex_pos_1[0] * self.width + 17, vertex_pos_1[1] * self.height + 20)
+            ctx.line_to(vertex_pos_2[0] * self.width + 17, vertex_pos_2[1] * self.height + 20)
             ctx.set_line_width(1)
             ctx.stroke()
 
@@ -185,25 +185,20 @@ class GraphPanel(object):
                 size = 5
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.arc(vertex_pos[0] * self.width + 17, vertex_pos[1] * self.height + 5, size, 0, 2 * math.pi)
+            ctx.arc(vertex_pos[0] * self.width + 17, vertex_pos[1] * self.height + 20, size, 0, 2 * math.pi)
             ctx.fill()
 
         current_pos = self.positions[self.V[0]]
 
-        if self.V[0] == self.hover_node:
-            text_extents = ctx.text_extents(self.titles_by_id[self.V[0]])
-            ctx.move_to(current_pos[0] * self.width + 17 - text_extents.width / 2, current_pos[1] * self.height - 5)
-            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_title'))
-            ctx.show_text(self.titles_by_id[self.V[0]])
-
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_node_current'))
-        ctx.arc(current_pos[0] * self.width + 17, current_pos[1] * self.height + 5, 8, 0, 2 * math.pi)
+        ctx.arc(current_pos[0] * self.width + 17, current_pos[1] * self.height + 20, 8, 0, 2 * math.pi)
         ctx.fill()
 
         if self.hover_node != None:
             vertex_pos = self.positions[self.hover_node]
             text_extents = ctx.text_extents(self.titles_by_id[self.hover_node])
-            ctx.move_to(vertex_pos[0] * self.width + 17 - text_extents.width / 2, vertex_pos[1] * self.height - 6)
+            hpos = max(6, min(self.width - text_extents.width + 28, vertex_pos[0] * self.width + 17 - text_extents.width / 2))
+            ctx.move_to(hpos, vertex_pos[1] * self.height + 9)
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('graph_panel_title'))
             ctx.show_text(self.titles_by_id[self.hover_node])
 
@@ -238,7 +233,7 @@ class GraphPanel(object):
 
     def get_node_at_xy(self, x, y):
         for node, pos in self.positions.items():
-            if abs((pos[0] * self.width + 17) - x) + abs((pos[1] * self.height + 5) - y) < 13:
+            if abs((pos[0] * self.width + 17) - x) + abs((pos[1] * self.height + 20) - y) < 13:
                 return node
         return None
 
