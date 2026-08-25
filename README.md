@@ -27,9 +27,9 @@ Note: Some distributions may not include systemwide installations of Python modu
 5. Install Lemma with: `ninja install -C builddir`<br />
 Or run it locally: `./scripts/lemma.dev`
 
-## Getting in touch
+## Development
 
-Lemma development / discussion takes place on GitHub at [https://github.com/cvfosammmm/Lemma](https://github.com/cvfosammmm/Lemma "project url").
+Lemma development / discussion takes place on GitHub at [https://github.com/cvfosammmm/Lemma](https://github.com/cvfosammmm/Lemma "project url"). There is a little guide about the development process at [https://www.cvfosammmm.org/lemma/book/development/](https://www.cvfosammmm.org/lemma/book/development/).
 
 ## License
 
