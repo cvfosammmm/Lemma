@@ -120,8 +120,8 @@ class GraphPanel(object):
                 max_x = max(max_x, vpos[0], -vpos[0])
                 max_y = max(max_y, vpos[1], -vpos[1])
 
-            if len(self.G.nodes) > 1:
-                scaling_factor_avg = (total_dist / (len(self.G.nodes) - 1)) / (math.sqrt(max(9, len(self.G.nodes))) * 0.06)
+            if len(self.G) > 1:
+                scaling_factor_avg = (total_dist / (len(self.G) - 1)) / (math.sqrt(max(9, len(self.G))) * 0.06)
                 scaling_x = min(1 / (2 * max_x), 1 / scaling_factor_avg)
                 scaling_y = min(1 / (2 * max_y), 1 / scaling_factor_avg)
             else:
