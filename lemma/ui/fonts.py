@@ -54,9 +54,13 @@ class Fonts(object):
             return
 
         with open(theme_path, 'r') as file:
-            for data in json.load(file)['fonts']:
-                TextShaper.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'], data['padding_top'], data['padding_bottom'])
-                TextRenderer.set_font(data['name'], os.path.join(font_path, data['path']), data['size'], data['ascend'], data['descend'])
+            data = json.load(file)
+
+            for font in data['fonts']:
+                TextShaper.set_font(font['name'], os.path.join(font_path, font['path']), font['size'], font['ascend'], font['descend'], font['padding_top'], font['padding_bottom'])
+                TextRenderer.set_font(font['name'], os.path.join(font_path, font['path']), font['size'], font['ascend'], font['descend'])
+
+            self.main_window.css_provider_fonts.load_from_string('\n'.join(data['css']))
 
         self.main_window.main_box.queue_draw()
         self.main_window.document_list.content.queue_draw()

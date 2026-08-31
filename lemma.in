@@ -25,6 +25,10 @@ from lemma.services.timer import Timer
 import lemma.ui.application as application
 from lemma.services.settings import Settings
 
+# add app-specific fonts path
+import lib.fontconfig.fontconfig as fontconfig
+fontconfig.Config.get_current().app_font_add_dir('/home/hp/Projects/Lemma/data/resources/fonts')
+
 # setup gettext
 gettext.install('lemma', names=('ngettext',), localedir='@localedir_path@')
 

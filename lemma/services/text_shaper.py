@@ -20,7 +20,6 @@ gi.require_version('HarfBuzz', '0.0')
 from gi.repository import HarfBuzz
 
 import lib.freetype2.freetype2 as freetype2
-import lib.fontconfig.fontconfig as fontconfig
 import lemma.services.timer as timer
 
 
@@ -31,8 +30,6 @@ class TextShaper():
     harfbuzz_features = [HarfBuzz.feature_from_string(b'liga 0')[1], HarfBuzz.feature_from_string(b'kern 1')[1]]
 
     def set_font(name, filename, size, ascend, descend, padding_top, padding_bottom):
-        fontconfig.Config.get_current().app_font_add_file(filename)
-
         TextShaper.fonts[name] = dict()
         TextShaper.fonts[name]['filename'] = filename
         face = freetype2.get_default_lib().new_face(filename)

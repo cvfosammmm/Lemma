@@ -140,6 +140,8 @@ class MainWindow(Adw.ApplicationWindow):
         Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors_default, 400)
         self.css_provider_colors = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_colors, 800)
+        self.css_provider_fonts = Gtk.CssProvider()
+        Gtk.StyleContext.add_provider_for_display(self.get_display(), self.css_provider_fonts, 800)
 
         resources_folder = Files.get_resources_folder()
         icon_theme = Gtk.IconTheme.get_for_display(self.get_display())
