@@ -89,6 +89,7 @@ class UseCases():
                 document.update_last_modified()
 
             workspace.set_active_document(document, update_history=True)
+            workspace.show_active_document()
 
             UseCases.__scroll_to_top(document, None)
             UseCases.__update_implicit_x_position()
@@ -137,10 +138,21 @@ class UseCases():
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('mode_set')
 
-    def leave_draft_mode():
+    def show_documents_or_welcome_page():
         workspace = WorkspaceRepo.get_workspace()
 
-        workspace.leave_draft_mode()
+        if workspace.get_active_document_id() != None:
+            workspace.show_active_document()
+        else:
+            workspace.show_welcome_page()
+
+        WorkspaceRepo.update(workspace)
+        MessageBus.add_message('mode_set')
+
+    def show_overview():
+        workspace = WorkspaceRepo.get_workspace()
+
+        workspace.show_overview()
 
         WorkspaceRepo.update(workspace)
         MessageBus.add_message('mode_set')
@@ -154,7 +166,7 @@ class UseCases():
         document.update_last_modified()
 
         workspace.set_active_document(document, update_history=True)
-        workspace.leave_draft_mode()
+        workspace.show_active_document()
 
         UseCases.__scroll_to_top(document, None)
         UseCases.__update_implicit_x_position()
@@ -177,18 +189,24 @@ class UseCases():
             if new_active_document_id == None:
                 new_active_document_id = workspace.get_next_id_in_history(document_id)
 
-            document = DocumentRepo.get_by_id(new_active_document_id)
-            workspace.set_active_document(document, update_history=False)
+            if new_active_document_id == None:
+                workspace.set_active_document(None, update_history=False)
+                workspace.show_welcome_page()
+            else:
+                document = DocumentRepo.get_by_id(new_active_document_id)
+                workspace.set_active_document(document, update_history=False)
+                workspace.show_active_document()
 
-            UseCases.__scroll_to_previous_position(document, None)
-            UseCases.__update_implicit_x_position()
-            UseCases.__reset_tags_at_cursor()
+                UseCases.__scroll_to_previous_position(document, None)
+                UseCases.__update_implicit_x_position()
+                UseCases.__reset_tags_at_cursor()
 
         workspace.remove_from_history(document_id)
         workspace.unbookmark_document(document_id)
 
         DocumentRepo.delete(document_id)
         WorkspaceRepo.update(workspace)
+        MessageBus.add_message('mode_set')
         MessageBus.add_message('document_removed')
         MessageBus.add_message('history_changed')
         MessageBus.add_message('document_changed')
@@ -205,6 +223,7 @@ class UseCases():
         else:
             document = workspace.get_active_document()
         workspace.set_active_document(document, update_history)
+        workspace.show_active_document()
 
         if update_history:
             UseCases.__scroll_to_top(document, None)

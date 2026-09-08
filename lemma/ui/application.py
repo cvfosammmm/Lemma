@@ -40,6 +40,7 @@ import lemma.ui.document_context_menu as context_menu_document
 import lemma.ui.toolbars as toolbars
 import lemma.ui.document_list as document_list
 import lemma.ui.document_draft as document_draft
+import lemma.ui.overview as overview
 import lemma.ui.backlinks as backlinks
 import lemma.ui.graph_panel as graph_panel
 import lemma.ui.actions as actions
@@ -80,6 +81,7 @@ class Application(Adw.Application):
         self.document_list = document_list.DocumentList(self.main_window)
         self.backlinks = backlinks.Backlinks(self.main_window)
         self.graph_panel = graph_panel.GraphPanel(self.main_window)
+        self.overview = overview.Overview(self.main_window)
         self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self)
         self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self)
         self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
@@ -105,6 +107,7 @@ class Application(Adw.Application):
         self.history.animate()
         self.backlinks.animate()
         self.graph_panel.animate()
+        self.overview.animate()
         self.document_draft.animate()
         self.keyboard.animate()
         self.pointer.animate()

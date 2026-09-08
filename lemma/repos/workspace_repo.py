@@ -36,6 +36,8 @@ class WorkspaceRepo():
                     workspace_data = pickle.loads(file.read())
                 except EOFError: pass
                 else:
+                    if 'mode' in workspace_data:
+                        WorkspaceRepo.workspace.set_mode(workspace_data['mode'])
                     if 'history' in workspace_data:
                         for document_id in workspace_data['history']:
                             if document_id in DocumentRepo.document_stubs_by_id:
@@ -62,6 +64,7 @@ class WorkspaceRepo():
             history_list = [document_id for document_id in workspace.history if document_id != None]
             data = {'active_document_id': active_document_id,
                     'history': history_list,
+                    'mode': workspace.mode,
                     'bookmarks': workspace.bookmarked_document_ids}
             filehandle.write(pickle.dumps(data))
 

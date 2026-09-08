@@ -28,7 +28,7 @@ class Workspace():
 
         self.bookmarked_document_ids = []
 
-        self.in_draft_mode = False
+        self.mode = 'welcome'
 
     def set_active_document(self, document, update_history):
         if update_history and document != None:
@@ -36,11 +36,20 @@ class Workspace():
 
         self.active_document = document
 
-    def enter_draft_mode(self):
-        self.in_draft_mode = True
+    def show_welcome_page(self):
+        self.mode = 'welcome'
 
-    def leave_draft_mode(self):
-        self.in_draft_mode = False
+    def enter_draft_mode(self):
+        self.mode = 'draft'
+
+    def show_active_document(self):
+        self.mode = 'documents'
+
+    def show_overview(self):
+        self.mode = 'overview'
+
+    def set_mode(self, mode):
+        self.mode = mode
 
     def add_to_history(self, document_id):
         if document_id == None: return
@@ -82,12 +91,7 @@ class Workspace():
         return self.active_document.id if self.active_document != None else None
 
     def get_mode(self):
-        if self.in_draft_mode:
-            return 'draft'
-        elif self.active_document != None:
-            return 'documents'
-        else:
-            return 'welcome'
+        return self.mode
 
     def get_history(self):
         return self.history

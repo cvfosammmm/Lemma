@@ -32,6 +32,7 @@ from lemma.ui.views.graph_panel_view import GraphPanelView
 from lemma.ui.views.toolbars_view import ToolbarsView
 from lemma.ui.views.document_view_view import DocumentView
 from lemma.ui.views.document_draft_view import DocumentDraftView
+from lemma.ui.views.overview_view import OverviewView
 from lemma.ui.views.animated_paned import AnimatedHPaned
 from lemma.ui.views.animated_paned import AnimatedVPaned
 
@@ -96,6 +97,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.welcome = WelcomeView()
         self.document_view = DocumentView()
         self.draft_view = DocumentDraftView()
+        self.overview = OverviewView()
 
         self.tools_sidebar = Gtk.Stack()
         self.tools_sidebar.set_size_request(266, 280)
@@ -105,6 +107,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.content_stack.add_css_class('content')
         self.content_stack.add_named(self.welcome, 'welcome')
         self.content_stack.add_named(self.draft_view, 'draft_view')
+        self.content_stack.add_named(self.overview, 'overview')
         self.content_stack.add_named(self.document_view, 'document_view')
 
         self.document_view_paned = AnimatedHPaned(self.content_stack, self.tools_sidebar, False)

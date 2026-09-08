@@ -28,7 +28,7 @@ class WindowState(object):
 
     def __init__(self, main_window):
         self.main_window = main_window
-        self.toolbar_right = self.main_window.toolbar.toolbar_right
+        self.toolbar_right = self.main_window.toolbar.main_right
 
         self.main_window.backlinks_toggle.connect('clicked', self.on_navigation_sidebar_toggle_clicked, 'backlinks')
         self.main_window.graph_panel_toggle.connect('clicked', self.on_navigation_sidebar_toggle_clicked, 'graph_panel')
@@ -59,6 +59,8 @@ class WindowState(object):
             self.main_window.content_stack.set_visible_child_name('document_view')
         elif mode == 'draft':
             self.main_window.content_stack.set_visible_child_name('draft_view')
+        elif mode == 'overview':
+            self.main_window.content_stack.set_visible_child_name('overview')
         else:
             self.main_window.content_stack.set_visible_child_name('welcome')
 

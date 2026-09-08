@@ -91,10 +91,13 @@ class History(object):
             total_width += document_width
             if document_stub['id'] == workspace.get_active_document_id():
                 self.active_document_index = i
-                if mode == 'draft':
+                if mode != 'documents':
                     break
+
         if mode == 'draft':
             total_width += self.get_item_extents('New Document').width / Pango.SCALE + 37
+        if mode == 'overview':
+            total_width += self.get_item_extents('Overview').width / Pango.SCALE + 37
         total_width += 72
 
         self.view.scrolling_widget.set_size(total_width, 1)
@@ -144,45 +147,56 @@ class History(object):
         hover_index = self.get_hover_index()
         scrolling_offset = int(self.view.scrolling_widget.scrolling_offset_x) + 1
 
-        draft_offset = 0
+        mode_offset = 0
 
-        if self.active_document_index != None or mode != 'draft':
-            for i, document_stub, document_offset, document_width in self.items:
-                is_active = (i == self.active_document_index)
-                if document_offset + document_width >= self.view.scrolling_widget.scrolling_offset_x and document_offset <= self.view.scrolling_widget.scrolling_offset_x + width:
-                    font_desc = self.font_desc_bold if (is_active and mode != 'draft') else self.font_desc_normal
+        for i, document_stub, document_offset, document_width in self.items:
+            is_active = (i == self.active_document_index)
+            if document_offset + document_width >= self.view.scrolling_widget.scrolling_offset_x and document_offset <= self.view.scrolling_widget.scrolling_offset_x + width:
+                font_desc = self.font_desc_bold if (is_active and mode == 'documents') else self.font_desc_normal
 
-                    if i == hover_index:
-                        if i == self.selected_index:
-                            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('toolbar_selected_bg'))
-                        else:
-                            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('history_hover'))
-                        rounded_rectangle(ctx, document_offset - scrolling_offset, 6, document_width, 35, 6)
-                        ctx.fill()
+                if i == hover_index:
+                    if i == self.selected_index:
+                        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('toolbar_selected_bg'))
+                    else:
+                        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('history_hover'))
+                    rounded_rectangle(ctx, document_offset - scrolling_offset, 6, document_width, 35, 6)
+                    ctx.fill()
 
-                    ctx.move_to(document_offset - scrolling_offset, 13)
-                    self.layout.set_font_description(font_desc)
-                    self.layout.set_width(document_width * Pango.SCALE)
-                    self.layout.set_text(str(document_stub['title']))
-                    Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('headerbar_fg_2'))
-                    PangoCairo.show_layout(ctx, self.layout)
-                    self.draw_divider(ctx, document_offset - scrolling_offset, height)
+                ctx.move_to(document_offset - scrolling_offset, 13)
+                self.layout.set_font_description(font_desc)
+                self.layout.set_width(document_width * Pango.SCALE)
+                self.layout.set_text(str(document_stub['title']))
+                Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('headerbar_fg_2'))
+                PangoCairo.show_layout(ctx, self.layout)
+                self.draw_divider(ctx, document_offset - scrolling_offset, height)
 
-                if is_active and mode == 'draft':
-                    draft_offset = document_offset + document_width + 1 - scrolling_offset
-                    break
+            if is_active and mode != 'documents':
+                mode_offset = document_offset + document_width + 1 - scrolling_offset
+                break
 
         if mode == 'draft':
             extents = self.get_item_extents('New Document')
-            ctx.move_to(draft_offset, 13)
+            ctx.move_to(mode_offset, 13)
             self.layout.set_font_description(self.font_desc_bold)
             self.layout.set_width(extents.width + 37 * Pango.SCALE)
             self.layout.set_text('New Document')
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('headerbar_fg_2'))
             PangoCairo.show_layout(ctx, self.layout)
 
-            if draft_offset > 0:
-                self.draw_divider(ctx, draft_offset, height)
+            if mode_offset > 0:
+                self.draw_divider(ctx, mode_offset, height)
+
+        elif mode == 'overview':
+            extents = self.get_item_extents('Overview')
+            ctx.move_to(mode_offset, 13)
+            self.layout.set_font_description(self.font_desc_bold)
+            self.layout.set_width(extents.width + 37 * Pango.SCALE)
+            self.layout.set_text('Overview')
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('headerbar_fg_2'))
+            PangoCairo.show_layout(ctx, self.layout)
+
+            if mode_offset > 0:
+                self.draw_divider(ctx, mode_offset, height)
 
     def draw_divider(self, ctx, offset, height):
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('border_1'))

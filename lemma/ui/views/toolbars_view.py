@@ -28,14 +28,24 @@ class ToolbarsView(Gtk.ActionBar):
         Gtk.ActionBar.__init__(self)
         self.add_css_class('toolbar')
 
-        self.mode_stack = Gtk.Stack()
-        self.pack_start(self.mode_stack)
+        self.main_left = ToolbarMain()
+        self.toolbar_overview = ToolbarOverview()
+        self.empty_left = ToolbarEmpty()
 
-        self.toolbar_main = ToolbarMain()
-        self.mode_stack.add_named(self.toolbar_main, 'main')
+        self.stack_left = Gtk.Stack()
+        self.stack_left.add_named(self.main_left, 'main')
+        self.stack_left.add_named(self.toolbar_overview, 'overview')
+        self.stack_left.add_named(self.empty_left, 'empty')
 
-        self.toolbar_right = ToolbarRight()
-        self.pack_end(self.toolbar_right)
+        self.main_right = ToolbarRight()
+        self.empty_right = ToolbarEmpty()
+
+        self.stack_right = Gtk.Stack()
+        self.stack_right.add_named(self.main_right, 'main')
+        self.stack_right.add_named(self.empty_right, 'empty')
+
+        self.pack_start(self.stack_left)
+        self.pack_end(self.stack_right)
 
 
 class ToolbarRight(Gtk.Box):
@@ -214,5 +224,19 @@ class ToolbarMain(Gtk.Box):
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.insert_link_button)
         self.append(box)
+
+
+class ToolbarOverview(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+
+
+class ToolbarEmpty(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
 

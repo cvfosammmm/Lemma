@@ -103,6 +103,14 @@
 @define-color graph_panel_edge_hover #fff7;
 @define-color graph_panel_title #eee;
 
+/* Overview */
+@define-color overview_node_normal #aaa;
+@define-color overview_node_normal_hover #666;
+@define-color overview_node_current #48f;
+@define-color overview_edge #ddd;
+@define-color overview_edge_hover #666;
+@define-color overview_title #222;
+
 /* Paneds */
 @define-color headerpaned_border_1 #666;
 @define-color headerpaned_border_2 #666;

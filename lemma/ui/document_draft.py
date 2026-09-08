@@ -127,12 +127,12 @@ class DocumentDraft():
     def on_entry_keypress(self, controller, keyval, keycode, state):
         if keyval == Gdk.keyval_from_name('Escape'):
             if state & Gtk.accelerator_get_default_mod_mask() == 0:
-                UseCases.leave_draft_mode()
+                UseCases.show_documents_or_welcome_page()
                 return True
         return False
 
     def on_cancel_button_clicked(self, widget=None):
-        UseCases.leave_draft_mode()
+        UseCases.show_documents_or_welcome_page()
 
     def init(self):
         self.reset_title()

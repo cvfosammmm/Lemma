@@ -67,6 +67,7 @@ class Shortcuts():
         Shortcuts.defaults['show_shortcuts_dialog'] = '<Control>question'
         Shortcuts.defaults['show_hamburger_menu'] = 'F10'
         Shortcuts.defaults['show_document_menu'] = 'F12'
+        Shortcuts.defaults['show_overview'] = '<Alt>Up'
         Shortcuts.defaults['show_bookmarks'] = '<Alt>0'
         for i in range(1, 10):
             Shortcuts.defaults['activate_bookmark_' + str(i)] = '<Alt>' + str(i)
@@ -84,6 +85,7 @@ class Shortcuts():
         Shortcuts.titles['start_global_search'] = 'Search'
         Shortcuts.titles['go_back'] = 'Go Back'
         Shortcuts.titles['go_forward'] = 'Go Forward'
+        Shortcuts.titles['show_overview'] = 'Show Overview'
         Shortcuts.titles['show_bookmarks'] = 'Show Bookmarks'
         Shortcuts.titles['activate_bookmark_1'] = 'Open Bookmark 1'
         Shortcuts.titles['activate_bookmark_2'] = 'Open Bookmark 2'

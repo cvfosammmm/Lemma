@@ -56,6 +56,7 @@ class Actions(object):
 
         self.add_simple_action('go-back', self.go_back)
         self.add_simple_action('go-forward', self.go_forward)
+        self.add_simple_action('show-overview', self.show_overview)
 
         self.add_simple_action('undo', self.undo)
         self.add_simple_action('redo', self.redo)
@@ -104,6 +105,7 @@ class Actions(object):
         self.shortcut_controller.add_cb('start_global_search', self.actions['start-global-search'].activate)
         self.shortcut_controller.add_cb('go_back', self.actions['go-back'].activate)
         self.shortcut_controller.add_cb('go_forward', self.actions['go-forward'].activate)
+        self.shortcut_controller.add_cb('show_overview', self.actions['show-overview'].activate)
         self.shortcut_controller.add_cb('show_shortcuts_dialog', self.actions['show-shortcuts-dialog'].activate)
         for i in range(1, 10):
             self.shortcut_controller.add_cb('activate_bookmark_' + str(i), self.activate_bookmark, i)
@@ -169,41 +171,45 @@ class Actions(object):
         selected_widget = None if document == None else document.get_selected_widget()
         image_selected = selected_widget != None and selected_widget.get_type() == 'image'
 
+        doc_mode = workspace.get_mode() == 'documents' and document != None
+        draft_mode = workspace.get_mode() == 'draft'
+        overview_mode = workspace.get_mode() == 'overview'
+
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
-        self.actions['export-bulk'].set_enabled(document != None)
-        self.actions['delete-document'].set_enabled(document != None)
-        self.actions['rename-document'].set_enabled(document != None)
-        self.actions['export-markdown'].set_enabled(document != None)
+        self.actions['export-bulk'].set_enabled(True)
+        self.actions['delete-document'].set_enabled(doc_mode)
+        self.actions['rename-document'].set_enabled(doc_mode)
+        self.actions['export-markdown'].set_enabled(doc_mode)
         self.actions['export-image'].set_enabled(image_selected)
-        self.actions['go-back'].set_enabled(workspace.get_mode() == 'draft' or (document != None and workspace.get_prev_id_in_history(document.id) != None))
-        self.actions['go-forward'].set_enabled(document != None and workspace.get_next_id_in_history(document.id) != None)
-        self.actions['undo'].set_enabled(document != None and document.can_undo())
-        self.actions['redo'].set_enabled(document != None and document.can_redo())
-        self.actions['cut'].set_enabled(document != None and document.has_selection())
-        self.actions['copy'].set_enabled(document != None and document.has_selection())
-        self.actions['paste'].set_enabled(document != None and (text_in_clipboard or subtree_in_clipboard or image_in_clipboard))
-        self.actions['delete'].set_enabled(workspace.get_mode() == 'documents' and document.has_selection())
-        self.actions['select-all'].set_enabled(document != None)
-        self.actions['remove-selection'].set_enabled(document != None and document.has_selection())
-        self.actions['extend-selection'].set_enabled(document != None)
-        self.actions['move-cursor-to-parent'].set_enabled(document != None)
-        self.actions['show-insert-image-dialog'].set_enabled(document != None and document.insert_parent_is_root())
-        self.actions['show-attach-files-dialog'].set_enabled(document != None and document.insert_parent_is_root())
-        self.actions['open-link'].set_enabled(document != None and document.cursor_inside_link())
-        self.actions['remove-link'].set_enabled(document != None and (document.links_inside_selection() or document.cursor_inside_link()))
-        self.actions['show-link-popover'].set_enabled(document != None and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
-        self.actions['copy-link'].set_enabled(document != None and (document.whole_selection_is_one_link() or document.cursor_inside_link()))
-        self.actions['subscript'].set_enabled(document != None)
-        self.actions['superscript'].set_enabled(document != None)
-        self.actions['set-paragraph-style'].set_enabled(document != None)
-        self.actions['toggle-checkbox'].set_enabled(document != None)
-        self.actions['toggle-bold'].set_enabled(document != None)
-        self.actions['toggle-italic'].set_enabled(document != None)
-        self.actions['toggle-verbatim'].set_enabled(document != None)
-        self.actions['toggle-highlight'].set_enabled(document != None)
-        self.actions['decrease-indent'].set_enabled(document != None)
-        self.actions['increase-indent'].set_enabled(document != None)
+        self.actions['go-back'].set_enabled(draft_mode or overview_mode or (doc_mode and workspace.get_prev_id_in_history(document.id) != None))
+        self.actions['go-forward'].set_enabled(doc_mode and workspace.get_next_id_in_history(document.id) != None)
+        self.actions['undo'].set_enabled(doc_mode and document.can_undo())
+        self.actions['redo'].set_enabled(doc_mode and document.can_redo())
+        self.actions['cut'].set_enabled(doc_mode and document.has_selection())
+        self.actions['copy'].set_enabled(doc_mode and document.has_selection())
+        self.actions['paste'].set_enabled(doc_mode and (text_in_clipboard or subtree_in_clipboard or image_in_clipboard))
+        self.actions['delete'].set_enabled(doc_mode and document.has_selection())
+        self.actions['select-all'].set_enabled(doc_mode)
+        self.actions['remove-selection'].set_enabled(doc_mode and document.has_selection())
+        self.actions['extend-selection'].set_enabled(doc_mode)
+        self.actions['move-cursor-to-parent'].set_enabled(doc_mode)
+        self.actions['show-insert-image-dialog'].set_enabled(doc_mode and document.insert_parent_is_root())
+        self.actions['show-attach-files-dialog'].set_enabled(doc_mode and document.insert_parent_is_root())
+        self.actions['open-link'].set_enabled(doc_mode and document.cursor_inside_link())
+        self.actions['remove-link'].set_enabled(doc_mode and (document.links_inside_selection() or document.cursor_inside_link()))
+        self.actions['show-link-popover'].set_enabled(doc_mode and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
+        self.actions['copy-link'].set_enabled(doc_mode and (document.whole_selection_is_one_link() or document.cursor_inside_link()))
+        self.actions['subscript'].set_enabled(doc_mode)
+        self.actions['superscript'].set_enabled(doc_mode)
+        self.actions['set-paragraph-style'].set_enabled(doc_mode)
+        self.actions['toggle-checkbox'].set_enabled(doc_mode)
+        self.actions['toggle-bold'].set_enabled(doc_mode)
+        self.actions['toggle-italic'].set_enabled(doc_mode)
+        self.actions['toggle-verbatim'].set_enabled(doc_mode)
+        self.actions['toggle-highlight'].set_enabled(doc_mode)
+        self.actions['decrease-indent'].set_enabled(doc_mode)
+        self.actions['increase-indent'].set_enabled(doc_mode)
         self.actions['toggle-tools-sidebar'].set_enabled(True)
         self.actions['show-settings-dialog'].set_enabled(True)
         self.actions['show-shortcuts-dialog'].set_enabled(True)
@@ -240,8 +246,8 @@ class Actions(object):
         workspace = WorkspaceRepo.get_workspace()
 
         mode = workspace.get_mode()
-        if mode == 'draft':
-            UseCases.leave_draft_mode()
+        if mode != 'documents':
+            UseCases.show_documents_or_welcome_page()
         else:
             prev_doc = workspace.get_prev_id_in_history(workspace.get_active_document_id())
             if prev_doc != None:
@@ -253,6 +259,9 @@ class Actions(object):
         next_doc = workspace.get_next_id_in_history(workspace.get_active_document_id())
         if next_doc != None:
             UseCases.set_active_document(next_doc, update_history=False)
+
+    def show_overview(self, action=None, parameter=''):
+        UseCases.show_overview()
 
     def undo(self, action=None, parameter=''):
         self.main_window.document_view.content.grab_focus()
