@@ -72,6 +72,7 @@ class WindowState(object):
 
         self.main_window.navigation_sidebar_stack.set_visible_child_name(active_tab)
         self.main_window.navigation_sidebar_paned.set_show_widget(sidebar_visible)
+
         self.main_window.navigation_sidebar_paned.animate(True)
 
         sidebar_visible = Settings.get_value('show_tools_sidebar') and mode == 'documents'
@@ -107,11 +108,11 @@ class WindowState(object):
 
         split_navigation_sidebar = Settings.get_value('split_navigation_sidebar')
         navbar_paned_position = Settings.get_value('navbar_paned_position')
-
-        if navbar_paned_position in [None, -1]: self.main_window.navigation_sidebar_paned.set_end_on_first_show()
-
+        if navbar_paned_position in [None, -1]:
+            self.main_window.navigation_sidebar_paned.set_end_on_first_show()
+        else:
+            self.main_window.navigation_sidebar_paned.set_target_position(navbar_paned_position)
         self.main_window.navigation_sidebar_paned.first_set_show_widget(split_navigation_sidebar)
-        self.main_window.navigation_sidebar_paned.set_target_position(navbar_paned_position)
 
         show_tools_sidebar = Settings.get_value('show_tools_sidebar')
         tools_sidebar_position = Settings.get_value('tools_sidebar_position')

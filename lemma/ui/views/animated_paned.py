@@ -128,9 +128,6 @@ class AnimatedPaned(object):
 
         if frame_clock != None and animate:
             if self.get_position() != end:
-                if self.show_widget:
-                    self.animated_widget.set_visible(True)
-
                 start = self.get_position()
                 if start == 0: start = self.get_paned_extent()
                 start_time = frame_clock.get_frame_time()
@@ -148,6 +145,9 @@ class AnimatedPaned(object):
             self.set_position(end)
 
     def set_position_on_tick(self, paned, frame_clock_cb, user_data):
+        if self.show_widget:
+            self.animated_widget.set_visible(True)
+
         show_widget, start_time, end_time, start, end = user_data
         now = frame_clock_cb.get_frame_time()
         if now < end_time and self.get_position() != end:

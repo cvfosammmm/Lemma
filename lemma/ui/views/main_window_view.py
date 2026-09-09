@@ -60,6 +60,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.graph_panel = GraphPanelView()
 
         self.navigation_sidebar_stack = Gtk.Stack()
+        self.navigation_sidebar_stack.set_size_request(262, 280)
         self.navigation_sidebar_stack.add_named(self.backlinks, 'backlinks')
         self.navigation_sidebar_stack.add_named(self.graph_panel, 'graph_panel')
 
