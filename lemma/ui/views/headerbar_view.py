@@ -115,16 +115,10 @@ class HeaderBarRight(Gtk.WindowHandle):
         self.bookmarks_button.set_tooltip_text(_('Bookmarks') + ' (' + Shortcuts.get_for_labels('show_bookmarks') + ')')
         self.bookmarks_button.add_css_class('flat')
 
-        self.document_menu_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
-        self.document_menu_button.set_can_focus(False)
-        self.document_menu_button.set_tooltip_text(_('Document Menu'))
-        self.document_menu_button.add_css_class('flat')
-
         self.add_docmenu_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.add_docmenu_box.append(self.add_document_button)
         self.add_docmenu_box.append(self.overview_button)
         self.add_docmenu_box.append(self.bookmarks_button)
-        self.add_docmenu_box.append(self.document_menu_button)
         self.add_docmenu_box.add_css_class('buttonbox')
         self.box.append(self.add_docmenu_box)
 

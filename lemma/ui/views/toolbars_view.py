@@ -69,10 +69,16 @@ class ToolbarRight(Gtk.Box):
         self.redo_button.set_can_focus(False)
         self.redo_button.set_tooltip_text(_('Redo') + ' (' + Shortcuts.get_for_labels('redo') + ')')
 
+        self.document_menu_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
+        self.document_menu_button.set_can_focus(False)
+        self.document_menu_button.set_tooltip_text(_('Document Menu'))
+        self.document_menu_button.add_css_class('flat')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.edit_menu_button)
         box.append(self.undo_button)
         box.append(self.redo_button)
+        box.append(self.document_menu_button)
         self.append(box)
         self.append(Gtk.Separator())
 

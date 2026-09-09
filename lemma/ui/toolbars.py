@@ -54,7 +54,7 @@ class Toolbars():
         self.docmenu_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.docmenu_button_controller.set_button(1)
         self.docmenu_button_controller.connect('pressed', self.on_docmenu_button_press)
-        self.headerbar.hb_right.document_menu_button.add_controller(self.docmenu_button_controller)
+        self.toolbar.main_right.document_menu_button.add_controller(self.docmenu_button_controller)
 
         self.paragraph_button_controller = Gtk.GestureClick()
         self.paragraph_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
@@ -117,7 +117,7 @@ class Toolbars():
             data.append((self.main_window.headerbar.hb_right.bookmarks_button, 'bookmarks'))
             data.append((self.toolbar.main_right.edit_menu_button, 'edit_menu'))
             data.append((self.toolbar.main_left.paragraph_style_menu_button, 'paragraph_style'))
-            data.append((self.main_window.headerbar.hb_right.document_menu_button, 'document_menu'))
+            data.append((self.toolbar.main_right.document_menu_button, 'document_menu'))
 
             for button, name in data:
                 if popover == name:
@@ -162,12 +162,12 @@ class Toolbars():
         self.paragraph_button_controller.reset()
 
     def on_docmenu_button_press(self, controller=None, n_press=None, x=None, y=None):
-        button = self.main_window.headerbar.hb_right.document_menu_button
+        button = self.toolbar.main_right.document_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
         x = allocation.origin.x + allocation.size.width / 2
-        y = allocation.origin.y + allocation.size.height
+        y = allocation.origin.y
 
-        UseCases.show_popover('document_menu', x, y, 'bottom')
+        UseCases.show_popover('document_menu', x, y, 'top')
         self.docmenu_button_controller.reset()
 
     @timer.timer
