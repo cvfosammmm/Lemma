@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, Pango
 
 import math
 
@@ -51,6 +51,7 @@ class DocumentView(Gtk.Widget):
         self.link_overlay.set_halign(Gtk.Align.END)
         self.link_overlay.add_css_class('link-overlay')
         self.link_overlay.set_visible(False)
+        self.link_overlay.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         self.link_overlay.set_parent(self)
 
         self.autocomplete_view = AutocompleteView()
