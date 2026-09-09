@@ -70,7 +70,6 @@ class Toolbars():
 
         self.shortcut_controller = Shortcuts.new_controller()
         self.shortcut_controller.add_cb('show_hamburger_menu', self.on_hamburger_button_press)
-        self.shortcut_controller.add_cb('show_document_menu', self.on_docmenu_button_press)
         self.shortcut_controller.add_cb('show_bookmarks', self.on_bookmarks_button_press)
         self.main_window.add_controller(self.shortcut_controller)
 

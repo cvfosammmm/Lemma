@@ -35,7 +35,7 @@ class PageShortcuts(object):
         self.buttons = dict()
 
         self.sections = list()
-        self.sections.append({'title': 'Windows and Panels', 'items': ['show_hamburger_menu', 'show_document_menu', 'show_shortcuts_dialog', 'quit']})
+        self.sections.append({'title': 'Windows and Panels', 'items': ['show_hamburger_menu', 'show_shortcuts_dialog', 'quit']})
         self.sections.append({'title': 'Documents', 'items': ['add_document', 'rename_document']})
         self.sections.append({'title': 'Navigation', 'items': ['start_global_search', 'go_back', 'go_forward', 'show_bookmarks', 'show_overview', 'activate_bookmark_1', 'activate_bookmark_2', 'activate_bookmark_3', 'activate_bookmark_4', 'activate_bookmark_5', 'activate_bookmark_6', 'activate_bookmark_7', 'activate_bookmark_8', 'activate_bookmark_9']})
         self.sections.append({'title': 'Undo and Redo', 'items': ['undo', 'redo']})

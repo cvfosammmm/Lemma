@@ -117,7 +117,7 @@ class HeaderBarRight(Gtk.WindowHandle):
 
         self.document_menu_button = Gtk.Button.new_from_icon_name('view-more-symbolic')
         self.document_menu_button.set_can_focus(False)
-        self.document_menu_button.set_tooltip_text(_('Document Menu') + ' (' + Shortcuts.get_for_labels('show_document_menu') + ')')
+        self.document_menu_button.set_tooltip_text(_('Document Menu'))
         self.document_menu_button.add_css_class('flat')
 
         self.add_docmenu_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)

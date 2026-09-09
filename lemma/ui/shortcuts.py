@@ -41,7 +41,7 @@ class Shortcuts():
         Shortcuts.defaults['link_popover'] = '<Control>l'
         Shortcuts.defaults['subscript'] = '<Control>minus'
         Shortcuts.defaults['superscript'] = '<Control>underscore'
-        Shortcuts.defaults['toggle_checkbox'] = '<Control>m'
+        Shortcuts.defaults['toggle_checkbox'] = 'F12'
         Shortcuts.defaults['undo'] = '<Control>z'
         Shortcuts.defaults['redo'] = '<Control><Shift>z'
         Shortcuts.defaults['cut'] = '<Control>x'
@@ -66,7 +66,6 @@ class Shortcuts():
         Shortcuts.defaults['go_forward'] = '<Alt>Right'
         Shortcuts.defaults['show_shortcuts_dialog'] = '<Control>question'
         Shortcuts.defaults['show_hamburger_menu'] = 'F10'
-        Shortcuts.defaults['show_document_menu'] = 'F12'
         Shortcuts.defaults['show_overview'] = '<Alt>Up'
         Shortcuts.defaults['show_bookmarks'] = '<Alt>0'
         for i in range(1, 10):
@@ -77,7 +76,6 @@ class Shortcuts():
         Shortcuts.defaults['global_search_next_result'] = 'Down'
 
         Shortcuts.titles['show_hamburger_menu'] = 'Show Global Menu'
-        Shortcuts.titles['show_document_menu'] = 'Show Document Menu'
         Shortcuts.titles['show_shortcuts_dialog'] = 'Show Keyboard Shortcuts'
         Shortcuts.titles['quit'] = 'Quit the Application'
         Shortcuts.titles['add_document'] = 'Create new Document'
