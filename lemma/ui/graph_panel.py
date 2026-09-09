@@ -83,9 +83,10 @@ class GraphPanel(object):
 
     @timer.timer
     def update(self):
+        mode = WorkspaceRepo.get_workspace().get_mode()
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        if document != None:
+        if mode == 'documents' and document != None:
             self.current_node = document.id
             self.titles_by_id = {document.id: document.title}
             self.ids_by_title = {document.title: document.id}
@@ -139,12 +140,16 @@ class GraphPanel(object):
             for v, vpos in pos.items():
                 self.positions[v] = (0.5 + vpos[0] * scaling_x, 0.5 + vpos[1] * scaling_y)
 
+            self.view.stack.set_visible_child_name('graph_view')
+
         else:
             self.current_node = None
             self.titles_by_id = dict()
             self.ids_by_title = dict()
             self.G = nx.Graph()
             self.positions = dict()
+
+            self.view.stack.set_visible_child_name('no_open_documents')
 
     def size_allocate(self, width, height, baseline):
         self.width = width - 34

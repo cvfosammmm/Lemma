@@ -34,7 +34,18 @@ class GraphPanelView(Gtk.Box):
         self.append(self.headline)
 
         self.content = GraphPanelDrawingArea()
-        self.append(self.content)
+
+        self.no_open_documents_page = Gtk.Label.new('No open document. Open a document to show its link graph.')
+        self.no_open_documents_page.add_css_class('info')
+        self.no_open_documents_page.set_xalign(0)
+        self.no_open_documents_page.set_yalign(0)
+        self.no_open_documents_page.set_wrap(True)
+
+        self.stack = Gtk.Stack()
+        self.stack.add_named(self.content, 'graph_view')
+        self.stack.add_named(self.no_open_documents_page, 'no_open_documents')
+
+        self.append(self.stack)
 
 
 class GraphPanelDrawingArea(Gtk.Widget):

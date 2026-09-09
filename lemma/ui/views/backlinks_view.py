@@ -48,7 +48,7 @@ class BacklinksView(Gtk.Box):
         self.no_backlinks_page.set_yalign(0)
         self.no_backlinks_page.set_wrap(True)
 
-        self.no_open_documents_page = Gtk.Label.new('No open documents. Open a document to show its backlinks.')
+        self.no_open_documents_page = Gtk.Label.new('No open document. Open a document to show its backlinks.')
         self.no_open_documents_page.add_css_class('info')
         self.no_open_documents_page.set_xalign(0)
         self.no_open_documents_page.set_yalign(0)

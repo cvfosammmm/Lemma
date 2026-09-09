@@ -226,6 +226,11 @@ paned.document-view separator.wide {
     padding: 18px 0px 15px 15px;
     background: @sidebar_bg_1;
 }
+.graph-panel label.info {
+    color: @sidebar_fg_2;
+    padding: 15px 15px 15px 15px;
+    background: @sidebar_bg_1;
+}
 
 /* toolbar */
 

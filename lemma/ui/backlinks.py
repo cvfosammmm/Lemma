@@ -50,9 +50,10 @@ class Backlinks(object):
 
     @timer.timer
     def update(self):
+        mode = WorkspaceRepo.get_workspace().get_mode()
         document = WorkspaceRepo.get_workspace().get_active_document()
 
-        if document != None:
+        if mode == 'documents' and document != None:
             backlinks = DocumentRepo.list_by_link_target(document.title)
             backlink_ids = [stub['id'] for stub in backlinks]
 
