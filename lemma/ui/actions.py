@@ -27,6 +27,7 @@ from lemma.services.node_type_db import NodeTypeDB
 from lemma.widgets.factory import WidgetFactory
 from lemma.services.xml_exporter import XMLExporter
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.use_cases.queries import Queries
@@ -171,19 +172,21 @@ class Actions(object):
         selected_widget = None if document == None else document.get_selected_widget()
         image_selected = selected_widget != None and selected_widget.get_type() == 'image'
 
+        has_documents = DocumentRepo.has_documents() > 0
         doc_mode = workspace.get_mode() == 'documents' and document != None
         draft_mode = workspace.get_mode() == 'draft'
         overview_mode = workspace.get_mode() == 'overview'
 
         self.actions['add-document'].set_enabled(True)
         self.actions['import-markdown-files'].set_enabled(True)
-        self.actions['export-bulk'].set_enabled(True)
+        self.actions['export-bulk'].set_enabled(has_documents)
         self.actions['delete-document'].set_enabled(doc_mode)
         self.actions['rename-document'].set_enabled(doc_mode)
         self.actions['export-markdown'].set_enabled(doc_mode)
         self.actions['export-image'].set_enabled(image_selected)
         self.actions['go-back'].set_enabled(draft_mode or overview_mode or (doc_mode and workspace.get_prev_id_in_history(document.id) != None))
         self.actions['go-forward'].set_enabled(doc_mode and workspace.get_next_id_in_history(document.id) != None)
+        self.actions['show-overview'].set_enabled(has_documents)
         self.actions['undo'].set_enabled(doc_mode and document.can_undo())
         self.actions['redo'].set_enabled(doc_mode and document.can_redo())
         self.actions['cut'].set_enabled(doc_mode and document.has_selection())

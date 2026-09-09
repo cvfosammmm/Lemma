@@ -200,6 +200,10 @@ class DocumentRepo():
         return DocumentRepo.max_document_id
 
     @timer.timer
+    def has_documents():
+        return len(DocumentRepo.document_stubs_by_id) > 0
+
+    @timer.timer
     def add(document):
         if document.id in DocumentRepo.document_stubs_by_id: return
 

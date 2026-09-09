@@ -22,6 +22,7 @@ from gi.repository import Gtk, Pango
 from lemma.services.message_bus import MessageBus
 from lemma.services.layout_info import LayoutInfo
 from lemma.repos.workspace_repo import WorkspaceRepo
+from lemma.repos.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
 from lemma.use_cases.use_cases import UseCases
 from lemma.services.settings import Settings
@@ -75,6 +76,7 @@ class Toolbars():
 
         MessageBus.subscribe(self, 'mode_set')
         MessageBus.subscribe(self, 'new_active_document')
+        MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'document_ast_or_cursor_changed')
         MessageBus.subscribe(self, 'document_changed')
         MessageBus.subscribe(self, 'settings_changed')
@@ -88,11 +90,18 @@ class Toolbars():
         self.update()
         self.update_paragraph_style()
 
+        has_documents = DocumentRepo.has_documents() > 0
+        self.headerbar.hb_right.bookmarks_button.set_sensitive(has_documents)
+
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'new_active_document' in messages or 'document_changed' in messages or 'settings_changed' in messages or 'mode_set' in messages:
             self.update()
             self.update_paragraph_style()
+
+        if 'new_active_document' in messages or 'document_removed' in messages:
+            has_documents = DocumentRepo.has_documents() > 0
+            self.headerbar.hb_right.bookmarks_button.set_sensitive(has_documents)
 
         if 'tags_at_cursor_changed' in messages:
             self.update_tag_toggle('bold')
