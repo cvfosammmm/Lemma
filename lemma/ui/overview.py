@@ -37,6 +37,8 @@ class Overview(object):
         self.main_window = main_window
         self.view = self.main_window.overview
 
+        self.do_update = True
+
         self.current_node = None
         self.G = nx.Graph()
         self.positions = dict()
@@ -69,18 +71,21 @@ class Overview(object):
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'mode_set')
 
-        self.update()
         if WorkspaceRepo.get_workspace().get_mode() == 'overview':
             self.view.grab_focus()
 
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'document_removed' in messages or 'mode_set' in messages:
-            self.update()
-            self.view.content.queue_draw()
+            self.do_update = True
 
         if 'mode_set' in messages and WorkspaceRepo.get_workspace().get_mode() == 'overview':
             self.view.grab_focus()
+
+        if self.do_update and WorkspaceRepo.get_workspace().get_mode() == 'overview':
+            self.update()
+            self.view.content.queue_draw()
+            self.do_update = False
 
     @timer.timer
     def update(self):

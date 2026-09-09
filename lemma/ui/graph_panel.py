@@ -26,6 +26,7 @@ from lemma.services.color_manager import ColorManager
 from lemma.services.message_bus import MessageBus
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
+from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
@@ -35,6 +36,8 @@ class GraphPanel(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.view = self.main_window.graph_panel
+
+        self.do_update = True
 
         self.current_node = None
         self.G = nx.Graph()
@@ -66,13 +69,17 @@ class GraphPanel(object):
         MessageBus.subscribe(self, 'document_ast_changed')
         MessageBus.subscribe(self, 'mode_set')
 
-        self.update()
-
     def animate(self):
         messages = MessageBus.get_messages(self)
         if 'new_active_document' in messages or 'document_removed' in messages or 'document_ast_changed' in messages or 'mode_set' in messages:
+            self.do_update = True
+
+        is_visible = Settings.get_value('split_navigation_sidebar') and Settings.get_value('navigation_sidebar_active_tab') == 'graph_panel'
+
+        if self.do_update and is_visible:
             self.update()
             self.view.content.queue_draw()
+            self.do_update = False
 
     @timer.timer
     def update(self):
