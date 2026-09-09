@@ -74,7 +74,7 @@ class WindowState(object):
         self.main_window.navigation_sidebar_paned.set_show_widget(sidebar_visible)
         self.main_window.navigation_sidebar_paned.animate(True)
 
-        sidebar_visible = Settings.get_value('show_tools_sidebar')
+        sidebar_visible = Settings.get_value('show_tools_sidebar') and mode == 'documents'
         active_tab = Settings.get_value('tools_sidebar_active_tab')
 
         self.update_toggle(self.toolbar_right.symbols_sidebar_toggle, sidebar_visible and active_tab == 'math')
