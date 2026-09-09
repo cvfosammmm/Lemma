@@ -64,6 +64,7 @@ class DocumentView():
         MessageBus.subscribe(self, 'separate_dark_color_scheme_settings_changed')
         MessageBus.subscribe(self, 'font_theme_settings_changed')
         MessageBus.subscribe(self, 'dark_mode_changed')
+        MessageBus.subscribe(self, 'mode_set')
 
         self.view.content.grab_focus()
 
@@ -98,6 +99,9 @@ class DocumentView():
             self.application.keyboard.reset_cursor_blink()
             self.view.queue_allocate()
             self.view.content.queue_draw()
+
+        if 'mode_set' in messages and WorkspaceRepo.get_workspace().get_mode() == 'documents':
+            self.main_window.document_view.content.grab_focus()
 
         self.update_link_overlay_text()
 

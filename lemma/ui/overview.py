@@ -89,14 +89,6 @@ class Overview(object):
 
     @timer.timer
     def update(self):
-        mode = WorkspaceRepo.get_workspace().get_mode()
-        if mode == 'draft':
-            self.init()
-        else:
-            self.deactivate()
-
-    @timer.timer
-    def update(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document != None:

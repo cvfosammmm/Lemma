@@ -191,11 +191,11 @@ class UseCases():
 
             if new_active_document_id == None:
                 workspace.set_active_document(None, update_history=False)
-                workspace.show_welcome_page()
+                if workspace.get_mode() == 'documents':
+                    workspace.show_welcome_page()
             else:
                 document = DocumentRepo.get_by_id(new_active_document_id)
                 workspace.set_active_document(document, update_history=False)
-                workspace.show_active_document()
 
                 UseCases.__scroll_to_previous_position(document, None)
                 UseCases.__update_implicit_x_position()
