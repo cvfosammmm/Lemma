@@ -79,4 +79,84 @@ class Queries():
     def get_document_offset():
         return ApplicationState.get_title_height() 
 
+    def get_implicit_xy():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+
+        insert = document.get_insert_node()
+        orig_x, orig_y = document_layout.get_absolute_xy(document_layout.get_node_layout(insert))
+        implicit_x_position = ApplicationState.get_implicit_x_position()
+        if implicit_x_position != None:
+            orig_x = implicit_x_position
+
+        return (orig_x, orig_y)
+
+    def get_node_above(document, node):
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+        layout = document_layout.get_node_layout(node)
+
+        x, y = document_layout.get_absolute_xy(document_layout.get_node_layout(node))
+        implicit_x_position = ApplicationState.get_implicit_x_position()
+        if implicit_x_position != None:
+            x = implicit_x_position
+
+        new_node = None
+        ancestors = document_layout.get_ancestors(document_layout.get_node_layout(node))
+        for i, box in enumerate(ancestors):
+            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
+                if box['type'] == 'vbox':
+                    j = box['children'].index(ancestors[i - 1])
+                    prev_hboxes = box['children'][:j]
+                elif box['type'] == 'paragraph':
+                    prev_hboxes = []
+                    for paragraph in document.ast:
+                        for hbox in document_layout.get_paragraph_layout(paragraph)['children']:
+                            if hbox['y'] + hbox['parent']['y'] < ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
+                                prev_hboxes.append(hbox)
+                for hbox in reversed(prev_hboxes):
+                    if new_node == None:
+                        min_distance = 10000
+                        for hbox_child in hbox['children']:
+                            layout_x, layout_y = document_layout.get_absolute_xy(hbox_child)
+                            distance = abs(layout_x - x)
+                            if distance < min_distance:
+                                new_node = hbox_child['node']
+                                min_distance = distance
+
+        return new_node
+
+    def get_node_below(document, node):
+        document_layout = document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+        layout = document_layout.get_node_layout(node)
+
+        x, y = document_layout.get_absolute_xy(layout)
+        implicit_x_position = ApplicationState.get_implicit_x_position()
+        if implicit_x_position != None:
+            x = implicit_x_position
+
+        new_node = None
+        ancestors = document_layout.get_ancestors(layout)
+        for i, box in enumerate(ancestors):
+            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
+                if box['type'] == 'vbox':
+                    j = box['children'].index(ancestors[i - 1])
+                    prev_hboxes = box['children'][j + 1:]
+                elif box['type'] == 'paragraph':
+                    prev_hboxes = []
+                    for paragraph in document.ast:
+                        for hbox in document_layout.get_paragraph_layout(paragraph)['children']:
+                            if hbox['y'] + hbox['parent']['y'] > ancestors[i - 1]['y'] + ancestors[i - 1]['parent']['y']:
+                                prev_hboxes.append(hbox)
+                for child in prev_hboxes:
+                    if new_node == None:
+                        min_distance = 10000
+                        for child_layout in child['children']:
+                            layout_x, layout_y = document_layout.get_absolute_xy(child_layout)
+                            distance = abs(layout_x - x)
+                            if distance < min_distance:
+                                new_node = child_layout['node']
+                                min_distance = distance
+
+        return new_node
+
 

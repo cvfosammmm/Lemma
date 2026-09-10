@@ -93,7 +93,6 @@ class Keyboard():
 
         modifiers = Gtk.accelerator_get_default_mod_mask()
         ctrl_shift_mask = int(Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
-        view_width, view_height = ApplicationState.get_view_size()
 
         ctrl_pressed = int(keyboard_state & modifiers) == Gdk.ModifierType.CONTROL_MASK or Gdk.keyval_name(keyval).startswith('Control')
         UseCases.set_ctrl_pressed(ctrl_pressed)
@@ -120,9 +119,9 @@ class Keyboard():
                 UseCases.paragraph_end()
                 UseCases.update_implicit_x_position()
             case ('page_up', 0):
-                UseCases.page(-view_height + 100)
+                UseCases.page_up()
             case ('page_down', 0):
-                UseCases.page(view_height - 100)
+                UseCases.page_down()
 
             case ('left', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.left(True)
@@ -137,9 +136,9 @@ class Keyboard():
             case ('end', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.paragraph_end(True)
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(-view_height + 100, True)
+                UseCases.page_up(True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
-                UseCases.page(view_height - 100, True)
+                UseCases.page_down(True)
 
             case ('left', Gdk.ModifierType.CONTROL_MASK):
                 UseCases.jump_left(False)
