@@ -415,18 +415,20 @@ class Document():
 
     @timer.timer
     def get_xml(self):
-        if 'xml' not in self.secondary_formats_cache:
+        if 'paragraph_xml' not in self.secondary_formats_cache:
             self.xml.update()
-            xml = '<head>'
-            xml += '<title>' + xml_helpers.escape(self.title) + '</title>'
-            xml += '<meta name="insert-position" content="' + str(self.get_cursor_state()[0]) + '" />'
-            xml += '<meta name="selection-position" content="' + str(self.get_cursor_state()[1]) + '" />'
-            xml += '</head>'
-            xml += '<root>'
+
+            paragraph_xml = ''
             for paragraph in self.ast:
-                xml += self.xml.paragraph_xml[paragraph]
-            xml += '</root>'
-            self.secondary_formats_cache['xml'] = xml
-        return self.secondary_formats_cache['xml']
+                paragraph_xml += self.xml.paragraph_xml[paragraph]
+            self.secondary_formats_cache['paragraph_xml'] = paragraph_xml
+
+        xml = '<head>'
+        xml += '<title>' + xml_helpers.escape(self.title) + '</title>'
+        xml += '<meta name="insert-position" content="' + str(self.get_cursor_state()[0]) + '" />'
+        xml += '<meta name="selection-position" content="' + str(self.get_cursor_state()[1]) + '" />'
+        xml += '</head>'
+        xml += '<root>' + self.secondary_formats_cache['paragraph_xml'] + '</root>'
+        return xml
 
 
