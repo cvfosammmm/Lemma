@@ -277,13 +277,13 @@ class DocumentList(object):
             i += first_item_no
 
             if document_stub['id'] == self.active_document_id:
-                title_color = ColorManager.get_ui_color('sidebar_active_fg')
-                teaser_color = ColorManager.get_ui_color('sidebar_active_fg')
-                date_color = ColorManager.get_ui_color('sidebar_active_fg')
+                title_color = ColorManager.get_ui_color('sidebar_fg_1')
+                teaser_color = ColorManager.get_ui_color('sidebar_fg_2')
+                date_color = ColorManager.get_ui_color('sidebar_fg_2')
             else:
                 title_color = ColorManager.get_ui_color('sidebar_fg_1')
-                teaser_color = ColorManager.get_ui_color('sidebar_fg_1')
-                date_color = ColorManager.get_ui_color('sidebar_fg_1')
+                teaser_color = ColorManager.get_ui_color('sidebar_fg_2')
+                date_color = ColorManager.get_ui_color('sidebar_fg_2')
 
             title_text = document_stub['title']
             if len(document_stub['plaintext'].strip()) == 0:
@@ -325,12 +325,12 @@ class DocumentList(object):
 
     def render_listitem(self, ctx, title_color, title_text, date_color, date_text, teaser_color, teaser_text):
         Gdk.cairo_set_source_rgba(ctx, title_color)
-        ctx.move_to(15, 14)
+        ctx.move_to(15, 13)
         self.view.layout_header.set_text(title_text)
         PangoCairo.show_layout(ctx, self.view.layout_header)
 
         Gdk.cairo_set_source_rgba(ctx, date_color)
-        ctx.move_to(15, 14)
+        ctx.move_to(15, 13)
         self.view.layout_date.set_text(date_text)
         PangoCairo.show_layout(ctx, self.view.layout_date)
 

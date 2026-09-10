@@ -46,7 +46,7 @@ class DocumentListView(Gtk.Overlay):
 
         self.layout_teaser = Pango.Layout(self.get_pango_context())
         self.layout_teaser.set_ellipsize(Pango.EllipsizeMode.END)
-        self.layout_teaser.set_font_description(Pango.FontDescription.from_string('NewComputerModern08 Book 13px'))
+        self.layout_teaser.set_font_description(Pango.FontDescription.from_string('Cantarell 11'))
 
         self.layout_no_results = Pango.Layout(self.get_pango_context())
         self.layout_no_results.set_alignment(Pango.Alignment.CENTER)
