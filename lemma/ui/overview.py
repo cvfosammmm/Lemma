@@ -42,10 +42,14 @@ class Overview(object):
         self.current_node = None
         self.G = nx.Graph()
         self.positions = dict()
+        self.graph_width = 0
+        self.graph_height = 0
         self.titles_by_id = dict()
         self.ids_by_title = dict()
         self.width = 0
         self.height = 0
+        self.scaling_factor = 100
+        self.padding = 50
         self.hover_node = None
         self.selected_node = None
 
@@ -83,12 +87,13 @@ class Overview(object):
             self.view.grab_focus()
 
         if self.do_update and WorkspaceRepo.get_workspace().get_mode() == 'overview':
-            self.update()
+            self.update_graph()
+            self.update_scale()
             self.view.content.queue_draw()
             self.do_update = False
 
     @timer.timer
-    def update(self):
+    def update_graph(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document != None:
@@ -96,38 +101,30 @@ class Overview(object):
             self.titles_by_id = {}
             self.ids_by_title = {}
 
-            G = nx.Graph()
+            self.G = nx.Graph()
             for document_stub in DocumentRepo.list():
-                G.add_node(document_stub['id'])
+                self.G.add_node(document_stub['id'])
                 self.titles_by_id[document_stub['id']] = document_stub['title']
                 self.ids_by_title[document_stub['title']] = document_stub['id']
 
             for document_stub in DocumentRepo.list():
                 for title in list(document_stub['links'] & set(self.ids_by_title)):
-                    G.add_edge(document_stub['id'], self.ids_by_title[title])
+                    self.G.add_edge(document_stub['id'], self.ids_by_title[title])
 
-            pos = nx.spring_layout(G, seed=42)
-            self.G = G
+            pos = nx.spring_layout(self.G, seed=42, scale=math.sqrt(len(self.G)))
 
-            total_dist = 0
-            max_x = 0
-            max_y = 0
+            min_x, min_y, max_x, max_y = (0, 0, 0, 0)
             for v, vpos in pos.items():
-                total_dist += math.sqrt(vpos[0]**2 + vpos[1]**2)
-                max_x = max(max_x, vpos[0], -vpos[0])
-                max_y = max(max_y, vpos[1], -vpos[1])
-
-            if len(self.G) > 1:
-                scaling_factor_avg = (total_dist / (len(self.G) - 1)) / (math.sqrt(max(9, len(self.G))) * 0.06)
-                scaling_x = min(1 / (2 * max_x), 1 / scaling_factor_avg)
-                scaling_y = min(1 / (2 * max_y), 1 / scaling_factor_avg)
-            else:
-                scaling_x = 1
-                scaling_y = 1
+                min_x = min(min_x, vpos[0])
+                min_y = min(min_y, vpos[1])
+                max_x = max(max_x, vpos[0])
+                max_y = max(max_y, vpos[1])
+            self.graph_width = abs(max_x - min_x)
+            self.graph_height = abs(max_y - min_y)
 
             self.positions = dict()
             for v, vpos in pos.items():
-                self.positions[v] = (0.5 + vpos[0] * scaling_x, 0.5 + vpos[1] * scaling_y)
+                self.positions[v] = (vpos[0] - min_x, vpos[1] - min_y)
 
         else:
             self.current_node = None
@@ -135,17 +132,22 @@ class Overview(object):
             self.ids_by_title = dict()
             self.G = nx.Graph()
             self.positions = dict()
+            self.graph_width = 0
+            self.graph_height = 0
+
+    def update_scale(self):
+        self.view.content.set_size_request(self.graph_width * self.scaling_factor + self.padding * 2, self.graph_height * self.scaling_factor + self.padding * 2)
 
     def size_allocate(self, width, height, baseline):
-        self.width = width - 34
-        self.height = height - 40
+        self.width = width
+        self.height = height
         self.view.content.queue_draw()
 
     @timer.timer
     def draw(self, snapshot):
         if self.current_node == None: return
 
-        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width + 34, self.height + 40))
+        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
 
         overview_current_stroke = ColorManager.get_ui_color('overview_current_stroke')
         overview_current_fill = ColorManager.get_ui_color('overview_current_fill')
@@ -160,8 +162,8 @@ class Overview(object):
             vertex_pos_2 = self.positions[edge[1]]
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.move_to(vertex_pos_1[0] * self.width + 17, vertex_pos_1[1] * self.height + 20)
-            ctx.line_to(vertex_pos_2[0] * self.width + 17, vertex_pos_2[1] * self.height + 20)
+            ctx.move_to(vertex_pos_1[0] * self.scaling_factor + self.padding, vertex_pos_1[1] * self.scaling_factor + self.padding)
+            ctx.line_to(vertex_pos_2[0] * self.scaling_factor + self.padding, vertex_pos_2[1] * self.scaling_factor + self.padding)
             ctx.set_line_width(1)
             ctx.stroke()
 
@@ -179,14 +181,14 @@ class Overview(object):
                 size = 5
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.arc(vertex_pos[0] * self.width + 17, vertex_pos[1] * self.height + 20, size, 0, 2 * math.pi)
+            ctx.arc(vertex_pos[0] * self.scaling_factor + self.padding, vertex_pos[1] * self.scaling_factor + self.padding, size, 0, 2 * math.pi)
             ctx.fill()
 
         if self.hover_node != None:
             vertex_pos = self.positions[self.hover_node]
             text_extents = ctx.text_extents(self.titles_by_id[self.hover_node])
-            hpos = max(6, min(self.width - text_extents.width + 28, vertex_pos[0] * self.width + 17 - text_extents.width / 2))
-            ctx.move_to(hpos, vertex_pos[1] * self.height + 9)
+            hpos = max(6, min(self.width - text_extents.width - 6, vertex_pos[0] * self.scaling_factor + self.padding - text_extents.width / 2))
+            ctx.move_to(hpos, vertex_pos[1] * self.scaling_factor + self.padding - 12)
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('overview_title'))
             ctx.show_text(self.titles_by_id[self.hover_node])
 
@@ -222,7 +224,7 @@ class Overview(object):
 
     def get_node_at_xy(self, x, y):
         for node, pos in self.positions.items():
-            if abs((pos[0] * self.width + 17) - x) + abs((pos[1] * self.height + 20) - y) < 13:
+            if abs((pos[0] * self.scaling_factor) + self.padding - x) + abs((pos[1] * self.scaling_factor) + self.padding - y) < 13:
                 return node
         return None
 

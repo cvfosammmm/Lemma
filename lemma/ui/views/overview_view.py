@@ -30,7 +30,11 @@ class OverviewView(Gtk.Box):
         self.set_focusable(True)
 
         self.content = DrawingArea()
-        self.append(self.content)
+
+        self.scrolled_window = Gtk.ScrolledWindow()
+        self.scrolled_window.set_child(self.content)
+
+        self.append(self.scrolled_window)
 
 
 class DrawingArea(Gtk.Widget):
