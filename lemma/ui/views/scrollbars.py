@@ -214,3 +214,192 @@ class ScrollbarVertical(Gtk.Widget, Observable):
         snapshot.pop()
 
 
+class ScrollbarHorizontal(Gtk.Widget, Observable):
+
+    def __init__(self):
+        Gtk.Widget.__init__(self)
+        Observable.__init__(self)
+
+        self.add_css_class('scrollbar-horizontal')
+        self.set_size_request(-1, 20)
+
+        self.set_halign(Gtk.Align.FILL)
+        self.set_valign(Gtk.Align.END)
+        self.set_can_target(False)
+
+        self.pointer_pos = None
+        self.view_width = 0
+        self.view_height = 20
+        self.content_width = 1
+        self.scrolling_offset = 0
+        self.drag_in_progress = False
+        self.drag_start_x, self.drag_start_y = (None, None)
+
+        self.last_ping = 0
+        self.pointer_entry_time = 0
+        self.visibility_timeout = False
+        self.is_visible = False
+
+        self.motion_controller = Gtk.EventControllerMotion()
+        self.motion_controller.connect('enter', self.on_enter)
+        self.motion_controller.connect('motion', self.on_hover)
+        self.motion_controller.connect('leave', self.on_hover)
+        self.add_controller(self.motion_controller)
+
+        self.drag_controller = Gtk.GestureDrag()
+        self.drag_controller.connect('drag-begin', self.on_drag_begin)
+        self.drag_controller.connect('drag-update', self.on_drag_update)
+        self.drag_controller.connect('drag-end', self.on_drag_end)
+        self.add_controller(self.drag_controller)
+
+        self.add_tick_callback(self.animate)
+
+    def animate(self, widget, frame_clock):
+        self.set_view_width(self.get_allocated_width())
+        self.set_visibility_timeout(self.pointer_entry_time != None and (time.time() - self.pointer_entry_time > 0.1))
+        self.set_is_visible(self.pointer_pos != None or time.time() - self.last_ping < 2)
+
+        return True
+
+    def on_enter(self, controller, x=None, y=None):
+        self.set_pointer_entry_time(time.time())
+        self.set_pointer_pos(x)
+
+    def on_hover(self, controller, x=None, y=None):
+        self.set_pointer_pos(x)
+
+    def on_drag_begin(self, gesture, x, y, data=None):
+        self.ping()
+        self.set_drag_in_progress(True)
+
+        view_width = self.view_width
+        slider_width = max(60, min(view_width, view_width * view_width / self.content_width))
+        slider_pos_fraction = self.scrolling_offset / (self.content_width - view_width)
+        slider_offset = slider_pos_fraction * (view_width - max(60, min(view_width, view_width * view_width / self.content_width)))
+
+        if x < slider_offset or x > slider_offset + slider_width:
+            new_x = self.get_x_offset(x)
+            self.add_change_code('dragged', new_x)
+
+            self.drag_start_x, self.drag_start_y = (x, y)
+        else:
+            self.drag_start_x, self.drag_start_y = (slider_offset + slider_width / 2, y)
+
+    def on_drag_update(self, gesture, x, y, data=None):
+        self.ping()
+
+        x += self.drag_start_x
+        new_x = self.get_x_offset(x)
+        self.add_change_code('dragged', new_x)
+
+    def on_drag_end(self, gesture, x, y, data=None):
+        self.set_drag_in_progress(False)
+
+    def set_pointer_entry_time(self, pointer_entry_time):
+        if pointer_entry_time != self.pointer_entry_time:
+            self.pointer_entry_time = pointer_entry_time
+
+    def set_pointer_pos(self, pointer_pos):
+        if pointer_pos != self.pointer_pos:
+            self.pointer_pos = pointer_pos
+            self.queue_draw()
+
+    def set_drag_in_progress(self, drag_in_progress):
+        if drag_in_progress != self.drag_in_progress:
+            self.drag_in_progress = drag_in_progress
+            self.queue_draw()
+
+    def set_view_width(self, view_width):
+        if view_width != self.view_width:
+            self.view_width = view_width
+
+            slider_width = max(60, min(self.view_width, self.view_width * self.view_width / self.content_width))
+            self.set_can_target(slider_width < self.view_width)
+            self.queue_draw()
+
+    def set_content_width(self, content_width):
+        if content_width != self.content_width:
+            self.content_width = content_width
+
+            slider_width = max(60, min(self.view_width, self.view_width * self.view_width / self.content_width))
+            self.set_can_target(slider_width < self.view_width)
+            self.queue_draw()
+
+    def set_scrolling_offset(self, scrolling_offset):
+        if scrolling_offset != self.scrolling_offset:
+            self.scrolling_offset = scrolling_offset
+            self.queue_draw()
+
+    def set_visibility_timeout(self, visibility_timeout):
+        if visibility_timeout != self.visibility_timeout:
+            self.visibility_timeout = visibility_timeout
+            self.queue_draw()
+
+    def set_is_visible(self, is_visible):
+        if is_visible != self.is_visible:
+            self.is_visible = is_visible
+            self.queue_draw()
+
+    def ping(self):
+        self.last_ping = time.time()
+
+    def get_x_offset(self, x):
+        slider_width = max(60, min(self.view_width, self.view_width * self.view_width / self.content_width))
+        x_in_range = max(slider_width / 2, min(self.view_width - slider_width / 2, x)) - slider_width / 2
+        x_fraction = x_in_range / (self.view_width - slider_width)
+        return int(x_fraction * (self.content_width - self.view_width))
+
+    def do_snapshot(self, snapshot):
+        expand_height = self.pointer_pos != None and self.visibility_timeout == True
+
+        visible_height = 8 if expand_height else 3
+        padding_bottom = 6 if expand_height else 3
+        padding_left = 6 if expand_height else 3
+        slider_width = max(60, min(self.view_width, self.view_width * self.view_width / self.content_width))
+        slider_pos_fraction = self.scrolling_offset / (self.content_width - self.view_width)
+        slider_offset = slider_pos_fraction * (self.view_width - max(60, min(self.view_width, self.view_width * self.view_width / self.content_width)))
+
+        if not self.is_visible: return
+        if slider_width >= self.view_width: return
+
+        pointer_hovers_slider = self.pointer_pos != None and self.pointer_pos > slider_offset and self.pointer_pos < slider_offset + slider_width
+
+        if self.has_css_class('sidebar'):
+            bg_color = ColorManager.get_ui_color('sidebar_scrollbar_bg')
+            if expand_height:
+                if self.drag_in_progress:
+                    slider_color = ColorManager.get_ui_color('sidebar_scrollbar_active')
+                elif pointer_hovers_slider:
+                    slider_color = ColorManager.get_ui_color('sidebar_scrollbar_hover')
+                else:
+                    slider_color = ColorManager.get_ui_color('sidebar_scrollbar_default')
+            else:
+                slider_color = ColorManager.get_ui_color('sidebar_scrollbar_thin')
+        else:
+            bg_color = ColorManager.get_ui_color('scrollbar_bg')
+            if expand_height:
+                if self.drag_in_progress:
+                    slider_color = ColorManager.get_ui_color('scrollbar_active')
+                elif pointer_hovers_slider:
+                    slider_color = ColorManager.get_ui_color('scrollbar_hover')
+                else:
+                    slider_color = ColorManager.get_ui_color('scrollbar_default')
+            else:
+                slider_color = ColorManager.get_ui_color('scrollbar_thin')
+
+        if expand_height:
+            rect = Graphene.Rect().init(padding_left, self.view_height - padding_bottom - visible_height, self.view_width - 2 * padding_left, visible_height)
+            rounded_rect = Gsk.RoundedRect()
+            rounded_rect.init_from_rect(rect, 20)
+            snapshot.push_rounded_clip(rounded_rect)
+            snapshot.append_color(bg_color, rect)
+            snapshot.pop()
+
+        rect = Graphene.Rect().init(slider_offset + padding_left, self.view_height - padding_bottom - visible_height, slider_width - 2 * padding_left, visible_height)
+        rounded_rect = Gsk.RoundedRect()
+        rounded_rect.init_from_rect(rect, 20)
+        snapshot.push_rounded_clip(rounded_rect)
+        snapshot.append_color(slider_color, rect)
+        snapshot.pop()
+
+
