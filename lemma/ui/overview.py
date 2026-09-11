@@ -38,6 +38,7 @@ class Overview(object):
         self.view = self.main_window.overview
 
         self.do_update = True
+        self.do_center = True
 
         self.current_node = None
         self.G = nx.Graph()
@@ -46,21 +47,12 @@ class Overview(object):
         self.graph_height = 0
         self.titles_by_id = dict()
         self.ids_by_title = dict()
-        self.width = 0
-        self.height = 0
         self.scaling_factor = 100
-        self.padding = 50
         self.hover_node = None
         self.selected_node = None
 
-        self.view.content.set_allocate_func(self.size_allocate)
-        self.view.content.set_draw_func(self.draw)
-
-        self.motion_controller = Gtk.EventControllerMotion()
-        self.motion_controller.connect('enter', self.on_enter)
-        self.motion_controller.connect('motion', self.on_hover)
-        self.motion_controller.connect('leave', self.on_leave)
-        self.view.content.add_controller(self.motion_controller)
+        self.view.set_draw_func(self.draw)
+        self.view.set_pointer_func(self.update_pointer)
 
         self.primary_click_controller = Gtk.GestureClick()
         self.primary_click_controller.set_button(1)
@@ -85,6 +77,7 @@ class Overview(object):
 
         if 'mode_set' in messages and WorkspaceRepo.get_workspace().get_mode() == 'overview':
             self.view.grab_focus()
+            self.do_center = True
 
         if self.do_update and WorkspaceRepo.get_workspace().get_mode() == 'overview':
             self.update_graph()
@@ -119,12 +112,12 @@ class Overview(object):
                 min_y = min(min_y, vpos[1])
                 max_x = max(max_x, vpos[0])
                 max_y = max(max_y, vpos[1])
-            self.graph_width = abs(max_x - min_x)
-            self.graph_height = abs(max_y - min_y)
+            self.graph_width = abs(max_x - min_x) + 0.1 * math.sqrt(len(self.G))
+            self.graph_height = abs(max_y - min_y) + 0.1 * math.sqrt(len(self.G))
 
             self.positions = dict()
             for v, vpos in pos.items():
-                self.positions[v] = (vpos[0] - min_x, vpos[1] - min_y)
+                self.positions[v] = (vpos[0] - min_x + 0.05 * math.sqrt(len(self.G)), vpos[1] - min_y + 0.05 * math.sqrt(len(self.G)))
 
         else:
             self.current_node = None
@@ -136,18 +129,21 @@ class Overview(object):
             self.graph_height = 0
 
     def update_scale(self):
-        self.view.content.set_size_request(self.graph_width * self.scaling_factor + self.padding * 2, self.graph_height * self.scaling_factor + self.padding * 2)
-
-    def size_allocate(self, width, height, baseline):
-        self.width = width
-        self.height = height
-        self.view.content.queue_draw()
+        drawing_width = self.graph_width * self.scaling_factor * self.view.zoom
+        drawing_height = self.graph_height * self.scaling_factor * self.view.zoom
+        self.view.set_content_size(drawing_width, drawing_height)
 
     @timer.timer
     def draw(self, snapshot):
         if self.current_node == None: return
 
-        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.width, self.height))
+        ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.view.view_width, self.view.view_height))
+
+        if self.do_center:
+            scroll_x = self.positions[self.current_node][0] * self.scaling_factor * self.view.zoom - self.view.view_width / 2
+            scroll_y = self.positions[self.current_node][1] * self.scaling_factor * self.view.zoom - self.view.view_height / 2
+            self.view.scroll_to(scroll_x, scroll_y)
+            self.do_center = False
 
         overview_current_stroke = ColorManager.get_ui_color('overview_current_stroke')
         overview_current_fill = ColorManager.get_ui_color('overview_current_fill')
@@ -162,8 +158,8 @@ class Overview(object):
             vertex_pos_2 = self.positions[edge[1]]
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.move_to(vertex_pos_1[0] * self.scaling_factor + self.padding, vertex_pos_1[1] * self.scaling_factor + self.padding)
-            ctx.line_to(vertex_pos_2[0] * self.scaling_factor + self.padding, vertex_pos_2[1] * self.scaling_factor + self.padding)
+            ctx.move_to(vertex_pos_1[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x, vertex_pos_1[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y)
+            ctx.line_to(vertex_pos_2[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x, vertex_pos_2[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y)
             ctx.set_line_width(1)
             ctx.stroke()
 
@@ -181,29 +177,31 @@ class Overview(object):
                 size = 5
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.arc(vertex_pos[0] * self.scaling_factor + self.padding, vertex_pos[1] * self.scaling_factor + self.padding, size, 0, 2 * math.pi)
+            ctx.arc(vertex_pos[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x, vertex_pos[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y, size, 0, 2 * math.pi)
             ctx.fill()
 
         if self.hover_node != None:
             vertex_pos = self.positions[self.hover_node]
             text_extents = ctx.text_extents(self.titles_by_id[self.hover_node])
-            hpos = max(6, min(self.width - text_extents.width - 6, vertex_pos[0] * self.scaling_factor + self.padding - text_extents.width / 2))
-            ctx.move_to(hpos, vertex_pos[1] * self.scaling_factor + self.padding - 12)
+            hpos = max(6, min(self.view.view_width - text_extents.width - 6, vertex_pos[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x - text_extents.width / 2))
+            ctx.move_to(hpos, vertex_pos[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y - 12)
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('overview_title'))
             ctx.show_text(self.titles_by_id[self.hover_node])
 
-        self.update_pointer()
+    def update_pointer(self):
+        x = self.view.pointer_x
+        y = self.view.pointer_y
 
-    def on_enter(self, controller, x, y):
-        node = self.get_node_at_xy(x, y)
-        self.set_hover_node(node)
+        if x != None and y != None:
+            node = self.get_node_at_xy(x, y)
+            self.set_hover_node(node)
+        else:
+            self.set_hover_node(None)
 
-    def on_hover(self, controller, x, y):
-        node = self.get_node_at_xy(x, y)
-        self.set_hover_node(node)
-
-    def on_leave(self, controller):
-        self.set_hover_node(None)
+        if self.hover_node != None:
+            self.view.content.set_cursor_from_name('pointer')
+        else:
+            self.view.content.set_cursor_from_name('default')
 
     def on_primary_button_press(self, controller, n_press, x, y):
         if n_press != 1: return
@@ -218,29 +216,18 @@ class Overview(object):
         node = self.get_node_at_xy(x, y)
         if node != None and node == self.selected_node:
             UseCases.set_active_document(node)
-            self.set_hover_node(None)
-
-        self.set_selected_node(None)
 
     def get_node_at_xy(self, x, y):
         for node, pos in self.positions.items():
-            if abs((pos[0] * self.scaling_factor) + self.padding - x) + abs((pos[1] * self.scaling_factor) + self.padding - y) < 13:
+            if abs((pos[0] * self.scaling_factor * self.view.zoom) - self.view.scroll_x - x) + abs((pos[1] * self.scaling_factor * self.view.zoom) - self.view.scroll_y - y) < 13:
                 return node
         return None
 
     def set_hover_node(self, node):
         self.hover_node = node
-        self.view.content.queue_draw()
 
     def set_selected_node(self, node):
         self.selected_node = node
-        self.view.content.queue_draw()
-
-    def update_pointer(self):
-        if self.hover_node != None:
-            self.view.content.set_cursor_from_name('pointer')
-        else:
-            self.view.content.set_cursor_from_name('default')
 
     def close_overview(self, action=None, parameter=''):
         workspace = WorkspaceRepo.get_workspace()

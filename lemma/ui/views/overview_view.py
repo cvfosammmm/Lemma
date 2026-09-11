@@ -17,7 +17,7 @@
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 
 class OverviewView(Gtk.Box):
@@ -30,12 +30,108 @@ class OverviewView(Gtk.Box):
         self.set_focusable(True)
 
         self.content = DrawingArea()
+        self.append(self.content)
 
-        self.scrolled_window = Gtk.ScrolledWindow()
-        self.scrolled_window.set_child(self.content)
+        self.__scrolling_multiplier = 2.5
 
-        self.append(self.scrolled_window)
+        self.view_width = 0
+        self.view_height = 0
+        self.content_width = 0
+        self.content_height = 0
+        self.zoom = 1
+        self.scroll_x = 0
+        self.scroll_y = 0
 
+        self.__pointer_func = lambda snapshot: None
+        self.__setup_signals()
+
+    def set_content_size(self, width, height):
+        self.content_width = width
+        self.content_height = height
+        self.content.queue_draw()
+
+    def scroll_to(self, x, y):
+        self.__set_scroll(x, y)
+        self.content.queue_draw()
+
+    def set_draw_func(self, draw_func):
+        self.content.draw_func = draw_func
+
+    def set_pointer_func(self, pointer_func):
+        self.__pointer_func = pointer_func
+
+    def __setup_signals(self):
+        self.content.allocate_func = self.__size_allocate
+
+        self.scrolling_controller = Gtk.EventControllerScroll()
+        self.scrolling_controller.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
+        self.scrolling_controller.connect('scroll', self.__on_scroll)
+        self.content.add_controller(self.scrolling_controller)
+
+        self.motion_controller = Gtk.EventControllerMotion()
+        self.motion_controller.connect('enter', self.__on_enter)
+        self.motion_controller.connect('motion', self.__on_hover)
+        self.motion_controller.connect('leave', self.__on_leave)
+        self.content.add_controller(self.motion_controller)
+
+    def __size_allocate(self, width, height, baseline):
+        self.view_width = width
+        self.view_height = height
+
+    def __on_enter(self, controller, x, y):
+        self.pointer_x = x
+        self.pointer_y = y
+        self.__pointer_func()
+        self.content.queue_draw()
+
+    def __on_hover(self, controller, x, y):
+        self.pointer_x = x
+        self.pointer_y = y
+        self.__pointer_func()
+        self.content.queue_draw()
+
+    def __on_leave(self, controller):
+        self.pointer_x = None
+        self.pointer_y = None
+        self.__pointer_func()
+        self.content.queue_draw()
+
+    def __on_scroll(self, controller, dx, dy):
+        modifiers = Gtk.accelerator_get_default_mod_mask()
+
+        if controller.get_current_event_state() & modifiers == 0:
+            dy *= self.__scrolling_multiplier
+            dx *= self.__scrolling_multiplier
+
+            scroll_x = self.scroll_x + dx
+            scroll_y = self.scroll_y + dy
+            self.__set_scroll(scroll_x, scroll_y)
+
+            self.content.queue_draw()
+
+        if controller.get_current_event_state() & modifiers == Gdk.ModifierType.CONTROL_MASK:
+            if controller.get_unit() == Gdk.ScrollUnit.WHEEL:
+                zoom_amount = dy * 0.1
+            else:
+                zoom_amount = (dy + dx) * 0.005
+            self.zoom *= 1 - zoom_amount
+
+            scroll_x = (self.scroll_x + self.pointer_x) * (1 - zoom_amount) - self.pointer_x
+            scroll_y = (self.scroll_y + self.pointer_y) * (1 - zoom_amount) - self.pointer_y
+            self.__set_scroll(scroll_x, scroll_y)
+
+            self.content.queue_draw()
+
+    def __set_scroll(self, x, y):
+        if self.content_width * self.zoom < self.view_width:
+            self.scroll_x = (self.content_width * self.zoom - self.view_width) / 2
+        else:
+            self.scroll_x = max(0, min(self.content_width * self.zoom - self.view_width, x))
+
+        if self.content_height * self.zoom < self.view_height:
+            self.scroll_y = (self.content_height * self.zoom - self.view_height) / 2
+        else:
+            self.scroll_y = max(0, min(self.content_height * self.zoom - self.view_height, y))
 
 class DrawingArea(Gtk.Widget):
 
@@ -46,12 +142,6 @@ class DrawingArea(Gtk.Widget):
 
         self.draw_func = lambda snapshot: None
         self.allocate_func = lambda width, height, baseline: None
-
-    def set_draw_func(self, draw_func):
-        self.draw_func = draw_func
-
-    def set_allocate_func(self, allocate_func):
-        self.allocate_func = allocate_func
 
     def do_snapshot(self, snapshot):
         self.draw_func(snapshot)
