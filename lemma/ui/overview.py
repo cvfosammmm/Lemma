@@ -85,6 +85,12 @@ class Overview(object):
             self.view.content.queue_draw()
             self.do_update = False
 
+        if self.do_center and self.view.view_width > 0:
+            scroll_x = self.positions[self.current_node][0] * self.scaling_factor * self.view.zoom - self.view.view_width / 2
+            scroll_y = self.positions[self.current_node][1] * self.scaling_factor * self.view.zoom - self.view.view_height / 2
+            self.view.scroll_to(scroll_x, scroll_y)
+            self.do_center = False
+
     @timer.timer
     def update_graph(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
@@ -138,12 +144,6 @@ class Overview(object):
         if self.current_node == None: return
 
         ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.view.view_width, self.view.view_height))
-
-        if self.do_center:
-            scroll_x = self.positions[self.current_node][0] * self.scaling_factor * self.view.zoom - self.view.view_width / 2
-            scroll_y = self.positions[self.current_node][1] * self.scaling_factor * self.view.zoom - self.view.view_height / 2
-            self.view.scroll_to(scroll_x, scroll_y)
-            self.do_center = False
 
         overview_current_stroke = ColorManager.get_ui_color('overview_current_stroke')
         overview_current_fill = ColorManager.get_ui_color('overview_current_fill')
