@@ -75,15 +75,15 @@ class Overview(object):
         if 'document_removed' in messages or 'mode_set' in messages:
             self.do_update = True
 
-        if 'mode_set' in messages and WorkspaceRepo.get_workspace().get_mode() == 'overview':
-            self.view.grab_focus()
-            self.do_center = True
-
         if self.do_update and WorkspaceRepo.get_workspace().get_mode() == 'overview':
             self.update_graph()
             self.update_scale()
             self.view.content.queue_draw()
             self.do_update = False
+
+        if 'mode_set' in messages and WorkspaceRepo.get_workspace().get_mode() == 'overview':
+            self.view.grab_focus()
+            self.do_center = True
 
         if self.do_center and self.view.view_width > 0:
             scroll_x = self.positions[self.current_node][0] * self.scaling_factor * self.view.zoom - self.view.view_width / 2
@@ -135,8 +135,8 @@ class Overview(object):
             self.graph_height = 0
 
     def update_scale(self):
-        drawing_width = self.graph_width * self.scaling_factor * self.view.zoom
-        drawing_height = self.graph_height * self.scaling_factor * self.view.zoom
+        drawing_width = self.graph_width * self.scaling_factor
+        drawing_height = self.graph_height * self.scaling_factor
         self.view.set_content_size(drawing_width, drawing_height)
 
     @timer.timer
