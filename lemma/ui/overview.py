@@ -243,10 +243,16 @@ class Overview(object):
         self.selected_node = node
 
     def zoom_out(self, arg=None):
-        self.view.set_zoom(self.view.zoom * 0.5)
+        if self.view.zoom <= 0.25: return
+
+        zoom_levels = [0.25, 0.33, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.2, 1.33, 1.5, 1.7, 2, 2.4, 3, 4]
+        self.view.set_zoom(max(level for level in zoom_levels if level < self.view.zoom))
 
     def zoom_in(self, arg=None):
-        self.view.set_zoom(self.view.zoom * 2)
+        if self.view.zoom >= 4: return
+
+        zoom_levels = [0.25, 0.33, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.2, 1.33, 1.5, 1.7, 2, 2.4, 3, 4]
+        self.view.set_zoom(min(level for level in zoom_levels if level > self.view.zoom))
 
     def zoom_reset(self, arg=None):
         self.view.set_zoom(1)
