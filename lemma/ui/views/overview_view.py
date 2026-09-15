@@ -64,6 +64,17 @@ class OverviewView(Gtk.Overlay):
         self.__update_scrollbars()
         self.content.queue_draw()
 
+    def set_zoom(self, zoom_level):
+        prev_level = self.zoom
+        self.__set_zoom(zoom_level)
+
+        scroll_x = (self.scroll_x + self.view_width / 2) * self.zoom / prev_level - self.view_width / 2
+        scroll_y = (self.scroll_y + self.view_height / 2) * self.zoom / prev_level - self.view_height / 2
+        self.__set_scroll(scroll_x, scroll_y)
+
+        self.__update_scrollbars()
+        self.content.queue_draw()
+
     def set_draw_func(self, draw_func):
         self.content.draw_func = draw_func
 
@@ -134,10 +145,11 @@ class OverviewView(Gtk.Overlay):
                 zoom_amount = dy * 0.1
             else:
                 zoom_amount = (dy + dx) * 0.005
-            self.zoom *= 1 - zoom_amount
+            prev_level = self.zoom
+            self.__set_zoom(self.zoom * (1 - zoom_amount))
 
-            scroll_x = (self.scroll_x + self.pointer_x) * (1 - zoom_amount) - self.pointer_x
-            scroll_y = (self.scroll_y + self.pointer_y) * (1 - zoom_amount) - self.pointer_y
+            scroll_x = (self.scroll_x + self.pointer_x) * self.zoom / prev_level - self.pointer_x
+            scroll_y = (self.scroll_y + self.pointer_y) * self.zoom / prev_level - self.pointer_y
             self.__set_scroll(scroll_x, scroll_y)
 
             self.__update_scrollbars()
@@ -154,6 +166,9 @@ class OverviewView(Gtk.Overlay):
 
         self.__update_scrollbars()
         self.content.queue_draw()
+
+    def __set_zoom(self, level):
+        self.zoom = min(4, max(0.25, level))
 
     def __set_scroll(self, x, y):
         if self.content_width * self.zoom < self.view_width:

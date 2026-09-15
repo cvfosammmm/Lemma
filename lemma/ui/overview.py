@@ -36,6 +36,7 @@ class Overview(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.view = self.main_window.overview
+        self.toolbar = self.main_window.toolbar.toolbar_overview
 
         self.do_update = True
         self.do_center = True
@@ -62,7 +63,14 @@ class Overview(object):
 
         self.shortcut_controller = Shortcuts.new_controller()
         self.shortcut_controller.add_cb('close_dialog', self.close_overview)
+        self.shortcut_controller.add_cb('zoom_in_overview', self.zoom_in)
+        self.shortcut_controller.add_cb('zoom_out_overview', self.zoom_out)
+        self.shortcut_controller.add_cb('zoom_reset_overview', self.zoom_reset)
         self.view.add_controller(self.shortcut_controller)
+
+        self.toolbar.zoom_out_button.connect('clicked', self.zoom_out)
+        self.toolbar.zoom_in_button.connect('clicked', self.zoom_in)
+        self.toolbar.reset_zoom_button.connect('clicked', self.zoom_reset)
 
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'mode_set')
@@ -228,6 +236,15 @@ class Overview(object):
 
     def set_selected_node(self, node):
         self.selected_node = node
+
+    def zoom_out(self, arg=None):
+        self.view.set_zoom(self.view.zoom * 0.5)
+
+    def zoom_in(self, arg=None):
+        self.view.set_zoom(self.view.zoom * 2)
+
+    def zoom_reset(self, arg=None):
+        self.view.set_zoom(1)
 
     def close_overview(self, action=None, parameter=''):
         workspace = WorkspaceRepo.get_workspace()

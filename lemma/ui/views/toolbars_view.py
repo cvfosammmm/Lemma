@@ -238,6 +238,24 @@ class ToolbarOverview(Gtk.Box):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
+        self.zoom_out_button = Gtk.Button.new_from_icon_name('zoom-out-symbolic')
+        self.zoom_out_button.set_can_focus(False)
+        self.zoom_out_button.set_tooltip_text(_('Zoom Out') + ' (' + Shortcuts.get_for_labels('zoom_out_overview') + ')')
+
+        self.reset_zoom_button = Gtk.Button.new_from_icon_name('zoom-original-symbolic')
+        self.reset_zoom_button.set_can_focus(False)
+        self.reset_zoom_button.set_tooltip_text(_('Reset Zoom') + ' (' + Shortcuts.get_for_labels('zoom_reset_overview') + ')')
+
+        self.zoom_in_button = Gtk.Button.new_from_icon_name('zoom-in-symbolic')
+        self.zoom_in_button.set_can_focus(False)
+        self.zoom_in_button.set_tooltip_text(_('Zoom In') + ' (' + Shortcuts.get_for_labels('zoom_in_overview') + ')')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.zoom_out_button)
+        box.append(self.reset_zoom_button)
+        box.append(self.zoom_in_button)
+        self.append(box)
+
 
 class ToolbarEmpty(Gtk.Box):
 

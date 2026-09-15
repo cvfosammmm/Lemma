@@ -66,10 +66,16 @@ class Shortcuts():
         Shortcuts.defaults['go_forward'] = '<Alt>Right'
         Shortcuts.defaults['show_shortcuts_dialog'] = '<Control>question'
         Shortcuts.defaults['show_hamburger_menu'] = 'F10'
+
         Shortcuts.defaults['show_overview'] = '<Alt>Up'
+        Shortcuts.defaults['zoom_in_overview'] = '<Control>plus'
+        Shortcuts.defaults['zoom_out_overview'] = '<Control>minus'
+        Shortcuts.defaults['zoom_reset_overview'] = '<Control>0'
+
         Shortcuts.defaults['show_bookmarks'] = '<Alt>0'
         for i in range(1, 10):
             Shortcuts.defaults['activate_bookmark_' + str(i)] = '<Alt>' + str(i)
+
         Shortcuts.defaults['start_global_search'] = '<Control>f'
         Shortcuts.defaults['stop_global_search'] = 'Escape'
         Shortcuts.defaults['global_search_prev_result'] = 'Up'
@@ -84,6 +90,9 @@ class Shortcuts():
         Shortcuts.titles['go_back'] = 'Go Back'
         Shortcuts.titles['go_forward'] = 'Go Forward'
         Shortcuts.titles['show_overview'] = 'Show Overview'
+        Shortcuts.titles['zoom_in_overview'] = 'Zoom In Overview'
+        Shortcuts.titles['zoom_out_overview'] = 'Zoom Out Overview'
+        Shortcuts.titles['zoom_reset_overview'] = 'Reset Zoom Overview'
         Shortcuts.titles['show_bookmarks'] = 'Show Bookmarks'
         Shortcuts.titles['activate_bookmark_1'] = 'Open Bookmark 1'
         Shortcuts.titles['activate_bookmark_2'] = 'Open Bookmark 2'
