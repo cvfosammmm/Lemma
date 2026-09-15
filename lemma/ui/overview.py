@@ -99,6 +99,11 @@ class Overview(object):
             self.view.scroll_to(scroll_x, scroll_y)
             self.do_center = False
 
+        if WorkspaceRepo.get_workspace().get_mode() == 'overview':
+            self.toolbar.zoom_out_button.set_sensitive(self.view.zoom > 0.25)
+            self.toolbar.zoom_in_button.set_sensitive(self.view.zoom < 4)
+            self.toolbar.reset_zoom_button.set_sensitive(self.view.zoom != 1)
+
     @timer.timer
     def update_graph(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
