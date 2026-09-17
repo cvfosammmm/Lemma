@@ -44,6 +44,7 @@ class Settings():
         Settings.defaults['split_navigation_sidebar'] = False
         Settings.defaults['navigation_sidebar_active_tab'] = 'backlinks'
         Settings.defaults['navbar_paned_position'] = -1
+        Settings.defaults['overview_zoom_level'] = 1
 
         Settings.defaults['last_export_folder'] = None
         Settings.defaults['last_image_export_folder'] = None

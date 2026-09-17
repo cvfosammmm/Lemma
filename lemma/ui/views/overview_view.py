@@ -20,12 +20,14 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk
 
 from lemma.ui.views.scrollbars import ScrollbarVertical, ScrollbarHorizontal
+from lemma.ui.helpers.observable import Observable
 
 
-class OverviewView(Gtk.Overlay):
+class OverviewView(Gtk.Overlay, Observable):
 
     def __init__(self):
         Gtk.Overlay.__init__(self)
+        Observable.__init__(self)
         self.add_css_class('overview')
 
         self.set_focusable(True)
@@ -44,7 +46,6 @@ class OverviewView(Gtk.Overlay):
         self.view_height = 0
         self.content_width = 0
         self.content_height = 0
-        self.zoom = 1
         self.scroll_x = 0
         self.scroll_y = 0
 
@@ -60,17 +61,6 @@ class OverviewView(Gtk.Overlay):
 
     def scroll_to(self, x, y):
         self.__set_scroll(x, y)
-
-        self.__update_scrollbars()
-        self.content.queue_draw()
-
-    def set_zoom(self, zoom_level):
-        prev_level = self.zoom
-        self.__set_zoom(zoom_level)
-
-        scroll_x = (self.scroll_x + self.view_width / 2) * self.zoom / prev_level - self.view_width / 2
-        scroll_y = (self.scroll_y + self.view_height / 2) * self.zoom / prev_level - self.view_height / 2
-        self.__set_scroll(scroll_x, scroll_y)
 
         self.__update_scrollbars()
         self.content.queue_draw()
@@ -145,15 +135,7 @@ class OverviewView(Gtk.Overlay):
                 zoom_amount = dy * 0.1
             else:
                 zoom_amount = (dy + dx) * 0.005
-            prev_level = self.zoom
-            self.__set_zoom(self.zoom * (1 - zoom_amount))
-
-            scroll_x = (self.scroll_x + self.pointer_x) * self.zoom / prev_level - self.pointer_x
-            scroll_y = (self.scroll_y + self.pointer_y) * self.zoom / prev_level - self.pointer_y
-            self.__set_scroll(scroll_x, scroll_y)
-
-            self.__update_scrollbars()
-            self.content.queue_draw()
+            self.add_change_code('zoom', zoom_amount)
 
     def __on_horizontal_scrollbar_drag(self, widget, new_x):
         self.__set_scroll(new_x, self.scroll_y)
@@ -167,25 +149,22 @@ class OverviewView(Gtk.Overlay):
         self.__update_scrollbars()
         self.content.queue_draw()
 
-    def __set_zoom(self, level):
-        self.zoom = min(4, max(0.25, level))
-
     def __set_scroll(self, x, y):
-        if self.content_width * self.zoom < self.view_width:
-            self.scroll_x = (self.content_width * self.zoom - self.view_width) / 2
+        if self.content_width < self.view_width:
+            self.scroll_x = (self.content_width - self.view_width) / 2
         else:
-            self.scroll_x = max(0, min(self.content_width * self.zoom - self.view_width, x))
+            self.scroll_x = max(0, min(self.content_width - self.view_width, x))
 
-        if self.content_height * self.zoom < self.view_height:
-            self.scroll_y = (self.content_height * self.zoom - self.view_height) / 2
+        if self.content_height < self.view_height:
+            self.scroll_y = (self.content_height - self.view_height) / 2
         else:
-            self.scroll_y = max(0, min(self.content_height * self.zoom - self.view_height, y))
+            self.scroll_y = max(0, min(self.content_height - self.view_height, y))
 
     def __update_scrollbars(self):
-        self.scrollbar_horizontal.set_content_width(self.content_width * self.zoom)
+        self.scrollbar_horizontal.set_content_width(self.content_width)
         self.scrollbar_horizontal.set_scrolling_offset(self.scroll_x)
         self.scrollbar_horizontal.ping()
-        self.scrollbar_vertical.set_content_height(self.content_height * self.zoom)
+        self.scrollbar_vertical.set_content_height(self.content_height)
         self.scrollbar_vertical.set_scrolling_offset(self.scroll_y)
         self.scrollbar_vertical.ping()
 

@@ -27,6 +27,7 @@ from lemma.services.message_bus import MessageBus
 from lemma.ui.shortcuts import Shortcuts
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
+from lemma.services.settings import Settings
 from lemma.use_cases.use_cases import UseCases
 import lemma.services.timer as timer
 
@@ -51,9 +52,11 @@ class Overview(object):
         self.scaling_factor = 100
         self.hover_node = None
         self.selected_node = None
+        self.zoom = Settings.get_value('overview_zoom_level')
 
         self.view.set_draw_func(self.draw)
         self.view.set_pointer_func(self.update_pointer)
+        self.view.observe('zoom', self.__on_zoom)
 
         self.primary_click_controller = Gtk.GestureClick()
         self.primary_click_controller.set_button(1)
@@ -94,15 +97,15 @@ class Overview(object):
             self.do_center = True
 
         if self.do_center and self.view.view_width > 0:
-            scroll_x = self.positions[self.current_node][0] * self.scaling_factor * self.view.zoom - self.view.view_width / 2
-            scroll_y = self.positions[self.current_node][1] * self.scaling_factor * self.view.zoom - self.view.view_height / 2
+            scroll_x = self.positions[self.current_node][0] * self.scaling_factor * self.zoom - self.view.view_width / 2
+            scroll_y = self.positions[self.current_node][1] * self.scaling_factor * self.zoom - self.view.view_height / 2
             self.view.scroll_to(scroll_x, scroll_y)
             self.do_center = False
 
         if WorkspaceRepo.get_workspace().get_mode() == 'overview':
-            self.toolbar.zoom_out_button.set_sensitive(self.view.zoom > 0.25)
-            self.toolbar.zoom_in_button.set_sensitive(self.view.zoom < 4)
-            self.toolbar.reset_zoom_button.set_sensitive(self.view.zoom != 1)
+            self.toolbar.zoom_out_button.set_sensitive(self.zoom > 0.25)
+            self.toolbar.zoom_in_button.set_sensitive(self.zoom < 4)
+            self.toolbar.reset_zoom_button.set_sensitive(self.zoom != 1)
 
     @timer.timer
     def update_graph(self):
@@ -147,11 +150,6 @@ class Overview(object):
             self.graph_width = 0
             self.graph_height = 0
 
-    def update_scale(self):
-        drawing_width = self.graph_width * self.scaling_factor
-        drawing_height = self.graph_height * self.scaling_factor
-        self.view.set_content_size(drawing_width, drawing_height)
-
     @timer.timer
     def draw(self, snapshot):
         if self.current_node == None: return
@@ -171,8 +169,8 @@ class Overview(object):
             vertex_pos_2 = self.positions[edge[1]]
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.move_to(vertex_pos_1[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x, vertex_pos_1[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y)
-            ctx.line_to(vertex_pos_2[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x, vertex_pos_2[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y)
+            ctx.move_to(vertex_pos_1[0] * self.scaling_factor * self.zoom - self.view.scroll_x, vertex_pos_1[1] * self.scaling_factor * self.zoom - self.view.scroll_y)
+            ctx.line_to(vertex_pos_2[0] * self.scaling_factor * self.zoom - self.view.scroll_x, vertex_pos_2[1] * self.scaling_factor * self.zoom - self.view.scroll_y)
             ctx.set_line_width(1)
             ctx.stroke()
 
@@ -190,14 +188,14 @@ class Overview(object):
                 size = 5
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.arc(vertex_pos[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x, vertex_pos[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y, size, 0, 2 * math.pi)
+            ctx.arc(vertex_pos[0] * self.scaling_factor * self.zoom - self.view.scroll_x, vertex_pos[1] * self.scaling_factor * self.zoom - self.view.scroll_y, size, 0, 2 * math.pi)
             ctx.fill()
 
         if self.hover_node != None:
             vertex_pos = self.positions[self.hover_node]
             text_extents = ctx.text_extents(self.titles_by_id[self.hover_node])
-            hpos = max(6, min(self.view.view_width - text_extents.width - 6, vertex_pos[0] * self.scaling_factor * self.view.zoom - self.view.scroll_x - text_extents.width / 2))
-            ctx.move_to(hpos, vertex_pos[1] * self.scaling_factor * self.view.zoom - self.view.scroll_y - 12)
+            hpos = max(6, min(self.view.view_width - text_extents.width - 6, vertex_pos[0] * self.scaling_factor * self.zoom - self.view.scroll_x - text_extents.width / 2))
+            ctx.move_to(hpos, vertex_pos[1] * self.scaling_factor * self.zoom - self.view.scroll_y - 12)
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('overview_title'))
             ctx.show_text(self.titles_by_id[self.hover_node])
 
@@ -232,7 +230,7 @@ class Overview(object):
 
     def get_node_at_xy(self, x, y):
         for node, pos in self.positions.items():
-            if abs((pos[0] * self.scaling_factor * self.view.zoom) - self.view.scroll_x - x) + abs((pos[1] * self.scaling_factor * self.view.zoom) - self.view.scroll_y - y) < 13:
+            if abs((pos[0] * self.scaling_factor * self.zoom) - self.view.scroll_x - x) + abs((pos[1] * self.scaling_factor * self.zoom) - self.view.scroll_y - y) < 13:
                 return node
         return None
 
@@ -242,20 +240,53 @@ class Overview(object):
     def set_selected_node(self, node):
         self.selected_node = node
 
+    def __on_zoom(self, view, zoom_amount):
+        prev_level = self.zoom
+        self.__set_zoom(self.zoom * (1 - zoom_amount))
+
+        scroll_x = (self.view.scroll_x + self.view.pointer_x) * self.zoom / prev_level - self.view.pointer_x
+        scroll_y = (self.view.scroll_y + self.view.pointer_y) * self.zoom / prev_level - self.view.pointer_y
+        self.view.scroll_to(scroll_x, scroll_y)
+
     def zoom_out(self, arg=None):
-        if self.view.zoom <= 0.25: return
+        if self.zoom <= 0.25: return
 
         zoom_levels = [0.25, 0.33, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.2, 1.33, 1.5, 1.7, 2, 2.4, 3, 4]
-        self.view.set_zoom(max(level for level in zoom_levels if level < self.view.zoom))
+        prev_level = self.zoom
+        self.__set_zoom(max(level for level in zoom_levels if level < self.zoom))
+
+        scroll_x = (self.view.scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
+        scroll_y = (self.view.scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
+        self.view.scroll_to(scroll_x, scroll_y)
 
     def zoom_in(self, arg=None):
-        if self.view.zoom >= 4: return
+        if self.zoom >= 4: return
 
         zoom_levels = [0.25, 0.33, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.2, 1.33, 1.5, 1.7, 2, 2.4, 3, 4]
-        self.view.set_zoom(min(level for level in zoom_levels if level > self.view.zoom))
+        prev_level = self.zoom
+        self.__set_zoom(min(level for level in zoom_levels if level > self.zoom))
+
+        scroll_x = (self.view.scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
+        scroll_y = (self.view.scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
+        self.view.scroll_to(scroll_x, scroll_y)
 
     def zoom_reset(self, arg=None):
-        self.view.set_zoom(1)
+        prev_level = self.zoom
+        self.__set_zoom(1)
+
+        scroll_x = (self.view.scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
+        scroll_y = (self.view.scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
+        self.view.scroll_to(scroll_x, scroll_y)
+
+    def __set_zoom(self, zoom_level):
+        self.zoom = min(4, max(0.25, zoom_level))
+        UseCases.settings_set_value('overview_zoom_level', self.zoom)
+        self.update_scale()
+
+    def update_scale(self):
+        drawing_width = self.graph_width * self.scaling_factor * self.zoom
+        drawing_height = self.graph_height * self.scaling_factor * self.zoom
+        self.view.set_content_size(drawing_width, drawing_height)
 
     def close_overview(self, action=None, parameter=''):
         workspace = WorkspaceRepo.get_workspace()
