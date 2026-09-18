@@ -53,6 +53,8 @@ class Overview(object):
         self.hover_node = None
         self.selected_node = None
         self.zoom = Settings.get_value('overview_zoom_level')
+        self.current_scroll_x = 0
+        self.current_scroll_y = 0
 
         self.view.set_draw_func(self.draw)
         self.view.set_pointer_func(self.update_pointer)
@@ -89,7 +91,7 @@ class Overview(object):
         if self.do_update and WorkspaceRepo.get_workspace().get_mode() == 'overview':
             self.update_graph()
             self.update_scale()
-            self.view.content.queue_draw()
+            self.view.queue_draw()
             self.do_update = False
 
         if 'mode_set' in messages and WorkspaceRepo.get_workspace().get_mode() == 'overview':
@@ -106,6 +108,12 @@ class Overview(object):
             self.toolbar.zoom_out_button.set_sensitive(self.zoom > 0.25)
             self.toolbar.zoom_in_button.set_sensitive(self.zoom < 4)
             self.toolbar.reset_zoom_button.set_sensitive(self.zoom != 1)
+
+            scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
+            if scroll_x != self.current_scroll_x or scroll_y != self.current_scroll_y:
+                self.current_scroll_x = scroll_x
+                self.current_scroll_y = scroll_y
+                self.view.queue_draw()
 
     @timer.timer
     def update_graph(self):
@@ -155,6 +163,7 @@ class Overview(object):
         if self.current_node == None: return
 
         ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, self.view.view_width, self.view.view_height))
+        scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
 
         overview_current_stroke = ColorManager.get_ui_color('overview_current_stroke')
         overview_current_fill = ColorManager.get_ui_color('overview_current_fill')
@@ -169,8 +178,8 @@ class Overview(object):
             vertex_pos_2 = self.positions[edge[1]]
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.move_to(vertex_pos_1[0] * self.scaling_factor * self.zoom - self.view.scroll_x, vertex_pos_1[1] * self.scaling_factor * self.zoom - self.view.scroll_y)
-            ctx.line_to(vertex_pos_2[0] * self.scaling_factor * self.zoom - self.view.scroll_x, vertex_pos_2[1] * self.scaling_factor * self.zoom - self.view.scroll_y)
+            ctx.move_to(vertex_pos_1[0] * self.scaling_factor * self.zoom - scroll_x, vertex_pos_1[1] * self.scaling_factor * self.zoom - scroll_y)
+            ctx.line_to(vertex_pos_2[0] * self.scaling_factor * self.zoom - scroll_x, vertex_pos_2[1] * self.scaling_factor * self.zoom - scroll_y)
             ctx.set_line_width(1)
             ctx.stroke()
 
@@ -188,14 +197,14 @@ class Overview(object):
                 size = 5
 
             Gdk.cairo_set_source_rgba(ctx, color)
-            ctx.arc(vertex_pos[0] * self.scaling_factor * self.zoom - self.view.scroll_x, vertex_pos[1] * self.scaling_factor * self.zoom - self.view.scroll_y, size, 0, 2 * math.pi)
+            ctx.arc(vertex_pos[0] * self.scaling_factor * self.zoom - scroll_x, vertex_pos[1] * self.scaling_factor * self.zoom - scroll_y, size, 0, 2 * math.pi)
             ctx.fill()
 
         if self.hover_node != None:
             vertex_pos = self.positions[self.hover_node]
             text_extents = ctx.text_extents(self.titles_by_id[self.hover_node])
-            hpos = max(6, min(self.view.view_width - text_extents.width - 6, vertex_pos[0] * self.scaling_factor * self.zoom - self.view.scroll_x - text_extents.width / 2))
-            ctx.move_to(hpos, vertex_pos[1] * self.scaling_factor * self.zoom - self.view.scroll_y - 12)
+            hpos = max(6, min(self.view.view_width - text_extents.width - 6, vertex_pos[0] * self.scaling_factor * self.zoom - scroll_x - text_extents.width / 2))
+            ctx.move_to(hpos, vertex_pos[1] * self.scaling_factor * self.zoom - scroll_y - 12)
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('overview_title'))
             ctx.show_text(self.titles_by_id[self.hover_node])
 
@@ -229,8 +238,10 @@ class Overview(object):
             UseCases.set_active_document(node)
 
     def get_node_at_xy(self, x, y):
+        scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
+
         for node, pos in self.positions.items():
-            if abs((pos[0] * self.scaling_factor * self.zoom) - self.view.scroll_x - x) + abs((pos[1] * self.scaling_factor * self.zoom) - self.view.scroll_y - y) < 13:
+            if abs((pos[0] * self.scaling_factor * self.zoom) - scroll_x - x) + abs((pos[1] * self.scaling_factor * self.zoom) - scroll_y - y) < 13:
                 return node
         return None
 
@@ -244,8 +255,9 @@ class Overview(object):
         prev_level = self.zoom
         self.__set_zoom(self.zoom * (1 - zoom_amount))
 
-        scroll_x = (self.view.scroll_x + self.view.pointer_x) * self.zoom / prev_level - self.view.pointer_x
-        scroll_y = (self.view.scroll_y + self.view.pointer_y) * self.zoom / prev_level - self.view.pointer_y
+        scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
+        scroll_x = (scroll_x + self.view.pointer_x) * self.zoom / prev_level - self.view.pointer_x
+        scroll_y = (scroll_y + self.view.pointer_y) * self.zoom / prev_level - self.view.pointer_y
         self.view.scroll_to(scroll_x, scroll_y)
 
     def zoom_out(self, arg=None):
@@ -255,8 +267,9 @@ class Overview(object):
         prev_level = self.zoom
         self.__set_zoom(max(level for level in zoom_levels if level < self.zoom))
 
-        scroll_x = (self.view.scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
-        scroll_y = (self.view.scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
+        scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
+        scroll_x = (scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
+        scroll_y = (scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
         self.view.scroll_to(scroll_x, scroll_y)
 
     def zoom_in(self, arg=None):
@@ -266,16 +279,18 @@ class Overview(object):
         prev_level = self.zoom
         self.__set_zoom(min(level for level in zoom_levels if level > self.zoom))
 
-        scroll_x = (self.view.scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
-        scroll_y = (self.view.scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
+        scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
+        scroll_x = (scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
+        scroll_y = (scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
         self.view.scroll_to(scroll_x, scroll_y)
 
     def zoom_reset(self, arg=None):
         prev_level = self.zoom
         self.__set_zoom(1)
 
-        scroll_x = (self.view.scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
-        scroll_y = (self.view.scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
+        scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
+        scroll_x = (scroll_x + self.view.view_width / 2) * self.zoom / prev_level - self.view.view_width / 2
+        scroll_y = (scroll_y + self.view.view_height / 2) * self.zoom / prev_level - self.view.view_height / 2
         self.view.scroll_to(scroll_x, scroll_y)
 
     def __set_zoom(self, zoom_level):

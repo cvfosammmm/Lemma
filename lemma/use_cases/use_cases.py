@@ -1275,9 +1275,6 @@ class UseCases():
         view_width, view_height = ApplicationState.get_view_size()
         x, y = Queries.get_current_scrolling_offsets()
 
-        max_y = max(0, Queries.get_document_offset() + document_layout.get_height() + LayoutInfo.get_document_padding_bottom() - view_height)
-        max_x = max(0, LayoutInfo.get_document_padding_left() + document_layout.get_width() - view_width)
-
         vel_x *= 0.4
         vel_y *= 0.4
         x = x + 15.13 / 16 * vel_x
