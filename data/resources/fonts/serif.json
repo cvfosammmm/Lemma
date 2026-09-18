@@ -75,7 +75,7 @@
         },
         {
             "name": "h1",
-            "path": "newcomputermodern/otf/NewCMSans10-Bold.otf",
+            "path": "newcomputermodern/otf/NewCM10-Bold.otf",
             "size": 32,
             "ascend": 38,
             "descend": 11,
@@ -138,6 +138,6 @@
         }
     ],
     "css": [
-        ".document-title entry { font-family: NewComputerModernSans10; font-size: 36px; font-weight: bold; }"
+        ".document-title entry { font-family: NewComputerModern10; font-size: 36px; font-weight: bold; }"
     ]
 }
