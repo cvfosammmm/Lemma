@@ -39,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="76" date="2026-9-18">
+            <description translatable="no">
+                <p>Overview Zoom, ...</p>
+            </description>
+        </release>
         ​<release version="75" date="2026-9-10">
             <description translatable="no">
                 <p>Overview Graph, ...</p>
