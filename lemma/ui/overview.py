@@ -53,8 +53,6 @@ class Overview(object):
         self.hover_node = None
         self.selected_node = None
         self.zoom = Settings.get_value('overview_zoom_level')
-        self.current_scroll_x = 0
-        self.current_scroll_y = 0
 
         self.view.set_draw_func(self.draw)
         self.view.set_pointer_func(self.update_pointer)
@@ -108,12 +106,7 @@ class Overview(object):
             self.toolbar.zoom_out_button.set_sensitive(self.zoom > 0.25)
             self.toolbar.zoom_in_button.set_sensitive(self.zoom < 4)
             self.toolbar.reset_zoom_button.set_sensitive(self.zoom != 1)
-
-            scroll_x, scroll_y = self.view.get_current_scrolling_offsets()
-            if scroll_x != self.current_scroll_x or scroll_y != self.current_scroll_y:
-                self.current_scroll_x = scroll_x
-                self.current_scroll_y = scroll_y
-                self.view.queue_draw()
+            self.view.animate()
 
     @timer.timer
     def update_graph(self):
