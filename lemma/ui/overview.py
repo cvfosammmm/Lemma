@@ -37,7 +37,7 @@ class Overview(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.view = self.main_window.overview
-        self.toolbar = self.main_window.toolbar.toolbar_overview
+        self.toolbar_right = self.main_window.toolbar.toolbar_overview_right
 
         self.do_update = True
         self.do_center = True
@@ -71,9 +71,9 @@ class Overview(object):
         self.shortcut_controller.add_cb('zoom_reset_overview', self.zoom_reset)
         self.view.add_controller(self.shortcut_controller)
 
-        self.toolbar.zoom_out_button.connect('clicked', self.zoom_out)
-        self.toolbar.zoom_in_button.connect('clicked', self.zoom_in)
-        self.toolbar.reset_zoom_button.connect('clicked', self.zoom_reset)
+        self.toolbar_right.zoom_out_button.connect('clicked', self.zoom_out)
+        self.toolbar_right.zoom_in_button.connect('clicked', self.zoom_in)
+        self.toolbar_right.reset_zoom_button.connect('clicked', self.zoom_reset)
 
         MessageBus.subscribe(self, 'document_removed')
         MessageBus.subscribe(self, 'mode_set')
@@ -103,9 +103,9 @@ class Overview(object):
             self.do_center = False
 
         if WorkspaceRepo.get_workspace().get_mode() == 'overview':
-            self.toolbar.zoom_out_button.set_sensitive(self.zoom > 0.25)
-            self.toolbar.zoom_in_button.set_sensitive(self.zoom < 4)
-            self.toolbar.reset_zoom_button.set_sensitive(self.zoom != 1)
+            self.toolbar_right.zoom_out_button.set_sensitive(self.zoom > 0.25)
+            self.toolbar_right.zoom_in_button.set_sensitive(self.zoom < 4)
+            self.toolbar_right.reset_zoom_button.set_sensitive(self.zoom != 1)
             self.view.animate()
 
     @timer.timer

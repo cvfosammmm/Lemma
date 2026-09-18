@@ -29,12 +29,11 @@ class ToolbarsView(Gtk.ActionBar):
         self.add_css_class('toolbar')
 
         self.main_left = ToolbarMain()
-        self.toolbar_overview = ToolbarOverview()
+        self.toolbar_overview_right = ToolbarOverviewRight()
         self.empty_left = ToolbarEmpty()
 
         self.stack_left = Gtk.Stack()
         self.stack_left.add_named(self.main_left, 'main')
-        self.stack_left.add_named(self.toolbar_overview, 'overview')
         self.stack_left.add_named(self.empty_left, 'empty')
 
         self.main_right = ToolbarRight()
@@ -42,6 +41,7 @@ class ToolbarsView(Gtk.ActionBar):
 
         self.stack_right = Gtk.Stack()
         self.stack_right.add_named(self.main_right, 'main')
+        self.stack_right.add_named(self.toolbar_overview_right, 'overview')
         self.stack_right.add_named(self.empty_right, 'empty')
 
         self.pack_start(self.stack_left)
@@ -232,10 +232,10 @@ class ToolbarMain(Gtk.Box):
         self.append(box)
 
 
-class ToolbarOverview(Gtk.Box):
+class ToolbarOverviewRight(Gtk.CenterBox):
 
     def __init__(self):
-        Gtk.Box.__init__(self)
+        Gtk.CenterBox.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
         self.zoom_out_button = Gtk.Button.new_from_icon_name('zoom-out-symbolic')
@@ -254,7 +254,7 @@ class ToolbarOverview(Gtk.Box):
         box.append(self.zoom_out_button)
         box.append(self.reset_zoom_button)
         box.append(self.zoom_in_button)
-        self.append(box)
+        self.set_end_widget(box)
 
 
 class ToolbarEmpty(Gtk.Box):

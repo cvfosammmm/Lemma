@@ -175,21 +175,11 @@ class OverviewView(Gtk.Overlay, Observable):
         self.queue_draw()
 
     def __set_scrolling_target(self, x, y, animation_type=None):
-        if self.content_width < self.view_width:
-            scroll_x = (self.content_width - self.view_width) / 2
-        else:
-            scroll_x = x
-
-        if self.content_height < self.view_height:
-            scroll_y = (self.content_height - self.view_height) / 2
-        else:
-            scroll_y = y
-
         self.prev_scroll_x = self.scroll_x
         self.prev_scroll_y = self.scroll_y
 
-        self.scroll_x = scroll_x
-        self.scroll_y = scroll_y
+        self.scroll_x = x
+        self.scroll_y = y
 
         self.last_scroll_scheduled = ApplicationState.get_frame_time()
         self.last_scroll_animation_type = animation_type
@@ -215,8 +205,14 @@ class OverviewView(Gtk.Overlay, Observable):
             x = self.scroll_x
             y = self.scroll_y
 
-        x = min(self.content_width - self.view_width, max(0, x))
-        y = min(self.content_height - self.view_height, max(0, y))
+        if self.content_width < self.view_width:
+            x = (self.content_width - self.view_width) / 2
+        else:
+            x = min(self.content_width - self.view_width, max(0, x))
+        if self.content_height < self.view_height:
+            y = (self.content_height - self.view_height) / 2
+        else:
+            y = min(self.content_height - self.view_height, max(0, y))
 
         self.current_scroll_x = x
         self.current_scroll_y = y
