@@ -37,6 +37,7 @@ class Overview(object):
     def __init__(self, main_window):
         self.main_window = main_window
         self.view = self.main_window.overview
+        self.toolbar_left = self.main_window.toolbar.toolbar_overview_left
         self.toolbar_right = self.main_window.toolbar.toolbar_overview_right
 
         self.do_update = True
@@ -150,6 +151,8 @@ class Overview(object):
             self.positions = dict()
             self.graph_width = 0
             self.graph_height = 0
+
+        self.toolbar_left.node_count.set_text(str(len(self.G)) + ' Documents')
 
     @timer.timer
     def draw(self, snapshot):

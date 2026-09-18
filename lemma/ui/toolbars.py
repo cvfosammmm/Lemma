@@ -199,7 +199,7 @@ class Toolbars():
                 self.update_button_visibility()
 
         elif mode == 'overview':
-            self.toolbar.stack_left.set_visible_child_name('empty')
+            self.toolbar.stack_left.set_visible_child_name('overview')
             self.toolbar.stack_right.set_visible_child_name('overview')
 
         else:
