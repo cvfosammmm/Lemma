@@ -484,6 +484,17 @@ box.welcome label.explainer {
     margin-bottom: 42px;
 }
 
+/* overview */
+
+.overview-toolbar-right .zoom-reset-button {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+.overview-toolbar-right .zoom-label {
+    min-width: 75px;
+    font-weight: normal;
+}
+
 /* action dialog */
 
 window.action-dialog {

@@ -50,11 +50,12 @@ class ToolbarsView(Gtk.ActionBar):
         self.pack_end(self.stack_right)
 
 
-class ToolbarRight(Gtk.Box):
+class ToolbarRight(Gtk.CenterBox):
 
     def __init__(self):
-        Gtk.Box.__init__(self)
+        Gtk.CenterBox.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.inner_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
 
         self.edit_menu_button = Gtk.Button.new_from_icon_name('document-edit-symbolic')
         self.edit_menu_button.set_can_focus(False)
@@ -81,8 +82,8 @@ class ToolbarRight(Gtk.Box):
         box.append(self.undo_button)
         box.append(self.redo_button)
         box.append(self.document_menu_button)
-        self.append(box)
-        self.append(Gtk.Separator())
+        self.inner_box.append(box)
+        self.inner_box.append(Gtk.Separator())
 
         self.symbols_sidebar_toggle = Gtk.Button()
         self.symbols_sidebar_toggle.set_tooltip_text(_('Symbols Sidebar'))
@@ -99,7 +100,9 @@ class ToolbarRight(Gtk.Box):
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.symbols_sidebar_toggle)
         box.append(self.emoji_sidebar_toggle)
-        self.append(box)
+        self.inner_box.append(box)
+
+        self.set_end_widget(self.inner_box)
 
 
 class ToolbarMain(Gtk.Box):
@@ -239,6 +242,7 @@ class ToolbarOverviewLeft(Gtk.Box):
     def __init__(self):
         Gtk.Box.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.add_css_class('overview-toolbar-left')
 
         self.node_count = Gtk.Label.new('')
         self.node_count.set_margin_start(6)
@@ -251,12 +255,19 @@ class ToolbarOverviewRight(Gtk.CenterBox):
     def __init__(self):
         Gtk.CenterBox.__init__(self)
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.add_css_class('overview-toolbar-right')
 
         self.zoom_out_button = Gtk.Button.new_from_icon_name('zoom-out-symbolic')
         self.zoom_out_button.set_can_focus(False)
         self.zoom_out_button.set_tooltip_text(_('Zoom Out') + ' (' + Shortcuts.get_for_labels('zoom_out_overview') + ')')
 
-        self.reset_zoom_button = Gtk.Button.new_from_icon_name('zoom-original-symbolic')
+        self.reset_zoom_button_label = Gtk.Label.new('100 %')
+        self.reset_zoom_button_label.add_css_class('zoom-label')
+
+        self.reset_zoom_button = Gtk.Button()
+        self.reset_zoom_button.add_css_class('zoom-reset-button')
+        self.reset_zoom_button.add_css_class('flat')
+        self.reset_zoom_button.set_child(self.reset_zoom_button_label)
         self.reset_zoom_button.set_can_focus(False)
         self.reset_zoom_button.set_tooltip_text(_('Reset Zoom') + ' (' + Shortcuts.get_for_labels('zoom_reset_overview') + ')')
 

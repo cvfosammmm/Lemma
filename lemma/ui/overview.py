@@ -81,6 +81,7 @@ class Overview(object):
 
         if WorkspaceRepo.get_workspace().get_mode() == 'overview':
             self.view.grab_focus()
+            self.toolbar_right.reset_zoom_button_label.set_text('{:.1f}%'.format(self.zoom * 100))
 
     def animate(self):
         messages = MessageBus.get_messages(self)
@@ -293,6 +294,7 @@ class Overview(object):
         self.zoom = min(4, max(0.25, zoom_level))
         UseCases.settings_set_value('overview_zoom_level', self.zoom)
         self.update_scale()
+        self.toolbar_right.reset_zoom_button_label.set_text('{:.1f}%'.format(self.zoom * 100))
 
     def update_scale(self):
         drawing_width = self.graph_width * self.scaling_factor * self.zoom
