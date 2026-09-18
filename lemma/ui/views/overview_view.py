@@ -77,7 +77,7 @@ class OverviewView(Gtk.Overlay, Observable):
         self.scrolling_controller = Gtk.EventControllerScroll()
         self.scrolling_controller.set_flags(Gtk.EventControllerScrollFlags.BOTH_AXES | Gtk.EventControllerScrollFlags.KINETIC)
         self.scrolling_controller.connect('scroll', self.__on_scroll)
-        self.content.add_controller(self.scrolling_controller)
+        self.add_controller(self.scrolling_controller)
 
         self.scrollbar_vertical.observe('dragged', self.__on_vertical_scrollbar_drag)
         self.scrollbar_horizontal.observe('dragged', self.__on_horizontal_scrollbar_drag)
@@ -86,7 +86,7 @@ class OverviewView(Gtk.Overlay, Observable):
         self.motion_controller.connect('enter', self.__on_enter)
         self.motion_controller.connect('motion', self.__on_hover)
         self.motion_controller.connect('leave', self.__on_leave)
-        self.content.add_controller(self.motion_controller)
+        self.add_controller(self.motion_controller)
 
     def __size_allocate(self, width, height, baseline):
         self.view_width = width
