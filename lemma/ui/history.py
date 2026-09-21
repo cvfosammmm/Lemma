@@ -56,6 +56,14 @@ class History(object):
         self.primary_click_controller.connect('released', self.on_primary_button_release)
         self.view.content.add_controller(self.primary_click_controller)
 
+        self.secondary_click_controller = Gtk.GestureClick()
+        self.secondary_click_controller.set_button(3)
+        self.secondary_click_controller.connect('pressed', self.on_secondary_button_press)
+        self.view.content.add_controller(self.secondary_click_controller)
+
+        self.view.context_menu.delete_document_button.connect('clicked', self.on_delete_document_clicked)
+        self.view.context_menu.popover.connect('closed', self.on_context_menu_close)
+
         MessageBus.subscribe(self, 'history_changed')
         MessageBus.subscribe(self, 'new_active_document')
         MessageBus.subscribe(self, 'document_title_changed')
@@ -134,6 +142,24 @@ class History(object):
             UseCases.set_active_document(self.items[hover_index][1]['id'], update_history=False)
         self.set_selected_index(None)
 
+    def on_secondary_button_press(self, controller, n_press, x, y):
+        if n_press != 1: return
+
+        hover_index = self.get_hover_index()
+        if hover_index != None:
+            self.set_selected_index(hover_index)
+            self.view.context_menu.popup_at_cursor(x, y)
+
+        return True
+
+    def on_delete_document_clicked(self, button):
+        document_id = self.items[self.selected_index][1]['id']
+        UseCases.delete_document(document_id)
+        self.view.context_menu.popover.popdown()
+
+    def on_context_menu_close(self, popover):
+        self.set_selected_index(None)
+
     def set_selected_index(self, index):
         if index != self.selected_index:
             self.selected_index = index
@@ -154,7 +180,7 @@ class History(object):
             if document_offset + document_width >= self.view.scrolling_widget.scrolling_offset_x and document_offset <= self.view.scrolling_widget.scrolling_offset_x + width:
                 font_desc = self.font_desc_bold if (is_active and mode == 'documents') else self.font_desc_normal
 
-                if i == hover_index:
+                if i == hover_index or i == self.selected_index:
                     if i == self.selected_index:
                         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('toolbar_selected_bg'))
                     else:

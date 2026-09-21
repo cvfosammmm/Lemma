@@ -176,7 +176,8 @@ class Shortcuts():
         try: value = Shortcuts.data[name]
         except KeyError:
             value = Shortcuts.defaults[name]
-        return Gtk.ShortcutTrigger.parse_string(value).to_label(Gdk.Display.get_default())
+        result = Gtk.ShortcutTrigger.parse_string(value).to_label(Gdk.Display.get_default())
+        return result
 
     def load_from_disk():
         try: filehandle = open(os.path.join(Files.get_config_folder(), 'shortcuts.pickle'), 'rb')

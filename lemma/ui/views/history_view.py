@@ -20,6 +20,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Pango
 
 from lemma.ui.views.scrolling_widget import ScrollingWidget
+from lemma.ui.views.context_menu import ContextMenu
 
 
 class HistoryView(Gtk.Overlay):
@@ -35,5 +36,20 @@ class HistoryView(Gtk.Overlay):
 
         self.content = self.scrolling_widget.content
         self.set_child(self.scrolling_widget.view)
+
+        self.context_menu = ContextMenuHistory(self.content)
+
+
+class ContextMenuHistory(ContextMenu):
+
+    def __init__(self, parent):
+        ContextMenu.__init__(self)
+
+        self.popover.set_parent(parent)
+        self.popover.set_size_request(260, -1)
+        self.popover.set_offset(130, 0)
+
+        self.delete_document_button = self.create_button('Delete document', popdown=False)
+        self.box.append(self.delete_document_button)
 
 
