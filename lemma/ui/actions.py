@@ -130,7 +130,7 @@ class Actions(object):
         self.shortcut_controller_docview.add_cb('go_to_parent_node', self.actions['move-cursor-to-parent'].activate)
         self.shortcut_controller_docview.add_cb('extend_selection', self.actions['extend-selection'].activate)
         self.shortcut_controller_docview.add_cb('rename_document', self.actions['rename-document'].activate)
-        for para_style in ['h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'p']:
+        for para_style in ['h2', 'h3', 'h4', 'h5', 'ul', 'ol', 'cl', 'code', 'p']:
             sc_name = 'paragraph_style_' + para_style
             callback = self.actions['set-paragraph-style'].activate
             self.shortcut_controller_docview.add_cb(sc_name, callback, GLib.Variant.new_string(para_style))

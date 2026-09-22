@@ -37,7 +37,6 @@ class Popover(PopoverView):
         entries.append(['h3', _('Heading 3'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h3')])
         entries.append(['h4', _('Heading 4'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h4')])
         entries.append(['h5', _('Heading 5'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h5')])
-        entries.append(['h6', _('Heading 6'), 'placeholder', Shortcuts.get_for_labels('paragraph_style_h6')])
 
         for entry in entries:
             self.add_action_button(entry[1], 'win.set-paragraph-style', entry[0], icon=entry[2], shortcut=entry[3])
@@ -48,6 +47,7 @@ class Popover(PopoverView):
         entries.append(['ul', _('Bullet List'), 'view-list-bullet-symbolic', Shortcuts.get_for_labels('paragraph_style_ul')])
         entries.append(['ol', _('Numbered List'), 'view-list-ordered-symbolic', Shortcuts.get_for_labels('paragraph_style_ol')])
         entries.append(['cl', _('Checklist'), 'view-checklist-symbolic', Shortcuts.get_for_labels('paragraph_style_cl')])
+        entries.append(['code', _('Code'), 'code-symbolic', Shortcuts.get_for_labels('paragraph_style_code')])
 
         for entry in entries:
             self.add_action_button(entry[1], 'win.set-paragraph-style', entry[0], icon=entry[2], shortcut=entry[3])

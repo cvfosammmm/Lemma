@@ -42,7 +42,7 @@ class PageShortcuts(object):
         self.sections.append({'title': 'Copy and Paste', 'items': ['cut', 'copy', 'paste']})
         self.sections.append({'title': 'Cursor Movement', 'items': ['go_to_parent_node', 'extend_selection', 'select_all']})
         self.sections.append({'title': 'Actions', 'items': ['toggle_checkbox', 'link_popover']})
-        self.sections.append({'title': 'Formatting', 'items': ['toggle_bold', 'toggle_italic', 'toggle_verbatim', 'toggle_highlight', 'paragraph_style_h2', 'paragraph_style_h3', 'paragraph_style_h4', 'paragraph_style_h5', 'paragraph_style_h6', 'paragraph_style_ul', 'paragraph_style_ol', 'paragraph_style_cl', 'paragraph_style_p']})
+        self.sections.append({'title': 'Formatting', 'items': ['toggle_bold', 'toggle_italic', 'toggle_verbatim', 'toggle_highlight', 'paragraph_style_h2', 'paragraph_style_h3', 'paragraph_style_h4', 'paragraph_style_h5', 'paragraph_style_ul', 'paragraph_style_ol', 'paragraph_style_cl', 'paragraph_style_code', 'paragraph_style_p']})
         self.sections.append({'title': 'Math', 'items': ['subscript', 'superscript']})
 
         self.view = PageShortcutsView()

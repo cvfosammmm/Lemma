@@ -180,10 +180,16 @@ class ToolbarMain(Gtk.Box):
         self.cl_button.set_can_focus(False)
         self.cl_button.set_tooltip_text(_('Checklist') + ' (' + Shortcuts.get_for_labels('paragraph_style_cl') + ')')
 
+        self.code_button = Gtk.Button.new_from_icon_name('code-symbolic')
+        self.code_button.set_detailed_action_name('win.set-paragraph-style::code')
+        self.code_button.set_can_focus(False)
+        self.code_button.set_tooltip_text(_('Code') + ' (' + Shortcuts.get_for_labels('paragraph_style_code') + ')')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.ul_button)
         box.append(self.ol_button)
         box.append(self.cl_button)
+        box.append(self.code_button)
         self.append(box)
 
         self.indentation_buttons_separator = Gtk.Separator()

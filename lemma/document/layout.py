@@ -564,6 +564,8 @@ class Layout(object):
 
         if self.current_paragraph_style.startswith('h'):
             return self.current_paragraph_style
+        elif self.current_paragraph_style == 'code':
+            return 'mono'
 
         if 'verbatim' in node.tags: return 'mono'
         if 'bold' in node.tags and 'italic' not in node.tags: return 'bold'

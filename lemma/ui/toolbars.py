@@ -213,7 +213,7 @@ class Toolbars():
         current_node = document.get_first_selection_bound()
         paragraph_style_at_cursor = current_node.paragraph().style
 
-        labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List'), 'cl': _('Checklist')}
+        labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List'), 'cl': _('Checklist'), 'code': _('Code')}
         self.toolbar.main_left.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
 
     def update_button_visibility(self):
@@ -226,6 +226,7 @@ class Toolbars():
         self.toolbar.main_left.ul_button.set_visible(Settings.get_value('button_visible_ul'))
         self.toolbar.main_left.ol_button.set_visible(Settings.get_value('button_visible_ol'))
         self.toolbar.main_left.cl_button.set_visible(Settings.get_value('button_visible_cl'))
+        self.toolbar.main_left.code_button.set_visible(Settings.get_value('button_visible_code'))
         self.toolbar.main_left.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
         self.toolbar.main_left.files_button.set_visible(Settings.get_value('button_visible_attach_files'))
         self.toolbar.main_left.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
@@ -233,7 +234,7 @@ class Toolbars():
         tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic') or Settings.get_value('button_visible_verbatim') or Settings.get_value('button_visible_highlight')
         self.toolbar.main_left.tag_buttons_separator.set_visible(tag_buttons_visible)
 
-        list_buttons_visible = Settings.get_value('button_visible_ul') or Settings.get_value('button_visible_ol') or Settings.get_value('button_visible_cl')
+        list_buttons_visible = Settings.get_value('button_visible_ul') or Settings.get_value('button_visible_ol') or Settings.get_value('button_visible_cl') or Settings.get_value('button_visible_code')
         self.toolbar.main_left.list_buttons_separator.set_visible(list_buttons_visible)
 
         indentation_buttons_visible = Settings.get_value('button_visible_decrease_indent') or Settings.get_value('button_visible_increase_indent')
