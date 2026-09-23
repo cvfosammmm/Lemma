@@ -167,6 +167,8 @@ class DocumentView():
 
             if content_offset_y + document_layout.get_paragraph_layout(paragraph)['y'] + document_layout.get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + document_layout.get_paragraph_layout(paragraph)['y'] <= view_height:
                 self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph, list_item_numbers)
+            if paragraph.style == 'code':
+                self.draw_code_bg(ctx, content_offset_x, content_offset_y, paragraph)
 
             for j, line_layout in enumerate(document_layout.get_paragraph_layout(paragraph)['children']):
                 if content_offset_y + line_layout['y'] + document_layout.get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + document_layout.get_paragraph_layout(paragraph)['y'] <= view_height:
@@ -258,9 +260,19 @@ class DocumentView():
             ctx.set_source_surface(surface, bullet_x, bullet_y)
             ctx.paint()
 
+    def draw_code_bg(self, ctx, offset_x, offset_y, paragraph):
+        document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+        layout = document_layout.get_paragraph_layout(paragraph)
+
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('code_bg'))
+        ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor((offset_y + layout['y']) * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['height'] * self.hidpi_factor))
+        ctx.fill()
+
     @timer.timer
     def draw_line(self, ctx, paragraph_no, line_no, layout, in_selection):
         surface = ctx.get_target().create_similar_image(cairo.Format.ARGB32, int((layout['x'] + layout['width'] + 10) * self.hidpi_factor), int(layout['height'] * self.hidpi_factor) + 1)
+        paragraph = self.document.ast[paragraph_no]
+
         self.draw_highlight_bg(layout, cairo.Context(surface), 0, -layout['y'])
         self.draw_selection_bg(layout, cairo.Context(surface), 0, -layout['y'], in_selection)
         self.draw_layout(layout, cairo.Context(surface), 0, -layout['y'])

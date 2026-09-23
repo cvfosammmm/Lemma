@@ -341,7 +341,10 @@ class Document():
     def get_node_at_position(self, pos):
         node = self.ast
         for index in pos:
-            node = node[index]
+            try:
+                node = node[index]
+            except IndexError:
+                return None
         return node
 
     def get_first_selection_bound(self):

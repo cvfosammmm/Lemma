@@ -88,12 +88,12 @@ class XMLParserObject(object):
             self.current_tags[self.level].add('italic')
         if tag == 'strong':
             self.current_tags[self.level].add('bold')
-        if tag == 'code':
+        if tag == 'verb':
             self.current_tags[self.level].add('verbatim')
         if tag == 'mark':
             self.current_tags[self.level].add('highlight')
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code']:
             if 'indentation_level' in attrs:
                 self.current_indentation_level = int(attrs['indentation_level'])
             if 'state' in attrs:
@@ -141,7 +141,7 @@ class XMLParserObject(object):
     def handle_endtag(self, tag):
         self.open_xml_tags.pop()
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code']:
             new_paragraph = Paragraph()
             for node in self.nodes:
                 new_paragraph.append(node)
@@ -157,7 +157,7 @@ class XMLParserObject(object):
             self.current_tags[self.level].discard('italic')
         if tag == 'strong':
             self.current_tags[self.level].discard('bold')
-        if tag == 'code':
+        if tag == 'verb':
             self.current_tags[self.level].discard('verbatim')
         if tag == 'mark':
             self.current_tags[self.level].discard('highlight')

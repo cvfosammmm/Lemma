@@ -135,6 +135,7 @@
 @define-color attachment_fg_2 @view_bg_color;
 @define-color attachment_bg_2 @text;
 @define-color selection_bg #ffffff44;
+@define-color code_bg #333;
 @define-color cursor #fff;
 @define-color highlight_bg #1f441f;
 @define-color drop_color @text;

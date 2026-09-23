@@ -436,8 +436,14 @@ class Cursor():
             self.restore_selection_invariant()
 
     def set_state(self, position):
-        self.node_insert = self.document.get_node_at_position(position[0])
-        self.node_selection = self.document.get_node_at_position(position[1])
+        node_insert = self.document.get_node_at_position(position[0])
+        node_selection = self.document.get_node_at_position(position[1])
+
+        if node_insert != None and node_selection != None:
+            self.node_insert = node_insert
+            self.node_selection = node_selection
+        else:
+            self.set_state([Position(0, 0), Position(0, 0)])
 
     def get_insert_node(self):
         return self.node_insert

@@ -29,7 +29,7 @@ def embellish_with_link_and_tags(xml, link, tags):
     if 'bold' in tags:
         xml = '<strong>' + xml + '</strong>'
     if 'verbatim' in tags:
-        xml = '<code>' + xml + '</code>'
+        xml = '<verb>' + xml + '</verb>'
     if 'highlight' in tags:
         xml = '<mark>' + xml + '</mark>'
     if link != None:
