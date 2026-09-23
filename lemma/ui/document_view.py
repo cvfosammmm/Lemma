@@ -293,7 +293,9 @@ class DocumentView():
     def draw_selection_bg(self, layout, ctx, offset_x, offset_y, in_selection):
         if in_selection and layout != self.first_selection_line and layout != self.last_selection_line:
             Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('selection_bg'))
-            ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor(offset_y * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['parent']['height'] * self.hidpi_factor))
+
+            height = math.ceil(layout['height'] * self.hidpi_factor)
+            ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor((offset_y + layout['y']) * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), height)
             ctx.fill()
 
         else:
