@@ -153,8 +153,12 @@ class DocumentView():
         self.last_selection_line = document_layout.get_ancestors(document_layout.get_node_layout(self.last_selection_node))[-2]
 
         ctx = snapshot.append_cairo(Graphene.Rect().init(0, 0, view_width, view_height))
-
         ctx.scale(self.hidpi_factor_inverted, self.hidpi_factor_inverted)
+
+        for i, paragraph in enumerate(self.document.ast):
+            if paragraph.style == 'code':
+                self.draw_code_bg(ctx, content_offset_x, content_offset_y, paragraph)
+
         in_selection = False
         list_item_numbers = [0, 0, 0, 0, 0]
         for i, paragraph in enumerate(self.document.ast):
@@ -167,8 +171,6 @@ class DocumentView():
 
             if content_offset_y + document_layout.get_paragraph_layout(paragraph)['y'] + document_layout.get_paragraph_layout(paragraph)['height'] >= 0 and content_offset_y + document_layout.get_paragraph_layout(paragraph)['y'] <= view_height:
                 self.draw_bullet(ctx, content_offset_x, content_offset_y, paragraph, list_item_numbers)
-            if paragraph.style == 'code':
-                self.draw_code_bg(ctx, content_offset_x, content_offset_y, paragraph)
 
             for j, line_layout in enumerate(document_layout.get_paragraph_layout(paragraph)['children']):
                 if content_offset_y + line_layout['y'] + document_layout.get_paragraph_layout(paragraph)['y'] + line_layout['height'] >= 0 and content_offset_y + line_layout['y'] + document_layout.get_paragraph_layout(paragraph)['y'] <= view_height:
@@ -265,7 +267,7 @@ class DocumentView():
         layout = document_layout.get_paragraph_layout(paragraph)
 
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('code_bg'))
-        ctx.rectangle(math.floor((offset_x + layout['x']) * self.hidpi_factor), math.floor((offset_y + layout['y']) * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['height'] * self.hidpi_factor))
+        ctx.rectangle(self.device_offset_x + math.floor((offset_x + layout['x']) * self.hidpi_factor), self.device_offset_y + math.floor((offset_y + layout['y']) * self.hidpi_factor), math.ceil(layout['width'] * self.hidpi_factor), math.ceil(layout['height'] * self.hidpi_factor))
         ctx.fill()
 
     @timer.timer
