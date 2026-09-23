@@ -385,6 +385,9 @@ class UseCases():
             paragraph = paragraphs[0]
 
             insert_node = document.get_insert_node()
+            if insert_node.parent.type == 'paragraph' and insert_node.parent.style == 'code':
+                paragraph.style = insert_node.parent.style
+
             if insert_node.parent.type == 'paragraph' and insert_node.is_first_in_parent() and paragraph[-1].type == 'eol':
                 document.insert_paragraph(paragraph, document.ast.index(insert_node.paragraph()))
             else:
