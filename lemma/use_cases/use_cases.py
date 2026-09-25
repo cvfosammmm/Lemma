@@ -353,6 +353,14 @@ class UseCases():
             document.set_paragraph_style(paragraph, paragraph_style)
             if indentation_level != 0:
                 document.set_indentation_level(document.get_insert_node().paragraph(), indentation_level)
+
+            if paragraph_style == 'code':
+                for node in insert_paragraph:
+                    if node.type == 'char' and node.value == ' ' or node.value == '	':
+                        title, meta, new_nodes = XMLParser.parse(node.value)
+                        document.insert_nodes(new_nodes[0].children, paragraph[0])
+                    else:
+                        break
         elif paragraph_style.startswith('h'):
             if len(document.get_insert_node().paragraph()) == 1:
                 paragraph = document.get_insert_node().paragraph()
