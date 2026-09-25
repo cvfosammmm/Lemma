@@ -27,6 +27,7 @@ import lemma.ui.dialogs.settings_page_toolbars as page_toolbars
 import lemma.ui.dialogs.settings_page_autocomplete as page_autocomplete
 import lemma.ui.dialogs.settings_page_shortcuts as page_shortcuts
 import lemma.ui.dialogs.settings_page_storage as page_storage
+import lemma.ui.dialogs.settings_page_code as page_code
 from lemma.use_cases.use_cases import UseCases
 
 
@@ -49,6 +50,7 @@ class Dialog(object):
         self.pages.append(['Workspace', 'overlapping-windows-symbolic', page_workspace.PageWorkspace(self, self.main_window)])
         self.pages.append(['Toolbars', 'preferences-system-symbolic', page_toolbars.PageToolbars(self, self.main_window)])
         self.pages.append(['Autocomplete', 'completion-snippet-symbolic', page_autocomplete.PageAutocomplete(self, self.main_window)])
+        self.pages.append(['Code', 'code-symbolic', page_code.PageCode(self, self.main_window)])
         self.pages.append(['Keyboard Shortcuts', 'preferences-desktop-keyboard-shortcuts-symbolic', page_shortcuts.PageShortcuts(self, self.main_window)])
         self.pages.append(['Storage', 'drawer-symbolic', page_storage.PageStorage(self, self.main_window)])
 

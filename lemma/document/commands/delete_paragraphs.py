@@ -24,16 +24,10 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.get_cursor_state()
         self.state['deleted_paragraphs'] = document.ast[self.index_from:self.index_to]
 
         first_paragraph = document.ast[self.index_from]
         last_paragraph = document.ast[self.index_to - 1]
-        if not last_paragraph.is_last_in_parent():
-            document.cursor.set_insert_selection_nodes(last_paragraph.next_in_parent()[0], last_paragraph.next_in_parent()[0])
-        else:
-            document.cursor.set_insert_selection_nodes(first_paragraph.prev_in_parent()[-1], first_paragraph.prev_in_parent()[-1])
-
         document.ast.remove_range(self.index_from, self.index_to)
 
         for paragraph in reversed(self.state['deleted_paragraphs']):
@@ -43,8 +37,6 @@ class Command():
     def undo(self, document):
         for paragraph in reversed(self.state['deleted_paragraphs']):
             document.ast.insert(self.index_from, paragraph)
-
-        document.cursor.set_state(self.state['cursor_state_before'])
 
         document.update_last_modified()
 

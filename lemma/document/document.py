@@ -140,6 +140,7 @@ class Document():
     def delete_nodes(self, node_from, node_to):
         if node_from.parent == node_to.parent:
             self.command_manager.add_command('delete_nodes', node_from, node_to)
+            self.command_manager.add_command('move_cursor_to_node', node_to, node_to)
         else:
             node_from_index = node_from.parent.index(node_from)
             paragraph_index_from = self.ast.index(node_from.parent)
@@ -148,6 +149,7 @@ class Document():
             if node_from.is_first_in_parent():
                 self.command_manager.add_command('delete_paragraphs', paragraph_index_from, paragraph_index_to)
                 self.command_manager.add_command('delete_nodes', node_to.first_in_parent(), node_to)
+                self.command_manager.add_command('move_cursor_to_node', node_to, node_to)
             else:
                 copy_nodes = node_to.parent[node_to.parent.index(node_to):node_to.parent.index(node_to.last_in_parent())]
                 end_of_first_paragraph = node_from.last_in_parent()
@@ -157,6 +159,17 @@ class Document():
                 self.command_manager.add_command('delete_paragraphs', paragraph_index_from + 1, paragraph_index_to + 1)
                 self.command_manager.add_command('insert_nodes', end_of_first_paragraph, copy_nodes)
                 self.command_manager.add_command('move_cursor_to_node', self.ast[paragraph_index_from][node_from_index], self.ast[paragraph_index_from][node_from_index])
+
+    @undoable_action
+    def remove_prefix_space(self, paragraph):
+        if paragraph[0].type == 'char' and (paragraph[0].value == ' ' or paragraph[0].value == '	'):
+            insert, selection = self.get_insert_node(), self.get_selection_node()
+            if insert == paragraph[0]:
+                insert = paragraph[1]
+            if selection == paragraph[0]:
+                selection = paragraph[1]
+            self.command_manager.add_command('move_cursor_to_node', insert, selection)
+            self.command_manager.add_command('delete_nodes', paragraph[0], paragraph[1])
 
     @undoable_action
     def merge_paragraphs(self, first_paragraph):
@@ -260,7 +273,8 @@ class Document():
     def cursor_at_paragraph_start(self):
         if 'cursor_at_paragraph_start' not in self.query_cache:
             insert = self.get_insert_node()
-            self.query_cache['cursor_at_paragraph_start'] = (insert == insert.paragraph_start())
+            subtree = self.get_subtree(insert.paragraph_start(), insert)
+            self.query_cache['cursor_at_paragraph_start'] = all(NodeTypeDB.is_whitespace(node) for node in subtree)
         return self.query_cache['cursor_at_paragraph_start']
 
     def cursor_inside_link(self):

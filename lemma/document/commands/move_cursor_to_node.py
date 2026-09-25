@@ -24,14 +24,15 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.get_cursor_state()
+        self.state['insert_before'] = document.get_insert_node()
+        self.state['selection_before'] = document.get_selection_node()
 
         document.cursor.set_insert_selection_nodes(self.insert, self.selection_bound)
 
         document.update_last_cursor_movement()
 
     def undo(self, document):
-        document.cursor.set_state(self.state['cursor_state_before'])
+        document.cursor.set_insert_selection_nodes(self.state['insert_before'], self.state['selection_before'])
 
         document.update_last_cursor_movement()
 

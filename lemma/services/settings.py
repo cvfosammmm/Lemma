@@ -33,6 +33,8 @@ class Settings():
         Settings.defaults['font_theme'] = 'sans'
         Settings.defaults['update_backlinks'] = True
         Settings.defaults['stylized_latex_autocomplete'] = True
+        Settings.defaults['indent_code_with_spaces'] = True
+        Settings.defaults['code_tab_width'] = 4
 
         Settings.defaults['width'] = 1020
         Settings.defaults['height'] = 550

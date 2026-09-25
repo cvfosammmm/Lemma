@@ -348,7 +348,7 @@ class UseCases():
         node.link = document.get_link_at_cursor()
         document.insert_nodes([node])
 
-        if paragraph_style in ['ul', 'ol', 'cl']:
+        if paragraph_style in ['ul', 'ol', 'cl', 'code']:
             paragraph = document.get_insert_node().paragraph()
             document.set_paragraph_style(paragraph, paragraph_style)
             if indentation_level != 0:
@@ -712,8 +712,27 @@ class UseCases():
 
         document.start_undoable_action()
         for paragraph in paragraphs:
-            new_level = max(0, min(4, paragraph.indentation_level + difference))
-            document.set_indentation_level(paragraph, new_level)
+            if paragraph.style == 'code':
+                if difference > 0:
+                    if Settings.get_value('indent_code_with_spaces'):
+                        title, meta, insert_paragraphs = XMLParser.parse(' ' * Settings.get_value('code_tab_width'))
+                        document.insert_nodes(insert_paragraphs[0].children, paragraph[0])
+                    else:
+                        new_level = max(0, min(4, paragraph.indentation_level + difference))
+                        document.set_indentation_level(paragraph, new_level)
+                else:
+                    if paragraph.indentation_level > 0:
+                        new_level = max(0, min(4, paragraph.indentation_level + difference))
+                        document.set_indentation_level(paragraph, new_level)
+                    else:
+                        if paragraph[0].type == 'char' and paragraph[0].value == '	':
+                            document.remove_prefix_space(paragraph)
+                        else:
+                            for i in range(Settings.get_value('code_tab_width')):
+                                document.remove_prefix_space(paragraph)
+            else:
+                new_level = max(0, min(4, paragraph.indentation_level + difference))
+                document.set_indentation_level(paragraph, new_level)
         document.end_undoable_action()
 
         DocumentRepo.update(document)

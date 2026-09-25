@@ -623,6 +623,10 @@ label.settings-header {
     font-weight: bold;
     margin-left: 17px;
 }
+label.settings-subheader {
+    margin-left: 17px;
+    margin-bottom: 6px;
+}
 label.settings-text-data-display {
     margin-left: 17px;
 }

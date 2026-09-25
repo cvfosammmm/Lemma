@@ -24,7 +24,6 @@ class Command():
         self.state = dict()
 
     def run(self, document):
-        self.state['cursor_state_before'] = document.get_cursor_state()
         self.state['deleted_nodes'] = []
 
         document.invalidate_paragraph(self.node_from.paragraph())
@@ -35,8 +34,6 @@ class Command():
         self.state['deleted_nodes'] = parent[index_from:index_to]
         parent.remove_range(index_from, index_to)
 
-        document.cursor.set_insert_selection_nodes(self.node_to, self.node_to)
-
         document.update_last_modified()
 
     def undo(self, document):
@@ -46,8 +43,6 @@ class Command():
         for node in self.state['deleted_nodes']:
             self.node_to.parent.insert(offset, node)
             offset += 1
-
-        document.cursor.set_state(self.state['cursor_state_before'])
 
         document.update_last_modified()
 
