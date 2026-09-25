@@ -392,7 +392,7 @@ class Layout(object):
             line['y'] = layout_tree['height']
             layout_tree['height'] += line['height']
         layout_tree['children'] = lines
-        layout_tree['width'] = layout_width
+        layout_tree['width'] = layout_width + indentation
         layout_tree['x'] = 0
         layout_tree['y'] = 0
 
