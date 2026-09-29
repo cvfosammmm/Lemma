@@ -82,6 +82,19 @@ class Document():
         self.command_manager.add_command('insert_paragraph', index, paragraph)
 
     @undoable_action
+    def delete_paragraph(self, paragraph):
+        if self.get_insert_node().paragraph() == paragraph:
+            if paragraph.next_in_parent() != None:
+                self.set_insert_and_selection_node(paragraph.next_in_parent()[0])
+            elif paragraph.prev_in_parent() != None:
+                self.set_insert_and_selection_node(paragraph.prev_in_parent()[-1])
+            else:
+                return
+
+        index = self.ast.index(paragraph)
+        self.command_manager.add_command('delete_paragraphs', index, index + 1)
+
+    @undoable_action
     def insert_nodes(self, nodes, insert=None):
         if insert == None:
             insert = self.get_insert_node()

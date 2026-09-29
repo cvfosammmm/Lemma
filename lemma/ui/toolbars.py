@@ -213,7 +213,7 @@ class Toolbars():
         current_node = document.get_first_selection_bound()
         paragraph_style_at_cursor = current_node.paragraph().style
 
-        labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List'), 'cl': _('Checklist'), 'code': _('Code')}
+        labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List'), 'cl': _('Checklist'), 'code': _('Code'), 'result': _('Result')}
         self.toolbar.main_left.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
 
     def update_button_visibility(self):

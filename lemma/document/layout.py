@@ -564,7 +564,7 @@ class Layout(object):
 
         if self.current_paragraph_style.startswith('h'):
             return self.current_paragraph_style
-        elif self.current_paragraph_style == 'code':
+        elif self.current_paragraph_style == 'code' or self.current_paragraph_style == 'result':
             return 'mono'
 
         if 'verbatim' in node.tags: return 'mono'

@@ -42,6 +42,7 @@ class Shortcuts():
         Shortcuts.defaults['subscript'] = '<Control>minus'
         Shortcuts.defaults['superscript'] = '<Control>underscore'
         Shortcuts.defaults['toggle_checkbox'] = 'F12'
+        Shortcuts.defaults['execute_current_code_block'] = '<Shift>Return'
         Shortcuts.defaults['undo'] = '<Control>z'
         Shortcuts.defaults['redo'] = '<Control><Shift>z'
         Shortcuts.defaults['cut'] = '<Control>x'
@@ -128,6 +129,7 @@ class Shortcuts():
         Shortcuts.titles['go_to_parent_node'] = 'Go to Parent Node'
         Shortcuts.titles['extend_selection'] = 'Extend Selection'
         Shortcuts.titles['link_popover'] = 'Insert Link'
+        Shortcuts.titles['execute_current_code_block'] = 'Run the Current Code Block'
 
         Shortcuts.load_from_disk()
 

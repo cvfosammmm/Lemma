@@ -122,7 +122,7 @@ class WindowState(object):
         self.main_window.document_view_paned.first_set_show_widget(show_tools_sidebar)
         self.main_window.document_view_paned.set_target_position(tools_sidebar_position)
 
-    def save_window_state(self):
+    def save_quit(self):
         UseCases.settings_set_value('width', self.main_window.get_property('default-width'))
         UseCases.settings_set_value('height', self.main_window.get_property('default-height'))
         UseCases.settings_set_value('is_maximized', self.main_window.get_property('maximized'))

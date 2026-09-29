@@ -37,6 +37,7 @@ import lemma.ui.pointer as pointer
 import lemma.ui.document_view as document_view
 import lemma.ui.document_title as document_title
 import lemma.ui.document_context_menu as context_menu_document
+import lemma.ui.computation as computation
 import lemma.ui.toolbars as toolbars
 import lemma.ui.document_list as document_list
 import lemma.ui.document_draft as document_draft
@@ -72,6 +73,7 @@ class Application(Adw.Application):
         self.pointer = pointer.Pointer(self.main_window, self)
         self.document_view = document_view.DocumentView(self.main_window, self)
         self.document_title = document_title.DocumentTitle(self.main_window, self)
+        self.computation = computation.Computation(self.main_window, self)
         self.scrolling = scrolling.DocumentScrolling(self.main_window, self)
         self.fonts = fonts.Fonts(self.main_window, self)
         self.colors = colors.Colors(self.main_window, self)
@@ -111,6 +113,7 @@ class Application(Adw.Application):
         self.document_draft.animate()
         self.keyboard.animate()
         self.pointer.animate()
+        self.computation.animate()
         self.document_view.animate()
         self.document_title.animate()
         self.context_menu_document.animate()
@@ -129,7 +132,8 @@ class Application(Adw.Application):
         self.save_quit()
 
     def save_quit(self):
-        self.window_state.save_window_state()
+        self.computation.save_quit()
+        self.window_state.save_quit()
         self.quit()
 
 

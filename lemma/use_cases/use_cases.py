@@ -412,6 +412,38 @@ class UseCases():
         MessageBus.add_message('cursor_movement')
         MessageBus.add_message('tags_at_cursor_changed')
 
+    @timer.timer
+    def insert_result_after_paragraph(text, paragraph):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        document.start_undoable_action()
+        index = document.ast.index(paragraph)
+        for line in (text + '\n').splitlines(keepends=True):
+            xml = xml_helpers.escape(line)
+            title, meta, paragraphs = XMLParser.parse(xml)
+            paragraphs[0].style = 'result'
+            document.insert_paragraph(paragraphs[0], index + 1)
+        document.end_undoable_action()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+
+    @timer.timer
+    def delete_paragraph(paragraph):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        document.start_undoable_action()
+        document.delete_paragraph(paragraph)
+        document.end_undoable_action()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+
+    @timer.timer
     def replace_section(document, node_from, node_to, xml):
         nodes = []
         title, meta, paragraphs = XMLParser.parse(xml)
@@ -720,7 +752,7 @@ class UseCases():
 
         document.start_undoable_action()
         for paragraph in paragraphs:
-            if paragraph.style == 'code':
+            if paragraph.style == 'code' or paragraph.style == 'result':
                 if difference > 0:
                     if Settings.get_value('indent_code_with_spaces'):
                         title, meta, insert_paragraphs = XMLParser.parse(' ' * Settings.get_value('code_tab_width'))

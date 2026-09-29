@@ -93,7 +93,7 @@ class XMLParserObject(object):
         if tag == 'mark':
             self.current_tags[self.level].add('highlight')
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code', 'result']:
             if 'indentation_level' in attrs:
                 self.current_indentation_level = int(attrs['indentation_level'])
             if 'state' in attrs:
@@ -141,7 +141,7 @@ class XMLParserObject(object):
     def handle_endtag(self, tag):
         self.open_xml_tags.pop()
 
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code']:
+        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code', 'result']:
             new_paragraph = Paragraph()
             for node in self.nodes:
                 new_paragraph.append(node)
