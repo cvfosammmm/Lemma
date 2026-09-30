@@ -30,6 +30,7 @@ class Computation():
         self.main_window = main_window
         self.application = application
         self.view = main_window.document_view
+        self.toolbar = main_window.toolbar.main_right
 
         self.code_cells_by_paragraph = dict()
         self.paragraphs_by_code_cell = dict()
@@ -109,6 +110,12 @@ class Computation():
             insert_node = paragraph[-1].next()
             if 'text/plain' in data:
                 UseCases.insert_result_after_paragraph(data['text/plain'], paragraph)
+
+        running_computations = CodeRunner.get_running_computations(document.id)
+        if len(running_computations) > 0:
+            self.toolbar.kernel_state_button.show_busy_state()
+        else:
+            self.toolbar.kernel_state_button.show_idle_state()
 
     def save_quit(self):
         CodeRunner.stop_all()

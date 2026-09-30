@@ -59,6 +59,12 @@ class CodeRunner():
         CodeRunner.kernels[kernel_id]['manager'].shutdown_kernel(now=True, restart=False)
         del(CodeRunner.kernels[kernel_id])
 
+    def get_running_computations(kernel_id):
+        if kernel_id not in CodeRunner.kernels:
+            return []
+
+        return list(CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'].values())
+
     @timer.timer
     def fetch_results(kernel_id):
         if kernel_id not in CodeRunner.kernels:
@@ -66,14 +72,25 @@ class CodeRunner():
 
         result = []
         while True:
+            messages = []
             try:
-                msg = CodeRunner.kernels[kernel_id]['client'].get_iopub_msg(timeout=0.0000001)
-            except queue.Empty:
+                messages.append(CodeRunner.kernels[kernel_id]['client'].get_iopub_msg(timeout=0.0000001))
+            except queue.Empty: pass
+            try:
+                messages.append(CodeRunner.kernels[kernel_id]['client'].get_shell_msg(timeout=0.0000001))
+            except queue.Empty: pass
+            if len(messages) == 0:
                 break
-            if msg['msg_type'] == 'execute_result':
-                orig_msg_id = msg['parent_header']['msg_id']
-                computation_id = CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id]
-                result.append({'computation_id': computation_id, 'result': msg['content']})
+
+            for msg in messages:
+                if msg['msg_type'] == 'execute_result':
+                    orig_msg_id = msg['parent_header']['msg_id']
+                    computation_id = CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id]
+                    result.append({'computation_id': computation_id, 'result': msg['content']})
+                elif msg['msg_type'] == 'status' and 'execution_state' in msg['content']:
+                    if msg['content']['execution_state'] == 'idle':
+                        orig_msg_id = msg['parent_header']['msg_id']
+                        del(CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id])
 
         return result
 

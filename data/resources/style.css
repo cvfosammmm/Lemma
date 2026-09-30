@@ -282,6 +282,28 @@ paned.document-view separator.wide {
 .toolbar scale mark {
     background: @toolbar_fg;
 }
+.toolbar button.kernel-state image {
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 0.25s;
+}
+.toolbar button.kernel-state.busy image {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.45s;
+    transition-delay: 0.05s;
+}
+.toolbar button.kernel-state spinner {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.25s;
+}
+.toolbar button.kernel-state.busy spinner {
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 0.45s;
+    transition-delay: 0.05s;
+}
 
 /* tools sidebar */
 
