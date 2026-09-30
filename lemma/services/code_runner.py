@@ -29,8 +29,14 @@ class CodeRunner():
         if kernel_id not in CodeRunner.kernels:
             CodeRunner.start_kernel(kernel_id)
 
+        if computation_id in CodeRunner.kernels[kernel_id]['msg_ids_by_computation_id']:
+            msg_id = CodeRunner.kernels[kernel_id]['msg_ids_by_computation_id'][computation_id]
+            del(CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][msg_id])
+            del(CodeRunner.kernels[kernel_id]['msg_ids_by_computation_id'][computation_id])
+
         msg_id = CodeRunner.kernels[kernel_id]['client'].execute(code)
         CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][msg_id] = computation_id
+        CodeRunner.kernels[kernel_id]['msg_ids_by_computation_id'][computation_id] = msg_id
 
     def restart_kernel(kernel_id):
         if kernel_id in CodeRunner.kernels:
@@ -45,6 +51,7 @@ class CodeRunner():
         kernel['client'].start_channels()
         kernel['client'].wait_for_ready()
         kernel['computation_ids_by_msg_id'] = dict()
+        kernel['msg_ids_by_computation_id'] = dict()
         CodeRunner.kernels[kernel_id] = kernel
 
     def stop_all():
@@ -63,7 +70,7 @@ class CodeRunner():
         if kernel_id not in CodeRunner.kernels:
             return []
 
-        return list(CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'].values())
+        return list(CodeRunner.kernels[kernel_id]['msg_ids_by_computation_id'])
 
     @timer.timer
     def fetch_results(kernel_id):
@@ -85,12 +92,16 @@ class CodeRunner():
             for msg in messages:
                 if msg['msg_type'] == 'execute_result':
                     orig_msg_id = msg['parent_header']['msg_id']
-                    computation_id = CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id]
-                    result.append({'computation_id': computation_id, 'result': msg['content']})
+                    if orig_msg_id in CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id']:
+                        computation_id = CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id]
+                        result.append({'computation_id': computation_id, 'result': msg['content']})
                 elif msg['msg_type'] == 'status' and 'execution_state' in msg['content']:
                     if msg['content']['execution_state'] == 'idle':
                         orig_msg_id = msg['parent_header']['msg_id']
-                        del(CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id])
+                        if orig_msg_id in CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id']:
+                            computation_id = CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id]
+                            del(CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id])
+                            del(CodeRunner.kernels[kernel_id]['msg_ids_by_computation_id'][computation_id])
 
         return result
 
