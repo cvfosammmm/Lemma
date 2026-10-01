@@ -286,23 +286,27 @@ paned.document-view separator.wide {
     opacity: 1;
     transition-property: opacity;
     transition-duration: 0.25s;
+    transition-timing-function: ease-in;
 }
 .toolbar button.kernel-state.busy image {
     opacity: 0;
     transition-property: opacity;
     transition-duration: 0.45s;
     transition-delay: 0.05s;
+    transition-timing-function: ease-in;
 }
 .toolbar button.kernel-state spinner {
     opacity: 0;
     transition-property: opacity;
     transition-duration: 0.25s;
+    transition-timing-function: ease-in;
 }
 .toolbar button.kernel-state.busy spinner {
     opacity: 1;
     transition-property: opacity;
     transition-duration: 0.45s;
     transition-delay: 0.05s;
+    transition-timing-function: ease-in;
 }
 
 /* tools sidebar */
@@ -937,6 +941,18 @@ label.explainer-bottom {
 .bookmarks .drag-handle {
     margin-left: 9px;
     margin-right: 9px;
+}
+
+/* kernel state dialog */
+
+.kernel-state label.title-2 {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 18px;
+}
+.kernel-state label.status {
+    margin-left: 10px;
+    margin-bottom: 6px;
 }
 
 

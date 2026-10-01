@@ -29,6 +29,7 @@ import lemma.ui.popovers.paragraph_style as paragraph_style
 import lemma.ui.popovers.link_autocomplete as link_autocomplete
 import lemma.ui.popovers.rename_file as rename_file
 import lemma.ui.popovers.bookmarks as bookmarks
+import lemma.ui.popovers.kernel_state as kernel_state
 
 
 class PopoverManager():
@@ -62,6 +63,7 @@ class PopoverManager():
         self.popovers["link_autocomplete"] = link_autocomplete.Popover()
         self.popovers["rename_file"] = rename_file.Popover()
         self.popovers["bookmarks"] = bookmarks.Popover()
+        self.popovers["kernel_state"] = kernel_state.Popover()
 
         MessageBus.subscribe(self, 'popover_changed')
 
