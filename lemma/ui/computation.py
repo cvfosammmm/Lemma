@@ -53,9 +53,14 @@ class Computation():
                 code += ''.join([node.value for node in paragraph if node.type == 'char']) + '\n'
             CodeRunner.run(document.id, cell_id, code)
 
+            paragraphs_to_be_removed = []
             next_paragraph = paragraphs[-1].next_in_parent()
-            if next_paragraph != None and next_paragraph.style == 'result':
-                UseCases.delete_paragraph(next_paragraph)
+            while next_paragraph != None and next_paragraph.style == 'result':
+                paragraphs_to_be_removed.append(next_paragraph)
+                next_paragraph = next_paragraph.next_in_parent()
+
+            for paragraph in paragraphs_to_be_removed:
+                UseCases.delete_paragraph(paragraph)
 
     @timer.timer
     def animate(self):
@@ -111,17 +116,26 @@ class Computation():
             cell_id = result['computation_id']
             if cell_id in self.paragraphs_by_code_cell:
                 paragraph = self.paragraphs_by_code_cell[cell_id][-1]
+                while True:
+                    next_paragraph = paragraph.next_in_parent()
+                    if next_paragraph != None and next_paragraph.style == 'result':
+                        paragraph = next_paragraph
+                    else:
+                        break
 
             if 'data' in result['result']:
                 data = result['result']['data']
                 insert_node = paragraph[-1].next()
                 if 'text/plain' in data:
-                    UseCases.insert_result_after_paragraph(data['text/plain'], paragraph)
+                    UseCases.insert_result_after_paragraph(data['text/plain'] + '\n', paragraph)
 
             elif 'traceback' in result['result']:
-                error_msg = result['result']['ename'] + ': ' + result['result']['evalue']
+                error_msg = result['result']['ename'] + ': ' + result['result']['evalue'] + '\n'
                 insert_node = paragraph[-1].next()
                 UseCases.insert_result_after_paragraph(error_msg, paragraph)
+
+            elif 'text' in result['result']:
+                UseCases.insert_result_after_paragraph(result['result']['text'], paragraph)
 
         running_computations = CodeRunner.get_running_computations(document.id)
         if len(running_computations) > 0:

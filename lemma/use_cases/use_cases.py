@@ -418,7 +418,7 @@ class UseCases():
 
         document.start_undoable_action()
         index = document.ast.index(paragraph)
-        for line in (text + '\n').splitlines(keepends=True):
+        for line in (text).splitlines(keepends=True):
             xml = xml_helpers.escape(line)
             title, meta, paragraphs = XMLParser.parse(xml)
             paragraphs[0].style = 'result'
