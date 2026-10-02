@@ -73,13 +73,6 @@ class ToolbarRight(Gtk.CenterBox):
         self.redo_button.set_can_focus(False)
         self.redo_button.set_tooltip_text(_('Redo') + ' (' + Shortcuts.get_for_labels('redo') + ')')
 
-        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
-        box.append(self.edit_menu_button)
-        box.append(self.undo_button)
-        box.append(self.redo_button)
-        self.inner_box.append(box)
-        self.inner_box.append(Gtk.Separator())
-
         self.kernel_state_button = KernelStateButton()
         self.kernel_state_button.add_css_class('flat')
         self.kernel_state_button.set_can_focus(False)
@@ -90,6 +83,9 @@ class ToolbarRight(Gtk.CenterBox):
         self.document_menu_button.add_css_class('flat')
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.edit_menu_button)
+        box.append(self.undo_button)
+        box.append(self.redo_button)
         box.append(self.kernel_state_button)
         box.append(self.document_menu_button)
         self.inner_box.append(box)
