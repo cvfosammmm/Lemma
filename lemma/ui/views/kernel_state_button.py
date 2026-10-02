@@ -36,7 +36,7 @@ class KernelStateButton(Gtk.Button):
         self.overlay.add_overlay(self.icon)
 
         self.set_child(self.overlay)
-        self.set_tooltip_text(_('Coding Menu'))
+        self.set_tooltip_text(_('Computation Menu'))
 
     def show_busy_state(self):
         self.add_css_class('busy')
