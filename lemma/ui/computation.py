@@ -32,6 +32,7 @@ class Computation():
         self.view = main_window.document_view
         self.toolbar = main_window.toolbar.main_right
 
+        self.document = None
         self.code_cells_by_paragraph = dict()
         self.paragraphs_by_code_cell = dict()
 
@@ -101,15 +102,26 @@ class Computation():
         self.code_cells_by_paragraph = code_cells_by_paragraph
         self.paragraphs_by_code_cell = paragraphs_by_code_cell
 
+        if document != self.document:
+            if self.document != None:
+                CodeRunner.stop_kernel(self.document.id)
+            self.document = document
+
         for result in CodeRunner.fetch_results(document.id):
             cell_id = result['computation_id']
             if cell_id in self.paragraphs_by_code_cell:
                 paragraph = self.paragraphs_by_code_cell[cell_id][-1]
 
-            data = result['result']['data']
-            insert_node = paragraph[-1].next()
-            if 'text/plain' in data:
-                UseCases.insert_result_after_paragraph(data['text/plain'], paragraph)
+            if 'data' in result['result']:
+                data = result['result']['data']
+                insert_node = paragraph[-1].next()
+                if 'text/plain' in data:
+                    UseCases.insert_result_after_paragraph(data['text/plain'], paragraph)
+
+            elif 'traceback' in result['result']:
+                error_msg = result['result']['ename'] + ': ' + result['result']['evalue']
+                insert_node = paragraph[-1].next()
+                UseCases.insert_result_after_paragraph(error_msg, paragraph)
 
         running_computations = CodeRunner.get_running_computations(document.id)
         if len(running_computations) > 0:

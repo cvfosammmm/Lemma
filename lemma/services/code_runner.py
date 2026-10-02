@@ -102,6 +102,11 @@ class CodeRunner():
                             computation_id = CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id]
                             del(CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id])
                             del(CodeRunner.kernels[kernel_id]['msg_ids_by_computation_id'][computation_id])
+                elif msg['msg_type'] == 'error':
+                    orig_msg_id = msg['parent_header']['msg_id']
+                    if orig_msg_id in CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id']:
+                        computation_id = CodeRunner.kernels[kernel_id]['computation_ids_by_msg_id'][orig_msg_id]
+                        result.append({'computation_id': computation_id, 'result': msg['content']})
 
         return result
 
