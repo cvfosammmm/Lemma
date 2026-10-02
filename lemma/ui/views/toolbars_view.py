@@ -30,12 +30,14 @@ class ToolbarsView(Gtk.ActionBar):
         self.add_css_class('toolbar')
 
         self.main_left = ToolbarMain()
+        self.toolbar_code_left = ToolbarCode()
         self.toolbar_overview_left = ToolbarOverviewLeft()
         self.toolbar_overview_right = ToolbarOverviewRight()
         self.empty_left = ToolbarEmpty()
 
         self.stack_left = Gtk.Stack()
         self.stack_left.add_named(self.main_left, 'main')
+        self.stack_left.add_named(self.toolbar_code_left, 'code')
         self.stack_left.add_named(self.toolbar_overview_left, 'overview')
         self.stack_left.add_named(self.empty_left, 'empty')
 
@@ -246,6 +248,37 @@ class ToolbarMain(Gtk.Box):
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.insert_link_button)
+        self.append(box)
+
+
+class ToolbarCode(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+
+        self.paragraph_style_menu_button_label = Gtk.Label()
+        self.paragraph_style_menu_button_label.set_xalign(Gtk.Align.FILL)
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+        box.append(self.paragraph_style_menu_button_label)
+        box.append(Gtk.Image.new_from_icon_name('pan-down-symbolic'))
+
+        self.paragraph_style_menu_button = Gtk.Button()
+        self.paragraph_style_menu_button.set_child(box)
+        self.paragraph_style_menu_button.set_can_focus(False)
+        self.paragraph_style_menu_button.set_tooltip_text(_('Paragraph Style'))
+        self.paragraph_style_menu_button.add_css_class('flat')
+
+        self.append(self.paragraph_style_menu_button)
+        self.append(Gtk.Separator())
+
+        self.run_cell_button = Gtk.Button.new_from_icon_name('run-code-symbolic')
+        self.run_cell_button.set_can_focus(False)
+        self.run_cell_button.set_tooltip_text(_('Run Code Block') + ' (' + Shortcuts.get_for_labels('execute_current_code_block') + ')')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.run_cell_button)
         self.append(box)
 
 

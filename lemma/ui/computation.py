@@ -30,7 +30,7 @@ class Computation():
         self.main_window = main_window
         self.application = application
         self.view = main_window.document_view
-        self.toolbar = main_window.toolbar.main_right
+        self.toolbar = main_window.toolbar
 
         self.document = None
         self.code_cells_by_paragraph = dict()
@@ -40,7 +40,9 @@ class Computation():
         self.shortcut_controller_docview.add_cb('execute_current_code_block', self.execute_code_block)
         self.view.content.add_controller(self.shortcut_controller_docview)
 
-    def execute_code_block(self):
+        self.toolbar.toolbar_code_left.run_cell_button.connect('clicked', self.execute_code_block)
+
+    def execute_code_block(self, *arguments):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         paragraph = document.get_insert_node().paragraph()
@@ -139,9 +141,9 @@ class Computation():
 
         running_computations = CodeRunner.get_running_computations(document.id)
         if len(running_computations) > 0:
-            self.toolbar.kernel_state_button.show_busy_state()
+            self.toolbar.main_right.kernel_state_button.show_busy_state()
         else:
-            self.toolbar.kernel_state_button.show_idle_state()
+            self.toolbar.main_right.kernel_state_button.show_idle_state()
 
     def save_quit(self):
         CodeRunner.stop_all()

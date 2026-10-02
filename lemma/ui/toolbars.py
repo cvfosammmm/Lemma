@@ -68,6 +68,12 @@ class Toolbars():
         self.paragraph_button_controller.connect('pressed', self.on_paragraph_button_press)
         self.toolbar.main_left.paragraph_style_menu_button.add_controller(self.paragraph_button_controller)
 
+        self.code_paragraph_button_controller = Gtk.GestureClick()
+        self.code_paragraph_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.code_paragraph_button_controller.set_button(1)
+        self.code_paragraph_button_controller.connect('pressed', self.on_paragraph_button_press)
+        self.toolbar.toolbar_code_left.paragraph_style_menu_button.add_controller(self.code_paragraph_button_controller)
+
         self.edit_button_controller = Gtk.GestureClick()
         self.edit_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.edit_button_controller.set_button(1)
@@ -124,6 +130,7 @@ class Toolbars():
             data.append((self.toolbar.main_right.kernel_state_button, 'kernel_state'))
             data.append((self.toolbar.main_right.edit_menu_button, 'edit_menu'))
             data.append((self.toolbar.main_left.paragraph_style_menu_button, 'paragraph_style'))
+            data.append((self.toolbar.toolbar_code_left.paragraph_style_menu_button, 'paragraph_style'))
             data.append((self.toolbar.main_right.document_menu_button, 'document_menu'))
 
             for button, name in data:
@@ -169,7 +176,7 @@ class Toolbars():
         self.edit_button_controller.reset()
 
     def on_paragraph_button_press(self, controller=None, n_press=None, x=None, y=None):
-        button = self.toolbar.main_left.paragraph_style_menu_button
+        button = controller.get_widget()
         allocation = button.compute_bounds(self.main_window).out_bounds
         x = allocation.origin.x + allocation.size.width / 2
         y = allocation.origin.y
@@ -205,7 +212,10 @@ class Toolbars():
                 self.toolbar.stack_right.set_visible_child_name('main')
 
             else:
-                self.toolbar.stack_left.set_visible_child_name('main')
+                if document.get_insert_node().paragraph().style == 'code':
+                    self.toolbar.stack_left.set_visible_child_name('code')
+                else:
+                    self.toolbar.stack_left.set_visible_child_name('main')
                 if edit_link_visible:
                     self.toolbar.main_left.insert_link_button.set_tooltip_text(_('Edit Link') + ' (' + Shortcuts.get_for_labels('link_popover') + ')')
                 else:
@@ -231,6 +241,7 @@ class Toolbars():
 
         labels_dict = {'p': _('Normal'), 'h1': _('Heading 2'), 'h2': _('Heading 2'), 'h3': _('Heading 3'), 'h4': _('Heading 4'), 'h5': _('Heading 5'), 'h6': _('Heading 6'), 'ul': _('Bullet List'), 'ol': _('Numbered List'), 'cl': _('Checklist'), 'code': _('Code'), 'result': _('Result')}
         self.toolbar.main_left.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
+        self.toolbar.toolbar_code_left.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
 
     def update_button_visibility(self):
         self.toolbar.main_left.bold_button.set_visible(Settings.get_value('button_visible_bold'))
