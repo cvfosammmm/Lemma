@@ -42,7 +42,7 @@ class Shortcuts():
         Shortcuts.defaults['subscript'] = '<Control>minus'
         Shortcuts.defaults['superscript'] = '<Control>underscore'
         Shortcuts.defaults['toggle_checkbox'] = 'F12'
-        Shortcuts.defaults['execute_current_code_block'] = '<Shift>Return'
+        Shortcuts.defaults['execute_current_code_block'] = '<Ctrl>Return'
         Shortcuts.defaults['undo'] = '<Control>z'
         Shortcuts.defaults['redo'] = '<Control><Shift>z'
         Shortcuts.defaults['cut'] = '<Control>x'
