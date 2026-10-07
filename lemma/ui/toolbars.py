@@ -74,6 +74,12 @@ class Toolbars():
         self.code_paragraph_button_controller.connect('pressed', self.on_paragraph_button_press)
         self.toolbar.toolbar_code_left.paragraph_style_menu_button.add_controller(self.code_paragraph_button_controller)
 
+        self.insert_table_button_controller = Gtk.GestureClick()
+        self.insert_table_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.insert_table_button_controller.set_button(1)
+        self.insert_table_button_controller.connect('pressed', self.on_insert_table_button_press)
+        self.toolbar.main_left.table_button.add_controller(self.insert_table_button_controller)
+
         self.edit_button_controller = Gtk.GestureClick()
         self.edit_button_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.edit_button_controller.set_button(1)
@@ -131,6 +137,7 @@ class Toolbars():
             data.append((self.toolbar.main_right.edit_menu_button, 'edit_menu'))
             data.append((self.toolbar.main_left.paragraph_style_menu_button, 'paragraph_style'))
             data.append((self.toolbar.toolbar_code_left.paragraph_style_menu_button, 'paragraph_style'))
+            data.append((self.toolbar.main_left.table_button, 'table_wizard'))
             data.append((self.toolbar.main_right.document_menu_button, 'document_menu'))
 
             for button, name in data:
@@ -184,6 +191,15 @@ class Toolbars():
         UseCases.show_popover('paragraph_style', x, y, 'top')
         self.paragraph_button_controller.reset()
 
+    def on_insert_table_button_press(self, controller=None, n_press=None, x=None, y=None):
+        button = controller.get_widget()
+        allocation = button.compute_bounds(self.main_window).out_bounds
+        x = allocation.origin.x + allocation.size.width / 2
+        y = allocation.origin.y
+
+        UseCases.show_popover('table_wizard', x, y, 'top')
+        self.paragraph_button_controller.reset()
+
     def on_docmenu_button_press(self, controller=None, n_press=None, x=None, y=None):
         button = self.toolbar.main_right.document_menu_button
         allocation = button.compute_bounds(self.main_window).out_bounds
@@ -197,6 +213,8 @@ class Toolbars():
     def update(self):
         document = WorkspaceRepo.get_workspace().get_active_document()
         mode = WorkspaceRepo.get_workspace().get_mode()
+
+        self.toolbar.main_left.table_button.set_sensitive(mode == 'documents' and document.insert_parent_is_root())
 
         if mode == 'documents':
             cursor_inside_link = document.get_insert_node().is_inside_link()
@@ -212,10 +230,13 @@ class Toolbars():
                 self.toolbar.stack_right.set_visible_child_name('main')
 
             else:
-                if document.get_insert_node().paragraph().style == 'code':
+                if 'table' in (node.type for node in document.get_insert_node().ancestors()):
+                    self.toolbar.stack_left.set_visible_child_name('table')
+                elif document.get_insert_node().paragraph().style == 'code':
                     self.toolbar.stack_left.set_visible_child_name('code')
                 else:
                     self.toolbar.stack_left.set_visible_child_name('main')
+
                 if edit_link_visible:
                     self.toolbar.main_left.insert_link_button.set_tooltip_text(_('Edit Link') + ' (' + Shortcuts.get_for_labels('link_popover') + ')')
                 else:
@@ -254,6 +275,7 @@ class Toolbars():
         self.toolbar.main_left.ol_button.set_visible(Settings.get_value('button_visible_ol'))
         self.toolbar.main_left.cl_button.set_visible(Settings.get_value('button_visible_cl'))
         self.toolbar.main_left.code_button.set_visible(Settings.get_value('button_visible_code'))
+        self.toolbar.main_left.table_button.set_visible(Settings.get_value('button_visible_insert_table'))
         self.toolbar.main_left.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
         self.toolbar.main_left.files_button.set_visible(Settings.get_value('button_visible_attach_files'))
         self.toolbar.main_left.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
@@ -267,7 +289,7 @@ class Toolbars():
         indentation_buttons_visible = Settings.get_value('button_visible_decrease_indent') or Settings.get_value('button_visible_increase_indent')
         self.toolbar.main_left.indentation_buttons_separator.set_visible(indentation_buttons_visible)
 
-        insert_buttons_visible = Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files')
+        insert_buttons_visible = Settings.get_value('button_visible_insert_table') or Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files')
         self.toolbar.main_left.insert_buttons_separator.set_visible(insert_buttons_visible)
 
         link_buttons_visible = Settings.get_value('button_visible_insert_link')

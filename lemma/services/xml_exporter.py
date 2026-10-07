@@ -87,6 +87,15 @@ class XMLExporter():
         if node.type == 'char':
             xml = '<char>' + xml_helpers.escape(node.value) + '</char>'
 
+        if node.type == 'table':
+            xml = '<table>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</table>'
+
+        if node.type == 'tr':
+            xml = '<tr>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</tr>'
+
+        if node.type == 'td':
+            xml = '<td>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</td>'
+
         if node.type == 'widget':
             xml = node.value.to_xml()
 

@@ -467,6 +467,35 @@ class UseCases():
         MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
+    def insert_table(size):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        xml = '<table>'
+        for i in range(size[1]):
+            xml += '<tr>'
+            for j in range(size[0]):
+                xml += '<td><end/></td>'
+            xml += '</tr>'
+        xml += '</table>'
+
+        title, meta, paragraphs = XMLParser.parse(xml)
+
+        document.start_undoable_action()
+        document.delete_selected_nodes()
+        document.insert_nodes(paragraphs[0].children)
+        document.end_undoable_action()
+
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
     def insert_xml(xml):
         document = WorkspaceRepo.get_workspace().get_active_document()
 

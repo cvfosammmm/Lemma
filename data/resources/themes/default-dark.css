@@ -60,6 +60,7 @@
 @define-color popover_hover_bg #3a3a3a;
 @define-color popover_active_bg #414141;
 @define-color menu_shortcut_color #888888;
+@define-color popover_overlay_color #aaa;
 
 /* Thumbnails */
 @define-color thumbnail_bg_color #ffffff;
@@ -146,6 +147,10 @@
 @define-color checkbox_unchecked_inner @view_bg_color;
 @define-color checkbox_checked_outline #666;
 @define-color checkbox_checked_inner @text;
+
+/* Tables */
+@define-color table_border_vertical #666;
+@define-color table_border_horizontal #666;
 
 /* Scrollbars */
 @define-color scrollbar_bg #333;

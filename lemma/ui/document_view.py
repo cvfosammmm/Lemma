@@ -394,6 +394,24 @@ class DocumentView():
             ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
             ctx.fill()
 
+        if layout['type'] == 'table':
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('table_border_horizontal'))
+            line_width = layout['width']
+            line_offset = 0
+            ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), (line_width - 2) * self.hidpi_factor, 1)
+            ctx.fill()
+            for child in layout['children']:
+                line_offset += child['height']
+                ctx.rectangle((offset_x + layout['x']) * self.hidpi_factor, int((offset_y + layout['y'] + line_offset) * self.hidpi_factor), line_width * self.hidpi_factor, 1)
+                ctx.fill()
+
+            Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('table_border_vertical'))
+            line_height = layout['height']
+            for child in layout['children'][0]['children'][1:]:
+                line_offset = child['x']
+                ctx.rectangle((offset_x + layout['x'] + line_offset) * self.hidpi_factor, int((offset_y + layout['y']) * self.hidpi_factor), 1, line_height * self.hidpi_factor)
+                ctx.fill()
+
     def get_fg_color_string_by_node(self, node):
         if node.link == None:
             return ColorManager.get_ui_color_string('text')

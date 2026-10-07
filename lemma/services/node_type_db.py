@@ -19,7 +19,10 @@
 class NodeTypeDB():
 
     def can_hold_cursor(node):
-        return node.type != 'mathlist' and node.type != 'paragraph' and node.type != 'root'
+        if node == None:
+            return False
+
+        return node.type != 'mathlist' and node.type != 'paragraph' and node.type != 'root' and node.type != 'tr' and node.type != 'td'
 
     def focus_on_click(node):
         return node.type in {'placeholder'}

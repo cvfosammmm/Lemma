@@ -31,6 +31,7 @@ class ToolbarsView(Gtk.ActionBar):
 
         self.main_left = ToolbarMain()
         self.toolbar_code_left = ToolbarCode()
+        self.toolbar_table_left = ToolbarTableLeft()
         self.toolbar_overview_left = ToolbarOverviewLeft()
         self.toolbar_overview_right = ToolbarOverviewRight()
         self.empty_left = ToolbarEmpty()
@@ -38,6 +39,7 @@ class ToolbarsView(Gtk.ActionBar):
         self.stack_left = Gtk.Stack()
         self.stack_left.add_named(self.main_left, 'main')
         self.stack_left.add_named(self.toolbar_code_left, 'code')
+        self.stack_left.add_named(self.toolbar_table_left, 'table')
         self.stack_left.add_named(self.toolbar_overview_left, 'overview')
         self.stack_left.add_named(self.empty_left, 'empty')
 
@@ -221,6 +223,10 @@ class ToolbarMain(Gtk.Box):
         self.insert_buttons_separator = Gtk.Separator()
         self.append(self.insert_buttons_separator)
 
+        self.table_button = Gtk.Button.new_from_icon_name('insert-table-symbolic')
+        self.table_button.set_can_focus(False)
+        self.table_button.set_tooltip_text(_('Insert Table'))
+
         self.image_button = Gtk.Button.new_from_icon_name('insert-image-new-symbolic')
         self.image_button.set_action_name('win.show-insert-image-dialog')
         self.image_button.set_can_focus(False)
@@ -232,6 +238,7 @@ class ToolbarMain(Gtk.Box):
         self.files_button.set_tooltip_text(_('Attach File(s)'))
 
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.table_button)
         box.append(self.image_button)
         box.append(self.files_button)
         self.append(box)
@@ -280,6 +287,14 @@ class ToolbarCode(Gtk.Box):
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.run_cell_button)
         self.append(box)
+
+
+class ToolbarTableLeft(Gtk.Box):
+
+    def __init__(self):
+        Gtk.Box.__init__(self)
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.add_css_class('table-toolbar-left')
 
 
 class ToolbarOverviewLeft(Gtk.Box):

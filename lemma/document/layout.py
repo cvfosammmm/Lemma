@@ -21,6 +21,7 @@ from lemma.services.node_type_db import NodeTypeDB
 from lemma.services.text_shaper import TextShaper
 from lemma.services.character_db import CharacterDB
 from lemma.services.layout_info import LayoutInfo
+from lemma.services.node_type_db import NodeTypeDB
 import lemma.services.timer as timer
 
 
@@ -42,6 +43,7 @@ class Layout(object):
         self.is_valid = False
 
         self.current_paragraph_style = None
+        self.in_table = False
         self.current_node_layouts = dict()
 
     def get_height(self):
@@ -80,19 +82,27 @@ class Layout(object):
         if y < 0: x = 0
         if y > self.get_height(): x = LayoutInfo.get_max_layout_width()
 
+        layouts = []
+        layout = self.get_line_layout_at_y(y)
+        go_down_hierarchy = True
+        while go_down_hierarchy:
+            go_down_hierarchy = False
+            for child in layout['children']:
+                child_x, child_y = self.get_absolute_xy(child)
+                if y >= child_y and y < child_y + child['height'] and x >= child_x and x < child_x + child['width']:
+                    layout = child
+                    layouts.append(child)
+                    go_down_hierarchy = True
+
         hbox = self.get_line_layout_at_y(y)
-        if y >= hbox['y'] + hbox['parent']['y'] and y < hbox['y'] + hbox['parent']['y'] + hbox['height']:
-            for layout in self.flatten_layout(hbox):
-                if layout['type'] == 'hbox':
-                    layout_x, layout_y = self.get_absolute_xy(layout)
-                    if x >= layout_x and x <= layout_x + layout['width'] \
-                            and y >= layout_y and y <= layout_y + layout['height'] \
-                            and hbox in self.get_ancestors(layout):
-                        hbox = layout
+        for layout in reversed(layouts):
+            if layout['type'] == 'hbox' and layout['node'] != None and layout['node'].type in {'td', 'mathlist'}:
+                hbox = layout
+                break
 
         closest_layout = None
         min_distance = 10000
-        for layout in hbox['children']:
+        for layout in (child for child in self.flatten_layout(hbox) if NodeTypeDB.can_hold_cursor(child['node'])):
             layout_x, layout_y = self.get_absolute_xy(layout)
             distance = abs(layout_x - x)
             if distance < min_distance:
@@ -195,6 +205,7 @@ class Layout(object):
     @timer.timer
     def make_layout_tree_paragraph(self, root, paragraph):
         self.current_paragraph_style = paragraph.style
+        self.in_table = False
         self.current_node_layouts = dict()
 
         layout_tree = {'type': 'paragraph',
@@ -295,13 +306,32 @@ class Layout(object):
             layout_tree['type'] = 'hbox'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
+        elif node.type == 'table':
+            layout_tree['type'] = 'table'
+            layout_tree['fixed'] = False
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
+            self.current_node_layouts[node] = layout_tree
+        elif node.type == 'tr':
+            layout_tree['type'] = 'hbox'
+            layout_tree['fixed'] = False
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
+            self.current_node_layouts[node] = layout_tree
+        elif node.type == 'td':
+            layout_tree['type'] = 'hbox'
+            layout_tree['fixed'] = False
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
+            self.current_node_layouts[node] = layout_tree
         else:
             return None
 
+        if node.type == 'table':
+            self.in_table = True
         for child in node:
             subtree = self.make_layout_tree(child, layout_tree)
             if subtree != None:
                 layout_tree['children'].append(subtree)
+        if node.type == 'table':
+            self.in_table = False
 
         return layout_tree
 
@@ -342,6 +372,7 @@ class Layout(object):
         elif layout_tree['type'] == 'mathscript': self.layout_mathscript(layout_tree)
         elif layout_tree['type'] == 'mathfraction': self.layout_mathfraction(layout_tree)
         elif layout_tree['type'] == 'mathroot': self.layout_mathroot(layout_tree)
+        elif layout_tree['type'] == 'table': self.layout_table(layout_tree)
 
     def layout_word(self, layout_tree):
         layout_tree['width'] = 0
@@ -445,6 +476,42 @@ class Layout(object):
 
         for child in layout_tree['children']:
             child['y'] = layout_tree['height'] - child['height']
+
+    def layout_table(self, layout_tree):
+        for child in layout_tree['children']:
+            if not child['fixed']:
+                self.layout_tree(child)
+
+        col_widths = [0 for i in layout_tree['children'][0]['children']]
+        for tr in layout_tree['children']:
+            for i, td in enumerate(tr['children']):
+                col_widths[i] = max(col_widths[i], td['width'])
+
+        for tr in layout_tree['children']:
+            tr['width'] = 0
+            for i, td in enumerate(tr['children']):
+                td['x'] = tr['width']
+                if i == 0:
+                    td['width'] = col_widths[i] + LayoutInfo.get_col_padding() * 1
+                elif i == len(tr['children']) - 1:
+                    td['width'] = col_widths[i] + LayoutInfo.get_col_padding() * 1
+                else:
+                    td['width'] = col_widths[i] + LayoutInfo.get_col_padding() * 2
+
+                if i > 0:
+                    for child in td['children']:
+                        child['x'] += LayoutInfo.get_col_padding()
+                tr['width'] += td['width']
+
+        layout_tree['width'] = layout_tree['children'][0]['width']
+        layout_tree['height'] = 0
+        for child in layout_tree['children']:
+            child['x'] = 0
+            child['y'] = layout_tree['height']
+            layout_tree['height'] += child['height']
+
+        layout_tree['x'] = None
+        layout_tree['y'] = None
 
     def layout_mathscript(self, layout_tree):
         if len(layout_tree['children']) == 2:
@@ -562,10 +629,11 @@ class Layout(object):
         if node.type == 'char' and CharacterDB.is_emoji(node.value):
             return 'emojis'
 
-        if self.current_paragraph_style.startswith('h'):
-            return self.current_paragraph_style
-        elif self.current_paragraph_style == 'code' or self.current_paragraph_style == 'result':
-            return 'mono'
+        if not self.in_table:
+            if self.current_paragraph_style.startswith('h'):
+                return self.current_paragraph_style
+            elif self.current_paragraph_style == 'code' or self.current_paragraph_style == 'result':
+                return 'mono'
 
         if 'verbatim' in node.tags: return 'mono'
         if 'bold' in node.tags and 'italic' not in node.tags: return 'bold'

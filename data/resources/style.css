@@ -955,4 +955,38 @@ label.explainer-bottom {
     margin-bottom: 6px;
 }
 
+/* table wizard */
+
+.table-wizard .topbox {
+    padding-top: 1px;
+}
+.table-wizard button {
+    border-left: 1px solid @dialog_bg_color;
+    border-bottom: 1px solid @dialog_bg_color;
+    padding: 0px;
+    border-radius: 0px;
+    min-width: 31px;
+    min-height: 31px;
+    transition: none;
+}
+.table-wizard button.first-first {
+    border-top-left-radius: 6px;
+}
+.table-wizard button.first-last {
+    border-top-right-radius: 6px;
+}
+.table-wizard button.last-first {
+    border-bottom-left-radius: 6px;
+}
+.table-wizard button.last-last {
+    border-bottom-right-radius: 6px;
+}
+.table-wizard button.hover {
+    background: @selection_bg;
+}
+.table-wizard label.overlay {
+    color: @popover_overlay_color;
+    font-size: 32px;
+}
+
 

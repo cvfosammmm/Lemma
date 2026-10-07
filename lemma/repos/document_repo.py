@@ -187,10 +187,14 @@ class DocumentRepo():
 
         document.title = title
 
-        if 'insert-position' in meta: insert_pos = eval(meta['insert-position'])
-        else: insert_pos = document.ast[0][0].get_position()
-        if 'selection-position' in meta: selection_pos = eval(meta['selection-position'])
-        else: selection_pos = document.ast[0][0].get_position()
+        if 'insert-position' in meta:
+            insert_pos = eval(meta['insert-position'])
+        else:
+            insert_pos = document.ast[0][0].get_position()
+        if 'selection-position' in meta:
+            selection_pos = eval(meta['selection-position'])
+        else:
+            selection_pos = document.ast[0][0].get_position()
         document.cursor.set_state([insert_pos, selection_pos])
 
         return document

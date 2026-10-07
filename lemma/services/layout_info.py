@@ -52,4 +52,7 @@ class LayoutInfo():
     def get_min_image_size():
         return 16
 
+    def get_col_padding():
+        return 9
+
 

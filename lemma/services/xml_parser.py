@@ -101,7 +101,7 @@ class XMLParserObject(object):
             else:
                 self.current_paragraph_state = None
 
-        if tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'widget']:
+        if tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td', 'widget']:
             if tag == 'mathscript':
                 node = Node('mathscript')
             if tag == 'mathfraction':
@@ -114,6 +114,12 @@ class XMLParserObject(object):
                 node = Node('end')
             if tag == 'placeholder':
                 node = Node('placeholder', '')
+            if tag == 'table':
+                node = Node('table', '')
+            if tag == 'tr':
+                node = Node('tr', '')
+            if tag == 'td':
+                node = Node('td', '')
             if tag == 'widget':
                 attributes = dict()
                 for key, value in attrs.items():
@@ -162,7 +168,7 @@ class XMLParserObject(object):
         if tag == 'mark':
             self.current_tags[self.level].discard('highlight')
 
-        if self.current_node != None and tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'widget']:
+        if self.current_node != None and tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td', 'widget']:
             if self.current_node.parent != None:
                 self.current_node = self.current_node.parent
             else:

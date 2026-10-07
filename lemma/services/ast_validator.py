@@ -52,11 +52,27 @@ class ASTValidator():
                 or all(child.type in {'char', 'placeholder', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
 
+        if node.type == 'table':
+            return all(child.type == 'tr' for child in node.children) \
+                and all(ASTValidator.validate_node(child) for child in node.children)
+
+        if node.type == 'tr':
+            return len(node.children) >= 1 \
+                and all(child.type == 'td' for child in node.children) \
+                and all(ASTValidator.validate_node(child) for child in node.children)
+
+        if node.type == 'td':
+            return len(node.children) >= 1 \
+                and all(child.type in {'char', 'placeholder', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'} for child in node.children) \
+                and all(ASTValidator.validate_node(child) for child in node.children)
+
     def validate_node_for_parent_type(node, parent_type):
         if parent_type == 'paragraph':
-            return node.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}
+            return node.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end', 'table'}
         if parent_type == 'mathlist':
             return node.type in {'char', 'placeholder', 'end'}
+        if parent_type == 'td':
+            return node.type in {'char', 'placeholder', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}
         return False
 
 
