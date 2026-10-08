@@ -77,7 +77,7 @@ class Popover(PopoverView):
                 else:
                     self.buttons[(i, j)].remove_css_class('hover')
         if self.size_hover != (-1, -1):
-            self.overlay_label.set_text(str(self.size_hover[0]) + ' x ' + str(self.size_hover[1]))
+            self.overlay_label.set_text(str(self.size_hover[0]) + ' × ' + str(self.size_hover[1]))
         else:
             self.overlay_label.set_text('')
 
