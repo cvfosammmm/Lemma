@@ -231,7 +231,11 @@ class Toolbars():
 
             else:
                 if document.cursor_in_table_cell():
+                    insert = document.get_insert_node()
+                    table = [node for node in insert.ancestors() if node.type == 'table'][0]
+
                     self.toolbar.stack_left.set_visible_child_name('table')
+                    self.toolbar.toolbar_table_left.table_size_label.set_text('Table (' + str(len(table[0])) + ' × ' + str(len(table)) + ')')
                 elif document.cursor_in_code_cell():
                     self.toolbar.stack_left.set_visible_child_name('code')
                 else:
@@ -280,8 +284,17 @@ class Toolbars():
         self.toolbar.main_left.files_button.set_visible(Settings.get_value('button_visible_attach_files'))
         self.toolbar.main_left.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
 
+        self.toolbar.toolbar_table_left.bold_button.set_visible(Settings.get_value('button_visible_bold'))
+        self.toolbar.toolbar_table_left.italic_button.set_visible(Settings.get_value('button_visible_italic'))
+        self.toolbar.toolbar_table_left.verbatim_button.set_visible(Settings.get_value('button_visible_verbatim'))
+        self.toolbar.toolbar_table_left.highlight_button.set_visible(Settings.get_value('button_visible_highlight'))
+        self.toolbar.toolbar_table_left.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
+        self.toolbar.toolbar_table_left.files_button.set_visible(Settings.get_value('button_visible_attach_files'))
+        self.toolbar.toolbar_table_left.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
+
         tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic') or Settings.get_value('button_visible_verbatim') or Settings.get_value('button_visible_highlight')
         self.toolbar.main_left.tag_buttons_separator.set_visible(tag_buttons_visible)
+        self.toolbar.toolbar_table_left.tag_buttons_separator.set_visible(tag_buttons_visible)
 
         list_buttons_visible = Settings.get_value('button_visible_ul') or Settings.get_value('button_visible_ol') or Settings.get_value('button_visible_cl') or Settings.get_value('button_visible_code')
         self.toolbar.main_left.list_buttons_separator.set_visible(list_buttons_visible)
@@ -292,8 +305,12 @@ class Toolbars():
         insert_buttons_visible = Settings.get_value('button_visible_insert_table') or Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files')
         self.toolbar.main_left.insert_buttons_separator.set_visible(insert_buttons_visible)
 
+        insert_buttons_visible = Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files')
+        self.toolbar.toolbar_table_left.insert_buttons_separator.set_visible(insert_buttons_visible)
+
         link_buttons_visible = Settings.get_value('button_visible_insert_link')
         self.toolbar.main_left.link_buttons_separator.set_visible(link_buttons_visible)
+        self.toolbar.toolbar_table_left.link_buttons_separator.set_visible(link_buttons_visible)
 
     @timer.timer
     def update_tag_toggle(self, tagname):

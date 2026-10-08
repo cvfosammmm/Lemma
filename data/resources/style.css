@@ -989,4 +989,9 @@ label.explainer-bottom {
     font-size: 32px;
 }
 
+/* table toolbar */
 
+.table-toolbar-left .table-size-label {
+    margin-left: 10px;
+    margin-right: 10px;
+}

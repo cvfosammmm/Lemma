@@ -296,6 +296,79 @@ class ToolbarTableLeft(Gtk.Box):
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
         self.add_css_class('table-toolbar-left')
 
+        self.table_size_label = Gtk.Label.new('Table')
+        self.table_size_label.add_css_class('table-size-label')
+
+        self.append(self.table_size_label)
+
+        self.tag_buttons_separator = Gtk.Separator()
+        self.append(self.tag_buttons_separator)
+
+        self.bold_button = Gtk.Button.new_from_icon_name('bold-text-symbolic')
+        self.bold_button.set_action_name('win.toggle-bold')
+        self.bold_button.set_can_focus(False)
+        self.bold_button.set_tooltip_text(_('Bold') + ' (' + Shortcuts.get_for_labels('toggle_bold') + ')')
+
+        self.italic_button = Gtk.Button.new_from_icon_name('italic-text-symbolic')
+        self.italic_button.set_action_name('win.toggle-italic')
+        self.italic_button.set_can_focus(False)
+        self.italic_button.set_tooltip_text(_('Italic') + ' (' + Shortcuts.get_for_labels('toggle_italic') + ')')
+
+        self.verbatim_button = Gtk.Button.new_from_icon_name('verbatim-text-symbolic')
+        self.verbatim_button.set_action_name('win.toggle-verbatim')
+        self.verbatim_button.set_can_focus(False)
+        self.verbatim_button.set_tooltip_text(_('Verbatim') + ' (' + Shortcuts.get_for_labels('toggle_verbatim') + ')')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.add_css_class('highlight-tag-button')
+        box.append(Gtk.Image.new_from_icon_name('highlight-text-symbolic'))
+
+        self.highlight_button = Gtk.Button()
+        self.highlight_button.set_child(box)
+        self.highlight_button.add_css_class('flat')
+        self.highlight_button.set_action_name('win.toggle-highlight')
+        self.highlight_button.set_can_focus(False)
+        self.highlight_button.set_tooltip_text(_('Highlight') + ' (' + Shortcuts.get_for_labels('toggle_highlight') + ')')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.bold_button)
+        box.append(self.italic_button)
+        box.append(self.verbatim_button)
+        box.append(self.highlight_button)
+        self.append(box)
+
+        self.insert_buttons_separator = Gtk.Separator()
+        self.append(self.insert_buttons_separator)
+
+        self.image_button = Gtk.Button.new_from_icon_name('insert-image-new-symbolic')
+        self.image_button.set_action_name('win.show-insert-image-dialog')
+        self.image_button.set_can_focus(False)
+        self.image_button.set_tooltip_text(_('Insert Image'))
+
+        self.files_button = Gtk.Button.new_from_icon_name('attach-files-symbolic')
+        self.files_button.set_action_name('win.show-attach-files-dialog')
+        self.files_button.set_can_focus(False)
+        self.files_button.set_tooltip_text(_('Attach File(s)'))
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.image_button)
+        box.append(self.files_button)
+        self.append(box)
+
+        self.link_buttons_separator = Gtk.Separator()
+        self.append(self.link_buttons_separator)
+
+        self.insert_link_button = Gtk.ToggleButton()
+        self.insert_link_button.set_child(Gtk.Image.new_from_icon_name('link-symbolic'))
+        self.insert_link_button.set_can_focus(False)
+        self.insert_link_button.add_css_class('flat')
+        self.insert_link_button.set_tooltip_text(_('Insert Link') + ' (' + Shortcuts.get_for_labels('link_popover') + ')')
+        self.insert_link_button.set_action_name('win.show-link-popover')
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.insert_link_button)
+        self.append(box)
+
 
 class ToolbarOverviewLeft(Gtk.Box):
 
