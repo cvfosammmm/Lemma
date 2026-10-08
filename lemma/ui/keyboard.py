@@ -154,6 +154,21 @@ class Keyboard():
                     UseCases.change_indentation_level(1)
                 elif not document.has_selection() and document.cursor_at_paragraph_start():
                     UseCases.change_indentation_level(1)
+                elif document.cursor_in_table_cell():
+                    insert = document.get_insert_node()
+                    cell = [node for node in insert.ancestors() if node.type == 'td'][0]
+                    relevant_nodes = [node for node in cell.flatten() if node == insert or node.type == 'placeholder']
+                    insert_index = relevant_nodes.index(insert)
+                    if len(relevant_nodes) > 1 and insert_index < len(relevant_nodes) - 1:
+                        UseCases.select_node(relevant_nodes[insert_index + 1])
+                    else:
+                        next_cell = cell.next_in_parent()
+                        if next_cell == None:
+                            next_row = cell.parent.next_in_parent()
+                            if next_row != None:
+                                next_cell = next_row[0]
+                        if next_cell != None:
+                            UseCases.move_cursor_to_node(next_cell[0])
                 else:
                     UseCases.select_next_placeholder()
             case ('iso_left_tab', Gdk.ModifierType.SHIFT_MASK):
@@ -161,6 +176,21 @@ class Keyboard():
                     UseCases.change_indentation_level(-1)
                 elif not document.has_selection() and document.cursor_at_paragraph_start():
                     UseCases.change_indentation_level(-1)
+                elif document.cursor_in_table_cell():
+                    insert = document.get_insert_node()
+                    cell = [node for node in insert.ancestors() if node.type == 'td'][0]
+                    relevant_nodes = [node for node in cell.flatten() if node == insert or node.type == 'placeholder']
+                    insert_index = relevant_nodes.index(insert)
+                    if len(relevant_nodes) > 1 and insert_index > 0:
+                        UseCases.select_node(relevant_nodes[insert_index - 1])
+                    else:
+                        prev_cell = cell.prev_in_parent()
+                        if prev_cell == None:
+                            prev_row = cell.parent.prev_in_parent()
+                            if prev_row != None:
+                                prev_cell = prev_row[-1]
+                        if prev_cell != None:
+                            UseCases.move_cursor_to_node(prev_cell[0])
                 else:
                     UseCases.select_prev_placeholder()
             case ('escape', _):

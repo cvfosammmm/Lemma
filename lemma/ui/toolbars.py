@@ -230,9 +230,9 @@ class Toolbars():
                 self.toolbar.stack_right.set_visible_child_name('main')
 
             else:
-                if 'table' in (node.type for node in document.get_insert_node().ancestors()):
+                if document.cursor_in_table_cell():
                     self.toolbar.stack_left.set_visible_child_name('table')
-                elif document.get_insert_node().paragraph().style == 'code':
+                elif document.cursor_in_code_cell():
                     self.toolbar.stack_left.set_visible_child_name('code')
                 else:
                     self.toolbar.stack_left.set_visible_child_name('main')

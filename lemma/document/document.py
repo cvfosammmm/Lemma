@@ -316,6 +316,18 @@ class Document():
             self.query_cache['whole_selection_is_one_link'] = self.links_inside_selection() and all(node.link == selected_nodes[0].link for node in selected_nodes)
         return self.query_cache['whole_selection_is_one_link']
 
+    def cursor_in_table_cell(self):
+        if 'cursor_in_table_cell' not in self.query_cache:
+            insert_ancestors = self.get_insert_node().ancestors()
+            self.query_cache['cursor_in_table_cell'] = any(node.type == 'table' for node in insert_ancestors)
+        return self.query_cache['cursor_in_table_cell']
+
+    def cursor_in_code_cell(self):
+        if 'cursor_in_code_cell' not in self.query_cache:
+            insert_paragraph = self.get_insert_node().paragraph()
+            self.query_cache['cursor_in_code_cell'] = (insert_paragraph.style == 'code')
+        return self.query_cache['cursor_in_code_cell']
+
     def get_selected_widget(self):
         if 'selected_widget' not in self.query_cache:
             selected_nodes = self.get_selected_nodes()
