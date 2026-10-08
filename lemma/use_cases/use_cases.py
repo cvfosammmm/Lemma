@@ -479,10 +479,12 @@ class UseCases():
         xml += '</table>'
 
         title, meta, paragraphs = XMLParser.parse(xml)
+        new_insert = paragraphs[0][0][0][0][0]
 
         document.start_undoable_action()
         document.delete_selected_nodes()
         document.insert_nodes(paragraphs[0].children)
+        document.set_insert_and_selection_node(new_insert, new_insert)
         document.end_undoable_action()
 
         UseCases.__scroll_insert_on_screen(document, animation_type='default')
