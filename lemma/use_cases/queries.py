@@ -103,10 +103,18 @@ class Queries():
         new_node = None
         ancestors = document_layout.get_ancestors(document_layout.get_node_layout(node))
         for i, box in enumerate(ancestors):
-            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
+            if new_node == None and (box['type'] == 'vbox' or box['type'] == 'table' or box['type'] == 'paragraph'):
                 if box['type'] == 'vbox':
                     j = box['children'].index(ancestors[i - 1])
                     prev_hboxes = box['children'][:j]
+                elif box['type'] == 'table':
+                    j = box['children'].index(ancestors[i - 1])
+                    k = box['children'][j]['children'].index(ancestors[i - 2])
+
+                    if j > 0:
+                        prev_hboxes = [box['children'][j - 1]['children'][k]]
+                    else:
+                        continue
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast:
@@ -137,10 +145,18 @@ class Queries():
         new_node = None
         ancestors = document_layout.get_ancestors(layout)
         for i, box in enumerate(ancestors):
-            if new_node == None and box['type'] == 'vbox' or box['type'] == 'paragraph':
+            if new_node == None and (box['type'] == 'vbox' or box['type'] == 'table' or box['type'] == 'paragraph'):
                 if box['type'] == 'vbox':
                     j = box['children'].index(ancestors[i - 1])
                     prev_hboxes = box['children'][j + 1:]
+                elif box['type'] == 'table':
+                    j = box['children'].index(ancestors[i - 1])
+                    k = box['children'][j]['children'].index(ancestors[i - 2])
+
+                    if len(box['children']) > j + 1:
+                        prev_hboxes = [box['children'][j + 1]['children'][k]]
+                    else:
+                        continue
                 elif box['type'] == 'paragraph':
                     prev_hboxes = []
                     for paragraph in document.ast:
