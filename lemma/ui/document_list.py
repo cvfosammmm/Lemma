@@ -47,6 +47,7 @@ class DocumentList(object):
         self.focus_index = None
         self.selected_index = None
         self.active_document_id = None
+        self.pointer_x, self.pointer_y = None, None
 
         self.main_window.headerbar.hb_left.search_entry.connect('changed', self.on_search_entry_changed)
         self.main_window.headerbar.hb_left.search_entry.connect('icon-release', self.on_search_entry_icon_released)
@@ -180,13 +181,20 @@ class DocumentList(object):
         item_num = self.get_item_at_cursor()
         self.set_focus_index(item_num)
 
+        self.pointer_x, self.pointer_y = x, y
+
     def on_hover(self, controller, x, y):
         item_num = self.get_item_at_cursor()
         self.set_focus_index(item_num)
-        self.view.scrollbar_vertical.ping()
+
+        if x != self.pointer_x or y != self.pointer_y:
+            self.pointer_x, self.pointer_y = x, y
+            self.view.scrollbar_vertical.ping()
 
     def on_leave(self, controller):
         self.set_focus_index(None)
+
+        self.pointer_x, self.pointer_y = None, None
 
     def on_context_menu_close(self, popover):
         self.set_selected_index(None)

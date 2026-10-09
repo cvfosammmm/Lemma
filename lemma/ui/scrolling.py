@@ -65,6 +65,7 @@ class DocumentScrolling():
             x = min(0, max(0, scrolling_pos_x + dx))
             y = min(max(0, height - view_height), max(0, scrolling_pos_y + dy))
 
+            self.view.scrollbar_vertical.ping()
             UseCases.scroll_to_xy(x, y, animation_type=None)
 
     def on_decelerate(self, controller, vel_x, vel_y):

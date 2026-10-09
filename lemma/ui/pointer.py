@@ -380,12 +380,14 @@ class Pointer():
 
     def on_drop_enter(self, controller, x, y):
         self.scroll_on_drop_callback_id = self.content.add_tick_callback(self.scroll_on_drop_callback)
+        self.view.scrollbar_vertical.ping()
 
         return Gdk.DragAction.COPY
 
     def on_drop_hover(self, controller, x, y):
         self.drop_cursor_x, self.drop_cursor_y = x, y
         self.view.content.queue_draw()
+        self.view.scrollbar_vertical.ping()
 
         return Gdk.DragAction.COPY
 
@@ -420,8 +422,9 @@ class Pointer():
         self.pointer_x, self.pointer_y = x, y
 
     def on_hover(self, controller, x, y):
-        self.pointer_x, self.pointer_y = x, y
-        self.view.scrollbar_vertical.ping()
+        if x != self.pointer_x or y != self.pointer_y:
+            self.pointer_x, self.pointer_y = x, y
+            self.view.scrollbar_vertical.ping()
 
     def on_leave(self, controller):
         self.pointer_x, self.pointer_y = None, None
