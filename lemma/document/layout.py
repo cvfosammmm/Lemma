@@ -127,7 +127,10 @@ class Layout(object):
                             if y - layout['y'] >= line['y'] and y - layout['y'] < line['y'] + line['height']:
                                 self.line_layouts_by_y[y] = line
 
-        return self.line_layouts_by_y[y]
+        if y in self.line_layouts_by_y:
+            return self.line_layouts_by_y[y]
+        else:
+            return None
 
     def flatten_layout(self, layout_tree):
         result = [layout_tree]
