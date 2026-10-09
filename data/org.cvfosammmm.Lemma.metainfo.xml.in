@@ -39,6 +39,11 @@
     </supports>
 
     <releases>
+        ​<release version="79" date="2026-10-9">
+            <description translatable="no">
+                <p>Table Editor, ...</p>
+            </description>
+        </release>
         ​<release version="78" date="2026-10-2">
             <description translatable="no">
                 <p>Run Code Blocks, ...</p>
