@@ -301,6 +301,30 @@ class ToolbarTableLeft(Gtk.Box):
 
         self.append(self.table_size_label)
 
+        self.table_edit_buttons_separator = Gtk.Separator()
+        self.append(self.table_edit_buttons_separator)
+
+        self.add_row_below_button = Gtk.Button.new_from_icon_name('add-row-below-symbolic')
+        self.add_row_below_button.set_action_name('win.add-row-below')
+        self.add_row_below_button.set_can_focus(False)
+        self.add_row_below_button.set_tooltip_text(_('Add Row Below'))
+
+        self.add_row_above_button = Gtk.Button.new_from_icon_name('add-row-above-symbolic')
+        self.add_row_above_button.set_action_name('win.add-row-above')
+        self.add_row_above_button.set_can_focus(False)
+        self.add_row_above_button.set_tooltip_text(_('Add Row Above'))
+
+        self.delete_row_button = Gtk.Button.new_from_icon_name('delete-row-symbolic')
+        self.delete_row_button.set_action_name('win.delete-row')
+        self.delete_row_button.set_can_focus(False)
+        self.delete_row_button.set_tooltip_text(_('Delete Row'))
+
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.append(self.add_row_below_button)
+        box.append(self.add_row_above_button)
+        box.append(self.delete_row_button)
+        self.append(box)
+
         self.tag_buttons_separator = Gtk.Separator()
         self.append(self.tag_buttons_separator)
 

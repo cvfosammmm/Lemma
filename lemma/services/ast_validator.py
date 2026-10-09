@@ -73,6 +73,8 @@ class ASTValidator():
             return node.type in {'char', 'placeholder', 'end'}
         if parent_type == 'td':
             return node.type in {'char', 'placeholder', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}
+        if parent_type == 'table':
+            return node.type == 'tr'
         return False
 
 

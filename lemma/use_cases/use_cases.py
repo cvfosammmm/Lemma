@@ -684,6 +684,89 @@ class UseCases():
         MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('tags_at_cursor_changed')
 
+    def add_row_above():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if not document.cursor_in_table_cell(): return
+
+        insert = document.get_insert_node()
+        row = [node for node in insert.ancestors() if node.type == 'tr'][0]
+        row_index = row.parent.index(row)
+        xml = '<tr>' + '<td><end/></td>' * len(row) + '</tr>'
+        title, meta, paragraphs = XMLParser.parse(xml)
+
+        document.start_undoable_action()
+        document.add_nodes_to_parent(paragraphs[0].children, row.parent, row_index)
+        document.end_undoable_action()
+
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def add_row_below():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if not document.cursor_in_table_cell(): return
+
+        insert = document.get_insert_node()
+        row = [node for node in insert.ancestors() if node.type == 'tr'][0]
+        row_index = row.parent.index(row)
+        xml = '<tr>' + '<td><end/></td>' * len(row) + '</tr>'
+        title, meta, paragraphs = XMLParser.parse(xml)
+
+        document.start_undoable_action()
+        document.add_nodes_to_parent(paragraphs[0].children, row.parent, row_index + 1)
+        document.end_undoable_action()
+
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def delete_row():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if not document.cursor_in_table_cell(): return
+
+        insert = document.get_insert_node()
+        row = [node for node in insert.ancestors() if node.type == 'tr'][0]
+        row_index = row.parent.index(row)
+
+        if len(row.parent) > row_index + 1:
+            new_insert = row.parent[row_index + 1][0][0]
+        elif len(row.parent) > 1:
+            new_insert = row.parent[row_index - 1][0][0]
+        else:
+            new_insert = row.parent.next_in_parent()
+
+        document.start_undoable_action()
+        document.set_insert_and_selection_node(new_insert, new_insert)
+        if len(row.parent) > 1:
+            document.remove_node_from_parent(row)
+        else:
+            document.remove_node_from_parent(row.parent)
+        document.end_undoable_action()
+
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
     @timer.timer
     def set_paragraph_style(style):
         document = WorkspaceRepo.get_workspace().get_active_document()

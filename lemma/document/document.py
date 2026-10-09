@@ -106,6 +106,14 @@ class Document():
         self.command_manager.add_command('insert_nodes', insert, nodes)
 
     @undoable_action
+    def add_nodes_to_parent(self, nodes, parent, index):
+        for node in nodes:
+            if not ASTValidator.validate_node_for_parent_type(node, parent.type): return
+            if not ASTValidator.validate_node(node): return
+
+        self.command_manager.add_command('add_nodes_to_parent', parent, index, nodes)
+
+    @undoable_action
     def replace_max_string_before_cursor(self):
         insert_node = self.get_insert_node()
         last_node = insert_node.prev()
@@ -172,6 +180,10 @@ class Document():
                 self.command_manager.add_command('delete_paragraphs', paragraph_index_from + 1, paragraph_index_to + 1)
                 self.command_manager.add_command('insert_nodes', end_of_first_paragraph, copy_nodes)
                 self.command_manager.add_command('move_cursor_to_node', self.ast[paragraph_index_from][node_from_index], self.ast[paragraph_index_from][node_from_index])
+
+    @undoable_action
+    def remove_node_from_parent(self, node):
+        self.command_manager.add_command('remove_node_from_parent', node)
 
     @undoable_action
     def remove_prefix_space(self, paragraph):

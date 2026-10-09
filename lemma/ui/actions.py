@@ -90,6 +90,9 @@ class Actions(object):
 
         self.add_simple_action('subscript', self.subscript)
         self.add_simple_action('superscript', self.superscript)
+        self.add_simple_action('add-row-above', self.add_row_above)
+        self.add_simple_action('add-row-below', self.add_row_below)
+        self.add_simple_action('delete-row', self.delete_row)
 
         self.add_simple_action('start-global-search', self.start_global_search)
         self.add_simple_action('toggle-tools-sidebar', self.toggle_tools_sidebar, GLib.VariantType('s'))
@@ -205,6 +208,9 @@ class Actions(object):
         self.actions['copy-link'].set_enabled(doc_mode and (document.whole_selection_is_one_link() or document.cursor_inside_link()))
         self.actions['subscript'].set_enabled(doc_mode)
         self.actions['superscript'].set_enabled(doc_mode)
+        self.actions['add-row-above'].set_enabled(doc_mode and document.cursor_in_table_cell())
+        self.actions['add-row-below'].set_enabled(doc_mode and document.cursor_in_table_cell())
+        self.actions['delete-row'].set_enabled(doc_mode and document.cursor_in_table_cell())
         self.actions['set-paragraph-style'].set_enabled(doc_mode)
         self.actions['toggle-checkbox'].set_enabled(doc_mode)
         self.actions['toggle-bold'].set_enabled(doc_mode)
@@ -424,6 +430,21 @@ class Actions(object):
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         UseCases.insert_xml(xml)
         UseCases.update_implicit_x_position()
+
+    def add_row_above(self, action=None, parameter=''):
+        self.main_window.document_view.content.grab_focus()
+
+        UseCases.add_row_above()
+
+    def add_row_below(self, action=None, parameter=''):
+        self.main_window.document_view.content.grab_focus()
+
+        UseCases.add_row_below()
+
+    def delete_row(self, action=None, parameter=''):
+        self.main_window.document_view.content.grab_focus()
+
+        UseCases.delete_row()
 
     def set_paragraph_style(self, action=None, parameter=None):
         self.main_window.document_view.content.grab_focus()
