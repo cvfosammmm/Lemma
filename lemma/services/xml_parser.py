@@ -104,7 +104,7 @@ class XMLParserObject(object):
                 self.current_paragraph_state = attrs['state']
             else:
                 self.current_paragraph_state = None
-        elif tag in ['math', 'mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td']:
+        elif tag in ['math', 'mathscript', 'mathfraction', 'mroot', 'msqrt', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td']:
             if self.check_parents:
                 if self.current_node != None:
                     parent_type = self.current_node.type
@@ -158,7 +158,7 @@ class XMLParserObject(object):
             self.current_tags[self.level].discard('verbatim')
         elif tag == 'mark':
             self.current_tags[self.level].discard('highlight')
-        elif tag in ['math', 'mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td', 'widget']:
+        elif tag in ['math', 'mathscript', 'mathfraction', 'mroot', 'msqrt', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td', 'widget']:
             if self.current_node != None and self.current_node.type == tag:
                 if self.current_node.parent != None:
                     self.current_node = self.current_node.parent

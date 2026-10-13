@@ -81,8 +81,11 @@ class XMLExporter():
         if node.type == 'mathfraction':
             xml = '<mathfraction>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mathfraction>'
 
-        if node.type == 'mathroot':
-            xml = '<mathroot>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mathroot>'
+        if node.type == 'mroot':
+            xml = '<mroot>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mroot>'
+
+        if node.type == 'msqrt':
+            xml = '<msqrt>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</msqrt>'
 
         if node.type == 'mathlist':
             xml = '<mathlist>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mathlist>'

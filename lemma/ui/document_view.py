@@ -365,11 +365,30 @@ class DocumentView():
         for child in layout['children']:
             self.draw_layout(child, ctx, offset_x + layout['x'], offset_y + layout['y'])
 
-        if layout['type'] == 'mathroot':
+        if layout['type'] == 'mroot':
             fg_color = self.get_fg_color_by_node(layout['node'])
             Gdk.cairo_set_source_rgba(ctx, fg_color)
 
             line_offset = max(7, layout['children'][1]['width'])
+            line_width = layout['children'][0]['width']
+            line_height = layout['children'][0]['height']
+
+            ctx.set_line_width(2)
+            ctx.move_to((offset_x + layout['x'] + line_offset - 6) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 10) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 2) * self.hidpi_factor)
+            ctx.stroke()
+            ctx.set_line_width(1)
+            ctx.move_to((offset_x + layout['x'] + line_offset) * self.hidpi_factor, (offset_y + layout['y'] + line_height - 2) * self.hidpi_factor)
+            ctx.line_to((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, (offset_y + layout['y'] + 1) * self.hidpi_factor)
+            ctx.stroke()
+            ctx.rectangle((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, int((offset_y + layout['y']) * self.hidpi_factor), line_width, 1)
+            ctx.fill()
+
+        if layout['type'] == 'msqrt':
+            fg_color = self.get_fg_color_by_node(layout['node'])
+            Gdk.cairo_set_source_rgba(ctx, fg_color)
+
+            line_offset = 7
             line_width = layout['children'][0]['width']
             line_height = layout['children'][0]['height']
 

@@ -31,42 +31,38 @@ class ASTValidator():
     def validate_node(node):
         if node.type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
             return len(node.children) == 0
-
-        if node.type == 'math':
+        elif node.type == 'math':
             return len(node.children) >= 1 \
-                and all(child.type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mathroot', 'end'} for child in node.children) \
+                and all(child.type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mroot', 'msqrt', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-
-        if node.type == 'mathscript':
+        elif node.type == 'mathscript':
             return len(node.children) == 2 \
                 and all(child.type == 'mathlist' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-
-        if node.type == 'mathfraction':
+        elif node.type == 'mathfraction':
             return len(node.children) == 2 \
                 and all(child.type == 'mathlist' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-
-        if node.type == 'mathroot':
+        elif node.type == 'mroot':
             return len(node.children) == 2 \
                 and all(child.type == 'mathlist' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-
-        if node.type == 'mathlist':
+        elif node.type == 'msqrt':
+            return len(node.children) == 1 \
+                and all(child.type == 'mathlist' for child in node.children) \
+                and all(ASTValidator.validate_node(child) for child in node.children)
+        elif node.type == 'mathlist':
             return len(node.children) >= 1 \
                 and all(child.type in {'char', 'placeholder', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-
-        if node.type == 'table':
+        elif node.type == 'table':
             return all(child.type == 'tr' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-
-        if node.type == 'tr':
+        elif node.type == 'tr':
             return len(node.children) >= 1 \
                 and all(child.type == 'td' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-
-        if node.type == 'td':
+        elif node.type == 'td':
             return len(node.children) >= 1 \
                 and all(child.type in {'char', 'placeholder', 'widget', 'math', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
@@ -75,14 +71,16 @@ class ASTValidator():
         if parent_type == 'paragraph':
             return node_type in {'char', 'placeholder', 'eol', 'widget', 'math', 'end', 'table'}
         elif parent_type == 'math':
-            return node_type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mathroot', 'end'}
+            return node_type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mroot', 'msqrt', 'end'}
         elif parent_type == 'mathlist':
             return node_type in {'char', 'placeholder', 'end'}
         elif parent_type == 'mathscript':
             return node_type in {'mathlist'}
         elif parent_type == 'mathfraction':
             return node_type in {'mathlist'}
-        elif parent_type == 'mathroot':
+        elif parent_type == 'mroot':
+            return node_type in {'mathlist'}
+        elif parent_type == 'msqrt':
             return node_type in {'mathlist'}
         elif parent_type == 'td':
             return node_type in {'char', 'placeholder', 'widget', 'math', 'end'}

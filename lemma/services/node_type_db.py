@@ -38,7 +38,7 @@ class NodeTypeDB():
     def is_superscript(node):
         if node.parent.parent.type == 'mathscript':
             return node.parent == node.parent.parent[1]
-        if node.parent.parent.type == 'mathroot':
+        if node.parent.parent.type == 'mroot':
             return node.parent == node.parent.parent[1]
         return False
 

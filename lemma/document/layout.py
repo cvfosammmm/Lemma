@@ -305,8 +305,13 @@ class Layout(object):
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
             self.current_node_layouts[node] = layout_tree
-        elif node.type == 'mathroot':
-            layout_tree['type'] = 'mathroot'
+        elif node.type == 'mroot':
+            layout_tree['type'] = 'mroot'
+            layout_tree['fixed'] = False
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
+            self.current_node_layouts[node] = layout_tree
+        elif node.type == 'msqrt':
+            layout_tree['type'] = 'msqrt'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
             self.current_node_layouts[node] = layout_tree
@@ -380,7 +385,8 @@ class Layout(object):
         elif layout_tree['type'] == 'math': self.layout_math(layout_tree)
         elif layout_tree['type'] == 'mathscript': self.layout_mathscript(layout_tree)
         elif layout_tree['type'] == 'mathfraction': self.layout_mathfraction(layout_tree)
-        elif layout_tree['type'] == 'mathroot': self.layout_mathroot(layout_tree)
+        elif layout_tree['type'] == 'mroot': self.layout_mroot(layout_tree)
+        elif layout_tree['type'] == 'msqrt': self.layout_msqrt(layout_tree)
         elif layout_tree['type'] == 'table': self.layout_table(layout_tree)
 
     def layout_word(self, layout_tree):
@@ -633,7 +639,7 @@ class Layout(object):
         layout_tree['x'] = None
         layout_tree['y'] = None
 
-    def layout_mathroot(self, layout_tree):
+    def layout_mroot(self, layout_tree):
         for child in layout_tree['children']:
             if not child['fixed']:
                 self.layout_tree(child)
@@ -644,6 +650,19 @@ class Layout(object):
         layout_tree['children'][1]['y'] = layout_tree['children'][0]['height'] - 13 - layout_tree['children'][1]['height']
 
         layout_tree['width'] = layout_tree['children'][0]['width'] + max(7, layout_tree['children'][1]['width']) + 10
+        layout_tree['height'] = layout_tree['children'][0]['height']
+        layout_tree['x'] = None
+        layout_tree['y'] = None
+
+    def layout_msqrt(self, layout_tree):
+        for child in layout_tree['children']:
+            if not child['fixed']:
+                self.layout_tree(child)
+
+        layout_tree['children'][0]['x'] = 17
+        layout_tree['children'][0]['y'] = 0
+
+        layout_tree['width'] = layout_tree['children'][0]['width'] + 17
         layout_tree['height'] = layout_tree['children'][0]['height']
         layout_tree['x'] = None
         layout_tree['y'] = None
