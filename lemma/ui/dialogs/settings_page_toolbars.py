@@ -47,6 +47,7 @@ class PageToolbars(object):
         self.button_list[-1].append(['insert-table-symbolic', 'button_visible_insert_table', 'Insert Table'])
         self.button_list[-1].append(['insert-image-new-symbolic', 'button_visible_insert_image', 'Insert Image'])
         self.button_list[-1].append(['attach-files-symbolic', 'button_visible_attach_files', 'Attach File(s)'])
+        self.button_list[-1].append(['math-environment-symbolic', 'button_visible_math_env', 'Math Formula'])
         self.button_list.append([])
         self.button_list[-1].append(['link-symbolic', 'button_visible_insert_link', 'Insert Link'])
 

@@ -65,7 +65,7 @@ class DocumentRepo():
                 with open(pathname_document, 'r') as file:
                     xml = file.read()
 
-                title, meta, paragraphs = XMLParser.parse(xml)
+                title, meta, paragraphs = XMLParser.parse(xml, check_parents=True)
                 if paragraphs != None:
                     for paragraph in paragraphs:
                         if len(paragraph) > 0 and paragraph[-1].type == 'eol':
@@ -177,7 +177,7 @@ class DocumentRepo():
         with open(pathname, 'r') as file:
             xml = file.read()
 
-        title, meta, paragraphs = XMLParser.parse(xml)
+        title, meta, paragraphs = XMLParser.parse(xml, check_parents=True)
         if paragraphs != None:
             for paragraph in paragraphs:
                 if len(paragraph) > 0 and paragraph[-1].type == 'eol':

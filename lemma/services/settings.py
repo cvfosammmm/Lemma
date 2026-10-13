@@ -68,6 +68,7 @@ class Settings():
         Settings.defaults['button_visible_insert_table'] = True
         Settings.defaults['button_visible_insert_image'] = True
         Settings.defaults['button_visible_attach_files'] = True
+        Settings.defaults['button_visible_math_env'] = True
         Settings.defaults['button_visible_insert_link'] = True
 
         Settings.data = Settings.defaults

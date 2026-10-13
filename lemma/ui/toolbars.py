@@ -282,6 +282,7 @@ class Toolbars():
         self.toolbar.main_left.table_button.set_visible(Settings.get_value('button_visible_insert_table'))
         self.toolbar.main_left.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
         self.toolbar.main_left.files_button.set_visible(Settings.get_value('button_visible_attach_files'))
+        self.toolbar.main_left.math_button.set_visible(Settings.get_value('button_visible_math_env'))
         self.toolbar.main_left.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
 
         self.toolbar.toolbar_table_left.bold_button.set_visible(Settings.get_value('button_visible_bold'))
@@ -290,6 +291,7 @@ class Toolbars():
         self.toolbar.toolbar_table_left.highlight_button.set_visible(Settings.get_value('button_visible_highlight'))
         self.toolbar.toolbar_table_left.image_button.set_visible(Settings.get_value('button_visible_insert_image'))
         self.toolbar.toolbar_table_left.files_button.set_visible(Settings.get_value('button_visible_attach_files'))
+        self.toolbar.toolbar_table_left.math_button.set_visible(Settings.get_value('button_visible_math_env'))
         self.toolbar.toolbar_table_left.insert_link_button.set_visible(Settings.get_value('button_visible_insert_link'))
 
         tag_buttons_visible = Settings.get_value('button_visible_bold') or Settings.get_value('button_visible_italic') or Settings.get_value('button_visible_verbatim') or Settings.get_value('button_visible_highlight')
@@ -302,10 +304,10 @@ class Toolbars():
         indentation_buttons_visible = Settings.get_value('button_visible_decrease_indent') or Settings.get_value('button_visible_increase_indent')
         self.toolbar.main_left.indentation_buttons_separator.set_visible(indentation_buttons_visible)
 
-        insert_buttons_visible = Settings.get_value('button_visible_insert_table') or Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files')
+        insert_buttons_visible = Settings.get_value('button_visible_insert_table') or Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files') or Settings.get_value('button_visible_math_env')
         self.toolbar.main_left.insert_buttons_separator.set_visible(insert_buttons_visible)
 
-        insert_buttons_visible = Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files')
+        insert_buttons_visible = Settings.get_value('button_visible_insert_image') or Settings.get_value('button_visible_attach_files') or Settings.get_value('button_visible_math_env')
         self.toolbar.toolbar_table_left.insert_buttons_separator.set_visible(insert_buttons_visible)
 
         link_buttons_visible = Settings.get_value('button_visible_insert_link')

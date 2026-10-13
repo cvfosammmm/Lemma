@@ -20,13 +20,14 @@ import xml.parsers.expat
 from lemma.document.ast import Paragraph, Node
 from lemma.widgets.factory import WidgetFactory
 import lemma.services.xml_helpers as xml_helpers
+from lemma.services.ast_validator import ASTValidator
 
 
 class XMLParser():
 
-    def parse(xml_string):
+    def parse(xml_string, check_parents=False):
         parser = XMLParserObject()
-        paragraphs = parser.parse(xml_string)
+        paragraphs = parser.parse(xml_string, check_parents)
 
         return parser.title, parser.meta, paragraphs
 
@@ -44,6 +45,7 @@ class XMLParserObject(object):
         self.nodes = []
         self.current_node = None
         self.open_xml_tags = []
+        self.check_parents = False
 
         self.level = 0
         self.current_link = [None for i in range(20)]
@@ -54,7 +56,7 @@ class XMLParserObject(object):
         self.title = ''
         self.meta = dict()
 
-    def parse(self, xml_string):
+    def parse(self, xml_string, check_parents):
         self.paragraphs = []
         self.nodes = []
         self.current_node = None
@@ -62,6 +64,7 @@ class XMLParserObject(object):
         self.current_link = [None for i in range(20)]
         self.current_tags = [set() for i in range(20)]
         self.title = ''
+        self.check_parents = check_parents
 
         xml_string = '<?xml version="1.0" encoding="utf-8"?><list>' + xml_string + '</list>'
         try:
@@ -78,71 +81,60 @@ class XMLParserObject(object):
 
     def handle_starttag(self, tag, attrs):
         self.open_xml_tags.append(tag)
+        node = None
 
-        if tag == 'meta' and 'name' in attrs and 'content' in attrs:
-            self.meta[attrs['name']] = attrs['content']
-
-        if tag == 'a' and 'href' in attrs:
-            self.current_link[self.level] = xml_helpers.unescape(attrs['href'])
-        if tag == 'em':
+        if tag == 'meta':
+            if 'name' in attrs and 'content' in attrs:
+                self.meta[attrs['name']] = attrs['content']
+        elif tag == 'a':
+            if 'href' in attrs:
+                self.current_link[self.level] = xml_helpers.unescape(attrs['href'])
+        elif tag == 'em':
             self.current_tags[self.level].add('italic')
-        if tag == 'strong':
+        elif tag == 'strong':
             self.current_tags[self.level].add('bold')
-        if tag == 'verb':
+        elif tag == 'verb':
             self.current_tags[self.level].add('verbatim')
-        if tag == 'mark':
+        elif tag == 'mark':
             self.current_tags[self.level].add('highlight')
-
-        if tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code', 'result']:
+        elif tag in ['p', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'cl', 'code', 'result']:
             if 'indentation_level' in attrs:
                 self.current_indentation_level = int(attrs['indentation_level'])
             if 'state' in attrs:
                 self.current_paragraph_state = attrs['state']
             else:
                 self.current_paragraph_state = None
-
-        if tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td', 'widget']:
-            if tag == 'mathscript':
-                node = Node('mathscript')
-            if tag == 'mathfraction':
-                node = Node('mathfraction')
-            if tag == 'mathroot':
-                node = Node('mathroot')
-            if tag == 'mathlist':
-                node = Node('mathlist')
-            if tag == 'end':
-                node = Node('end')
-            if tag == 'placeholder':
-                node = Node('placeholder', '')
-            if tag == 'table':
-                node = Node('table', '')
-            if tag == 'tr':
-                node = Node('tr', '')
-            if tag == 'td':
-                node = Node('td', '')
-            if tag == 'widget':
-                attributes = dict()
-                for key, value in attrs.items():
-                    if key != 'type':
-                        attributes[key] = value
-
-                widget = WidgetFactory.make_widget(attrs['type'], attributes)
-                if widget != None:
-                    node = Node('widget', widget)
-                else:
-                    node = None
-
-            if node != None:
-                node.link = self.current_link[self.level]
-                node.tags = self.current_tags[self.level].copy()
-
+        elif tag in ['math', 'mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td']:
+            if self.check_parents:
                 if self.current_node != None:
-                    self.current_node.append(node)
+                    parent_type = self.current_node.type
                 else:
-                    self.nodes.append(node)
+                    parent_type = 'paragraph'
+                if parent_type != None and ASTValidator.validate_node_for_parent(tag, parent_type):
+                    node = Node(tag)
+            else:
+                node = Node(tag)
+        elif tag == 'widget':
+            attributes = dict()
+            for key, value in attrs.items():
+                if key != 'type':
+                    attributes[key] = value
 
-                self.current_node = node
-                self.level += 1
+            widget = WidgetFactory.make_widget(attrs['type'], attributes)
+            if widget != None:
+                node = Node('widget', widget)
+
+        if node != None:
+            node.link = self.current_link[self.level]
+            node.tags = self.current_tags[self.level].copy()
+
+            if self.current_node != None:
+                self.current_node.append(node)
+            else:
+                self.nodes.append(node)
+
+            self.current_node = node
+            self.level += 1
 
     def handle_endtag(self, tag):
         self.open_xml_tags.pop()
@@ -156,24 +148,23 @@ class XMLParserObject(object):
             new_paragraph.state = self.current_paragraph_state
             self.paragraphs.append(new_paragraph)
             self.nodes = []
-
-        if tag == 'a':
+        elif tag == 'a':
             self.current_link[self.level] = None
-        if tag == 'em':
+        elif tag == 'em':
             self.current_tags[self.level].discard('italic')
-        if tag == 'strong':
+        elif tag == 'strong':
             self.current_tags[self.level].discard('bold')
-        if tag == 'verb':
+        elif tag == 'verb':
             self.current_tags[self.level].discard('verbatim')
-        if tag == 'mark':
+        elif tag == 'mark':
             self.current_tags[self.level].discard('highlight')
-
-        if self.current_node != None and tag in ['mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td', 'widget']:
-            if self.current_node.parent != None:
-                self.current_node = self.current_node.parent
-            else:
-                self.current_node = None
-            self.level -= 1
+        elif tag in ['math', 'mathscript', 'mathfraction', 'mathroot', 'mathlist', 'end', 'placeholder', 'table', 'tr', 'td', 'widget']:
+            if self.current_node != None and self.current_node.type == tag:
+                if self.current_node.parent != None:
+                    self.current_node = self.current_node.parent
+                else:
+                    self.current_node = None
+                self.level -= 1
 
     def handle_data(self, data):
         if 'head' in self.open_xml_tags and 'title' in self.open_xml_tags:

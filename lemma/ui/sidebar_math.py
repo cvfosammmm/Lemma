@@ -429,7 +429,7 @@ class SidebarMath(object):
 
     def on_button_clicked(self, button, xml):
         self.main_window.document_view.content.grab_focus()
-        UseCases.insert_xml(xml)
+        UseCases.insert_xml(xml, is_math=True)
         UseCases.update_implicit_x_position()
 
 

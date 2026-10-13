@@ -237,10 +237,16 @@ class ToolbarMain(Gtk.Box):
         self.files_button.set_can_focus(False)
         self.files_button.set_tooltip_text(_('Attach File(s)'))
 
+        self.math_button = Gtk.Button.new_from_icon_name('math-environment-symbolic')
+        self.math_button.set_action_name('win.insert-math-environment')
+        self.math_button.set_can_focus(False)
+        self.math_button.set_tooltip_text(_('Math Formula') + ' (' + Shortcuts.get_for_labels('math_environment') + ')')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.table_button)
         box.append(self.image_button)
         box.append(self.files_button)
+        box.append(self.math_button)
         self.append(box)
 
         self.link_buttons_separator = Gtk.Separator()
@@ -374,9 +380,15 @@ class ToolbarTableLeft(Gtk.Box):
         self.files_button.set_can_focus(False)
         self.files_button.set_tooltip_text(_('Attach File(s)'))
 
+        self.math_button = Gtk.Button.new_from_icon_name('math-environment-symbolic')
+        self.math_button.set_action_name('win.insert-math-environment')
+        self.math_button.set_can_focus(False)
+        self.math_button.set_tooltip_text(_('Math Formula') + ' (' + Shortcuts.get_for_labels('math_environment') + ')')
+
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         box.append(self.image_button)
         box.append(self.files_button)
+        box.append(self.math_button)
         self.append(box)
 
         self.link_buttons_separator = Gtk.Separator()

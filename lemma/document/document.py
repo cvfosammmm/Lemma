@@ -100,7 +100,7 @@ class Document():
             insert = self.get_insert_node()
 
         for node in nodes:
-            if not ASTValidator.validate_node_for_parent_type(node, insert.parent.type): return
+            if not ASTValidator.validate_node_for_parent(node.type, insert.parent.type): return
             if not ASTValidator.validate_node(node): return
 
         self.command_manager.add_command('insert_nodes', insert, nodes)
@@ -108,7 +108,7 @@ class Document():
     @undoable_action
     def add_nodes_to_parent(self, nodes, parent, index):
         for node in nodes:
-            if not ASTValidator.validate_node_for_parent_type(node, parent.type): return
+            if not ASTValidator.validate_node_for_parent(node.type, parent.type): return
             if not ASTValidator.validate_node(node): return
 
         self.command_manager.add_command('add_nodes_to_parent', parent, index, nodes)
@@ -327,6 +327,12 @@ class Document():
             selected_nodes = self.get_selected_nodes()
             self.query_cache['whole_selection_is_one_link'] = self.links_inside_selection() and all(node.link == selected_nodes[0].link for node in selected_nodes)
         return self.query_cache['whole_selection_is_one_link']
+
+    def cursor_in_math_formula(self):
+        if 'cursor_in_math_formula' not in self.query_cache:
+            insert_ancestors = self.get_insert_node().ancestors()
+            self.query_cache['cursor_in_math_formula'] = any(node.type == 'math' for node in insert_ancestors)
+        return self.query_cache['cursor_in_math_formula']
 
     def cursor_in_table_cell(self):
         if 'cursor_in_table_cell' not in self.query_cache:

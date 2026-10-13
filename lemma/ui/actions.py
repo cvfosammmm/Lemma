@@ -88,6 +88,7 @@ class Actions(object):
         self.add_simple_action('show-insert-image-dialog', self.show_insert_image_dialog)
         self.add_simple_action('show-attach-files-dialog', self.show_attach_files_dialog)
 
+        self.add_simple_action('insert-math-environment', self.insert_math_environment)
         self.add_simple_action('subscript', self.subscript)
         self.add_simple_action('superscript', self.superscript)
         self.add_simple_action('add-row-above', self.add_row_above)
@@ -121,6 +122,7 @@ class Actions(object):
         self.shortcut_controller_docview.add_cb('toggle_verbatim', self.actions['toggle-verbatim'].activate)
         self.shortcut_controller_docview.add_cb('toggle_highlight', self.actions['toggle-highlight'].activate)
         self.shortcut_controller_docview.add_cb('link_popover', self.actions['show-link-popover'].activate)
+        self.shortcut_controller_docview.add_cb('math_environment', self.actions['insert-math-environment'].activate)
         self.shortcut_controller_docview.add_cb('subscript', self.actions['subscript'].activate)
         self.shortcut_controller_docview.add_cb('superscript', self.actions['superscript'].activate)
         self.shortcut_controller_docview.add_cb('toggle_checkbox', self.actions['toggle-checkbox'].activate)
@@ -206,6 +208,7 @@ class Actions(object):
         self.actions['remove-link'].set_enabled(doc_mode and (document.links_inside_selection() or document.cursor_inside_link()))
         self.actions['show-link-popover'].set_enabled(doc_mode and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
         self.actions['copy-link'].set_enabled(doc_mode and (document.whole_selection_is_one_link() or document.cursor_inside_link()))
+        self.actions['insert-math-environment'].set_enabled(doc_mode and not document.cursor_in_math_formula())
         self.actions['subscript'].set_enabled(doc_mode)
         self.actions['superscript'].set_enabled(doc_mode)
         self.actions['add-row-above'].set_enabled(doc_mode and document.cursor_in_table_cell())
@@ -405,6 +408,11 @@ class Actions(object):
         UseCases.move_cursor_to_parent()
         UseCases.update_implicit_x_position()
 
+    def insert_math_environment(self, action=None, parameter=''):
+        self.main_window.document_view.content.grab_focus()
+        UseCases.insert_math_environment()
+        UseCases.update_implicit_x_position()
+
     def subscript(self, action=None, parameter=''):
         self.main_window.document_view.content.grab_focus()
 
@@ -415,7 +423,7 @@ class Actions(object):
             xml = '<mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
-        UseCases.insert_xml(xml)
+        UseCases.insert_xml(xml, is_math=True)
         UseCases.update_implicit_x_position()
 
     def superscript(self, action=None, parameter=''):
@@ -428,7 +436,7 @@ class Actions(object):
             xml = '<mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
         else:
             xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
-        UseCases.insert_xml(xml)
+        UseCases.insert_xml(xml, is_math=True)
         UseCases.update_implicit_x_position()
 
     def add_row_above(self, action=None, parameter=''):

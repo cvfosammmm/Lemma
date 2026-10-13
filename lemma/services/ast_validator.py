@@ -32,6 +32,11 @@ class ASTValidator():
         if node.type in {'char', 'widget', 'placeholder', 'eol', 'end'}:
             return len(node.children) == 0
 
+        if node.type == 'math':
+            return len(node.children) == 1 \
+                and all(child.type == 'mathlist' for child in node.children) \
+                and all(ASTValidator.validate_node(child) for child in node.children)
+
         if node.type == 'mathscript':
             return len(node.children) == 2 \
                 and all(child.type == 'mathlist' for child in node.children) \
@@ -49,7 +54,7 @@ class ASTValidator():
 
         if node.type == 'mathlist':
             return len(node.children) == 0 \
-                or all(child.type in {'char', 'placeholder', 'end'} for child in node.children) \
+                or all(child.type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mathroot', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
 
         if node.type == 'table':
@@ -63,18 +68,28 @@ class ASTValidator():
 
         if node.type == 'td':
             return len(node.children) >= 1 \
-                and all(child.type in {'char', 'placeholder', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'} for child in node.children) \
+                and all(child.type in {'char', 'placeholder', 'widget', 'math', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
 
-    def validate_node_for_parent_type(node, parent_type):
+    def validate_node_for_parent(node_type, parent_type):
         if parent_type == 'paragraph':
-            return node.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end', 'table'}
-        if parent_type == 'mathlist':
-            return node.type in {'char', 'placeholder', 'end'}
-        if parent_type == 'td':
-            return node.type in {'char', 'placeholder', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}
-        if parent_type == 'table':
-            return node.type == 'tr'
+            return node_type in {'char', 'placeholder', 'eol', 'widget', 'math', 'end', 'table'}
+        elif parent_type == 'math':
+            return node_type in {'mathlist'}
+        elif parent_type == 'mathlist':
+            return node_type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mathroot', 'end'}
+        elif parent_type == 'mathscript':
+            return node_type in {'mathlist'}
+        elif parent_type == 'mathfraction':
+            return node_type in {'mathlist'}
+        elif parent_type == 'mathroot':
+            return node_type in {'mathlist'}
+        elif parent_type == 'td':
+            return node_type in {'char', 'placeholder', 'widget', 'math', 'end'}
+        elif parent_type == 'tr':
+            return node_type == 'td'
+        elif parent_type == 'table':
+            return node_type == 'tr'
         return False
 
 

@@ -498,7 +498,33 @@ class UseCases():
         MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
-    def insert_xml(xml):
+    def insert_math_environment():
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        if document.cursor_in_math_formula(): return
+
+        xml = '<math><mathlist><end/></mathlist></math>'
+
+        title, meta, paragraphs = XMLParser.parse(xml)
+        new_insert = paragraphs[0][0][0][0]
+
+        document.start_undoable_action()
+        document.delete_selected_nodes()
+        document.insert_nodes(paragraphs[0].children)
+        document.set_insert_and_selection_node(new_insert, new_insert)
+        document.end_undoable_action()
+
+        UseCases.__scroll_insert_on_screen(document, animation_type='default')
+        UseCases.__reset_tags_at_cursor()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+        MessageBus.add_message('cursor_movement')
+        MessageBus.add_message('tags_at_cursor_changed')
+
+    @timer.timer
+    def insert_xml(xml, is_math=False):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         if document.has_selection() and xml.find('<placeholder marks="prev_selection"/>') >= 0:
@@ -506,6 +532,9 @@ class UseCases():
                 prev_selection = document.get_selected_nodes()
                 prev_selection_xml = xml_exporter.XMLExporter.export_paragraph(prev_selection)
                 xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
+
+        if is_math and not document.cursor_in_math_formula():
+            xml = '<math><mathlist>' + xml + '<end/></mathlist></math>'
 
         title, meta, paragraphs = XMLParser.parse(xml)
 

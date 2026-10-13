@@ -72,6 +72,9 @@ class XMLExporter():
     def export_node(node):
         xml = ''
 
+        if node.type == 'math':
+            xml = '<math>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</math>'
+
         if node.type == 'mathscript':
             xml = '<mathscript>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mathscript>'
 
