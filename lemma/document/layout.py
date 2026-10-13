@@ -527,12 +527,23 @@ class Layout(object):
             if not child['fixed']:
                 self.layout_tree(child)
 
-        fontname = self.get_fontname_from_node(layout_tree['node'])
+        min_descend = 0
+        for child in layout_tree['children']:
+            min_descend = min(min_descend, TextShaper.get_descend(fontname=child['fontname']))
 
-        layout_tree['width'] = layout_tree['children'][0]['width']
-        layout_tree['height'] = layout_tree['children'][0]['height']
-        layout_tree['x'] = None
-        layout_tree['y'] = None
+        for child in layout_tree['children']:
+            child['height'] -= min_descend - TextShaper.get_descend(fontname=child['fontname'])
+
+        layout_tree['width'] = 0
+        layout_tree['height'] = 0
+        for child in layout_tree['children']:
+            child['x'] = layout_tree['width']
+
+            layout_tree['width'] += child['width']
+            layout_tree['height'] = max(layout_tree['height'], child['height'] - min_descend + TextShaper.get_descend(fontname=child['fontname']))
+
+        for child in layout_tree['children']:
+            child['y'] = layout_tree['height'] - child['height']
 
     def layout_mathscript(self, layout_tree):
         if len(layout_tree['children']) == 2:

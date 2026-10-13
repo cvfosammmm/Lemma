@@ -46,7 +46,7 @@ class SidebarMath(object):
         self.data['math_typesetting']['symbols'].append(['superscript', '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'])
         self.data['math_typesetting']['symbols'].append(['subsuperscript', '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'])
         self.data['math_typesetting']['symbols'].append(['fraction', '<mathfraction><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathfraction>'])
-        self.data['math_typesetting']['symbols'].append(['sqrt', '<mathroot><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist></mathlist></mathroot>'])
+        self.data['math_typesetting']['symbols'].append(['sqrt', '<mathroot><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><end/></mathlist></mathroot>'])
         self.data['math_typesetting']['symbols'].append(['nthroot', '<mathroot><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathroot>'])
         self.data['math_typesetting']['symbols'].append(['sumwithindex', '∑<mathscript><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/>'])
         self.data['math_typesetting']['symbols'].append(['prodwithindex', '∏<mathscript><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/>'])

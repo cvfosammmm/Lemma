@@ -502,7 +502,7 @@ class UseCases():
         document = WorkspaceRepo.get_workspace().get_active_document()
         if document.cursor_in_math_formula(): return
 
-        xml = '<math><mathlist><end/></mathlist></math>'
+        xml = '<math><end/></math>'
 
         title, meta, paragraphs = XMLParser.parse(xml)
         new_insert = paragraphs[0][0][0][0]
@@ -534,7 +534,7 @@ class UseCases():
                 xml = xml.replace('<placeholder marks="prev_selection"/>', prev_selection_xml[prev_selection_xml.find('>') + 1:prev_selection_xml.rfind('<')])
 
         if is_math and not document.cursor_in_math_formula():
-            xml = '<math><mathlist>' + xml + '<end/></mathlist></math>'
+            xml = '<math>' + xml + '<end/></math>'
 
         title, meta, paragraphs = XMLParser.parse(xml)
 
