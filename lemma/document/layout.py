@@ -375,7 +375,7 @@ class Layout(object):
         last_tags = set()
         result = list()
         for node in nodes:
-            if node.type != 'char' or NodeTypeDB.is_whitespace(node) or CharacterDB.is_mathsymbol(node.value) or CharacterDB.is_emoji(node.value):
+            if node.type != 'char' or NodeTypeDB.is_whitespace(node) or CharacterDB.is_emoji(node.value):
                 result.append(node)
                 last_type = None
                 last_tags = set()
@@ -742,7 +742,7 @@ class Layout(object):
             return 'math_small'
         if NodeTypeDB.in_fraction(node):
             return 'math_small'
-        if node.type == 'char' and CharacterDB.is_mathsymbol(node.value):
+        if any(ancestor.type == 'math' for ancestor in node.ancestors()):
             return 'math'
         if node.type == 'placeholder':
             return 'math'
