@@ -33,7 +33,8 @@ class WindowState(object):
         self.main_window.backlinks_toggle.connect('clicked', self.on_navigation_sidebar_toggle_clicked, 'backlinks')
         self.main_window.graph_panel_toggle.connect('clicked', self.on_navigation_sidebar_toggle_clicked, 'graph_panel')
 
-        self.toolbar_right.symbols_sidebar_toggle.connect('clicked', self.on_tools_sidebar_toggle_clicked, 'math')
+        self.toolbar_right.math_sidebar_toggle.connect('clicked', self.on_tools_sidebar_toggle_clicked, 'math')
+        self.toolbar_right.symbols_sidebar_toggle.connect('clicked', self.on_tools_sidebar_toggle_clicked, 'symbols')
         self.toolbar_right.emoji_sidebar_toggle.connect('clicked', self.on_tools_sidebar_toggle_clicked, 'emojis')
 
         self.restore_window_state()
@@ -78,7 +79,8 @@ class WindowState(object):
         sidebar_visible = Settings.get_value('show_tools_sidebar') and mode == 'documents'
         active_tab = Settings.get_value('tools_sidebar_active_tab')
 
-        self.update_toggle(self.toolbar_right.symbols_sidebar_toggle, sidebar_visible and active_tab == 'math')
+        self.update_toggle(self.toolbar_right.math_sidebar_toggle, sidebar_visible and active_tab == 'math')
+        self.update_toggle(self.toolbar_right.symbols_sidebar_toggle, sidebar_visible and active_tab == 'symbols')
         self.update_toggle(self.toolbar_right.emoji_sidebar_toggle, sidebar_visible and active_tab == 'emojis')
 
         self.main_window.tools_sidebar.set_visible_child_name(active_tab)

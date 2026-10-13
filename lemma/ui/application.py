@@ -45,8 +45,9 @@ import lemma.ui.overview as overview
 import lemma.ui.backlinks as backlinks
 import lemma.ui.graph_panel as graph_panel
 import lemma.ui.actions as actions
-import lemma.ui.sidebar_emojis as sidebar_emojis
 import lemma.ui.sidebar_math as sidebar_math
+import lemma.ui.sidebar_symbols as sidebar_symbols
+import lemma.ui.sidebar_emojis as sidebar_emojis
 import lemma.ui.autocomplete as autocomplete
 import lemma.ui.shortcuts as shortcuts
 
@@ -84,8 +85,9 @@ class Application(Adw.Application):
         self.backlinks = backlinks.Backlinks(self.main_window)
         self.graph_panel = graph_panel.GraphPanel(self.main_window)
         self.overview = overview.Overview(self.main_window)
-        self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self)
         self.sidebar_math = sidebar_math.SidebarMath(self.main_window, self)
+        self.sidebar_symbols = sidebar_symbols.SidebarSymbols(self.main_window, self)
+        self.sidebar_emojis = sidebar_emojis.SidebarEmojis(self.main_window, self)
         self.autocomplete = autocomplete.Autocomplete(self.main_window, self)
         self.window_state = window_state.WindowState(self.main_window)
 
@@ -119,8 +121,9 @@ class Application(Adw.Application):
         self.context_menu_document.animate()
         self.autocomplete.animate()
         self.toolbars.animate()
-        self.sidebar_emojis.animate()
         self.sidebar_math.animate()
+        self.sidebar_symbols.animate()
+        self.sidebar_emojis.animate()
 
         return True
 
