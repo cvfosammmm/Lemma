@@ -505,7 +505,7 @@ class UseCases():
         xml = '<math><end/></math>'
 
         title, meta, paragraphs = XMLParser.parse(xml)
-        new_insert = paragraphs[0][0][0][0]
+        new_insert = paragraphs[0][0][0]
 
         document.start_undoable_action()
         document.delete_selected_nodes()
