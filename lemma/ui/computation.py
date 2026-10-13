@@ -71,40 +71,41 @@ class Computation():
         code_cells_by_paragraph = dict()
         paragraphs_by_code_cell = dict()
 
-        current_cell = []
-        current_cell_id = uuid.uuid4()
-        for paragraph in document.ast:
-            if paragraph.style == 'code':
-                current_cell.append(paragraph)
-            else:
-                if len(current_cell) > 0:
-                    paragraphs_by_code_cell[current_cell_id] = current_cell
-                    for paragraph in current_cell:
-                        code_cells_by_paragraph[paragraph] = current_cell_id
-                    current_cell = []
-                    current_cell_id = uuid.uuid4()
-        if len(current_cell) > 0:
-            paragraphs_by_code_cell[current_cell_id] = current_cell
-            for paragraph in current_cell:
-                code_cells_by_paragraph[paragraph] = current_cell_id
+        if document != None:
+            current_cell = []
+            current_cell_id = uuid.uuid4()
+            for paragraph in document.ast:
+                if paragraph.style == 'code':
+                    current_cell.append(paragraph)
+                else:
+                    if len(current_cell) > 0:
+                        paragraphs_by_code_cell[current_cell_id] = current_cell
+                        for paragraph in current_cell:
+                            code_cells_by_paragraph[paragraph] = current_cell_id
+                        current_cell = []
+                        current_cell_id = uuid.uuid4()
+            if len(current_cell) > 0:
+                paragraphs_by_code_cell[current_cell_id] = current_cell
+                for paragraph in current_cell:
+                    code_cells_by_paragraph[paragraph] = current_cell_id
 
-        # The cells are now compared to the old ones. If they can be identified,
-        # we asign them the same id. Firstly, there have to be some paragraphs
-        # that were already in the old cell. But we don't want to allow splits,
-        # so exactly one new cell should have paragraphs of the old one. Also,
-        # we don't allow merges, so only one old cell can have paragraphs of the
-        # new one. If all that is given, we replace the new cell_id with the old
-        # one. The following code is supposed to do the identification.
-        for prev_cell_id, paragraphs in self.paragraphs_by_code_cell.items():
-            new_cells_with_same_paragraphs = set([code_cells_by_paragraph[paragraph] for paragraph in paragraphs if paragraph in code_cells_by_paragraph])
-            if len(new_cells_with_same_paragraphs) == 1:
-                cell_id = new_cells_with_same_paragraphs.pop()
-                old_cells_with_same_paragraphs = set([self.code_cells_by_paragraph[paragraph] for paragraph in paragraphs_by_code_cell[cell_id] if paragraph in self.code_cells_by_paragraph])
-                if len(old_cells_with_same_paragraphs) == 1:
-                    paragraphs_by_code_cell[prev_cell_id] = paragraphs_by_code_cell[cell_id]
-                    for paragraph in paragraphs_by_code_cell[prev_cell_id]:
-                        code_cells_by_paragraph[paragraph] = prev_cell_id
-                    del(paragraphs_by_code_cell[cell_id])
+            # The cells are now compared to the old ones. If they can be identified,
+            # we asign them the same id. Firstly, there have to be some paragraphs
+            # that were already in the old cell. But we don't want to allow splits,
+            # so exactly one new cell should have paragraphs of the old one. Also,
+            # we don't allow merges, so only one old cell can have paragraphs of the
+            # new one. If all that is given, we replace the new cell_id with the old
+            # one. The following code is supposed to do the identification.
+            for prev_cell_id, paragraphs in self.paragraphs_by_code_cell.items():
+                new_cells_with_same_paragraphs = set([code_cells_by_paragraph[paragraph] for paragraph in paragraphs if paragraph in code_cells_by_paragraph])
+                if len(new_cells_with_same_paragraphs) == 1:
+                    cell_id = new_cells_with_same_paragraphs.pop()
+                    old_cells_with_same_paragraphs = set([self.code_cells_by_paragraph[paragraph] for paragraph in paragraphs_by_code_cell[cell_id] if paragraph in self.code_cells_by_paragraph])
+                    if len(old_cells_with_same_paragraphs) == 1:
+                        paragraphs_by_code_cell[prev_cell_id] = paragraphs_by_code_cell[cell_id]
+                        for paragraph in paragraphs_by_code_cell[prev_cell_id]:
+                            code_cells_by_paragraph[paragraph] = prev_cell_id
+                        del(paragraphs_by_code_cell[cell_id])
 
         self.code_cells_by_paragraph = code_cells_by_paragraph
         self.paragraphs_by_code_cell = paragraphs_by_code_cell
@@ -114,33 +115,33 @@ class Computation():
                 CodeRunner.stop_kernel(self.document.id)
             self.document = document
 
-        for result in CodeRunner.fetch_results(document.id):
-            cell_id = result['computation_id']
-            if cell_id in self.paragraphs_by_code_cell:
-                paragraph = self.paragraphs_by_code_cell[cell_id][-1]
-                while True:
-                    next_paragraph = paragraph.next_in_parent()
-                    if next_paragraph != None and next_paragraph.style == 'result':
-                        paragraph = next_paragraph
-                    else:
-                        break
+        if document != None:
+            for result in CodeRunner.fetch_results(document.id):
+                cell_id = result['computation_id']
+                if cell_id in self.paragraphs_by_code_cell:
+                    paragraph = self.paragraphs_by_code_cell[cell_id][-1]
+                    while True:
+                        next_paragraph = paragraph.next_in_parent()
+                        if next_paragraph != None and next_paragraph.style == 'result':
+                            paragraph = next_paragraph
+                        else:
+                            break
 
-            if 'data' in result['result']:
-                data = result['result']['data']
-                insert_node = paragraph[-1].next()
-                if 'text/plain' in data:
-                    UseCases.insert_result_after_paragraph(data['text/plain'] + '\n', paragraph)
+                if 'data' in result['result']:
+                    data = result['result']['data']
+                    insert_node = paragraph[-1].next()
+                    if 'text/plain' in data:
+                        UseCases.insert_result_after_paragraph(data['text/plain'] + '\n', paragraph)
 
-            elif 'traceback' in result['result']:
-                error_msg = result['result']['ename'] + ': ' + result['result']['evalue'] + '\n'
-                insert_node = paragraph[-1].next()
-                UseCases.insert_result_after_paragraph(error_msg, paragraph)
+                elif 'traceback' in result['result']:
+                    error_msg = result['result']['ename'] + ': ' + result['result']['evalue'] + '\n'
+                    insert_node = paragraph[-1].next()
+                    UseCases.insert_result_after_paragraph(error_msg, paragraph)
 
-            elif 'text' in result['result']:
-                UseCases.insert_result_after_paragraph(result['result']['text'], paragraph)
+                elif 'text' in result['result']:
+                    UseCases.insert_result_after_paragraph(result['result']['text'], paragraph)
 
-        running_computations = CodeRunner.get_running_computations(document.id)
-        if len(running_computations) > 0:
+        if document != None and len(CodeRunner.get_running_computations(document.id)) > 0:
             self.toolbar.main_right.kernel_state_button.show_busy_state()
         else:
             self.toolbar.main_right.kernel_state_button.show_idle_state()
