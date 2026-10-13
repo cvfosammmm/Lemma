@@ -206,7 +206,7 @@ class Actions(object):
         self.actions['show-attach-files-dialog'].set_enabled(doc_mode and document.insert_parent_is_root())
         self.actions['open-link'].set_enabled(doc_mode and document.cursor_inside_link())
         self.actions['remove-link'].set_enabled(doc_mode and (document.links_inside_selection() or document.cursor_inside_link()))
-        self.actions['show-link-popover'].set_enabled(doc_mode and (document.insert_parent_is_root() or document.whole_selection_is_one_link() or document.cursor_inside_link()))
+        self.actions['show-link-popover'].set_enabled(doc_mode and not document.cursor_in_math_formula() and not image_selected)
         self.actions['copy-link'].set_enabled(doc_mode and (document.whole_selection_is_one_link() or document.cursor_inside_link()))
         self.actions['insert-math-environment'].set_enabled(doc_mode and not document.cursor_in_math_formula())
         self.actions['subscript'].set_enabled(doc_mode)
