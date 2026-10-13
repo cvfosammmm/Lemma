@@ -22,7 +22,7 @@ class ASTValidator():
 
     def validate_paragraph(paragraph):
         for child in paragraph:
-            if not child.type in {'char', 'placeholder', 'eol', 'widget', 'mathscript', 'mathfraction', 'mathroot', 'end'}:
+            if not child.type in {'char', 'placeholder', 'eol', 'widget', 'math', 'end', 'table'}:
                 return False
             if not ASTValidator.validate_node(child):
                 return False
