@@ -96,7 +96,7 @@ class Layout(object):
 
         hbox = self.get_line_layout_at_y(y)
         for layout in reversed(layouts):
-            if layout['type'] == 'hbox' and layout['node'] != None and layout['node'].type in {'td', 'mathlist'}:
+            if layout['type'] == 'hbox' and layout['node'] != None and layout['node'].type in {'td', 'mrow'}:
                 hbox = layout
                 break
 
@@ -290,8 +290,18 @@ class Layout(object):
             width, height = layout_tree['node'].value.get_allocation(layout_tree['fontname'])
             layout_tree['width'] = width
             layout_tree['height'] = height
-        elif node.type == 'mathscript':
-            layout_tree['type'] = 'mathscript'
+        elif node.type == 'msub':
+            layout_tree['type'] = 'msub'
+            layout_tree['fixed'] = False
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
+            self.current_node_layouts[node] = layout_tree
+        elif node.type == 'msup':
+            layout_tree['type'] = 'msup'
+            layout_tree['fixed'] = False
+            layout_tree['fontname'] = self.get_fontname_from_node(node)
+            self.current_node_layouts[node] = layout_tree
+        elif node.type == 'msubsup':
+            layout_tree['type'] = 'msubsup'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
             self.current_node_layouts[node] = layout_tree
@@ -300,8 +310,8 @@ class Layout(object):
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
             self.current_node_layouts[node] = layout_tree
-        elif node.type == 'mathfraction':
-            layout_tree['type'] = 'mathfraction'
+        elif node.type == 'mfrac':
+            layout_tree['type'] = 'mfrac'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
             self.current_node_layouts[node] = layout_tree
@@ -315,7 +325,7 @@ class Layout(object):
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
             self.current_node_layouts[node] = layout_tree
-        elif node.type == 'mathlist':
+        elif node.type == 'mrow':
             layout_tree['type'] = 'hbox'
             layout_tree['fixed'] = False
             layout_tree['fontname'] = self.get_fontname_from_node(node)
@@ -383,8 +393,10 @@ class Layout(object):
         elif layout_tree['type'] == 'hbox': self.layout_hbox(layout_tree)
         elif layout_tree['type'] == 'vbox': self.layout_vbox(layout_tree)
         elif layout_tree['type'] == 'math': self.layout_math(layout_tree)
-        elif layout_tree['type'] == 'mathscript': self.layout_mathscript(layout_tree)
-        elif layout_tree['type'] == 'mathfraction': self.layout_mathfraction(layout_tree)
+        elif layout_tree['type'] == 'msub': self.layout_msub(layout_tree)
+        elif layout_tree['type'] == 'msup': self.layout_msup(layout_tree)
+        elif layout_tree['type'] == 'msubsup': self.layout_msubsup(layout_tree)
+        elif layout_tree['type'] == 'mfrac': self.layout_mfrac(layout_tree)
         elif layout_tree['type'] == 'mroot': self.layout_mroot(layout_tree)
         elif layout_tree['type'] == 'msqrt': self.layout_msqrt(layout_tree)
         elif layout_tree['type'] == 'table': self.layout_table(layout_tree)
@@ -551,7 +563,65 @@ class Layout(object):
         for child in layout_tree['children']:
             child['y'] = layout_tree['height'] - child['height']
 
-    def layout_mathscript(self, layout_tree):
+    def layout_msub(self, layout_tree):
+        for child in layout_tree['children']:
+            if not child['fixed']:
+                self.layout_tree(child)
+
+        vbox = {'type': 'vbox', 'fixed': False, 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
+        child = layout_tree['children'][0]
+        child['parent'] = vbox
+        child['x'] = 0
+        child['y'] = child['height']
+        vbox['children'].insert(0, child)
+
+        layout_tree['children'] = [vbox]
+
+        for child in layout_tree['children']:
+            if not child['fixed']:
+                self.layout_tree(child)
+
+        fontname = self.get_fontname_from_node(layout_tree['node'])
+        extents = TextShaper.measure_single(' ', fontname=fontname)
+
+        layout_tree['children'][0]['x'] = 1
+        layout_tree['children'][0]['y'] = extents[1] / 2
+
+        layout_tree['width'] = layout_tree['children'][0]['width'] + 1
+        layout_tree['height'] = layout_tree['children'][0]['height'] * 2
+        layout_tree['x'] = None
+        layout_tree['y'] = None
+
+    def layout_msup(self, layout_tree):
+        for child in layout_tree['children']:
+            if not child['fixed']:
+                self.layout_tree(child)
+
+        vbox = {'type': 'vbox', 'fixed': False, 'node': None, 'parent': layout_tree, 'children': [], 'x': 0, 'y': 0, 'width': 0, 'height': 0, 'fontname': None}
+        child = layout_tree['children'][0]
+        child['parent'] = vbox
+        child['x'] = 0
+        child['y'] = 0
+        vbox['children'].insert(0, child)
+
+        layout_tree['children'] = [vbox]
+
+        for child in layout_tree['children']:
+            if not child['fixed']:
+                self.layout_tree(child)
+
+        fontname = self.get_fontname_from_node(layout_tree['node'])
+        extents = TextShaper.measure_single(' ', fontname=fontname)
+
+        layout_tree['children'][0]['x'] = 1
+        layout_tree['children'][0]['y'] = extents[1] / 2 - layout_tree['children'][0]['height']
+
+        layout_tree['width'] = layout_tree['children'][0]['width'] + 1
+        layout_tree['height'] = layout_tree['children'][0]['height'] * 2
+        layout_tree['x'] = None
+        layout_tree['y'] = None
+
+    def layout_msubsup(self, layout_tree):
         if len(layout_tree['children']) == 2:
             for child in layout_tree['children']:
                 if not child['fixed']:
@@ -592,7 +662,7 @@ class Layout(object):
         layout_tree['x'] = None
         layout_tree['y'] = None
 
-    def layout_mathfraction(self, layout_tree):
+    def layout_mfrac(self, layout_tree):
         if len(layout_tree['children']) == 2:
             for child in layout_tree['children']:
                 if not child['fixed']:

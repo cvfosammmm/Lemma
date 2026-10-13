@@ -420,9 +420,9 @@ class Actions(object):
         insert = document.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
-            xml = '<mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
+            xml = '<msub><mrow><placeholder/><end/></mrow></msub>'
         else:
-            xml = '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'
+            xml = '<placeholder marks="prev_selection"/><msub><mrow><placeholder/><end/></mrow></msub>'
         UseCases.insert_xml(xml, is_math=True)
         UseCases.update_implicit_x_position()
 
@@ -433,9 +433,9 @@ class Actions(object):
         insert = document.get_insert_node()
         prev_char = insert.prev_in_parent()
         if not document.has_selection() and prev_char != None and prev_char.type == 'char' and not NodeTypeDB.is_whitespace(prev_char):
-            xml = '<mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
+            xml = '<msup><mrow><placeholder/><end/></mrow></msup>'
         else:
-            xml = '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'
+            xml = '<placeholder marks="prev_selection"/><msup><mrow><placeholder/><end/></mrow></msup>'
         UseCases.insert_xml(xml, is_math=True)
         UseCases.update_implicit_x_position()
 

@@ -1398,7 +1398,7 @@ class UseCases():
                     new_selection = document.get_selection_node()
                     break
 
-                if ancestor.type == 'mathlist':
+                if ancestor.type == 'mrow':
                     if insert == ancestor[0] and selection == ancestor[-1]: continue
                     if insert == ancestor[-1] and selection == ancestor[0]: continue
                     new_insert = ancestor[-1]

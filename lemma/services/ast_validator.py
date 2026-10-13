@@ -33,25 +33,33 @@ class ASTValidator():
             return len(node.children) == 0
         elif node.type == 'math':
             return len(node.children) >= 1 \
-                and all(child.type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mroot', 'msqrt', 'end'} for child in node.children) \
+                and all(child.type in {'char', 'placeholder', 'msub', 'msup', 'msubsup', 'mfrac', 'mroot', 'msqrt', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-        elif node.type == 'mathscript':
-            return len(node.children) == 2 \
-                and all(child.type == 'mathlist' for child in node.children) \
+        elif node.type == 'msub':
+            return len(node.children) == 1 \
+                and all(child.type == 'mrow' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-        elif node.type == 'mathfraction':
+        elif node.type == 'msup':
+            return len(node.children) == 1 \
+                and all(child.type == 'mrow' for child in node.children) \
+                and all(ASTValidator.validate_node(child) for child in node.children)
+        elif node.type == 'msubsup':
             return len(node.children) == 2 \
-                and all(child.type == 'mathlist' for child in node.children) \
+                and all(child.type == 'mrow' for child in node.children) \
+                and all(ASTValidator.validate_node(child) for child in node.children)
+        elif node.type == 'mfrac':
+            return len(node.children) == 2 \
+                and all(child.type == 'mrow' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
         elif node.type == 'mroot':
             return len(node.children) == 2 \
-                and all(child.type == 'mathlist' for child in node.children) \
+                and all(child.type == 'mrow' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
         elif node.type == 'msqrt':
             return len(node.children) == 1 \
-                and all(child.type == 'mathlist' for child in node.children) \
+                and all(child.type == 'mrow' for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
-        elif node.type == 'mathlist':
+        elif node.type == 'mrow':
             return len(node.children) >= 1 \
                 and all(child.type in {'char', 'placeholder', 'end'} for child in node.children) \
                 and all(ASTValidator.validate_node(child) for child in node.children)
@@ -71,17 +79,21 @@ class ASTValidator():
         if parent_type == 'paragraph':
             return node_type in {'char', 'placeholder', 'eol', 'widget', 'math', 'end', 'table'}
         elif parent_type == 'math':
-            return node_type in {'char', 'placeholder', 'mathscript', 'mathfraction', 'mroot', 'msqrt', 'end'}
-        elif parent_type == 'mathlist':
+            return node_type in {'char', 'placeholder', 'msub', 'msup', 'msubsup', 'mfrac', 'mroot', 'msqrt', 'end'}
+        elif parent_type == 'mrow':
             return node_type in {'char', 'placeholder', 'end'}
-        elif parent_type == 'mathscript':
-            return node_type in {'mathlist'}
-        elif parent_type == 'mathfraction':
-            return node_type in {'mathlist'}
+        elif parent_type == 'msub':
+            return node_type in {'mrow'}
+        elif parent_type == 'msup':
+            return node_type in {'mrow'}
+        elif parent_type == 'msubsup':
+            return node_type in {'mrow'}
+        elif parent_type == 'mfrac':
+            return node_type in {'mrow'}
         elif parent_type == 'mroot':
-            return node_type in {'mathlist'}
+            return node_type in {'mrow'}
         elif parent_type == 'msqrt':
-            return node_type in {'mathlist'}
+            return node_type in {'mrow'}
         elif parent_type == 'td':
             return node_type in {'char', 'placeholder', 'widget', 'math', 'end'}
         elif parent_type == 'tr':

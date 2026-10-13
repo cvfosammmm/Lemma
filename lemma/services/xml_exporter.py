@@ -75,11 +75,17 @@ class XMLExporter():
         if node.type == 'math':
             xml = '<math>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</math>'
 
-        if node.type == 'mathscript':
-            xml = '<mathscript>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mathscript>'
+        if node.type == 'msub':
+            xml = '<msub>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</msub>'
 
-        if node.type == 'mathfraction':
-            xml = '<mathfraction>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mathfraction>'
+        if node.type == 'msup':
+            xml = '<msup>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</msup>'
+
+        if node.type == 'msubsup':
+            xml = '<msubsup>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</msubsup>'
+
+        if node.type == 'mfrac':
+            xml = '<mfrac>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mfrac>'
 
         if node.type == 'mroot':
             xml = '<mroot>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mroot>'
@@ -87,8 +93,8 @@ class XMLExporter():
         if node.type == 'msqrt':
             xml = '<msqrt>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</msqrt>'
 
-        if node.type == 'mathlist':
-            xml = '<mathlist>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mathlist>'
+        if node.type == 'mrow':
+            xml = '<mrow>' + ''.join([XMLExporter.export_node(child) for child in node]) + '</mrow>'
 
         if node.type == 'char':
             xml = '<char>' + xml_helpers.escape(node.value) + '</char>'

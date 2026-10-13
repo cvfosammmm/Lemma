@@ -403,7 +403,7 @@ class DocumentView():
             ctx.rectangle((offset_x + layout['x'] + line_offset + 9) * self.hidpi_factor, int((offset_y + layout['y']) * self.hidpi_factor), line_width, 1)
             ctx.fill()
 
-        if layout['type'] == 'mathfraction':
+        if layout['type'] == 'mfrac':
             fg_color = self.get_fg_color_by_node(layout['node'])
             Gdk.cairo_set_source_rgba(ctx, fg_color)
 

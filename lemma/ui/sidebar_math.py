@@ -42,17 +42,17 @@ class SidebarMath(object):
 
         self.data = dict()
         self.data['math_typesetting'] = {'title': 'Math Typesetting', 'symbols': []}
-        self.data['math_typesetting']['symbols'].append(['subscript', '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist></mathlist></mathscript>'])
-        self.data['math_typesetting']['symbols'].append(['superscript', '<placeholder marks="prev_selection"/><mathscript><mathlist></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'])
-        self.data['math_typesetting']['symbols'].append(['subsuperscript', '<placeholder marks="prev_selection"/><mathscript><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript>'])
-        self.data['math_typesetting']['symbols'].append(['fraction', '<mathfraction><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathfraction>'])
-        self.data['math_typesetting']['symbols'].append(['sqrt', '<msqrt><mathlist><placeholder marks="prev_selection"/><end/></mathlist></msqrt>'])
-        self.data['math_typesetting']['symbols'].append(['nthroot', '<mroot><mathlist><placeholder marks="prev_selection"/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mroot>'])
-        self.data['math_typesetting']['symbols'].append(['sumwithindex', '∑<mathscript><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/>'])
-        self.data['math_typesetting']['symbols'].append(['prodwithindex', '∏<mathscript><mathlist><placeholder/>=<placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/>'])
+        self.data['math_typesetting']['symbols'].append(['subscript', '<placeholder marks="prev_selection"/><msub><mrow><placeholder/><end/></mrow></msub>'])
+        self.data['math_typesetting']['symbols'].append(['superscript', '<placeholder marks="prev_selection"/><msup><mrow><placeholder/><end/></mrow></msup>'])
+        self.data['math_typesetting']['symbols'].append(['subsuperscript', '<placeholder marks="prev_selection"/><msubsup><mrow><placeholder/><end/></mrow><mrow><placeholder/><end/></mrow></msubsup>'])
+        self.data['math_typesetting']['symbols'].append(['fraction', '<mfrac><mrow><placeholder marks="prev_selection"/><end/></mrow><mrow><placeholder/><end/></mrow></mfrac>'])
+        self.data['math_typesetting']['symbols'].append(['sqrt', '<msqrt><mrow><placeholder marks="prev_selection"/><end/></mrow></msqrt>'])
+        self.data['math_typesetting']['symbols'].append(['nthroot', '<mroot><mrow><placeholder marks="prev_selection"/><end/></mrow><mrow><placeholder/><end/></mrow></mroot>'])
+        self.data['math_typesetting']['symbols'].append(['sumwithindex', '∑<msubsup><mrow><placeholder/>=<placeholder/><end/></mrow><mrow><placeholder/><end/></mrow></msubsup> <placeholder marks="prev_selection"/>'])
+        self.data['math_typesetting']['symbols'].append(['prodwithindex', '∏<msubsup><mrow><placeholder/>=<placeholder/><end/></mrow><mrow><placeholder/><end/></mrow></msubsup> <placeholder marks="prev_selection"/>'])
         self.data['math_typesetting']['symbols'].append(['indefint', '∫ <placeholder marks="prev_selection"/> 𝑑<placeholder/>'])
-        self.data['math_typesetting']['symbols'].append(['defint', '∫<mathscript><mathlist><placeholder/><end/></mathlist><mathlist><placeholder/><end/></mathlist></mathscript> <placeholder marks="prev_selection"/> 𝑑<placeholder/>'])
-        self.data['math_typesetting']['symbols'].append(['limitwithindex', 'lim<mathscript><mathlist><placeholder/> → <placeholder/><end/></mathlist><mathlist></mathlist></mathscript> <placeholder marks="prev_selection"/>'])
+        self.data['math_typesetting']['symbols'].append(['defint', '∫<msubsup><mrow><placeholder/><end/></mrow><mrow><placeholder/><end/></mrow></msubsup> <placeholder marks="prev_selection"/> 𝑑<placeholder/>'])
+        self.data['math_typesetting']['symbols'].append(['limitwithindex', 'lim<msub><mrow><placeholder/> → <placeholder/><end/></mrow></msub> <placeholder marks="prev_selection"/>'])
 
         self.data['punctuation'] = {'title': 'Punctuation', 'symbols': []}
         self.data['punctuation']['symbols'].append(['textendash', CharacterDB.get_unicode_from_latex_name('textendash')])
