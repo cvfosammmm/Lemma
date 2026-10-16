@@ -251,7 +251,9 @@ class Autocomplete():
 
         if not self.is_active: return
 
-        self.suggestions = AutocompleteDB.get_suggestions(self.command_at_cursor[1:], limit=20)
+        document = WorkspaceRepo.get_workspace().get_active_document()
+        is_math = document.cursor_in_math_formula()
+        self.suggestions = AutocompleteDB.get_suggestions(self.command_at_cursor[1:], is_math, limit=20)
 
         if len(self.suggestions) > 0:
             self.view.set_items(self.suggestions)
@@ -266,7 +268,8 @@ class Autocomplete():
 
         document = WorkspaceRepo.get_workspace().get_active_document()
         insert = document.get_insert_node()
-        xml = AutocompleteDB.get_xml(self.view.listbox.get_selected_row().title[1:])
+        is_math = document.cursor_in_math_formula()
+        xml = AutocompleteDB.get_xml(self.view.listbox.get_selected_row().title[1:], is_math)
         UseCases.replace_section(document, self.session_first_node, insert, xml)
         UseCases.update_implicit_x_position()
 

@@ -18,7 +18,7 @@
 
 class AutocompleteDB():
 
-    stylized_latex_to_xml = {
+    stylized_latex_to_xml_math = {
         'textendash': '–',
         'textemdash': '—',
         'guillemetleft': '«',
@@ -346,18 +346,151 @@ class AutocompleteDB():
         'bigotimes': '⨂', 
         'bigcupdot': '⨃'
     }
+    stylized_latex_to_xml_text = {
+        'textendash': '–',
+        'textemdash': '—',
+        'guillemetleft': '«',
+        'guillemetright': '»',
+        'textquotedblleft': '“',
+        'textquotedblright': '”',
+        'quotedblbase': '„',
+        'textquoteleft': '‘',
+        'textquoteright': '’',
+        'lparen': '(',
+        'rparen': ')',
+        'lbrack': '[',
+        'rbrack': ']',
+        'textlbrackdbl': '⟦',
+        'textrbrackdbl': '⟧',
+        'textlquill': '⁅',
+        'textrquill': '⁆',
+        'lbrace': '{',
+        'rbrace': '}',
+        'vert': '|',
+        'Vert': '‖',
+        'cdot': '·',
+        'colon': ':',
+        'cdots': '…',
+        'textquestiondown': '¿',
+        'textexclamdown': '¡',
+        'textinterrobang': '‽',
+        'textinterrobangdown': '⸘',
+        'leftarrow': '←',
+        'rightarrow': '→',
+        'downarrow': '↓',
+        'uparrow': '↑',
+        'searrow': '↘',
+        'nearrow': '↗',
+        'textdollar': '$',
+        'textcent': '¢',
+        'textbaht': '฿',
+        'textguarani': '₲',
+        'textwon': '₩',
+        'textyen': '¥',
+        'textdong': '₫',
+        'textnaira': '₦',
+        'textpeso': '₤',
+        'textsterling': '£',
+        'texteuro': '€',
+        'textcopyright': '©',
+        'texttrademark': '™',
+        'textservicemark': '℠',
+        'alpha': 'α',
+        'beta': 'β',
+        'gamma': 'γ',
+        'delta': 'δ',
+        'epsilon': 'ε',
+        'zeta': 'ζ',
+        'eta': 'η',
+        'theta': 'θ',
+        'vartheta': 'ϑ',
+        'iota': 'ι',
+        'kappa': 'κ',
+        'lambda': 'λ',
+        'mu': 'μ',
+        'nu': 'ν',
+        'xi': 'ξ',
+        'pi': 'π',
+        'varpi': 'ϖ',
+        'rho': 'ρ',
+        'varrho': 'ϱ',
+        'sigma': 'σ',
+        'varsigma': 'ϲ',
+        'tau': 'τ',
+        'upsilon': 'υ',
+        'phi': 'φ',
+        'varphi': 'ϕ',
+        'chi': 'χ',
+        'psi': 'ψ',
+        'omega': 'ω',
+        'Gamma': 'Γ',
+        'Delta': 'Δ',
+        'Theta': 'Θ',
+        'Lambda': 'Λ',
+        'Xi': 'Ξ',
+        'Pi': 'Π',
+        'Sigma': 'Σ',
+        'Upsilon': 'Υ',
+        'Phi': 'Φ',
+        'Psi': 'Ψ',
+        'Omega': 'Ω',
+        'neg': '¬',
+        'infty': '∞',
+        'backslash': '\\',
+        'sphericalangle': '∢',
+        'eth': 'ð',
+        'mho': '℧',
+        'pm': '±',
+        'times': '×',
+        'ast': '∗',
+        'star': '⋆',
+        'circ': '◦',
+        'bullet': '•',
+        'div': '÷',
+        'textdiscount': '⁒',
+        'textreferencemark': '※',
+        'textless': '<',
+        'textgreater': '>',
+        'textperthousand': '‰',
+        'textpertenthousand': '‱',
+        'S': '§',
+        'textpilcrow': '¶',
+        'textestimated': '℮',
+        'textbrokenbar': '¦',
+        'textfractionsolidus': '⁄',
+        'textcelsius': '℃',
+        'textdegree': '°',
+        'textmho': '℧',
+        'textohm': 'Ω',
+        'textvisiblespace': '␣',
+        'textrecipe': '℞',
+        'textmusicalnote': '♪',
+        'textordmasculine': 'º',
+        'textordfeminine': 'ª',
+        'textdivorced': '⚮',
+        'textmarried': '⚭',
+        'textdied': '✝',
+        'dagger': '†',
+        'ddagger': '‡'
+    }
 
-    def get_suggestions(term, limit=None):
+    def get_suggestions(term, is_math, limit=None):
+        if is_math: commands = AutocompleteDB.stylized_latex_to_xml_math
+        else: commands = AutocompleteDB.stylized_latex_to_xml_text
+
         result = []
-        for command in AutocompleteDB.stylized_latex_to_xml:
+        for command in commands:
             if command.lower().startswith(term.lower()):
                 result.append(command)
             if len(result) == limit:
                 break
         return result
 
-    def get_xml(command):
-        if command in AutocompleteDB.stylized_latex_to_xml:
-            return AutocompleteDB.stylized_latex_to_xml[command]
+    def get_xml(command, is_math):
+        if is_math: commands = AutocompleteDB.stylized_latex_to_xml_math
+        else: commands = AutocompleteDB.stylized_latex_to_xml_text
+
+        if command in commands:
+            return commands[command]
 
 
