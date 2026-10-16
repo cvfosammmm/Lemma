@@ -25,6 +25,7 @@ import time
 import cairo
 import math
 
+from lemma.ui.helpers.cairo import draw_border
 from lemma.services.text_shaper import TextShaper
 from lemma.services.text_renderer import TextRenderer
 from lemma.services.color_manager import ColorManager
@@ -191,6 +192,8 @@ class DocumentView():
             self.draw_drop_cursor(ctx, content_offset_x, content_offset_y)
         else:
             self.draw_cursor(ctx, content_offset_x, content_offset_y)
+            if self.document.cursor_in_math_formula():
+                self.draw_math_env_highlight(ctx, content_offset_x, content_offset_y)
 
     @timer.timer
     def setup_scaling_offsets(self):
@@ -479,5 +482,15 @@ class DocumentView():
         Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('drop_color'))
         ctx.rectangle(*cursor_coords)
         ctx.fill()
+
+    def draw_math_env_highlight(self, ctx, offset_x, offset_y):
+        document_layout = self.document.get_layout(ApplicationState.get_preedit(), Settings.get_value('font_theme'))
+        insert = self.document.get_insert_node()
+        math_node = [node for node in insert.ancestors() if node.type == 'math'][0]
+        layout = document_layout.get_node_layout(math_node)
+        x, y = document_layout.get_absolute_xy(layout)
+        rect = (self.device_offset_x + int((x + offset_x) * self.hidpi_factor), self.device_offset_y + int((y + offset_y) * self.hidpi_factor), int(layout['width'] * self.hidpi_factor), int(layout['height'] * self.hidpi_factor))
+        Gdk.cairo_set_source_rgba(ctx, ColorManager.get_ui_color('math_env'))
+        draw_border(ctx, *rect, 1)
 
 

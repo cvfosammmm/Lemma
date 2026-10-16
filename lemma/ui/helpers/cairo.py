@@ -29,4 +29,21 @@ def rounded_rectangle(ctx, x, y, width, height, radius):
     ctx.line_to(x, y + radius)
     ctx.arc(x + radius, y + radius, radius, math.pi / 2, -math.pi / 2)
 
+def draw_border(ctx, x, y, width, height, border_width):
+    ctx.set_line_width(border_width)
+
+    ctx.rectangle(x, y, width, border_width)
+    ctx.rectangle(x, y + height - border_width, width, border_width)
+    ctx.rectangle(x, y, border_width, height)
+    ctx.rectangle(x + width - border_width, y, border_width, height)
+    ctx.fill()
+    return
+
+    ctx.move_to(x, y)
+    ctx.line_to(x + width, y)
+    ctx.line_to(x + width, y + height)
+    ctx.line_to(x, y + height)
+    ctx.line_to(x, y)
+    ctx.stroke()
+
 
