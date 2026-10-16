@@ -130,11 +130,12 @@ class Document():
 
         subtree = self.get_subtree(first_node, last_node)
         chars = ''.join([node.value for node in subtree])
+        is_math = self.cursor_in_math_formula()
         if len(chars) >= 2:
             for i in range(len(chars) - 1):
-                if CharacterDB.has_replacement(chars[i:]):
+                if CharacterDB.has_replacement(chars[i:], is_math):
                     length = len(chars) - i
-                    text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:]))
+                    text = xml_helpers.escape(CharacterDB.get_replacement(chars[i:], is_math))
                     xml = xml_helpers.embellish_with_link_and_tags(text, None, first_node.tags)
                     start_node = last_node
                     for i in range(length):

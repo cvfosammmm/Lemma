@@ -345,7 +345,20 @@ class CharacterDB():
         'bigotimes': '⨂', 
         'bigcupdot': '⨃'
     }
-    replacements = {
+    replacements_text = {
+        '--': '–',
+        '---': '—',
+        '+-': '±',
+        '->': '→',
+        '<-': '←',
+        '<<': '«',
+        '>>': '»',
+        ',,': '„',
+        '``': '“',
+        '´´': '”',
+        '\'\'': '”'
+    }
+    replacements_math = {
         '--': '–',
         '---': '—',
         '>=': '≥',
@@ -399,10 +412,16 @@ class CharacterDB():
     def is_closing_symbol(char):
         return char in CharacterDB.closing_symbols
 
-    def has_replacement(text):
-        return text in CharacterDB.replacements
+    def has_replacement(text, is_math):
+        if is_math:
+            return text in CharacterDB.replacements_math
+        else:
+            return text in CharacterDB.replacements_text
 
-    def get_replacement(text):
-        return CharacterDB.replacements[text]
+    def get_replacement(text, is_math):
+        if is_math:
+            return CharacterDB.replacements_math[text]
+        else:
+            return CharacterDB.replacements_text[text]
 
 
