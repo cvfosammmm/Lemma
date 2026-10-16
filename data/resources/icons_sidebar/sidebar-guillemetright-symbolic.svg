@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="8.5" height="8.5" viewBox="0 0 8.5 8.5">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="8.5pt" height="7.87pt" viewBox="0 0 8.5 7.87">
 <defs>
 <g>
 <g id="glyph-0-0">
@@ -8,6 +8,6 @@
 </g>
 </defs>
 <g fill="rgb(0%, 0%, 0%)" fill-opacity="1">
-<use xlink:href="#glyph-0-0" x="0.996" y="7.188"/>
+<use xlink:href="#glyph-0-0" x="0.996" y="6.874"/>
 </g>
 </svg>
