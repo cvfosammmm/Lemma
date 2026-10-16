@@ -1241,7 +1241,7 @@ class UseCases():
         node = document.get_first_selection_bound()
         start_node = node
 
-        while node != None and not node.type == 'placeholder':
+        while (node != None and not node.type == 'placeholder') or node == start_node:
             if node == document.ast[0][0]:
                 node = document.ast[-1][-1]
             else:
