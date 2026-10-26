@@ -466,6 +466,8 @@ class Document():
 
     def get_layout(self, preedit_string, font_theme):
         if 'layout' not in self.secondary_formats_cache:
+            self.layout.update_font_theme(font_theme)
+            self.layout.update_preedit(preedit_string)
             self.layout.update()
             self.secondary_formats_cache['layout'] = self.layout
         elif self.layout.preedit_string != preedit_string or self.layout.font_theme != font_theme:
