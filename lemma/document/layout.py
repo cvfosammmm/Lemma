@@ -524,11 +524,16 @@ class Layout(object):
                     td['width'] = col_widths[i] + LayoutInfo.get_col_padding() * 1
                 else:
                     td['width'] = col_widths[i] + LayoutInfo.get_col_padding() * 2
+                td['height'] += LayoutInfo.get_row_padding_top() + LayoutInfo.get_row_padding_bottom()
 
                 if i > 0:
                     for child in td['children']:
                         child['x'] += LayoutInfo.get_col_padding()
+
+                for child in td['children']:
+                    child['y'] += LayoutInfo.get_row_padding_top()
                 tr['width'] += td['width']
+            tr['height'] += LayoutInfo.get_row_padding_top() + LayoutInfo.get_row_padding_bottom()
 
         layout_tree['width'] = layout_tree['children'][0]['width']
         layout_tree['height'] = 0

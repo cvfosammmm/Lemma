@@ -55,4 +55,10 @@ class LayoutInfo():
     def get_col_padding():
         return 9
 
+    def get_row_padding_top():
+        return 4
+
+    def get_row_padding_bottom():
+        return 3
+
 
