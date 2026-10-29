@@ -268,6 +268,21 @@ class Toolbars():
         self.toolbar.main_left.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
         self.toolbar.toolbar_code_left.paragraph_style_menu_button_label.set_text(labels_dict[paragraph_style_at_cursor])
 
+        if paragraph_style_at_cursor == 'ul':
+            self.toolbar.main_left.ul_button.add_css_class('checked')
+        else:
+            self.toolbar.main_left.ul_button.remove_css_class('checked')
+
+        if paragraph_style_at_cursor == 'ol':
+            self.toolbar.main_left.ol_button.add_css_class('checked')
+        else:
+            self.toolbar.main_left.ol_button.remove_css_class('checked')
+
+        if paragraph_style_at_cursor == 'cl':
+            self.toolbar.main_left.cl_button.add_css_class('checked')
+        else:
+            self.toolbar.main_left.cl_button.remove_css_class('checked')
+
     def update_button_visibility(self):
         self.toolbar.main_left.bold_button.set_visible(Settings.get_value('button_visible_bold'))
         self.toolbar.main_left.italic_button.set_visible(Settings.get_value('button_visible_italic'))
