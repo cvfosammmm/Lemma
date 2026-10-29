@@ -125,16 +125,20 @@ class Keyboard():
 
             case ('left', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.left(True)
+                UseCases.update_implicit_x_position()
             case ('right', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.right(True)
+                UseCases.update_implicit_x_position()
             case ('up', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.up(True)
             case ('down', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.down(True)
             case ('home', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.paragraph_start(True)
+                UseCases.update_implicit_x_position()
             case ('end', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.paragraph_end(True)
+                UseCases.update_implicit_x_position()
             case ('page_up', Gdk.ModifierType.SHIFT_MASK):
                 UseCases.page_up(True)
             case ('page_down', Gdk.ModifierType.SHIFT_MASK):
