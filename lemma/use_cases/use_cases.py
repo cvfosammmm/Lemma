@@ -210,6 +210,8 @@ class UseCases():
         MessageBus.add_message('document_removed')
         MessageBus.add_message('history_changed')
         MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
         MessageBus.add_message('bookmarks_changed')
         if document_changed:
             MessageBus.add_message('new_active_document')
