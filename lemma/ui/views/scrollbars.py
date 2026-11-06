@@ -134,6 +134,8 @@ class ScrollbarVertical(Gtk.Widget, Observable):
 
             slider_height = max(60, min(self.view_height, self.view_height * self.view_height / self.content_height))
             self.set_can_target(slider_height < self.view_height)
+
+            self.ping()
             self.queue_draw()
 
     def set_scrolling_offset(self, scrolling_offset):
@@ -323,6 +325,8 @@ class ScrollbarHorizontal(Gtk.Widget, Observable):
 
             slider_width = max(60, min(self.view_width, self.view_width * self.view_width / self.content_width))
             self.set_can_target(slider_width < self.view_width)
+
+            self.ping()
             self.queue_draw()
 
     def set_scrolling_offset(self, scrolling_offset):
