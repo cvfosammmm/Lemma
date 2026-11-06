@@ -363,7 +363,7 @@ class UseCases():
                         document.insert_nodes(new_nodes[0].children, paragraph[0])
                     else:
                         break
-        elif paragraph_style.startswith('h'):
+        elif paragraph_style.startswith('h') or paragraph_style == 'result':
             if len(document.get_insert_node().paragraph()) == 1:
                 paragraph = document.get_insert_node().paragraph()
                 document.set_paragraph_style(paragraph, 'p')
