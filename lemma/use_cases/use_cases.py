@@ -28,7 +28,7 @@ from lemma.services.settings import Settings
 from lemma.services.regex import RegexService
 from lemma.services.files import Files
 from lemma.services.node_type_db import NodeTypeDB
-from lemma.document.ast import Node
+from lemma.document.ast import Paragraph, Node
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.repos.document_repo import DocumentRepo
 from lemma.application_state.application_state import ApplicationState
@@ -415,7 +415,7 @@ class UseCases():
         MessageBus.add_message('tags_at_cursor_changed')
 
     @timer.timer
-    def insert_result_after_paragraph(text, paragraph):
+    def insert_text_result_after_paragraph(text, paragraph):
         document = WorkspaceRepo.get_workspace().get_active_document()
 
         document.start_undoable_action()
@@ -425,6 +425,26 @@ class UseCases():
             title, meta, paragraphs = XMLParser.parse(xml)
             paragraphs[0].style = 'result'
             document.insert_paragraph(paragraphs[0], index + 1)
+        document.end_undoable_action()
+
+        DocumentRepo.update(document)
+        MessageBus.add_message('document_changed')
+        MessageBus.add_message('document_ast_changed')
+        MessageBus.add_message('document_ast_or_cursor_changed')
+
+    @timer.timer
+    def insert_widget_result_after_paragraph(widget, paragraph):
+        document = WorkspaceRepo.get_workspace().get_active_document()
+
+        document.start_undoable_action()
+        index = document.ast.index(paragraph)
+
+        paragraph = Paragraph()
+        paragraph.append(Node('widget', widget))
+        paragraph.append(Node('eol'))
+        paragraph.style = 'result'
+
+        document.insert_paragraph(paragraph, index + 1)
         document.end_undoable_action()
 
         DocumentRepo.update(document)

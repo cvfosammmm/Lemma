@@ -15,10 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-import uuid
+import uuid, base64
 
 from lemma.repos.workspace_repo import WorkspaceRepo
 from lemma.services.code_runner import CodeRunner
+from lemma.services.files import Files
+from lemma.widgets.factory import WidgetFactory
 from lemma.use_cases.use_cases import UseCases
 from lemma.ui.shortcuts import Shortcuts
 import lemma.services.timer as timer
@@ -130,16 +132,22 @@ class Computation():
                 if 'data' in result['result']:
                     data = result['result']['data']
                     insert_node = paragraph[-1].next()
-                    if 'text/plain' in data:
-                        UseCases.insert_result_after_paragraph(data['text/plain'] + '\n', paragraph)
+                    if 'image/png' in data:
+                        filename = Files.get_distinct_document_file_name(document, '.png')
+                        Files.write_bytes_to_document_file(filename, base64.b64decode(data['image/png']))
+                        image = WidgetFactory.make_widget('image', {'filename': filename})
+                        UseCases.insert_widget_result_after_paragraph(image, paragraph)
+
+                    elif 'text/plain' in data:
+                        UseCases.insert_text_result_after_paragraph(data['text/plain'] + '\n', paragraph)
 
                 elif 'traceback' in result['result']:
                     error_msg = result['result']['ename'] + ': ' + result['result']['evalue'] + '\n'
                     insert_node = paragraph[-1].next()
-                    UseCases.insert_result_after_paragraph(error_msg, paragraph)
+                    UseCases.insert_text_result_after_paragraph(error_msg, paragraph)
 
                 elif 'text' in result['result']:
-                    UseCases.insert_result_after_paragraph(result['result']['text'], paragraph)
+                    UseCases.insert_text_result_after_paragraph(result['result']['text'], paragraph)
 
         if document != None and len(CodeRunner.get_running_computations(document.id)) > 0:
             self.toolbar.main_right.kernel_state_button.show_busy_state()
