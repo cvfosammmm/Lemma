@@ -323,7 +323,11 @@ class ToolbarImage(Gtk.Box):
     def on_enlarge_button_clicked(self, button):
         self.main_window.document_view.content.grab_focus()
 
-        width, height = widget.get_size()
+        if self.widget.get_attribute('width') != None:
+            width = self.widget.get_attribute('width')
+        else:
+            width = min(self.widget.cache['original_width'], LayoutInfo.get_max_layout_width())
+
         UseCases.resize_widget(width + 1)
 
 
