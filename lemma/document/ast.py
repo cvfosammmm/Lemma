@@ -223,24 +223,20 @@ class Node():
     def word_bounds(self):
         if NodeTypeDB.is_whitespace(self): return (None, None)
 
+        is_alphanumeric = NodeTypeDB.is_alphanumeric(self)
         node1 = self
         node2 = self
 
         while node2 != None:
             next_node = node2.next_in_parent()
-            if next_node == None:
+            node2 = next_node
+            if next_node == None or NodeTypeDB.is_alphanumeric(next_node) != is_alphanumeric:
                 break
-            elif NodeTypeDB.is_whitespace(next_node):
-                node2 = next_node
-                break
-            else:
-                node2 = next_node
         while node1 != None:
             prev_node = node1.prev_in_parent()
-            if prev_node == None or NodeTypeDB.is_whitespace(prev_node):
+            if prev_node == None or NodeTypeDB.is_alphanumeric(prev_node) != is_alphanumeric:
                 break
-            else:
-                node1 = prev_node
+            node1 = prev_node
         return (node1, node2)
 
     def paragraph(self):

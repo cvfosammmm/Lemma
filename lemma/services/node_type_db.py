@@ -30,6 +30,9 @@ class NodeTypeDB():
     def is_whitespace(node):
         return node.type == 'eol' or (node.type == 'char' and node.value.isspace())
 
+    def is_alphanumeric(node):
+        return (node.type == 'char' and node.value.isalnum())
+
     def is_subscript(node):
         if node.parent.parent.type == 'msub':
             return True
