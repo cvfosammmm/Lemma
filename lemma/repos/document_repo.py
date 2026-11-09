@@ -119,13 +119,19 @@ class DocumentRepo():
         if len(terms) == 0:
             return DocumentRepo.list()
 
-        result = []
+        result = dict()
         for doc_stub in DocumentRepo.list():
             for term in terms:
-                if min(x.casefold() in doc_stub['plaintext'].casefold() or x.casefold() in doc_stub['title'].casefold() for x in terms):
-                    result.append(doc_stub)
+                if min(x.casefold() in doc_stub['title'].casefold() for x in terms):
+                    result[doc_stub['id']] = doc_stub
                     break
-        return result
+        for doc_stub in DocumentRepo.list():
+            for term in terms:
+                if min(x.casefold() in doc_stub['plaintext'].casefold() for x in terms):
+                    result[doc_stub['id']] = doc_stub
+                    break
+
+        return list(result.values())
 
     def list_by_link_target(title):
         result = []
