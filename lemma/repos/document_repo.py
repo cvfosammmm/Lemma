@@ -57,6 +57,8 @@ class DocumentRepo():
                     else:
                         if os.path.getmtime(pathname_stub) >= stub['last_modified']:
                             DocumentRepo.document_stubs_by_id[document_id] = stub
+                        if 'plaintext_casefold' not in stub:
+                            stub['plaintext_casefold'] = stub['plaintext'].casefold()
 
             if document_id not in DocumentRepo.document_stubs_by_id:
                 document = Document(document_id)
@@ -76,7 +78,7 @@ class DocumentRepo():
                 document.title = title
                 document.cursor.set_state([document.ast[0][0].get_position(), document.ast[0][0].get_position()])
 
-                stub = {'id': document_id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'links': document.get_links(), 'files': document.get_files()}
+                stub = {'id': document_id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'plaintext_casefold': document.get_plaintext().casefold(), 'links': document.get_links(), 'files': document.get_files()}
 
                 DocumentRepo.document_stubs_by_id[document_id] = stub
                 with open(pathname_stub, 'wb') as filehandle:
@@ -119,15 +121,17 @@ class DocumentRepo():
         if len(terms) == 0:
             return DocumentRepo.list()
 
+        casefold_terms = [term.casefold() for term in terms]
+
         result = dict()
         for doc_stub in DocumentRepo.list():
             for term in terms:
-                if min(x.casefold() in doc_stub['title'].casefold() for x in terms):
+                if min(x in doc_stub['title'].casefold() for x in casefold_terms):
                     result[doc_stub['id']] = doc_stub
                     break
         for doc_stub in DocumentRepo.list():
             for term in terms:
-                if min(x.casefold() in doc_stub['plaintext'].casefold() for x in terms):
+                if min(x in doc_stub['plaintext_casefold'] for x in casefold_terms):
                     result[doc_stub['id']] = doc_stub
                     break
 
@@ -217,7 +221,7 @@ class DocumentRepo():
     def add(document):
         if document.id in DocumentRepo.document_stubs_by_id: return
 
-        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'links': document.get_links(), 'files': document.get_files()}
+        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'plaintext_casefold': document.get_plaintext().casefold(), 'links': document.get_links(), 'files': document.get_files()}
         DocumentRepo.save_document(document, can_wait=False)
         DocumentRepo.max_document_id = max(document.id, DocumentRepo.max_document_id)
 
@@ -247,7 +251,7 @@ class DocumentRepo():
 
     @timer.timer
     def update(document):
-        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'links': document.get_links(), 'files': document.get_files()}
+        DocumentRepo.document_stubs_by_id[document.id] = {'id': document.id, 'last_modified': document.last_modified, 'title': document.title, 'plaintext': document.get_plaintext(), 'plaintext_casefold': document.get_plaintext().casefold(), 'links': document.get_links(), 'files': document.get_files()}
         DocumentRepo.save_document(document, can_wait=True)
 
     @timer.timer
