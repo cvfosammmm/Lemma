@@ -15,14 +15,17 @@ I develop Lemma on Debian and that's what I tested it with. On Debian derivative
 1. Run the following command to install prerequisite Debian packages:<br />
 `apt-get install meson python3-gi gir1.2-gtk-4.0 gir1.2-pango-1.0 gettext python3-cairo python3-gi-cairo gir1.2-adw-1 python3-xdg python3-markdown-it python3-html2text python3-willow gir1.2-harfbuzz-0.0 python3-networkx python3-jupyter-client python3-ipykernel`
 
-2. Download und Unpack Lemma from GitHub
+2. Install packages from PyPI: `pip install fa2`<br />
+If this fails, please look up the recommended way for your distribution.
 
-3. cd to Lemma folder
+3. Download und Unpack Lemma from GitHub
 
-4. Run meson: `meson setup builddir`<br />
+4. cd to Lemma folder
+
+5. Run meson: `meson setup builddir`<br />
 Note: Some distributions may not include systemwide installations of Python modules which aren't installed from distribution packages. In this case, you want to install Lemma in your home directory with `meson setup builddir --prefix=~/.local`.
 
-5. Install Lemma with: `ninja install -C builddir`<br />
+6. Install Lemma with: `ninja install -C builddir`<br />
 Or run it locally: `./scripts/lemma.dev`
 
 ## Development

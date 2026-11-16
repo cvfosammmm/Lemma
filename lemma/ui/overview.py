@@ -21,6 +21,7 @@ from gi.repository import Gtk, Gdk, Graphene
 
 import math
 import networkx as nx
+from fa2 import ForceAtlas2
 
 from lemma.services.color_manager import ColorManager
 from lemma.services.message_bus import MessageBus
@@ -129,7 +130,13 @@ class Overview(object):
                 for title in list(document_stub['links'] & set(self.ids_by_title)):
                     self.G.add_edge(document_stub['id'], self.ids_by_title[title])
 
-            pos = nx.spring_layout(self.G, seed=42, scale=math.sqrt(len(self.G)))
+            self.G.remove_edges_from(nx.selfloop_edges(self.G))
+
+            fa2 = ForceAtlas2(seed=42, verbose=False, gravity=10, strongGravityMode=True, scalingRatio=0.15)
+            pos = fa2.forceatlas2_networkx_layout(self.G)
+
+            fa2 = ForceAtlas2(seed=42, verbose=False, gravity=2, strongGravityMode=True, scalingRatio=1)
+            pos = fa2.forceatlas2_networkx_layout(nx.create_empty_copy(self.G), pos, iterations=10)
 
             min_x, min_y, max_x, max_y = (0, 0, 0, 0)
             for v, vpos in pos.items():
