@@ -46,6 +46,11 @@
     </supports>
 
     <releases>
+        ​<release version="83" date="2026-11-16">
+            <description translatable="no">
+                <p>Overview Improvements, Faster Search, ...</p>
+            </description>
+        </release>
         ​<release version="82" date="2026-10-30">
             <description translatable="no">
                 <p>Tweaks and Fixes, ...</p>
