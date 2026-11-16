@@ -12,10 +12,10 @@
         <p>Take notes with beautiful typography.</p>
         <p>Features include:</p>
         <ul>
-            <li><em>Super-fast Page Management:</em> Create pages by linking to them (just like in a wiki). Press Ctrl+L to add a link to another page.</li>
-            <li><em>Easy Math Entry:</em> Edit mathematical expressions directly in the main text editor. No separate windows for math entry!</li>
-            <li><em>Programming Support:</em> Run Python scripts from within your documents and display the results. It's Literate Programming taken to the next level.</li>
-            <li><em>Convenient Import / Export:</em> Add files and images with drag and drop or copy and paste. You can easily export them too. Markdown import and export is also built in.</li>
+            <li><em>Super-fast Page Management:</em> Create pages by linking to them (just like in a wiki).</li>
+            <li><em>Easy Math Entry:</em> Edit mathematical expressions directly in the main text editor.</li>
+            <li><em>Programming Support:</em> Run Python scripts from within your documents and display the results.</li>
+            <li><em>Convenient Import / Export:</em> Add files and images with drag and drop or copy and paste, import/export Markdown files.</li>
             <li><em>And much much more:</em> To-Do Lists, View Backlinks, Sidebars with Buttons for Emojis and Special Symbols, Bookmark Pages with Convenient Shortcuts, Full-Text Search, Editable Toolbars and Keyboard Shortcuts, ...</li>
         </ul>
     </description>
